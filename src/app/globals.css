@@ -1,0 +1,24 @@
+:root {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #202920;
+  background: #e8ece6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+button:focus-visible {
+  outline: 3px solid #d3a640;
+  outline-offset: 3px;
+}

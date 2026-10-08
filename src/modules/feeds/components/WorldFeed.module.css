@@ -1,0 +1,137 @@
+.feed {
+  width: min(100%, 1040px);
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 68px) 58px;
+}
+
+.intro {
+  position: relative;
+  display: flex;
+  min-height: 302px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+
+.intro::after {
+  position: absolute;
+  top: 34px;
+  right: 18px;
+  width: 210px;
+  height: 210px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  content: '';
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.introCopy {
+  position: relative;
+  z-index: 1;
+  max-width: 610px;
+  padding: 48px 0;
+}
+
+.eyebrow {
+  margin: 0 0 17px;
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.intro h1 {
+  max-width: 570px;
+  margin: 0;
+  color: var(--ink);
+  font-size: 54px;
+  font-weight: 400;
+  line-height: 1.08;
+}
+
+.description {
+  max-width: 460px;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.worldStamp {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 120px;
+  height: 120px;
+  flex: 0 0 auto;
+  align-content: center;
+  justify-items: center;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.worldStamp span:first-child {
+  font-family: Georgia, serif;
+  font-size: 29px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.stampRule {
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .feed {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .intro {
+    min-height: 260px;
+  }
+
+  .intro::after {
+    top: 65px;
+    right: -70px;
+    width: 180px;
+    height: 180px;
+  }
+
+  .introCopy {
+    padding: 39px 0;
+  }
+
+  .intro h1 {
+    max-width: 470px;
+    font-size: 42px;
+  }
+
+  .description {
+    max-width: 390px;
+    font-size: 13px;
+  }
+
+  .worldStamp {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .intro h1 {
+    font-size: 36px;
+  }
+}

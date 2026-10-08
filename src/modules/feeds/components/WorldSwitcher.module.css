@@ -1,0 +1,162 @@
+.worldApp {
+  --surface: #fbfcf9;
+  --surface-raised: #fff;
+  --ink: #25372c;
+  --muted: #68776c;
+  --line: #dce4dc;
+  --accent: #52765c;
+  --accent-soft: #e8f0e8;
+  min-height: inherit;
+  background: var(--surface);
+  color: var(--ink);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.worldApp[data-world='guild'] {
+  --surface: #171b20;
+  --surface-raised: #20262c;
+  --ink: #f1f0ea;
+  --muted: #a2aaa8;
+  --line: #343c40;
+  --accent: #d7ff5c;
+  --accent-soft: #303923;
+}
+
+.header {
+  display: flex;
+  min-height: 96px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px clamp(20px, 4vw, 58px);
+  border-bottom: 1px solid var(--line);
+  transition: border-color 180ms ease;
+}
+
+.headerLabel {
+  margin: 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+}
+
+.switcher {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.worldButton {
+  display: flex;
+  min-width: 204px;
+  min-height: 56px;
+  align-items: center;
+  gap: 11px;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.worldButton:hover {
+  color: var(--ink);
+}
+
+.worldButton[aria-pressed='true'] {
+  border-color: var(--line);
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.worldMark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--accent);
+  font-family: Georgia, serif;
+  font-size: 15px;
+}
+
+.worldCopy {
+  display: grid;
+  gap: 3px;
+}
+
+.worldName {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.worldDescriptor {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+
+@media (max-width: 760px) {
+  .header {
+    min-height: 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 13px;
+    padding: 18px 20px 15px;
+  }
+
+  .switcher {
+    width: 100%;
+  }
+
+  .worldButton {
+    min-width: 0;
+    flex: 1;
+    gap: 8px;
+    padding: 6px 8px;
+  }
+
+  .worldMark {
+    width: 30px;
+    height: 30px;
+  }
+
+  .worldName {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .worldButton {
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .worldName {
+    font-size: 11px;
+  }
+
+  .worldDescriptor {
+    font-size: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .worldApp,
+  .switcher,
+  .worldButton {
+    transition: none;
+  }
+}
