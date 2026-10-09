@@ -1,0 +1,73 @@
+.engagement {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actions button,
+.commentPanel form button {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--accent);
+  cursor: pointer;
+  font: 10px Arial, sans-serif;
+}
+
+.actions span {
+  color: var(--muted);
+}
+
+.commentPanel {
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-raised);
+}
+
+.commentPanel p {
+  margin: 0;
+  color: var(--ink);
+  font: 10px/1.5 Arial, sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.commentPanel form {
+  display: flex;
+  gap: 6px;
+}
+
+.commentPanel input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 10px Arial, sans-serif;
+}
+
+.commentPanel form button {
+  background: var(--accent);
+  color: #fff;
+}
+
+.error {
+  margin: 0;
+  color: #b33b32;
+  font: 10px Arial, sans-serif;
+}

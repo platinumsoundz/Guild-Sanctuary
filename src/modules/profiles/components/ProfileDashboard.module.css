@@ -1,0 +1,273 @@
+.dashboard {
+  --profile-color: var(--accent);
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 18px;
+  padding: 24px clamp(16px, 4vw, 44px) 48px;
+}
+
+.pageHeader,
+.sectionHeading,
+.saveRow {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: var(--profile-color);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.pageHeader h1,
+.sectionHeading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.themeControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+
+.themeControl input {
+  width: 36px;
+  height: 32px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-raised);
+}
+
+.editor,
+.showcase {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-raised);
+}
+
+.editor {
+  display: grid;
+  gap: 18px;
+}
+
+.editorSection {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+}
+
+.sectionHeading {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.imageFields,
+.detailGrid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  max-width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.field textarea {
+  min-height: 78px;
+  resize: vertical;
+}
+
+.uploadLabel {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 7px;
+  color: var(--profile-color);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.uploadLabel input {
+  width: auto;
+  min-height: 0;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 10px;
+}
+
+.fieldHint {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.privacyToggle {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.privacyToggle input {
+  width: 14px;
+  height: 14px;
+  min-height: 0;
+  accent-color: var(--profile-color);
+}
+
+.saveRow {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  color: var(--profile-color);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+.saveButton {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--profile-color);
+  border-radius: 4px;
+  background: var(--profile-color);
+  color: #fff;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.error {
+  margin: 0;
+  color: #b33b32;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+.showcaseGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 12px;
+  margin-top: 13px;
+}
+
+.showcaseItem {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.showcaseItem p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.showcaseItem img,
+.showcaseItem audio {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 3px;
+}
+
+.showcaseItem img {
+  max-height: 300px;
+  object-fit: contain;
+}
+
+.showcaseWorld,
+.storyTag {
+  color: var(--profile-color);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.storyTag {
+  width: fit-content;
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--profile-color) 12%, transparent);
+}
+
+.emptyShowcase {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+@media (max-width: 580px) {
+  .dashboard {
+    gap: 12px;
+    padding: 18px 12px 30px;
+  }
+
+  .pageHeader h1,
+  .sectionHeading h2 {
+    font-size: 21px;
+  }
+
+  .editor,
+  .showcase {
+    padding: 13px;
+  }
+
+  .imageFields,
+  .detailGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

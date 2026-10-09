@@ -1,0 +1,42 @@
+.filter {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-raised);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.radiusValue {
+  color: var(--ink);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.range {
+  width: 100%;
+  margin: 22px 0 0;
+  accent-color: var(--accent);
+}

@@ -1,0 +1,181 @@
+.formContainer {
+  color: var(--ink, #25372c);
+}
+
+.modeTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line, #dce4dc);
+  border-radius: 5px;
+  background: var(--surface, #fbfcf9);
+}
+
+.modeTab {
+  min-height: 39px;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted, #68776c);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.modeTab[aria-selected='true'] {
+  border-color: var(--line, #dce4dc);
+  background: var(--surface-raised, #fff);
+  color: var(--ink, #25372c);
+}
+
+.panel {
+  padding-top: 22px;
+}
+
+.form {
+  display: grid;
+  gap: 17px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  color: var(--ink, #25372c);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field input {
+  width: 100%;
+  min-height: 43px;
+  padding: 9px 11px;
+  border: 1px solid var(--line, #dce4dc);
+  border-radius: 4px;
+  background: var(--surface, #fbfcf9);
+  color: var(--ink, #25372c);
+  font: inherit;
+  font-weight: 400;
+}
+
+.field input:focus-visible,
+.entryWorld:focus-within {
+  outline: 2px solid var(--accent, #52765c);
+  outline-offset: 2px;
+}
+
+.entryFieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.entryFieldset legend {
+  margin-bottom: 8px;
+  color: var(--ink, #25372c);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.entryWorlds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.entryWorld {
+  display: grid;
+  min-height: 74px;
+  align-content: center;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--line, #dce4dc);
+  border-radius: 4px;
+  background: var(--surface, #fbfcf9);
+  cursor: pointer;
+}
+
+.entryWorld[data-selected='true'] {
+  border-color: var(--accent, #52765c);
+  background: var(--accent-soft, #e8f0e8);
+}
+
+.entryWorld input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.entryWorldName {
+  color: var(--ink, #25372c);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.entryWorldDescription {
+  color: var(--muted, #68776c);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+
+.submitButton {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--accent, #52765c);
+  border-radius: 4px;
+  background: var(--accent, #52765c);
+  color: #fff;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.submitButton:hover {
+  filter: brightness(1.08);
+}
+
+.error {
+  margin: 0;
+  color: #b33b32;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.disclaimer {
+  margin: 16px 0 0;
+  color: var(--muted, #68776c);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.challengeCopy {
+  margin: 0;
+  color: var(--muted, #68776c);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.backButton {
+  justify-self: start;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted, #68776c);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

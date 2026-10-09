@@ -1,0 +1,114 @@
+.backdrop {
+  position: fixed;
+  z-index: 1000;
+  display: grid;
+  overflow-y: auto;
+  place-items: center;
+  padding: 22px;
+  background: rgb(15 23 18 / 62%);
+  inset: 0;
+}
+
+.modal {
+  width: min(100%, 470px);
+  max-height: calc(100svh - 44px);
+  overflow-y: auto;
+  padding: 23px;
+  border: 1px solid var(--line, #dce4dc);
+  border-radius: 6px;
+  background: var(--surface-raised, #fff);
+  color: var(--ink, #25372c);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 28%);
+}
+
+.modal:focus {
+  outline: none;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: var(--accent, #52765c);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  color: var(--ink, #25372c);
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.closeButton,
+.signOutButton {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--line, #dce4dc);
+  border-radius: 4px;
+  background: var(--surface, #fbfcf9);
+  color: var(--ink, #25372c);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+.accountActions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line, #dce4dc);
+  color: var(--muted, #68776c);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+.accountDetails {
+  display: grid;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+
+.securityButton {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent, #52765c);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.signOutButton:hover,
+.closeButton:hover {
+  border-color: var(--accent, #52765c);
+}
+
+@media (max-width: 480px) {
+  .backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .modal {
+    width: 100%;
+    max-height: min(92svh, 760px);
+    padding: 20px 18px max(20px, env(safe-area-inset-bottom));
+    border-radius: 9px 9px 0 0;
+  }
+}

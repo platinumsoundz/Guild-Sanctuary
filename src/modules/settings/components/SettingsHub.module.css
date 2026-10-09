@@ -1,0 +1,164 @@
+.settings {
+  display: grid;
+  max-width: 900px;
+  gap: 16px;
+  margin: 0 auto;
+  padding: 42px clamp(18px, 5vw, 64px);
+}
+
+.header {
+  margin-bottom: 4px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font: 700 9px Arial, sans-serif;
+  letter-spacing: 1px;
+}
+
+.header h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 400;
+}
+
+.header > p:last-child,
+.hint,
+.status {
+  color: var(--muted);
+  font: 12px/1.6 Arial, sans-serif;
+}
+
+.panel {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-raised);
+}
+
+.panel h2 {
+  margin: 0 0 14px;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.toggleList,
+.linksForm {
+  display: grid;
+  gap: 10px;
+}
+
+.toggleRow {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink);
+  font: 12px Arial, sans-serif;
+}
+
+.toggleRow input[type='checkbox'],
+.layoutChoices input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.toggleRow select,
+.field input {
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 12px Arial, sans-serif;
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  color: var(--muted);
+  font: 700 10px Arial, sans-serif;
+}
+
+.field input {
+  width: 100%;
+  font-weight: 400;
+}
+
+.linksForm {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.linksForm button {
+  align-self: end;
+  justify-self: start;
+}
+
+.primaryButton,
+.deleteButton {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font: 700 11px Arial, sans-serif;
+}
+
+.layoutChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  color: var(--ink);
+  font: 12px Arial, sans-serif;
+}
+
+.layoutChoices label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dangerPanel {
+  border-color: #d8a7a2;
+}
+
+.deleteButton {
+  border-color: #a9362d;
+  background: #a9362d;
+}
+
+.deleteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.error {
+  margin: 0;
+  color: #b33b32;
+  font: 12px/1.5 Arial, sans-serif;
+}
+
+@media (max-width: 560px) {
+  .settings {
+    padding: 30px 17px;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .linksForm {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

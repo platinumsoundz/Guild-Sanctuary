@@ -1,0 +1,248 @@
+.calendar {
+  min-height: 500px;
+  padding: 48px clamp(20px, 5vw, 68px);
+}
+
+.pageHeader,
+.sectionHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 9px;
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.calendar h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 34px;
+  font-weight: 400;
+}
+
+.worldTag,
+.sectionHeading > span {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.createPanel {
+  margin-top: 28px;
+  padding: 19px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-raised);
+}
+
+.createPanel h2,
+.sectionHeading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 19px;
+  font-weight: 400;
+}
+
+.eventForm {
+  display: grid;
+  gap: 13px;
+  margin-top: 15px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.field textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.formActions,
+.eventActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.formActions {
+  justify-content: flex-end;
+}
+
+.primaryButton,
+.secondaryButton,
+.selectedButton {
+  min-height: 34px;
+  padding: 6px 11px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.primaryButton,
+.selectedButton {
+  background: var(--accent);
+  color: #fff;
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--accent);
+}
+
+.textButton {
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.eventsSection {
+  margin-top: 32px;
+}
+
+.sectionHeading {
+  padding-bottom: 12px;
+}
+
+.eventList {
+  border-top: 1px solid var(--line);
+}
+
+.eventCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 2px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eventMain {
+  min-width: 0;
+}
+
+.eventDate,
+.locationText,
+.attendeeCount {
+  display: block;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.eventMain h3 {
+  margin: 7px 0 0;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.eventMain > p {
+  margin: 6px 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.locationText,
+.attendeeCount {
+  display: inline-block;
+  margin: 4px 12px 0 0;
+  font-weight: 400;
+}
+
+.emptyState {
+  margin: 0;
+  padding: 22px 2px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+}
+
+.error {
+  margin: 0;
+  color: #b33b32;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+@media (max-width: 500px) {
+  .calendar {
+    padding: 32px 20px;
+  }
+
+  .calendar h1 {
+    font-size: 29px;
+  }
+
+  .worldTag {
+    display: none;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .formRow .field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .eventCard {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .createPanel {
+    padding: 15px;
+  }
+}

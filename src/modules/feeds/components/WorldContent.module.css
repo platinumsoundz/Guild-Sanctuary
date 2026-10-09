@@ -34,6 +34,153 @@
   letter-spacing: 1px;
 }
 
+.feedStatus {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.composer {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 24px;
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-raised);
+}
+
+.composerLabel {
+  color: var(--ink);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.composer textarea,
+.editArea textarea {
+  width: 100%;
+  min-height: 78px;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.composerFooter,
+.postActions,
+.editArea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.composerFooter {
+  justify-content: space-between;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+
+.actionButton {
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.textButton {
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.postText {
+  margin: 10px 0 0;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.postActions {
+  margin-top: 10px;
+}
+
+.editArea {
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.editArea textarea {
+  flex-basis: 100%;
+}
+
+.error {
+  margin: 0 0 14px;
+  color: #b33b32;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.postList {
+  border-top: 1px solid var(--line);
+}
+
+.post {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.postBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.postMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.postBody > p {
+  margin: 10px 0 0;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
 .emptyState {
   display: flex;
   min-height: 150px;
@@ -78,7 +225,211 @@
   white-space: nowrap;
 }
 
+.attachmentControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.attachmentField,
+.storyTagField {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+
+.attachmentField input,
+.attachmentField select,
+.storyTagField select {
+  width: 100%;
+  max-width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 10px;
+}
+
+.attachmentField input:disabled {
+  opacity: 0.55;
+}
+
+.uploadButton {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.uploadButton input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.storyTagField {
+  max-width: 220px;
+}
+
+.attachmentName {
+  margin: 0;
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+
+.postAvatar {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  color: var(--accent);
+  font-family: Georgia, serif;
+  font-size: 17px;
+}
+
+.postAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.postAuthor {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.postAuthor strong {
+  color: var(--ink);
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+.postAuthor > span {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.postAuthor .storyTag {
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 9px;
+}
+
+.postImage {
+  display: block;
+  width: min(100%, 680px);
+  max-height: 540px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  object-fit: contain;
+}
+
+.postVideo {
+  display: block;
+  width: min(100%, 680px);
+  max-height: 540px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #101310;
+}
+
+:global(html[data-layout='compact']) .post {
+  padding-block: 12px;
+}
+
+:global(html[data-layout='compact']) .composer {
+  padding: 12px;
+}
+
+.audioAttachment {
+  display: grid;
+  width: min(100%, 520px);
+  gap: 8px;
+  margin-top: 13px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-raised);
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+
+.audioAttachment audio {
+  width: 100%;
+  max-width: 100%;
+  min-height: 36px;
+}
+
 @media (max-width: 580px) {
+  .composer {
+    padding: 14px;
+  }
+
+  .attachmentControls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .uploadButton {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .storyTagField {
+    max-width: none;
+  }
+
+  .post {
+    gap: 10px;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .postAvatar {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .postMeta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
   .emptyState {
     min-height: 132px;
     align-items: flex-start;

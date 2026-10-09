@@ -1,39 +1,17 @@
-.worldApp {
-  --surface: #fbfcf9;
-  --surface-raised: #fff;
-  --ink: #25372c;
-  --muted: #68776c;
-  --line: #dce4dc;
-  --accent: #52765c;
-  --accent-soft: #e8f0e8;
-  min-height: inherit;
-  background: var(--surface);
-  color: var(--ink);
-  transition: background-color 180ms ease, color 180ms ease;
-}
-
-.worldApp[data-world='guild'] {
-  --surface: #171b20;
-  --surface-raised: #20262c;
-  --ink: #f1f0ea;
-  --muted: #a2aaa8;
-  --line: #343c40;
-  --accent: #d7ff5c;
-  --accent-soft: #303923;
-}
-
 .header {
-  display: flex;
+  display: grid;
   min-height: 96px;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 18px;
   padding: 20px clamp(20px, 4vw, 58px);
   border-bottom: 1px solid var(--line);
   transition: border-color 180ms ease;
 }
 
 .headerLabel {
+  grid-column: 1;
+  grid-row: 1;
   margin: 0;
   color: var(--muted);
   font-family: Arial, sans-serif;
@@ -43,6 +21,8 @@
 }
 
 .switcher {
+  grid-column: 2;
+  grid-row: 1;
   display: flex;
   gap: 6px;
   padding: 5px;
@@ -52,7 +32,57 @@
   transition: background-color 180ms ease, border-color 180ms ease;
 }
 
+.accountArea {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+}
+
+.accountButton {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.accountButton:hover {
+  border-color: var(--accent);
+}
+
+.accountButton > svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.accountMark {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  color: var(--accent);
+}
+
+.accountPlaceholder {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+
 .worldButton {
+  position: relative;
+  isolation: isolate;
   display: flex;
   min-width: 204px;
   min-height: 56px;
@@ -65,20 +95,30 @@
   color: var(--muted);
   cursor: pointer;
   text-align: left;
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+  transition: color 180ms ease;
 }
 
-.worldButton:hover {
-  color: var(--ink);
-}
-
+.worldButton:hover,
 .worldButton[aria-pressed='true'] {
-  border-color: var(--line);
-  background: var(--accent-soft);
   color: var(--ink);
+}
+
+.worldIndicator {
+  position: absolute;
+  z-index: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--accent-soft);
+  inset: 0;
+}
+
+.worldButton > :not(.worldIndicator) {
+  position: relative;
+  z-index: 1;
 }
 
 .worldMark {
+  position: relative;
   display: grid;
   width: 34px;
   height: 34px;
@@ -87,8 +127,16 @@
   border: 1px solid currentColor;
   border-radius: 50%;
   color: var(--accent);
-  font-family: Georgia, serif;
-  font-size: 15px;
+}
+
+.worldAccentIcon {
+  position: absolute;
+  right: -5px;
+  bottom: -3px;
+  padding: 1px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  color: var(--accent);
 }
 
 .worldCopy {
@@ -111,13 +159,25 @@
 @media (max-width: 760px) {
   .header {
     min-height: 0;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 13px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
     padding: 18px 20px 15px;
   }
 
+  .headerLabel {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .accountArea {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
   .switcher {
+    grid-column: 1 / -1;
+    grid-row: 2;
     width: 100%;
   }
 
@@ -139,6 +199,12 @@
 }
 
 @media (max-width: 380px) {
+  .accountButton {
+    min-height: 34px;
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+
   .worldButton {
     gap: 6px;
     padding: 6px;
@@ -154,7 +220,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .worldApp,
   .switcher,
   .worldButton {
     transition: none;

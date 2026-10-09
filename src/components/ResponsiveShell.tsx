@@ -11,7 +11,7 @@ export function ResponsiveShell({ children }: ResponsiveShellProps) {
   const [isMobilePreview, setIsMobilePreview] = useState(false);
 
   return (
-    <div className={styles.workspace}>
+    <div className={`${styles.workspace} w-full min-w-0 max-w-full overflow-x-clip`}>
       <header className={styles.toolbar}>
         <div className={styles.brand}>
           <span className={styles.brandMark} aria-hidden="true">G</span>
@@ -27,8 +27,8 @@ export function ResponsiveShell({ children }: ResponsiveShellProps) {
           {isMobilePreview ? 'Full-width view' : 'Mobile preview'}
         </button>
       </header>
-      <div className={`${styles.stage} ${isMobilePreview ? styles.mobileStage : ''}`}>
-        <div className={`${styles.viewport} ${isMobilePreview ? styles.mobileViewport : ''}`}>
+      <div className={`${styles.stage} w-full min-w-0 max-w-full ${isMobilePreview ? styles.mobileStage : ''}`}>
+        <div className={`${styles.viewport} w-full min-w-0 max-w-full overflow-x-clip ${isMobilePreview ? styles.mobileViewport : ''}`}>
           {children}
         </div>
       </div>

@@ -1,0 +1,179 @@
+.worldSurface {
+  --surface: #fbfcf9;
+  --surface-raised: #fff;
+  --ink: #25372c;
+  --muted: #68776c;
+  --line: #dce4dc;
+  --accent: #52765c;
+  --accent-soft: #e8f0e8;
+  min-height: inherit;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  background: var(--surface);
+  color: var(--ink);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.worldSurface[data-world='guild'] {
+  --surface: #171b20;
+  --surface-raised: #20262c;
+  --ink: #f1f0ea;
+  --muted: #a2aaa8;
+  --line: #343c40;
+  --accent: #d7ff5c;
+  --accent-soft: #303923;
+}
+
+.navigation {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 clamp(20px, 4vw, 58px);
+  border-bottom: 1px solid var(--line);
+}
+
+.navigationItems {
+  display: flex;
+  min-width: 0;
+  align-self: stretch;
+  gap: 22px;
+}
+
+.navigationButton {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.navigationButton svg {
+  flex: 0 0 auto;
+}
+
+.navigationButton:hover,
+.navigationButton[aria-current='page'] {
+  color: var(--ink);
+}
+
+.navigationButton[aria-current='page']::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  content: '';
+}
+
+.accountName {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+.sectionPage,
+.profilePage {
+  display: flex;
+  min-height: 360px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 48px clamp(20px, 5vw, 68px);
+}
+
+.profilePage {
+  gap: 20px;
+}
+
+.walletPage {
+  max-width: 1050px;
+  min-height: 360px;
+  margin: 0 auto;
+  padding: 36px clamp(20px, 5vw, 68px);
+}
+
+.worldContent {
+  min-height: 300px;
+}
+
+.sessionLoading {
+  display: grid;
+  min-height: 300px;
+  place-items: center;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.sectionEyebrow {
+  margin: 0 0 14px;
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.sectionPage h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 44px;
+  font-weight: 400;
+}
+
+.sectionDescription {
+  max-width: 500px;
+  margin: 13px 0 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .navigation {
+    min-height: 0;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 12px;
+  }
+
+  .navigationItems {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-self: stretch;
+    gap: 4px;
+  }
+
+  .navigationButton {
+    min-width: 0;
+    min-height: 38px;
+    justify-content: center;
+    gap: 5px;
+    font-size: 11px;
+  }
+
+  .accountName {
+    display: none;
+  }
+
+  .walletPage {
+    padding: 22px 12px;
+  }
+
+  .sectionPage h1 {
+    font-size: 36px;
+  }
+}

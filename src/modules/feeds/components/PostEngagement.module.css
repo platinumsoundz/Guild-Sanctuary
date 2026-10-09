@@ -1,0 +1,82 @@
+.engagement {
+  margin-top: 12px;
+  font-family: Arial, sans-serif;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actions button {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--accent);
+  cursor: pointer;
+  font: 11px Arial, sans-serif;
+}
+
+.actions span {
+  color: var(--muted);
+}
+
+.commentPanel {
+  display: grid;
+  gap: 8px;
+  margin-top: 9px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-raised);
+}
+
+.comment,
+.empty {
+  margin: 0;
+  color: var(--ink);
+  font: 11px/1.5 Arial, sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.empty {
+  color: var(--muted);
+}
+
+.commentPanel form {
+  display: flex;
+  gap: 7px;
+}
+
+.commentPanel input {
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 11px Arial, sans-serif;
+}
+
+.commentPanel form button {
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+}
+
+.error {
+  margin: 6px 0 0;
+  color: #b33b32;
+  font: 10px Arial, sans-serif;
+}

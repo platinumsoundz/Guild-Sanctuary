@@ -1,10 +1,10 @@
-import { ResponsiveShell } from '@/components/ResponsiveShell';
-import { WorldSwitcher } from '@/modules/feeds/components/WorldSwitcher';
+import { AppWorkspace } from '@/components/AppWorkspace';
+import { AppContextProvider } from '@/context/AppContext';
 
 export default function Home() {
   return (
-    <ResponsiveShell>
-      <WorldSwitcher />
-    </ResponsiveShell>
+    <AppContextProvider>
+      <AppWorkspace />
+    </AppContextProvider>
   );
 }

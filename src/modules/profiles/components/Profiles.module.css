@@ -1,0 +1,177 @@
+.profileCard,
+.cosmetics {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-raised);
+}
+
+.banner,
+.bannerFallback {
+  display: block;
+  width: 100%;
+  max-height: 150px;
+  aspect-ratio: 5 / 1;
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+.profileIdentity {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.avatar,
+.framePreview {
+  position: relative;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  color: var(--accent);
+  font-family: Georgia, serif;
+  font-size: 23px;
+}
+
+.avatar {
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.frameRing {
+  position: absolute;
+  border: 2px solid;
+  border-radius: 50%;
+  inset: 1px;
+  pointer-events: none;
+}
+
+.profileDetails {
+  min-width: 0;
+  flex: 1;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.profileDetails h1,
+.cosmetics h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 23px;
+  font-weight: 400;
+}
+
+.profileDetails h1 {
+  overflow-wrap: anywhere;
+}
+
+.bio {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.username {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+.role {
+  justify-self: end;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.personalDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+
+.socialLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.socialLinks a {
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--accent);
+  font: 10px Arial, sans-serif;
+  text-decoration: none;
+}
+
+.socialLinks a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.framePreview {
+  border-style: dashed;
+  font-family: Arial, sans-serif;
+  font-size: 23px;
+}
+
+@media (max-width: 580px) {
+  .profileCard,
+  .cosmetics {
+    gap: 13px;
+    padding: 13px;
+  }
+
+  .banner,
+  .bannerFallback {
+    aspect-ratio: 3 / 1;
+  }
+
+  .profileIdentity {
+    align-items: flex-start;
+    gap: 11px;
+  }
+
+  .avatar,
+  .framePreview {
+    width: 44px;
+    height: 44px;
+  }
+
+  .role {
+    display: none;
+  }
+
+  .profileDetails h1 {
+    font-size: 19px;
+  }
+}
