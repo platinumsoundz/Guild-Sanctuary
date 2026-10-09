@@ -12,7 +12,6 @@ export {
 	restoreSession,
 	setLocalTwoFactor,
 	searchLocalPublicProfiles,
-	syncLocalProfileEntitlements,
 	getLocalPublicProfileById,
 	updateLocalProfile,
 	verifyLocalEmail,
@@ -20,3 +19,18 @@ export {
 } from './sessionStore';
 export { MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE } from './sessionStore';
 export type { AuthSession, SignUpInput } from './sessionStore';
+export {
+  isPrivateProfileVaultUnlocked,
+  lockPrivateProfileVault,
+  savePrivateProfileVault,
+  unlockPrivateProfileVault,
+} from './privateProfileVault';
+export type { PrivateProfileData } from './privateProfileVault';
+export {
+  isSupabaseAuthConfigured,
+  requestSupabaseEmailCode,
+  restoreSupabaseSession,
+  verifySupabaseEmailCode,
+  verifySupabaseTotpCode,
+} from './supabaseAuth';
+export type { SupabaseEmailVerification } from './supabaseAuth';

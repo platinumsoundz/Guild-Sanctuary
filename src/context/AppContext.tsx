@@ -19,13 +19,20 @@ import {
   updateLocalProfile,
   verifyLocalEmail,
   verifyLocalTwoFactor,
+  lockPrivateProfileVault,
+  isSupabaseAuthConfigured,
+  requestSupabaseEmailCode,
+  restoreSupabaseSession,
+  verifySupabaseEmailCode,
+  verifySupabaseTotpCode,
 } from '@/modules/auth';
 import type { AuthSession, SignUpInput } from '@/modules/auth';
 import type { Profile } from '@/types/database';
 import { toggleWorld as toggleWorldRequest } from '@/services/mockApi';
 import { deleteDemoAccount } from '@/services/accountDeletion';
+import { getSupabaseBrowserClient } from '@/services/supabase';
 
-export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'wallet' | 'settings';
+export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'support' | 'settings';
 
 export type UserSession = AuthSession;
 
@@ -34,17 +41,18 @@ interface AppContextValue {
   currentUser: UserSession | null;
   isAuthenticated: boolean;
   isSessionReady: boolean;
+  sessionError: string | null;
   pendingEmail: string | null;
   pendingTwoFactorEmail: string | null;
   activeNavigation: NavigationState;
   selectWorld: (world: WorldType) => Promise<void>;
   toggleWorld: () => Promise<WorldType>;
-  login: (email: string) => void;
-  signup: (input: SignUpInput) => void;
-  verifyEmailCode: (code: string) => boolean;
-  verifyTwoFactorCode: (code: string) => void;
+  login: (email: string) => Promise<void>;
+  signup: (input: SignUpInput) => Promise<void>;
+  verifyEmailCode: (code: string) => Promise<boolean>;
+  verifyTwoFactorCode: (code: string) => Promise<void>;
   setTwoFactorEnabled: (enabled: boolean) => void;
-  updateProfile: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role' | 'vipTier'>>) => void;
+  updateProfile: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => void;
   cancelAuthChallenge: () => void;
   logout: () => void;
   deleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => void;
@@ -63,33 +71,51 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   const [activeNavigation, setActiveNavigation] = useState<NavigationState>('feed');
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
   const [isSessionReady, setIsSessionReady] = useState(false);
+  const [sessionError, setSessionError] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [pendingTwoFactorEmail, setPendingTwoFactorEmail] = useState<string | null>(null);
+  const [pendingEntryWorld, setPendingEntryWorld] = useState<WorldType>('sanctuary');
+  const [pendingTotp, setPendingTotp] = useState<{ factorId: string; challengeId: string } | null>(null);
 
   useEffect(() => {
-    const restoredSession = restoreSession();
-
-    if (restoredSession) {
-      if (restoredSession.user.status === 'active' && restoredSession.user.emailVerified) {
-        setCurrentUser(restoredSession);
-        activeWorldRef.current = restoredSession.entryWorld;
-        setActiveWorld(restoredSession.entryWorld);
-      } else {
-        clearStoredSession();
+    let cancelled = false;
+    const restore = async () => {
+      try {
+        const restoredSession = isSupabaseAuthConfigured()
+          ? await restoreSupabaseSession('sanctuary')
+          : restoreSession();
+        if (cancelled) return;
+        if (restoredSession) {
+          if (restoredSession.user.status === 'active' && restoredSession.user.emailVerified) {
+            setCurrentUser(restoredSession);
+            activeWorldRef.current = restoredSession.entryWorld;
+            setActiveWorld(restoredSession.entryWorld);
+          } else if (!isSupabaseAuthConfigured()) {
+            clearStoredSession();
+          }
+        }
+      } catch (restoreError) {
+        if (!cancelled) {
+          setSessionError(restoreError instanceof Error ? restoreError.message : 'Your session could not be restored.');
+        }
+      } finally {
+        if (!cancelled) setIsSessionReady(true);
       }
-    }
-
-    setIsSessionReady(true);
+    };
+    void restore();
+    return () => { cancelled = true; };
   }, []);
 
-  const activateSession = (session: AuthSession) => {
-    persistActiveSession(session);
+  const activateSession = (session: AuthSession, persist = !isSupabaseAuthConfigured()) => {
+    if (persist) persistActiveSession(session);
     setCurrentUser(session);
     activeWorldRef.current = session.entryWorld;
     setActiveWorld(session.entryWorld);
     setActiveNavigation('feed');
     setPendingEmail(null);
     setPendingTwoFactorEmail(null);
+    setPendingTotp(null);
+    setSessionError(null);
   };
 
   const toggleWorld = async () => {
@@ -102,7 +128,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     if (currentUser) {
       const updatedSession: AuthSession = { ...currentUser, entryWorld: nextWorld };
       setCurrentUser(updatedSession);
-      persistActiveSession(updatedSession);
+      if (!isSupabaseAuthConfigured()) persistActiveSession(updatedSession);
     }
 
     return toggleWorldRequest(currentWorld);
@@ -114,13 +140,36 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     }
   };
 
-  const signup = (input: SignUpInput) => {
+  const signup = async (input: SignUpInput) => {
+    if (isSupabaseAuthConfigured()) {
+      await requestSupabaseEmailCode(input.email, input);
+      setPendingEmail(input.email.trim().toLowerCase());
+      setPendingEntryWorld(input.entryWorld);
+      setPendingTwoFactorEmail(null);
+      setPendingTotp(null);
+      return;
+    }
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Production sign-up is disabled until Supabase Auth is configured.');
+    }
     const session = registerLocalAccount(input);
     setPendingEmail(session.user.email);
+    setPendingEntryWorld(input.entryWorld);
     setPendingTwoFactorEmail(null);
   };
 
-  const login = (email: string) => {
+  const login = async (email: string) => {
+    if (isSupabaseAuthConfigured()) {
+      await requestSupabaseEmailCode(email);
+      setPendingEmail(email.trim().toLowerCase());
+      setPendingEntryWorld('sanctuary');
+      setPendingTwoFactorEmail(null);
+      setPendingTotp(null);
+      return;
+    }
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Production sign-in is disabled until Supabase Auth is configured.');
+    }
     const session = findLocalAccountByEmail(email);
 
     if (!session) {
@@ -134,11 +183,23 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     setPendingTwoFactorEmail(null);
   };
 
-  const verifyEmailCode = (code: string) => {
+  const verifyEmailCode = async (code: string) => {
     if (!pendingEmail) {
       throw new Error('Start sign in or registration before verifying your email.');
     }
 
+    if (isSupabaseAuthConfigured()) {
+      const result = await verifySupabaseEmailCode(pendingEmail, code, pendingEntryWorld);
+      if (result.challenge) {
+        setPendingEmail(null);
+        setPendingTwoFactorEmail(pendingEmail);
+        setPendingTotp(result.challenge);
+        return true;
+      }
+      if (!result.session) throw new Error('Authentication completed without an active session.');
+      activateSession(result.session, false);
+      return false;
+    }
     const session = verifyLocalEmail(pendingEmail, code);
     if (!session) {
       throw new Error('The email verification code is incorrect.');
@@ -154,11 +215,22 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     return false;
   };
 
-  const verifyTwoFactorCode = (code: string) => {
+  const verifyTwoFactorCode = async (code: string) => {
     if (!pendingTwoFactorEmail) {
       throw new Error('No two-factor challenge is pending.');
     }
 
+    if (isSupabaseAuthConfigured()) {
+      if (!pendingTotp) throw new Error('The authenticator challenge has expired. Start sign-in again.');
+      const session = await verifySupabaseTotpCode(
+        pendingTotp.factorId,
+        pendingTotp.challengeId,
+        code,
+        pendingEntryWorld,
+      );
+      activateSession(session, false);
+      return;
+    }
     const session = verifyLocalTwoFactor(pendingTwoFactorEmail, code);
     if (!session) {
       throw new Error('The two-factor code is incorrect.');
@@ -171,14 +243,20 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     if (!currentUser) {
       throw new Error('Sign in before changing two-factor settings.');
     }
+    if (isSupabaseAuthConfigured()) {
+      throw new Error('Use your Supabase Authenticator settings to manage TOTP. In-app enrollment is not available yet.');
+    }
 
     const session = setLocalTwoFactor(currentUser.user.email, enabled);
     setCurrentUser(session);
   };
 
-  const updateProfile = (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role' | 'vipTier'>>) => {
+  const updateProfile = (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => {
     if (!currentUser) {
       throw new Error('Sign in before editing your profile.');
+    }
+    if (isSupabaseAuthConfigured()) {
+      throw new Error('Profile editing is not yet enabled for Supabase accounts.');
     }
 
     const session = updateLocalProfile(currentUser.user.id, updates);
@@ -186,11 +264,23 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   };
 
   const cancelAuthChallenge = () => {
+    if (isSupabaseAuthConfigured()) {
+      void getSupabaseBrowserClient().auth.signOut().then(({ error }) => {
+        if (error) setSessionError(`The pending sign-in could not be cleared: ${error.message}`);
+      });
+    }
     setPendingEmail(null);
     setPendingTwoFactorEmail(null);
+    setPendingTotp(null);
   };
 
   const logout = () => {
+    if (currentUser) lockPrivateProfileVault(currentUser.user.id);
+    if (isSupabaseAuthConfigured()) {
+      void getSupabaseBrowserClient().auth.signOut().then(({ error }) => {
+        if (error) setSessionError(`Sign-out could not be confirmed: ${error.message}`);
+      });
+    }
     clearStoredSession();
     setCurrentUser(null);
     setActiveNavigation('feed');
@@ -201,7 +291,11 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     if (!currentUser) {
       throw new Error('Sign in before deleting your account.');
     }
+    if (isSupabaseAuthConfigured()) {
+      throw new Error('Account deletion must be completed through the verified support process. In-app deletion is not enabled yet.');
+    }
     deleteDemoAccount(currentUser.user.id, emailConfirmation, phrase, twoFactorCode);
+    lockPrivateProfileVault(currentUser.user.id);
     setCurrentUser(null);
     setActiveNavigation('feed');
     cancelAuthChallenge();
@@ -214,6 +308,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         currentUser,
         isAuthenticated: currentUser !== null,
         isSessionReady,
+        sessionError,
         pendingEmail,
         pendingTwoFactorEmail,
         activeNavigation,

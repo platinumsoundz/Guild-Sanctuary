@@ -6,7 +6,6 @@ import type { PostMediaType, PublicProfile } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { getLocalPublicProfileById } from '@/modules/auth';
 import { useFeed } from '@/modules/feeds';
-import { AdPlacement } from '@/modules/ads';
 import { ReportContentButton } from '@/modules/moderation';
 import { PostEngagement } from './PostEngagement';
 import styles from './WorldContent.module.css';
@@ -31,10 +30,10 @@ const content: Record<WorldType, { heading: string; message: string; mark: strin
 export function WorldContent({ worldType }: WorldContentProps) {
   const view = content[worldType];
   const { currentUser } = useAppContext();
-  const isPaidMember = currentUser?.profile.vipTier !== undefined && currentUser.profile.vipTier !== 'free';
   const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(worldType, currentUser?.user.id ?? null);
   const [draft, setDraft] = useState('');
   const [attachmentUrl, setAttachmentUrl] = useState('');
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [attachmentType, setAttachmentType] = useState<PostMediaType | ''>('');
   const [attachmentName, setAttachmentName] = useState('');
   const [storyTag, setStoryTag] = useState('');
@@ -64,18 +63,24 @@ export function WorldContent({ worldType }: WorldContentProps) {
     };
   }, [posts]);
 
+  useEffect(() => () => {
+    if (attachmentUrl) URL.revokeObjectURL(attachmentUrl);
+  }, [attachmentUrl]);
+
   const handlePublish = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setActionError(null);
     try {
       await publishPost({
         content: draft,
-        mediaUrl: attachmentUrl.trim() || null,
+        mediaUrl: null,
         mediaType: attachmentUrl.trim() ? attachmentType || null : null,
+        mediaFile: attachmentFile,
         storyTag: storyTag || null,
       });
       setDraft('');
       setAttachmentUrl('');
+      setAttachmentFile(null);
       setAttachmentType('');
       setAttachmentName('');
       setStoryTag('');
@@ -107,8 +112,9 @@ export function WorldContent({ worldType }: WorldContentProps) {
     }
 
     try {
-      const dataUrl = await readFileAsDataUrl(file);
-      setAttachmentUrl(dataUrl);
+      const previewUrl = URL.createObjectURL(file);
+      setAttachmentUrl(previewUrl);
+      setAttachmentFile(file);
       setAttachmentType(isAudio ? 'audio' : isVideo ? 'video' : 'image');
       setAttachmentName(file.name);
       setAttachmentError(null);
@@ -166,6 +172,7 @@ export function WorldContent({ worldType }: WorldContentProps) {
               type="button"
               onClick={() => {
                 setAttachmentUrl('');
+                setAttachmentFile(null);
                 setAttachmentType('');
                 setAttachmentName('');
               }}
@@ -185,13 +192,12 @@ export function WorldContent({ worldType }: WorldContentProps) {
           </select>
         </label>
         {(attachmentError || actionError) && <p className={styles.error} role="alert">{attachmentError ?? actionError}</p>}
-        {attachmentUrl.startsWith('data:') && <p className={styles.attachmentName}>Local {attachmentType} selected: {attachmentName}</p>}
+        {attachmentFile && <p className={styles.attachmentName}>Selected {attachmentType}: {attachmentName}</p>}
         <div className={styles.composerFooter}>
           <span>{draft.length}/2800</span>
           <button className={styles.actionButton} type="submit">Publish</button>
         </div>
       </form>
-      <AdPlacement isPaidMember={isPaidMember} placement="feed" />
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isLoading && <p className={styles.feedStatus}>Loading your feed...</p>}
       {!isLoading && posts.length === 0 && (
@@ -257,13 +263,4 @@ export function WorldContent({ worldType }: WorldContentProps) {
       )}
     </section>
   );
-}
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Invalid file data.'));
-    reader.onerror = () => reject(new Error('File read failed.'));
-    reader.readAsDataURL(file);
-  });
 }

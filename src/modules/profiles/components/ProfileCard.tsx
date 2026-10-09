@@ -15,7 +15,6 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       <div className={styles.profileIdentity}>
         <div className={styles.avatar} aria-hidden="true" style={{ borderColor: profile.themeColor }}>
           {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
-          {profile.cosmeticFrames[0] && <span className={styles.frameRing} style={{ borderColor: profile.themeColor }} />}
         </div>
         <div className={styles.profileDetails}>
           <p className={styles.eyebrow}>COMMUNITY PROFILE</p>

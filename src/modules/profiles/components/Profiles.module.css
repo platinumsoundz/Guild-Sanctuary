@@ -1,5 +1,4 @@
-.profileCard,
-.cosmetics {
+.profileCard {
   display: grid;
   min-width: 0;
   gap: 14px;
@@ -26,8 +25,7 @@
   gap: 16px;
 }
 
-.avatar,
-.framePreview {
+.avatar {
   position: relative;
   display: grid;
   width: 58px;
@@ -51,14 +49,6 @@
   object-fit: cover;
 }
 
-.frameRing {
-  position: absolute;
-  border: 2px solid;
-  border-radius: 50%;
-  inset: 1px;
-  pointer-events: none;
-}
-
 .profileDetails {
   min-width: 0;
   flex: 1;
@@ -72,8 +62,7 @@
   font-weight: 700;
 }
 
-.profileDetails h1,
-.cosmetics h2 {
+.profileDetails h1 {
   margin: 0;
   color: var(--ink);
   font-size: 23px;
@@ -138,15 +127,8 @@
   text-underline-offset: 2px;
 }
 
-.framePreview {
-  border-style: dashed;
-  font-family: Arial, sans-serif;
-  font-size: 23px;
-}
-
 @media (max-width: 580px) {
-  .profileCard,
-  .cosmetics {
+  .profileCard {
     gap: 13px;
     padding: 13px;
   }
@@ -161,8 +143,7 @@
     gap: 11px;
   }
 
-  .avatar,
-  .framePreview {
+  .avatar {
     width: 44px;
     height: 44px;
   }

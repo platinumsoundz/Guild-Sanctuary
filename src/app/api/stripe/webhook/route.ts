@@ -4,26 +4,29 @@ import type { Database } from '@/services/supabase/database.types';
 
 export const runtime = 'nodejs';
 
-const priceEnvironmentKeys = {
-  credits_500: 'STRIPE_PRICE_CREDITS_500',
-  credits_1500: 'STRIPE_PRICE_CREDITS_1500',
-  vip_wayfinder: 'STRIPE_PRICE_VIP_WAYFINDER',
-  vip_champion: 'STRIPE_PRICE_VIP_CHAMPION',
+const tipPriceEnvironmentKeys = {
+  tip_5_usd: { environmentKey: 'STRIPE_PRICE_TIP_5_USD', amountCents: 500 },
+  tip_10_usd: { environmentKey: 'STRIPE_PRICE_TIP_10_USD', amountCents: 1000 },
+  tip_25_usd: { environmentKey: 'STRIPE_PRICE_TIP_25_USD', amountCents: 2500 },
 } as const;
 
-type ProductKey = keyof typeof priceEnvironmentKeys;
+type TipOption = keyof typeof tipPriceEnvironmentKeys;
 
-function configuredPriceIds(): Map<string, ProductKey> {
-  const prices = new Map<string, ProductKey>();
-  for (const [productKey, environmentKey] of Object.entries(priceEnvironmentKeys) as [ProductKey, string][]) {
-    const priceId = process.env[environmentKey];
+function isTipOption(value: unknown): value is TipOption {
+  return typeof value === 'string' && Object.hasOwn(tipPriceEnvironmentKeys, value);
+}
+
+function configuredTipPrices(): Map<string, TipOption> {
+  const prices = new Map<string, TipOption>();
+  for (const [tipOption, configuration] of Object.entries(tipPriceEnvironmentKeys) as [TipOption, (typeof tipPriceEnvironmentKeys)[TipOption]][]) {
+    const priceId = process.env[configuration.environmentKey];
     if (!priceId) {
-      throw new Error(`Missing ${environmentKey}.`);
+      throw new Error(`Missing ${configuration.environmentKey}.`);
     }
     if (prices.has(priceId)) {
-      throw new Error('Each Stripe product must use a distinct configured price ID.');
+      throw new Error('Each contribution amount must use a distinct configured Stripe Price ID.');
     }
-    prices.set(priceId, productKey);
+    prices.set(priceId, tipOption);
   }
   return prices;
 }
@@ -35,7 +38,13 @@ export async function POST(request: Request): Promise<Response> {
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const signature = request.headers.get('stripe-signature');
 
-  if (!stripeSecretKey || !stripeWebhookSecret || !supabaseUrl || !supabaseServiceRoleKey) {
+  if (
+    process.env.COMMUNITY_TIPS_ENABLED !== 'true' ||
+    !stripeSecretKey ||
+    !stripeWebhookSecret ||
+    !supabaseUrl ||
+    !supabaseServiceRoleKey
+  ) {
     console.error('Stripe webhook is missing server configuration.');
     return Response.json({ error: 'Webhook service is not configured.' }, { status: 503 });
   }
@@ -43,8 +52,8 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: 'Missing Stripe signature.' }, { status: 400 });
   }
 
-  const expectsLiveEvents = stripeSecretKey.startsWith('sk_live_') || stripeSecretKey.startsWith('rk_live_');
-  const expectsTestEvents = stripeSecretKey.startsWith('sk_test_') || stripeSecretKey.startsWith('rk_test_');
+  const expectsLiveEvents = stripeSecretKey.startsWith('sk_live_');
+  const expectsTestEvents = stripeSecretKey.startsWith('sk_test_');
   if (!expectsLiveEvents && !expectsTestEvents) {
     console.error('Stripe webhook has an unsupported API key mode.');
     return Response.json({ error: 'Webhook service is not configured.' }, { status: 503 });
@@ -77,18 +86,14 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ received: true, fulfilled: false });
     }
 
-    const userId = checkout.client_reference_id;
-    if (
-      !userId ||
-      checkout.metadata?.user_id !== userId ||
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId)
-    ) {
-      throw new Error('Stripe checkout is missing a valid matching user identity.');
+    const tipOption = checkout.metadata?.tip_option;
+    if (!isTipOption(tipOption)) {
+      throw new Error('Stripe checkout is missing a supported community tip option.');
     }
 
     const lineItems = checkout.line_items?.data ?? [];
     if (lineItems.length !== 1 || lineItems[0].quantity !== 1) {
-      throw new Error('Stripe checkout must contain exactly one configured item.');
+      throw new Error('Stripe checkout must contain exactly one community tip.');
     }
     const lineItem = lineItems[0];
     const price = typeof lineItem.price === 'string'
@@ -97,16 +102,20 @@ export async function POST(request: Request): Promise<Response> {
     if (!price) {
       throw new Error('Stripe checkout is missing its configured Price.');
     }
-    const productKey = configuredPriceIds().get(price.id);
+    const configuredPrices = configuredTipPrices();
+    const configuredTip = configuredPrices.get(price.id);
+    const expectedTip = tipPriceEnvironmentKeys[tipOption];
 
     if (
-      !productKey ||
-      !price.unit_amount ||
-      !checkout.amount_total ||
-      checkout.currency !== price.currency ||
-      checkout.amount_total < price.unit_amount
+      !configuredTip ||
+      configuredTip !== tipOption ||
+      price.type !== 'one_time' ||
+      price.unit_amount !== expectedTip.amountCents ||
+      checkout.amount_total !== expectedTip.amountCents ||
+      checkout.currency !== 'usd' ||
+      price.currency !== 'usd'
     ) {
-      throw new Error('Stripe checkout does not match a configured paid product.');
+      throw new Error('Stripe checkout does not match a configured one-time community contribution.');
     }
 
     const supabase = createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
@@ -116,12 +125,11 @@ export async function POST(request: Request): Promise<Response> {
         persistSession: false,
       },
     });
-    const { data: fulfilled, error } = await supabase.rpc('fulfill_stripe_checkout', {
+    const { data: recorded, error } = await supabase.rpc('record_community_tip', {
       requested_event_id: event.id,
       requested_event_type: event.type,
       requested_session_id: checkout.id,
-      requested_user_id: userId,
-      requested_product_key: productKey,
+      requested_tip_option: tipOption,
       requested_amount_total: checkout.amount_total,
       requested_currency: checkout.currency,
     });
@@ -130,7 +138,7 @@ export async function POST(request: Request): Promise<Response> {
       throw new Error(`Supabase fulfillment failed: ${error.message}`);
     }
 
-    return Response.json({ received: true, fulfilled });
+    return Response.json({ received: true, recorded });
   } catch (error) {
     console.error('Stripe checkout fulfillment failed.', {
       eventId: event.id,

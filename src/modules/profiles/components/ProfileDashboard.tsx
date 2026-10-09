@@ -9,7 +9,7 @@ interface ProfileDashboardProps {
   profile: Profile;
   posts: Post[];
   isPostsLoading: boolean;
-  onSave: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role' | 'vipTier'>>) => void;
+  onSave: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => void;
   onThemeChange: (themeColor: string) => void;
 }
 
@@ -62,7 +62,6 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
         starSign: draft.starSign,
         belief: draft.belief?.trim() || null,
         privacy: draft.privacy,
-        cosmeticFrames: draft.cosmeticFrames,
       });
       setSaved(true);
     } catch (saveError) {
@@ -113,17 +112,6 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
               <span className={styles.uploadLabel}>Upload banner <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void readImage(event, 'bannerUrl')} /></span>
             </label>
           </div>
-          <label className={styles.field}>
-            <span>Cosmetic frame</span>
-            <select
-              value={draft.cosmeticFrames[0] ?? ''}
-              onChange={(event) => updateDraft({ cosmeticFrames: event.currentTarget.value ? [event.currentTarget.value] : [] })}
-            >
-              <option value="">No frame</option>
-              {draft.cosmeticFrames.map((frame) => <option key={frame} value={frame}>{frame}</option>)}
-            </select>
-            <span className={styles.fieldHint}>Frames appear here after unlocking them from your wallet.</span>
-          </label>
         </section>
 
         <section className={styles.editorSection} aria-labelledby="details-heading">

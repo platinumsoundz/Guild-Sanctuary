@@ -101,14 +101,6 @@
   object-fit: cover;
 }
 
-.frameMarker {
-  position: absolute;
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  inset: 1px;
-  pointer-events: none;
-}
-
 .profileCopy {
   min-width: 0;
   flex: 1;
@@ -134,12 +126,6 @@
   font-size: 10px;
 }
 
-.nameLine .vipBadge {
-  color: var(--accent);
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
 .profileCopy p {
   margin: 5px 0 0;
   color: var(--muted);
@@ -149,30 +135,22 @@
   overflow-wrap: anywhere;
 }
 
-.cosmeticLine {
-
-  .publicDetails {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 12px;
-    margin-top: 6px;
-    color: var(--muted);
-    font-family: Arial, sans-serif;
-    font-size: 10px;
-  }
-
-  .publicDetails span {
-    display: inline-flex;
-    max-width: 100%;
-    align-items: center;
-    gap: 4px;
-    overflow-wrap: anywhere;
-  }
-  display: inline-block;
+.publicDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
   margin-top: 4px;
-  color: var(--accent);
+  color: var(--muted);
   font-family: Arial, sans-serif;
-  font-size: 9px;
+  font-size: 10px;
+}
+
+.publicDetails span {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 4px;
+  overflow-wrap: anywhere;
 }
 
 .messageButton {

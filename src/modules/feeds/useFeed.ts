@@ -9,7 +9,7 @@ interface UseFeedResult {
   posts: Post[];
   isLoading: boolean;
   error: string | null;
-  publishPost: (input: Pick<CreatePostInput, 'content' | 'mediaUrl' | 'mediaType' | 'storyTag'>) => Promise<void>;
+  publishPost: (input: Pick<CreatePostInput, 'content' | 'mediaUrl' | 'mediaType' | 'mediaFile' | 'storyTag'>) => Promise<void>;
   editPost: (postId: string, content: string) => Promise<void>;
   removePost: (postId: string) => Promise<void>;
 }
@@ -35,7 +35,7 @@ export function useFeed(worldType: WorldType, authorId: string | null): UseFeedR
     void refresh();
   }, [refresh]);
 
-  const publishPost = async (input: Pick<CreatePostInput, 'content' | 'mediaUrl' | 'mediaType' | 'storyTag'>) => {
+  const publishPost = async (input: Pick<CreatePostInput, 'content' | 'mediaUrl' | 'mediaType' | 'mediaFile' | 'storyTag'>) => {
     if (!authorId) {
       throw new Error('Sign in before creating a post.');
     }

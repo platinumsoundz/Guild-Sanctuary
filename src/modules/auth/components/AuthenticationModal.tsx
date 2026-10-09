@@ -9,10 +9,10 @@ interface AuthenticationModalProps {
   currentUser: AuthSession | null;
   pendingEmail: string | null;
   onClose: () => void;
-  onLogin: (email: string) => void;
-  onSignup: (input: SignUpInput) => void;
-  onVerifyEmailCode: (code: string) => boolean;
-  onVerifyTwoFactorCode: (code: string) => void;
+  onLogin: (email: string) => void | Promise<void>;
+  onSignup: (input: SignUpInput) => void | Promise<void>;
+  onVerifyEmailCode: (code: string) => boolean | Promise<boolean>;
+  onVerifyTwoFactorCode: (code: string) => void | Promise<void>;
   onCancelChallenge: () => void;
   onSetTwoFactorEnabled: (enabled: boolean) => void;
   onLogout: () => void;
@@ -113,14 +113,14 @@ export function AuthenticationModal({
             <div className={styles.accountDetails}>
               <span>Signed in as {currentUser.profile.displayName}</span>
               <span>{currentUser.user.email}</span>
-              <button
+              {!isSupabaseConfigured() && <button
                 className={styles.securityButton}
                 type="button"
                 aria-pressed={currentUser.user.twoFactorEnabled}
                 onClick={() => onSetTwoFactorEnabled(!currentUser.user.twoFactorEnabled)}
               >
                 {currentUser.user.twoFactorEnabled ? 'Disable demo 2FA' : 'Enable demo 2FA'}
-              </button>
+              </button>}
             </div>
             <button className={styles.signOutButton} type="button" onClick={() => {
               onLogout();
@@ -133,4 +133,8 @@ export function AuthenticationModal({
       </section>
     </div>
   );
+}
+
+function isSupabaseConfigured(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }

@@ -89,13 +89,11 @@ export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryP
             <article className={styles.profileRow} key={profile.profileId}>
               <div className={styles.avatar} aria-hidden="true">
                 {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
-                {profile.cosmeticFrames[0] && <span className={styles.frameMarker} />}
               </div>
               <div className={styles.profileCopy}>
                 <div className={styles.nameLine}>
                   <h2>{profile.displayName}</h2>
                   <span>@{profile.username}</span>
-                  {profile.vipTier !== 'free' && <span className={styles.vipBadge}>{profile.vipTier}</span>}
                 </div>
                 <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
                 <ProfileSocialLinks links={profile.socialLinks} />
@@ -107,7 +105,6 @@ export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryP
                                     {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
                                   </div>
                                 )}
-                {profile.cosmeticFrames.length > 0 && <span className={styles.cosmeticLine}>Frame: {profile.cosmeticFrames[0]}</span>}
               </div>
               <button
                 className={styles.messageButton}

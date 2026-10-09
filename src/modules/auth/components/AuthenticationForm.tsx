@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import type { WorldType } from '@/types';
 import { MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE, type SignUpInput } from '../sessionStore';
 import styles from './AuthenticationForm.module.css';
@@ -10,10 +10,11 @@ export type AuthMode = 'login' | 'signup';
 interface AuthenticationFormProps {
   initialMode?: AuthMode;
   initialEmail?: string;
-  onLogin: (email: string) => void;
-  onSignup: (input: SignUpInput) => void;
-  onVerifyEmailCode: (code: string) => boolean;
-  onVerifyTwoFactorCode: (code: string) => void;
+  initialError?: string | null;
+  onLogin: (email: string) => void | Promise<void>;
+  onSignup: (input: SignUpInput) => void | Promise<void>;
+  onVerifyEmailCode: (code: string) => boolean | Promise<boolean>;
+  onVerifyTwoFactorCode: (code: string) => void | Promise<void>;
   onCancelChallenge: () => void;
   onSuccess?: () => void;
 }
@@ -28,6 +29,7 @@ const entryWorlds: { type: WorldType; title: string; description: string }[] = [
 export function AuthenticationForm({
   initialMode = 'signup',
   initialEmail = '',
+  initialError = null,
   onLogin,
   onSignup,
   onVerifyEmailCode,
@@ -42,15 +44,21 @@ export function AuthenticationForm({
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [entryWorld, setEntryWorld] = useState<WorldType>('sanctuary');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (initialError) setError(initialError);
+  }, [initialError]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    setIsSubmitting(true);
 
     try {
       if (step === 'email-code') {
-        const requiresTwoFactor = onVerifyEmailCode(verificationCode.trim());
+        const requiresTwoFactor = await onVerifyEmailCode(verificationCode.trim());
         setVerificationCode('');
         if (requiresTwoFactor) {
           setStep('two-factor-code');
@@ -61,25 +69,27 @@ export function AuthenticationForm({
       }
 
       if (step === 'two-factor-code') {
-        onVerifyTwoFactorCode(verificationCode.trim());
+        await onVerifyTwoFactorCode(verificationCode.trim());
         onSuccess?.();
         return;
       }
 
       if (mode === 'signup') {
-        onSignup({
+        await onSignup({
           email: email.trim(),
           username: username.trim(),
           displayName: displayName.trim(),
           entryWorld,
         });
       } else {
-        onLogin(email.trim());
+        await onLogin(email.trim());
       }
 
       setStep('email-code');
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'We could not complete your request.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -129,7 +139,7 @@ export function AuthenticationForm({
         role="region"
         aria-label={step === 'email-code' ? 'Email verification' : step === 'two-factor-code' ? 'Two-factor verification' : mode === 'login' ? 'Sign in' : 'Create account'}
       >
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={(event) => void handleSubmit(event)}>
           {step === 'credentials' ? (
             <>
               <label className={styles.field} htmlFor="auth-email">
@@ -205,8 +215,12 @@ export function AuthenticationForm({
             <>
               <p className={styles.challengeCopy}>
                 {step === 'email-code'
-                  ? `Enter the code sent to ${email}. For this local demo, use ${MOCK_EMAIL_CODE}.`
-                  : `Enter your second-factor code. For this local demo, use ${MOCK_TWO_FACTOR_CODE}.`}
+                  ? isSupabaseConfigured()
+                    ? `Enter the verification code sent to ${email}.`
+                    : `Enter the code sent to ${email}. For this local demo, use ${MOCK_EMAIL_CODE}.`
+                  : isSupabaseConfigured()
+                    ? 'Enter the code from your authenticator app.'
+                    : `Enter your second-factor code. For this local demo, use ${MOCK_TWO_FACTOR_CODE}.`}
               </p>
               <label className={styles.field} htmlFor="auth-verification-code">
                 <span>{step === 'email-code' ? 'Email verification code' : 'Two-factor code'}</span>
@@ -232,12 +246,18 @@ export function AuthenticationForm({
 
           {error && <p className={styles.error} role="alert">{error}</p>}
 
-          <button className={styles.submitButton} type="submit">
-            {step === 'email-code' ? 'Verify email' : step === 'two-factor-code' ? 'Verify and continue' : mode === 'signup' ? 'Continue to email verification' : 'Continue with email'}
+          <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Please wait…' : step === 'email-code' ? 'Verify email' : step === 'two-factor-code' ? 'Verify and continue' : mode === 'signup' ? 'Continue to email verification' : 'Continue with email'}
           </button>
         </form>
-        {step === 'credentials' && <p className={styles.disclaimer}>Local demo accounts are saved in this browser. Verification codes are mocked; no email is sent and no backend authentication is used.</p>}
+        {step === 'credentials' && <p className={styles.disclaimer}>{isSupabaseConfigured()
+          ? 'We use Supabase Auth for email verification. If you have enabled an authenticator, you will be asked for its current code.'
+          : 'Local demo accounts are saved in this browser. Verification codes are mocked; no email is sent and no backend authentication is used.'}</p>}
       </div>
     </div>
   );
+}
+
+function isSupabaseConfigured(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }

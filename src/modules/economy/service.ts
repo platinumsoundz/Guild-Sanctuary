@@ -1,12 +1,47 @@
-import type {
-  CosmeticProduct,
-  CreditPackage,
-  InventoryItem,
-  VipTier,
-  Wallet,
-  WalletLedgerEntry,
-} from '@/types/database';
-import { syncLocalProfileEntitlements } from '@/modules/auth';
+export type VipTier = 'free' | 'wayfinder' | 'champion';
+export type CosmeticKind = 'frame' | 'vip_badge' | 'sticker';
+
+export interface Wallet {
+  id: string;
+  userId: string;
+  balanceCredits: number;
+  vipTier: VipTier;
+  updatedAt: string;
+}
+
+export interface WalletLedgerEntry {
+  id: string;
+  walletId: string;
+  amountCredits: number;
+  reason: 'top_up' | 'purchase' | 'refund' | 'adjustment';
+  referenceId: string;
+  createdAt: string;
+}
+
+export interface CreditPackage {
+  id: string;
+  name: string;
+  credits: number;
+  priceCents: number;
+  currency: 'USD';
+}
+
+export interface CosmeticProduct {
+  id: string;
+  name: string;
+  kind: CosmeticKind;
+  priceCredits: number;
+  requiredVipTier: Exclude<VipTier, 'free'> | null;
+  preview: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  userId: string;
+  productId: string;
+  acquiredAt: string;
+  equipped: boolean;
+}
 
 export interface MockCheckoutSession {
   id: string;
@@ -245,7 +280,6 @@ export async function purchaseCosmetic(userId: string, productId: string): Promi
   inventories.set(userId, inventory);
   recordLedger(wallet, -product.priceCredits, 'purchase', item.id);
   persistUserWallet(userId);
-  syncProfileEntitlements(userId, wallet, inventory);
   return fetchWallet(userId);
 }
 
@@ -264,7 +298,6 @@ export async function purchaseVipTier(userId: string, tier: Exclude<VipTier, 'fr
   wallet.vipTier = tier;
   recordLedger(wallet, -price, 'purchase', `vip-${tier}`);
   persistUserWallet(userId);
-  syncProfileEntitlements(userId, wallet, inventories.get(userId) ?? []);
   return fetchWallet(userId);
 }
 
@@ -289,21 +322,7 @@ export async function equipInventoryItem(userId: string, inventoryItemId: string
   item.equipped = shouldEquip;
   wallet.updatedAt = new Date().toISOString();
   persistUserWallet(userId);
-  syncProfileEntitlements(userId, wallet, inventory);
   return fetchWallet(userId);
-}
-
-function syncProfileEntitlements(userId: string, wallet: Wallet, inventory: InventoryItem[]): void {
-  const equippedFrames = inventory
-    .filter((item) => item.equipped)
-    .map((item) => cosmeticCatalog.find((product) => product.id === item.productId))
-    .filter((product): product is CosmeticProduct => product?.kind === 'frame')
-    .map((product) => product.name);
-
-  syncLocalProfileEntitlements(userId, {
-    vipTier: wallet.vipTier,
-    cosmeticFrames: equippedFrames,
-  });
 }
 
 export async function getVipTierPrice(tier: Exclude<VipTier, 'free'>): Promise<number> {

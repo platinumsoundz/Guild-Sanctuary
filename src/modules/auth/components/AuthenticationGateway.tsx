@@ -3,14 +3,16 @@ import { AuthenticationForm } from './AuthenticationForm';
 import styles from './AuthenticationGateway.module.css';
 
 interface AuthenticationGatewayProps {
-  onLogin: (email: string) => void;
-  onSignup: (input: SignUpInput) => void;
-  onVerifyEmailCode: (code: string) => boolean;
-  onVerifyTwoFactorCode: (code: string) => void;
+  initialError?: string | null;
+  onLogin: (email: string) => void | Promise<void>;
+  onSignup: (input: SignUpInput) => void | Promise<void>;
+  onVerifyEmailCode: (code: string) => boolean | Promise<boolean>;
+  onVerifyTwoFactorCode: (code: string) => void | Promise<void>;
   onCancelChallenge: () => void;
 }
 
 export function AuthenticationGateway({
+  initialError,
   onLogin,
   onSignup,
   onVerifyEmailCode,
@@ -26,6 +28,7 @@ export function AuthenticationGateway({
       </section>
       <section className={styles.formPanel} aria-label="Sign in or create an account">
         <AuthenticationForm
+          initialError={initialError}
           onLogin={onLogin}
           onSignup={onSignup}
           onVerifyEmailCode={onVerifyEmailCode}

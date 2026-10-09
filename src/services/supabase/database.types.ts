@@ -11,12 +11,30 @@ export type ProfileRow = {
   id: string;
   username: string;
   display_name: string;
+  bio: string | null;
+  status_message: string | null;
+  avatar_url: string | null;
+  banner_url: string | null;
+  theme_color: string;
+  location: string | null;
+  age: number | null;
+  star_sign: string | null;
+  belief: string | null;
+  social_links: Record<string, string | null>;
+  privacy: Record<string, boolean>;
   role: 'member' | 'moderator' | 'admin';
   status: 'active' | 'suspended' | 'banned';
   suspended_until: string | null;
   allow_direct_messages: boolean;
   visibility: 'public' | 'private';
   created_at: string;
+  updated_at: string;
+}
+
+export type PrivateProfileVaultRow = {
+  user_id: string;
+  ciphertext: string;
+  salt: string;
   updated_at: string;
 }
 
@@ -66,33 +84,15 @@ export interface Database {
   public: {
     Tables: {
       profiles: Table<ProfileRow>;
-      wallets: Table<{
-        user_id: string;
-        balance_credits: number;
-        updated_at: string;
-      }>;
-      wallet_ledger_entries: Table<{
-        id: string;
-        user_id: string;
-        amount_credits: number;
-        reason: 'top_up';
-        reference_id: string;
-        created_at: string;
-      }>;
-      stripe_webhook_events: Table<{
-        event_id: string;
-        event_type: string;
-        processed_at: string;
-      }>;
-      payment_fulfillments: Table<{
-        checkout_session_id: string;
-        user_id: string;
+      community_tips: Table<{
         stripe_event_id: string;
-        product_key: 'credits_500' | 'credits_1500' | 'vip_wayfinder' | 'vip_champion';
+        checkout_session_id: string;
+        tip_option: 'tip_5_usd' | 'tip_10_usd' | 'tip_25_usd';
         amount_total: number;
-        currency: string;
-        fulfilled_at: string;
+        currency: 'usd';
+        completed_at: string;
       }>;
+      private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
         user_id: string;
         preferences: Record<string, unknown>;
@@ -229,13 +229,12 @@ export interface Database {
         Args: Record<string, never>;
         Returns: boolean;
       };
-      fulfill_stripe_checkout: {
+      record_community_tip: {
         Args: {
           requested_event_id: string;
           requested_event_type: string;
           requested_session_id: string;
-          requested_user_id: string;
-          requested_product_key: 'credits_500' | 'credits_1500' | 'vip_wayfinder' | 'vip_champion';
+          requested_tip_option: 'tip_5_usd' | 'tip_10_usd' | 'tip_25_usd';
           requested_amount_total: number;
           requested_currency: string;
         };

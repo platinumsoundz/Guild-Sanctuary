@@ -22,8 +22,6 @@ create table public.profiles (
   belief text,
   social_links jsonb not null default '{"facebook":null,"x":null,"youtube":null,"xbox":null,"playstation":null,"steam":null,"epicGames":null,"reddit":null}'::jsonb,
   privacy jsonb not null default '{"bio":true,"location":false,"age":false,"starSign":false,"belief":false,"socialLinks":false,"allowDirectMessages":true}'::jsonb,
-  cosmetic_frames text[] not null default '{}',
-  vip_tier text not null default 'free' check (vip_tier in ('free', 'wayfinder', 'champion')),
   role text not null default 'member' check (role in ('member', 'moderator', 'admin')),
   status text not null default 'active' check (status in ('active', 'suspended', 'banned')),
   suspended_until timestamptz,
@@ -56,9 +54,7 @@ select
   case when privacy ->> 'starSign' = 'true' then star_sign end as star_sign,
   case when privacy ->> 'belief' = 'true' then belief end as belief,
   case when privacy ->> 'socialLinks' = 'true' then social_links end as social_links,
-  allow_direct_messages,
-  cosmetic_frames,
-  vip_tier
+  allow_direct_messages
 from public.profiles
 where visibility = 'public'
   and allow_profile_discovery
@@ -831,7 +827,7 @@ create policy "moderators view audit events"
 grant select, delete on public.profiles to authenticated;
 grant insert (id, username, display_name) on public.profiles to authenticated;
 revoke update on public.profiles from authenticated;
-grant update (username, display_name, bio, status_message, avatar_url, banner_url, theme_color, location, age, star_sign, belief, social_links, privacy, cosmetic_frames, allow_direct_messages, allow_profile_discovery, visibility) on public.profiles to authenticated;
+grant update (username, display_name, bio, status_message, avatar_url, banner_url, theme_color, location, age, star_sign, belief, social_links, privacy, allow_direct_messages, allow_profile_discovery, visibility) on public.profiles to authenticated;
 grant select on public.account_settings to authenticated;
 grant insert (user_id, preferences) on public.account_settings to authenticated;
 grant update (preferences) on public.account_settings to authenticated;

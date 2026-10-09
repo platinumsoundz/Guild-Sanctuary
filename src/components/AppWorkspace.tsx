@@ -11,7 +11,8 @@ import { AuthenticationGateway } from '@/modules/auth';
 import { DualWorldFeed } from '@/modules/feeds';
 import { MeetupCalendarPlaceholder } from '@/modules/events';
 import { ProfileDashboard, ProfileDiscovery } from '@/modules/profiles';
-import { WalletPanel } from '@/modules/economy';
+import { SupportPanel } from '@/modules/support';
+import { AdSlot } from '@/modules/ads';
 import { DirectMessageThread, MessagesInbox } from '@/modules/messages';
 import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
@@ -25,6 +26,7 @@ export function AppWorkspace() {
     currentUser,
     isAuthenticated,
     isSessionReady,
+    sessionError,
     login,
     logout,
     deleteAccount,
@@ -49,6 +51,12 @@ export function AppWorkspace() {
       setProfileThemePreview(null);
     }
   }, [activeNavigation]);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tip') === 'success') {
+      setActiveNavigation('support');
+    }
+  }, [setActiveNavigation]);
 
   useEffect(() => {
     if (activeNavigation !== 'profile' || !currentUser) {
@@ -84,10 +92,18 @@ export function AppWorkspace() {
     setActiveNavigation(navigation);
   };
 
-  const authenticatedContent = isAuthenticated && currentUser ? (
+  const authenticatedContent = activeNavigation === 'support' ? (
+    <main className={styles.supportPage}>
+      <SupportPanel />
+    </main>
+  ) : isAuthenticated && currentUser ? (
     <>
       {activeNavigation === 'feed' ? (
-        <DualWorldFeed />
+        <>
+          <AdSlot placement="feed-inline" />
+          <DualWorldFeed />
+          <AdSlot placement="feed-sidebar" />
+        </>
       ) : activeNavigation === 'events' ? (
         <MeetupCalendarPlaceholder />
       ) : activeNavigation === 'profile' ? (
@@ -98,10 +114,6 @@ export function AppWorkspace() {
           onSave={updateProfile}
           onThemeChange={setProfileThemePreview}
         />
-      ) : activeNavigation === 'wallet' ? (
-        <main className={styles.walletPage}>
-          <WalletPanel userId={currentUser.user.id} />
-        </main>
       ) : activeNavigation === 'discover' ? (
         <ProfileDiscovery currentUserId={currentUser.user.id} onMessage={openMessage} />
       ) : activeNavigation === 'messages' && messagePeer ? (
@@ -119,7 +131,10 @@ export function AppWorkspace() {
           }}
         />
       ) : activeNavigation === 'shorts' ? (
-        <ShortsFeed />
+        <>
+          <AdSlot placement="shorts" />
+          <ShortsFeed />
+        </>
       ) : activeNavigation === 'settings' ? (
         <SettingsHub
           userId={currentUser.user.id}
@@ -141,6 +156,7 @@ export function AppWorkspace() {
     </>
   ) : (
     <AuthenticationGateway
+      initialError={sessionError}
       onLogin={login}
       onSignup={signup}
       onVerifyEmailCode={verifyEmailCode}

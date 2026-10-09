@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { CosmeticProduct, CreditPackage, VipTier } from '@/types/database';
 import {
   completeStripeCheckoutMock,
   createStripeCheckoutMock,
@@ -11,7 +10,10 @@ import {
   fetchWallet,
   purchaseCosmetic,
   purchaseVipTier,
+  type CosmeticProduct,
+  type CreditPackage,
   type MockCheckoutSession,
+  type VipTier,
   type WalletSnapshot,
 } from './service';
 

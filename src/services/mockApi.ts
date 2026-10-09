@@ -79,9 +79,7 @@ export async function createUser(input: CreateUserInput): Promise<{ user: User; 
     belief: null,
     privacy: { bio: true, location: false, age: false, starSign: false, belief: false, socialLinks: false, allowDirectMessages: true },
     socialLinks: { facebook: null, x: null, youtube: null, xbox: null, playstation: null, steam: null, epicGames: null, reddit: null },
-    cosmeticFrames: [],
     visibility: 'public',
-    vipTier: 'free',
     role: 'member',
   };
 

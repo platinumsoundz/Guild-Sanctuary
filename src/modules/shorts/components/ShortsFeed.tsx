@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Heart, MessageCircle } from 'lucide-react';
+import { Heart, MessageCircle, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
-import { AdPlacement } from '@/modules/ads';
 import { ReportContentButton } from '@/modules/moderation';
 import type { ShortVideo, SocialComment } from '@/types/database';
-import { addShortComment, createShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike } from '../service';
+import { addShortComment, createShortVideo, deleteShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike } from '../service';
 import styles from './ShortsFeed.module.css';
 
 interface ShortState {
@@ -17,7 +16,6 @@ interface ShortState {
 
 export function ShortsFeed() {
   const { activeWorld, currentUser } = useAppContext();
-  const isPaidMember = currentUser?.profile.vipTier !== undefined && currentUser.profile.vipTier !== 'free';
   const viewerId = currentUser?.user.id ?? '';
   const [videos, setVideos] = useState<ShortVideo[]>([]);
   const [engagement, setEngagement] = useState<Record<string, ShortState>>({});
@@ -26,6 +24,7 @@ export function ShortsFeed() {
   const [draft, setDraft] = useState('');
   const [captionDraft, setCaptionDraft] = useState('');
   const [videoDraft, setVideoDraft] = useState('');
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoFileName, setVideoFileName] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,12 +38,21 @@ export function ShortsFeed() {
     recordingStreamRef.current?.getTracks().forEach((track) => track.stop());
   }, []);
 
+  useEffect(() => () => {
+    if (videoDraft) URL.revokeObjectURL(videoDraft);
+  }, [videoDraft]);
+
   useEffect(() => {
     let cancelled = false;
-    fetchShortVideos(activeWorld).then((items) => {
+    fetchShortVideos(activeWorld).then(async (items) => {
+      if (cancelled) return;
+      const stats = await Promise.all(items.map(async (item) => [
+        item.id,
+        await getShortEngagement(item.id, viewerId),
+      ] as const));
       if (cancelled) return;
       setVideos(items);
-      setEngagement(Object.fromEntries(items.map((item) => [item.id, getShortEngagement(item.id, viewerId)])));
+      setEngagement(Object.fromEntries(stats));
     }).catch((loadError) => {
       if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Short videos could not be loaded.');
     });
@@ -127,7 +135,8 @@ export function ShortsFeed() {
       return;
     }
     try {
-      setVideoDraft(await readFileAsDataUrl(file));
+      setVideoDraft(URL.createObjectURL(file));
+      setVideoFile(file);
       setVideoFileName(file.name);
       setError(null);
     } catch {
@@ -165,13 +174,11 @@ export function ShortsFeed() {
           setError('Recorded videos must be 5 MB or smaller. Record a shorter clip.');
           return;
         }
-        void readBlobAsDataUrl(blob)
-          .then((dataUrl) => {
-            setVideoDraft(dataUrl);
+        const file = new File([blob], 'recorded-clip.webm', { type: blob.type || 'video/webm' });
+        setVideoDraft(URL.createObjectURL(file));
+        setVideoFile(file);
             setVideoFileName('Recorded clip');
             setError(null);
-          })
-          .catch(() => setError('The recorded video could not be prepared.'));
       };
       recorder.start(500);
       setIsRecording(true);
@@ -189,7 +196,7 @@ export function ShortsFeed() {
 
   const handlePublishVideo = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!viewerId || !videoDraft) {
+    if (!viewerId || !videoDraft || !videoFile) {
       setError('Choose a video file before publishing.');
       return;
     }
@@ -197,17 +204,39 @@ export function ShortsFeed() {
       const video = await createShortVideo({
         authorId: viewerId,
         worldType: activeWorld,
-        videoUrl: videoDraft,
+        videoFile,
         caption: captionDraft,
       });
       setVideos((current) => [video, ...current]);
       setEngagement((current) => ({ ...current, [video.id]: { liked: false, likesCount: 0, commentsCount: 0 } }));
       setVideoDraft('');
+      setVideoFile(null);
       setVideoFileName('');
       setCaptionDraft('');
       setError(null);
     } catch (publishError) {
       setError(publishError instanceof Error ? publishError.message : 'Your video could not be published.');
+    }
+  };
+
+  const handleDeleteVideo = async (videoId: string) => {
+    if (!window.confirm('Delete this video and its uploaded media? This cannot be undone.')) return;
+    try {
+      await deleteShortVideo(videoId, viewerId);
+      setVideos((current) => current.filter((video) => video.id !== videoId));
+      setEngagement((current) => {
+        const next = { ...current };
+        delete next[videoId];
+        return next;
+      });
+      setCommentsByVideo((current) => {
+        const next = { ...current };
+        delete next[videoId];
+        return next;
+      });
+      setError(null);
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : 'The video could not be deleted.');
     }
   };
 
@@ -233,7 +262,6 @@ export function ShortsFeed() {
         {videoDraft && <video className={styles.videoDraftPreview} src={videoDraft} controls muted playsInline />}
         <button type="submit" disabled={!videoDraft}>Publish short</button>
       </form>
-      <AdPlacement isPaidMember={isPaidMember} placement="shorts" />
       {error && <p className={styles.error} role="alert">{error}</p>}
       <div className={styles.feed} ref={feedRef}>
         {videos.map((video, index) => {
@@ -241,7 +269,7 @@ export function ShortsFeed() {
           const isCommentsOpen = openCommentsId === video.id;
           return (
             <article className={styles.clip} key={video.id}>
-              <video className={styles.video} src={video.videoUrl} controls loop muted playsInline preload={index === 0 ? 'metadata' : 'none'} aria-label={`Short video: ${video.caption}`} />
+              <video className={styles.video} src={video.videoUrl} controls muted playsInline preload={index === 0 ? 'metadata' : 'none'} aria-label={`Short video: ${video.caption}`} />
               <div className={styles.scrim} aria-hidden="true" />
               <div className={styles.caption}>
                 <span>@{video.authorId}</span>
@@ -256,6 +284,12 @@ export function ShortsFeed() {
                   <MessageCircle />
                   <span>{stats.commentsCount}</span>
                 </button>
+                {video.authorId === viewerId && (
+                  <button type="button" aria-label="Delete your short video" onClick={() => void handleDeleteVideo(video.id)}>
+                    <Trash2 />
+                    <span>Delete</span>
+                  </button>
+                )}
               </div>
               <ReportContentButton targetType="short" targetId={video.id} />
               {isCommentsOpen && (
@@ -279,22 +313,4 @@ export function ShortsFeed() {
       </div>
     </main>
   );
-}
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Invalid file data.'));
-    reader.onerror = () => reject(new Error('File read failed.'));
-    reader.readAsDataURL(file);
-  });
-}
-
-function readBlobAsDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Invalid video data.'));
-    reader.onerror = () => reject(new Error('Video read failed.'));
-    reader.readAsDataURL(blob);
-  });
 }

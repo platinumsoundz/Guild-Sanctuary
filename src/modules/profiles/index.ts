@@ -1,4 +1,3 @@
-export { CosmeticFramePlaceholder } from './components/CosmeticFramePlaceholder';
 export { ProfileDiscovery } from './components/ProfileDiscovery';
 export { ProfileDashboard } from './components/ProfileDashboard';
 export { ProfileCard } from './components/ProfileCard';

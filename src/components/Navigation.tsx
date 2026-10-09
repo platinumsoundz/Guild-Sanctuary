@@ -15,7 +15,7 @@ import {
   Sparkles,
   Sun,
   UserRound,
-  WalletCards,
+  HeartHandshake,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -36,7 +36,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
   { id: 'profile', label: 'Profile', icon: UserRound },
-  { id: 'wallet', label: 'Wallet', icon: WalletCards },
+  { id: 'support', label: 'Support the community', icon: HeartHandshake },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -48,10 +48,10 @@ interface NavigationProps {
   isSessionReady: boolean;
   onSelectWorld: (world: WorldType) => void;
   onNavigate: (navigation: NavigationState) => void;
-  onLogin: (email: string) => void;
-  onSignup: (input: SignUpInput) => void;
-  onVerifyEmailCode: (code: string) => boolean;
-  onVerifyTwoFactorCode: (code: string) => void;
+  onLogin: (email: string) => void | Promise<void>;
+  onSignup: (input: SignUpInput) => void | Promise<void>;
+  onVerifyEmailCode: (code: string) => boolean | Promise<boolean>;
+  onVerifyTwoFactorCode: (code: string) => void | Promise<void>;
   onCancelChallenge: () => void;
   onSetTwoFactorEnabled: (enabled: boolean) => void;
   onLogout: () => void;

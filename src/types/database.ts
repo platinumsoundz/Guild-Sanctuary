@@ -4,8 +4,6 @@ export type UserStatus = 'active' | 'suspended';
 export type FriendshipStatus = 'pending' | 'accepted' | 'blocked';
 export type UserPermission = 'feed:read' | 'post:create' | 'event:rsvp' | 'message:send' | 'profile:edit';
 export type ProfileVisibility = 'public' | 'private';
-export type VipTier = 'free' | 'wayfinder' | 'champion';
-export type CosmeticKind = 'frame' | 'vip_badge' | 'sticker';
 export type EventRsvpStatus = 'going' | 'interested' | 'cancelled';
 export type PostMediaType = 'image' | 'audio' | 'video';
 export type ConversationKind = 'direct' | 'group';
@@ -82,9 +80,7 @@ export interface Profile {
   belief: string | null;
   privacy: ProfilePrivacy;
   socialLinks: SocialLinks;
-  cosmeticFrames: string[];
   visibility: ProfileVisibility;
-  vipTier: VipTier;
   role: string;
 }
 
@@ -104,8 +100,6 @@ export interface PublicProfile {
   belief: string | null;
   socialLinks: SocialLinks;
   allowDirectMessages: boolean;
-  cosmeticFrames: string[];
-  vipTier: VipTier;
   role: string;
 }
 
@@ -194,46 +188,4 @@ export interface Conversation {
   name: string | null;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface Wallet {
-  id: string;
-  userId: string;
-  balanceCredits: number;
-  vipTier: VipTier;
-  updatedAt: string;
-}
-
-export interface WalletLedgerEntry {
-  id: string;
-  walletId: string;
-  amountCredits: number;
-  reason: 'top_up' | 'purchase' | 'refund' | 'adjustment';
-  referenceId: string;
-  createdAt: string;
-}
-
-export interface CreditPackage {
-  id: string;
-  name: string;
-  credits: number;
-  priceCents: number;
-  currency: 'USD';
-}
-
-export interface CosmeticProduct {
-  id: string;
-  name: string;
-  kind: CosmeticKind;
-  priceCredits: number;
-  requiredVipTier: Exclude<VipTier, 'free'> | null;
-  preview: string;
-}
-
-export interface InventoryItem {
-  id: string;
-  userId: string;
-  productId: string;
-  acquiredAt: string;
-  equipped: boolean;
 }

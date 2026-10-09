@@ -83,7 +83,9 @@ function normalizeSession(value: unknown): AuthSession | null {
     return null;
   }
 
-  const profile = value.profile;
+  const profile = { ...value.profile };
+  delete profile.cosmeticFrames;
+  delete profile.vipTier;
   const socialLinks = isRecord(profile.socialLinks) ? profile.socialLinks : {};
   const normalized: Record<string, unknown> = {
     ...value,
@@ -99,9 +101,6 @@ function normalizeSession(value: unknown): AuthSession | null {
       age: typeof profile.age === 'number' && Number.isInteger(profile.age) ? profile.age : null,
       starSign: typeof profile.starSign === 'string' ? profile.starSign : null,
       belief: typeof profile.belief === 'string' ? profile.belief : null,
-      cosmeticFrames: Array.isArray(profile.cosmeticFrames)
-        ? profile.cosmeticFrames.filter((frame): frame is string => typeof frame === 'string')
-        : [],
       privacy: defaultPrivacy(profile.privacy),
       socialLinks: {
         facebook: normalizeSocialLink(socialLinks.facebook, 'facebook'),
@@ -150,7 +149,6 @@ function normalizeSession(value: unknown): AuthSession | null {
     (typeof normalizedProfile.belief !== 'string' && normalizedProfile.belief !== null) ||
     !isRecord(normalizedProfile.privacy) ||
     (normalizedProfile.visibility !== 'public' && normalizedProfile.visibility !== 'private') ||
-    (normalizedProfile.vipTier !== 'free' && normalizedProfile.vipTier !== 'wayfinder' && normalizedProfile.vipTier !== 'champion') ||
     typeof normalizedProfile.role !== 'string'
   ) {
     return null;
@@ -216,9 +214,7 @@ function createSession(input: SignUpInput): AuthSession {
       belief: null,
       privacy: defaultPrivacy(null),
       socialLinks: { facebook: null, x: null, youtube: null, xbox: null, playstation: null, steam: null, epicGames: null, reddit: null },
-      cosmeticFrames: [],
       visibility: 'public',
-      vipTier: 'free',
       role: 'member',
     },
     entryWorld: input.entryWorld,
@@ -318,8 +314,6 @@ function toPublicProfile(session: AuthSession): PublicProfile {
       reddit: null,
     },
     allowDirectMessages: profile.privacy.allowDirectMessages,
-    cosmeticFrames: [...profile.cosmeticFrames],
-    vipTier: profile.vipTier,
     role: profile.role,
   };
 }
@@ -348,7 +342,7 @@ export function searchLocalPublicProfiles(query: string): PublicProfile[] {
 
 export function updateLocalProfile(
   userId: string,
-  updates: Partial<Omit<Profile, 'id' | 'userId' | 'role' | 'vipTier'>>,
+  updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>,
 ): AuthSession {
   const session = parseSessions(getStorage().getItem(accountsKey)).find((account) => account.user.id === userId);
   if (!session) {
@@ -440,22 +434,6 @@ export function setLocalTwoFactor(email: string, enabled: boolean): AuthSession 
     persistActiveSession(updated);
   }
   return updated;
-}
-
-export function syncLocalProfileEntitlements(
-  userId: string,
-  entitlements: Pick<Profile, 'vipTier' | 'cosmeticFrames'>,
-): void {
-  const session = parseSessions(getStorage().getItem(accountsKey)).find((account) => account.user.id === userId);
-  if (!session) {
-    throw new Error('The account could not be found in this browser.');
-  }
-
-  const updated: AuthSession = { ...session, profile: { ...session.profile, ...entitlements } };
-  saveAccount(updated);
-  if (restoreSession()?.user.id === userId) {
-    persistActiveSession(updated);
-  }
 }
 
 export function assertLocalAccountDeletion(userId: string, emailConfirmation: string, phrase: string, twoFactorCode: string): void {
