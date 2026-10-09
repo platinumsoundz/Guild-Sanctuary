@@ -39,7 +39,8 @@ The commercial architecture, provider defaults, migration sequence, and release 
 - Keep component and type names specific to their owning module. Prefer explicit prop interfaces and avoid importing sibling module internals.
 - Preserve keyboard access, visible focus, responsive sizing, and reduced-motion preferences in interactive UI.
 - Use Tailwind v4 utility classes for shared layout constraints and keep detailed visual styling in CSS Modules. Constrain app surfaces with `w-full min-w-0 max-w-full`; use `minmax(0, 1fr)`, wrapping, and mobile breakpoints for grids and navigation.
-- In the mobile-frame preview, keep the world selector and feature tabs within the frame, wrap long user text/media, and collapse profile/editor grids to one column where needed. Avoid fixed minimum widths on mobile controls.
+- At widths below the `md` breakpoint, keep primary navigation in an accessible, Framer Motion off-canvas drawer opened by a Lucide hamburger; desktop retains the horizontal tab bar. Keep the world selector visible in the header, and close the drawer after selection or Escape while respecting reduced motion.
+- Scale headings and body copy down responsively (mobile body text generally `text-sm`, supporting labels `text-xs`; desktop body text generally `text-base`) and use narrower mobile gutters without letting content touch the viewport edge. Wrap long user text/media and collapse profile/editor grids to one column where needed. Avoid fixed minimum widths on mobile controls.
 
 ### Living-document rule for AI and contributors
 
@@ -142,7 +143,7 @@ Only verified profiles with public visibility enter the local demo search. Searc
 - [x] Mock wallet, Stripe checkout lifecycle, VIP tiers, cosmetics, and inventory UI.
 - [x] Participant-checked in-memory DM threads and privacy-filtered public profile discovery.
 - [x] Lucide navigation/world icons, shared animated world indicator, reduced-motion-aware Framer Motion transitions, and dynamic context-driven themes.
-- [x] Responsive three-column mobile tab grid, rich profile editor/privacy switches, own-post media showcase, author metadata, image/MP3 post attachments, and story tags.
+- [x] Responsive mobile hamburger and animated off-canvas navigation drawer, desktop horizontal navigation, mobile-scaled feed hero typography and spacing, rich profile editor/privacy switches, own-post media showcase, author metadata, image/MP3 post attachments, and story tags.
 - [x] Account settings hub with account preferences, privacy controls, Facebook/X/YouTube links, compact/comfortable layout choices, and confirmed local account deletion.
 - [x] Short-form vertical video feed with scroll snapping, native video controls, live likes, and clip-specific comment threads.
 - [x] Feed-post and event likes/comment threads; group DM creation, listings, membership-checked threads, and group-aware message presentation.

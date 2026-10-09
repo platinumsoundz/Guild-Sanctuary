@@ -26,63 +26,6 @@
   --accent-soft: #303923;
 }
 
-.navigation {
-  display: flex;
-  min-height: 56px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 0 clamp(20px, 4vw, 58px);
-  border-bottom: 1px solid var(--line);
-}
-
-.navigationItems {
-  display: flex;
-  min-width: 0;
-  align-self: stretch;
-  gap: 22px;
-}
-
-.navigationButton {
-  position: relative;
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 7px;
-  padding: 0 2px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-}
-
-.navigationButton svg {
-  flex: 0 0 auto;
-}
-
-.navigationButton:hover,
-.navigationButton[aria-current='page'] {
-  color: var(--ink);
-}
-
-.navigationButton[aria-current='page']::after {
-  position: absolute;
-  right: 0;
-  bottom: -1px;
-  left: 0;
-  height: 2px;
-  background: var(--accent);
-  content: '';
-}
-
-.accountName {
-  color: var(--muted);
-  font-family: Arial, sans-serif;
-  font-size: 11px;
-}
-
 .sectionPage,
 .profilePage {
   display: flex;
@@ -142,38 +85,21 @@
 }
 
 @media (max-width: 700px) {
-  .navigation {
-    min-height: 0;
-    align-items: stretch;
-    flex-direction: column;
-    gap: 0;
-    padding: 8px 12px;
-  }
-
-  .navigationItems {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-self: stretch;
-    gap: 4px;
-  }
-
-  .navigationButton {
-    min-width: 0;
-    min-height: 38px;
-    justify-content: center;
-    gap: 5px;
-    font-size: 11px;
-  }
-
-  .accountName {
-    display: none;
-  }
-
   .walletPage {
-    padding: 22px 12px;
+    padding: 22px 16px;
   }
 
   .sectionPage h1 {
-    font-size: 36px;
+    font-size: clamp(28px, 7vw, 34px);
+  }
+
+  .sectionPage,
+  .profilePage {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .sectionDescription {
+    font-size: 13px;
   }
 }

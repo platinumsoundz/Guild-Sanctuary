@@ -10,14 +10,35 @@
 }
 
 .headerLabel {
-  grid-column: 1;
-  grid-row: 1;
   margin: 0;
   color: var(--muted);
   font-family: Arial, sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.3px;
+}
+
+.headerIdentity {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.menuButton {
+  display: none;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
 }
 
 .switcher {
@@ -78,6 +99,157 @@
   color: var(--muted);
   font-family: Arial, sans-serif;
   font-size: 10px;
+}
+
+.desktopNavigation {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 clamp(20px, 4vw, 58px);
+  border-bottom: 1px solid var(--line);
+}
+
+.desktopNavigationItems {
+  display: flex;
+  min-width: 0;
+  align-self: stretch;
+  gap: 22px;
+}
+
+.desktopNavigationButton {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.desktopNavigationButton svg {
+  flex: 0 0 auto;
+}
+
+.desktopNavigationButton:hover,
+.desktopNavigationButton[aria-current='page'] {
+  color: var(--ink);
+}
+
+.desktopNavigationButton[aria-current='page']::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  content: '';
+}
+
+.accountName {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+.drawerOverlay,
+.mobileDrawer {
+  position: fixed;
+  z-index: 100;
+}
+
+.drawerOverlay {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: rgb(12 20 15 / 58%);
+  cursor: pointer;
+}
+
+.mobileDrawer {
+  inset: 0 auto 0 0;
+  width: min(88vw, 360px);
+  overflow-y: auto;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  border-right: 1px solid var(--line);
+  background: var(--surface-raised);
+  box-shadow: 18px 0 48px rgb(12 20 15 / 18%);
+  color: var(--ink);
+}
+
+.drawerHeader {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.drawerTitle {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.drawerCloseButton {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.drawerNavigationItems {
+  display: grid;
+  gap: 5px;
+}
+
+.drawerNavigationButton {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  gap: 14px;
+  padding: 0 13px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  text-align: left;
+}
+
+.drawerNavigationButton:hover,
+.drawerNavigationButton[aria-current='page'] {
+  border-color: var(--line);
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.drawerNavigationButton[aria-current='page'] svg {
+  color: var(--accent);
+}
+
+.drawerAccountName {
+  margin: 22px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 13px;
 }
 
 .worldButton {
@@ -156,18 +328,21 @@
   font-size: 10px;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   .header {
     min-height: 0;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px;
-    padding: 18px 20px 15px;
+    padding: 12px 16px;
   }
 
   .headerLabel {
-    grid-column: 1;
-    grid-row: 1;
-    align-self: center;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+
+  .menuButton {
+    display: inline-flex;
   }
 
   .accountArea {
@@ -196,9 +371,27 @@
   .worldName {
     font-size: 12px;
   }
+
+  .desktopNavigation {
+    display: none;
+  }
 }
 
 @media (max-width: 380px) {
+  .header {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .headerIdentity {
+    gap: 7px;
+  }
+
+  .menuButton {
+    width: 36px;
+    height: 36px;
+  }
+
   .accountButton {
     min-height: 34px;
     padding: 3px 7px;
@@ -223,5 +416,10 @@
   .switcher,
   .worldButton {
     transition: none;
+  }
+
+  .drawerOverlay,
+  .mobileDrawer {
+    scroll-behavior: auto;
   }
 }

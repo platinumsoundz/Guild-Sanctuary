@@ -94,35 +94,37 @@
   background: var(--accent);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   .feed {
-    padding-right: 20px;
-    padding-left: 20px;
+    padding-right: 16px;
+    padding-left: 16px;
   }
 
   .intro {
-    min-height: 260px;
+    min-height: 230px;
   }
 
   .intro::after {
-    top: 65px;
-    right: -70px;
-    width: 180px;
-    height: 180px;
+    top: 50px;
+    right: -84px;
+    width: 160px;
+    height: 160px;
   }
 
   .introCopy {
-    padding: 39px 0;
+    padding: 30px 0;
   }
 
   .intro h1 {
-    max-width: 470px;
-    font-size: 42px;
+    max-width: 390px;
+    font-size: clamp(30px, 8.5vw, 38px);
+    line-height: 1.12;
   }
 
   .description {
-    max-width: 390px;
+    max-width: 340px;
     font-size: 13px;
+    line-height: 1.55;
   }
 
   .worldStamp {
@@ -131,7 +133,12 @@
 }
 
 @media (max-width: 380px) {
+  .feed {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
   .intro h1 {
-    font-size: 36px;
+    font-size: clamp(28px, 8.5vw, 32px);
   }
 }

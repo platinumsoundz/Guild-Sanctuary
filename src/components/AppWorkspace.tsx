@@ -4,7 +4,6 @@ import { ResponsiveShell } from '@/components/ResponsiveShell';
 import { Navigation } from '@/components/Navigation';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
-import { CalendarDays, MessageSquare, Newspaper, Search, UserRound, WalletCards, Settings, Clapperboard, type LucideIcon } from 'lucide-react';
 import type { Conversation, PublicProfile } from '@/types/database';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { AuthenticationGateway } from '@/modules/auth';
@@ -17,17 +16,6 @@ import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import styles from './AppWorkspace.module.css';
-
-const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
-  { id: 'feed', label: 'Feed', icon: Newspaper },
-  { id: 'events', label: 'Events', icon: CalendarDays },
-  { id: 'discover', label: 'Discover', icon: Search },
-  { id: 'messages', label: 'Messages', icon: MessageSquare },
-  { id: 'shorts', label: 'Shorts', icon: Clapperboard },
-  { id: 'profile', label: 'Profile', icon: UserRound },
-  { id: 'wallet', label: 'Wallet', icon: WalletCards },
-  { id: 'settings', label: 'Settings', icon: Settings },
-];
 
 export function AppWorkspace() {
   const {
@@ -90,23 +78,6 @@ export function AppWorkspace() {
 
   const authenticatedContent = isAuthenticated && currentUser ? (
     <>
-      <nav className={`${styles.navigation} w-full min-w-0 max-w-full`} aria-label="Main navigation">
-        <div className={`${styles.navigationItems} grid w-full min-w-0 grid-cols-3 gap-1 sm:flex sm:w-full sm:flex-wrap sm:gap-2`}>
-          {navigationItems.map((item) => (
-            <button
-              key={item.id}
-              className={styles.navigationButton}
-              type="button"
-              aria-current={activeNavigation === item.id ? 'page' : undefined}
-              onClick={() => openNavigation(item.id)}
-            >
-                <item.icon size={15} strokeWidth={1.8} aria-hidden="true" />
-              {item.label}
-            </button>
-          ))}
-        </div>
-        <span className={styles.accountName}>{currentUser.profile.displayName}</span>
-      </nav>
       {activeNavigation === 'feed' ? (
         <DualWorldFeed />
       ) : activeNavigation === 'events' ? (
@@ -174,10 +145,12 @@ export function AppWorkspace() {
         <div className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`} data-world={activeWorld}>
         <Navigation
           activeWorld={activeWorld}
+          activeNavigation={activeNavigation}
           currentUser={currentUser}
           pendingEmail={pendingEmail}
           isSessionReady={isSessionReady}
           onSelectWorld={(world) => void selectWorld(world)}
+          onNavigate={openNavigation}
           onLogin={login}
           onSignup={signup}
           onVerifyEmailCode={verifyEmailCode}
