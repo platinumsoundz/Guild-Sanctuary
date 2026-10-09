@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Guild &amp; Sanctuary</string>
+    <string name="title_activity_main">Guild &amp; Sanctuary</string>
+    <string name="package_name">com.guildsanctuary.app</string>
+    <string name="custom_url_scheme">com.guildsanctuary.app</string>
+</resources>

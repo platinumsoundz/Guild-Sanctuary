@@ -66,6 +66,33 @@ export interface Database {
   public: {
     Tables: {
       profiles: Table<ProfileRow>;
+      wallets: Table<{
+        user_id: string;
+        balance_credits: number;
+        updated_at: string;
+      }>;
+      wallet_ledger_entries: Table<{
+        id: string;
+        user_id: string;
+        amount_credits: number;
+        reason: 'top_up';
+        reference_id: string;
+        created_at: string;
+      }>;
+      stripe_webhook_events: Table<{
+        event_id: string;
+        event_type: string;
+        processed_at: string;
+      }>;
+      payment_fulfillments: Table<{
+        checkout_session_id: string;
+        user_id: string;
+        stripe_event_id: string;
+        product_key: 'credits_500' | 'credits_1500' | 'vip_wayfinder' | 'vip_champion';
+        amount_total: number;
+        currency: string;
+        fulfilled_at: string;
+      }>;
       account_settings: Table<{
         user_id: string;
         preferences: Record<string, unknown>;
@@ -200,6 +227,18 @@ export interface Database {
       };
       is_moderator: {
         Args: Record<string, never>;
+        Returns: boolean;
+      };
+      fulfill_stripe_checkout: {
+        Args: {
+          requested_event_id: string;
+          requested_event_type: string;
+          requested_session_id: string;
+          requested_user_id: string;
+          requested_product_key: 'credits_500' | 'credits_1500' | 'vip_wayfinder' | 'vip_champion';
+          requested_amount_total: number;
+          requested_currency: string;
+        };
         Returns: boolean;
       };
     };
