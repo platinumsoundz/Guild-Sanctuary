@@ -39,6 +39,11 @@ const linkLabels: { key: keyof SocialLinks; label: string; host: string }[] = [
   { key: 'facebook', label: 'Facebook', host: 'facebook.com' },
   { key: 'x', label: 'X / Twitter', host: 'x.com or twitter.com' },
   { key: 'youtube', label: 'YouTube', host: 'youtube.com' },
+  { key: 'xbox', label: 'Xbox gamertag', host: 'gamertag or xbox.com profile URL' },
+  { key: 'playstation', label: 'PlayStation ID', host: 'Online ID or playstation.com profile URL' },
+  { key: 'steam', label: 'Steam', host: 'username or steamcommunity.com profile URL' },
+  { key: 'epicGames', label: 'Epic Games', host: 'display name or epicgames.com profile URL' },
+  { key: 'reddit', label: 'Reddit', host: 'reddit.com/u/username' },
 ];
 
 export function SettingsHub({
@@ -79,14 +84,36 @@ export function SettingsHub({
   const handleSocialLinks = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const normalized: SocialLinks = { facebook: null, x: null, youtube: null };
+      const normalized: SocialLinks = {
+        facebook: null,
+        x: null,
+        youtube: null,
+        xbox: null,
+        playstation: null,
+        steam: null,
+        epicGames: null,
+        reddit: null,
+      };
       for (const item of linkLabels) {
         const value = linksDraft[item.key]?.trim() ?? '';
         if (!value) continue;
+        if (['xbox', 'playstation', 'steam', 'epicGames'].includes(item.key) &&
+            /^[A-Za-z0-9_. -]{2,40}$/.test(value)) {
+          normalized[item.key] = value;
+          continue;
+        }
         const url = new URL(value);
-        const validHost = item.key === 'x'
-          ? url.hostname === 'x.com' || url.hostname === 'www.x.com' || url.hostname === 'twitter.com' || url.hostname === 'www.twitter.com'
-          : url.hostname === item.host || url.hostname === `www.${item.host}`;
+        const allowedHosts: Record<keyof SocialLinks, string[]> = {
+          facebook: ['facebook.com', 'www.facebook.com'],
+          x: ['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com'],
+          youtube: ['youtube.com', 'www.youtube.com'],
+          xbox: ['xbox.com', 'www.xbox.com'],
+          playstation: ['playstation.com', 'www.playstation.com'],
+          steam: ['steamcommunity.com', 'www.steamcommunity.com'],
+          epicGames: ['epicgames.com', 'www.epicgames.com'],
+          reddit: ['reddit.com', 'www.reddit.com', 'old.reddit.com'],
+        };
+        const validHost = allowedHosts[item.key].includes(url.hostname);
         if (url.protocol !== 'https:' || !validHost) {
           throw new Error(`Enter a secure ${item.label} profile URL (${item.host}).`);
         }
@@ -182,10 +209,14 @@ export function SettingsHub({
                 <label className={styles.field} key={item.key}>
                   <span>{item.label}</span>
                   <input
-                    type="url"
+                    type="text"
+                    maxLength={300}
+                    autoComplete="url"
                     value={linksDraft[item.key] ?? ''}
                     onChange={(event) => setLinksDraft({ ...linksDraft, [item.key]: event.currentTarget.value || null })}
-                    placeholder={`https://${item.host}/your-profile`}
+                    placeholder={['xbox', 'playstation', 'steam', 'epicGames'].includes(item.key)
+                      ? item.host
+                      : `https://${item.host}/your-profile`}
                   />
                 </label>
               ))}

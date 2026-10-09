@@ -6,6 +6,7 @@ import type { PostMediaType, PublicProfile } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { getLocalPublicProfileById } from '@/modules/auth';
 import { useFeed } from '@/modules/feeds';
+import { AdPlacement } from '@/modules/ads';
 import { PostEngagement } from './PostEngagement';
 import styles from './WorldContent.module.css';
 
@@ -29,10 +30,12 @@ const content: Record<WorldType, { heading: string; message: string; mark: strin
 export function WorldContent({ worldType }: WorldContentProps) {
   const view = content[worldType];
   const { currentUser } = useAppContext();
+  const isPaidMember = currentUser?.profile.vipTier !== undefined && currentUser.profile.vipTier !== 'free';
   const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(worldType, currentUser?.user.id ?? null);
   const [draft, setDraft] = useState('');
   const [attachmentUrl, setAttachmentUrl] = useState('');
   const [attachmentType, setAttachmentType] = useState<PostMediaType | ''>('');
+  const [attachmentName, setAttachmentName] = useState('');
   const [storyTag, setStoryTag] = useState('');
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const [authors, setAuthors] = useState<Record<string, PublicProfile>>({});
@@ -73,6 +76,7 @@ export function WorldContent({ worldType }: WorldContentProps) {
       setDraft('');
       setAttachmentUrl('');
       setAttachmentType('');
+      setAttachmentName('');
       setStoryTag('');
       setAttachmentError(null);
     } catch (submitError) {
@@ -87,24 +91,25 @@ export function WorldContent({ worldType }: WorldContentProps) {
       return;
     }
 
-    const isImage = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type);
-    const isMp3 = file.type === 'audio/mpeg' || file.name.toLowerCase().endsWith('.mp3');
-    const isMp4 = file.type === 'video/mp4' || file.name.toLowerCase().endsWith('.mp4');
-    const maxBytes = isMp3 ? 5 * 1024 * 1024 : isMp4 ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
+    const isImage = file.type.startsWith('image/');
+    const isAudio = file.type.startsWith('audio/');
+    const isVideo = file.type.startsWith('video/');
+    const maxBytes = isImage ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
 
-    if (!isImage && !isMp3 && !isMp4) {
-      setAttachmentError('Choose a JPEG, PNG, WebP, GIF, MP3, or MP4 file.');
+    if (!isImage && !isAudio && !isVideo) {
+      setAttachmentError('Choose an image, audio, or video file.');
       return;
     }
     if (file.size > maxBytes) {
-      setAttachmentError(isMp3 || isMp4 ? 'Audio and video files must be 5 MB or smaller.' : 'Images must be 2 MB or smaller.');
+      setAttachmentError(isImage ? 'Images must be 2 MB or smaller.' : 'Audio and video files must be 5 MB or smaller.');
       return;
     }
 
     try {
       const dataUrl = await readFileAsDataUrl(file);
       setAttachmentUrl(dataUrl);
-      setAttachmentType(isMp3 ? 'audio' : isMp4 ? 'video' : 'image');
+      setAttachmentType(isAudio ? 'audio' : isVideo ? 'video' : 'image');
+      setAttachmentName(file.name);
       setAttachmentError(null);
     } catch {
       setAttachmentError('This attachment could not be read.');
@@ -148,36 +153,25 @@ export function WorldContent({ worldType }: WorldContentProps) {
           onChange={(event) => setDraft(event.currentTarget.value)}
           maxLength={2800}
           placeholder={worldType === 'sanctuary' ? 'A reflection, thought, or moment...' : 'Share a story or rally your crew...'}
-          required
         />
         <div className={styles.attachmentControls}>
-          <label className={styles.attachmentField}>
-            <span>Attachment type</span>
-            <select value={attachmentType} onChange={(event) => setAttachmentType(event.currentTarget.value as PostMediaType | '')}>
-              <option value="">No attachment</option>
-              <option value="image">Image</option>
-              <option value="audio">MP3 audio</option>
-              <option value="video">MP4 video</option>
-            </select>
-          </label>
-          <label className={styles.attachmentField}>
-            <span>Image, MP3, or MP4 URL</span>
-            <input
-              type="url"
-              value={attachmentUrl.startsWith('data:') ? '' : attachmentUrl}
-              onChange={(event) => {
-                setAttachmentUrl(event.currentTarget.value);
-                setAttachmentError(null);
-              }}
-              placeholder="https://..."
-              disabled={!attachmentType}
-              required={Boolean(attachmentType) && !attachmentUrl.startsWith('data:')}
-            />
-          </label>
           <label className={styles.uploadButton}>
-            <span>Upload file</span>
-            <input type="file" accept={attachmentType === 'audio' ? '.mp3,audio/mpeg' : attachmentType === 'video' ? 'video/mp4,.mp4' : 'image/jpeg,image/png,image/webp,image/gif'} disabled={!attachmentType} onChange={(event) => void handleAttachmentFile(event)} />
+            <span>{attachmentName ? `Change media: ${attachmentName}` : 'Add an image, audio, or video'}</span>
+            <input type="file" accept="image/*,video/*,audio/*" onChange={(event) => void handleAttachmentFile(event)} />
           </label>
+          {attachmentName && (
+            <button
+              className={styles.textButton}
+              type="button"
+              onClick={() => {
+                setAttachmentUrl('');
+                setAttachmentType('');
+                setAttachmentName('');
+              }}
+            >
+              Remove media
+            </button>
+          )}
         </div>
         <label className={styles.storyTagField}>
           <span>Story tag</span>
@@ -190,12 +184,13 @@ export function WorldContent({ worldType }: WorldContentProps) {
           </select>
         </label>
         {(attachmentError || actionError) && <p className={styles.error} role="alert">{attachmentError ?? actionError}</p>}
-        {attachmentUrl.startsWith('data:') && <p className={styles.attachmentName}>Local {attachmentType} selected</p>}
+        {attachmentUrl.startsWith('data:') && <p className={styles.attachmentName}>Local {attachmentType} selected: {attachmentName}</p>}
         <div className={styles.composerFooter}>
           <span>{draft.length}/2800</span>
           <button className={styles.actionButton} type="submit">Publish</button>
         </div>
       </form>
+      <AdPlacement isPaidMember={isPaidMember} placement="feed" />
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isLoading && <p className={styles.feedStatus}>Loading your feed...</p>}
       {!isLoading && posts.length === 0 && (

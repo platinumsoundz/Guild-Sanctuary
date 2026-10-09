@@ -4,6 +4,7 @@ import { ResponsiveShell } from '@/components/ResponsiveShell';
 import { Navigation } from '@/components/Navigation';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
+import type { CSSProperties } from 'react';
 import type { Conversation, PublicProfile } from '@/types/database';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { AuthenticationGateway } from '@/modules/auth';
@@ -41,6 +42,13 @@ export function AppWorkspace() {
   const [messageConversation, setMessageConversation] = useState<Conversation | null>(null);
   const [profilePosts, setProfilePosts] = useState<import('@/types/database').Post[]>([]);
   const [isProfilePostsLoading, setIsProfilePostsLoading] = useState(false);
+  const [profileThemePreview, setProfileThemePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (activeNavigation !== 'profile') {
+      setProfileThemePreview(null);
+    }
+  }, [activeNavigation]);
 
   useEffect(() => {
     if (activeNavigation !== 'profile' || !currentUser) {
@@ -88,6 +96,7 @@ export function AppWorkspace() {
           posts={profilePosts}
           isPostsLoading={isProfilePostsLoading}
           onSave={updateProfile}
+          onThemeChange={setProfileThemePreview}
         />
       ) : activeNavigation === 'wallet' ? (
         <main className={styles.walletPage}>
@@ -102,6 +111,7 @@ export function AppWorkspace() {
       ) : activeNavigation === 'messages' ? (
         <MessagesInbox
           currentUserId={currentUser.user.id}
+          worldType={activeWorld}
           onDiscoverPeople={() => setActiveNavigation('discover')}
           onOpenConversation={(conversation) => {
             setMessagePeer(null);
@@ -142,7 +152,11 @@ export function AppWorkspace() {
   return (
     <MotionConfig reducedMotion="user">
       <ResponsiveShell>
-        <div className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`} data-world={activeWorld}>
+        <div
+          className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`}
+          data-world={activeWorld}
+          style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}
+        >
         <Navigation
           activeWorld={activeWorld}
           activeNavigation={activeNavigation}

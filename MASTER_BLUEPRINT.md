@@ -40,6 +40,7 @@ The commercial architecture, provider defaults, migration sequence, and release 
 - Preserve keyboard access, visible focus, responsive sizing, and reduced-motion preferences in interactive UI.
 - Use Tailwind v4 utility classes for shared layout constraints and keep detailed visual styling in CSS Modules. Constrain app surfaces with `w-full min-w-0 max-w-full`; use `minmax(0, 1fr)`, wrapping, and mobile breakpoints for grids and navigation.
 - At widths below the `md` breakpoint, keep primary navigation in an accessible, Framer Motion off-canvas drawer opened by a Lucide hamburger; desktop retains the horizontal tab bar. Keep the world selector visible in the header, and close the drawer after selection or Escape while respecting reduced motion.
+- The application shell renders at the real viewport width; do not add a simulated device frame or mobile-preview toggle.
 - Scale headings and body copy down responsively (mobile body text generally `text-sm`, supporting labels `text-xs`; desktop body text generally `text-base`) and use narrower mobile gutters without letting content touch the viewport edge. Wrap long user text/media and collapse profile/editor grids to one column where needed. Avoid fixed minimum widths on mobile controls.
 
 ### Living-document rule for AI and contributors
@@ -68,7 +69,7 @@ npm run start
 
 ### `src/modules/auth/`
 
-Owns registration, sign-in, sign-out, email verification challenges, session lifecycle, and mock second-factor challenges. `AuthenticationForm`, `AuthenticationGateway`, and `AuthenticationModal` are exported through the module entry point. The demo uses browser `localStorage`, fixed `000000` codes, and no password or email delivery; it is not production authentication.
+Owns registration, sign-in, sign-out, email verification challenges, session lifecycle, and mock second-factor challenges. `AuthenticationForm`, `AuthenticationGateway`, and `AuthenticationModal` are exported through the module entry point. The demo uses browser `localStorage`, fixed `000000` codes, and no password or email delivery; it is not production authentication. Google, Facebook, Microsoft/Xbox, and PlayStation federated sign-in are architecture targets only and are not live in the demo. Production requires provider application registration, server-side authorization-code/PKCE or OIDC validation, state/nonce checks, verified-subject account linking, and secure session issuance. External email verification must not silently disable a user's required 2FA or step-up policy.
 
 ### `src/modules/profiles/`
 
@@ -76,21 +77,21 @@ Owns profile presentation, rich customization, per-field privacy controls, own-p
 
 ### `src/modules/settings/`
 
-Owns the signed-in account settings hub, persisted account preferences, profile privacy controls, social-link integration, layout arrangement, and account deletion confirmation. `AccountSettings` stores preferences per user in browser-local storage; profile visibility/privacy and `SocialLinks` remain in the canonical `Profile`. Supported social-link slots are Facebook, X/Twitter, and YouTube and accept HTTPS profile URLs. `comfortable` and `compact` layouts are available.
+Owns the signed-in account settings hub, persisted account preferences, profile privacy controls, social-link integration, layout arrangement, and account deletion confirmation. `AccountSettings` stores preferences per user in browser-local storage; profile visibility/privacy and `SocialLinks` remain in the canonical `Profile`. Supported links include Facebook, X/Twitter, YouTube, Xbox, PlayStation, Steam, Epic Games, and Reddit. Gaming handles may be stored directly; provider profile URLs must use HTTPS and approved hosts. `comfortable` and `compact` layouts are available.
 
 Account deletion in this prototype requires the active local session, matching account email, exact `DELETE` confirmation, and the mock 2FA code when 2FA is enabled; it then clears local settings and in-memory content owned by the account. It is not production-grade reauthentication, durable data erasure, or an authorization boundary.
 
 ### `src/modules/feeds/`
 
-Owns Sanctuary and Guild Hall feed views, post CRUD, likes/comments, and the `useFeed` hook. Posts are world-scoped and support text, image, MP3 audio, or MP4 video attachment metadata, timestamps, and optional story tags. The demo UI supports create/edit/delete and displays author identity. Shared world selection and top-level navigation belong to `src/components/Navigation.tsx`.
+Owns Sanctuary and Guild Hall feed views, post CRUD, likes/comments, and the `useFeed` hook. Separate in-memory stores keyed by `WorldType` isolate posts per world. Posts support text, image, audio, or video attachment metadata, timestamps, and optional story tags. The composer reads local media files into demo-only in-memory data URLs. The demo UI supports create/edit/delete and displays author identity. Shared world selection and top-level navigation belong to `src/components/Navigation.tsx`.
 
 ### `src/modules/shorts/`
 
-Owns the immersive short-form vertical video feed, video playback, scroll-snap navigation, and short-specific likes/comment threads. `ShortVideo` records author, world, video URL, caption, and timestamp. The feed currently uses in-memory sample clips; production upload/transcoding, storage, moderation, and delivery remain roadmap work.
+Owns the immersive short-form vertical video feed, video playback, scroll-snap navigation, and short-specific likes/comment threads. `ShortVideo` records author, world, video URL, caption, and timestamp. Separate world-keyed in-memory stores hold sample and locally uploaded/recorded clips; the Shorts composer previews selected file or MediaRecorder data URLs and publishes into the active world. Production upload/transcoding, storage, moderation, and delivery remain roadmap work.
 
 ### `src/modules/events/`
 
-Owns event CRUD, world-scoped listings, event editing, and Going/Interested/Cancelled RSVP behavior. The current service is in-memory and does not enforce capacity or server authorization.
+Owns event CRUD, world-scoped listings, event editing, and Going/Interested/Cancelled RSVP behavior. Separate in-memory event repositories are keyed by `WorldType`; likes, comments, and RSVPs reference event IDs. The current service does not enforce capacity or server authorization.
 
 ### `src/modules/locations/`
 
@@ -102,7 +103,7 @@ Owns demo credit wallets, a signed ledger, mock checkout sessions, VIP tier unlo
 
 ### `src/modules/messages/`
 
-Owns direct and group conversation creation, participant-checked message reads/sends, group member selection, conversation listings, and thread UI. `Conversation` records `kind` (`direct` or `group`), participant user IDs, optional group name, and timestamps. The current adapter is in-memory with no persistence or realtime transport.
+Owns direct and group conversation creation, participant-checked message reads/sends, group member selection, conversation listings, and thread UI. `Conversation` records `kind` (`direct` or `group`), `worldType`, participant user IDs, optional group name, and timestamps. Separate world-keyed conversation and message repositories prevent cross-world thread visibility; profile identity, account settings, and wallet state remain account-wide. The current adapter is in-memory with no persistence or realtime transport.
 
 ### `src/modules/profiles/` discovery boundary
 
@@ -111,7 +112,7 @@ Only verified profiles with public visibility enter the local demo search. Searc
 ### App-level foundation
 
 - `src/components/Navigation.tsx` presents the two world choices and delegates selection to the context.
-- `src/components/ResponsiveShell.tsx` provides full-width and mobile-frame preview modes.
+- `src/components/ResponsiveShell.tsx` provides the full-width responsive application shell without a simulated-device preview toggle.
 - `src/components/AppWorkspace.tsx` composes the auth gate and the feed, events, discovery, messages, profile, and economy modules.
 - `src/services/mockApi.ts` retains miscellaneous in-memory examples. Domain operations live with their owning feature modules.
 
@@ -135,7 +136,7 @@ Only verified profiles with public visibility enter the local demo search. Searc
 - [x] App context for active world, navigation, mock user session, and world toggling.
 - [x] Async in-memory mock API functions with typed inputs and outputs.
 - [x] Shared world header with distinct Sanctuary and Guild Hall themes.
-- [x] Responsive full-width and mobile-frame preview shell.
+- [x] Native responsive full-width shell without a mobile-preview toggle.
 - [x] Five original feature folders with scope READMEs, public entry points, and initial components.
 - [x] Auth gateway/modal, local email registration and code verification, login challenge, optional mock 2FA, logout, typed permissions, and persisted demo session.
 - [x] Feed create/read/update/delete service and author controls.
@@ -143,9 +144,14 @@ Only verified profiles with public visibility enter the local demo search. Searc
 - [x] Mock wallet, Stripe checkout lifecycle, VIP tiers, cosmetics, and inventory UI.
 - [x] Participant-checked in-memory DM threads and privacy-filtered public profile discovery.
 - [x] Lucide navigation/world icons, shared animated world indicator, reduced-motion-aware Framer Motion transitions, and dynamic context-driven themes.
-- [x] Responsive mobile hamburger and animated off-canvas navigation drawer, desktop horizontal navigation, mobile-scaled feed hero typography and spacing, rich profile editor/privacy switches, own-post media showcase, author metadata, image/MP3 post attachments, and story tags.
+- [x] Interactive mobile hamburger and animated off-canvas navigation drawer, desktop horizontal navigation, mobile-scaled feed hero typography and spacing, rich profile editor/privacy switches, own-post media showcase, author metadata, local post media uploads, and story tags.
+- [x] World-keyed feed, event, short-video, and message repositories with unified account-wide profile, settings, and wallet state.
+- [x] Live global accent preview from profile theme selection and local banner image selection with profile-card preview.
+- [x] Gaming and community profile links for Xbox, PlayStation, Steam, Epic Games, and Reddit.
+- [x] Browser camera/microphone recording and local file upload for Shorts, with preview and size validation.
+- [x] Free-tier demo ad placeholders in feed and Shorts, hidden for non-free VIP tiers; real ad provider and revenue reporting remain unconfigured.
 - [x] Account settings hub with account preferences, privacy controls, Facebook/X/YouTube links, compact/comfortable layout choices, and confirmed local account deletion.
-- [x] Short-form vertical video feed with scroll snapping, native video controls, live likes, and clip-specific comment threads.
+- [x] Short-form vertical video feed with scroll snapping, native video controls, local video uploads, live likes, and clip-specific comment threads.
 - [x] Feed-post and event likes/comment threads; group DM creation, listings, membership-checked threads, and group-aware message presentation.
 - [x] Production build and TypeScript validation passed for the current implementation.
 
@@ -188,6 +194,7 @@ The current systems are locally interactive prototypes, not a production deploym
 
 - Use Supabase Auth with PostgreSQL as the preferred managed identity/database pairing unless vendor diligence changes the decision. Keep auth-provider calls behind the auth module/server adapter and keep domain entities in PostgreSQL migrations. If a custom password flow is explicitly required, use a maintained server-side Argon2id implementation with parameters calibrated for deployment hardware; accept bcrypt only for interoperability or migration, with modern cost settings and rehash-on-login. Supabase-managed credentials must remain within the supported Supabase Auth flow—do not duplicate its password store or claim application-side hashing of provider-managed passwords.
 - Require verified email for account activation and sensitive recovery. Offer RFC 6238 TOTP enrollment with one-time secret display/QR, confirmation before enablement, encrypted secret storage, rotation, hashed single-use recovery codes, challenge throttling, replay protection, and step-up prompts for account deletion, payment/security changes, and other high-impact actions. Email one-time codes must be high entropy, expiring, single-use, hashed at rest, rate limited, delivered through a verified transactional provider, and protected against enumeration. Email codes complement but do not silently substitute for enrolled TOTP.
+- Add Google and Facebook OIDC, Microsoft identity for Xbox-linked sign-in, and PlayStation Network federation only after provider applications, callback URLs, scopes, privacy terms, and account-linking rules are approved. Use server-side authorization code with PKCE where supported; validate `state`, `nonce`, issuer, audience, signature, expiry, and verified email claims. Link identities to a stable `(issuer, subject)` key only after explicit proof of control for both existing and new accounts; never merge by unverified email alone. Provider verification may satisfy email ownership only according to a configured trust policy and must not skip required 2FA, risk checks, or sensitive-action step-up. Keep client IDs/config public as appropriate, but all client secrets, token exchange, refresh tokens, and app session issuance remain server-side.
 - Keep long-lived credentials out of browser storage. Prefer provider-managed secure cookies/session refresh with `HttpOnly`, `Secure`, and appropriate `SameSite`; validate origin/CSRF on writes. Redact secrets/tokens from logs, rotate keys, and use short-lived signed service credentials scoped to server workloads.
 - Authorization must be deny-by-default at both the server service boundary and PostgreSQL RLS. Derive the actor from a verified server session/JWT, never a submitted user ID. Review every `SECURITY DEFINER` function, view, storage policy, and service-role use; never ship the service-role key to clients. Test both positive and negative cross-user access cases.
 
@@ -328,6 +335,7 @@ Use UUID primary keys where public unpredictability matters, UTC `timestamptz` a
 - Ad inventory is a product-controlled set of placement slots, not arbitrary third-party code in feature components. Define stable slot IDs and eligibility for feed insertion and Shorts/Reels interstitial or in-feed placements. Every ad is clearly labeled and visually distinct from member content.
 - Implement a provider adapter boundary for web display inventory (evaluate Google AdSense) and native mobile inventory (evaluate Google AdMob only under app-store and ad-network policies). Provider approval, account setup, inventory rules, consent mode, SDK support, and placement review are launch gates, not assumed capabilities.
 - A server-side policy/config service controls enablement, placement frequency, user eligibility, world/age restrictions, house ads, and experiment assignment. Start with conservative frequency caps and exclude auth, account deletion, payment, private messages, moderation, and other sensitive contexts.
+- Entitlement checks use a server-authoritative VIP/ad-free subscription state, not the client `Profile.vipTier` or a wallet balance. The current demo only shows disclosed placeholder slots to `free` profiles and hides them for non-free mock VIP tiers; it has no network SDK, billable impression, or revenue integration. Provider setup, consent management, viewability verification, and auditable reconciliation are required before monetization is enabled.
 - Feed ads should be inserted only at defined pagination boundaries and never represented as community posts. Shorts ads must not break video controls, autoplay expectations, accessibility, reduced-motion, or consent; respect platform-required controls and interruptibility. Provide an ad-free or reduced-ad entitlement only if product/legal policy explicitly supports it.
 
 ### Measurement, consent, and revenue recognition

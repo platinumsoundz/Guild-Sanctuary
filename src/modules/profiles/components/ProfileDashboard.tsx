@@ -10,11 +10,12 @@ interface ProfileDashboardProps {
   posts: Post[];
   isPostsLoading: boolean;
   onSave: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role' | 'vipTier'>>) => void;
+  onThemeChange: (themeColor: string) => void;
 }
 
 const starSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
 
-export function ProfileDashboard({ profile, posts, isPostsLoading, onSave }: ProfileDashboardProps) {
+export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThemeChange }: ProfileDashboardProps) {
   const [draft, setDraft] = useState(profile);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -78,7 +79,15 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave }: Pro
         </div>
         <label className={styles.themeControl}>
           <span>Profile theme</span>
-          <input type="color" value={draft.themeColor} onChange={(event) => updateDraft({ themeColor: event.currentTarget.value })} />
+          <input
+            type="color"
+            value={draft.themeColor}
+            onChange={(event) => {
+              const themeColor = event.currentTarget.value;
+              updateDraft({ themeColor });
+              onThemeChange(themeColor);
+            }}
+          />
         </label>
       </header>
 

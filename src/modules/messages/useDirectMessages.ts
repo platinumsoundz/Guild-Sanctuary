@@ -14,7 +14,7 @@ interface UseDirectMessagesResult {
 }
 
 export function useDirectMessages(peerUserId: string | null, selectedConversationId: string | null = null): UseDirectMessagesResult {
-  const { currentUser } = useAppContext();
+  const { activeWorld, currentUser } = useAppContext();
   const userId = currentUser?.user.id ?? '';
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -27,9 +27,9 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     setIsLoading(true);
     setMessages([]);
     const openThread = selectedConversationId
-      ? fetchConversationThread(selectedConversationId, userId)
+      ? fetchConversationThread(selectedConversationId, userId, activeWorld)
       : peerUserId
-        ? openDirectConversation(userId, peerUserId)
+        ? openDirectConversation(userId, peerUserId, activeWorld)
         : Promise.reject(new Error('Choose a conversation to open.'));
     openThread
       .then((thread) => {
@@ -53,18 +53,18 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     return () => {
       cancelled = true;
     };
-  }, [peerUserId, selectedConversationId, userId]);
+  }, [activeWorld, peerUserId, selectedConversationId, userId]);
 
   const refresh = useCallback(async () => {
     if (!conversationId || !userId) {
       return;
     }
     try {
-      setMessages((await fetchConversationThread(conversationId, userId)).messages);
+      setMessages((await fetchConversationThread(conversationId, userId, activeWorld)).messages);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Messages could not be loaded.');
     }
-  }, [conversationId, userId]);
+  }, [activeWorld, conversationId, userId]);
 
   const send = async (body: string) => {
     if (!conversationId || !userId) {
@@ -75,7 +75,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     setIsSending(true);
     setError(null);
     try {
-      const message = await sendConversationMessage(conversationId, userId, body);
+      const message = await sendConversationMessage(conversationId, userId, body, activeWorld);
       setMessages((currentMessages) => [...currentMessages, message]);
       return true;
     } catch (sendError) {

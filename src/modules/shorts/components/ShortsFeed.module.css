@@ -30,6 +30,77 @@
   font: 10px Arial, sans-serif;
 }
 
+.videoComposer {
+  display: grid;
+  width: min(100%, 780px);
+  gap: 10px;
+  margin: 0 auto 16px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+}
+
+.videoComposer label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font: 11px Arial, sans-serif;
+}
+
+.videoComposer label > input:not([type='file']) {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 12px Arial, sans-serif;
+}
+
+.videoPicker {
+  padding: 10px;
+  border: 1px dashed var(--line);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.videoPicker input {
+  max-width: 100%;
+  font: 11px Arial, sans-serif;
+}
+
+.videoDraftPreview {
+  width: min(100%, 240px);
+  max-height: 260px;
+  border-radius: 5px;
+  background: #141714;
+}
+
+.videoComposer button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font: 700 12px Arial, sans-serif;
+}
+
+.videoComposer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.recordingStatus {
+  margin: 0;
+  color: #a9362d;
+  font: 700 11px Arial, sans-serif;
+}
+
 .feed {
   display: grid;
   height: min(calc(100svh - 230px), 760px);

@@ -1,24 +1,28 @@
 import type { WorldType } from '@/types';
 import type { ShortVideo, SocialComment, SocialLike } from '@/types/database';
 
-const videos: ShortVideo[] = [
-  {
-    id: 'short-demo-1',
-    authorId: 'community-creator',
-    worldType: 'guild',
-    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-    caption: 'A quick escape with the crew. What should we play next?',
-    createdAt: '2026-10-08T12:00:00.000Z',
-  },
-  {
-    id: 'short-demo-2',
-    authorId: 'community-creator',
-    worldType: 'sanctuary',
-    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-    caption: 'A little reminder to take the scenic route today.',
-    createdAt: '2026-10-08T11:00:00.000Z',
-  },
-];
+const videosByWorld: Record<WorldType, ShortVideo[]> = {
+  sanctuary: [
+    {
+      id: 'short-demo-2',
+      authorId: 'community-creator',
+      worldType: 'sanctuary',
+      videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+      caption: 'A little reminder to take the scenic route today.',
+      createdAt: '2026-10-08T11:00:00.000Z',
+    },
+  ],
+  guild: [
+    {
+      id: 'short-demo-1',
+      authorId: 'community-creator',
+      worldType: 'guild',
+      videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      caption: 'A quick escape with the crew. What should we play next?',
+      createdAt: '2026-10-08T12:00:00.000Z',
+    },
+  ],
+};
 
 const likes: SocialLike[] = [];
 const comments: SocialComment[] = [];
@@ -28,16 +32,35 @@ function delay(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 40));
 }
 
-export async function fetchShortVideos(worldType?: WorldType): Promise<ShortVideo[]> {
+function findShort(shortId: string): ShortVideo | undefined {
+  return Object.values(videosByWorld).flat().find((video) => video.id === shortId);
+}
+
+export async function fetchShortVideos(worldType: WorldType): Promise<ShortVideo[]> {
   await delay();
-  return videos
-    .filter((video) => !worldType || video.worldType === worldType)
+  return videosByWorld[worldType]
     .slice()
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'worldType' | 'videoUrl' | 'caption'>): Promise<ShortVideo> {
+  const caption = input.caption.trim();
+  if (!input.authorId || !input.videoUrl || input.videoUrl.length > 8_000_000 || caption.length > 500) {
+    throw new Error('Choose a video and add a caption of no more than 500 characters.');
+  }
+  await delay();
+  const video: ShortVideo = {
+    ...input,
+    caption,
+    id: `short-local-${nextId++}`,
+    createdAt: new Date().toISOString(),
+  };
+  videosByWorld[input.worldType].unshift(video);
+  return video;
+}
+
 export async function toggleShortLike(shortId: string, userId: string): Promise<{ liked: boolean; count: number }> {
-  if (!userId || !videos.some((video) => video.id === shortId)) {
+  if (!userId || !findShort(shortId)) {
     throw new Error('This short video is unavailable.');
   }
   await delay();
@@ -60,7 +83,7 @@ export async function toggleShortLike(shortId: string, userId: string): Promise<
 }
 
 export async function fetchShortComments(shortId: string): Promise<SocialComment[]> {
-  if (!videos.some((video) => video.id === shortId)) {
+  if (!findShort(shortId)) {
     throw new Error('Comments for this short video are unavailable.');
   }
   await delay();
@@ -69,7 +92,7 @@ export async function fetchShortComments(shortId: string): Promise<SocialComment
 
 export async function addShortComment(shortId: string, authorId: string, body: string): Promise<SocialComment> {
   const normalizedBody = body.trim();
-  if (!authorId || !videos.some((video) => video.id === shortId) || normalizedBody.length < 1 || normalizedBody.length > 1000) {
+  if (!authorId || !findShort(shortId) || normalizedBody.length < 1 || normalizedBody.length > 1000) {
     throw new Error('Comments must contain 1 to 1,000 characters.');
   }
   await delay();
@@ -94,9 +117,11 @@ export function getShortEngagement(shortId: string, userId: string) {
 }
 
 export function removeUserShortData(userId: string): void {
-  const removedShortIds = new Set(videos.filter((video) => video.authorId === userId).map((video) => video.id));
-  for (let index = videos.length - 1; index >= 0; index -= 1) {
-    if (videos[index].authorId === userId) videos.splice(index, 1);
+  const removedShortIds = new Set(Object.values(videosByWorld).flat().filter((video) => video.authorId === userId).map((video) => video.id));
+  for (const worldVideos of Object.values(videosByWorld)) {
+    for (let index = worldVideos.length - 1; index >= 0; index -= 1) {
+      if (worldVideos[index].authorId === userId) worldVideos.splice(index, 1);
+    }
   }
   for (let index = likes.length - 1; index >= 0; index -= 1) {
     if (likes[index].userId === userId || removedShortIds.has(likes[index].targetId)) likes.splice(index, 1);

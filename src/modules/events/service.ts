@@ -16,7 +16,10 @@ export interface EventView extends Event {
   viewerStatus: EventRsvpStatus | null;
 }
 
-const events: Event[] = [];
+const eventsByWorld: Record<WorldType, Event[]> = {
+  sanctuary: [],
+  guild: [],
+};
 const rsvps: EventRsvp[] = [];
 const likes: SocialLike[] = [];
 const comments: SocialComment[] = [];
@@ -53,10 +56,14 @@ function validateCoordinates(locationCoords: Coordinates): void {
   }
 }
 
+function findEvent(eventId: string): Event | undefined {
+  return Object.values(eventsByWorld).flat().find((event) => event.id === eventId);
+}
+
 export async function fetchEvents(worldType: WorldType, userId: string): Promise<EventView[]> {
   await delay();
-  return events
-    .filter((event) => event.worldType === worldType)
+  return eventsByWorld[worldType]
+    .slice()
     .sort((first, second) => first.startsAt.localeCompare(second.startsAt))
     .map((event) => ({
       ...event,
@@ -84,14 +91,14 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
     endsAt: input.endsAt ? new Date(input.endsAt).toISOString() : null,
     createdAt: new Date().toISOString(),
   };
-  events.push(event);
+  eventsByWorld[input.worldType].push(event);
   return event;
 }
 
 export async function updateEvent(eventId: string, creatorId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt'>): Promise<Event> {
   validateEvent(input.title, input.description, input.startsAt);
   await delay();
-  const event = events.find((item) => item.id === eventId);
+  const event = findEvent(eventId);
   if (!event || event.creatorId !== creatorId) {
     throw new Error('This event could not be updated.');
   }
@@ -104,12 +111,13 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
 
 export async function deleteEvent(eventId: string, creatorId: string): Promise<void> {
   await delay();
-  const index = events.findIndex((event) => event.id === eventId && event.creatorId === creatorId);
-  if (index < 0) {
+  const worldEvents = Object.values(eventsByWorld).find((items) => items.some((event) => event.id === eventId && event.creatorId === creatorId));
+  const index = worldEvents?.findIndex((event) => event.id === eventId && event.creatorId === creatorId) ?? -1;
+  if (!worldEvents || index < 0) {
     throw new Error('This event could not be deleted.');
   }
 
-  events.splice(index, 1);
+  worldEvents.splice(index, 1);
   for (let index = rsvps.length - 1; index >= 0; index -= 1) {
     if (rsvps[index].eventId === eventId) rsvps.splice(index, 1);
   }
@@ -122,7 +130,7 @@ export async function deleteEvent(eventId: string, creatorId: string): Promise<v
 }
 
 export async function setEventRsvp(eventId: string, userId: string, status: 'going' | 'interested' | 'cancelled'): Promise<EventRsvp> {
-  if (!userId || !events.some((event) => event.id === eventId)) {
+  if (!userId || !findEvent(eventId)) {
     throw new Error('This event is not available for RSVP.');
   }
 
@@ -148,7 +156,7 @@ export async function setEventRsvp(eventId: string, userId: string, status: 'goi
 }
 
 export async function getEventEngagement(eventId: string, userId: string) {
-  if (!events.some((event) => event.id === eventId)) {
+  if (!findEvent(eventId)) {
     throw new Error('This event is unavailable.');
   }
   return {
@@ -159,7 +167,7 @@ export async function getEventEngagement(eventId: string, userId: string) {
 }
 
 export async function toggleEventLike(eventId: string, userId: string): Promise<{ liked: boolean; count: number }> {
-  if (!userId || !events.some((event) => event.id === eventId)) {
+  if (!userId || !findEvent(eventId)) {
     throw new Error('This event is unavailable for liking.');
   }
   await delay();
@@ -179,7 +187,7 @@ export async function toggleEventLike(eventId: string, userId: string): Promise<
 }
 
 export async function fetchEventComments(eventId: string): Promise<SocialComment[]> {
-  if (!events.some((event) => event.id === eventId)) {
+  if (!findEvent(eventId)) {
     throw new Error('Comments for this event are unavailable.');
   }
   await delay();
@@ -188,7 +196,7 @@ export async function fetchEventComments(eventId: string): Promise<SocialComment
 
 export async function addEventComment(eventId: string, authorId: string, body: string): Promise<SocialComment> {
   const normalizedBody = body.trim();
-  if (!authorId || !events.some((event) => event.id === eventId) || normalizedBody.length < 1 || normalizedBody.length > 1000) {
+  if (!authorId || !findEvent(eventId) || normalizedBody.length < 1 || normalizedBody.length > 1000) {
     throw new Error('Comments must contain 1 to 1,000 characters.');
   }
   await delay();
@@ -205,9 +213,11 @@ export async function addEventComment(eventId: string, authorId: string, body: s
 }
 
 export function removeUserEventData(userId: string): void {
-  const removedEventIds = new Set(events.filter((event) => event.creatorId === userId).map((event) => event.id));
-  for (let index = events.length - 1; index >= 0; index -= 1) {
-    if (events[index].creatorId === userId) events.splice(index, 1);
+  const removedEventIds = new Set(Object.values(eventsByWorld).flat().filter((event) => event.creatorId === userId).map((event) => event.id));
+  for (const worldEvents of Object.values(eventsByWorld)) {
+    for (let index = worldEvents.length - 1; index >= 0; index -= 1) {
+      if (worldEvents[index].creatorId === userId) worldEvents.splice(index, 1);
+    }
   }
   for (let index = rsvps.length - 1; index >= 0; index -= 1) {
     if (rsvps[index].userId === userId || removedEventIds.has(rsvps[index].eventId)) rsvps.splice(index, 1);

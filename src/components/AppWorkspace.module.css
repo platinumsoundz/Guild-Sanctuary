@@ -4,8 +4,8 @@
   --ink: #25372c;
   --muted: #68776c;
   --line: #dce4dc;
-  --accent: #52765c;
-  --accent-soft: #e8f0e8;
+  --accent: var(--profile-accent, #52765c);
+  --accent-soft: color-mix(in srgb, var(--profile-accent, #52765c) 14%, var(--surface-raised));
   min-height: inherit;
   width: 100%;
   min-width: 0;
@@ -22,8 +22,8 @@
   --ink: #f1f0ea;
   --muted: #a2aaa8;
   --line: #343c40;
-  --accent: #d7ff5c;
-  --accent-soft: #303923;
+  --accent: var(--profile-accent, #d7ff5c);
+  --accent-soft: color-mix(in srgb, var(--profile-accent, #d7ff5c) 14%, var(--surface-raised));
 }
 
 .sectionPage,

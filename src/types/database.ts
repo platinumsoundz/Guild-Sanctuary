@@ -16,6 +16,11 @@ export interface SocialLinks {
   facebook: string | null;
   x: string | null;
   youtube: string | null;
+  xbox: string | null;
+  playstation: string | null;
+  steam: string | null;
+  epicGames: string | null;
+  reddit: string | null;
 }
 
 export interface AccountPreferences {
@@ -184,6 +189,7 @@ export interface Message {
 export interface Conversation {
   id: string;
   kind: ConversationKind;
+  worldType: WorldType;
   participantIds: string[];
   name: string | null;
   createdAt: string;

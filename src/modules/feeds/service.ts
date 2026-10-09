@@ -10,30 +10,34 @@ export interface CreatePostInput {
   storyTag?: string | null;
 }
 
-const posts: Post[] = [
-  {
-    id: 'post-demo-sanctuary',
-    authorId: 'community-member',
-    worldType: 'sanctuary',
-    content: 'A quiet moment can change the shape of a whole day.',
-    mediaUrl: null,
-    mediaType: null,
-    storyTag: null,
-    createdAt: '2026-10-08T09:00:00.000Z',
-    updatedAt: '2026-10-08T09:00:00.000Z',
-  },
-  {
-    id: 'post-demo-guild',
-    authorId: 'community-member',
-    worldType: 'guild',
-    content: "Looking for a few more people for tonight's co-op run.",
-    mediaUrl: null,
-    mediaType: null,
-    storyTag: null,
-    createdAt: '2026-10-08T10:30:00.000Z',
-    updatedAt: '2026-10-08T10:30:00.000Z',
-  },
-];
+const postsByWorld: Record<WorldType, Post[]> = {
+  sanctuary: [
+    {
+      id: 'post-demo-sanctuary',
+      authorId: 'community-member',
+      worldType: 'sanctuary',
+      content: 'A quiet moment can change the shape of a whole day.',
+      mediaUrl: null,
+      mediaType: null,
+      storyTag: null,
+      createdAt: '2026-10-08T09:00:00.000Z',
+      updatedAt: '2026-10-08T09:00:00.000Z',
+    },
+  ],
+  guild: [
+    {
+      id: 'post-demo-guild',
+      authorId: 'community-member',
+      worldType: 'guild',
+      content: "Looking for a few more people for tonight's co-op run.",
+      mediaUrl: null,
+      mediaType: null,
+      storyTag: null,
+      createdAt: '2026-10-08T10:30:00.000Z',
+      updatedAt: '2026-10-08T10:30:00.000Z',
+    },
+  ],
+};
 
 let nextPostId = 1;
 const likes: SocialLike[] = [];
@@ -49,7 +53,7 @@ function validateAttachment(mediaUrl: string | null | undefined, mediaType: Post
     throw new Error('Choose a valid attachment before publishing.');
   }
   if (mediaUrl && mediaType !== 'image' && mediaType !== 'audio' && mediaType !== 'video') {
-    throw new Error('Attachments must be an image, MP3 audio, or MP4 video file.');
+    throw new Error('Attachments must be an image, audio, or video file.');
   }
   if (mediaUrl && mediaUrl.length > 8_000_000) {
     throw new Error('Attachments must be smaller than 6 MB.');
@@ -58,14 +62,14 @@ function validateAttachment(mediaUrl: string | null | undefined, mediaType: Post
 
 export async function fetchFeed(worldType: WorldType): Promise<Post[]> {
   await delay();
-  return posts
-    .filter((post) => post.worldType === worldType)
+  return postsByWorld[worldType]
+    .slice()
     .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }
 
 export async function fetchPostsByAuthor(authorId: string): Promise<Post[]> {
   await delay();
-  return posts
+  return Object.values(postsByWorld).flat()
     .filter((post) => post.authorId === authorId)
     .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }
@@ -90,7 +94,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     createdAt: timestamp,
     updatedAt: timestamp,
   };
-  posts.unshift(post);
+  postsByWorld[input.worldType].unshift(post);
   return post;
 }
 
@@ -101,7 +105,7 @@ export async function updatePost(postId: string, authorId: string, content: stri
   }
 
   await delay();
-  const post = posts.find((item) => item.id === postId);
+  const post = Object.values(postsByWorld).flat().find((item) => item.id === postId);
   if (!post || post.authorId !== authorId) {
     throw new Error('This post could not be edited.');
   }
@@ -113,11 +117,12 @@ export async function updatePost(postId: string, authorId: string, content: stri
 
 export async function deletePost(postId: string, authorId: string): Promise<void> {
   await delay();
-  const postIndex = posts.findIndex((item) => item.id === postId && item.authorId === authorId);
-  if (postIndex < 0) {
+  const worldPosts = Object.values(postsByWorld).find((items) => items.some((item) => item.id === postId && item.authorId === authorId));
+  const postIndex = worldPosts?.findIndex((item) => item.id === postId && item.authorId === authorId) ?? -1;
+  if (!worldPosts || postIndex < 0) {
     throw new Error('This post could not be deleted.');
   }
-  posts.splice(postIndex, 1);
+  worldPosts.splice(postIndex, 1);
   for (let index = likes.length - 1; index >= 0; index -= 1) {
     if (likes[index].targetId === postId) likes.splice(index, 1);
   }
@@ -127,7 +132,7 @@ export async function deletePost(postId: string, authorId: string): Promise<void
 }
 
 export async function getPostEngagement(postId: string, userId: string) {
-  if (!posts.some((post) => post.id === postId)) {
+  if (!Object.values(postsByWorld).some((items) => items.some((post) => post.id === postId))) {
     throw new Error('This post is unavailable.');
   }
   return {
@@ -138,7 +143,7 @@ export async function getPostEngagement(postId: string, userId: string) {
 }
 
 export async function togglePostLike(postId: string, userId: string): Promise<{ liked: boolean; count: number }> {
-  if (!userId || !posts.some((post) => post.id === postId)) {
+  if (!userId || !Object.values(postsByWorld).some((items) => items.some((post) => post.id === postId))) {
     throw new Error('This post is unavailable for liking.');
   }
   await delay();
@@ -158,7 +163,7 @@ export async function togglePostLike(postId: string, userId: string): Promise<{ 
 }
 
 export async function fetchPostComments(postId: string): Promise<SocialComment[]> {
-  if (!posts.some((post) => post.id === postId)) {
+  if (!Object.values(postsByWorld).some((items) => items.some((post) => post.id === postId))) {
     throw new Error('Comments for this post are unavailable.');
   }
   await delay();
@@ -167,7 +172,7 @@ export async function fetchPostComments(postId: string): Promise<SocialComment[]
 
 export async function addPostComment(postId: string, authorId: string, body: string): Promise<SocialComment> {
   const normalizedBody = body.trim();
-  if (!authorId || !posts.some((post) => post.id === postId) || normalizedBody.length < 1 || normalizedBody.length > 1000) {
+  if (!authorId || !Object.values(postsByWorld).some((items) => items.some((post) => post.id === postId)) || normalizedBody.length < 1 || normalizedBody.length > 1000) {
     throw new Error('Comments must contain 1 to 1,000 characters.');
   }
   await delay();
@@ -184,9 +189,11 @@ export async function addPostComment(postId: string, authorId: string, body: str
 }
 
 export function removeUserFeedData(userId: string): void {
-  const removedPostIds = new Set(posts.filter((post) => post.authorId === userId).map((post) => post.id));
-  for (let index = posts.length - 1; index >= 0; index -= 1) {
-    if (posts[index].authorId === userId) posts.splice(index, 1);
+  const removedPostIds = new Set(Object.values(postsByWorld).flat().filter((post) => post.authorId === userId).map((post) => post.id));
+  for (const worldPosts of Object.values(postsByWorld)) {
+    for (let index = worldPosts.length - 1; index >= 0; index -= 1) {
+      if (worldPosts[index].authorId === userId) worldPosts.splice(index, 1);
+    }
   }
   for (let index = likes.length - 1; index >= 0; index -= 1) {
     if (likes[index].userId === userId || removedPostIds.has(likes[index].targetId)) likes.splice(index, 1);

@@ -9,7 +9,7 @@
   width: min(100%, 1500px);
   min-height: 66px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin: 0 auto;
 }
 
@@ -44,84 +44,27 @@
   color: #a78339;
 }
 
-.previewButton {
-  display: inline-flex;
-  min-height: 38px;
-  align-items: center;
-  gap: 10px;
-  padding: 0 14px;
-  border: 1px solid #cbd2c9;
-  border-radius: 5px;
-  background: #f8f9f6;
-  color: #34453a;
-  cursor: pointer;
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.previewButton:hover {
-  background: #fff;
-}
-
-.previewGlyph {
-  position: relative;
-  width: 12px;
-  height: 17px;
-  border: 1.5px solid currentColor;
-  border-radius: 3px;
-}
-
-.previewGlyph::after {
-  position: absolute;
-  right: 3px;
-  bottom: 1px;
-  left: 3px;
-  height: 1px;
-  background: currentColor;
-  content: '';
-}
-
 .stage {
-  width: min(100%, 1500px);
-  min-height: calc(100vh - 90px);
-  min-height: calc(100svh - 90px);
+  width: 100%;
+  min-height: calc(100vh - 66px);
+  min-height: calc(100svh - 66px);
   margin: 0 auto;
 }
 
 .viewport {
   min-height: inherit;
-  overflow: hidden;
-  border: 1px solid #d6ddd4;
-  border-radius: 7px;
+  overflow: clip;
   background: #fbfcf9;
-  box-shadow: 0 14px 40px rgb(37 53 40 / 7%);
-}
-
-.mobileStage {
-  display: flex;
-  min-height: 0;
-  justify-content: center;
-  padding: 7px 0 0;
-}
-
-.mobileViewport {
-  width: min(390px, calc(100vw - 60px));
-  min-height: min(820px, calc(100svh - 100px));
-  height: min(820px, calc(100svh - 100px));
-  border: 8px solid #27332d;
-  border-radius: 38px;
-  background: #fbfcf9;
-  box-shadow: 0 24px 70px rgb(29 43 33 / 25%);
 }
 
 @media (max-width: 640px) {
   .workspace {
-    padding: 0 12px 12px;
+    padding: 0;
   }
 
   .toolbar {
     min-height: 58px;
+    padding: 0 12px;
   }
 
   .brand {
@@ -137,30 +80,5 @@
   .brandName {
     font-size: 8px;
     letter-spacing: 0.7px;
-  }
-
-  .previewButton {
-    min-height: 34px;
-    gap: 7px;
-    padding: 0 9px;
-    font-size: 11px;
-  }
-
-  .stage {
-    min-height: calc(100svh - 70px);
-  }
-
-  .mobileViewport {
-    width: min(390px, calc(100vw - 24px));
-    min-height: min(820px, calc(100svh - 84px));
-    height: min(820px, calc(100svh - 84px));
-    border-width: 6px;
-    border-radius: 32px;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .viewport {
-    transition: width 180ms ease, border-radius 180ms ease, box-shadow 180ms ease;
   }
 }

@@ -55,12 +55,22 @@ function normalizeSocialLink(value: unknown, provider: keyof Profile['socialLink
   if (typeof value !== 'string' || !value.trim()) {
     return null;
   }
+  const normalizedValue = value.trim();
+  if (['xbox', 'playstation', 'steam', 'epicGames'].includes(provider) &&
+      /^[A-Za-z0-9_. -]{2,40}$/.test(normalizedValue)) {
+    return normalizedValue;
+  }
   try {
-    const url = new URL(value);
+    const url = new URL(normalizedValue);
     const hosts: Record<keyof Profile['socialLinks'], string[]> = {
       facebook: ['facebook.com', 'www.facebook.com'],
       x: ['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com'],
       youtube: ['youtube.com', 'www.youtube.com'],
+      xbox: ['xbox.com', 'www.xbox.com'],
+      playstation: ['playstation.com', 'www.playstation.com'],
+      steam: ['steamcommunity.com', 'www.steamcommunity.com'],
+      epicGames: ['epicgames.com', 'www.epicgames.com'],
+      reddit: ['reddit.com', 'www.reddit.com', 'old.reddit.com'],
     };
     return url.protocol === 'https:' && hosts[provider].includes(url.hostname) ? url.toString() : null;
   } catch {
@@ -97,6 +107,11 @@ function normalizeSession(value: unknown): AuthSession | null {
         facebook: normalizeSocialLink(socialLinks.facebook, 'facebook'),
         x: normalizeSocialLink(socialLinks.x, 'x'),
         youtube: normalizeSocialLink(socialLinks.youtube, 'youtube'),
+        xbox: normalizeSocialLink(socialLinks.xbox, 'xbox'),
+        playstation: normalizeSocialLink(socialLinks.playstation, 'playstation'),
+        steam: normalizeSocialLink(socialLinks.steam, 'steam'),
+        epicGames: normalizeSocialLink(socialLinks.epicGames, 'epicGames'),
+        reddit: normalizeSocialLink(socialLinks.reddit, 'reddit'),
       },
     },
   };
@@ -200,7 +215,7 @@ function createSession(input: SignUpInput): AuthSession {
       starSign: null,
       belief: null,
       privacy: defaultPrivacy(null),
-      socialLinks: { facebook: null, x: null, youtube: null },
+      socialLinks: { facebook: null, x: null, youtube: null, xbox: null, playstation: null, steam: null, epicGames: null, reddit: null },
       cosmeticFrames: [],
       visibility: 'public',
       vipTier: 'free',
@@ -292,7 +307,16 @@ function toPublicProfile(session: AuthSession): PublicProfile {
     age: profile.privacy.age ? profile.age : null,
     starSign: profile.privacy.starSign ? profile.starSign : null,
     belief: profile.privacy.belief ? profile.belief : null,
-    socialLinks: profile.privacy.socialLinks ? { ...profile.socialLinks } : { facebook: null, x: null, youtube: null },
+    socialLinks: profile.privacy.socialLinks ? { ...profile.socialLinks } : {
+      facebook: null,
+      x: null,
+      youtube: null,
+      xbox: null,
+      playstation: null,
+      steam: null,
+      epicGames: null,
+      reddit: null,
+    },
     allowDirectMessages: profile.privacy.allowDirectMessages,
     cosmeticFrames: [...profile.cosmeticFrames],
     vipTier: profile.vipTier,
@@ -350,11 +374,11 @@ export function updateLocalProfile(
     throw new Error('Belief or philosophy cannot exceed 120 characters.');
   }
   if (updates.socialLinks) {
-    const providers: (keyof Profile['socialLinks'])[] = ['facebook', 'x', 'youtube'];
+    const providers: (keyof Profile['socialLinks'])[] = ['facebook', 'x', 'youtube', 'xbox', 'playstation', 'steam', 'epicGames', 'reddit'];
     for (const provider of providers) {
       const value = updates.socialLinks[provider];
       if (value && (value.length > 300 || !normalizeSocialLink(value, provider))) {
-        throw new Error('Use HTTPS Facebook, X/Twitter, and YouTube profile URLs no longer than 300 characters.');
+        throw new Error('Use a valid gaming handle or HTTPS profile URL no longer than 300 characters.');
       }
     }
   }
