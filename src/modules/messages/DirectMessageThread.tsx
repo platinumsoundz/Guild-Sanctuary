@@ -5,6 +5,7 @@ import type { PublicProfile } from '@/types/database';
 import type { Conversation } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { useDirectMessages } from './useDirectMessages';
+import { ReportContentButton } from '@/modules/moderation';
 import styles from './DirectMessageThread.module.css';
 
 interface DirectMessageThreadProps {
@@ -49,6 +50,7 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
             {conversation?.kind === 'group' && message.senderId !== currentUser?.user.id && <span className={styles.senderName}>{message.senderId}</span>}
             <p>{message.body}</p>
             <time dateTime={message.sentAt}>{message.sentAt.slice(11, 16)} UTC</time>
+            {message.senderId !== currentUser?.user.id && <ReportContentButton targetType="message" targetId={message.id} />}
           </article>
         ))}
       </section>

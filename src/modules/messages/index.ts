@@ -11,3 +11,10 @@ export {
   sendConversationMessage,
   sendDirectMessage,
 } from './service';
+export {
+  createPersistentConversation,
+  fetchPersistentConversations,
+  fetchPersistentThread,
+  sendPersistentMessage,
+  subscribeToPersistentMessages,
+} from './supabaseRepository';

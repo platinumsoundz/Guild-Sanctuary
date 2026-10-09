@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { useEvents, type EventView } from '@/modules/events';
 import { EventEngagement } from './EventEngagement';
+import { ReportContentButton } from '@/modules/moderation';
 import styles from './MeetupCalendarPlaceholder.module.css';
 
 export function MeetupCalendarPlaceholder() {
@@ -139,6 +140,7 @@ export function MeetupCalendarPlaceholder() {
                   <span className={styles.locationText}>Location: {event.locationCoords.latitude.toFixed(3)}, {event.locationCoords.longitude.toFixed(3)}</span>
                   <span className={styles.attendeeCount}>{event.rsvpCount} going</span>
                   <EventEngagement eventId={event.id} userId={userId} />
+                  <ReportContentButton targetType="event" targetId={event.id} />
                 </div>
                 <div className={styles.eventActions}>
                   <button className={event.viewerStatus === 'going' ? styles.selectedButton : styles.secondaryButton} type="button" onClick={() => void handleRsvp(event.id, event.viewerStatus === 'going' ? 'cancelled' : 'going')}>

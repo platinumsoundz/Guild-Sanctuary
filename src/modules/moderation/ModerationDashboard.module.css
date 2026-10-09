@@ -1,0 +1,92 @@
+.dashboard {
+  width: min(100%, 60rem);
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  color: #26342a;
+}
+
+.dashboard header {
+  margin-bottom: 1.5rem;
+}
+
+.dashboard h1 {
+  margin: 0.25rem 0 0.5rem;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+}
+
+.dashboard header > p:last-child,
+.notice {
+  color: #627066;
+}
+
+.eyebrow {
+  color: #56745d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.queue {
+  display: grid;
+  gap: 1rem;
+}
+
+.report {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid #d8e0d8;
+  border-radius: 1rem;
+  background: #fff;
+  padding: clamp(1rem, 3vw, 1.4rem);
+}
+
+.reportHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.reportHeader time,
+.details {
+  color: #69776d;
+  font-size: 0.85rem;
+}
+
+.rationale {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.rationale textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #cbd4cb;
+  border-radius: 0.6rem;
+  padding: 0.6rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.actions button {
+  border: 1px solid #cbd4cb;
+  border-radius: 999px;
+  background: #f8faf8;
+  color: #344b3b;
+  cursor: pointer;
+  padding: 0.55rem 0.85rem;
+}
+
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.error {
+  color: #9b3131;
+}

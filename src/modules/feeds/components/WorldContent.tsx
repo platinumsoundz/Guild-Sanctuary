@@ -7,6 +7,7 @@ import { useAppContext } from '@/context/AppContext';
 import { getLocalPublicProfileById } from '@/modules/auth';
 import { useFeed } from '@/modules/feeds';
 import { AdPlacement } from '@/modules/ads';
+import { ReportContentButton } from '@/modules/moderation';
 import { PostEngagement } from './PostEngagement';
 import styles from './WorldContent.module.css';
 
@@ -239,6 +240,7 @@ export function WorldContent({ worldType }: WorldContentProps) {
                   </video>
                 )}
                 <PostEngagement postId={post.id} userId={currentUser?.user.id ?? ''} />
+                <ReportContentButton targetType="post" targetId={post.id} />
                 {post.authorId === currentUser?.user.id && editingPostId !== post.id && (
                   <div className={styles.postActions}>
                     <button className={styles.textButton} type="button" onClick={() => {

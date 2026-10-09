@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import { Heart, MessageCircle } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { AdPlacement } from '@/modules/ads';
+import { ReportContentButton } from '@/modules/moderation';
 import type { ShortVideo, SocialComment } from '@/types/database';
 import { addShortComment, createShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike } from '../service';
 import styles from './ShortsFeed.module.css';
@@ -256,6 +257,7 @@ export function ShortsFeed() {
                   <span>{stats.commentsCount}</span>
                 </button>
               </div>
+              <ReportContentButton targetType="short" targetId={video.id} />
               {isCommentsOpen && (
                 <aside className={styles.comments} aria-label="Short video comments">
                   <h2>Comments</h2>
