@@ -2,6 +2,7 @@ import { AppWorkspace } from '@/components/AppWorkspace'
 import SanctuaryFeed from '@/components/SanctuaryFeed'
 import CheckoutButton from '@/components/CheckoutButton'
 
+export const dynamic = 'force-dynamic'
 export default function Home() {
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto space-y-8">

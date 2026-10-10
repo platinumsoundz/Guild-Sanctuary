@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@supabase/ssr' // or @supabase/supabase-js
+import { createBrowserClient } from '@supabase/ssr'
 
 export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
