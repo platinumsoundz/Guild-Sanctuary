@@ -7,12 +7,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-01-27.acacia' as any,
 })
 
-// Admin Supabase client to bypass RLS and grant privileges
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
-)
-
 export async function POST(req: Request) {
   const body = await req.text()
   const headerList = await headers()
@@ -37,6 +31,12 @@ export async function POST(req: Request) {
     const userId = session.metadata?.userId
 
     if (userId) {
+      // Instantiated inside the handler to prevent build-time evaluation errors
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SECRET_KEY!
+      )
+
       const { error } = await supabaseAdmin
         .from('profiles')
         .update({ is_supporter: true })
