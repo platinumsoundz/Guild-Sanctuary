@@ -45,6 +45,7 @@ interface AppContextValue {
   pendingEmail: string | null;
   pendingTwoFactorEmail: string | null;
   activeNavigation: NavigationState;
+  isGuest: boolean;
   selectWorld: (world: WorldType) => Promise<void>;
   toggleWorld: () => Promise<WorldType>;
   login: (email: string) => Promise<void>;
@@ -57,6 +58,7 @@ interface AppContextValue {
   logout: () => void;
   deleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => void;
   setActiveNavigation: (navigation: NavigationState) => void;
+  loginAsGuest: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -70,6 +72,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   const activeWorldRef = useRef<WorldType>('sanctuary');
   const [activeNavigation, setActiveNavigation] = useState<NavigationState>('feed');
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
@@ -109,12 +112,40 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   const activateSession = (session: AuthSession, persist = !isSupabaseAuthConfigured()) => {
     if (persist) persistActiveSession(session);
     setCurrentUser(session);
+    setIsGuest(false);
     activeWorldRef.current = session.entryWorld;
     setActiveWorld(session.entryWorld);
     setActiveNavigation('feed');
     setPendingEmail(null);
     setPendingTwoFactorEmail(null);
     setPendingTotp(null);
+    setSessionError(null);
+  };
+
+const loginAsGuest = () => {
+    setIsGuest(true);
+    const guestSession: UserSession = {
+      user: {
+        id: 'guest-user-id',
+        email: 'guest@guildsanctuary.local',
+        status: 'active',
+        emailVerified: true,
+        twoFactorEnabled: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      profile: {
+        id: 'guest-profile-id',
+        userId: 'guest-user-id',
+        username: 'Guest Explorer',
+        avatarUrl: '',
+        role: 'user',
+      } as any, // Bypass strict optional profile property checks for guest mode
+      permissions: [],
+      entryWorld: 'sanctuary',
+    };
+    setCurrentUser(guestSession);
+    setActiveNavigation('feed');
     setSessionError(null);
   };
 
@@ -125,7 +156,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     activeWorldRef.current = nextWorld;
     setActiveWorld(nextWorld);
 
-    if (currentUser) {
+    if (currentUser && !isGuest) {
       const updatedSession: AuthSession = { ...currentUser, entryWorld: nextWorld };
       setCurrentUser(updatedSession);
       if (!isSupabaseAuthConfigured()) persistActiveSession(updatedSession);
@@ -255,6 +286,9 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     if (!currentUser) {
       throw new Error('Sign in before editing your profile.');
     }
+    if (isGuest) {
+      throw new Error('Profile editing is disabled in Guest Mode.');
+    }
     if (isSupabaseAuthConfigured()) {
       throw new Error('Profile editing is not yet enabled for Supabase accounts.');
     }
@@ -275,14 +309,15 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   };
 
   const logout = () => {
-    if (currentUser) lockPrivateProfileVault(currentUser.user.id);
-    if (isSupabaseAuthConfigured()) {
+    if (currentUser && !isGuest) lockPrivateProfileVault(currentUser.user.id);
+    if (isSupabaseAuthConfigured() && !isGuest) {
       void getSupabaseBrowserClient().auth.signOut().then(({ error }) => {
         if (error) setSessionError(`Sign-out could not be confirmed: ${error.message}`);
       });
     }
     clearStoredSession();
     setCurrentUser(null);
+    setIsGuest(false);
     setActiveNavigation('feed');
     cancelAuthChallenge();
   };
@@ -291,12 +326,16 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     if (!currentUser) {
       throw new Error('Sign in before deleting your account.');
     }
+    if (isGuest) {
+      throw new Error('Guest accounts cannot be deleted this way.');
+    }
     if (isSupabaseAuthConfigured()) {
       throw new Error('Account deletion must be completed through the verified support process. In-app deletion is not enabled yet.');
     }
     deleteDemoAccount(currentUser.user.id, emailConfirmation, phrase, twoFactorCode);
     lockPrivateProfileVault(currentUser.user.id);
     setCurrentUser(null);
+    setIsGuest(false);
     setActiveNavigation('feed');
     cancelAuthChallenge();
   };
@@ -312,6 +351,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         pendingEmail,
         pendingTwoFactorEmail,
         activeNavigation,
+        isGuest,
         selectWorld,
         toggleWorld,
         login,
@@ -324,6 +364,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         logout,
         deleteAccount,
         setActiveNavigation,
+        loginAsGuest,
       }}
     >
       {children}
