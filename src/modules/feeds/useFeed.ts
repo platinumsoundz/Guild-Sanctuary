@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { WorldType } from '@/types';
 import type { Post } from '@/types/database';
 import { createPost, deletePost, fetchFeed, updatePost, type CreatePostInput } from './service';
 
@@ -14,7 +13,7 @@ interface UseFeedResult {
   removePost: (postId: string) => Promise<void>;
 }
 
-export function useFeed(worldType: WorldType, authorId: string | null): UseFeedResult {
+export function useFeed(authorId: string | null): UseFeedResult {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,13 +22,13 @@ export function useFeed(worldType: WorldType, authorId: string | null): UseFeedR
     setIsLoading(true);
     setError(null);
     try {
-      setPosts(await fetchFeed(worldType));
+      setPosts(await fetchFeed());
     } catch {
       setError('The feed could not be loaded.');
     } finally {
       setIsLoading(false);
     }
-  }, [worldType]);
+  }, []);
 
   useEffect(() => {
     void refresh();
@@ -40,7 +39,7 @@ export function useFeed(worldType: WorldType, authorId: string | null): UseFeedR
       throw new Error('Sign in before creating a post.');
     }
 
-    const post = await createPost({ ...input, authorId, worldType });
+    const post = await createPost({ ...input, authorId });
     setPosts((currentPosts) => [post, ...currentPosts]);
   };
 
