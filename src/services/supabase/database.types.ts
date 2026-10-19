@@ -190,6 +190,14 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      create_sanctuary_conversation: {
+        Args: {
+          requested_kind: 'direct' | 'group';
+          requested_member_ids: string[];
+          requested_name?: string | null;
+        };
+        Returns: string;
+      };
       create_conversation: {
         Args: {
           requested_kind: 'direct' | 'group';
