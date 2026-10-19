@@ -16,16 +16,6 @@
   transition: background-color 180ms ease, color 180ms ease;
 }
 
-.worldSurface[data-world='guild'] {
-  --surface: #171b20;
-  --surface-raised: #20262c;
-  --ink: #f1f0ea;
-  --muted: #a2aaa8;
-  --line: #343c40;
-  --accent: var(--profile-accent, #d7ff5c);
-  --accent-soft: color-mix(in srgb, var(--profile-accent, #d7ff5c) 14%, var(--surface-raised));
-}
-
 .sectionPage,
 .profilePage {
   display: flex;
