@@ -96,7 +96,7 @@ export function SupportPanel() {
       <p className={styles.eyebrow}>COMMUNITY-SUPPORTED</p>
       <h1 id="support-title">Help keep this space open</h1>
       <p className={styles.intro}>
-        If Guild &amp; Sanctuary has been meaningful to you, you can make a voluntary, one-time contribution.
+        If The Sanctuary has been meaningful to you, you can make a voluntary, one-time contribution.
         Every core feature stays available without paying.
       </p>
 
