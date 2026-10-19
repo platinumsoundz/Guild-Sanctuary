@@ -1,8 +1,10 @@
 # Guild & Sanctuary Master Blueprint
 
-Last updated: 2026-10-09
+Last updated: 2026-10-10
 
-This document is the shared architecture and progress reference for Guild & Sanctuary. Read it before making project changes. Keep the progress checklist and relevant module scope current whenever code changes so collaborators and AI tools can understand the system without reconstructing it from scratch.
+This document is the shared architecture and progress reference for The Sanctuary. Read it before making project changes. Keep the progress checklist and relevant module scope current whenever code changes so collaborators and AI tools can understand the system without reconstructing it from scratch.
+
+> **Architecture update (2026-10-10):** The dual-world model has been retired. The Sanctuary is the sole community surface: application contracts, local stores, navigation, feeds, events, Shorts, and messages no longer accept a world selector or split content. The Supabase migration `20261010000000_unify_sanctuary_scope.sql` normalizes prior data to `sanctuary` and supplies defaults for legacy database columns while a later reviewed migration can remove those legacy columns. Payments are disabled pending a complete, audited provider and fulfillment implementation; the checkout and Stripe webhook endpoints return `503` intentionally, and `/api/community-tips` advertises no providers.
 
 The commercial architecture, provider defaults, migration sequence, and release gates in this document are the definitive target for future implementation. They describe planned architecture, not deployed production capability: Chapter 4 is the source of truth for what is implemented today, and every production gate remains open until it has been built, tested, reviewed, and operated successfully. Provider alternatives are decision points, not simultaneous integrations; record any approved deviation here before implementation.
 
