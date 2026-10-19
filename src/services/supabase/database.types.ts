@@ -1,4 +1,5 @@
-import type { WorldType } from '@/types';
+// Legacy database column retained during the Sanctuary migration.
+type SanctuaryScope = 'sanctuary';
 
 type Table<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row;
@@ -41,7 +42,7 @@ export type PrivateProfileVaultRow = {
 export type ConversationRow = {
   id: string;
   kind: 'direct' | 'group';
-  world_type: WorldType;
+  world_type: SanctuaryScope;
   name: string | null;
   created_by: string;
   created_at: string;
@@ -101,7 +102,7 @@ export interface Database {
       posts: Table<{
         id: string;
         author_id: string;
-        world_type: WorldType;
+        world_type: SanctuaryScope;
         content: string;
         media_url: string | null;
         media_type: 'image' | 'audio' | 'video' | null;
@@ -113,7 +114,7 @@ export interface Database {
       short_videos: Table<{
         id: string;
         author_id: string;
-        world_type: WorldType;
+        world_type: SanctuaryScope;
         video_url: string;
         caption: string;
         state: 'visible' | 'hidden' | 'removed';
@@ -122,7 +123,7 @@ export interface Database {
       events: Table<{
         id: string;
         creator_id: string;
-        world_type: WorldType;
+        world_type: SanctuaryScope;
         title: string;
         description: string;
         latitude: number;
@@ -162,7 +163,7 @@ export interface Database {
         conversation_id: string;
         first_user_id: string;
         second_user_id: string;
-        world_type: WorldType;
+        world_type: SanctuaryScope;
       }>;
       messages: Table<MessageRow>;
       content_reports: Table<ContentReportRow>;
@@ -192,7 +193,7 @@ export interface Database {
       create_conversation: {
         Args: {
           requested_kind: 'direct' | 'group';
-          requested_world: WorldType;
+          requested_world: SanctuaryScope;
           requested_member_ids: string[];
           requested_name?: string | null;
         };
@@ -242,7 +243,7 @@ export interface Database {
       };
     };
     Enums: {
-      world_type: WorldType;
+      world_type: SanctuaryScope;
       conversation_kind: 'direct' | 'group';
       content_state: 'visible' | 'hidden' | 'removed';
       report_status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
