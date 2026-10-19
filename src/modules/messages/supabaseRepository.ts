@@ -58,7 +58,7 @@ export async function createPersistentConversation(
   if (!authData.user) throw new Error('Sign in with a Supabase account before starting a conversation.');
 
   const uniqueIds = [...new Set([authData.user.id, ...participantIds])];
-  const { data: conversationId, error } = await client.rpc('create_conversation', {
+  const { data: conversationId, error } = await client.rpc('create_sanctuary_conversation', {
     requested_kind: kind,
     requested_member_ids: uniqueIds,
     requested_name: name,
