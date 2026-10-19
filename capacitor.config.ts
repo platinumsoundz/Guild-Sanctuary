@@ -12,7 +12,7 @@ if (configuredServerUrl && new URL(configuredServerUrl).protocol !== 'https:') {
 
 const config: CapacitorConfig = {
   appId: 'com.guildsanctuary.app',
-  appName: 'Guild & Sanctuary',
+  appName: 'The Sanctuary',
   webDir: 'capacitor-web',
   server: {
     ...(configuredServerUrl ? { url: configuredServerUrl } : {}),
