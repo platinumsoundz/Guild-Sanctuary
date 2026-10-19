@@ -22,9 +22,9 @@ export function AuthenticationGateway({
   return (
     <main className={styles.gateway}>
       <section className={styles.introduction}>
-        <p className={styles.eyebrow}>GUILD &amp; SANCTUARY</p>
-        <h1>One community.<br />Two worlds.</h1>
-        <p className={styles.description}>Find a place to reflect, make room for play, and meet people along the way.</p>
+        <p className={styles.eyebrow}>THE SANCTUARY</p>
+        <h1>A community<br />to pause and grow.</h1>
+        <p className={styles.description}>Reflect, share what matters, and meet people with care.</p>
       </section>
       <section className={styles.formPanel} aria-label="Sign in or create an account">
         <AuthenticationForm
