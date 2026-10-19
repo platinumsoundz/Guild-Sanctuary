@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import type { WorldType } from '@/types';
 import type { Conversation, PublicProfile } from '@/types/database';
 import { searchPublicProfiles } from '@/modules/profiles';
 import { createGroupConversation, fetchUserConversations } from './service';
@@ -9,12 +8,11 @@ import styles from './MessagesInbox.module.css';
 
 interface MessagesInboxProps {
   currentUserId: string;
-  worldType: WorldType;
   onDiscoverPeople: () => void;
   onOpenConversation: (conversation: Conversation) => void;
 }
 
-export function MessagesInbox({ currentUserId, worldType, onDiscoverPeople, onOpenConversation }: MessagesInboxProps) {
+export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversation }: MessagesInboxProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PublicProfile[]>([]);
@@ -25,7 +23,7 @@ export function MessagesInbox({ currentUserId, worldType, onDiscoverPeople, onOp
 
   const refresh = async () => {
     try {
-      setConversations(await fetchUserConversations(currentUserId, worldType));
+      setConversations(await fetchUserConversations(currentUserId));
       setError(null);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Conversations could not be loaded.');
@@ -36,7 +34,7 @@ export function MessagesInbox({ currentUserId, worldType, onDiscoverPeople, onOp
 
   useEffect(() => {
     void refresh();
-  }, [currentUserId, worldType]);
+  }, [currentUserId]);
 
   const search = async (value: string) => {
     setQuery(value);
@@ -57,7 +55,7 @@ export function MessagesInbox({ currentUserId, worldType, onDiscoverPeople, onOp
   const handleCreateGroup = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const conversation = await createGroupConversation(currentUserId, selectedMembers.map((member) => member.userId), groupName, worldType);
+      const conversation = await createGroupConversation(currentUserId, selectedMembers.map((member) => member.userId), groupName);
       setGroupName('');
       setSelectedMembers([]);
       setQuery('');
