@@ -1,4 +1,3 @@
-import type { WorldType } from '@/types';
 import type { Conversation, Message } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { ConversationRow, MessageRow } from '@/services/supabase/database.types';
@@ -12,7 +11,6 @@ function toConversation(row: ConversationRow, participantIds: string[]): Convers
   return {
     id: row.id,
     kind: row.kind,
-    worldType: row.world_type,
     participantIds,
     name: row.name,
     createdAt: row.created_at,
@@ -51,7 +49,6 @@ async function getMembers(conversationIds: string[]): Promise<Map<string, string
 
 export async function createPersistentConversation(
   kind: Conversation['kind'],
-  worldType: WorldType,
   participantIds: string[],
   name: string | null,
 ): Promise<Conversation> {
@@ -63,7 +60,6 @@ export async function createPersistentConversation(
   const uniqueIds = [...new Set([authData.user.id, ...participantIds])];
   const { data: conversationId, error } = await client.rpc('create_conversation', {
     requested_kind: kind,
-    requested_world: worldType,
     requested_member_ids: uniqueIds,
     requested_name: name,
   });
@@ -79,7 +75,7 @@ export async function createPersistentConversation(
   return toConversation(row, memberMap.get(row.id) ?? []);
 }
 
-export async function fetchPersistentConversations(userId: string, worldType: WorldType): Promise<Conversation[]> {
+export async function fetchPersistentConversations(userId: string): Promise<Conversation[]> {
   const client = getSupabaseBrowserClient();
   const { data: memberships, error: membershipError } = await client
     .from('conversation_members')
@@ -94,7 +90,6 @@ export async function fetchPersistentConversations(userId: string, worldType: Wo
     .from('conversations')
     .select('*')
     .in('id', conversationIds)
-    .eq('world_type', worldType)
     .order('updated_at', { ascending: false });
   if (error) throw new Error(`Conversations could not be loaded: ${error.message}`);
 
@@ -104,14 +99,12 @@ export async function fetchPersistentConversations(userId: string, worldType: Wo
 
 export async function fetchPersistentThread(
   conversationId: string,
-  worldType: WorldType,
 ): Promise<PersistentConversationThread> {
   const client = getSupabaseBrowserClient();
   const { data: row, error } = await client
     .from('conversations')
     .select('*')
     .eq('id', conversationId)
-    .eq('world_type', worldType)
     .single();
   if (error) throw new Error(`Conversation could not be opened: ${error.message}`);
 
