@@ -4,11 +4,9 @@ import {
   createContext,
   useEffect,
   useContext,
-  useRef,
   useState,
   type ReactNode,
 } from 'react';
-import type { WorldType } from '@/types';
 import {
   findLocalAccountByEmail,
   persistActiveSession,
@@ -28,7 +26,6 @@ import {
 } from '@/modules/auth';
 import type { AuthSession, SignUpInput } from '@/modules/auth';
 import type { Profile } from '@/types/database';
-import { toggleWorld as toggleWorldRequest } from '@/services/mockApi';
 import { deleteDemoAccount } from '@/services/accountDeletion';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 
@@ -37,7 +34,6 @@ export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'disco
 export type UserSession = AuthSession;
 
 interface AppContextValue {
-  activeWorld: WorldType;
   currentUser: UserSession | null;
   isAuthenticated: boolean;
   isSessionReady: boolean;
@@ -46,8 +42,6 @@ interface AppContextValue {
   pendingTwoFactorEmail: string | null;
   activeNavigation: NavigationState;
   isGuest: boolean;
-  selectWorld: (world: WorldType) => Promise<void>;
-  toggleWorld: () => Promise<WorldType>;
   login: (email: string) => Promise<void>;
   signup: (input: SignUpInput) => Promise<void>;
   verifyEmailCode: (code: string) => Promise<boolean>;
@@ -68,8 +62,6 @@ interface AppContextProviderProps {
 }
 
 export function AppContextProvider({ children }: AppContextProviderProps) {
-  const [activeWorld, setActiveWorld] = useState<WorldType>('sanctuary');
-  const activeWorldRef = useRef<WorldType>('sanctuary');
   const [activeNavigation, setActiveNavigation] = useState<NavigationState>('feed');
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
   const [isGuest, setIsGuest] = useState(false);
@@ -77,7 +69,6 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [pendingTwoFactorEmail, setPendingTwoFactorEmail] = useState<string | null>(null);
-  const [pendingEntryWorld, setPendingEntryWorld] = useState<WorldType>('sanctuary');
   const [pendingTotp, setPendingTotp] = useState<{ factorId: string; challengeId: string } | null>(null);
 
   useEffect(() => {
@@ -85,17 +76,13 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     const restore = async () => {
       try {
         const restoredSession = isSupabaseAuthConfigured()
-          ? await restoreSupabaseSession('sanctuary')
+          ? await restoreSupabaseSession()
           : restoreSession();
         if (cancelled) return;
-        if (restoredSession) {
-          if (restoredSession.user.status === 'active' && restoredSession.user.emailVerified) {
-            setCurrentUser(restoredSession);
-            activeWorldRef.current = restoredSession.entryWorld;
-            setActiveWorld(restoredSession.entryWorld);
-          } else if (!isSupabaseAuthConfigured()) {
-            clearStoredSession();
-          }
+        if (restoredSession && restoredSession.user.status === 'active' && restoredSession.user.emailVerified) {
+          setCurrentUser(restoredSession);
+        } else if (!isSupabaseAuthConfigured()) {
+          clearStoredSession();
         }
       } catch (restoreError) {
         if (!cancelled) {
@@ -113,8 +100,6 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     if (persist) persistActiveSession(session);
     setCurrentUser(session);
     setIsGuest(false);
-    activeWorldRef.current = session.entryWorld;
-    setActiveWorld(session.entryWorld);
     setActiveNavigation('feed');
     setPendingEmail(null);
     setPendingTwoFactorEmail(null);
@@ -122,7 +107,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     setSessionError(null);
   };
 
-const loginAsGuest = () => {
+  const loginAsGuest = () => {
     setIsGuest(true);
     const guestSession: UserSession = {
       user: {
@@ -140,42 +125,18 @@ const loginAsGuest = () => {
         username: 'Guest Explorer',
         avatarUrl: '',
         role: 'user',
-      } as any, // Bypass strict optional profile property checks for guest mode
+      } as any,
       permissions: [],
-      entryWorld: 'sanctuary',
     };
     setCurrentUser(guestSession);
     setActiveNavigation('feed');
     setSessionError(null);
   };
 
-  const toggleWorld = async () => {
-    const currentWorld = activeWorldRef.current;
-    const nextWorld = currentWorld === 'sanctuary' ? 'guild' : 'sanctuary';
-
-    activeWorldRef.current = nextWorld;
-    setActiveWorld(nextWorld);
-
-    if (currentUser && !isGuest) {
-      const updatedSession: AuthSession = { ...currentUser, entryWorld: nextWorld };
-      setCurrentUser(updatedSession);
-      if (!isSupabaseAuthConfigured()) persistActiveSession(updatedSession);
-    }
-
-    return toggleWorldRequest(currentWorld);
-  };
-
-  const selectWorld = async (world: WorldType) => {
-    if (world !== activeWorldRef.current) {
-      await toggleWorld();
-    }
-  };
-
   const signup = async (input: SignUpInput) => {
     if (isSupabaseAuthConfigured()) {
       await requestSupabaseEmailCode(input.email, input);
       setPendingEmail(input.email.trim().toLowerCase());
-      setPendingEntryWorld(input.entryWorld);
       setPendingTwoFactorEmail(null);
       setPendingTotp(null);
       return;
@@ -185,7 +146,6 @@ const loginAsGuest = () => {
     }
     const session = registerLocalAccount(input);
     setPendingEmail(session.user.email);
-    setPendingEntryWorld(input.entryWorld);
     setPendingTwoFactorEmail(null);
   };
 
@@ -193,7 +153,6 @@ const loginAsGuest = () => {
     if (isSupabaseAuthConfigured()) {
       await requestSupabaseEmailCode(email);
       setPendingEmail(email.trim().toLowerCase());
-      setPendingEntryWorld('sanctuary');
       setPendingTwoFactorEmail(null);
       setPendingTotp(null);
       return;
@@ -220,7 +179,7 @@ const loginAsGuest = () => {
     }
 
     if (isSupabaseAuthConfigured()) {
-      const result = await verifySupabaseEmailCode(pendingEmail, code, pendingEntryWorld);
+      const result = await verifySupabaseEmailCode(pendingEmail, code);
       if (result.challenge) {
         setPendingEmail(null);
         setPendingTwoFactorEmail(pendingEmail);
@@ -257,7 +216,6 @@ const loginAsGuest = () => {
         pendingTotp.factorId,
         pendingTotp.challengeId,
         code,
-        pendingEntryWorld,
       );
       activateSession(session, false);
       return;
@@ -343,7 +301,6 @@ const loginAsGuest = () => {
   return (
     <AppContext.Provider
       value={{
-        activeWorld,
         currentUser,
         isAuthenticated: currentUser !== null,
         isSessionReady,
@@ -352,8 +309,6 @@ const loginAsGuest = () => {
         pendingTwoFactorEmail,
         activeNavigation,
         isGuest,
-        selectWorld,
-        toggleWorld,
         login,
         signup,
         verifyEmailCode,
