@@ -138,7 +138,6 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
       .from('posts')
       .insert({
         author_id: userId,
-        world_type: input.worldType,
         content,
         media_url: mediaPath,
         media_type: input.mediaFile ? input.mediaType ?? null : null,
@@ -162,7 +161,6 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     return {
       id: data.id,
       authorId: data.author_id,
-      worldType: data.world_type,
       content: data.content,
       mediaUrl,
       mediaType: data.media_type,
@@ -177,7 +175,6 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
   const post: Post = {
     id: `post-local-${nextPostId++}`,
     authorId: input.authorId,
-    worldType: input.worldType,
     content,
     mediaUrl: input.mediaFile ? URL.createObjectURL(input.mediaFile) : input.mediaUrl ?? null,
     mediaType: input.mediaType ?? null,
@@ -185,7 +182,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     createdAt: timestamp,
     updatedAt: timestamp,
   };
-  postsByWorld[input.worldType].unshift(post);
+  posts.unshift(post);
   return post;
 }
 
