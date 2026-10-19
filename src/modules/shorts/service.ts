@@ -1,4 +1,5 @@
-import type { WorldType } from '@/types';
+'use client';
+
 import type { ShortVideo, SocialComment, SocialLike } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import {
@@ -9,28 +10,15 @@ import {
   uploadCommunityMedia,
 } from '@/services/supabase/communityMedia';
 
-const videosByWorld: Record<WorldType, ShortVideo[]> = {
-  sanctuary: [
-    {
-      id: 'short-demo-2',
-      authorId: 'community-creator',
-      worldType: 'sanctuary',
-      videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-      caption: 'A little reminder to take the scenic route today.',
-      createdAt: '2026-10-08T11:00:00.000Z',
-    },
-  ],
-  guild: [
-    {
-      id: 'short-demo-1',
-      authorId: 'community-creator',
-      worldType: 'guild',
-      videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-      caption: 'A quick escape with the crew. What should we play next?',
-      createdAt: '2026-10-08T12:00:00.000Z',
-    },
-  ],
-};
+const videos: ShortVideo[] = [
+  {
+    id: 'short-demo-1',
+    authorId: 'community-creator',
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+    caption: 'A little reminder to take the scenic route today.',
+    createdAt: '2026-10-08T11:00:00.000Z',
+  },
+];
 
 const likes: SocialLike[] = [];
 const comments: SocialComment[] = [];
@@ -41,16 +29,15 @@ function delay(): Promise<void> {
 }
 
 function findShort(shortId: string): ShortVideo | undefined {
-  return Object.values(videosByWorld).flat().find((video) => video.id === shortId);
+  return videos.find((video) => video.id === shortId);
 }
 
-export async function fetchShortVideos(worldType: WorldType): Promise<ShortVideo[]> {
+export async function fetchShortVideos(): Promise<ShortVideo[]> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser();
     const { data, error } = await getSupabaseBrowserClient()
       .from('short_videos')
       .select('*')
-      .eq('world_type', worldType)
       .eq('state', 'visible')
       .order('created_at', { ascending: false });
     if (error) throw new Error(`Short videos could not be loaded: ${error.message}`);
@@ -58,19 +45,16 @@ export async function fetchShortVideos(worldType: WorldType): Promise<ShortVideo
     return data.map((row) => ({
       id: row.id,
       authorId: row.author_id,
-      worldType: row.world_type,
       videoUrl: urls.get(row.video_url) ?? '',
       caption: row.caption,
       createdAt: row.created_at,
     }));
   }
   await delay();
-  return videosByWorld[worldType]
-    .slice()
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return videos.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'worldType' | 'caption'> & { videoFile: File; videoUrl?: string }): Promise<ShortVideo> {
+export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'caption'> & { videoFile: File; videoUrl?: string }): Promise<ShortVideo> {
   const caption = input.caption.trim();
   if (!input.authorId || !input.videoFile || input.videoFile.size > 5 * 1024 * 1024 || caption.length > 500) {
     throw new Error('Choose a video and add a caption of no more than 500 characters.');
@@ -99,7 +83,6 @@ export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'wor
       .from('short_videos')
       .insert({
         author_id: userId,
-        world_type: input.worldType,
         video_url: videoPath,
         caption,
       })
@@ -116,7 +99,6 @@ export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'wor
     return {
       id: data.id,
       authorId: data.author_id,
-      worldType: data.world_type,
       videoUrl,
       caption: data.caption,
       createdAt: data.created_at,
@@ -125,13 +107,12 @@ export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'wor
   await delay();
   const video: ShortVideo = {
     authorId: input.authorId,
-    worldType: input.worldType,
     videoUrl: URL.createObjectURL(input.videoFile),
     caption,
     id: `short-local-${nextId++}`,
     createdAt: new Date().toISOString(),
   };
-  videosByWorld[input.worldType].unshift(video);
+  videos.unshift(video);
   return video;
 }
 
@@ -150,11 +131,9 @@ export async function deleteShortVideo(shortId: string, authorId: string): Promi
     await removeCommunityMedia(data.video_url);
     return;
   }
-  const worldVideos = Object.values(videosByWorld).find((world) =>
-    world.some((video) => video.id === shortId && video.authorId === authorId));
-  const videoIndex = worldVideos?.findIndex((video) => video.id === shortId && video.authorId === authorId) ?? -1;
-  if (!worldVideos || videoIndex < 0) throw new Error('This short video could not be deleted.');
-  worldVideos.splice(videoIndex, 1);
+  const videoIndex = videos.findIndex((video) => video.id === shortId && video.authorId === authorId);
+  if (videoIndex < 0) throw new Error('This short video could not be deleted.');
+  videos.splice(videoIndex, 1);
   for (let index = likes.length - 1; index >= 0; index -= 1) {
     if (likes[index].targetId === shortId) likes.splice(index, 1);
   }
@@ -182,7 +161,6 @@ export async function updateShortVideo(shortId: string, authorId: string, captio
     return {
       id: data.id,
       authorId: data.author_id,
-      worldType: data.world_type,
       videoUrl,
       caption: data.caption,
       createdAt: data.created_at,
@@ -325,11 +303,9 @@ export async function getShortEngagement(shortId: string, userId: string) {
 }
 
 export function removeUserShortData(userId: string): void {
-  const removedShortIds = new Set(Object.values(videosByWorld).flat().filter((video) => video.authorId === userId).map((video) => video.id));
-  for (const worldVideos of Object.values(videosByWorld)) {
-    for (let index = worldVideos.length - 1; index >= 0; index -= 1) {
-      if (worldVideos[index].authorId === userId) worldVideos.splice(index, 1);
-    }
+  const removedShortIds = new Set(videos.filter((video) => video.authorId === userId).map((video) => video.id));
+  for (let index = videos.length - 1; index >= 0; index -= 1) {
+    if (videos[index].authorId === userId) videos.splice(index, 1);
   }
   for (let index = likes.length - 1; index >= 0; index -= 1) {
     if (likes[index].userId === userId || removedShortIds.has(likes[index].targetId)) likes.splice(index, 1);
