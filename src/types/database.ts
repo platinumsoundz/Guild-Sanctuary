@@ -1,4 +1,4 @@
-import type { Coordinates, WorldType } from './index';
+import type { Coordinates } from './index';
 
 export type UserStatus = 'active' | 'suspended';
 export type FriendshipStatus = 'pending' | 'accepted' | 'blocked';
@@ -106,7 +106,6 @@ export interface PublicProfile {
 export interface Post {
   id: string;
   authorId: string;
-  worldType: WorldType;
   content: string;
   mediaUrl: string | null;
   mediaType: PostMediaType | null;
@@ -144,7 +143,6 @@ export interface SocialComment {
 export interface ShortVideo {
   id: string;
   authorId: string;
-  worldType: WorldType;
   videoUrl: string;
   caption: string;
   createdAt: string;
@@ -155,7 +153,6 @@ export interface Event {
   creatorId: string;
   title: string;
   description: string;
-  worldType: WorldType;
   locationCoords: Coordinates;
   startsAt: string;
   endsAt: string | null;
@@ -183,7 +180,6 @@ export interface Message {
 export interface Conversation {
   id: string;
   kind: ConversationKind;
-  worldType: WorldType;
   participantIds: string[];
   name: string | null;
   createdAt: string;
