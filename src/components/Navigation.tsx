@@ -5,29 +5,20 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   CalendarDays,
   Clapperboard,
-  Flame,
-  Gamepad2,
   Menu,
   MessageSquare,
   Newspaper,
   Search,
   Settings,
-  Sparkles,
   Sun,
   UserRound,
   HeartHandshake,
   X,
   type LucideIcon,
 } from 'lucide-react';
-import type { WorldType } from '@/types';
 import type { NavigationState } from '@/context/AppContext';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
 import styles from './Navigation.module.css';
-
-const worlds: { type: WorldType; name: string; descriptor: string; icon: LucideIcon; accentIcon: LucideIcon }[] = [
-  { type: 'sanctuary', name: 'The Sanctuary', descriptor: 'Reflect & grow', icon: Sun, accentIcon: Sparkles },
-  { type: 'guild', name: 'The Guild Hall', descriptor: 'Play & connect', icon: Gamepad2, accentIcon: Flame },
-];
 
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
   { id: 'feed', label: 'Feed', icon: Newspaper },
@@ -41,12 +32,10 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
 ];
 
 interface NavigationProps {
-  activeWorld: WorldType;
   activeNavigation: NavigationState;
   currentUser: AuthSession | null;
   pendingEmail: string | null;
   isSessionReady: boolean;
-  onSelectWorld: (world: WorldType) => void;
   onNavigate: (navigation: NavigationState) => void;
   onLogin: (email: string) => void | Promise<void>;
   onSignup: (input: SignUpInput) => void | Promise<void>;
@@ -58,12 +47,10 @@ interface NavigationProps {
 }
 
 export function Navigation({
-  activeWorld,
   activeNavigation,
   currentUser,
   pendingEmail,
   isSessionReady,
-  onSelectWorld,
   onNavigate,
   onLogin,
   onSignup,
@@ -135,36 +122,11 @@ export function Navigation({
               <Menu size={21} strokeWidth={1.8} aria-hidden="true" />
             </button>
           )}
-          <p className={styles.headerLabel}>CHOOSE YOUR WORLD</p>
+          <div className="flex items-center gap-2">
+            <Sun size={18} className="text-amber-400" />
+            <p className={styles.headerLabel}>THE SANCTUARY</p>
+          </div>
         </div>
-        <nav className={`${styles.switcher} min-w-0 max-w-full flex-wrap sm:flex-nowrap`} aria-label="Choose a world">
-          {worlds.map((world) => (
-            <button
-              key={world.type}
-              className={`${styles.worldButton} min-w-0 max-w-full flex-1`}
-              type="button"
-              aria-pressed={activeWorld === world.type}
-              onClick={() => onSelectWorld(world.type)}
-            >
-              {activeWorld === world.type && (
-                <motion.span
-                  className={styles.worldIndicator}
-                  layoutId="active-world-indicator"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  aria-hidden="true"
-                />
-              )}
-              <span className={styles.worldMark} aria-hidden="true">
-                <world.icon size={18} strokeWidth={1.8} />
-                <world.accentIcon className={styles.worldAccentIcon} size={10} strokeWidth={2} />
-              </span>
-              <span className={styles.worldCopy}>
-                <span className={styles.worldName}>{world.name}</span>
-                <span className={styles.worldDescriptor}>{world.descriptor}</span>
-              </span>
-            </button>
-          ))}
-        </nav>
         <div className={styles.accountArea}>
           {!isSessionReady ? (
             <span className={styles.accountPlaceholder} role="status">Restoring session</span>
