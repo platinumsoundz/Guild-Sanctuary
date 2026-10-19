@@ -217,7 +217,7 @@ export async function updatePost(postId: string, authorId: string, content: stri
   }
 
   await delay();
-  const post = Object.values(postsByWorld).flat().find((item) => item.id === postId);
+  const post = posts.find((item) => item.id === postId);
   if (!post || post.authorId !== authorId) {
     throw new Error('This post could not be edited.');
   }
@@ -244,12 +244,11 @@ export async function deletePost(postId: string, authorId: string): Promise<void
     return;
   }
   await delay();
-  const worldPosts = Object.values(postsByWorld).find((items) => items.some((item) => item.id === postId && item.authorId === authorId));
-  const postIndex = worldPosts?.findIndex((item) => item.id === postId && item.authorId === authorId) ?? -1;
-  if (!worldPosts || postIndex < 0) {
+  const postIndex = posts.findIndex((item) => item.id === postId && item.authorId === authorId);
+  if (postIndex < 0) {
     throw new Error('This post could not be deleted.');
   }
-  worldPosts.splice(postIndex, 1);
+  posts.splice(postIndex, 1);
   for (let index = likes.length - 1; index >= 0; index -= 1) {
     if (likes[index].targetId === postId) likes.splice(index, 1);
   }
@@ -272,7 +271,7 @@ export async function getPostEngagement(postId: string, userId: string) {
     }
     return { liked: Boolean(like.data), likesCount: likesCount.count ?? 0, commentsCount: commentsCount.count ?? 0 };
   }
-  if (!Object.values(postsByWorld).some((items) => items.some((post) => post.id === postId))) {
+  if (!posts.some((post) => post.id === postId)) {
     throw new Error('This post is unavailable.');
   }
   return {
@@ -306,7 +305,7 @@ export async function togglePostLike(postId: string, userId: string): Promise<{ 
     if (error) throw new Error(`Reaction count could not be loaded: ${error.message}`);
     return { liked: !existing, count: count ?? 0 };
   }
-  if (!userId || !Object.values(postsByWorld).some((items) => items.some((post) => post.id === postId))) {
+  if (!userId || !posts.some((post) => post.id === postId)) {
     throw new Error('This post is unavailable for liking.');
   }
   await delay();
@@ -345,7 +344,7 @@ export async function fetchPostComments(postId: string): Promise<SocialComment[]
       createdAt: comment.created_at,
     }));
   }
-  if (!Object.values(postsByWorld).some((items) => items.some((post) => post.id === postId))) {
+  if (!posts.some((post) => post.id === postId)) {
     throw new Error('Comments for this post are unavailable.');
   }
   await delay();
@@ -374,7 +373,7 @@ export async function addPostComment(postId: string, authorId: string, body: str
       createdAt: data.created_at,
     };
   }
-  if (!Object.values(postsByWorld).some((items) => items.some((post) => post.id === postId))) {
+  if (!posts.some((post) => post.id === postId)) {
     throw new Error('Comments for this post are unavailable.');
   }
   await delay();
@@ -391,11 +390,9 @@ export async function addPostComment(postId: string, authorId: string, body: str
 }
 
 export function removeUserFeedData(userId: string): void {
-  const removedPostIds = new Set(Object.values(postsByWorld).flat().filter((post) => post.authorId === userId).map((post) => post.id));
-  for (const worldPosts of Object.values(postsByWorld)) {
-    for (let index = worldPosts.length - 1; index >= 0; index -= 1) {
-      if (worldPosts[index].authorId === userId) worldPosts.splice(index, 1);
-    }
+  const removedPostIds = new Set(posts.filter((post) => post.authorId === userId).map((post) => post.id));
+  for (let index = posts.length - 1; index >= 0; index -= 1) {
+    if (posts[index].authorId === userId) posts.splice(index, 1);
   }
   for (let index = likes.length - 1; index >= 0; index -= 1) {
     if (likes[index].userId === userId || removedPostIds.has(likes[index].targetId)) likes.splice(index, 1);
