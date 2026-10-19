@@ -1,6 +1,6 @@
 'use client';
 
-import type { AuthSession, SignUpInput } from './sessionStore';
+import type { AuthSession } from './sessionStore';
 import type { Profile, ProfilePrivacy, SocialLinks } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 
@@ -69,7 +69,7 @@ async function getProfileRow(userId: string) {
   return data;
 }
 
-async function buildSession(entryWorld: SignUpInput['entryWorld']): Promise<AuthSession> {
+async function buildSession(): Promise<AuthSession> {
   const client = getSupabaseBrowserClient();
   const { data: userResult, error: userError } = await client.auth.getUser();
   if (userError) throw new Error(`Your sign-in could not be verified: ${userError.message}`);
@@ -90,12 +90,11 @@ async function buildSession(entryWorld: SignUpInput['entryWorld']): Promise<Auth
       updatedAt: user.updated_at ?? user.created_at,
     },
     profile: toProfile(profileRow),
-    entryWorld,
     permissions: [...permissions],
   };
 }
 
-export async function requestSupabaseEmailCode(email: string, signup?: SignUpInput): Promise<void> {
+export async function requestSupabaseEmailCode(email: string, signup?: { username: string; displayName: string }): Promise<void> {
   const client = getSupabaseBrowserClient();
   const { error } = await client.auth.signInWithOtp({
     email: email.trim().toLowerCase(),
@@ -115,7 +114,6 @@ export type SupabaseEmailVerification = {
 export async function verifySupabaseEmailCode(
   email: string,
   code: string,
-  entryWorld: SignUpInput['entryWorld'],
 ): Promise<SupabaseEmailVerification> {
   const client = getSupabaseBrowserClient();
   const { error: verifyError } = await client.auth.verifyOtp({
@@ -133,21 +131,20 @@ export async function verifySupabaseEmailCode(
     if (challengeError) throw new Error(`A two-factor challenge could not be started: ${challengeError.message}`);
     return { session: null, challenge: { factorId: factor.id, challengeId: challenge.id } };
   }
-  return { session: await buildSession(entryWorld), challenge: null };
+  return { session: await buildSession(), challenge: null };
 }
 
 export async function verifySupabaseTotpCode(
   factorId: string,
   challengeId: string,
   code: string,
-  entryWorld: SignUpInput['entryWorld'],
 ): Promise<AuthSession> {
   const { error } = await getSupabaseBrowserClient().auth.mfa.verify({ factorId, challengeId, code });
   if (error) throw new Error(`Two-factor verification failed: ${error.message}`);
-  return buildSession(entryWorld);
+  return buildSession();
 }
 
-export async function restoreSupabaseSession(entryWorld: SignUpInput['entryWorld']): Promise<AuthSession | null> {
+export async function restoreSupabaseSession(): Promise<AuthSession | null> {
   const client = getSupabaseBrowserClient();
   const { data, error } = await client.auth.getSession();
   if (error) throw new Error(`Your session could not be restored: ${error.message}`);
@@ -160,5 +157,5 @@ export async function restoreSupabaseSession(entryWorld: SignUpInput['entryWorld
     if (assuranceError) throw new Error(`Your authentication assurance could not be verified: ${assuranceError.message}`);
     if (assurance.currentLevel !== 'aal2') return null;
   }
-  return buildSession(entryWorld);
+  return buildSession();
 }
