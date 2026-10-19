@@ -8,9 +8,9 @@ import { ReportContentButton } from '@/modules/moderation';
 import styles from './MeetupCalendarPlaceholder.module.css';
 
 export function MeetupCalendarPlaceholder() {
-  const { activeWorld, currentUser } = useAppContext();
+  const { currentUser } = useAppContext();
   const userId = currentUser?.user.id ?? '';
-  const { events, isLoading, error, addEvent, editEvent, removeEvent, rsvp } = useEvents(activeWorld, userId);
+  const { events, isLoading, error, addEvent, editEvent, removeEvent, rsvp } = useEvents(userId);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startsAt, setStartsAt] = useState('');
@@ -81,10 +81,10 @@ export function MeetupCalendarPlaceholder() {
     <main className={styles.calendar}>
       <header className={styles.pageHeader}>
         <div>
-          <p className={styles.eyebrow}>{activeWorld === 'sanctuary' ? 'GATHER WITH CARE' : 'FIND YOUR PARTY'}</p>
+          <p className={styles.eyebrow}>GATHER WITH CARE</p>
           <h1>Community events</h1>
         </div>
-        <span className={styles.worldTag}>{activeWorld === 'sanctuary' ? 'THE SANCTUARY' : 'THE GUILD HALL'}</span>
+        <span className={styles.worldTag}>THE SANCTUARY</span>
       </header>
 
       <section className={styles.createPanel} aria-labelledby="event-form-title">
@@ -128,7 +128,7 @@ export function MeetupCalendarPlaceholder() {
         {isLoading ? <p className={styles.emptyState}>Loading events...</p> : error ? (
           <p className={styles.error} role="alert">{error}</p>
         ) : events.length === 0 ? (
-          <p className={styles.emptyState}>No events in this world yet. Start one for your community.</p>
+          <p className={styles.emptyState}>No events yet. Start one for your community.</p>
         ) : (
           <div className={styles.eventList}>
             {events.map((event) => (
