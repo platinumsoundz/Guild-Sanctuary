@@ -177,7 +177,7 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
           <div className={styles.showcaseGrid}>
             {posts.map((post) => (
               <article className={styles.showcaseItem} key={post.id}>
-                <span className={styles.showcaseWorld}>{post.worldType === 'sanctuary' ? 'SANCTUARY' : 'GUILD HALL'}</span>
+                <span className={styles.showcaseWorld}>SANCTUARY</span>
                 <p>{post.content}</p>
                 {post.mediaUrl && post.mediaType === 'image' && <img src={post.mediaUrl} alt="Your uploaded post" />}
                 {post.mediaUrl && post.mediaType === 'audio' && <audio controls preload="none" src={post.mediaUrl}>Audio playback is not supported.</audio>}
