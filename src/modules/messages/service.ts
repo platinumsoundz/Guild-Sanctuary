@@ -64,6 +64,8 @@ export async function createDirectConversation(userId: string, peerUserId: strin
   };
 }
 
+export const openDirectConversation = createDirectConversation;
+
 export async function createGroupConversation(userId: string, participantIds: string[], name: string): Promise<Conversation> {
   const normalizedName = name.trim();
   const members = [...new Set([userId, ...participantIds].filter(Boolean))];
