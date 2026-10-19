@@ -56,13 +56,12 @@ function validateAttachment(
   }
 }
 
-export async function fetchFeed(worldType: WorldType): Promise<Post[]> {
+export async function fetchFeed(): Promise<Post[]> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser();
     const { data, error } = await getSupabaseBrowserClient()
       .from('posts')
       .select('*')
-      .eq('world_type', worldType)
       .eq('state', 'visible')
       .order('created_at', { ascending: false });
     if (error) throw new Error(`The feed could not be loaded: ${error.message}`);
@@ -70,7 +69,6 @@ export async function fetchFeed(worldType: WorldType): Promise<Post[]> {
     return data.map((row) => ({
       id: row.id,
       authorId: row.author_id,
-      worldType: row.world_type,
       content: row.content,
       mediaUrl: row.media_url ? (urls.get(row.media_url) ?? null) : null,
       mediaType: row.media_type,
@@ -80,9 +78,7 @@ export async function fetchFeed(worldType: WorldType): Promise<Post[]> {
     }));
   }
   await delay();
-  return postsByWorld[worldType]
-    .slice()
-    .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+  return posts.slice().sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }
 
 export async function fetchPostsByAuthor(authorId: string): Promise<Post[]> {
@@ -98,7 +94,6 @@ export async function fetchPostsByAuthor(authorId: string): Promise<Post[]> {
     return data.map((row) => ({
       id: row.id,
       authorId: row.author_id,
-      worldType: row.world_type,
       content: row.content,
       mediaUrl: row.media_url ? (urls.get(row.media_url) ?? null) : null,
       mediaType: row.media_type,
@@ -108,9 +103,7 @@ export async function fetchPostsByAuthor(authorId: string): Promise<Post[]> {
     }));
   }
   await delay();
-  return Object.values(postsByWorld).flat()
-    .filter((post) => post.authorId === authorId)
-    .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+  return posts.filter((post) => post.authorId === authorId).sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }
 
 export async function createPost(input: CreatePostInput): Promise<Post> {
