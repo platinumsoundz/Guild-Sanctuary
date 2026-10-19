@@ -186,12 +186,12 @@ export function WorldContent() {
       {isLoading && <p className={styles.feedStatus}>Loading your feed...</p>}
       {!isLoading && posts.length === 0 && (
         <div className={styles.emptyState}>
-          <span className={styles.emptyMark} aria-hidden="true">{view.mark}</span>
+          <span className={styles.emptyMark} aria-hidden="true">S</span>
           <div>
-            <h3>{view.heading}</h3>
-            <p>{view.message}</p>
+            <h3>{PLACEHOLDER_HEADING}</h3>
+            <p>{PLACEHOLDER_MESSAGE}</p>
           </div>
-          <span className={styles.worldLabel}>{worldType === 'sanctuary' ? 'SANCTUARY' : 'GUILD HALL'}</span>
+          <span className={styles.worldLabel}>SANCTUARY</span>
         </div>
       )}
       {!isLoading && posts.length > 0 && (
