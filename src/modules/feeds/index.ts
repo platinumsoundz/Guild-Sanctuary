@@ -1,5 +1,4 @@
-export { DualWorldFeed } from './components/DualWorldFeed';
-export { WorldFeed } from './components/WorldFeed';
+export { Feed } from './components/Feed';
 export { PostEngagement } from './components/PostEngagement';
 export { useFeed } from './useFeed';
 export {
