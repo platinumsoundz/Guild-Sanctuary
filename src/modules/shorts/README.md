@@ -1,3 +1,5 @@
 # Shorts
 
-Owns the immersive vertical short-video feed and short-specific likes/comments. The feed uses vertical scroll snapping, native touch scrolling, inline video controls, muted looped playback, and per-clip comment threads. Each world has a separate in-memory clip repository. Signed-in users can select a local video or record a short clip using the browser camera/microphone APIs, preview it, and publish into the active world's demo feed. Free demo accounts receive an AdMob interstitial on Android at most once every five minutes; non-free VIP demo tiers do not. Web builds do not show native ads. Production ad eligibility still depends on server-authoritative VIP state, and uploads/transcoding, authorization, moderation, durable counters, and CDN delivery remain outstanding.
+Owns The Sanctuary's unified short-form video feed, local file/recording composer, playback, likes, and comments. Shorts are not partitioned into worlds.
+
+The current storage is in-memory unless the optional Supabase media adapter is configured. Production video processing, scanning, transcoding, moderation, quota enforcement, and delivery are not implemented.
