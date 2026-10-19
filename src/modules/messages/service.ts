@@ -1,5 +1,6 @@
-import type { Conversation, Message } from '@/types/database';
-import type { WorldType } from '@/types';
+'use client';
+
+import type { Conversation, Message, PublicProfile } from '@/types/database';
 import { getLocalPublicProfileById } from '@/modules/auth';
 
 export interface ConversationThread {
@@ -7,38 +8,29 @@ export interface ConversationThread {
   messages: Message[];
 }
 
-const conversationsByWorld: Record<WorldType, Map<string, Conversation>> = {
-  sanctuary: new Map(),
-  guild: new Map(),
-};
-const conversationKeysByWorld: Record<WorldType, Map<string, string>> = {
-  sanctuary: new Map(),
-  guild: new Map(),
-};
-const messagesByWorld: Record<WorldType, Message[]> = {
-  sanctuary: [],
-  guild: [],
-};
-let nextMessageId = 1;
+const conversations = new Map<string, Conversation>();
+const messages: Message[] = [];
+const conversationKeys = new Map<string, string>(); // Keyed by participant pair string
 let nextConversationId = 1;
+let nextMessageId = 1;
 
 function delay(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 50));
+  return new Promise((resolve) => setTimeout(resolve, 60));
 }
 
-function participantKey(firstUserId: string, secondUserId: string): string {
-  return [firstUserId, secondUserId].sort().join(':');
+function participantKey(userId: string, peerUserId: string): string {
+  return [userId, peerUserId].sort().join(':');
 }
 
-function requireParticipant(conversationId: string, userId: string, worldType: WorldType): Conversation {
-  const conversation = conversationsByWorld[worldType].get(conversationId);
+function requireParticipant(conversationId: string, userId: string): Conversation {
+  const conversation = conversations.get(conversationId);
   if (!conversation || !conversation.participantIds.includes(userId)) {
-    throw new Error('This conversation is unavailable.');
+    throw new Error('You do not have access to this conversation.');
   }
   return conversation;
 }
 
-export async function openDirectConversation(userId: string, peerUserId: string, worldType: WorldType): Promise<ConversationThread> {
+export async function createDirectConversation(userId: string, peerUserId: string): Promise<ConversationThread> {
   if (!userId || !peerUserId || userId === peerUserId) {
     throw new Error('Choose another community member to start a conversation.');
   }
@@ -49,31 +41,30 @@ export async function openDirectConversation(userId: string, peerUserId: string,
 
   await delay();
   const key = participantKey(userId, peerUserId);
-  let conversationId = conversationKeysByWorld[worldType].get(key);
-  let conversation = conversationId ? conversationsByWorld[worldType].get(conversationId) : undefined;
+  let conversationId = conversationKeys.get(key);
+  let conversation = conversationId ? conversations.get(conversationId) : undefined;
   if (!conversation) {
     const timestamp = new Date().toISOString();
     conversationId = `conversation-${nextConversationId++}`;
     conversation = {
       id: conversationId,
       kind: 'direct',
-      worldType,
       participantIds: [userId, peerUserId],
       name: null,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
-    conversationsByWorld[worldType].set(conversation.id, conversation);
-    conversationKeysByWorld[worldType].set(key, conversation.id);
+    conversations.set(conversation.id, conversation);
+    conversationKeys.set(key, conversation.id);
   }
 
   return {
     conversation: { ...conversation, participantIds: [...conversation.participantIds] },
-    messages: messagesByWorld[worldType].filter((message) => message.conversationId === conversation.id).map((message) => ({ ...message })),
+    messages: messages.filter((message) => message.conversationId === conversation.id).map((message) => ({ ...message })),
   };
 }
 
-export async function createGroupConversation(userId: string, participantIds: string[], name: string, worldType: WorldType): Promise<Conversation> {
+export async function createGroupConversation(userId: string, participantIds: string[], name: string): Promise<Conversation> {
   const normalizedName = name.trim();
   const members = [...new Set([userId, ...participantIds].filter(Boolean))];
   if (!userId || members.length < 3 || participantIds.includes(userId)) {
@@ -90,42 +81,41 @@ export async function createGroupConversation(userId: string, participantIds: st
   const conversation: Conversation = {
     id: `conversation-${nextConversationId++}`,
     kind: 'group',
-    worldType,
     participantIds: members,
     name: normalizedName,
     createdAt: timestamp,
     updatedAt: timestamp,
   };
-  conversationsByWorld[worldType].set(conversation.id, conversation);
+  conversations.set(conversation.id, conversation);
   return { ...conversation, participantIds: [...conversation.participantIds] };
 }
 
-export async function fetchUserConversations(userId: string, worldType: WorldType): Promise<Conversation[]> {
+export async function fetchUserConversations(userId: string): Promise<Conversation[]> {
   if (!userId) {
     throw new Error('Sign in to view your conversations.');
   }
   await delay();
-  return [...conversationsByWorld[worldType].values()]
+  return [...conversations.values()]
     .filter((conversation) => conversation.participantIds.includes(userId))
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .map((conversation) => ({ ...conversation, participantIds: [...conversation.participantIds] }));
 }
 
-export async function fetchConversationThread(conversationId: string, userId: string, worldType: WorldType): Promise<ConversationThread> {
-  const conversation = requireParticipant(conversationId, userId, worldType);
+export async function fetchConversationThread(conversationId: string, userId: string): Promise<ConversationThread> {
+  const conversation = requireParticipant(conversationId, userId);
   await delay();
   return {
     conversation: { ...conversation, participantIds: [...conversation.participantIds] },
-    messages: messagesByWorld[worldType].filter((message) => message.conversationId === conversationId).map((message) => ({ ...message })),
+    messages: messages.filter((message) => message.conversationId === conversationId).map((message) => ({ ...message })),
   };
 }
 
-export async function fetchConversationMessages(conversationId: string, userId: string, worldType: WorldType): Promise<Message[]> {
-  return (await fetchConversationThread(conversationId, userId, worldType)).messages;
+export async function fetchConversationMessages(conversationId: string, userId: string): Promise<Message[]> {
+  return (await fetchConversationThread(conversationId, userId)).messages;
 }
 
-export async function sendConversationMessage(conversationId: string, senderId: string, body: string, worldType: WorldType): Promise<Message> {
-  const conversation = requireParticipant(conversationId, senderId, worldType);
+export async function sendConversationMessage(conversationId: string, senderId: string, body: string): Promise<Message> {
+  const conversation = requireParticipant(conversationId, senderId);
   const peerUserId = conversation.kind === 'direct'
     ? conversation.participantIds.find((participantId) => participantId !== senderId)
     : undefined;
@@ -146,7 +136,7 @@ export async function sendConversationMessage(conversationId: string, senderId: 
     sentAt: new Date().toISOString(),
     readAt: null,
   };
-  messagesByWorld[worldType].push(message);
+  messages.push(message);
   conversation.updatedAt = message.sentAt;
   return { ...message };
 }
@@ -154,21 +144,19 @@ export async function sendConversationMessage(conversationId: string, senderId: 
 export const sendDirectMessage = sendConversationMessage;
 
 export function removeUserConversationData(userId: string): void {
-  for (const worldType of ['sanctuary', 'guild'] as const) {
-    for (const [key] of conversationKeysByWorld[worldType]) {
-      if (key.split(':').includes(userId)) conversationKeysByWorld[worldType].delete(key);
-    }
-    for (const [conversationId, conversation] of conversationsByWorld[worldType]) {
-      conversation.participantIds = conversation.participantIds.filter((participantId) => participantId !== userId);
-      if (conversation.kind === 'group' && conversation.participantIds.length < 2) {
-        conversationsByWorld[worldType].delete(conversationId);
-        for (let index = messagesByWorld[worldType].length - 1; index >= 0; index -= 1) {
-          if (messagesByWorld[worldType][index].conversationId === conversationId) messagesByWorld[worldType].splice(index, 1);
-        }
+  for (const [key] of conversationKeys) {
+    if (key.split(':').includes(userId)) conversationKeys.delete(key);
+  }
+  for (const [conversationId, conversation] of conversations) {
+    conversation.participantIds = conversation.participantIds.filter((participantId) => participantId !== userId);
+    if (conversation.kind === 'group' && conversation.participantIds.length < 2) {
+      conversations.delete(conversationId);
+      for (let index = messages.length - 1; index >= 0; index -= 1) {
+        if (messages[index].conversationId === conversationId) messages.splice(index, 1);
       }
     }
-    for (let index = messagesByWorld[worldType].length - 1; index >= 0; index -= 1) {
-      if (messagesByWorld[worldType][index].senderId === userId) messagesByWorld[worldType].splice(index, 1);
-    }
+  }
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index].senderId === userId) messages.splice(index, 1);
   }
 }
