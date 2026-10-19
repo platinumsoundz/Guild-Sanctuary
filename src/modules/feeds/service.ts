@@ -207,7 +207,6 @@ export async function updatePost(postId: string, authorId: string, content: stri
     return {
       id: data.id,
       authorId: data.author_id,
-      worldType: data.world_type,
       content: data.content,
       mediaUrl,
       mediaType: data.media_type,
