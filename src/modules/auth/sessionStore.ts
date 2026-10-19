@@ -1,4 +1,3 @@
-import type { WorldType } from '@/types';
 import type {
   Profile,
   ProfilePrivacy,
@@ -20,7 +19,6 @@ const allowedPermissions: UserPermission[] = [
 export interface AuthSession {
   user: User;
   profile: Profile;
-  entryWorld: WorldType;
   permissions: UserPermission[];
 }
 
@@ -28,7 +26,6 @@ export interface SignUpInput {
   email: string;
   username: string;
   displayName: string;
-  entryWorld: WorldType;
 }
 
 export const MOCK_EMAIL_CODE = '000000';
@@ -124,7 +121,6 @@ function normalizeSession(value: unknown): AuthSession | null {
   const permissions = normalized.permissions;
 
   if (
-    (normalized.entryWorld !== 'sanctuary' && normalized.entryWorld !== 'guild') ||
     !Array.isArray(permissions) ||
     !permissions.every((permission) => allowedPermissions.includes(permission as UserPermission)) ||
     typeof user.id !== 'string' ||
@@ -217,7 +213,6 @@ function createSession(input: SignUpInput): AuthSession {
       visibility: 'public',
       role: 'member',
     },
-    entryWorld: input.entryWorld,
     permissions: [...allowedPermissions],
   };
 }
