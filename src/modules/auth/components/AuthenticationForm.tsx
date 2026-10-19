@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import type { WorldType } from '@/types';
 import { MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE, type SignUpInput } from '../sessionStore';
 import styles from './AuthenticationForm.module.css';
 
@@ -21,11 +20,6 @@ interface AuthenticationFormProps {
 
 type AuthStep = 'credentials' | 'email-code' | 'two-factor-code';
 
-const entryWorlds: { type: WorldType; title: string; description: string }[] = [
-  { type: 'sanctuary', title: 'The Sanctuary', description: 'Reflect and grow' },
-  { type: 'guild', title: 'The Guild Hall', description: 'Play and connect' },
-];
-
 export function AuthenticationForm({
   initialMode = 'signup',
   initialEmail = '',
@@ -43,7 +37,6 @@ export function AuthenticationForm({
   const [verificationCode, setVerificationCode] = useState('');
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [entryWorld, setEntryWorld] = useState<WorldType>('sanctuary');
   const [error, setError] = useState<string | null>(initialError);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,7 +72,6 @@ export function AuthenticationForm({
           email: email.trim(),
           username: username.trim(),
           displayName: displayName.trim(),
-          entryWorld,
         });
       } else {
         await onLogin(email.trim());
@@ -172,42 +164,19 @@ export function AuthenticationForm({
                       required
                     />
                   </label>
-              <label className={styles.field} htmlFor="auth-display-name">
-                <span>Display name</span>
-                <input
-                  id="auth-display-name"
-                  name="displayName"
-                  type="text"
-                  autoComplete="nickname"
-                  maxLength={50}
-                  value={displayName}
-                  onChange={(event) => setDisplayName(event.currentTarget.value)}
-                  required
-                />
-              </label>
-
-              <fieldset className={styles.entryFieldset}>
-                <legend>Choose your entry world</legend>
-                <div className={styles.entryWorlds}>
-                  {entryWorlds.map((world) => (
-                    <label
-                      key={world.type}
-                      className={styles.entryWorld}
-                      data-selected={entryWorld === world.type}
-                    >
-                      <input
-                        type="radio"
-                        name="entryWorld"
-                        value={world.type}
-                        checked={entryWorld === world.type}
-                        onChange={() => setEntryWorld(world.type)}
-                      />
-                      <span className={styles.entryWorldName}>{world.title}</span>
-                      <span className={styles.entryWorldDescription}>{world.description}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+                  <label className={styles.field} htmlFor="auth-display-name">
+                    <span>Display name</span>
+                    <input
+                      id="auth-display-name"
+                      name="displayName"
+                      type="text"
+                      autoComplete="nickname"
+                      maxLength={50}
+                      value={displayName}
+                      onChange={(event) => setDisplayName(event.currentTarget.value)}
+                      required
+                    />
+                  </label>
                 </>
               )}
             </>
