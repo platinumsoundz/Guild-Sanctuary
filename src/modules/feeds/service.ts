@@ -1,4 +1,3 @@
-import type { WorldType } from '@/types';
 import type { Post, PostMediaType, SocialComment, SocialLike } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import {
@@ -11,7 +10,6 @@ import {
 
 export interface CreatePostInput {
   authorId: string;
-  worldType: WorldType;
   content: string;
   mediaUrl?: string | null;
   mediaType?: PostMediaType | null;
@@ -19,34 +17,19 @@ export interface CreatePostInput {
   storyTag?: string | null;
 }
 
-const postsByWorld: Record<WorldType, Post[]> = {
-  sanctuary: [
-    {
-      id: 'post-demo-sanctuary',
-      authorId: 'community-member',
-      worldType: 'sanctuary',
-      content: 'A quiet moment can change the shape of a whole day.',
-      mediaUrl: null,
-      mediaType: null,
-      storyTag: null,
-      createdAt: '2026-10-08T09:00:00.000Z',
-      updatedAt: '2026-10-08T09:00:00.000Z',
-    },
-  ],
-  guild: [
-    {
-      id: 'post-demo-guild',
-      authorId: 'community-member',
-      worldType: 'guild',
-      content: "Looking for a few more people for tonight's co-op run.",
-      mediaUrl: null,
-      mediaType: null,
-      storyTag: null,
-      createdAt: '2026-10-08T10:30:00.000Z',
-      updatedAt: '2026-10-08T10:30:00.000Z',
-    },
-  ],
-};
+// Single unified post store (no world scoping)
+const posts: Post[] = [
+  {
+    id: 'post-demo-1',
+    authorId: 'community-member',
+    content: 'A quiet moment can change the shape of a whole day.',
+    mediaUrl: null,
+    mediaType: null,
+    storyTag: null,
+    createdAt: '2026-10-08T09:00:00.000Z',
+    updatedAt: '2026-10-08T09:00:00.000Z',
+  },
+];
 
 let nextPostId = 1;
 const likes: SocialLike[] = [];
