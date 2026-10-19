@@ -15,7 +15,7 @@ interface ShortState {
 }
 
 export function ShortsFeed() {
-  const { activeWorld, currentUser } = useAppContext();
+  const { currentUser } = useAppContext();
   const viewerId = currentUser?.user.id ?? '';
   const [videos, setVideos] = useState<ShortVideo[]>([]);
   const [engagement, setEngagement] = useState<Record<string, ShortState>>({});
@@ -44,7 +44,7 @@ export function ShortsFeed() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchShortVideos(activeWorld).then(async (items) => {
+    fetchShortVideos().then(async (items) => {
       if (cancelled) return;
       const stats = await Promise.all(items.map(async (item) => [
         item.id,
@@ -57,7 +57,7 @@ export function ShortsFeed() {
       if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Short videos could not be loaded.');
     });
     return () => { cancelled = true; };
-  }, [activeWorld, viewerId]);
+  }, [viewerId]);
 
   useEffect(() => {
     const feed = feedRef.current;
@@ -203,7 +203,6 @@ export function ShortsFeed() {
     try {
       const video = await createShortVideo({
         authorId: viewerId,
-        worldType: activeWorld,
         videoFile,
         caption: captionDraft,
       });
@@ -249,7 +248,7 @@ export function ShortsFeed() {
       <form className={styles.videoComposer} onSubmit={(event) => void handlePublishVideo(event)}>
         <label>
           <span>Video caption</span>
-          <input value={captionDraft} onChange={(event) => setCaptionDraft(event.currentTarget.value)} maxLength={500} placeholder="Add a caption for this world…" />
+          <input value={captionDraft} onChange={(event) => setCaptionDraft(event.currentTarget.value)} maxLength={500} placeholder="Add a caption…" />
         </label>
         <label className={styles.videoPicker}>
           <span>{videoFileName || 'Choose a short video (up to 5 MB)'}</span>
@@ -309,7 +308,7 @@ export function ShortsFeed() {
             </article>
           );
         })}
-        {videos.length === 0 && <p className={styles.empty}>No short videos in this world yet.</p>}
+        {videos.length === 0 && <p className={styles.empty}>No short videos yet.</p>}
       </div>
     </main>
   );
