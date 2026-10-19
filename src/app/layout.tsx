@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import { AppContextProvider } from '@/context/AppContext'
 
 export const metadata: Metadata = {
-  title: 'Guild & Sanctuary',
-  description: 'An intentional, privacy-focused 3D browser space.',
+  title: 'The Sanctuary',
+  description: 'An intentional, privacy-focused community space for reflection and connection.',
 }
 
 export default function RootLayout({
