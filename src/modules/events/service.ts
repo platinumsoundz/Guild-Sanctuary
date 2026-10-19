@@ -155,6 +155,39 @@ export async function getEventEngagement(eventId: string, userId: string) {
   };
 }
 
+export async function toggleEventLike(eventId: string, userId: string): Promise<{ liked: boolean; count: number }> {
+  if (!userId || !findEvent(eventId)) throw new Error('This event is unavailable for liking.');
+  await delay();
+  const existingIndex = likes.findIndex((like) => like.targetId === eventId && like.userId === userId);
+  if (existingIndex >= 0) likes.splice(existingIndex, 1);
+  else likes.push({ id: `event-like-${Date.now()}`, targetType: 'event', targetId: eventId, userId, createdAt: new Date().toISOString() });
+  return { liked: existingIndex < 0, count: likes.filter((like) => like.targetId === eventId).length };
+}
+
+export async function fetchEventComments(eventId: string): Promise<SocialComment[]> {
+  if (!findEvent(eventId)) throw new Error('Comments for this event are unavailable.');
+  await delay();
+  return comments.filter((comment) => comment.targetId === eventId).map((comment) => ({ ...comment }));
+}
+
+export async function addEventComment(eventId: string, authorId: string, body: string): Promise<SocialComment> {
+  const normalizedBody = body.trim();
+  if (!findEvent(eventId) || !authorId || normalizedBody.length < 1 || normalizedBody.length > 1000) {
+    throw new Error('Comments must contain 1 to 1,000 characters.');
+  }
+  await delay();
+  const comment: SocialComment = {
+    id: `event-comment-${Date.now()}`,
+    targetType: 'event',
+    targetId: eventId,
+    authorId,
+    body: normalizedBody,
+    createdAt: new Date().toISOString(),
+  };
+  comments.push(comment);
+  return { ...comment };
+}
+
 export function removeUserEventData(userId: string): void {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     if (events[index].creatorId === userId) events.splice(index, 1);
