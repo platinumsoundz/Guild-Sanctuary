@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import type { WorldType } from '@/types';
 import type { PostMediaType, PublicProfile } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { getLocalPublicProfileById } from '@/modules/auth';
@@ -10,27 +9,12 @@ import { ReportContentButton } from '@/modules/moderation';
 import { PostEngagement } from './PostEngagement';
 import styles from './WorldContent.module.css';
 
-interface WorldContentProps {
-  worldType: WorldType;
-}
+const PLACEHOLDER_HEADING = 'A little room to begin';
+const PLACEHOLDER_MESSAGE = 'Thoughts and reflections from your community will find a home here.';
 
-const content: Record<WorldType, { heading: string; message: string; mark: string }> = {
-  sanctuary: {
-    heading: 'A little room to begin',
-    message: 'Thoughts and reflections from your community will find a home here.',
-    mark: 'S',
-  },
-  guild: {
-    heading: 'The hall is yours',
-    message: 'Stories, sessions, and updates from your crew will gather here.',
-    mark: 'G',
-  },
-};
-
-export function WorldContent({ worldType }: WorldContentProps) {
-  const view = content[worldType];
+export function WorldContent() {
   const { currentUser } = useAppContext();
-  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(worldType, currentUser?.user.id ?? null);
+  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(currentUser?.user.id ?? null);
   const [draft, setDraft] = useState('');
   const [attachmentUrl, setAttachmentUrl] = useState('');
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
@@ -152,14 +136,14 @@ export function WorldContent({ worldType }: WorldContentProps) {
         <span className={styles.sortLabel}>LATEST</span>
       </div>
       <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
-        <label className={styles.composerLabel} htmlFor="post-content">Share with this world</label>
+        <label className={styles.composerLabel} htmlFor="post-content">Share with Sanctuary</label>
         <textarea
           className="w-full max-w-full"
           id="post-content"
           value={draft}
           onChange={(event) => setDraft(event.currentTarget.value)}
           maxLength={2800}
-          placeholder={worldType === 'sanctuary' ? 'A reflection, thought, or moment...' : 'Share a story or rally your crew...'}
+          placeholder="A reflection, thought, or moment..."
         />
         <div className={styles.attachmentControls}>
           <label className={styles.uploadButton}>
@@ -188,7 +172,7 @@ export function WorldContent({ worldType }: WorldContentProps) {
             <option value="Reflection">Reflection</option>
             <option value="Question">Question</option>
             <option value="Story">Story</option>
-            <option value="Looking for group">Looking for group</option>
+
           </select>
         </label>
         {(attachmentError || actionError) && <p className={styles.error} role="alert">{attachmentError ?? actionError}</p>}
