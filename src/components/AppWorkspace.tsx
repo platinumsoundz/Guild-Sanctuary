@@ -8,7 +8,7 @@ import type { CSSProperties } from 'react';
 import type { Conversation, PublicProfile } from '@/types/database';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { AuthenticationGateway } from '@/modules/auth';
-import { DualWorldFeed } from '@/modules/feeds';
+import { Feed } from '@/modules/feeds';
 import { MeetupCalendarPlaceholder } from '@/modules/events';
 import { ProfileDashboard, ProfileDiscovery } from '@/modules/profiles';
 import { SupportPanel } from '@/modules/support';
@@ -21,7 +21,6 @@ import styles from './AppWorkspace.module.css';
 
 export function AppWorkspace() {
   const {
-    activeWorld,
     activeNavigation,
     currentUser,
     isAuthenticated,
@@ -31,7 +30,6 @@ export function AppWorkspace() {
     logout,
     deleteAccount,
     pendingEmail,
-    selectWorld,
     setTwoFactorEnabled,
     setActiveNavigation,
     updateProfile,
@@ -101,7 +99,7 @@ export function AppWorkspace() {
       {activeNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
-          <DualWorldFeed />
+          <Feed />
           <AdSlot placement="feed-sidebar" />
         </>
       ) : activeNavigation === 'events' ? (
@@ -123,7 +121,6 @@ export function AppWorkspace() {
       ) : activeNavigation === 'messages' ? (
         <MessagesInbox
           currentUserId={currentUser.user.id}
-          worldType={activeWorld}
           onDiscoverPeople={() => setActiveNavigation('discover')}
           onOpenConversation={(conversation) => {
             setMessagePeer(null);
@@ -170,16 +167,14 @@ export function AppWorkspace() {
       <ResponsiveShell>
         <div
           className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`}
-          data-world={activeWorld}
+          data-world="sanctuary"
           style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}
         >
         <Navigation
-          activeWorld={activeWorld}
           activeNavigation={activeNavigation}
           currentUser={currentUser}
           pendingEmail={pendingEmail}
           isSessionReady={isSessionReady}
-          onSelectWorld={(world) => void selectWorld(world)}
           onNavigate={openNavigation}
           onLogin={login}
           onSignup={signup}
@@ -191,18 +186,12 @@ export function AppWorkspace() {
         />
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            key={activeWorld}
+            key={activeNavigation}
             className={`${styles.worldContent} w-full min-w-0 max-w-full`}
-            initial={activeWorld === 'sanctuary'
-              ? { opacity: 0, y: 7 }
-              : { opacity: 0, x: 12, scale: 0.99 }}
-            animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-            exit={activeWorld === 'sanctuary'
-              ? { opacity: 0, y: -4 }
-              : { opacity: 0, x: -8, scale: 0.995 }}
-            transition={activeWorld === 'sanctuary'
-              ? { duration: 0.42, ease: [0.22, 1, 0.36, 1] }
-              : { duration: 0.2, ease: 'easeOut' }}
+            initial={{ opacity: 0, y: 7 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           >
             {isSessionReady ? authenticatedContent : (
               <main className={styles.sessionLoading} role="status">
