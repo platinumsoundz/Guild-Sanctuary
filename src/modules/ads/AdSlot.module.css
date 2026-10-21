@@ -1,0 +1,11 @@
+.container {
+  width: 100%;
+  min-width: 0;
+  margin: 1rem auto;
+  overflow: hidden;
+  text-align: center;
+}
+
+.unit {
+  min-height: 0;
+}
