@@ -28,12 +28,19 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `moderation` | Report UI and moderator workflow contracts | Supabase-dependent when configured |
 | `support` | Explains optional community support | No provider is enabled |
 | `economy` | Demo-only wallet, credits, VIP, cosmetics | Browser-local demo state only |
+| `ads` | Responsive web display slots plus optional native AdMob placements | AdSense IDs via public build-time environment; native AdMob module not wired into the active shell |
 
 ## Sanctuary consolidation
 
 The application contracts and local repositories have been unified: `worldType`, `activeWorld`, `entryWorld`, world switching, and per-world local stores were removed.
 
 `supabase/migrations/20261010000000_unify_sanctuary_scope.sql` is an **expand migration** for existing databases. It normalizes legacy records to `sanctuary`, makes legacy scope columns default to `sanctuary`, and adds `create_sanctuary_conversation`. It intentionally does not drop the old columns or enum in the same release. Drop them only after the deployed application, generated database types, historical clients, RLS policies, indexes, and restore procedure have been reviewed and migrated together.
+
+## Advertising
+
+Web display units are wired through `src/modules/ads/AdSenseScript.tsx` and `AdSlot.tsx`. The script only loads with a valid `NEXT_PUBLIC_ADSENSE_CLIENT_ID`; each feed/Shorts unit also requires its numeric slot ID. Configure all public AdSense values before each Next.js build, since `NEXT_PUBLIC_*` values are inlined at build time. Placements remain absent when IDs are blank or malformed.
+
+Before serving live inventory, verify domain approval, site verification/`ads.txt` requirements, policy-compliant placement, and an approved consent-management platform for applicable regions. Do not log or infer billable impressions from the rendered units. The native AdMob consent and placements module is separate and is not currently mounted in `AppWorkspace`.
 
 ## Payments and support — audit result
 
@@ -62,7 +69,8 @@ Do not call this a production release until all of the following are complete:
 2. Test Supabase migrations, RLS policies, backup restore, and forward/rollback behavior in staging.
 3. Complete media validation, scanning, storage, moderation, rate limits, and abuse controls.
 4. Keep payments disabled or finish the complete provider lifecycle described above.
-5. Run `npm run typecheck` and `npm run build` after code changes, then manually test responsive navigation, auth, feed, event, message, and support states.
+5. Validate ad consent, placements, and production IDs in relevant territories; keep ads disabled until approval and site policies are in place.
+6. Run `npm run typecheck` and `npm run build` after code changes, then manually test responsive navigation, auth, feed, event, message, and support states.
 
 ## Local development
 
