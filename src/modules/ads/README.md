@@ -2,7 +2,7 @@
 
 ## Web: Google AdSense
 
-`AdSenseScript` conditionally loads the AdSense library from the root layout when `NEXT_PUBLIC_ADSENSE_CLIENT_ID` is a valid `ca-pub-...` publisher ID. `AdSlot` renders responsive display units only when both that publisher ID and the relevant numeric slot ID are configured:
+`AdSenseScript` conditionally loads the AdSense library from the root layout using the supplied publisher ID by default; deployments can override it with `NEXT_PUBLIC_ADSENSE_CLIENT_ID`. `AdSlot` renders responsive display units only when both that publisher ID and the relevant numeric slot ID are configured:
 
 - `NEXT_PUBLIC_ADSENSE_SLOT_FEED_INLINE`
 - `NEXT_PUBLIC_ADSENSE_SLOT_FEED_SIDEBAR`
