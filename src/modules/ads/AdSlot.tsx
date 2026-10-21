@@ -23,7 +23,7 @@ const slotIds: Record<AdSlotPlacement, string | undefined> = {
 
 export function AdSlot({ placement }: AdSlotProps) {
   const slotId = slotIds[placement];
-  const adRef = useRef<HTMLElement>(null);
+  const adRef = useRef<HTMLModElement>(null);
   const publisherId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
   const configured = Boolean(publisherId && /^ca-pub-\d+$/.test(publisherId) && slotId && /^\d+$/.test(slotId));
 
