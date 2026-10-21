@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import styles from './AdSlot.module.css';
+import { ADSENSE_CLIENT_ID, isValidAdsenseClientId } from './config';
 
 export type AdSlotPlacement = 'feed-inline' | 'feed-sidebar' | 'shorts';
 
@@ -24,8 +25,8 @@ const slotIds: Record<AdSlotPlacement, string | undefined> = {
 export function AdSlot({ placement }: AdSlotProps) {
   const slotId = slotIds[placement];
   const adRef = useRef<HTMLModElement>(null);
-  const publisherId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
-  const configured = Boolean(publisherId && /^ca-pub-\d+$/.test(publisherId) && slotId && /^\d+$/.test(slotId));
+  const publisherId = ADSENSE_CLIENT_ID;
+  const configured = isValidAdsenseClientId(publisherId) && Boolean(slotId && /^\d+$/.test(slotId));
 
   useEffect(() => {
     if (!configured || !adRef.current || adRef.current.dataset.adRequested === 'true') return;
