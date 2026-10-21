@@ -1,7 +1,8 @@
 import Script from 'next/script';
+import { ADSENSE_CLIENT_ID, isValidAdsenseClientId } from './config';
 
-const publisherId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
-const validPublisherId = publisherId && /^ca-pub-\d+$/.test(publisherId);
+const publisherId = ADSENSE_CLIENT_ID;
+const validPublisherId = isValidAdsenseClientId(publisherId);
 
 /** Loads Google AdSense only when a valid public publisher ID is configured. */
 export function AdSenseScript() {
