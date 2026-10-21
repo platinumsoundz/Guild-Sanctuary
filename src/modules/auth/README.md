@@ -2,7 +2,7 @@
 
 Owns registration, sign-in, sign-out, email verification challenges, session lifecycle, and mock second-factor challenges. `AuthenticationForm`, `AuthenticationGateway`, and `AuthenticationModal` provide the UI; `sessionStore.ts` owns browser-local demo account persistence and validation.
 
-The current flow stores demo accounts in `localStorage`, uses the fixed code `000000` for email and 2FA steps, and does not send email or store passwords. Permissions and active world are session fields for UI composition only. This is not secure authentication and has no production security guarantees. Replace it with server-authoritative identity, verification, credential, and session providers before handling real accounts.
+The current flow stores demo accounts in `localStorage`, uses the fixed code `000000` for email and 2FA steps, and does not send email or store passwords. Session roles/permissions are UI composition data only. This is not secure authentication and has no production security guarantees. Replace it with server-authoritative identity, verification, credential, and session providers before handling real accounts.
 
 Google, Facebook, Microsoft/Xbox, and PlayStation federated sign-in are not configured in this demo. Production sign-in requires registered provider applications, server-side authorization-code/OIDC validation, state and nonce checks, immutable provider subject linking, and secure session issuance. Provider email verification must not automatically bypass an account's required 2FA or step-up authentication.
 
