@@ -38,7 +38,7 @@ The application contracts and local repositories have been unified: `worldType`,
 
 ## Advertising
 
-Web display units are wired through `src/modules/ads/AdSenseScript.tsx` and `AdSlot.tsx`. The script loads with the configured publisher ID `ca-pub-8267279636493149` (override via `NEXT_PUBLIC_ADSENSE_CLIENT_ID`); each feed/Shorts unit also requires its numeric slot ID. Configure all public AdSense values before each Next.js build, since `NEXT_PUBLIC_*` values are inlined at build time. Placements remain absent when IDs are blank or malformed.
+Web display units are wired through `src/modules/ads/AdSenseScript.tsx` and `AdSlot.tsx`. The script loads with publisher ID `ca-pub-8267279636493149` (override via `NEXT_PUBLIC_ADSENSE_CLIENT_ID`) using Next.js `beforeInteractive`, which places it in the initial HTML head for AdSense site verification. Each manually placed feed/Shorts unit also requires its numeric slot ID. Configure public AdSense values before each Next.js build, since `NEXT_PUBLIC_*` values are inlined at build time. Placements remain absent when slot IDs are blank or malformed.
 
 Before serving live inventory, verify domain approval, site verification/`ads.txt` requirements, policy-compliant placement, and an approved consent-management platform for applicable regions. Do not log or infer billable impressions from the rendered units. The native AdMob consent and placements module is separate and is not currently mounted in `AppWorkspace`.
 
