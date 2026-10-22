@@ -50,6 +50,15 @@ export function AuthenticationForm({
     setIsSubmitting(true);
 
     try {
+      if (step === 'email-link') {
+        if (mode === 'signup') {
+          await onSignup({ email: email.trim(), username: username.trim(), displayName: displayName.trim() });
+        } else {
+          await onLogin(email.trim());
+        }
+        return;
+      }
+
       if (step === 'email-code') {
         const requiresTwoFactor = await onVerifyEmailCode(verificationCode.trim());
         setVerificationCode('');
@@ -129,7 +138,7 @@ export function AuthenticationForm({
         id="authentication-panel"
         className={styles.panel}
         role="region"
-        aria-label={step === 'email-code' ? 'Email verification' : step === 'two-factor-code' ? 'Two-factor verification' : mode === 'login' ? 'Sign in' : 'Create account'}
+        aria-label={step === 'email-link' ? 'Email link sent' : step === 'email-code' ? 'Email verification' : step === 'two-factor-code' ? 'Two-factor verification' : mode === 'login' ? 'Sign in' : 'Create account'}
       >
         <form className={styles.form} onSubmit={(event) => void handleSubmit(event)}>
           {step === 'credentials' ? (
@@ -180,13 +189,20 @@ export function AuthenticationForm({
                 </>
               )}
             </>
+          ) : step === 'email-link' ? (
+            <>
+              <p className={styles.challengeCopy} role="status">
+                We sent a secure link to <strong>{email}</strong>. Open it in this browser to verify your email and continue. You do not need to enter a code.
+              </p>
+              <button className={styles.backButton} type="button" onClick={cancelChallenge}>
+                Back to {mode === 'signup' ? 'registration' : 'sign in'}
+              </button>
+            </>
           ) : (
             <>
               <p className={styles.challengeCopy}>
                 {step === 'email-code'
-                  ? isSupabaseConfigured()
-                    ? `Enter the verification code sent to ${email}.`
-                    : `Enter the code sent to ${email}. For this local demo, use ${MOCK_EMAIL_CODE}.`
+                  ? `Enter the code sent to ${email}. For this local demo, use ${MOCK_EMAIL_CODE}.`
                   : isSupabaseConfigured()
                     ? 'Enter the code from your authenticator app.'
                     : `Enter your second-factor code. For this local demo, use ${MOCK_TWO_FACTOR_CODE}.`}
@@ -216,7 +232,7 @@ export function AuthenticationForm({
           {error && <p className={styles.error} role="alert">{error}</p>}
 
           <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Please wait…' : step === 'email-code' ? 'Verify email' : step === 'two-factor-code' ? 'Verify and continue' : mode === 'signup' ? 'Continue to email verification' : 'Continue with email'}
+            {isSubmitting ? 'Please wait…' : step === 'email-link' ? 'Resend email link' : step === 'email-code' ? 'Verify email' : step === 'two-factor-code' ? 'Verify and continue' : mode === 'signup' ? 'Continue to email verification' : 'Continue with email'}
           </button>
         </form>
         {step === 'credentials' && <p className={styles.disclaimer}>{isSupabaseConfigured()
