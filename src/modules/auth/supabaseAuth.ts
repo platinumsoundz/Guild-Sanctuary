@@ -100,6 +100,7 @@ export async function requestSupabaseEmailCode(email: string, signup?: { usernam
     email: email.trim().toLowerCase(),
     options: {
       shouldCreateUser: Boolean(signup),
+      emailRedirectTo: `${window.location.origin}/auth/callback`,
       ...(signup ? { data: { username: signup.username, displayName: signup.displayName } } : {}),
     },
   });
