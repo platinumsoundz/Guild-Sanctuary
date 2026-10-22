@@ -18,7 +18,7 @@ interface AuthenticationFormProps {
   onSuccess?: () => void;
 }
 
-type AuthStep = 'credentials' | 'email-code' | 'two-factor-code';
+type AuthStep = 'credentials' | 'email-code' | 'email-link' | 'two-factor-code';
 
 export function AuthenticationForm({
   initialMode = 'signup',
@@ -77,7 +77,7 @@ export function AuthenticationForm({
         await onLogin(email.trim());
       }
 
-      setStep('email-code');
+      setStep(isSupabaseConfigured() ? 'email-link' : 'email-code');
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'We could not complete your request.');
     } finally {
