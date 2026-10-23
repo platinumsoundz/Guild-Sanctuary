@@ -12,6 +12,7 @@ import {
   Settings,
   Sun,
   UserRound,
+  Wallet,
   HeartHandshake,
   X,
   type LucideIcon,
@@ -27,6 +28,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
   { id: 'profile', label: 'Profile', icon: UserRound },
+  { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
