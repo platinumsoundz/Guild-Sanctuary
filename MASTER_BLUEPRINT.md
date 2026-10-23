@@ -53,12 +53,32 @@ Before serving live inventory, verify domain approval, site verification/`ads.tx
 
 Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do not represent this staged code as production-ready until migration/RLS, webhook idempotency, refund/dispute handling, backups, and staging tests are complete.
 
+## Wallet roadmap and handoff
+
+### Complete in the repository (not yet deployed or validated)
+
+- Wallet navigation and page with persistent balance/history UI and fixed £1/£5/£10 bundle cards.
+- Supabase wallet/ledger migration with owner-read-only policies and service-role-only transactional/idempotent purchase fulfillment.
+- Authenticated Checkout Session Edge Function and raw-body Stripe-signature webhook. Checkout validates the configured Stripe Prices' mode, amount, currency, and active one-time status.
+- Purchase checkout remains disabled by default. A test-mode staging enablement is allowed only after staging migration, functions, Price IDs, webhook, and end-to-end test are configured.
+
+### Blocking before live token sales
+
+1. Run `npm run typecheck` and `npm run build` in an environment with dependencies and command execution; neither has been run for this work yet.
+2. Apply the wallet migration and deploy both Edge Functions in an isolated staging project; verify RLS, paid and unpaid sessions, duplicate webhook delivery, wrong mode/price, and invalid signatures.
+3. Decide and implement refund/chargeback behavior. Ask the product owner about full vs partial refunds, disputes, support/manual review, and reversal if tokens have already been spent; do not guess this policy.
+4. Only then configure production-mode Price IDs/secrets/webhook and consider enabling live checkout. The migration has not been applied and the functions have not been deployed to the user's project.
+
+### Deferred product scope
+
+Token spending and entitlements (profile cosmetics, chat items, gifts, VIP, post promotion), transfers, trading, marketplace, and cash-out are not implemented. Keep them deferred until purchase, refund, and ledger rules are complete. Guest mode remains read-only. Account deletion currently cascades wallet and purchase history; the UI discloses this behavior.
+
 ## Supabase status
 
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` enable browser clients only. Supabase Edge Function secrets remain server-side.
 - Local demo auth is not production authentication; mock code `000000` is development-only.
 - Production cutover requires Supabase Auth configuration, profile-creation handling, RLS/policy tests, persistent repository wiring, storage policies, session refresh/middleware strategy, and migration/restore validation.
-- `SUPABASE_SERVICE_ROLE_KEY` remains server-only and is not currently required by disabled payment paths.
+- Never expose a Supabase secret/service-role credential to the web client. The token Edge Functions use the platform-provided admin context (`ctx.supabaseAdmin`); no service-role key belongs in the Next.js runtime.
 
 ## Security and release gates
 
@@ -67,7 +87,7 @@ Do not call this a production release until all of the following are complete:
 1. Replace local/mock authentication and data with tested authenticated APIs or RLS-protected browser access.
 2. Test Supabase migrations, RLS policies, backup restore, and forward/rollback behavior in staging.
 3. Complete media validation, scanning, storage, moderation, rate limits, and abuse controls.
-4. Keep token checkout disabled until the complete wallet lifecycle described above is tested; keep token spending/trading disabled until refunds, disputes, and account-deletion behavior are reviewed.
+4. Keep live token checkout disabled until the staging flow is verified and refund/chargeback handling is implemented; keep token spending/trading disabled until reversals and account-deletion behavior are tested.
 5. Validate ad consent, placements, and production IDs in relevant territories; keep ads disabled until approval and site policies are in place.
 6. Run `npm run typecheck` and `npm run build` after code changes, then manually test responsive navigation, auth, feed, event, message, and support states.
 
