@@ -28,6 +28,7 @@ import type { AuthSession, SignUpInput } from '@/modules/auth';
 import type { Profile } from '@/types/database';
 import { deleteDemoAccount } from '@/services/accountDeletion';
 import { getSupabaseBrowserClient } from '@/services/supabase';
+import type { Database } from '@/services/supabase/database.types';
 
 export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'support' | 'settings';
 
@@ -248,7 +249,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       throw new Error('Profile editing is disabled in Guest Mode.');
     }
     if (isSupabaseAuthConfigured()) {
-      const databaseUpdates: Record<string, unknown> = {};
+      const databaseUpdates: Database['public']['Tables']['profiles']['Update'] = {};
       if ('displayName' in updates && updates.displayName !== undefined) databaseUpdates.display_name = updates.displayName.trim();
       if ('bio' in updates) databaseUpdates.bio = updates.bio?.trim() || null;
       if ('statusMessage' in updates) databaseUpdates.status_message = updates.statusMessage?.trim() || null;
