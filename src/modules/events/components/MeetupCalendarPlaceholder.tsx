@@ -13,7 +13,8 @@ export function MeetupCalendarPlaceholder() {
   const { events, isLoading, error, addEvent, editEvent, removeEvent, rsvp } = useEvents(userId);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [startsAt, setStartsAt] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [startTime, setStartTime] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [editingEvent, setEditingEvent] = useState<EventView | null>(null);
@@ -22,7 +23,8 @@ export function MeetupCalendarPlaceholder() {
   const clearForm = () => {
     setTitle('');
     setDescription('');
-    setStartsAt('');
+    setStartDate('');
+    setStartTime('');
     setLatitude('');
     setLongitude('');
     setEditingEvent(null);
@@ -33,14 +35,15 @@ export function MeetupCalendarPlaceholder() {
     setFormError(null);
 
     try {
+      const startsAt = toIsoDateTime(startDate, startTime);
       if (editingEvent) {
-        await editEvent(editingEvent.id, { title, description, startsAt: new Date(startsAt).toISOString() });
+        await editEvent(editingEvent.id, { title, description, startsAt });
       } else {
         await addEvent({
           creatorId: userId,
           title,
           description,
-          startsAt: new Date(startsAt).toISOString(),
+          startsAt,
           locationCoords: { latitude: Number(latitude), longitude: Number(longitude) },
         });
       }
@@ -54,7 +57,9 @@ export function MeetupCalendarPlaceholder() {
     setEditingEvent(event);
     setTitle(event.title);
     setDescription(event.description);
-    setStartsAt(toLocalDateTime(event.startsAt));
+    const localDateTime = toLocalDateTime(event.startsAt);
+    setStartDate(localDateTime.slice(0, 10));
+    setStartTime(localDateTime.slice(11, 16));
     setLatitude(String(event.locationCoords.latitude));
     setLongitude(String(event.locationCoords.longitude));
   };
@@ -100,8 +105,12 @@ export function MeetupCalendarPlaceholder() {
           </label>
           <div className={styles.formRow}>
             <label className={styles.field}>
-              <span>Date and time</span>
-              <input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.currentTarget.value)} required />
+              <span>Event date</span>
+              <input type="date" value={startDate} onChange={(event) => setStartDate(event.currentTarget.value)} required />
+            </label>
+            <label className={styles.field}>
+              <span>Start time</span>
+              <input type="time" step="60" value={startTime} onChange={(event) => setStartTime(event.currentTarget.value)} required />
             </label>
             <label className={styles.field}>
               <span>Latitude</span>
