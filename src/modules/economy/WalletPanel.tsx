@@ -94,7 +94,7 @@ export function WalletPanel({ userId, isGuest }: WalletPanelProps) {
         {hasSupabaseAccount && !isLoading && !checkoutEnabled && (
           <p className={styles.disclaimer}>Purchases stay disabled until Stripe prices, webhook verification, and token fulfillment are configured.</p>
         )}
-        <p className={styles.disclaimer}>Tokens are account-bound in this first release: no transfers, trading, or cash-out. Deleting your account also deletes its wallet and token history.
+        <p className={styles.disclaimer}>Tokens are account-bound in this first release: no transfers, trading, or cash-out. Deleting your account also deletes its wallet and token history.</p>
       </section>
 
       <section className={styles.section} aria-labelledby="future-uses-title">
