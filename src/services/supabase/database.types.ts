@@ -188,7 +188,12 @@ export interface Database {
         created_at: string;
       }>;
     };
-    Views: Record<string, never>;
+    Views: {
+      event_rsvp_counts: {
+        Row: { event_id: string; going_count: number };
+        Relationships: [];
+      };
+    };
     Functions: {
       create_sanctuary_conversation: {
         Args: {
