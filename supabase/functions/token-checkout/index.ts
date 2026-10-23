@@ -73,9 +73,19 @@ export default {
 
     const config = getCheckoutConfig()
     if (body.action === 'status') {
-      return Response.json({ enabled: config.enabled })
+      if (!config.ready) return Response.json({ enabled: false })
+      try {
+        const stripe = new Stripe(config.secretKey)
+        const priceChecks = await Promise.all(
+          (Object.keys(bundleEnvironmentKeys) as BundleId[]).map((bundleId) =>
+            isExpectedPrice(stripe, config.prices[bundleId], bundleId, config.mode)),
+        )
+        return Response.json({ enabled: priceChecks.every(Boolean) })
+      } catch {
+        return Response.json({ enabled: false })
+      }
     }
-    if (!config.enabled) {
+    if (!config.ready) {
       return Response.json({ error: 'Token purchases are not enabled yet.' }, { status: 503 })
     }
 
@@ -96,6 +106,9 @@ export default {
 
     try {
       const stripe = new Stripe(config.secretKey)
+      if (!await isExpectedPrice(stripe, config.prices[bundleId], bundleId, config.mode)) {
+        return Response.json({ error: 'The selected bundle is not configured at its approved GBP price.' }, { status: 503 })
+      }
       const appOrigin = new URL(config.appBaseUrl).origin
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
