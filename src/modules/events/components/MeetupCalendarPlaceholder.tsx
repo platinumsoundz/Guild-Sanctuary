@@ -172,6 +172,17 @@ export function MeetupCalendarPlaceholder() {
   );
 }
 
+function toIsoDateTime(dateValue: string, timeValue: string): string {
+  if (!dateValue || !timeValue) {
+    throw new Error('Choose both an event date and a start time.');
+  }
+  const date = new Date(`${dateValue}T${timeValue}`);
+  if (!Number.isFinite(date.getTime())) {
+    throw new Error('Choose a valid event date and time.');
+  }
+  return date.toISOString();
+}
+
 function toLocalDateTime(isoDate: string): string {
   const date = new Date(isoDate);
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
