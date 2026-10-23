@@ -269,6 +269,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       }
       if ('visibility' in updates && updates.visibility !== undefined) {
         databaseUpdates.visibility = updates.visibility;
+        databaseUpdates.allow_profile_discovery = updates.visibility === 'public';
       }
       if (Object.keys(databaseUpdates).length === 0) return;
       const { error } = await getSupabaseBrowserClient()
