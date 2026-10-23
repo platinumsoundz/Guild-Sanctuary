@@ -229,7 +229,7 @@ export async function setEventRsvp(eventId: string, userId: string, status: 'goi
     const currentUserId = await requireCommunityStorageUser(userId);
     const { data, error } = await getSupabaseBrowserClient()
       .from('event_rsvps')
-      .upsert({ event_id: eventId, user_id: currentUserId, status }, { onConflict: 'event_id,user_id' })
+      .upsert({ event_id: eventId, user_id: currentUserId, status, updated_at: new Date().toISOString() }, { onConflict: 'event_id,user_id' })
       .select('*')
       .single();
     if (error) throw new Error(`Your event RSVP could not be saved: ${error.message}`);
