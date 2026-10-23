@@ -3,7 +3,7 @@
 begin;
 
 create table public.token_wallets (
-  user_id uuid primary key references public.profiles(id) on delete restrict,
+  user_id uuid primary key references public.profiles(id) on delete cascade,
   balance_tokens bigint not null default 0 check (balance_tokens >= 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -11,13 +11,14 @@ create table public.token_wallets (
 
 create table public.token_ledger (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.token_wallets(user_id) on delete restrict,
+  user_id uuid not null references public.token_wallets(user_id) on delete cascade,
   bundle_id text not null check (bundle_id in ('tokens_100', 'tokens_600', 'tokens_1200')),
   tokens_delta bigint not null check (tokens_delta > 0),
   amount_total integer not null,
   currency text not null check (currency = 'gbp'),
   stripe_event_id text not null unique,
   checkout_session_id text not null unique,
+  livemode boolean not null,
   created_at timestamptz not null default now(),
   check (
     (bundle_id = 'tokens_100' and tokens_delta = 100 and amount_total = 100)
@@ -66,7 +67,7 @@ begin
     or requested_event_type not in ('checkout.session.completed', 'checkout.session.async_payment_succeeded')
     or requested_session_id is null or requested_session_id = ''
     or requested_user_id is null
-    or requested_livemode is distinct from true
+    or requested_livemode is null
     or requested_currency <> 'gbp'
   then
     raise exception 'Invalid token purchase event' using errcode = '22023';
@@ -103,6 +104,7 @@ begin
       or existing_entry.tokens_delta <> expected_tokens
       or existing_entry.amount_total <> expected_amount
       or existing_entry.currency <> requested_currency
+      or existing_entry.livemode <> requested_livemode
     then
       raise exception 'Token purchase replay does not match the original payment' using errcode = '22023';
     end if;
@@ -119,10 +121,10 @@ begin
 
   insert into public.token_ledger (
     user_id, bundle_id, tokens_delta, amount_total, currency,
-    stripe_event_id, checkout_session_id
+    stripe_event_id, checkout_session_id, livemode
   ) values (
     requested_user_id, requested_bundle_id, expected_tokens, expected_amount, requested_currency,
-    requested_event_id, requested_session_id
+    requested_event_id, requested_session_id, requested_livemode
   );
 
   update public.token_wallets
