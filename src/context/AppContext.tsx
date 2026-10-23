@@ -47,7 +47,7 @@ interface AppContextValue {
   verifyEmailCode: (code: string) => Promise<boolean>;
   verifyTwoFactorCode: (code: string) => Promise<void>;
   setTwoFactorEnabled: (enabled: boolean) => void;
-  updateProfile: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => void;
+  updateProfile: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => Promise<void>;
   cancelAuthChallenge: () => void;
   logout: () => void;
   deleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => void;
@@ -240,7 +240,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     setCurrentUser(session);
   };
 
-  const updateProfile = (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => {
+  const updateProfile = async (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => {
     if (!currentUser) {
       throw new Error('Sign in before editing your profile.');
     }
@@ -248,7 +248,38 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       throw new Error('Profile editing is disabled in Guest Mode.');
     }
     if (isSupabaseAuthConfigured()) {
-      throw new Error('Profile editing is not yet enabled for Supabase accounts.');
+      const databaseUpdates: Record<string, unknown> = {};
+      if ('displayName' in updates && updates.displayName !== undefined) databaseUpdates.display_name = updates.displayName.trim();
+      if ('bio' in updates) databaseUpdates.bio = updates.bio?.trim() || null;
+      if ('statusMessage' in updates) databaseUpdates.status_message = updates.statusMessage?.trim() || null;
+      if ('avatarUrl' in updates) databaseUpdates.avatar_url = updates.avatarUrl;
+      if ('bannerUrl' in updates) databaseUpdates.banner_url = updates.bannerUrl;
+      if ('themeColor' in updates && updates.themeColor !== undefined) databaseUpdates.theme_color = updates.themeColor;
+      if ('location' in updates) databaseUpdates.location = updates.location?.trim() || null;
+      if ('age' in updates) databaseUpdates.age = updates.age;
+      if ('starSign' in updates) databaseUpdates.star_sign = updates.starSign;
+      if ('belief' in updates) databaseUpdates.belief = updates.belief?.trim() || null;
+      if ('socialLinks' in updates) databaseUpdates.social_links = updates.socialLinks;
+      if ('privacy' in updates) {
+        databaseUpdates.privacy = updates.privacy;
+        if (updates.privacy?.allowDirectMessages !== undefined) {
+          databaseUpdates.allow_direct_messages = updates.privacy.allowDirectMessages;
+        }
+      }
+      if ('visibility' in updates && updates.visibility !== undefined) {
+        databaseUpdates.visibility = updates.visibility;
+        databaseUpdates.allow_profile_discovery = updates.visibility === 'public';
+      }
+      if (Object.keys(databaseUpdates).length === 0) return;
+      const { error } = await getSupabaseBrowserClient()
+        .from('profiles')
+        .update(databaseUpdates)
+        .eq('id', currentUser.user.id);
+      if (error) throw new Error(`Profile changes could not be saved: ${error.message}`);
+      const refreshedSession = await restoreSupabaseSession();
+      if (!refreshedSession) throw new Error('Your profile was saved, but the account session could not be refreshed. Reload the page.');
+      setCurrentUser(refreshedSession);
+      return;
     }
 
     const session = updateLocalProfile(currentUser.user.id, updates);
