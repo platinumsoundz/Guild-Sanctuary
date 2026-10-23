@@ -57,7 +57,7 @@ export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
   return {
     userId,
     balanceTokens: walletResult.data?.balance_tokens ?? 0,
-    ledger: ledgerResult.data.map((entry) => ({
+    ledger: (ledgerResult.data ?? []).map((entry) => ({
       id: entry.id,
       bundleId: entry.bundle_id,
       tokensDelta: entry.tokens_delta,
