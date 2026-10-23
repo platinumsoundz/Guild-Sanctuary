@@ -9,7 +9,7 @@ interface ProfileDashboardProps {
   profile: Profile;
   posts: Post[];
   isPostsLoading: boolean;
-  onSave: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => void;
+  onSave: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => void | Promise<void>;
   onThemeChange: (themeColor: string) => void;
 }
 
@@ -19,6 +19,7 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
   const [draft, setDraft] = useState(profile);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => setDraft(profile), [profile]);
 
@@ -47,11 +48,12 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
     }
   };
 
-  const handleSave = (event: FormEvent<HTMLFormElement>) => {
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    setIsSaving(true);
     try {
-      onSave({
+      await onSave({
         bio: draft.bio?.trim() || null,
         statusMessage: draft.statusMessage?.trim() || null,
         avatarUrl: draft.avatarUrl,
@@ -66,6 +68,8 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
       setSaved(true);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Profile changes could not be saved.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
