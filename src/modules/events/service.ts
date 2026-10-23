@@ -98,16 +98,23 @@ export async function fetchEvents(userId: string): Promise<EventView[]> {
 
     if (rows.length === 0) return [];
     const eventIds = rows.map((row) => row.id);
-    const [countsResult, rsvpsResult] = await Promise.all([
-      client.from('event_rsvp_counts').select('*').in('event_id', eventIds),
-      userId
-        ? client.from('event_rsvps').select('event_id, status').eq('user_id', userId)
-        : Promise.resolve({ data: [], error: null }),
-    ]);
-    if (countsResult.error) throw new Error(`Event RSVP totals could not be loaded: ${countsResult.error.message}`);
-    if (rsvpsResult.error) throw new Error(`Your event RSVPs could not be loaded: ${rsvpsResult.error.message}`);
-    const counts = new Map(countsResult.data.map((row) => [row.event_id, row.going_count]));
-    const viewerStatuses = new Map(rsvpsResult.data.map((row) => [row.event_id, row.status as EventRsvpStatus]));
+    const { data: countRows, error: countsError } = await client
+      .from('event_rsvp_counts')
+      .select('*')
+      .in('event_id', eventIds);
+    if (countsError) throw new Error(`Event RSVP totals could not be loaded: ${countsError.message}`);
+
+    let viewerRsvpRows: { event_id: string; status: string }[] = [];
+    if (userId) {
+      const { data, error: rsvpError } = await client
+        .from('event_rsvps')
+        .select('event_id, status')
+        .eq('user_id', userId);
+      if (rsvpError) throw new Error(`Your event RSVPs could not be loaded: ${rsvpError.message}`);
+      viewerRsvpRows = data;
+    }
+    const counts = new Map(countRows.map((row) => [row.event_id, row.going_count]));
+    const viewerStatuses = new Map(viewerRsvpRows.map((row) => [row.event_id, row.status as EventRsvpStatus]));
     return rows.map((row) => ({
       ...toEvent(row),
       rsvpCount: counts.get(row.id) ?? 0,
