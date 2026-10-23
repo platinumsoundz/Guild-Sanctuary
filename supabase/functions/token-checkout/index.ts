@@ -9,6 +9,12 @@ const bundleEnvironmentKeys = {
 
 type BundleId = keyof typeof bundleEnvironmentKeys
 
+const expectedBundles: Record<BundleId, { amount: number; currency: 'gbp' }> = {
+  tokens_100: { amount: 100, currency: 'gbp' },
+  tokens_600: { amount: 500, currency: 'gbp' },
+  tokens_1200: { amount: 1000, currency: 'gbp' },
+}
+
 function getCheckoutConfig() {
   const mode = Deno.env.get('STRIPE_TOKEN_MODE')
   const secretKey = Deno.env.get('STRIPE_SECRET_KEY') ?? ''
@@ -29,13 +35,26 @@ function getCheckoutConfig() {
   const keyMatchesMode = mode === 'live'
     ? secretKey.startsWith('sk_live_')
     : mode === 'test' && secretKey.startsWith('sk_test_')
-  const enabled = Deno.env.get('TOKEN_CHECKOUT_ENABLED') === 'true'
+  const ready = Deno.env.get('TOKEN_CHECKOUT_ENABLED') === 'true'
     && keyMatchesMode
     && webhookSecret.startsWith('whsec_')
     && validAppOrigin
     && Object.values(prices).every((priceId) => priceId.startsWith('price_'))
 
-  return { enabled, mode, secretKey, appBaseUrl, prices }
+  return { ready, mode, secretKey, appBaseUrl, prices }
+}
+
+async function isExpectedPrice(stripe: Stripe, priceId: string, bundleId: BundleId, mode: string | undefined): Promise<boolean> {
+  try {
+    const price = await stripe.prices.retrieve(priceId)
+    return price.active
+      && price.type === 'one_time'
+      && price.currency === expectedBundles[bundleId].currency
+      && price.unit_amount === expectedBundles[bundleId].amount
+      && price.livemode === (mode === 'live')
+  } catch {
+    return false
+  }
 }
 
 export default {
