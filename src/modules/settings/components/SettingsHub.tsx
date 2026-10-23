@@ -12,7 +12,7 @@ interface SettingsHubProps {
   privacy: ProfilePrivacy;
   visibility: Profile['visibility'];
   socialLinks: SocialLinks;
-  onUpdateProfile: (updates: Partial<Pick<Profile, 'privacy' | 'visibility' | 'socialLinks'>>) => void;
+  onUpdateProfile: (updates: Partial<Pick<Profile, 'privacy' | 'visibility' | 'socialLinks'>>) => void | Promise<void>;
   onDeleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => void;
 }
 
@@ -67,21 +67,21 @@ export function SettingsHub({
     document.documentElement.dataset.layout = settings.preferences.layout;
   }, [settings.preferences.layout]);
 
-  const updatePreference = (key: keyof typeof preferenceLabels, value: boolean) => {
+  const updatePreference = async (key: keyof typeof preferenceLabels, value: boolean) => {
     try {
       updatePreferences({ [key]: value });
       if (key === 'allowProfileDiscovery') {
-        onUpdateProfile({ visibility: value ? 'public' : 'private' });
+        await onUpdateProfile({ visibility: value ? 'public' : 'private' });
       }
       if (key === 'allowDirectMessages') {
-        onUpdateProfile({ privacy: { ...privacy, allowDirectMessages: value } });
+        await onUpdateProfile({ privacy: { ...privacy, allowDirectMessages: value } });
       }
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
     }
   };
 
-  const handleSocialLinks = (event: FormEvent<HTMLFormElement>) => {
+  const handleSocialLinks = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const normalized: SocialLinks = {
@@ -119,7 +119,7 @@ export function SettingsHub({
         }
         normalized[item.key] = url.toString();
       }
-      onUpdateProfile({ socialLinks: normalized });
+      await onUpdateProfile({ socialLinks: normalized });
       setLinksDraft(normalized);
       setError(null);
     } catch (saveError) {
@@ -155,7 +155,7 @@ export function SettingsHub({
               {(Object.entries(preferenceLabels) as [keyof typeof preferenceLabels, string][]).map(([key, label]) => (
                 <label className={styles.toggleRow} key={key}>
                   <span>{label}</span>
-                  <input type="checkbox" checked={settings.preferences[key]} onChange={(event) => updatePreference(key, event.currentTarget.checked)} />
+                  <input type="checkbox" checked={settings.preferences[key]} onChange={(event) => void updatePreference(key, event.currentTarget.checked)} />
                 </label>
               ))}
             </div>
@@ -171,7 +171,9 @@ export function SettingsHub({
                 const nextVisibility = selectedVisibility;
                 try {
                   updatePreferences({ allowProfileDiscovery: nextVisibility === 'public' });
-                  onUpdateProfile({ visibility: nextVisibility });
+                  void onUpdateProfile({ visibility: nextVisibility }).catch((saveError) => {
+                    setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
+                  });
                 } catch (saveError) {
                   setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
                 }
@@ -189,8 +191,9 @@ export function SettingsHub({
                     checked={privacy[key]}
                     onChange={(event) => {
                       try {
-                        onUpdateProfile({ privacy: { ...privacy, [key]: event.currentTarget.checked } });
-                        setError(null);
+                        void onUpdateProfile({ privacy: { ...privacy, [key]: event.currentTarget.checked } })
+                          .then(() => setError(null))
+                          .catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The privacy setting could not be saved.'));
                       } catch (saveError) {
                         setError(saveError instanceof Error ? saveError.message : 'The privacy setting could not be saved.');
                       }
