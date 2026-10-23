@@ -34,6 +34,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
 interface NavigationProps {
   activeNavigation: NavigationState;
   currentUser: AuthSession | null;
+  isGuest: boolean;
   pendingEmail: string | null;
   isSessionReady: boolean;
   onNavigate: (navigation: NavigationState) => void;
@@ -49,6 +50,7 @@ interface NavigationProps {
 export function Navigation({
   activeNavigation,
   currentUser,
+  isGuest,
   pendingEmail,
   isSessionReady,
   onNavigate,
@@ -233,6 +235,7 @@ export function Navigation({
       {isAuthModalOpen && (
         <AuthenticationModal
           currentUser={currentUser}
+          isGuest={isGuest}
           pendingEmail={pendingEmail}
           onClose={closeAuthModal}
           onLogin={onLogin}
