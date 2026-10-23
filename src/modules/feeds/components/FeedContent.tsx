@@ -13,8 +13,8 @@ const PLACEHOLDER_HEADING = 'A little room to begin';
 const PLACEHOLDER_MESSAGE = 'Thoughts and reflections from your community will find a home here.';
 
 export function FeedContent() {
-  const { currentUser } = useAppContext();
-  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(currentUser?.user.id ?? null);
+  const { currentUser, isGuest } = useAppContext();
+  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(isGuest ? null : currentUser?.user.id ?? null);
   const [draft, setDraft] = useState('');
   const [attachmentUrl, setAttachmentUrl] = useState('');
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
@@ -229,9 +229,9 @@ export function FeedContent() {
                     Your browser does not support video playback.
                   </video>
                 )}
-                <PostEngagement postId={post.id} userId={currentUser?.user.id ?? ''} />
-                <ReportContentButton targetType="post" targetId={post.id} />
-                {post.authorId === currentUser?.user.id && editingPostId !== post.id && (
+                {currentUser && !isGuest && <PostEngagement postId={post.id} userId={currentUser.user.id} />}
+                {currentUser && !isGuest && <ReportContentButton targetType="post" targetId={post.id} />}
+                {currentUser && !isGuest && post.authorId === currentUser.user.id && editingPostId !== post.id && (
                   <div className={styles.postActions}>
                     <button className={styles.textButton} type="button" onClick={() => {
                       setEditingPostId(post.id);
