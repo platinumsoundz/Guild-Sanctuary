@@ -1,6 +1,6 @@
 # Supabase setup and migration
 
-`migrations/20261009000000_social_core_and_moderation.sql` is the initial social schema. `migrations/20261009000100_community_tips.sql` contains a server-only tip-reconciliation schema/RPC. `migrations/20261010000000_unify_sanctuary_scope.sql` normalizes legacy world-scoped data and adds the Sanctuary-scoped conversation RPC while retaining legacy scope columns for compatibility. These migrations have not been certified for production; test them against a disposable project and staging database first.
+`migrations/20261009000000_social_core_and_moderation.sql` is the initial social schema. `migrations/20261009000100_community_tips.sql` contains a server-only tip-reconciliation schema/RPC. `migrations/20261010000000_unify_sanctuary_scope.sql` normalizes legacy world-scoped data and adds the Sanctuary-scoped conversation RPC while retaining legacy scope columns for compatibility. `migrations/20261011000000_repair_social_engagement_insert_policies.sql` restores authenticated, owner-scoped like/comment inserts on visible social content. These migrations have not been certified for production; test them against a disposable project and staging database first.
 
 ## Configure a project
 
