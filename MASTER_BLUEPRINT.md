@@ -1,6 +1,6 @@
 # The Sanctuary — Master Blueprint
 
-Last updated: 2026-10-10
+Last updated: 2026-10-12
 
 ## Product decision
 
