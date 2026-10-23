@@ -10,6 +10,7 @@ import {
   Newspaper,
   Search,
   Settings,
+  ShieldCheck,
   Sun,
   UserRound,
   HeartHandshake,
@@ -28,6 +29,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
+  { id: 'moderation', label: 'Moderation', icon: ShieldCheck },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -62,6 +64,8 @@ export function Navigation({
 }: NavigationProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const canModerate = currentUser?.profile.role === 'moderator' || currentUser?.profile.role === 'admin';
+  const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'moderation' || canModerate);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
@@ -153,7 +157,7 @@ export function Navigation({
         <>
           <nav className={styles.desktopNavigation} aria-label="Main navigation">
             <div className={styles.desktopNavigationItems}>
-              {navigationItems.map((item) => (
+              {visibleNavigationItems.map((item) => (
                 <button
                   key={item.id}
                   className={styles.desktopNavigationButton}
@@ -206,7 +210,7 @@ export function Navigation({
                   </div>
                   <nav aria-label="Main navigation">
                     <div className={styles.drawerNavigationItems}>
-                      {navigationItems.map((item) => (
+                      {visibleNavigationItems.map((item) => (
                         <button
                           key={item.id}
                           className={styles.drawerNavigationButton}

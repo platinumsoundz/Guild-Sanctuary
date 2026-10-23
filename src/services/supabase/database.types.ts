@@ -27,9 +27,27 @@ export type ProfileRow = {
   status: 'active' | 'suspended' | 'banned';
   suspended_until: string | null;
   allow_direct_messages: boolean;
+  allow_profile_discovery: boolean;
   visibility: 'public' | 'private';
   created_at: string;
   updated_at: string;
+}
+
+export type PublicProfileRow = {
+  id: string;
+  username: string;
+  display_name: string;
+  bio: string | null;
+  status_message: string | null;
+  avatar_url: string | null;
+  banner_url: string | null;
+  theme_color: string;
+  location: string | null;
+  age: number | null;
+  star_sign: string | null;
+  belief: string | null;
+  social_links: Record<string, string | null>;
+  allow_direct_messages: boolean;
 }
 
 export type PrivateProfileVaultRow = {
@@ -65,6 +83,47 @@ export type MessageRow = {
   sent_at: string;
   read_at: string | null;
 }
+
+export type EventRow = {
+  id: string;
+  creator_id: string;
+  world_type: SanctuaryScope;
+  title: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  starts_at: string;
+  ends_at: string | null;
+  state: 'visible' | 'hidden' | 'removed';
+  created_at: string;
+};
+
+export type EventRsvpRow = {
+  id: string;
+  event_id: string;
+  user_id: string;
+  status: 'going' | 'interested' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+};
+
+export type SocialLikeRow = {
+  id: string;
+  target_type: 'post' | 'short' | 'event';
+  target_id: string;
+  user_id: string;
+  created_at: string;
+};
+
+export type SocialCommentRow = {
+  id: string;
+  target_type: 'post' | 'short' | 'event';
+  target_id: string;
+  author_id: string;
+  body: string;
+  state: 'visible' | 'hidden' | 'removed';
+  created_at: string;
+};
 
 export type ContentReportRow = {
   id: string;
@@ -188,7 +247,27 @@ export interface Database {
         created_at: string;
       }>;
     };
-    Views: Record<string, never>;
+    Views: {
+      public_profiles: {
+        Row: PublicProfileRow;
+        Relationships: [];
+      };
+      event_rsvp_counts: {
+        Row: {
+          event_id: string;
+          going_count: number;
+        };
+        Relationships: [];
+      };
+      social_like_counts: {
+        Row: {
+          target_type: 'post' | 'short' | 'event';
+          target_id: string;
+          like_count: number;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
       create_sanctuary_conversation: {
         Args: {

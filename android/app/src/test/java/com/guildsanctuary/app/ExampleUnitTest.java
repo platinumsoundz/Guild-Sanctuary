@@ -1,4 +1,4 @@
-package com.getcapacitor.myapp;
+package com.guildsanctuary.app;
 
 import static org.junit.Assert.*;
 

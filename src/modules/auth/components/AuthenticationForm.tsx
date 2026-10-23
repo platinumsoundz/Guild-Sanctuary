@@ -192,8 +192,20 @@ export function AuthenticationForm({
           ) : step === 'email-link' ? (
             <>
               <p className={styles.challengeCopy} role="status">
-                We sent a secure link to <strong>{email}</strong>. Open it in this browser to verify your email and continue. You do not need to enter a code.
+                We sent a secure link to <strong>{email}</strong>. Open it in this browser to verify your email and continue.
+                If your email also includes a six-digit code, you can enter it instead.
               </p>
+              <button
+                className={styles.backButton}
+                type="button"
+                onClick={() => {
+                  setVerificationCode('');
+                  setError(null);
+                  setStep('email-code');
+                }}
+              >
+                Use a code instead
+              </button>
               <button className={styles.backButton} type="button" onClick={cancelChallenge}>
                 Back to {mode === 'signup' ? 'registration' : 'sign in'}
               </button>
@@ -202,7 +214,9 @@ export function AuthenticationForm({
             <>
               <p className={styles.challengeCopy}>
                 {step === 'email-code'
-                  ? `Enter the code sent to ${email}. For this local demo, use ${MOCK_EMAIL_CODE}.`
+                  ? isSupabaseConfigured()
+                    ? `Enter the six-digit code from the email sent to ${email}. If your email template only contains a link, go back and open the link instead.`
+                    : `Enter the code sent to ${email}. For this local demo, use ${MOCK_EMAIL_CODE}.`
                   : isSupabaseConfigured()
                     ? 'Enter the code from your authenticator app.'
                     : `Enter your second-factor code. For this local demo, use ${MOCK_TWO_FACTOR_CODE}.`}

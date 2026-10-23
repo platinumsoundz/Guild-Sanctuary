@@ -89,9 +89,41 @@
   font: 700 10px Arial, sans-serif;
 }
 
-.field input {
+.field input,
+.field textarea {
   width: 100%;
   font-weight: 400;
+}
+
+.field textarea {
+  min-height: 72px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 12px/1.5 Arial, sans-serif;
+  resize: vertical;
+}
+
+.formActions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.textButton {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: 700 11px Arial, sans-serif;
 }
 
 .linksForm {

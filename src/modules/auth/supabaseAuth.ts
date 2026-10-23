@@ -1,8 +1,9 @@
 'use client';
 
 import type { AuthSession } from './sessionStore';
-import type { Profile, ProfilePrivacy, SocialLinks } from '@/types/database';
+import type { Profile, ProfilePrivacy, PublicProfile, SocialLinks } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
+import type { ProfileRow, PublicProfileRow } from '@/services/supabase/database.types';
 
 const permissions: AuthSession['permissions'] = [
   'feed:read',
@@ -27,7 +28,7 @@ export function isSupabaseAuthConfigured(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
-function toProfile(row: Awaited<ReturnType<typeof getProfileRow>>): Profile {
+export function mapProfileRow(row: ProfileRow): Profile {
   const privacy = row.privacy as Partial<ProfilePrivacy>;
   return {
     id: row.id,
@@ -58,6 +59,36 @@ function toProfile(row: Awaited<ReturnType<typeof getProfileRow>>): Profile {
   };
 }
 
+export function mapPublicProfileRow(row: PublicProfileRow): PublicProfile {
+  return {
+    userId: row.id,
+    profileId: row.id,
+    username: row.username,
+    displayName: row.display_name,
+    bio: row.bio,
+    statusMessage: row.status_message,
+    avatarUrl: row.avatar_url,
+    bannerUrl: row.banner_url,
+    themeColor: row.theme_color,
+    location: row.location,
+    age: row.age,
+    starSign: row.star_sign,
+    belief: row.belief,
+    socialLinks: { ...emptyLinks, ...(row.social_links as Partial<SocialLinks>) },
+    allowDirectMessages: row.allow_direct_messages,
+    role: 'member',
+  };
+}
+
+function isProfileActive(profile: ProfileRow): boolean {
+  if (profile.status === 'active') return true;
+  return (
+    profile.status === 'suspended' &&
+    profile.suspended_until !== null &&
+    Date.parse(profile.suspended_until) <= Date.now()
+  );
+}
+
 async function getProfileRow(userId: string) {
   const { data, error } = await getSupabaseBrowserClient()
     .from('profiles')
@@ -65,7 +96,7 @@ async function getProfileRow(userId: string) {
     .eq('id', userId)
     .single();
   if (error) throw new Error(`Your account profile could not be loaded: ${error.message}`);
-  if (data.status !== 'active') throw new Error('This account is not active. Contact support for help.');
+  if (!isProfileActive(data)) throw new Error('This account is not active. Contact support for help.');
   return data;
 }
 
@@ -85,13 +116,63 @@ async function buildSession(): Promise<AuthSession> {
       email: user.email,
       emailVerified: true,
       twoFactorEnabled,
-      status: profileRow.status === 'suspended' || profileRow.status === 'banned' ? 'suspended' : 'active',
+      status: isProfileActive(profileRow) ? 'active' : 'suspended',
       createdAt: user.created_at,
       updatedAt: user.updated_at ?? user.created_at,
     },
-    profile: toProfile(profileRow),
+    profile: mapProfileRow(profileRow),
     permissions: [...permissions],
   };
+}
+
+export type SupabaseProfileUpdate = Partial<Omit<Profile, 'id' | 'userId' | 'role'>>;
+
+export async function updateSupabaseProfile(
+  userId: string,
+  updates: SupabaseProfileUpdate,
+): Promise<Profile> {
+  const payload: Partial<ProfileRow> = {};
+
+  if (updates.bio !== undefined) payload.bio = updates.bio;
+  if (updates.statusMessage !== undefined) payload.status_message = updates.statusMessage;
+  if (updates.avatarUrl !== undefined) payload.avatar_url = updates.avatarUrl;
+  if (updates.bannerUrl !== undefined) payload.banner_url = updates.bannerUrl;
+  if (updates.themeColor !== undefined) payload.theme_color = updates.themeColor;
+  if (updates.location !== undefined) payload.location = updates.location;
+  if (updates.age !== undefined) payload.age = updates.age;
+  if (updates.starSign !== undefined) payload.star_sign = updates.starSign;
+  if (updates.belief !== undefined) payload.belief = updates.belief;
+  if (updates.socialLinks !== undefined) {
+    payload.social_links = updates.socialLinks as unknown as Record<string, string | null>;
+  }
+  if (updates.visibility !== undefined) {
+    payload.visibility = updates.visibility;
+    payload.allow_profile_discovery = updates.visibility === 'public';
+  }
+  if (updates.privacy !== undefined) {
+    payload.privacy = updates.privacy as unknown as Record<string, boolean>;
+    payload.allow_direct_messages = updates.privacy.allowDirectMessages;
+  }
+
+  if (Object.keys(payload).length === 0) {
+    const { data, error } = await getSupabaseBrowserClient()
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    if (error) throw new Error(`Your profile could not be loaded: ${error.message}`);
+    return mapProfileRow(data);
+  }
+
+  const { data, error } = await getSupabaseBrowserClient()
+    .from('profiles')
+    .update(payload)
+    .eq('id', userId)
+    .select('*')
+    .single();
+
+  if (error) throw new Error(`Your profile could not be updated: ${error.message}`);
+  return mapProfileRow(data);
 }
 
 export async function requestSupabaseEmailCode(email: string, signup?: { username: string; displayName: string }): Promise<void> {

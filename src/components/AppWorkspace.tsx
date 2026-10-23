@@ -12,10 +12,11 @@ import { Feed } from '@/modules/feeds';
 import { MeetupCalendarPlaceholder } from '@/modules/events';
 import { ProfileDashboard, ProfileDiscovery } from '@/modules/profiles';
 import { SupportPanel } from '@/modules/support';
-import { AdSlot } from '@/modules/ads';
+import { AdSlot } from '@/modules/ads/AdSlot';
 import { DirectMessageThread, MessagesInbox } from '@/modules/messages';
 import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
+import { ModerationDashboard } from '@/modules/moderation';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import styles from './AppWorkspace.module.css';
 
@@ -132,6 +133,8 @@ export function AppWorkspace() {
           <AdSlot placement="shorts" />
           <ShortsFeed />
         </>
+      ) : activeNavigation === 'moderation' ? (
+        <ModerationDashboard />
       ) : activeNavigation === 'settings' ? (
         <SettingsHub
           userId={currentUser.user.id}

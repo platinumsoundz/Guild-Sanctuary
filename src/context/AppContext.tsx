@@ -21,6 +21,7 @@ import {
   isSupabaseAuthConfigured,
   requestSupabaseEmailCode,
   restoreSupabaseSession,
+  updateSupabaseProfile,
   verifySupabaseEmailCode,
   verifySupabaseTotpCode,
 } from '@/modules/auth';
@@ -29,7 +30,7 @@ import type { Profile } from '@/types/database';
 import { deleteDemoAccount } from '@/services/accountDeletion';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 
-export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'support' | 'settings';
+export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'support' | 'settings' | 'moderation';
 
 export type UserSession = AuthSession;
 
@@ -47,10 +48,10 @@ interface AppContextValue {
   verifyEmailCode: (code: string) => Promise<boolean>;
   verifyTwoFactorCode: (code: string) => Promise<void>;
   setTwoFactorEnabled: (enabled: boolean) => void;
-  updateProfile: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => void;
+  updateProfile: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => Promise<void>;
   cancelAuthChallenge: () => void;
   logout: () => void;
-  deleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => void;
+  deleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => Promise<void>;
   setActiveNavigation: (navigation: NavigationState) => void;
   loginAsGuest: () => void;
 }
@@ -109,6 +110,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
 
   const loginAsGuest = () => {
     setIsGuest(true);
+    const timestamp = new Date().toISOString();
     const guestSession: UserSession = {
       user: {
         id: 'guest-user-id',
@@ -116,16 +118,45 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         status: 'active',
         emailVerified: true,
         twoFactorEnabled: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: timestamp,
+        updatedAt: timestamp,
       },
       profile: {
         id: 'guest-profile-id',
         userId: 'guest-user-id',
         username: 'Guest Explorer',
-        avatarUrl: '',
-        role: 'user',
-      } as any,
+        displayName: 'Guest Explorer',
+        bio: null,
+        statusMessage: null,
+        avatarUrl: null,
+        bannerUrl: null,
+        themeColor: '#52765c',
+        location: null,
+        age: null,
+        starSign: null,
+        belief: null,
+        privacy: {
+          bio: true,
+          location: false,
+          age: false,
+          starSign: false,
+          belief: false,
+          socialLinks: false,
+          allowDirectMessages: true,
+        },
+        socialLinks: {
+          facebook: null,
+          x: null,
+          youtube: null,
+          xbox: null,
+          playstation: null,
+          steam: null,
+          epicGames: null,
+          reddit: null,
+        },
+        visibility: 'public',
+        role: 'member',
+      },
       permissions: [],
     };
     setCurrentUser(guestSession);
@@ -240,15 +271,18 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     setCurrentUser(session);
   };
 
-  const updateProfile = (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => {
+  const updateProfile = async (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => {
     if (!currentUser) {
       throw new Error('Sign in before editing your profile.');
     }
     if (isGuest) {
       throw new Error('Profile editing is disabled in Guest Mode.');
     }
+
     if (isSupabaseAuthConfigured()) {
-      throw new Error('Profile editing is not yet enabled for Supabase accounts.');
+      const profile = await updateSupabaseProfile(currentUser.user.id, updates);
+      setCurrentUser({ ...currentUser, profile });
+      return;
     }
 
     const session = updateLocalProfile(currentUser.user.id, updates);
@@ -277,25 +311,45 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     setCurrentUser(null);
     setIsGuest(false);
     setActiveNavigation('feed');
-    cancelAuthChallenge();
+    setPendingEmail(null);
+    setPendingTwoFactorEmail(null);
+    setPendingTotp(null);
   };
 
-  const deleteAccount = (emailConfirmation: string, phrase: string, twoFactorCode: string) => {
+  const deleteAccount = async (emailConfirmation: string, phrase: string, twoFactorCode: string) => {
     if (!currentUser) {
       throw new Error('Sign in before deleting your account.');
     }
     if (isGuest) {
       throw new Error('Guest accounts cannot be deleted this way.');
     }
+
     if (isSupabaseAuthConfigured()) {
-      throw new Error('Account deletion must be completed through the verified support process. In-app deletion is not enabled yet.');
+      const response = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailConfirmation, phrase, twoFactorCode }),
+      });
+      const result: unknown = await response.json().catch(() => null);
+      if (!response.ok) {
+        const message = typeof result === 'object' && result !== null && 'error' in result && typeof result.error === 'string'
+          ? result.error
+          : 'Your account could not be deleted.';
+        throw new Error(message);
+      }
+      await getSupabaseBrowserClient().auth.signOut({ scope: 'local' }).catch(() => undefined);
+    } else {
+      deleteDemoAccount(currentUser.user.id, emailConfirmation, phrase, twoFactorCode);
     }
-    deleteDemoAccount(currentUser.user.id, emailConfirmation, phrase, twoFactorCode);
+
     lockPrivateProfileVault(currentUser.user.id);
+    clearStoredSession();
     setCurrentUser(null);
     setIsGuest(false);
     setActiveNavigation('feed');
-    cancelAuthChallenge();
+    setPendingEmail(null);
+    setPendingTwoFactorEmail(null);
+    setPendingTotp(null);
   };
 
   return (

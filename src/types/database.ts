@@ -1,6 +1,7 @@
 import type { Coordinates } from './index';
 
 export type UserStatus = 'active' | 'suspended';
+export type UserRole = 'member' | 'moderator' | 'admin';
 export type FriendshipStatus = 'pending' | 'accepted' | 'blocked';
 export type UserPermission = 'feed:read' | 'post:create' | 'event:rsvp' | 'message:send' | 'profile:edit';
 export type ProfileVisibility = 'public' | 'private';
@@ -81,7 +82,7 @@ export interface Profile {
   privacy: ProfilePrivacy;
   socialLinks: SocialLinks;
   visibility: ProfileVisibility;
-  role: string;
+  role: UserRole;
 }
 
 export interface PublicProfile {
@@ -100,7 +101,7 @@ export interface PublicProfile {
   belief: string | null;
   socialLinks: SocialLinks;
   allowDirectMessages: boolean;
-  role: string;
+  role: UserRole;
 }
 
 export interface Post {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import type { Conversation, PublicProfile } from '@/types/database';
 import { searchPublicProfiles } from '@/modules/profiles';
 import { createGroupConversation, fetchUserConversations } from './service';
@@ -21,7 +21,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
       setConversations(await fetchUserConversations(currentUserId));
       setError(null);
@@ -30,11 +30,11 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentUserId]);
 
   useEffect(() => {
     void refresh();
-  }, [currentUserId]);
+  }, [refresh]);
 
   const search = async (value: string) => {
     setQuery(value);

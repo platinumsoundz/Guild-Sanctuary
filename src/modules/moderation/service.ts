@@ -36,11 +36,14 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
 
   const { data: profile, error: profileError } = await client
     .from('profiles')
-    .select('role,status')
+    .select('role,status,suspended_until')
     .eq('id', userData.user.id)
     .single();
   if (profileError) throw new Error(`Your moderation permissions could not be checked: ${profileError.message}`);
-  if (!['moderator', 'admin'].includes(profile.role) || profile.status !== 'active') {
+  const suspensionExpired = profile.status === 'suspended'
+    && profile.suspended_until !== null
+    && Date.parse(profile.suspended_until) <= Date.now();
+  if (!['moderator', 'admin'].includes(profile.role) || (profile.status !== 'active' && !suspensionExpired)) {
     throw new Error('This account is not authorized to use moderation tools.');
   }
 

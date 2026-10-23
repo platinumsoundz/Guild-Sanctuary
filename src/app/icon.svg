@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="The Sanctuary">
+  <rect width="64" height="64" rx="16" fill="#0f172a"/>
+  <circle cx="32" cy="32" r="22" fill="none" stroke="#a7f3d0" stroke-width="2" opacity=".55"/>
+  <path d="M32 14c7 7 11 13 11 20a11 11 0 0 1-22 0c0-7 4-13 11-20Z" fill="#a7f3d0" opacity=".9"/>
+  <path d="M32 26v20M32 36l-6-6M32 42l6-6" fill="none" stroke="#0f172a" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

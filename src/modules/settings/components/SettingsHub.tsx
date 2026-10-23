@@ -2,6 +2,13 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import type { Profile, ProfilePrivacy, SocialLinks } from '@/types/database';
+import {
+  isSupabaseAuthConfigured,
+  lockPrivateProfileVault,
+  savePrivateProfileVault,
+  unlockPrivateProfileVault,
+  type PrivateProfileData,
+} from '@/modules/auth';
 import { useAccountSettings } from '../useAccountSettings';
 import styles from './SettingsHub.module.css';
 
@@ -12,8 +19,8 @@ interface SettingsHubProps {
   privacy: ProfilePrivacy;
   visibility: Profile['visibility'];
   socialLinks: SocialLinks;
-  onUpdateProfile: (updates: Partial<Pick<Profile, 'privacy' | 'visibility' | 'socialLinks'>>) => void;
-  onDeleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => void;
+  onUpdateProfile: (updates: Partial<Pick<Profile, 'privacy' | 'visibility' | 'socialLinks'>>) => Promise<void>;
+  onDeleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => Promise<void>;
 }
 
 const preferenceLabels = {
@@ -62,26 +69,33 @@ export function SettingsHub({
   const [deletePhrase, setDeletePhrase] = useState('');
   const [deleteCode, setDeleteCode] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [vaultPassphrase, setVaultPassphrase] = useState('');
+  const [vaultData, setVaultData] = useState<PrivateProfileData | null>(null);
+  const [vaultError, setVaultError] = useState<string | null>(null);
+  const [vaultStatus, setVaultStatus] = useState<string | null>(null);
+  const [isVaultBusy, setIsVaultBusy] = useState(false);
+  const vaultConfigured = isSupabaseAuthConfigured();
 
   useEffect(() => {
     document.documentElement.dataset.layout = settings.preferences.layout;
   }, [settings.preferences.layout]);
 
-  const updatePreference = (key: keyof typeof preferenceLabels, value: boolean) => {
+  const updatePreference = async (key: keyof typeof preferenceLabels, value: boolean) => {
     try {
-      updatePreferences({ [key]: value });
+      await updatePreferences({ [key]: value });
       if (key === 'allowProfileDiscovery') {
-        onUpdateProfile({ visibility: value ? 'public' : 'private' });
+        await onUpdateProfile({ visibility: value ? 'public' : 'private' });
       }
       if (key === 'allowDirectMessages') {
-        onUpdateProfile({ privacy: { ...privacy, allowDirectMessages: value } });
+        await onUpdateProfile({ privacy: { ...privacy, allowDirectMessages: value } });
       }
+      setError(null);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
     }
   };
 
-  const handleSocialLinks = (event: FormEvent<HTMLFormElement>) => {
+  const handleSocialLinks = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const normalized: SocialLinks = {
@@ -119,7 +133,7 @@ export function SettingsHub({
         }
         normalized[item.key] = url.toString();
       }
-      onUpdateProfile({ socialLinks: normalized });
+      await onUpdateProfile({ socialLinks: normalized });
       setLinksDraft(normalized);
       setError(null);
     } catch (saveError) {
@@ -127,13 +141,54 @@ export function SettingsHub({
     }
   };
 
-  const handleDelete = (event: FormEvent<HTMLFormElement>) => {
+  const handleUnlockVault = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setVaultError(null);
+    setVaultStatus(null);
+    setIsVaultBusy(true);
+    try {
+      setVaultData(await unlockPrivateProfileVault(userId, vaultPassphrase));
+      setVaultPassphrase('');
+      setVaultStatus('Private vault unlocked for this browser session.');
+    } catch (unlockError) {
+      setVaultError(unlockError instanceof Error ? unlockError.message : 'The private vault could not be unlocked.');
+    } finally {
+      setIsVaultBusy(false);
+    }
+  };
+
+  const handleSaveVault = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!vaultData) return;
+    setVaultError(null);
+    setVaultStatus(null);
+    setIsVaultBusy(true);
+    try {
+      await savePrivateProfileVault(userId, vaultData);
+      setVaultStatus('Encrypted private details saved.');
+    } catch (saveError) {
+      setVaultError(saveError instanceof Error ? saveError.message : 'The private vault could not be saved.');
+    } finally {
+      setIsVaultBusy(false);
+    }
+  };
+
+  const handleLockVault = () => {
+    lockPrivateProfileVault(userId);
+    setVaultData(null);
+    setVaultPassphrase('');
+    setVaultError(null);
+    setVaultStatus('Private vault locked.');
+  };
+
+  const handleDelete = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsDeleting(true);
     try {
-      onDeleteAccount(deleteEmail, deletePhrase, deleteCode);
+      await onDeleteAccount(deleteEmail, deletePhrase, deleteCode);
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : 'The account could not be deleted.');
+    } finally {
       setIsDeleting(false);
     }
   };
@@ -155,7 +210,7 @@ export function SettingsHub({
               {(Object.entries(preferenceLabels) as [keyof typeof preferenceLabels, string][]).map(([key, label]) => (
                 <label className={styles.toggleRow} key={key}>
                   <span>{label}</span>
-                  <input type="checkbox" checked={settings.preferences[key]} onChange={(event) => updatePreference(key, event.currentTarget.checked)} />
+                  <input type="checkbox" checked={settings.preferences[key]} onChange={(event) => void updatePreference(key, event.currentTarget.checked)} />
                 </label>
               ))}
             </div>
@@ -169,12 +224,15 @@ export function SettingsHub({
                 const selectedVisibility = event.currentTarget.value;
                 if (selectedVisibility !== 'public' && selectedVisibility !== 'private') return;
                 const nextVisibility = selectedVisibility;
-                try {
-                  updatePreferences({ allowProfileDiscovery: nextVisibility === 'public' });
-                  onUpdateProfile({ visibility: nextVisibility });
-                } catch (saveError) {
-                  setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
-                }
+                void (async () => {
+                  try {
+                    await updatePreferences({ allowProfileDiscovery: nextVisibility === 'public' });
+                    await onUpdateProfile({ visibility: nextVisibility });
+                    setError(null);
+                  } catch (saveError) {
+                    setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
+                  }
+                })();
               }}>
                 <option value="public">Public</option>
                 <option value="private">Private</option>
@@ -188,12 +246,14 @@ export function SettingsHub({
                     type="checkbox"
                     checked={privacy[key]}
                     onChange={(event) => {
-                      try {
-                        onUpdateProfile({ privacy: { ...privacy, [key]: event.currentTarget.checked } });
-                        setError(null);
-                      } catch (saveError) {
-                        setError(saveError instanceof Error ? saveError.message : 'The privacy setting could not be saved.');
-                      }
+                      void (async () => {
+                        try {
+                          await onUpdateProfile({ privacy: { ...privacy, [key]: event.currentTarget.checked } });
+                          setError(null);
+                        } catch (saveError) {
+                          setError(saveError instanceof Error ? saveError.message : 'The privacy setting could not be saved.');
+                        }
+                      })();
                     }}
                   />
                 </label>
@@ -224,17 +284,84 @@ export function SettingsHub({
             </form>
           </section>
 
+          {vaultConfigured && (
+            <section className={styles.panel} aria-labelledby="vault-title">
+              <h2 id="vault-title">Private profile vault</h2>
+              <p className={styles.hint}>
+                Encrypt optional details with a passphrase. The server stores ciphertext only, and the
+                passphrase never leaves this browser. If you lose it, the vault cannot be recovered.
+              </p>
+              {vaultError && <p className={styles.error} role="alert">{vaultError}</p>}
+              {vaultStatus && <p className={styles.hint} role="status">{vaultStatus}</p>}
+              {!vaultData ? (
+                <form className={styles.linksForm} onSubmit={(event) => void handleUnlockVault(event)}>
+                  <label className={styles.field}>
+                    <span>Vault passphrase</span>
+                    <input
+                      type="password"
+                      autoComplete="current-password"
+                      minLength={12}
+                      maxLength={256}
+                      value={vaultPassphrase}
+                      onChange={(event) => setVaultPassphrase(event.currentTarget.value)}
+                      required
+                    />
+                  </label>
+                  <button className={styles.primaryButton} type="submit" disabled={isVaultBusy}>
+                    {isVaultBusy ? 'Unlocking…' : 'Unlock vault'}
+                  </button>
+                </form>
+              ) : (
+                <form className={styles.linksForm} onSubmit={(event) => void handleSaveVault(event)}>
+                  <label className={styles.field}>
+                    <span>Private bio</span>
+                    <textarea
+                      maxLength={4000}
+                      rows={3}
+                      value={vaultData.bio}
+                      onChange={(event) => setVaultData({ ...vaultData, bio: event.currentTarget.value })}
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span>Private location</span>
+                    <input
+                      maxLength={4000}
+                      value={vaultData.location}
+                      onChange={(event) => setVaultData({ ...vaultData, location: event.currentTarget.value })}
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span>Private notes</span>
+                    <textarea
+                      maxLength={4000}
+                      rows={3}
+                      value={vaultData.belief}
+                      onChange={(event) => setVaultData({ ...vaultData, belief: event.currentTarget.value })}
+                      placeholder="Only you can decrypt this after unlocking."
+                    />
+                  </label>
+                  <div className={styles.formActions}>
+                    <button className={styles.textButton} type="button" onClick={handleLockVault}>Lock vault</button>
+                    <button className={styles.primaryButton} type="submit" disabled={isVaultBusy}>
+                      {isVaultBusy ? 'Saving…' : 'Save encrypted details'}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </section>
+          )}
+
           <section className={styles.panel} aria-labelledby="layout-title">
             <h2 id="layout-title">Layout arrangement</h2>
             <div className={styles.layoutChoices}>
-              <label><input type="radio" name="layout" value="comfortable" checked={settings.preferences.layout === 'comfortable'} onChange={() => updatePreferences({ layout: 'comfortable' })} /> Comfortable</label>
-              <label><input type="radio" name="layout" value="compact" checked={settings.preferences.layout === 'compact'} onChange={() => updatePreferences({ layout: 'compact' })} /> Compact</label>
+              <label><input type="radio" name="layout" value="comfortable" checked={settings.preferences.layout === 'comfortable'} onChange={() => void updatePreferences({ layout: 'comfortable' }).catch((saveError: unknown) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Comfortable</label>
+              <label><input type="radio" name="layout" value="compact" checked={settings.preferences.layout === 'compact'} onChange={() => void updatePreferences({ layout: 'compact' }).catch((saveError: unknown) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Compact</label>
             </div>
           </section>
 
           <section className={`${styles.panel} ${styles.dangerPanel}`} aria-labelledby="delete-title">
             <h2 id="delete-title">Delete account</h2>
-            <p className={styles.hint}>This permanently removes your local demo account and signs you out. This prototype cannot securely erase server data.</p>
+            <p className={styles.hint}>This permanently removes your account, profile, posts, messages, and stored media, then signs you out. This cannot be undone.</p>
             <form className={styles.linksForm} onSubmit={handleDelete}>
               <label className={styles.field}>
                 <span>Confirm your account email</span>

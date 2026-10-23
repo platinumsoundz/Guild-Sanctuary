@@ -11,6 +11,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // The repository can be checked out below a parent directory that also has a
+  // lockfile (for example /public/package-lock.json). Pin Turbopack to this app
+  // so it does not infer the wrong workspace root.
+  turbopack: {
+    root: process.cwd(),
+  },
   async headers() {
     return [
       {

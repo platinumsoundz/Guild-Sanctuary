@@ -2,8 +2,13 @@
 
 Owns community-wide direct and group conversation threads, message history, conversation discovery, and message composition. Group chats require a name and at least two additional selected public members. Conversations and messages are shared across The Sanctuary; there are no world-specific stores.
 
-These mock checks are not authorization boundaries. Production messaging needs server-side participant authorization on every read/write, persistent storage, abuse controls, rate limits, moderation/reporting paths, retention policy, and transport/storage encryption decisions.
+When Supabase is configured, `service.ts` delegates to `supabaseRepository.ts`:
 
-`supabaseRepository.ts` contains an optional Supabase/PostgreSQL adapter for direct/group conversation creation, durable message writes, and per-conversation INSERT subscriptions. The active inbox and thread still use the in-memory `service.ts`; do not treat the adapter as active until Supabase Auth is connected and the migration/RLS/Realtime integration tests pass.
+- `create_sanctuary_conversation` creates or reuses a direct conversation transactionally.
+- Conversations and messages are durable Postgres rows protected by RLS.
+- `useDirectMessages` subscribes to Realtime INSERT events for the open conversation and de-duplicates messages.
+- The in-memory store remains a development fallback when Supabase is absent.
+
+These UI checks are not authorization boundaries. Production messaging still needs abuse controls, rate limits, moderation/reporting paths, retention policy, and operational monitoring. Realtime must be enabled for `messages` and tested with RLS.
 
 End-to-end encryption is not implemented. The intended direction is a maintained Signal-protocol implementation, not custom cryptography; encrypted messaging must remain unavailable until device/key provisioning, key rotation on group membership changes, multi-device recovery, backup behavior, and user-reported evidence workflows have been validated. Database/TLS encryption alone is not E2EE.

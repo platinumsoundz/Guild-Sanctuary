@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import type { PostMediaType, PublicProfile } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
-import { getLocalPublicProfileById } from '@/modules/auth';
+import { getPublicProfileById } from '@/services/publicProfiles';
 import { useFeed } from '@/modules/feeds';
 import { ReportContentButton } from '@/modules/moderation';
 import { PostEngagement } from './PostEngagement';
@@ -30,18 +30,21 @@ export function FeedContent() {
   useEffect(() => {
     let cancelled = false;
     const uniqueAuthorIds = [...new Set(posts.map((post) => post.authorId))];
-    const profiles = uniqueAuthorIds.flatMap((authorId) => {
+
+    void Promise.all(uniqueAuthorIds.map(async (authorId) => {
       try {
-        const profile = getLocalPublicProfileById(authorId);
-        return profile ? [[authorId, profile] as const] : [];
+        const profile = await getPublicProfileById(authorId);
+        return profile ? [authorId, profile] as const : null;
       } catch {
-        return [];
+        return null;
       }
+    })).then((profiles) => {
+      if (cancelled) return;
+      setAuthors(Object.fromEntries(
+        profiles.filter((profile): profile is readonly [string, PublicProfile] => profile !== null),
+      ));
     });
 
-    if (!cancelled) {
-      setAuthors(Object.fromEntries(profiles));
-    }
     return () => {
       cancelled = true;
     };

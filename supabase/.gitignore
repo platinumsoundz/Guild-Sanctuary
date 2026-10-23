@@ -1,0 +1,2 @@
+# Supabase CLI local state — never commit project refs or cached versions.
+.temp/

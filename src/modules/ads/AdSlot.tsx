@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './AdSlot.module.css';
-import { ADSENSE_CLIENT_ID, isValidAdsenseClientId } from './config';
+import { ADSENSE_CLIENT_ID, ADS_CONSENT_EVENT, isValidAdsenseClientId } from './config';
+import { hasAdsConsent, type AdsConsent } from './consent';
 
 export type AdSlotPlacement = 'feed-inline' | 'feed-sidebar' | 'shorts';
 
@@ -27,9 +28,19 @@ export function AdSlot({ placement }: AdSlotProps) {
   const adRef = useRef<HTMLModElement>(null);
   const publisherId = ADSENSE_CLIENT_ID;
   const configured = isValidAdsenseClientId(publisherId) && Boolean(slotId && /^\d+$/.test(slotId));
+  const [consented, setConsented] = useState(false);
 
   useEffect(() => {
-    if (!configured || !adRef.current || adRef.current.dataset.adRequested === 'true') return;
+    setConsented(hasAdsConsent());
+    const handleConsent = (event: Event) => {
+      setConsented((event as CustomEvent<AdsConsent>).detail === 'granted');
+    };
+    window.addEventListener(ADS_CONSENT_EVENT, handleConsent);
+    return () => window.removeEventListener(ADS_CONSENT_EVENT, handleConsent);
+  }, []);
+
+  useEffect(() => {
+    if (!configured || !consented || !adRef.current || adRef.current.dataset.adRequested === 'true') return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       adRef.current.dataset.adRequested = 'true';
@@ -37,9 +48,9 @@ export function AdSlot({ placement }: AdSlotProps) {
       // Ad blockers, consent controls, and invalid/unapproved units can prevent ad requests.
       console.info('AdSense placement was not requested.', error);
     }
-  }, [configured, placement]);
+  }, [configured, consented, placement]);
 
-  if (!configured) return null;
+  if (!configured || !consented) return null;
 
   return (
     <aside className={styles.container} aria-label="Advertisement">

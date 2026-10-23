@@ -1,4 +1,8 @@
+'use client';
+
 import type { AccountPreferences, AccountSettings } from '@/types/database';
+import { isSupabaseAuthConfigured } from '@/modules/auth';
+import { getSupabaseBrowserClient } from '@/services/supabase';
 
 const storagePrefix = 'guild-sanctuary:settings:v1:';
 
@@ -38,10 +42,7 @@ function normalizePreferences(value: unknown): AccountPreferences {
   };
 }
 
-export function fetchAccountSettings(userId: string): AccountSettings {
-  if (!userId) {
-    throw new Error('Sign in to view account settings.');
-  }
+function readLocalSettings(userId: string): AccountSettings {
   let stored: unknown;
   try {
     const raw = getStorage().getItem(`${storagePrefix}${userId}`);
@@ -61,27 +62,85 @@ export function fetchAccountSettings(userId: string): AccountSettings {
   };
 }
 
-export function saveAccountPreferences(userId: string, preferences: AccountPreferences): AccountSettings {
-  if (!userId) {
-    throw new Error('Sign in before changing account settings.');
-  }
-  if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') {
-    throw new Error('Choose a supported layout arrangement.');
-  }
-  const settings: AccountSettings = {
-    userId,
-    preferences,
-    updatedAt: new Date().toISOString(),
-  };
+function writeLocalSettings(settings: AccountSettings): AccountSettings {
   try {
-    getStorage().setItem(`${storagePrefix}${userId}`, JSON.stringify(settings));
+    getStorage().setItem(`${storagePrefix}${settings.userId}`, JSON.stringify(settings));
   } catch {
     throw new Error('Account settings could not be saved in this browser.');
   }
   return settings;
 }
 
+export async function fetchAccountSettings(userId: string): Promise<AccountSettings> {
+  if (!userId) {
+    throw new Error('Sign in to view account settings.');
+  }
+
+  if (!isSupabaseAuthConfigured()) {
+    return readLocalSettings(userId);
+  }
+
+  const client = getSupabaseBrowserClient();
+  const { data, error } = await client
+    .from('account_settings')
+    .select('preferences,updated_at')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throw new Error(`Account settings could not be loaded: ${error.message}`);
+
+  if (!data) {
+    const { data: created, error: createError } = await client
+      .from('account_settings')
+      .insert({ user_id: userId, preferences: defaultAccountPreferences as unknown as Record<string, unknown> })
+      .select('preferences,updated_at')
+      .single();
+    if (createError) throw new Error(`Account settings could not be created: ${createError.message}`);
+    return {
+      userId,
+      preferences: normalizePreferences(created.preferences),
+      updatedAt: created.updated_at,
+    };
+  }
+
+  return {
+    userId,
+    preferences: normalizePreferences(data.preferences),
+    updatedAt: data.updated_at,
+  };
+}
+
+export async function saveAccountPreferences(userId: string, preferences: AccountPreferences): Promise<AccountSettings> {
+  if (!userId) {
+    throw new Error('Sign in before changing account settings.');
+  }
+  if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') {
+    throw new Error('Choose a supported layout arrangement.');
+  }
+
+  if (isSupabaseAuthConfigured()) {
+    const { data, error } = await getSupabaseBrowserClient()
+      .from('account_settings')
+      .upsert({ user_id: userId, preferences: preferences as unknown as Record<string, unknown> }, { onConflict: 'user_id' })
+      .select('preferences,updated_at')
+      .single();
+    if (error) throw new Error(`Account settings could not be saved: ${error.message}`);
+    return {
+      userId,
+      preferences: normalizePreferences(data.preferences),
+      updatedAt: data.updated_at,
+    };
+  }
+
+  return writeLocalSettings({
+    userId,
+    preferences,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 export function removeAccountSettings(userId: string): void {
+  if (isSupabaseAuthConfigured()) return;
+
   try {
     getStorage().removeItem(`${storagePrefix}${userId}`);
   } catch {

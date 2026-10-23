@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Message } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
+import { isSupabaseAuthConfigured } from '@/modules/auth';
+import { subscribeToPersistentMessages } from './supabaseRepository';
 import { fetchConversationThread, createDirectConversation, sendConversationMessage } from './service';
 
 interface UseDirectMessagesResult {
@@ -24,6 +26,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
 
   useEffect(() => {
     let cancelled = false;
+    let unsubscribe: (() => void) | null = null;
     setIsLoading(true);
     setMessages([]);
     const openThread = selectedConversationId
@@ -32,17 +35,31 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
         ? createDirectConversation(userId, peerUserId)
         : Promise.reject(new Error('Choose a conversation to open.'));
     openThread.then((thread) => {
-      if (!cancelled) {
-        setConversationId(thread.conversation.id);
-        setMessages(thread.messages);
-        setError(null);
+      if (cancelled) return;
+      setConversationId(thread.conversation.id);
+      setMessages(thread.messages);
+      setError(null);
+
+      if (isSupabaseAuthConfigured()) {
+        unsubscribe = subscribeToPersistentMessages(
+          thread.conversation.id,
+          (message) => {
+            setMessages((currentMessages) => currentMessages.some((item) => item.id === message.id)
+              ? currentMessages
+              : [...currentMessages, message]);
+          },
+          (message) => setError(message),
+        );
       }
     }).catch((loadError) => {
       if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Conversation could not be opened.');
     }).finally(() => {
       if (!cancelled) setIsLoading(false);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   }, [peerUserId, selectedConversationId, userId]);
 
   const refresh = useCallback(async () => {

@@ -28,9 +28,12 @@ export {
 export type { PrivateProfileData } from './privateProfileVault';
 export {
   isSupabaseAuthConfigured,
+  mapProfileRow,
+  mapPublicProfileRow,
   requestSupabaseEmailCode,
   restoreSupabaseSession,
+  updateSupabaseProfile,
   verifySupabaseEmailCode,
   verifySupabaseTotpCode,
 } from './supabaseAuth';
-export type { SupabaseEmailVerification } from './supabaseAuth';
+export type { SupabaseEmailVerification, SupabaseProfileUpdate } from './supabaseAuth';

@@ -165,8 +165,9 @@ export function SupportPanel() {
       <p className={styles.privacy}>
         Contributions are optional and do not affect community visibility. External payment providers process
         transactions under their own terms. Voluntary contributions are not linked to your account; digital
-        purchases do not grant in-app entitlements until that service is implemented. We do not use behavioral
-        advertising.
+        purchases do not grant in-app entitlements until that service is implemented. Web advertising is off
+        until you allow it; if you allow ads, Google AdSense may use cookies or similar technologies. See the{' '}
+        <a href="/privacy">privacy notice</a>.
       </p>
     </section>
   );

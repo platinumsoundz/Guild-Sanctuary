@@ -1,11 +1,19 @@
 # Authentication
 
-Owns registration, sign-in, sign-out, email verification challenges, session lifecycle, and mock second-factor challenges. `AuthenticationForm`, `AuthenticationGateway`, and `AuthenticationModal` provide the UI; `sessionStore.ts` owns browser-local demo account persistence and validation.
+Owns registration, sign-in, sign-out, email verification, optional TOTP, session lifecycle, and the authentication UI. `AuthenticationForm`, `AuthenticationGateway`, and `AuthenticationModal` provide the UI; `sessionStore.ts` owns the browser-local demo fallback; `supabaseAuth.ts` owns the Supabase flow.
 
-The current flow stores demo accounts in `localStorage`, uses the fixed code `000000` for email and 2FA steps, and does not send email or store passwords. Session roles/permissions are UI composition data only. This is not secure authentication and has no production security guarantees. Replace it with server-authoritative identity, verification, credential, and session providers before handling real accounts.
+When Supabase is configured, the app uses Supabase Auth:
 
-Google, Facebook, Microsoft/Xbox, and PlayStation federated sign-in are not configured in this demo. Production sign-in requires registered provider applications, server-side authorization-code/OIDC validation, state and nonce checks, immutable provider subject linking, and secure session issuance. Provider email verification must not automatically bypass an account's required 2FA or step-up authentication.
+- Email sign-in/up sends a secure link to `/auth/callback` and can also be completed with the numeric OTP from the email template. The form offers a “Use a code instead” path.
+- The callback route exchanges PKCE `code` values or verifies token-hash links and writes SSR session cookies.
+- `src/proxy.ts` refreshes the session cookies on subsequent requests.
+- A verified TOTP factor upgrades the session to `aal2`; community writes and account deletion require that assurance when 2FA is enabled.
+- The profile row is created by a database trigger from auth metadata and loaded into the session.
 
-Expose only the authentication operations needed by the app shell through `index.ts`. Use shared contracts from `src/types/database.ts` and `src/types/index.ts` for data that crosses module boundaries; do not import implementation details from sibling modules.
+In Supabase Authentication → URL Configuration, allow the deployed origin's `/auth/callback` URL and the local development callback. Open links in the browser/device where signup started so the PKCE verifier is available.
 
-When Supabase Auth is configured, the app requests email verification and sends `emailRedirectTo` to `/auth/callback`. That route exchanges Supabase PKCE `code` values (and supports token-hash confirmation links) into SSR cookies before redirecting to the app. In Supabase Authentication → URL Configuration, allow the deployed origin's `/auth/callback` URL and the local development callback. The email template's confirmation link must redirect to an allowed URL; links should be opened in the browser/device where signup was started for the PKCE verifier to be available. The local session store remains the fallback only when Supabase public configuration is absent. Database-backed application repositories still require the deployed schema, Auth profile creation, and tested RLS.
+When Supabase is absent, the local demo fallback uses `localStorage`, fixed code `000000`, and no passwords. Production sign-in is disabled without Supabase. The local store is not secure authentication and must never handle real accounts.
+
+Federated sign-in is not configured. Production provider integration requires registered applications, server-side authorization-code/OIDC validation, state and nonce checks, immutable provider subject linking, and secure session issuance. Provider email verification must not bypass an account's required 2FA or step-up authentication.
+
+Expose only the operations needed by the app shell through `index.ts`. Use shared contracts from `src/types/database.ts` and `src/types/index.ts`; do not import implementation details from sibling modules.
