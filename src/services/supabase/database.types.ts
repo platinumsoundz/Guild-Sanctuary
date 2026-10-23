@@ -273,6 +273,19 @@ export interface Database {
         };
         Returns: boolean;
       };
+      record_token_bundle_purchase: {
+        Args: {
+          requested_event_id: string;
+          requested_event_type: string;
+          requested_session_id: string;
+          requested_user_id: string;
+          requested_bundle_id: 'tokens_100' | 'tokens_600' | 'tokens_1200';
+          requested_amount_total: number;
+          requested_currency: string;
+          requested_livemode: boolean;
+        };
+        Returns: number;
+      };
     };
     Enums: {
       world_type: SanctuaryScope;
