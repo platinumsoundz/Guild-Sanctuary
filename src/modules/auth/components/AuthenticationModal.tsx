@@ -98,20 +98,23 @@ export function AuthenticationModal({
             Close
           </button>
         </div>
-        <AuthenticationForm
-          initialMode="login"
-          initialEmail={pendingEmail ?? ''}
-          onLogin={onLogin}
-          onSignup={onSignup}
-          onVerifyEmailCode={onVerifyEmailCode}
-          onVerifyTwoFactorCode={onVerifyTwoFactorCode}
-          onCancelChallenge={onCancelChallenge}
-          onSuccess={onClose}
-        />
+        {!currentUser && (
+          <AuthenticationForm
+            initialMode="login"
+            initialEmail={pendingEmail ?? ''}
+            onLogin={onLogin}
+            onSignup={onSignup}
+            onVerifyEmailCode={onVerifyEmailCode}
+            onVerifyTwoFactorCode={onVerifyTwoFactorCode}
+            onCancelChallenge={onCancelChallenge}
+            onSuccess={onClose}
+          />
+        )}
         {currentUser && (
           <div className={styles.accountActions}>
             <div className={styles.accountDetails}>
               <span>Signed in as {currentUser.profile.displayName}</span>
+              <span>@{currentUser.profile.username}</span>
               <span>{currentUser.user.email}</span>
               {!isSupabaseConfigured() && <button
                 className={styles.securityButton}
