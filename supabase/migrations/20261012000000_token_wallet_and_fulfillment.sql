@@ -27,6 +27,9 @@ create table public.token_ledger (
   )
 );
 
+create index token_ledger_user_created_idx
+  on public.token_ledger (user_id, created_at desc);
+
 alter table public.token_wallets enable row level security;
 alter table public.token_ledger enable row level security;
 
