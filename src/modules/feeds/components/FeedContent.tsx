@@ -135,7 +135,7 @@ export function FeedContent() {
         </div>
         <span className={styles.sortLabel}>LATEST</span>
       </div>
-      <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
+      {currentUser && !isGuest && <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
         <label className={styles.composerLabel} htmlFor="post-content">Share with Sanctuary</label>
         <textarea
           className="w-full max-w-full"
@@ -181,7 +181,7 @@ export function FeedContent() {
           <span>{draft.length}/2800</span>
           <button className={styles.actionButton} type="submit">Publish</button>
         </div>
-      </form>
+      </form>}
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isLoading && <p className={styles.feedStatus}>Loading your feed...</p>}
       {!isLoading && posts.length === 0 && (
