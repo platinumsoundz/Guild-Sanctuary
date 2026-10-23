@@ -27,6 +27,7 @@ export type ProfileRow = {
   status: 'active' | 'suspended' | 'banned';
   suspended_until: string | null;
   allow_direct_messages: boolean;
+  allow_profile_discovery: boolean;
   visibility: 'public' | 'private';
   created_at: string;
   updated_at: string;
