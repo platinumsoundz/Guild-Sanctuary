@@ -117,8 +117,9 @@ export function WalletPanel({ userId, isGuest }: WalletPanelProps) {
           <ul className={styles.historyList}>
             {snapshot.ledger.map((entry) => (
               <li className={styles.historyRow} key={entry.id}>
-                <span>Bundle purchase · {entry.bundleId.replace('tokens_', '')} tokens</span>
+                <span>Bundle purchase · {entry.tokensDelta.toLocaleString('en-GB')} tokens</span>
                 <span>+{entry.tokensDelta.toLocaleString('en-GB')} tokens</span>
+                <span>{gbp.format(entry.amountMinor / 100)}</span>
                 <time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleDateString('en-GB')}</time>
               </li>
             ))}
