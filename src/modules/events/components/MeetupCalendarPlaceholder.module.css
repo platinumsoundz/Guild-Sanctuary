@@ -60,7 +60,7 @@
 
 .formRow {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
+  grid-template-columns: 1.2fr 0.9fr 1fr 1fr;
   gap: 12px;
 }
 
@@ -91,6 +91,12 @@
 .field textarea {
   min-height: 70px;
   resize: vertical;
+}
+
+.field input[type='date'],
+.field input[type='time'] {
+  appearance: auto;
+  color-scheme: light dark;
 }
 
 .formActions,
@@ -230,10 +236,6 @@
 
   .formRow {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .formRow .field:first-child {
-    grid-column: 1 / -1;
   }
 
   .eventCard {
