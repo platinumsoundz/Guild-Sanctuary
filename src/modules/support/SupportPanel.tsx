@@ -174,9 +174,6 @@ export function SupportPanel() {
             </section>
           )}
 
-          {!stripeDonationUrl && !options.lemonSqueezyCheckoutUrl && !options.stripeTipsEnabled && !options.monzoContributionUrl && (
-            <p className={styles.status}>Payment and contribution options are not currently configured.</p>
-          )}
         </div>
       )}
 
