@@ -275,7 +275,9 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       const { error } = await getSupabaseBrowserClient()
         .from('profiles')
         .update(databaseUpdates)
-        .eq('id', currentUser.user.id);
+        .eq('id', currentUser.user.id)
+        .select('id')
+        .single();
       if (error) throw new Error(`Profile changes could not be saved: ${error.message}`);
       const refreshedSession = await restoreSupabaseSession();
       if (!refreshedSession) throw new Error('Your profile was saved, but the account session could not be refreshed. Reload the page.');
