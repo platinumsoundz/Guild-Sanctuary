@@ -64,10 +64,12 @@ declare
   existing_entry public.token_ledger%rowtype;
 begin
   if requested_event_id is null or requested_event_id = ''
+    or requested_event_type is null
     or requested_event_type not in ('checkout.session.completed', 'checkout.session.async_payment_succeeded')
     or requested_session_id is null or requested_session_id = ''
     or requested_user_id is null
     or requested_livemode is null
+    or requested_currency is null
     or requested_currency <> 'gbp'
   then
     raise exception 'Invalid token purchase event' using errcode = '22023';
