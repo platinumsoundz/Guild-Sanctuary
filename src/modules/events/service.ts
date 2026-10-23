@@ -132,6 +132,25 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
     throw new Error('Sign in before creating an event.');
   }
 
+  if (isSupabaseCommunityStorageConfigured()) {
+    const userId = await requireCommunityStorageUser(input.creatorId);
+    const { data, error } = await getSupabaseBrowserClient()
+      .from('events')
+      .insert({
+        creator_id: userId,
+        title: input.title.trim(),
+        description: input.description.trim(),
+        latitude: input.locationCoords.latitude,
+        longitude: input.locationCoords.longitude,
+        starts_at: new Date(input.startsAt).toISOString(),
+        ends_at: input.endsAt ? new Date(input.endsAt).toISOString() : null,
+      })
+      .select('*')
+      .single();
+    if (error) throw new Error(`Event could not be saved: ${error.message}`);
+    return toEvent(data);
+  }
+
   await delay();
   const event: Event = {
     id: `event-local-${nextEventId++}`,
