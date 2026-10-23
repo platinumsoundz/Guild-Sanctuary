@@ -176,7 +176,7 @@
 
 .historyRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   gap: 14px;
   padding: 12px 0;
   border-top: 1px solid var(--line);
@@ -209,7 +209,7 @@
   }
 
   .historyRow {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .historyRow time {
