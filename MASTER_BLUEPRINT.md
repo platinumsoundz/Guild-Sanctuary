@@ -47,9 +47,9 @@ Before serving live inventory, verify domain approval, site verification/`ads.tx
 - The Support page contains a public Stripe-hosted voluntary donation link. Those donations are not associated with Sanctuary accounts or reconciled by the app.
 - `/api/checkout`, `/api/webhooks/stripe`, and `/api/community-tips` remain disabled; do not register the disabled Next.js Stripe webhook.
 - Token bundles use separate Supabase Edge Functions: authenticated `token-checkout` creates a Checkout Session from server-side Price IDs; `stripe-token-webhook` verifies the raw Stripe signature and calls an idempotent, service-role-only database RPC.
-- `TOKEN_CHECKOUT_ENABLED` defaults to `false`. Keep it false until the token migration, Edge Functions, Price IDs, webhook endpoint/secrets, mode, and end-to-end staging test are confirmed.
+- `TOKEN_CHECKOUT_ENABLED` defaults to `false`. Enable it only in isolated test-mode staging after migration, Edge Functions, mode-matched Price IDs, webhook secrets, and end-to-end checks are confirmed. Keep live checkout disabled until refund/chargeback handling and a customer-support policy are decided.
 - The shared Stripe Payment Link is not used for token purchases because it cannot securely associate a session with the signed-in account.
-- The initial token release supports balance display and bundle grants only. No spending, transfers, trading, marketplace, cash-out, VIP, promotions, or cosmetics are active. Refund/chargeback reconciliation must be implemented before token redemption or trading is enabled.
+- The initial token release supports balance display and bundle grants only. No spending, transfers, trading, marketplace, cash-out, VIP, promotions, or cosmetics are active. Automatic refund/chargeback reconciliation is not implemented; decide and implement that lifecycle before live sales, token redemption, or trading.
 
 Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do not represent this staged code as production-ready until migration/RLS, webhook idempotency, refund/dispute handling, backups, and staging tests are complete.
 
