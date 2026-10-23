@@ -171,7 +171,7 @@ export function SettingsHub({
                 const nextVisibility = selectedVisibility;
                 try {
                   updatePreferences({ allowProfileDiscovery: nextVisibility === 'public' });
-                  void onUpdateProfile({ visibility: nextVisibility }).catch((saveError) => {
+                  void Promise.resolve(onUpdateProfile({ visibility: nextVisibility })).catch((saveError) => {
                     setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
                   });
                 } catch (saveError) {
@@ -191,7 +191,7 @@ export function SettingsHub({
                     checked={privacy[key]}
                     onChange={(event) => {
                       try {
-                        void onUpdateProfile({ privacy: { ...privacy, [key]: event.currentTarget.checked } })
+                        void Promise.resolve(onUpdateProfile({ privacy: { ...privacy, [key]: event.currentTarget.checked } }))
                           .then(() => setError(null))
                           .catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The privacy setting could not be saved.'));
                       } catch (saveError) {
