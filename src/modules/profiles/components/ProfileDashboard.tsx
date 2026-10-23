@@ -164,7 +164,7 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
         {error && <p className={styles.error} role="alert">{error}</p>}
         <div className={styles.saveRow}>
           {saved && <span role="status">Profile saved</span>}
-          <button className={styles.saveButton} type="submit">Save profile</button>
+          <button className={styles.saveButton} type="submit" disabled={isSaving}>{isSaving ? 'Saving…' : 'Save profile'}</button>
         </div>
       </form>
 
