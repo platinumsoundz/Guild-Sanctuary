@@ -94,6 +94,24 @@ export interface Database {
         currency: 'usd';
         completed_at: string;
       }>;
+      token_wallets: Table<{
+        user_id: string;
+        balance_tokens: number;
+        created_at: string;
+        updated_at: string;
+      }>;
+      token_ledger: Table<{
+        id: string;
+        user_id: string;
+        bundle_id: 'tokens_100' | 'tokens_600' | 'tokens_1200';
+        tokens_delta: number;
+        amount_total: number;
+        currency: 'gbp';
+        stripe_event_id: string;
+        checkout_session_id: string;
+        livemode: boolean;
+        created_at: string;
+      }>;
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
         user_id: string;
