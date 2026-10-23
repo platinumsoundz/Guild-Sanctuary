@@ -7,6 +7,7 @@ import styles from './AuthenticationModal.module.css';
 
 interface AuthenticationModalProps {
   currentUser: AuthSession | null;
+  isGuest: boolean;
   pendingEmail: string | null;
   onClose: () => void;
   onLogin: (email: string) => void | Promise<void>;
@@ -20,6 +21,7 @@ interface AuthenticationModalProps {
 
 export function AuthenticationModal({
   currentUser,
+  isGuest,
   pendingEmail,
   onClose,
   onLogin,
@@ -98,7 +100,7 @@ export function AuthenticationModal({
             Close
           </button>
         </div>
-        {!currentUser && (
+        {(!currentUser || isGuest) && (
           <AuthenticationForm
             initialMode="login"
             initialEmail={pendingEmail ?? ''}
@@ -110,7 +112,7 @@ export function AuthenticationModal({
             onSuccess={onClose}
           />
         )}
-        {currentUser && (
+        {currentUser && !isGuest && (
           <div className={styles.accountActions}>
             <div className={styles.accountDetails}>
               <span>Signed in as {currentUser.profile.displayName}</span>
