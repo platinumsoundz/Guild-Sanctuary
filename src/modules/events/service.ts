@@ -87,6 +87,33 @@ function findEvent(eventId: string): Event | undefined {
 }
 
 export async function fetchEvents(userId: string): Promise<EventView[]> {
+  if (isSupabaseCommunityStorageConfigured()) {
+    const client = getSupabaseBrowserClient();
+    const { data: rows, error } = await client
+      .from('events')
+      .select('*')
+      .eq('state', 'visible')
+      .order('starts_at', { ascending: true });
+    if (error) throw new Error(`Events could not be loaded: ${error.message}`);
+
+    if (rows.length === 0) return [];
+    const eventIds = rows.map((row) => row.id);
+    const [countsResult, rsvpsResult] = await Promise.all([
+      client.from('event_rsvp_counts').select('*').in('event_id', eventIds),
+      userId
+        ? client.from('event_rsvps').select('event_id, status').eq('user_id', userId)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (countsResult.error) throw new Error(`Event RSVP totals could not be loaded: ${countsResult.error.message}`);
+    if (rsvpsResult.error) throw new Error(`Your event RSVPs could not be loaded: ${rsvpsResult.error.message}`);
+    const counts = new Map(countsResult.data.map((row) => [row.event_id, row.going_count]));
+    const viewerStatuses = new Map(rsvpsResult.data.map((row) => [row.event_id, row.status as EventRsvpStatus]));
+    return rows.map((row) => ({
+      ...toEvent(row),
+      rsvpCount: counts.get(row.id) ?? 0,
+      viewerStatus: viewerStatuses.get(row.id) ?? null,
+    }));
+  }
   await delay();
   return events
     .slice()
