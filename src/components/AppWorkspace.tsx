@@ -56,6 +56,10 @@ export function AppWorkspace() {
     if (new URLSearchParams(window.location.search).get('tip') === 'success') {
       setActiveNavigation('support');
     }
+    const walletResult = new URLSearchParams(window.location.search).get('wallet');
+    if (walletResult === 'success' || walletResult === 'cancelled') {
+      setActiveNavigation('wallet');
+    }
   }, [setActiveNavigation]);
 
   useEffect(() => {
@@ -98,7 +102,11 @@ export function AppWorkspace() {
     </main>
   ) : isAuthenticated && currentUser ? (
     <>
-      {activeNavigation === 'feed' ? (
+      {activeNavigation === 'wallet' ? (
+        <main className={styles.supportPage}>
+          <WalletPanel userId={currentUser.user.id} isGuest={isGuest} />
+        </main>
+      ) : activeNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
           <Feed />
