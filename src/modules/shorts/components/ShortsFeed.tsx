@@ -29,6 +29,7 @@ export function ShortsFeed() {
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
+  const recordingPreviewRef = useRef<HTMLVideoElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recordingStreamRef = useRef<MediaStream | null>(null);
   const recordingChunksRef = useRef<Blob[]>([]);
@@ -41,6 +42,14 @@ export function ShortsFeed() {
   useEffect(() => () => {
     if (videoDraft) URL.revokeObjectURL(videoDraft);
   }, [videoDraft]);
+
+  useEffect(() => {
+    const preview = recordingPreviewRef.current;
+    if (!preview) return;
+    preview.srcObject = isRecording ? recordingStreamRef.current : null;
+    if (isRecording) void preview.play().catch(() => undefined);
+    return () => { preview.srcObject = null; };
+  }, [isRecording]);
 
   useEffect(() => {
     let cancelled = false;
@@ -258,7 +267,8 @@ export function ShortsFeed() {
           {isRecording ? 'Stop recording' : 'Record a clip'}
         </button>
         {isRecording && <p className={styles.recordingStatus} role="status">Recording… camera and microphone are active.</p>}
-        {videoDraft && <video className={styles.videoDraftPreview} src={videoDraft} controls muted playsInline />}
+        {isRecording && <video ref={recordingPreviewRef} className={styles.videoDraftPreview} autoPlay muted playsInline />}
+        {videoDraft && !isRecording && <video className={styles.videoDraftPreview} src={videoDraft} controls muted playsInline />}
         <button type="submit" disabled={!videoDraft}>Publish short</button>
       </form>
       {error && <p className={styles.error} role="alert">{error}</p>}
