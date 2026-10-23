@@ -26,8 +26,8 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `messages` | Direct/group conversations and threads | In-memory; optional Supabase repository is not active UI |
 | `profiles` / `settings` | Profile, discovery, privacy, local preferences | Browser-local demo store |
 | `moderation` | Report UI and moderator workflow contracts | Supabase-dependent when configured |
-| `support` | Explains optional community support | No provider is enabled |
-| `economy` | Demo-only wallet, credits, VIP, cosmetics | Browser-local demo state only |
+| `support` | Optional community support | Public Stripe-hosted donation link; no app-side reconciliation |
+| `economy` | Persistent token wallet and bundle purchase foundation | Supabase wallet/ledger migration and Edge Functions staged; checkout disabled by default; no spending/transfers yet |
 | `ads` | Responsive web display slots plus optional native AdMob placements | AdSense IDs via public build-time environment; native AdMob module not wired into the active shell |
 
 ## Sanctuary consolidation
@@ -42,21 +42,20 @@ Web display units are wired through `src/modules/ads/AdSenseScript.tsx` and `AdS
 
 Before serving live inventory, verify domain approval, site verification/`ads.txt` requirements, policy-compliant placement, and an approved consent-management platform for applicable regions. Do not log or infer billable impressions from the rendered units. The native AdMob consent and placements module is separate and is not currently mounted in `AppWorkspace`.
 
-## Payments and support — audit result
+## Payments and support — current state
 
-Payments are disabled by design in this build.
+- The Support page contains a public Stripe-hosted voluntary donation link. Those donations are not associated with Sanctuary accounts or reconciled by the app.
+- `/api/checkout`, `/api/webhooks/stripe`, and `/api/community-tips` remain disabled; do not register the disabled Next.js Stripe webhook.
+- Token bundles use separate Supabase Edge Functions: authenticated `token-checkout` creates a Checkout Session from server-side Price IDs; `stripe-token-webhook` verifies the raw Stripe signature and calls an idempotent, service-role-only database RPC.
+- `TOKEN_CHECKOUT_ENABLED` defaults to `false`. Keep it false until the token migration, Edge Functions, Price IDs, webhook endpoint/secrets, mode, and end-to-end staging test are confirmed.
+- The shared Stripe Payment Link is not used for token purchases because it cannot securely associate a session with the signed-in account.
+- The initial token release supports balance display and bundle grants only. No spending, transfers, trading, marketplace, cash-out, VIP, promotions, or cosmetics are active. Refund/chargeback reconciliation must be implemented before token redemption or trading is enabled.
 
-- `/api/checkout` returns `503`; it does not accept browser-supplied prices or create a checkout.
-- `/api/webhooks/stripe` returns `503`; do not register it with Stripe.
-- `/api/community-tips` returns no enabled providers, so the support UI has a reliable disabled state.
-- Lemon Squeezy and Monzo are not integrated. Do not populate checkout URLs or provider secrets.
-- The wallet/economy UI is a demo only and must never be represented as a real balance, entitlement, or purchase system.
-
-Before enabling payment collection, implement and review: server-side product allowlists, authenticated checkout creation, raw-body provider signature verification, provider event idempotency, transactional orders/ledger/entitlements, refunds/disputes/reconciliation, and sandbox tests. Never trust a client-provided price, amount, user ID, or fulfillment status.
+Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do not represent this staged code as production-ready until migration/RLS, webhook idempotency, refund/dispute handling, backups, and staging tests are complete.
 
 ## Supabase status
 
-- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` enable browser clients only.
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` enable browser clients only. Supabase Edge Function secrets remain server-side.
 - Local demo auth is not production authentication; mock code `000000` is development-only.
 - Production cutover requires Supabase Auth configuration, profile-creation handling, RLS/policy tests, persistent repository wiring, storage policies, session refresh/middleware strategy, and migration/restore validation.
 - `SUPABASE_SERVICE_ROLE_KEY` remains server-only and is not currently required by disabled payment paths.
@@ -68,7 +67,7 @@ Do not call this a production release until all of the following are complete:
 1. Replace local/mock authentication and data with tested authenticated APIs or RLS-protected browser access.
 2. Test Supabase migrations, RLS policies, backup restore, and forward/rollback behavior in staging.
 3. Complete media validation, scanning, storage, moderation, rate limits, and abuse controls.
-4. Keep payments disabled or finish the complete provider lifecycle described above.
+4. Keep token checkout disabled until the complete wallet lifecycle described above is tested; keep token spending/trading disabled until refunds, disputes, and account-deletion behavior are reviewed.
 5. Validate ad consent, placements, and production IDs in relevant territories; keep ads disabled until approval and site policies are in place.
 6. Run `npm run typecheck` and `npm run build` after code changes, then manually test responsive navigation, auth, feed, event, message, and support states.
 
