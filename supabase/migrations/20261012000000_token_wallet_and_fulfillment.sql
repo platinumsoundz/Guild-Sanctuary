@@ -94,8 +94,8 @@ begin
 
   select * into existing_entry
   from public.token_ledger
-  where stripe_event_id = requested_event_id
-     or checkout_session_id = requested_session_id;
+  where checkout_session_id = requested_session_id
+  for update;
 
   if found then
     if existing_entry.user_id <> requested_user_id
@@ -103,11 +103,18 @@ begin
       or existing_entry.tokens_delta <> expected_tokens
       or existing_entry.amount_total <> expected_amount
       or existing_entry.currency <> requested_currency
-      or existing_entry.checkout_session_id <> requested_session_id
     then
       raise exception 'Token purchase replay does not match the original payment' using errcode = '22023';
     end if;
     return wallet_balance;
+  end if;
+
+  select * into existing_entry
+  from public.token_ledger
+  where stripe_event_id = requested_event_id
+  for update;
+  if found then
+    raise exception 'Stripe event ID was already applied to another checkout' using errcode = '22023';
   end if;
 
   insert into public.token_ledger (
