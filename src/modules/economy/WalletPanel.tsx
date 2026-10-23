@@ -51,7 +51,7 @@ export function WalletPanel({ userId, isGuest }: WalletPanelProps) {
         </div>
         <div className={styles.balanceCard} aria-live="polite">
           <span>Available balance</span>
-          <strong>{isLoading ? '…' : `${(snapshot?.balanceTokens ?? 0).toLocaleString('en-GB')} tokens`}</strong>
+          <strong>{isLoading ? '…' : hasSupabaseAccount ? `${(snapshot?.balanceTokens ?? 0).toLocaleString('en-GB')} tokens` : 'Sign in'}</strong>
         </div>
       </header>
 
@@ -94,7 +94,7 @@ export function WalletPanel({ userId, isGuest }: WalletPanelProps) {
         {hasSupabaseAccount && !isLoading && !checkoutEnabled && (
           <p className={styles.disclaimer}>Purchases stay disabled until Stripe prices, webhook verification, and token fulfillment are configured.</p>
         )}
-        <p className={styles.disclaimer}>Tokens are account-bound in this first release: no transfers, trading, or cash-out.</p>
+        <p className={styles.disclaimer}>Tokens are account-bound in this first release: no transfers, trading, or cash-out. Deleting your account also deletes its wallet and token history.
       </section>
 
       <section className={styles.section} aria-labelledby="future-uses-title">
