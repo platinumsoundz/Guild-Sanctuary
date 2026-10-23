@@ -168,6 +168,23 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
 
 export async function updateEvent(eventId: string, creatorId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt'>): Promise<Event> {
   validateEvent(input.title, input.description, input.startsAt);
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser(creatorId);
+    const { data, error } = await getSupabaseBrowserClient()
+      .from('events')
+      .update({
+        title: input.title.trim(),
+        description: input.description.trim(),
+        starts_at: new Date(input.startsAt).toISOString(),
+      })
+      .eq('id', eventId)
+      .eq('creator_id', creatorId)
+      .select('*')
+      .maybeSingle();
+    if (error) throw new Error(`Event could not be updated: ${error.message}`);
+    if (!data) throw new Error('This event could not be updated.');
+    return toEvent(data);
+  }
   await delay();
   const event = findEvent(eventId);
   if (!event || event.creatorId !== creatorId) {
@@ -181,6 +198,19 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
 }
 
 export async function deleteEvent(eventId: string, creatorId: string): Promise<void> {
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser(creatorId);
+    const { data, error } = await getSupabaseBrowserClient()
+      .from('events')
+      .delete()
+      .eq('id', eventId)
+      .eq('creator_id', creatorId)
+      .select('id')
+      .maybeSingle();
+    if (error) throw new Error(`Event could not be deleted: ${error.message}`);
+    if (!data) throw new Error('This event could not be deleted.');
+    return;
+  }
   await delay();
   const index = events.findIndex((event) => event.id === eventId && event.creatorId === creatorId);
   if (index < 0) {
@@ -194,7 +224,18 @@ export async function deleteEvent(eventId: string, creatorId: string): Promise<v
 }
 
 export async function setEventRsvp(eventId: string, userId: string, status: 'going' | 'interested' | 'cancelled'): Promise<EventRsvp> {
-  if (!userId || !findEvent(eventId)) {
+  if (!userId) throw new Error('Sign in before responding to an event.');
+  if (isSupabaseCommunityStorageConfigured()) {
+    const currentUserId = await requireCommunityStorageUser(userId);
+    const { data, error } = await getSupabaseBrowserClient()
+      .from('event_rsvps')
+      .upsert({ event_id: eventId, user_id: currentUserId, status }, { onConflict: 'event_id,user_id' })
+      .select('*')
+      .single();
+    if (error) throw new Error(`Your event RSVP could not be saved: ${error.message}`);
+    return toRsvp(data);
+  }
+  if (!findEvent(eventId)) {
     throw new Error('This event is not available for RSVP.');
   }
 
