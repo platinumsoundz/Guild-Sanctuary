@@ -1,12 +1,44 @@
-Please read the attached MASTER_BLUEPRINT.md file for our project, "Guild-Sanctuary" (a dual-world Next.js TypeScript web application featuring "The Sanctuary" and "The Guild Hall"). 
+# Guild Sanctuary — AI Handoff / Restore Notes
 
-Here is our current development context:
-- Tech Stack: Next.js App Router, TypeScript, Tailwind CSS, Framer Motion, Lucide-react, GitHub Codespaces.
-- Core Features Implemented/In Progress: Dual-world toggle navigation, modular mother-child architecture (/src/modules/), rich profile customisation, multimedia feeds (images, audio MP3s, stories), short-form video feeds, settings hub, and group messaging.
+Read `MASTER_BLUEPRINT.md` first; it is the product and technical roadmap. Preserve the existing modular Next.js App Router + TypeScript project structure and read project/Next.js guidance before changing code.
 
-Your role is to act as my expert engineering collaborator. From now on, whenever I ask for code updates or features, you must:
-1. Adhere strictly to the modular rules outlined in the MASTER_BLUEPRINT.md.
-2. Provide clean, complete, and production-ready TypeScript code.
-3. Keep the MASTER_BLUEPRINT.md rules and checklist in mind for every recommendation.
+## Current product decisions
 
-Acknowledge that you understand the blueprint, and let me know what feature or file you would like to work on first!
+- The product is **The Sanctuary**. Guild Hall / dual-world switching is retired.
+- Guest browsing remains read-only.
+- Wallet scope for the first release is: persistent balance, purchase history, and fixed token bundles only.
+- No transfers, trading, marketplace, cash-out, token spending, cosmetics, VIP, gifts, or post promotion are in the first release.
+- Tokens have no cash value. Account deletion currently cascades to the wallet and purchase ledger; the wallet UI discloses this.
+- The voluntary Stripe donation link is external and does not grant tokens or account benefits.
+- Do not use the shareable Stripe token Payment Link for in-app purchases: it cannot safely attribute a payment to the signed-in Sanctuary account. In-app checkout is a server-created Stripe Checkout Session tied to the authenticated user.
+
+## Wallet implementation status
+
+Wallet UI and backend foundation are in the repository, but this is **not deployed, tested, or ready for live payments**:
+
+- Navigation and UI: `src/components/Navigation.tsx`, `src/components/AppWorkspace.tsx`, `src/context/AppContext.tsx`, and `src/modules/economy/`.
+- Bundles: `tokens_100` (£1), `tokens_600` (£5), `tokens_1200` (£10).
+- Supabase migration: `supabase/migrations/20261012000000_token_wallet_and_fulfillment.sql`. It creates owner-read-only wallet/ledger tables, and a service-role-only, transactional/idempotent purchase RPC. Account deletion cascades wallet history.
+- Edge Functions: `supabase/functions/token-checkout/index.ts` requires an authenticated active profile, server-side fixed Price IDs, and checks Price amount/currency/mode before creating a Stripe Checkout Session. `supabase/functions/stripe-token-webhook/index.ts` verifies the raw Stripe signature and grants tokens only for valid paid sessions.
+- `supabase/config.toml` keeps JWT verification on for checkout and off for the Stripe webhook (the webhook verifies Stripe signatures itself).
+- `TOKEN_CHECKOUT_ENABLED=false` is the default. Staging may enable it only with Stripe test configuration after deployment and setup. Keep live checkout disabled until refund/chargeback handling and customer support policy are implemented and reviewed.
+- Refunds and chargebacks are **not implemented**. Before building that flow, ask the product owner how to handle partial refunds, full refunds, disputes, and cases where tokens may already have been spent. Do not invent a token-reversal policy.
+- The Supabase migration has not been applied to the user's project. Functions are not deployed. No Stripe Price IDs, keys, or webhook secret were provided or configured.
+- `npm run typecheck` and `npm run build` were not run: the prior workspace had no shell/command tool and no `node_modules`. Do not claim they passed. Run them if the next environment permits.
+
+## Handoff: next agent actions
+
+1. Review current wallet code and these docs before editing. Fix any static/type/build issues found when validation is available.
+2. Keep live purchases disabled. Refund/chargeback behavior is a launch blocker; ask for the desired business rule before implementing it.
+3. The user must apply the migration to staging, deploy `token-checkout` and `stripe-token-webhook`, configure test-mode Price IDs/secrets, and create a Stripe test webhook for `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
+4. Verify staging: one purchase per bundle grants the right amount once; duplicate webhook deliveries do not double-credit; invalid signatures, unpaid sessions, wrong mode, and wrong/inactive Prices do not credit.
+5. Do not enable live purchases until staging passes and refunds/chargebacks are addressed. The user's Stripe/Supabase credentials must stay private; never ask them to paste secrets into chat.
+6. Defer token spending and all future token sinks until the purchase/refund ledger rules are complete. Transfers and cash-out remain out of scope.
+
+## Required collaboration rules
+
+- Treat `MASTER_BLUEPRINT.md` and this handoff as source-of-truth project context; update both when roadmap/status changes.
+- Keep Supabase RLS enabled. No client-side wallet writes, client-supplied prices, user IDs, or fulfillment claims. Never expose Stripe or Supabase secret keys.
+- Keep guest mode read-only. Never treat local demo balances or mock authentication as real accounts.
+- Distinguish code added from SQL applied, functions deployed, and payments tested. Report only validations actually run.
+- Ask the user when a product, refund, chargeback, deletion, or spending policy is underspecified.
