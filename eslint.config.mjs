@@ -25,6 +25,7 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     'android/**',
     'capacitor-web/**',
+    'supabase/functions/**',
   ]),
 ]);
 

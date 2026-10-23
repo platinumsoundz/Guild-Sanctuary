@@ -7,6 +7,7 @@ import styles from './AuthenticationModal.module.css';
 
 interface AuthenticationModalProps {
   currentUser: AuthSession | null;
+  isGuest: boolean;
   pendingEmail: string | null;
   onClose: () => void;
   onLogin: (email: string) => void | Promise<void>;
@@ -20,6 +21,7 @@ interface AuthenticationModalProps {
 
 export function AuthenticationModal({
   currentUser,
+  isGuest,
   pendingEmail,
   onClose,
   onLogin,
@@ -98,20 +100,23 @@ export function AuthenticationModal({
             Close
           </button>
         </div>
-        <AuthenticationForm
-          initialMode="login"
-          initialEmail={pendingEmail ?? ''}
-          onLogin={onLogin}
-          onSignup={onSignup}
-          onVerifyEmailCode={onVerifyEmailCode}
-          onVerifyTwoFactorCode={onVerifyTwoFactorCode}
-          onCancelChallenge={onCancelChallenge}
-          onSuccess={onClose}
-        />
-        {currentUser && (
+        {(!currentUser || isGuest) && (
+          <AuthenticationForm
+            initialMode="login"
+            initialEmail={pendingEmail ?? ''}
+            onLogin={onLogin}
+            onSignup={onSignup}
+            onVerifyEmailCode={onVerifyEmailCode}
+            onVerifyTwoFactorCode={onVerifyTwoFactorCode}
+            onCancelChallenge={onCancelChallenge}
+            onSuccess={onClose}
+          />
+        )}
+        {currentUser && !isGuest && (
           <div className={styles.accountActions}>
             <div className={styles.accountDetails}>
               <span>Signed in as {currentUser.profile.displayName}</span>
+              <span>@{currentUser.profile.username}</span>
               <span>{currentUser.user.email}</span>
               {!isSupabaseConfigured() && <button
                 className={styles.securityButton}

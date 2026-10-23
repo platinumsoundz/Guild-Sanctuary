@@ -2,9 +2,9 @@
 
 import type { Coordinates } from '@/types';
 import type { Event, EventRsvp, EventRsvpStatus, SocialComment, SocialLike } from '@/types/database';
-import { isSupabaseAuthConfigured } from '@/modules/auth';
 import { getSupabaseBrowserClient } from '@/services/supabase';
-import type { EventRow, EventRsvpRow, SocialCommentRow } from '@/services/supabase/database.types';
+import type { Database } from '@/services/supabase/database.types';
+import { isSupabaseCommunityStorageConfigured, requireCommunityStorageUser } from '@/services/supabase/communityMedia';
 
 export interface CreateEventInput {
   creatorId: string;
@@ -26,6 +26,32 @@ const likes: SocialLike[] = [];
 const comments: SocialComment[] = [];
 let nextEventId = 1;
 let nextRsvpId = 1;
+
+type EventRow = Database['public']['Tables']['events']['Row'];
+
+function toEvent(row: EventRow): Event {
+  return {
+    id: row.id,
+    creatorId: row.creator_id,
+    title: row.title,
+    description: row.description,
+    locationCoords: { latitude: row.latitude, longitude: row.longitude },
+    startsAt: row.starts_at,
+    endsAt: row.ends_at,
+    createdAt: row.created_at,
+  };
+}
+
+function toRsvp(row: Database['public']['Tables']['event_rsvps']['Row']): EventRsvp {
+  return {
+    id: row.id,
+    eventId: row.event_id,
+    userId: row.user_id,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 function delay(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 60));
@@ -56,67 +82,45 @@ function validateCoordinates(locationCoords: Coordinates): void {
   }
 }
 
-function toEvent(row: EventRow): Event {
-  return {
-    id: row.id,
-    creatorId: row.creator_id,
-    title: row.title,
-    description: row.description,
-    locationCoords: { latitude: row.latitude, longitude: row.longitude },
-    startsAt: row.starts_at,
-    endsAt: row.ends_at,
-    createdAt: row.created_at,
-  };
-}
-
-function toRsvp(row: EventRsvpRow): EventRsvp {
-  return {
-    id: row.id,
-    eventId: row.event_id,
-    userId: row.user_id,
-    status: row.status,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
-
-function toComment(row: SocialCommentRow): SocialComment {
-  return {
-    id: row.id,
-    targetType: row.target_type,
-    targetId: row.target_id,
-    authorId: row.author_id,
-    body: row.body,
-    createdAt: row.created_at,
-  };
-}
-
 function findEvent(eventId: string): Event | undefined {
   return events.find((event) => event.id === eventId);
 }
 
 export async function fetchEvents(userId: string): Promise<EventView[]> {
-  if (isSupabaseAuthConfigured()) {
+  if (isSupabaseCommunityStorageConfigured()) {
     const client = getSupabaseBrowserClient();
-    const [eventResult, rsvpResult, countResult] = await Promise.all([
-      client.from('events').select('*').eq('state', 'visible').order('starts_at', { ascending: true }),
-      client.from('event_rsvps').select('event_id,status').eq('user_id', userId),
-      client.from('event_rsvp_counts').select('*'),
-    ]);
-
-    const error = eventResult.error ?? rsvpResult.error ?? countResult.error;
+    const { data: rows, error } = await client
+      .from('events')
+      .select('*')
+      .eq('state', 'visible')
+      .order('starts_at', { ascending: true });
     if (error) throw new Error(`Events could not be loaded: ${error.message}`);
 
-    const counts = new Map((countResult.data ?? []).map((row) => [row.event_id, row.going_count]));
-    const viewerStatuses = new Map((rsvpResult.data ?? []).map((row) => [row.event_id, row.status]));
+    if (rows.length === 0) return [];
+    const eventIds = rows.map((row) => row.id);
+    const { data: countRows, error: countsError } = await client
+      .from('event_rsvp_counts')
+      .select('*')
+      .in('event_id', eventIds);
+    if (countsError) throw new Error(`Event RSVP totals could not be loaded: ${countsError.message}`);
 
-    return (eventResult.data ?? []).map((row) => ({
+    let viewerRsvpRows: { event_id: string; status: string }[] = [];
+    if (userId) {
+      const { data, error: rsvpError } = await client
+        .from('event_rsvps')
+        .select('event_id, status')
+        .eq('user_id', userId);
+      if (rsvpError) throw new Error(`Your event RSVPs could not be loaded: ${rsvpError.message}`);
+      viewerRsvpRows = data;
+    }
+    const counts = new Map(countRows.map((row) => [row.event_id, row.going_count]));
+    const viewerStatuses = new Map(viewerRsvpRows.map((row) => [row.event_id, row.status as EventRsvpStatus]));
+    return rows.map((row) => ({
       ...toEvent(row),
       rsvpCount: counts.get(row.id) ?? 0,
       viewerStatus: viewerStatuses.get(row.id) ?? null,
     }));
   }
-
   await delay();
   return events
     .slice()
@@ -135,11 +139,12 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
     throw new Error('Sign in before creating an event.');
   }
 
-  if (isSupabaseAuthConfigured()) {
+  if (isSupabaseCommunityStorageConfigured()) {
+    const userId = await requireCommunityStorageUser(input.creatorId);
     const { data, error } = await getSupabaseBrowserClient()
       .from('events')
       .insert({
-        creator_id: input.creatorId,
+        creator_id: userId,
         title: input.title.trim(),
         description: input.description.trim(),
         latitude: input.locationCoords.latitude,
@@ -170,8 +175,8 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
 
 export async function updateEvent(eventId: string, creatorId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt'>): Promise<Event> {
   validateEvent(input.title, input.description, input.startsAt);
-
-  if (isSupabaseAuthConfigured()) {
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser(creatorId);
     const { data, error } = await getSupabaseBrowserClient()
       .from('events')
       .update({
@@ -187,7 +192,6 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
     if (!data) throw new Error('This event could not be updated.');
     return toEvent(data);
   }
-
   await delay();
   const event = findEvent(eventId);
   if (!event || event.creatorId !== creatorId) {
@@ -201,7 +205,8 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
 }
 
 export async function deleteEvent(eventId: string, creatorId: string): Promise<void> {
-  if (isSupabaseAuthConfigured()) {
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser(creatorId);
     const { data, error } = await getSupabaseBrowserClient()
       .from('events')
       .delete()
@@ -213,7 +218,6 @@ export async function deleteEvent(eventId: string, creatorId: string): Promise<v
     if (!data) throw new Error('This event could not be deleted.');
     return;
   }
-
   await delay();
   const index = events.findIndex((event) => event.id === eventId && event.creatorId === creatorId);
   if (index < 0) {
@@ -227,20 +231,17 @@ export async function deleteEvent(eventId: string, creatorId: string): Promise<v
 }
 
 export async function setEventRsvp(eventId: string, userId: string, status: 'going' | 'interested' | 'cancelled'): Promise<EventRsvp> {
-  if (!userId) {
-    throw new Error('This event is not available for RSVP.');
-  }
-
-  if (isSupabaseAuthConfigured()) {
+  if (!userId) throw new Error('Sign in before responding to an event.');
+  if (isSupabaseCommunityStorageConfigured()) {
+    const currentUserId = await requireCommunityStorageUser(userId);
     const { data, error } = await getSupabaseBrowserClient()
       .from('event_rsvps')
-      .upsert({ event_id: eventId, user_id: userId, status }, { onConflict: 'event_id,user_id' })
+      .upsert({ event_id: eventId, user_id: currentUserId, status, updated_at: new Date().toISOString() }, { onConflict: 'event_id,user_id' })
       .select('*')
       .single();
-    if (error) throw new Error(`Your RSVP could not be saved: ${error.message}`);
+    if (error) throw new Error(`Your event RSVP could not be saved: ${error.message}`);
     return toRsvp(data);
   }
-
   if (!findEvent(eventId)) {
     throw new Error('This event is not available for RSVP.');
   }
@@ -267,19 +268,19 @@ export async function setEventRsvp(eventId: string, userId: string, status: 'goi
 }
 
 export async function getEventEngagement(eventId: string, userId: string) {
-  if (isSupabaseAuthConfigured()) {
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser(userId);
     const client = getSupabaseBrowserClient();
     const [like, likesCount, commentsCount] = await Promise.all([
       client.from('social_likes').select('id').eq('target_type', 'event').eq('target_id', eventId).eq('user_id', userId).maybeSingle(),
-      client.from('social_like_counts').select('like_count').eq('target_type', 'event').eq('target_id', eventId).maybeSingle(),
+      client.from('social_likes').select('id', { count: 'exact', head: true }).eq('target_type', 'event').eq('target_id', eventId),
       client.from('social_comments').select('id', { count: 'exact', head: true }).eq('target_type', 'event').eq('target_id', eventId).eq('state', 'visible'),
     ]);
     if (like.error || likesCount.error || commentsCount.error) {
       throw new Error(`Event reactions could not be loaded: ${like.error?.message ?? likesCount.error?.message ?? commentsCount.error?.message}`);
     }
-    return { liked: Boolean(like.data), likesCount: likesCount.data?.like_count ?? 0, commentsCount: commentsCount.count ?? 0 };
+    return { liked: Boolean(like.data), likesCount: likesCount.count ?? 0, commentsCount: commentsCount.count ?? 0 };
   }
-
   if (!findEvent(eventId)) {
     throw new Error('This event is unavailable.');
   }
@@ -291,9 +292,8 @@ export async function getEventEngagement(eventId: string, userId: string) {
 }
 
 export async function toggleEventLike(eventId: string, userId: string): Promise<{ liked: boolean; count: number }> {
-  if (!userId) throw new Error('This event is unavailable for liking.');
-
-  if (isSupabaseAuthConfigured()) {
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser(userId);
     const client = getSupabaseBrowserClient();
     const { data: existing, error: existingError } = await client
       .from('social_likes')
@@ -302,24 +302,19 @@ export async function toggleEventLike(eventId: string, userId: string): Promise<
       .eq('target_id', eventId)
       .eq('user_id', userId)
       .maybeSingle();
-    if (existingError) throw new Error(`Your reaction could not be checked: ${existingError.message}`);
-
+    if (existingError) throw new Error(`Your event reaction could not be checked: ${existingError.message}`);
     const mutation = existing
       ? await client.from('social_likes').delete().eq('id', existing.id)
       : await client.from('social_likes').insert({ target_type: 'event', target_id: eventId, user_id: userId });
-    if (mutation.error) throw new Error(`Your reaction could not be saved: ${mutation.error.message}`);
-
-    const { data: countRow, error } = await client
-      .from('social_like_counts')
-      .select('like_count')
+    if (mutation.error) throw new Error(`Your event reaction could not be saved: ${mutation.error.message}`);
+    const { count, error } = await client.from('social_likes')
+      .select('id', { count: 'exact', head: true })
       .eq('target_type', 'event')
-      .eq('target_id', eventId)
-      .maybeSingle();
-    if (error) throw new Error(`Event reactions could not be counted: ${error.message}`);
-    return { liked: !existing, count: countRow?.like_count ?? 0 };
+      .eq('target_id', eventId);
+    if (error) throw new Error(`Event reaction count could not be loaded: ${error.message}`);
+    return { liked: !existing, count: count ?? 0 };
   }
-
-  if (!findEvent(eventId)) throw new Error('This event is unavailable for liking.');
+  if (!userId || !findEvent(eventId)) throw new Error('This event is unavailable for liking.');
   await delay();
   const existingIndex = likes.findIndex((like) => like.targetId === eventId && like.userId === userId);
   if (existingIndex >= 0) likes.splice(existingIndex, 1);
@@ -328,7 +323,8 @@ export async function toggleEventLike(eventId: string, userId: string): Promise<
 }
 
 export async function fetchEventComments(eventId: string): Promise<SocialComment[]> {
-  if (isSupabaseAuthConfigured()) {
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser();
     const { data, error } = await getSupabaseBrowserClient()
       .from('social_comments')
       .select('*')
@@ -336,10 +332,16 @@ export async function fetchEventComments(eventId: string): Promise<SocialComment
       .eq('target_id', eventId)
       .eq('state', 'visible')
       .order('created_at', { ascending: true });
-    if (error) throw new Error(`Comments could not be loaded: ${error.message}`);
-    return (data ?? []).map(toComment);
+    if (error) throw new Error(`Event comments could not be loaded: ${error.message}`);
+    return data.map((row) => ({
+      id: row.id,
+      targetType: 'event',
+      targetId: row.target_id,
+      authorId: row.author_id,
+      body: row.body,
+      createdAt: row.created_at,
+    }));
   }
-
   if (!findEvent(eventId)) throw new Error('Comments for this event are unavailable.');
   await delay();
   return comments.filter((comment) => comment.targetId === eventId).map((comment) => ({ ...comment }));
@@ -350,20 +352,24 @@ export async function addEventComment(eventId: string, authorId: string, body: s
   if (!authorId || normalizedBody.length < 1 || normalizedBody.length > 1000) {
     throw new Error('Comments must contain 1 to 1,000 characters.');
   }
-
-  if (isSupabaseAuthConfigured()) {
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser(authorId);
     const { data, error } = await getSupabaseBrowserClient()
       .from('social_comments')
       .insert({ target_type: 'event', target_id: eventId, author_id: authorId, body: normalizedBody })
       .select('*')
       .single();
-    if (error) throw new Error(`Your comment could not be saved: ${error.message}`);
-    return toComment(data);
+    if (error) throw new Error(`Your event comment could not be saved: ${error.message}`);
+    return {
+      id: data.id,
+      targetType: 'event',
+      targetId: data.target_id,
+      authorId: data.author_id,
+      body: data.body,
+      createdAt: data.created_at,
+    };
   }
-
-  if (!findEvent(eventId)) {
-    throw new Error('Comments for this event are unavailable.');
-  }
+  if (!findEvent(eventId)) throw new Error('Comments for this event are unavailable.');
   await delay();
   const comment: SocialComment = {
     id: `event-comment-${Date.now()}`,
@@ -378,7 +384,7 @@ export async function addEventComment(eventId: string, authorId: string, body: s
 }
 
 export function removeUserEventData(userId: string): void {
-  if (isSupabaseAuthConfigured()) return;
+  if (isSupabaseCommunityStorageConfigured()) return;
 
   for (let index = events.length - 1; index >= 0; index -= 1) {
     if (events[index].creatorId === userId) events.splice(index, 1);

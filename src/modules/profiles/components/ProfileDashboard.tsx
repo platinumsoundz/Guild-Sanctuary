@@ -9,7 +9,7 @@ interface ProfileDashboardProps {
   profile: Profile;
   posts: Post[];
   isPostsLoading: boolean;
-  onSave: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => Promise<void>;
+  onSave: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => void | Promise<void>;
   onThemeChange: (themeColor: string) => void;
 }
 

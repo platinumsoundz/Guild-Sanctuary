@@ -29,21 +29,26 @@ export function isSupabaseAuthConfigured(): boolean {
 }
 
 export function mapProfileRow(row: ProfileRow): Profile {
-  const privacy = row.privacy as Partial<ProfilePrivacy>;
+  const privacy = row.privacy && typeof row.privacy === 'object'
+    ? row.privacy as Partial<ProfilePrivacy>
+    : {};
+  const socialLinks = row.social_links && typeof row.social_links === 'object'
+    ? row.social_links as Partial<SocialLinks>
+    : {};
   return {
     id: row.id,
     userId: row.id,
     username: row.username,
     displayName: row.display_name,
-    bio: row.bio,
-    statusMessage: row.status_message,
-    avatarUrl: row.avatar_url,
-    bannerUrl: row.banner_url,
+    bio: row.bio ?? null,
+    statusMessage: row.status_message ?? null,
+    avatarUrl: row.avatar_url ?? null,
+    bannerUrl: row.banner_url ?? null,
     themeColor: row.theme_color,
-    location: row.location,
-    age: row.age,
-    starSign: row.star_sign,
-    belief: row.belief,
+    location: row.location ?? null,
+    age: row.age ?? null,
+    starSign: row.star_sign ?? null,
+    belief: row.belief ?? null,
     privacy: {
       bio: privacy.bio ?? true,
       location: privacy.location ?? false,
@@ -53,7 +58,7 @@ export function mapProfileRow(row: ProfileRow): Profile {
       socialLinks: privacy.socialLinks ?? false,
       allowDirectMessages: privacy.allowDirectMessages ?? true,
     },
-    socialLinks: { ...emptyLinks, ...(row.social_links as Partial<SocialLinks>) },
+    socialLinks: { ...emptyLinks, ...socialLinks },
     visibility: row.visibility,
     role: row.role,
   };
@@ -95,7 +100,12 @@ async function getProfileRow(userId: string) {
     .select('*')
     .eq('id', userId)
     .single();
-  if (error) throw new Error(`Your account profile could not be loaded: ${error.message}`);
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('Your email is verified, but no profile row exists for this account. Check the auth_user_creates_profile trigger and apply the pending Supabase migrations.');
+    }
+    throw new Error(`Your account profile could not be loaded: ${error.message}`);
+  }
   if (!isProfileActive(data)) throw new Error('This account is not active. Contact support for help.');
   return data;
 }
@@ -133,6 +143,7 @@ export async function updateSupabaseProfile(
 ): Promise<Profile> {
   const payload: Partial<ProfileRow> = {};
 
+  if (updates.displayName !== undefined) payload.display_name = updates.displayName.trim();
   if (updates.bio !== undefined) payload.bio = updates.bio;
   if (updates.statusMessage !== undefined) payload.status_message = updates.statusMessage;
   if (updates.avatarUrl !== undefined) payload.avatar_url = updates.avatarUrl;

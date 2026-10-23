@@ -30,7 +30,7 @@ import type { Profile } from '@/types/database';
 import { deleteDemoAccount } from '@/services/accountDeletion';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 
-export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'support' | 'settings' | 'moderation';
+export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'wallet' | 'support' | 'settings' | 'moderation';
 
 export type UserSession = AuthSession;
 

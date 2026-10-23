@@ -13,8 +13,8 @@ const PLACEHOLDER_HEADING = 'A little room to begin';
 const PLACEHOLDER_MESSAGE = 'Thoughts and reflections from your community will find a home here.';
 
 export function FeedContent() {
-  const { currentUser } = useAppContext();
-  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(currentUser?.user.id ?? null);
+  const { currentUser, isGuest } = useAppContext();
+  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(isGuest ? null : currentUser?.user.id ?? null);
   const [draft, setDraft] = useState('');
   const [attachmentUrl, setAttachmentUrl] = useState('');
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
@@ -138,7 +138,7 @@ export function FeedContent() {
         </div>
         <span className={styles.sortLabel}>LATEST</span>
       </div>
-      <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
+      {currentUser && !isGuest && <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
         <label className={styles.composerLabel} htmlFor="post-content">Share with Sanctuary</label>
         <textarea
           className="w-full max-w-full"
@@ -184,7 +184,7 @@ export function FeedContent() {
           <span>{draft.length}/2800</span>
           <button className={styles.actionButton} type="submit">Publish</button>
         </div>
-      </form>
+      </form>}
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isLoading && <p className={styles.feedStatus}>Loading your feed...</p>}
       {!isLoading && posts.length === 0 && (
@@ -232,9 +232,9 @@ export function FeedContent() {
                     Your browser does not support video playback.
                   </video>
                 )}
-                <PostEngagement postId={post.id} userId={currentUser?.user.id ?? ''} />
-                <ReportContentButton targetType="post" targetId={post.id} />
-                {post.authorId === currentUser?.user.id && editingPostId !== post.id && (
+                {currentUser && !isGuest && <PostEngagement postId={post.id} userId={currentUser.user.id} />}
+                {currentUser && !isGuest && <ReportContentButton targetType="post" targetId={post.id} />}
+                {currentUser && !isGuest && post.authorId === currentUser.user.id && editingPostId !== post.id && (
                   <div className={styles.postActions}>
                     <button className={styles.textButton} type="button" onClick={() => {
                       setEditingPostId(post.id);

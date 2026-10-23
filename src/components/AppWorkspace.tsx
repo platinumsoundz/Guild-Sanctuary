@@ -17,6 +17,7 @@ import { DirectMessageThread, MessagesInbox } from '@/modules/messages';
 import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
 import { ModerationDashboard } from '@/modules/moderation';
+import { WalletPanel } from '@/modules/economy';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import styles from './AppWorkspace.module.css';
 
@@ -25,6 +26,7 @@ export function AppWorkspace() {
     activeNavigation,
     currentUser,
     isAuthenticated,
+    isGuest,
     isSessionReady,
     sessionError,
     login,
@@ -54,6 +56,10 @@ export function AppWorkspace() {
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('tip') === 'success') {
       setActiveNavigation('support');
+    }
+    const walletResult = new URLSearchParams(window.location.search).get('wallet');
+    if (walletResult === 'success' || walletResult === 'cancelled') {
+      setActiveNavigation('wallet');
     }
   }, [setActiveNavigation]);
 
@@ -97,7 +103,11 @@ export function AppWorkspace() {
     </main>
   ) : isAuthenticated && currentUser ? (
     <>
-      {activeNavigation === 'feed' ? (
+      {activeNavigation === 'wallet' ? (
+        <main className={styles.supportPage}>
+          <WalletPanel userId={currentUser.user.id} isGuest={isGuest} />
+        </main>
+      ) : activeNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
           <Feed />
@@ -176,6 +186,7 @@ export function AppWorkspace() {
         <Navigation
           activeNavigation={activeNavigation}
           currentUser={currentUser}
+          isGuest={isGuest}
           pendingEmail={pendingEmail}
           isSessionReady={isSessionReady}
           onNavigate={openNavigation}

@@ -11,6 +11,9 @@ const tipOptions = [
 
 type TipOption = (typeof tipOptions)[number]['id'];
 
+// A public, provider-hosted voluntary donation link; this is not a credential.
+const stripeDonationUrl = 'https://buy.stripe.com/eVq9AV61h15k6ydgcmfbq01';
+
 interface SupportOptions {
   stripeTipsEnabled: boolean;
   lemonSqueezyCheckoutUrl: string | null;
@@ -106,6 +109,21 @@ export function SupportPanel() {
         <p className={styles.status} role="status">Checking contribution options…</p>
       ) : (
         <div className={styles.providers}>
+          <section className={styles.provider}>
+            <h2>One-time community contribution</h2>
+            <a
+              className={styles.providerLink}
+              href={stripeDonationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Choose an amount with Stripe
+            </a>
+            <p className={styles.providerNote}>
+              Voluntary contributions do not purchase tokens or grant account perks.
+            </p>
+          </section>
+
           {options.lemonSqueezyCheckoutUrl && (
             <section className={styles.provider}>
               <h2>Digital goods</h2>
@@ -156,9 +174,6 @@ export function SupportPanel() {
             </section>
           )}
 
-          {!options.lemonSqueezyCheckoutUrl && !options.stripeTipsEnabled && !options.monzoContributionUrl && (
-            <p className={styles.status}>Payment and contribution options are not currently configured.</p>
-          )}
         </div>
       )}
 

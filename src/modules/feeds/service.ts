@@ -58,7 +58,6 @@ function validateAttachment(
 
 export async function fetchFeed(): Promise<Post[]> {
   if (isSupabaseCommunityStorageConfigured()) {
-    await requireCommunityStorageUser();
     const { data, error } = await getSupabaseBrowserClient()
       .from('posts')
       .select('*')

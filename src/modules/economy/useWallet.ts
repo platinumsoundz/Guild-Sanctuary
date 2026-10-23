@@ -2,108 +2,90 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import {
-  completeStripeCheckoutMock,
-  createStripeCheckoutMock,
-  equipInventoryItem,
-  fetchCosmeticCatalog,
-  fetchCreditPackages,
+  checkTokenCheckoutEnabled,
   fetchWallet,
-  purchaseCosmetic,
-  purchaseVipTier,
-  type CosmeticProduct,
-  type CreditPackage,
-  type MockCheckoutSession,
-  type VipTier,
+  isSupabaseWalletConfigured,
+  startTokenCheckout,
+  tokenBundles,
+  type TokenBundle,
+  type TokenBundleId,
   type WalletSnapshot,
 } from './service';
 
 interface UseWalletResult {
   snapshot: WalletSnapshot | null;
-  packages: CreditPackage[];
-  catalog: CosmeticProduct[];
-  checkout: MockCheckoutSession | null;
+  bundles: TokenBundle[];
+  checkoutEnabled: boolean;
   isLoading: boolean;
+  isStartingCheckout: boolean;
   error: string | null;
-  beginTopUp: (packageId: string) => Promise<void>;
-  completeTopUp: () => Promise<void>;
-  unlock: (productId: string) => Promise<void>;
-  upgradeVip: (tier: Exclude<VipTier, 'free'>) => Promise<void>;
-  equip: (inventoryItemId: string) => Promise<void>;
+  refresh: () => Promise<void>;
+  buyBundle: (bundleId: TokenBundleId) => Promise<void>;
 }
 
-export function useWallet(userId: string): UseWalletResult {
+export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
   const [snapshot, setSnapshot] = useState<WalletSnapshot | null>(null);
-  const [packages, setPackages] = useState<CreditPackage[]>([]);
-  const [catalog, setCatalog] = useState<CosmeticProduct[]>([]);
-  const [checkout, setCheckout] = useState<MockCheckoutSession | null>(null);
+  const [checkoutEnabled, setCheckoutEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStartingCheckout, setIsStartingCheckout] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const canUseWallet = !isGuest && isSupabaseWalletConfigured();
 
   const refresh = useCallback(async () => {
+    if (!canUseWallet) {
+      setSnapshot(null);
+      setCheckoutEnabled(false);
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const [walletSnapshot, availablePackages, availableProducts] = await Promise.all([
+      const [wallet, enabled] = await Promise.all([
         fetchWallet(userId),
-        fetchCreditPackages(),
-        fetchCosmeticCatalog(),
+        checkTokenCheckoutEnabled(userId).catch(() => false),
       ]);
-      setSnapshot(walletSnapshot);
-      setPackages(availablePackages);
-      setCatalog(availableProducts);
+      setSnapshot(wallet);
+      setCheckoutEnabled(enabled);
       setError(null);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'The wallet could not be loaded.');
+      setSnapshot(null);
+      setCheckoutEnabled(false);
+      setError(loadError instanceof Error ? loadError.message : 'The token wallet could not be loaded.');
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  }, [canUseWallet, userId]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
-  const beginTopUp = async (packageId: string) => {
-    try {
-      setCheckout(await createStripeCheckoutMock(userId, packageId));
-      setError(null);
-    } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : 'Checkout could not be started.');
-    }
-  };
-
-  const completeTopUp = async () => {
-    if (!checkout) {
+  const buyBundle = async (bundleId: TokenBundleId) => {
+    if (!canUseWallet || !checkoutEnabled) {
+      setError('Secure token checkout is still being configured.');
       return;
     }
+    setIsStartingCheckout(true);
+    setError(null);
     try {
-      setSnapshot(await completeStripeCheckoutMock(userId, checkout.id));
-      setCheckout(null);
-      setError(null);
-    } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : 'Checkout could not be completed.');
-    }
-  };
-
-  const updateSnapshot = async (action: () => Promise<WalletSnapshot>) => {
-    try {
-      setSnapshot(await action());
-      setError(null);
-    } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : 'Wallet action could not be completed.');
+      const checkoutUrl = await startTokenCheckout(userId, bundleId);
+      window.location.assign(checkoutUrl);
+    } catch (checkoutError) {
+      setError(checkoutError instanceof Error ? checkoutError.message : 'Token checkout could not be started.');
+      setIsStartingCheckout(false);
     }
   };
 
   return {
     snapshot,
-    packages,
-    catalog,
-    checkout,
+    bundles: tokenBundles,
+    checkoutEnabled,
     isLoading,
+    isStartingCheckout,
     error,
-    beginTopUp,
-    completeTopUp,
-    unlock: (productId) => updateSnapshot(() => purchaseCosmetic(userId, productId)),
-    upgradeVip: (tier) => updateSnapshot(() => purchaseVipTier(userId, tier)),
-    equip: (inventoryItemId) => updateSnapshot(() => equipInventoryItem(userId, inventoryItemId)),
+    refresh,
+    buyBundle,
   };
 }

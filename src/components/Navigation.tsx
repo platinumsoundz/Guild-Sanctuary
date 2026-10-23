@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Sun,
   UserRound,
+  Wallet,
   HeartHandshake,
   X,
   type LucideIcon,
@@ -28,6 +29,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
   { id: 'profile', label: 'Profile', icon: UserRound },
+  { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
   { id: 'moderation', label: 'Moderation', icon: ShieldCheck },
   { id: 'settings', label: 'Settings', icon: Settings },
@@ -36,6 +38,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
 interface NavigationProps {
   activeNavigation: NavigationState;
   currentUser: AuthSession | null;
+  isGuest: boolean;
   pendingEmail: string | null;
   isSessionReady: boolean;
   onNavigate: (navigation: NavigationState) => void;
@@ -51,6 +54,7 @@ interface NavigationProps {
 export function Navigation({
   activeNavigation,
   currentUser,
+  isGuest,
   pendingEmail,
   isSessionReady,
   onNavigate,
@@ -237,6 +241,7 @@ export function Navigation({
       {isAuthModalOpen && (
         <AuthenticationModal
           currentUser={currentUser}
+          isGuest={isGuest}
           pendingEmail={pendingEmail}
           onClose={closeAuthModal}
           onLogin={onLogin}

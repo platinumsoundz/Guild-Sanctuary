@@ -7,6 +7,8 @@ The schema is defined in `supabase/migrations/`:
 - `20261009000200_private_vault_and_media_storage.sql` — encrypted profile vault table and the `community-media` bucket.
 - `20261009000300_persistent_social_content.sql` — active-user checks, visible-content like policy, and engagement cleanup triggers.
 - `20261010000000_unify_sanctuary_scope.sql` — normalizes legacy world-scoped rows and adds the Sanctuary conversation RPC while retaining legacy columns.
+- `20261011000000_repair_social_engagement_insert_policies.sql` — restores authenticated, owner-scoped like/comment inserts on visible social content.
+- `20261012000000_token_wallet_and_fulfillment.sql` — read-only-to-clients token wallet, purchase ledger, and service-role-only idempotent purchase RPC.
 - `20261023000000_harden_policies_and_views.sql` — aggregate count views, discovery indexes, and active-user storage policies.
 
 These migrations have not been certified for production. Apply them to a disposable project first, then staging, then production after a backup.
@@ -22,6 +24,19 @@ These migrations have not been certified for production. Apply them to a disposa
    - The email template may send a confirmation link, a numeric OTP, or both. The app supports the link and the code entry path.
 5. Set moderator/admin roles only through trusted SQL or a server-side administrative process after verifying staff identity. `profiles.role` is not client-updatable.
 6. Enable Realtime for `messages` (the migration adds it to the `supabase_realtime` publication) and confirm RLS is respected for Realtime subscriptions.
+
+## Payments and token checkout
+
+The Support page links to a public Stripe-hosted voluntary donation page; those donations are not associated with accounts. `/api/checkout`, `/api/webhooks/stripe`, and the fixed-amount `/api/community-tips` flow remain disabled. Token purchases use the authenticated `token-checkout` Edge Function and signed `stripe-token-webhook`, not the shareable Payment Link; direct Payment Link purchases cannot be safely attributed to a wallet.
+
+### Token checkout setup
+
+1. Link the Supabase CLI to an isolated staging project, apply `migrations/20261012000000_token_wallet_and_fulfillment.sql` there, then deploy `token-checkout` and `stripe-token-webhook` with `supabase functions deploy <function-name>`. Do not apply this migration to production before staging validation and a backup.
+2. In Stripe test mode, create/identify one-time GBP Prices at £1/£5/£10. Configure these as **Supabase Edge Function secrets** (Dashboard → Edge Functions → Secrets, or the approved secure CLI workflow): `STRIPE_SECRET_KEY`, `STRIPE_TOKEN_WEBHOOK_SECRET`, `STRIPE_TOKEN_MODE=test`, `STRIPE_TOKEN_PRICE_100_ID`, `STRIPE_TOKEN_PRICE_600_ID`, `STRIPE_TOKEN_PRICE_1200_ID`, `APP_BASE_URL`, and `TOKEN_CHECKOUT_ENABLED=false` initially. The checkout function checks each Price is active, one-time, the expected amount/currency, and matches the configured test/live mode.
+3. Register a Stripe **test-mode** webhook at `https://<project-ref>.supabase.co/functions/v1/stripe-token-webhook` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Store that endpoint's signing secret as `STRIPE_TOKEN_WEBHOOK_SECRET`. Never share or commit Stripe secret/signing keys.
+4. Once staging config is verified, set `TOKEN_CHECKOUT_ENABLED=true` in staging only. Test one purchase per bundle, duplicate webhook delivery, unpaid sessions, invalid signatures, wrong-mode events, and incorrect/inactive Price IDs. Confirm only paid valid sessions credit exactly once. Keep the production flag false until these tests pass **and refund/chargeback handling has been implemented and reviewed**. Test and live keys, Price IDs, and webhook signing secrets are different; use separate staging and production projects/configurations.
+
+The wallet currently supports balance display and verified bundle grants only. Transfers, cash-out, and redemptions are not implemented. Refund/chargeback reconciliation is not implemented; keep live sales off until a refund policy and handling path are in place, and do not add token spending/trading until reversals are tested. Account deletion currently cascades to the wallet and purchase history (the UI discloses that forfeiture). The historical community-tip migration is not an active payment path and has not been validated for production use.
 
 ## Account deletion
 
@@ -50,5 +65,6 @@ If the service-role key is missing, the route returns `503` and the app surfaces
 - The `event_rsvp_counts` and `social_like_counts` views expose aggregates without revealing which member reacted. They run with the view owner's privileges, so keep their definitions narrow.
 - Storage policies require an active profile for upload, read, and delete. Media is served through short-lived signed URLs. Production still needs scanning, lifecycle cleanup, and abuse controls.
 - Run RLS tests against a disposable Supabase project for anonymous users, ordinary users, unrelated conversation members, moderators, suspended users, and expired suspensions. A successful Next.js build does not validate SQL, RLS, Auth, or Realtime behavior.
-- Community-tip records have RLS enabled and no browser grants. Only the service role can execute `record_community_tip`; keep its key server-only. Payments are disabled.
-- Lemon Squeezy checkout/webhooks and Monzo contributions are not implemented. Do not add unused credentials or enable live digital-goods sales.
+- Community-tip records have RLS enabled and no browser grants. Only the service role can execute `record_community_tip`; keep its key server-only. Replays are constrained by Stripe event ID and Checkout session ID. The historical tip flow is not an active payment path.
+- Token wallet fulfillment is defined in `migrations/20261012000000_token_wallet_and_fulfillment.sql`; it is staged but not applied or validated against the user's project. The Next.js `/api/checkout`, `/api/webhooks/stripe`, and `/api/community-tips` routes remain disabled.
+- Lemon Squeezy checkout/webhooks and Monzo Business bank-transfer contributions are not implemented. Do not add unused credentials to deployment environments. Keep token checkout disabled until the account, migration, Stripe test flow, webhook fulfillment, and refund policy have been verified.

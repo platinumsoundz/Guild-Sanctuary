@@ -1,13 +1,10 @@
 export { WalletPanel } from './WalletPanel';
 export { useWallet } from './useWallet';
 export {
-  completeStripeCheckoutMock,
-  createStripeCheckoutMock,
-  equipInventoryItem,
-  fetchCosmeticCatalog,
-  fetchCreditPackages,
+  checkTokenCheckoutEnabled,
   fetchWallet,
-  purchaseCosmetic,
-  purchaseVipTier,
+  isSupabaseWalletConfigured,
+  startTokenCheckout,
+  tokenBundles,
 } from './service';
-export type { MockCheckoutSession, WalletSnapshot } from './service';
+export type { TokenBundle, TokenBundleId, TokenLedgerEntry, WalletSnapshot } from './service';

@@ -38,7 +38,8 @@ export async function uploadCommunityMedia(userId: string, file: File, prefix: '
     'audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/webm',
     'video/mp4', 'video/webm', 'video/quicktime',
   ]);
-  if (!allowedTypes.has(file.type)) {
+  const contentType = file.type.split(';', 1)[0].trim().toLowerCase();
+  if (!allowedTypes.has(contentType)) {
     throw new Error('This file format is not supported for community uploads.');
   }
   const client = getSupabaseBrowserClient();
@@ -46,7 +47,7 @@ export async function uploadCommunityMedia(userId: string, file: File, prefix: '
   const objectPath = `${userId}/${prefix}/${crypto.randomUUID()}.${extension}`;
   const { error } = await client.storage.from(bucketName).upload(objectPath, file, {
     cacheControl: '3600',
-    contentType: file.type,
+    contentType,
     upsert: false,
   });
   if (error) throw new Error(`Media upload failed: ${error.message}`);

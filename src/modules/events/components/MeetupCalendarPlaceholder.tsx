@@ -8,12 +8,13 @@ import { ReportContentButton } from '@/modules/moderation';
 import styles from './MeetupCalendarPlaceholder.module.css';
 
 export function MeetupCalendarPlaceholder() {
-  const { currentUser } = useAppContext();
-  const userId = currentUser?.user.id ?? '';
+  const { currentUser, isGuest } = useAppContext();
+  const userId = currentUser && !isGuest ? currentUser.user.id : '';
   const { events, isLoading, error, addEvent, editEvent, removeEvent, rsvp } = useEvents(userId);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [startsAt, setStartsAt] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [startTime, setStartTime] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [editingEvent, setEditingEvent] = useState<EventView | null>(null);
@@ -22,7 +23,8 @@ export function MeetupCalendarPlaceholder() {
   const clearForm = () => {
     setTitle('');
     setDescription('');
-    setStartsAt('');
+    setStartDate('');
+    setStartTime('');
     setLatitude('');
     setLongitude('');
     setEditingEvent(null);
@@ -33,14 +35,15 @@ export function MeetupCalendarPlaceholder() {
     setFormError(null);
 
     try {
+      const startsAt = toIsoDateTime(startDate, startTime);
       if (editingEvent) {
-        await editEvent(editingEvent.id, { title, description, startsAt: new Date(startsAt).toISOString() });
+        await editEvent(editingEvent.id, { title, description, startsAt });
       } else {
         await addEvent({
           creatorId: userId,
           title,
           description,
-          startsAt: new Date(startsAt).toISOString(),
+          startsAt,
           locationCoords: { latitude: Number(latitude), longitude: Number(longitude) },
         });
       }
@@ -54,7 +57,9 @@ export function MeetupCalendarPlaceholder() {
     setEditingEvent(event);
     setTitle(event.title);
     setDescription(event.description);
-    setStartsAt(toLocalDateTime(event.startsAt));
+    const localDateTime = toLocalDateTime(event.startsAt);
+    setStartDate(localDateTime.slice(0, 10));
+    setStartTime(localDateTime.slice(11, 16));
     setLatitude(String(event.locationCoords.latitude));
     setLongitude(String(event.locationCoords.longitude));
   };
@@ -87,7 +92,7 @@ export function MeetupCalendarPlaceholder() {
         <span className={styles.worldTag}>THE SANCTUARY</span>
       </header>
 
-      <section className={styles.createPanel} aria-labelledby="event-form-title">
+      {userId && <section className={styles.createPanel} aria-labelledby="event-form-title">
         <h2 id="event-form-title">{editingEvent ? 'Edit event' : 'Create an event'}</h2>
         <form className={styles.eventForm} onSubmit={handleSubmit}>
           <label className={styles.field}>
@@ -100,8 +105,12 @@ export function MeetupCalendarPlaceholder() {
           </label>
           <div className={styles.formRow}>
             <label className={styles.field}>
-              <span>Date and time</span>
-              <input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.currentTarget.value)} required />
+              <span>Event date</span>
+              <input type="date" value={startDate} onChange={(event) => setStartDate(event.currentTarget.value)} required />
+            </label>
+            <label className={styles.field}>
+              <span>Start time</span>
+              <input type="time" step="60" value={startTime} onChange={(event) => setStartTime(event.currentTarget.value)} required />
             </label>
             <label className={styles.field}>
               <span>Latitude</span>
@@ -118,7 +127,7 @@ export function MeetupCalendarPlaceholder() {
             <button className={styles.primaryButton} type="submit">{editingEvent ? 'Save changes' : 'Publish event'}</button>
           </div>
         </form>
-      </section>
+      </section>}
 
       <section className={styles.eventsSection} aria-labelledby="upcoming-events-title">
         <div className={styles.sectionHeading}>
@@ -139,10 +148,10 @@ export function MeetupCalendarPlaceholder() {
                   <p>{event.description || 'No description provided.'}</p>
                   <span className={styles.locationText}>Location: {event.locationCoords.latitude.toFixed(3)}, {event.locationCoords.longitude.toFixed(3)}</span>
                   <span className={styles.attendeeCount}>{event.rsvpCount} going</span>
-                  <EventEngagement eventId={event.id} userId={userId} />
-                  <ReportContentButton targetType="event" targetId={event.id} />
+                  {userId && <EventEngagement eventId={event.id} userId={userId} />}
+                  {userId && <ReportContentButton targetType="event" targetId={event.id} />}
                 </div>
-                <div className={styles.eventActions}>
+                {userId && <div className={styles.eventActions}>
                   <button className={event.viewerStatus === 'going' ? styles.selectedButton : styles.secondaryButton} type="button" onClick={() => void handleRsvp(event.id, event.viewerStatus === 'going' ? 'cancelled' : 'going')}>
                     {event.viewerStatus === 'going' ? 'Going' : 'RSVP'}
                   </button>
@@ -153,7 +162,7 @@ export function MeetupCalendarPlaceholder() {
                       <button className={styles.textButton} type="button" onClick={() => void handleDelete(event.id)}>Delete</button>
                     </>
                   )}
-                </div>
+                </div>} 
               </article>
             ))}
           </div>
@@ -161,6 +170,17 @@ export function MeetupCalendarPlaceholder() {
       </section>
     </main>
   );
+}
+
+function toIsoDateTime(dateValue: string, timeValue: string): string {
+  if (!dateValue || !timeValue) {
+    throw new Error('Choose both an event date and a start time.');
+  }
+  const date = new Date(`${dateValue}T${timeValue}`);
+  if (!Number.isFinite(date.getTime())) {
+    throw new Error('Choose a valid event date and time.');
+  }
+  return date.toISOString();
 }
 
 function toLocalDateTime(isoDate: string): string {
