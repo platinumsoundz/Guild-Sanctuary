@@ -24,6 +24,7 @@ export function AppWorkspace() {
     activeNavigation,
     currentUser,
     isAuthenticated,
+    isGuest,
     isSessionReady,
     sessionError,
     login,
@@ -173,6 +174,7 @@ export function AppWorkspace() {
         <Navigation
           activeNavigation={activeNavigation}
           currentUser={currentUser}
+          isGuest={isGuest}
           pendingEmail={pendingEmail}
           isSessionReady={isSessionReady}
           onNavigate={openNavigation}
