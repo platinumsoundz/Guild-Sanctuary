@@ -1,11 +1,23 @@
 import './globals.css'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { AppContextProvider } from '@/context/AppContext'
+import { PwaInstallHelp } from '@/components/PwaInstallHelp'
 import { AdSenseScript } from '@/modules/ads/AdSenseScript'
 
 export const metadata: Metadata = {
   title: 'The Sanctuary',
+  applicationName: 'The Sanctuary',
   description: 'An intentional, privacy-focused community space for reflection and connection.',
+  appleWebApp: {
+    capable: true,
+    title: 'The Sanctuary',
+    statusBarStyle: 'black-translucent',
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#0b2b20',
+  colorScheme: 'dark',
 }
 
 export default function RootLayout({
@@ -17,6 +29,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="bg-neutral-950 text-neutral-100 min-h-screen antialiased">
         <AdSenseScript />
+        <PwaInstallHelp />
         <AppContextProvider>
           {children}
         </AppContextProvider>
