@@ -145,6 +145,7 @@ export interface Database {
         world_type: SanctuaryScope;
         title: string;
         description: string;
+        location_name: string;
         latitude: number;
         longitude: number;
         starts_at: string;
@@ -175,6 +176,16 @@ export interface Database {
         body: string;
         state: 'visible' | 'hidden' | 'removed';
         created_at: string;
+      }>;
+      notifications: Table<{
+        id: string;
+        recipient_id: string;
+        actor_id: string;
+        notification_type: 'like' | 'comment';
+        target_type: 'post' | 'short' | 'event';
+        target_id: string;
+        created_at: string;
+        read_at: string | null;
       }>;
       conversations: Table<ConversationRow>;
       conversation_members: Table<ConversationMemberRow>;
@@ -210,6 +221,25 @@ export interface Database {
     Views: {
       event_rsvp_counts: {
         Row: { event_id: string; going_count: number };
+        Relationships: [];
+      };
+      public_profiles: {
+        Row: {
+          id: string;
+          username: string;
+          display_name: string;
+          bio: string | null;
+          status_message: string | null;
+          avatar_url: string | null;
+          banner_url: string | null;
+          theme_color: string;
+          location: string | null;
+          age: number | null;
+          star_sign: string | null;
+          belief: string | null;
+          social_links: Record<string, string | null> | null;
+          allow_direct_messages: boolean;
+        };
         Relationships: [];
       };
     };
