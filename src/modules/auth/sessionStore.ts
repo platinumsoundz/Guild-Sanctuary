@@ -5,6 +5,7 @@ import type {
   User,
   UserPermission,
 } from '@/types/database';
+import { normalizeSocialLinks } from '@/lib/socialLinks';
 
 const activeSessionKey = 'guild-sanctuary:active-session:v1';
 const accountsKey = 'guild-sanctuary:accounts:v1';
