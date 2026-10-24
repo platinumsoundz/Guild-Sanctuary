@@ -63,6 +63,7 @@ function normalizeSocialLink(value: unknown, provider: keyof Profile['socialLink
       facebook: ['facebook.com', 'www.facebook.com'],
       x: ['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com'],
       youtube: ['youtube.com', 'www.youtube.com'],
+      instagram: ['instagram.com', 'www.instagram.com'],
       xbox: ['xbox.com', 'www.xbox.com'],
       playstation: ['playstation.com', 'www.playstation.com'],
       steam: ['steamcommunity.com', 'www.steamcommunity.com'],
@@ -103,6 +104,7 @@ function normalizeSession(value: unknown): AuthSession | null {
         facebook: normalizeSocialLink(socialLinks.facebook, 'facebook'),
         x: normalizeSocialLink(socialLinks.x, 'x'),
         youtube: normalizeSocialLink(socialLinks.youtube, 'youtube'),
+        instagram: normalizeSocialLink(socialLinks.instagram, 'instagram'),
         xbox: normalizeSocialLink(socialLinks.xbox, 'xbox'),
         playstation: normalizeSocialLink(socialLinks.playstation, 'playstation'),
         steam: normalizeSocialLink(socialLinks.steam, 'steam'),
@@ -209,7 +211,7 @@ function createSession(input: SignUpInput): AuthSession {
       starSign: null,
       belief: null,
       privacy: defaultPrivacy(null),
-      socialLinks: { facebook: null, x: null, youtube: null, xbox: null, playstation: null, steam: null, epicGames: null, reddit: null },
+      socialLinks: { facebook: null, x: null, youtube: null, instagram: null, xbox: null, playstation: null, steam: null, epicGames: null, reddit: null },
       visibility: 'public',
       role: 'member',
     },
@@ -302,6 +304,7 @@ function toPublicProfile(session: AuthSession): PublicProfile {
       facebook: null,
       x: null,
       youtube: null,
+      instagram: null,
       xbox: null,
       playstation: null,
       steam: null,
@@ -363,7 +366,7 @@ export function updateLocalProfile(
     throw new Error('Belief or philosophy cannot exceed 120 characters.');
   }
   if (updates.socialLinks) {
-    const providers: (keyof Profile['socialLinks'])[] = ['facebook', 'x', 'youtube', 'xbox', 'playstation', 'steam', 'epicGames', 'reddit'];
+    const providers: (keyof Profile['socialLinks'])[] = ['facebook', 'x', 'youtube', 'instagram', 'xbox', 'playstation', 'steam', 'epicGames', 'reddit'];
     for (const provider of providers) {
       const value = updates.socialLinks[provider];
       if (value && (value.length > 300 || !normalizeSocialLink(value, provider))) {
