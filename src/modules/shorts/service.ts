@@ -179,7 +179,7 @@ export async function toggleShortLike(shortId: string, userId: string): Promise<
       requested_short_id: shortId,
     });
     if (error) throw new Error(`Your reaction could not be saved: ${error.message}`);
-    const stats = data[0];
+    const stats = data?.[0];
     if (!stats) throw new Error('This short video is unavailable for reactions.');
     return { liked: stats.liked, count: stats.likes_count };
   }
@@ -275,7 +275,7 @@ export async function getShortEngagement(shortId: string, userId: string) {
       requested_short_id: shortId,
     });
     if (error) throw new Error(`Short video reactions could not be loaded: ${error.message}`);
-    const stats = data[0];
+    const stats = data?.[0];
     if (!stats) throw new Error('This short video is unavailable for reactions.');
     return {
       liked: stats.liked,
