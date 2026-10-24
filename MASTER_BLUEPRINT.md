@@ -26,7 +26,7 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `messages` | Direct/group conversations and threads | In-memory; optional Supabase repository is not active UI |
 | `profiles` / `settings` | Profile, discovery, privacy, local preferences | Browser-local demo store |
 | `moderation` | Report UI and moderator workflow contracts | Supabase-dependent when configured |
-| `support` | Optional community support | Public Stripe-hosted donation link; no app-side reconciliation |
+| `support` | Optional community support | Stripe donation link returned only on explicitly enabled Vercel Production deployments; no app-side reconciliation |
 | `economy` | Persistent token wallet and bundle purchase foundation | Supabase wallet/ledger migration and Edge Functions staged; checkout disabled by default; no spending/transfers yet |
 | `ads` | Responsive web display slots plus optional native AdMob placements | AdSense IDs via public build-time environment; native AdMob module not wired into the active shell |
 
@@ -44,9 +44,9 @@ Before serving live inventory, verify domain approval, site verification/`ads.tx
 
 ## Payments and support — current state
 
-- The Support page contains a public Stripe-hosted voluntary donation link. Those donations are not associated with Sanctuary accounts or reconciled by the app.
+- The Support page can show a Stripe-hosted voluntary donation link only when `VERCEL_ENV=production` and `STRIPE_DONATION_LINK_ENABLED=true`; it is not returned to previews/local builds. Donations are not associated with Sanctuary accounts or reconciled by the app.
 - `/api/checkout`, `/api/webhooks/stripe`, and `/api/community-tips` remain disabled; do not register the disabled Next.js Stripe webhook.
-- Token bundles use separate Supabase Edge Functions: authenticated `token-checkout` creates a Checkout Session from server-side Price IDs; `stripe-token-webhook` verifies the raw Stripe signature and calls an idempotent, service-role-only database RPC.
+- Token bundles use separate Supabase Edge Functions: authenticated `token-checkout` creates a Checkout Session from server-side Price IDs and requires the request Origin to match the configured `APP_BASE_URL`; `stripe-token-webhook` verifies the raw Stripe signature and calls an idempotent, service-role-only database RPC.
 - `TOKEN_CHECKOUT_ENABLED` defaults to `false`. Enable it only in isolated test-mode staging after migration, Edge Functions, mode-matched Price IDs, webhook secrets, and end-to-end checks are confirmed. Keep live checkout disabled until refund/chargeback handling and a customer-support policy are decided.
 - The shared Stripe Payment Link is not used for token purchases because it cannot securely associate a session with the signed-in account.
 - The initial token release supports balance display and bundle grants only. No spending, transfers, trading, marketplace, cash-out, VIP, promotions, or cosmetics are active. Automatic refund/chargeback reconciliation is not implemented; decide and implement that lifecycle before live sales, token redemption, or trading.
@@ -57,7 +57,7 @@ Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do
 
 ### Complete in the repository (not yet deployed or validated)
 
-- Wallet navigation and page with persistent balance/history UI and fixed £1/£5/£10 bundle cards.
+- Wallet navigation and page with persistent balance/history UI and fixed £1/£5/£10 bundle cards. Purchase status is origin-bound; preview URLs do not use a production checkout origin.
 - Supabase wallet/ledger migration with owner-read-only policies and service-role-only transactional/idempotent purchase fulfillment.
 - Authenticated Checkout Session Edge Function and raw-body Stripe-signature webhook. Checkout validates the configured Stripe Prices' mode, amount, currency, and active one-time status.
 - Purchase checkout remains disabled by default. A test-mode staging enablement is allowed only after staging migration, functions, Price IDs, webhook, and end-to-end test are configured.
