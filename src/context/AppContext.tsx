@@ -260,12 +260,14 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       if ('age' in updates) databaseUpdates.age = updates.age;
       if ('starSign' in updates) databaseUpdates.star_sign = updates.starSign;
       if ('belief' in updates) databaseUpdates.belief = updates.belief?.trim() || null;
-      if ('socialLinks' in updates) databaseUpdates.social_links = updates.socialLinks;
-      if ('privacy' in updates) {
-        databaseUpdates.privacy = updates.privacy;
-        if (updates.privacy?.allowDirectMessages !== undefined) {
-          databaseUpdates.allow_direct_messages = updates.privacy.allowDirectMessages;
-        }
+      if ('socialLinks' in updates && updates.socialLinks) {
+        const { facebook, x, youtube, xbox, playstation, steam, epicGames, reddit } = updates.socialLinks;
+        databaseUpdates.social_links = { facebook, x, youtube, xbox, playstation, steam, epicGames, reddit };
+      }
+      if ('privacy' in updates && updates.privacy) {
+        const { bio, location, age, starSign, belief, socialLinks, allowDirectMessages } = updates.privacy;
+        databaseUpdates.privacy = { bio, location, age, starSign, belief, socialLinks, allowDirectMessages };
+        databaseUpdates.allow_direct_messages = allowDirectMessages;
       }
       if ('visibility' in updates && updates.visibility !== undefined) {
         databaseUpdates.visibility = updates.visibility;
