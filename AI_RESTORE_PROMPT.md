@@ -9,7 +9,7 @@ Read `MASTER_BLUEPRINT.md` first; it is the product and technical roadmap. Prese
 - Wallet scope for the first release is: persistent balance, purchase history, and fixed token bundles only.
 - No transfers, trading, marketplace, cash-out, token spending, cosmetics, VIP, gifts, or post promotion are in the first release.
 - Tokens have no cash value. Account deletion currently cascades to the wallet and purchase ledger; the wallet UI discloses this.
-- The voluntary Stripe donation link is external and does not grant tokens or account benefits. It is served only when `VERCEL_ENV=production` and `STRIPE_DONATION_LINK_ENABLED=true`; preview/local deployments fail closed.
+- The voluntary Stripe donation link is external and does not grant tokens or account benefits. It is served only when `VERCEL_ENV=production` and `STRIPE_DONATION_LINK_ENABLED=true`; preview/local deployments fail closed. AdSense is likewise disabled by default and requires an explicit flag plus production environment.
 - Do not use the shareable Stripe token Payment Link for in-app purchases: it cannot safely attribute a payment to the signed-in Sanctuary account. In-app checkout is a server-created Stripe Checkout Session tied to the authenticated user.
 
 ## Wallet implementation status
@@ -31,7 +31,7 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 1. Review current wallet code and these docs before editing. Fix any static/type/build issues found when validation is available.
 2. Keep live purchases disabled. Refund/chargeback behavior is a launch blocker; ask for the desired business rule before implementing it.
 3. The user must apply the migration to staging, deploy `token-checkout` and `stripe-token-webhook`, configure test-mode Price IDs/secrets, and create a Stripe test webhook for `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
-4. Use a stable staging app origin (not an ephemeral preview URL) for test checkout. Verify one purchase per bundle grants the right amount once; duplicate webhook deliveries do not double-credit; invalid signatures, unpaid sessions, wrong mode, and wrong/inactive Prices do not credit. Confirm preview builds hide external donation links and cannot invoke production checkout due to the Origin check.
+4. Use a stable staging app origin (not an ephemeral preview URL) for test checkout. Verify one purchase per bundle grants the right amount once; duplicate webhook deliveries do not double-credit; invalid signatures, unpaid sessions, wrong mode, and wrong/inactive Prices do not credit. Confirm previews hide donation links and AdSense, and cannot invoke production checkout due to the Origin check.
 5. Do not enable live purchases until staging passes and refunds/chargebacks are addressed. The user's Stripe/Supabase credentials must stay private; never ask them to paste secrets into chat.
 6. Defer token spending and all future token sinks until the purchase/refund ledger rules are complete. Transfers and cash-out remain out of scope.
 
