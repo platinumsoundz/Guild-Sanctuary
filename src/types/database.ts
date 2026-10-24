@@ -14,6 +14,7 @@ export interface SocialLinks {
   facebook: string | null;
   x: string | null;
   youtube: string | null;
+  instagram: string | null;
   xbox: string | null;
   playstation: string | null;
   steam: string | null;
