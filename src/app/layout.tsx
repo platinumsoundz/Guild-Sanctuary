@@ -4,10 +4,17 @@ import { Analytics } from '@vercel/analytics/next'
 import { AppContextProvider } from '@/context/AppContext'
 import { PwaInstallHelp } from '@/components/PwaInstallHelp'
 import { AdsConsent } from '@/modules/ads/AdsConsent'
+import {
+  ADSENSE_CLIENT_ID,
+  ADSENSE_ENABLED,
+  isAdsProductionDeployment,
+  isValidAdsenseClientId,
+} from '@/modules/ads/config'
 
 const adsEnabled =
-  process.env.NEXT_PUBLIC_ADSENSE_ENABLED === 'true' &&
-  process.env.VERCEL_ENV === 'production'
+  ADSENSE_ENABLED &&
+  isAdsProductionDeployment() &&
+  isValidAdsenseClientId(ADSENSE_CLIENT_ID)
 
 export const metadata: Metadata = {
   title: 'The Sanctuary',
@@ -18,6 +25,13 @@ export const metadata: Metadata = {
     title: 'The Sanctuary',
     statusBarStyle: 'black-translucent',
   },
+  ...(adsEnabled
+    ? {
+        other: {
+          'google-adsense-account': ADSENSE_CLIENT_ID,
+        },
+      }
+    : {}),
 }
 
 export const viewport: Viewport = {

@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import styles from './AdSlot.module.css';
-import { ADSENSE_CLIENT_ID, ADS_CONSENT_EVENT, isValidAdsenseClientId } from './config';
+import {
+  ADSENSE_CLIENT_ID,
+  ADSENSE_ENABLED,
+  ADS_CONSENT_EVENT,
+  isAdsProductionDeployment,
+  isValidAdsenseClientId,
+} from './config';
 import { hasAdsConsent, type AdsConsent } from './consent';
 
 export type AdSlotPlacement = 'feed-inline' | 'feed-sidebar' | 'shorts';
@@ -27,8 +33,11 @@ export function AdSlot({ placement }: AdSlotProps) {
   const slotId = slotIds[placement];
   const adRef = useRef<HTMLModElement>(null);
   const publisherId = ADSENSE_CLIENT_ID;
-  const adsEnabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED === 'true';
-  const configured = adsEnabled && isValidAdsenseClientId(publisherId) && Boolean(slotId && /^\d+$/.test(slotId));
+  const configured =
+    ADSENSE_ENABLED &&
+    isAdsProductionDeployment() &&
+    isValidAdsenseClientId(publisherId) &&
+    Boolean(slotId && /^\d+$/.test(slotId));
   const [consented, setConsented] = useState(false);
 
   useEffect(() => {

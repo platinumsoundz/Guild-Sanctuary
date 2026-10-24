@@ -17,8 +17,8 @@ interface AdsConsentProps {
  * Consent-gated AdSense loader.
  *
  * The script is never injected until the visitor grants advertising consent.
- * The server layout also requires the explicit AdSense flag and a Vercel
- * Production deployment before mounting this component.
+ * The server layout also requires the explicit AdSense flag and an explicitly
+ * configured production deployment before mounting this component.
  *
  * Production deployments in the EEA/UK must also use a Google-certified CMP;
  * this local banner is the minimum gate for non-regulated deployments.
