@@ -10,7 +10,7 @@ import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { AuthenticationGateway } from '@/modules/auth';
 import { Feed } from '@/modules/feeds';
 import { MeetupCalendarPlaceholder } from '@/modules/events';
-import { ProfileDashboard, ProfileDiscovery } from '@/modules/profiles';
+import { ProfileDashboard, ProfileDiscovery, PublicProfilePage } from '@/modules/profiles';
 import { SupportPanel } from '@/modules/support';
 import { AdSlot } from '@/modules/ads';
 import { DirectMessageThread, MessagesInbox } from '@/modules/messages';
@@ -40,7 +40,7 @@ export function AppWorkspace() {
     verifyTwoFactorCode,
     cancelAuthChallenge,
   } = useAppContext();
-  const [messagePeer, setMessagePeer] = useState<PublicProfile | null>(null);
+  const [messagePeer, setMessagePeer] = useState<PublicProfile | null>(null);\n  const [viewedProfile, setViewedProfile] = useState<PublicProfile | null>(null);
   const [messageConversation, setMessageConversation] = useState<Conversation | null>(null);
   const [profilePosts, setProfilePosts] = useState<import('@/types/database').Post[]>([]);
   const [isProfilePostsLoading, setIsProfilePostsLoading] = useState(false);
@@ -83,13 +83,13 @@ export function AppWorkspace() {
   }, [activeNavigation, currentUser]);
 
   const openMessage = (profile: PublicProfile) => {
-    setMessageConversation(null);
+    setViewedProfile(null);\n    setMessageConversation(null);
     setMessagePeer(profile);
     setActiveNavigation('messages');
   };
 
   const openNavigation = (navigation: NavigationState) => {
-    if (navigation === 'messages') {
+    setViewedProfile(null);\n    if (navigation === 'messages') {
       setMessagePeer(null);
       setMessageConversation(null);
     }
@@ -122,8 +122,18 @@ export function AppWorkspace() {
           onSave={updateProfile}
           onThemeChange={setProfileThemePreview}
         />
+      ) : activeNavigation === 'discover' && viewedProfile ? (
+        <PublicProfilePage
+          profile={viewedProfile}
+          onBack={() => setViewedProfile(null)}
+          onMessage={openMessage}
+        />
       ) : activeNavigation === 'discover' ? (
-        <ProfileDiscovery currentUserId={currentUser.user.id} onMessage={openMessage} />
+        <ProfileDiscovery
+          currentUserId={currentUser.user.id}
+          onMessage={openMessage}
+          onView={(profile) => setViewedProfile(profile)}
+        />
       ) : activeNavigation === 'messages' && messagePeer ? (
         <DirectMessageThread peer={messagePeer} onBack={() => setMessagePeer(null)} />
       ) : activeNavigation === 'messages' && messageConversation ? (
