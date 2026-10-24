@@ -1,0 +1,77 @@
+.installCard {
+  position: fixed;
+  z-index: 50;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: min(100% - 24px, 380px);
+  padding: 10px;
+  border: 1px solid #315445;
+  border-radius: 12px;
+  background: rgb(10 22 17 / 96%);
+  color: #f4efe1;
+  box-shadow: 0 12px 36px rgb(0 0 0 / 35%);
+  font: 12px/1.5 system-ui, sans-serif;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.primaryButton,
+.secondaryButton,
+.closeButton {
+  min-height: 38px;
+  border: 1px solid #52765c;
+  border-radius: 8px;
+  cursor: pointer;
+  font: 600 12px system-ui, sans-serif;
+}
+
+.primaryButton {
+  padding: 8px 12px;
+  background: #52765c;
+  color: #fff;
+}
+
+.secondaryButton {
+  flex: 1;
+  padding: 8px 10px;
+  background: transparent;
+  color: #f4efe1;
+}
+
+.closeButton {
+  width: 38px;
+  background: transparent;
+  color: #f4efe1;
+  font-size: 20px;
+}
+
+.instructions {
+  max-height: min(40vh, 260px);
+  margin-top: 8px;
+  overflow-y: auto;
+  color: #d9e3db;
+}
+
+.instructions p,
+.instructions ul {
+  margin: 0;
+  padding: 0 4px;
+}
+
+.instructions ul {
+  display: grid;
+  gap: 6px;
+  padding-left: 22px;
+}
+
+@media (max-width: 480px) {
+  .installCard {
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: calc(100% - 20px);
+  }
+}
