@@ -30,7 +30,9 @@ export function PwaInstallHelp() {
       setInstallPrompt(null);
     };
 
-    setIsIos(/iphone|ipad|ipod/i.test(navigator.userAgent));
+    const isAppleMobile = /iphone|ipad|ipod/i.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsIos(isAppleMobile);
     updateInstalledState();
     standaloneQuery.addEventListener('change', updateInstalledState);
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -46,10 +48,14 @@ export function PwaInstallHelp() {
   const installApp = async () => {
     if (!installPrompt) return;
     const prompt = installPrompt;
-    await prompt.prompt();
-    const choice = await prompt.userChoice;
     setInstallPrompt(null);
-    if (choice.outcome === 'accepted') setIsInstalled(true);
+    try {
+      await prompt.prompt();
+      const choice = await prompt.userChoice;
+      if (choice.outcome === 'accepted') setIsInstalled(true);
+    } catch {
+      setInstructionsOpen(true);
+    }
   };
 
   if (isInstalled || dismissed) return null;
