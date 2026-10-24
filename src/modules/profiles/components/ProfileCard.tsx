@@ -1,9 +1,9 @@
-import type { Profile } from '@/types/database';
+import type { Profile, PublicProfile } from '@/types/database';
 import styles from './Profiles.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
 interface ProfileCardProps {
-  profile: Profile;
+  profile: Profile | PublicProfile;
 }
 
 export function ProfileCard({ profile }: ProfileCardProps) {
@@ -20,14 +20,14 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           <p className={styles.eyebrow}>COMMUNITY PROFILE</p>
           <h1>{profile.displayName}</h1>
           <p className={styles.username}>@{profile.username}</p>
-          <p className={styles.bio}>{profile.bio ?? 'No profile introduction yet.'}</p>
+          {profile.statusMessage && <p className={styles.statusMessage}>{profile.statusMessage}</p>}\n          <p className={styles.bio}>{profile.bio ?? 'No profile introduction yet.'}</p>
           <div className={styles.personalDetails}>
             {profile.location && <span>{profile.location}</span>}
             {profile.age && <span>{profile.age}</span>}
             {profile.starSign && <span>{profile.starSign}</span>}
             {profile.belief && <span>{profile.belief}</span>}
           </div>
-          {profile.privacy.socialLinks && <ProfileSocialLinks links={profile.socialLinks} />}
+          {(!('privacy' in profile) || profile.privacy.socialLinks) && <ProfileSocialLinks links={profile.socialLinks} />}
         </div>
       </div>
       <span className={styles.role}>{profile.role}</span>
