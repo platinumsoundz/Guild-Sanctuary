@@ -144,25 +144,27 @@ export async function updateSupabaseProfile(
   const payload: Partial<ProfileRow> = {};
 
   if (updates.displayName !== undefined) payload.display_name = updates.displayName.trim();
-  if (updates.bio !== undefined) payload.bio = updates.bio;
-  if (updates.statusMessage !== undefined) payload.status_message = updates.statusMessage;
+  if (updates.bio !== undefined) payload.bio = updates.bio?.trim() || null;
+  if (updates.statusMessage !== undefined) payload.status_message = updates.statusMessage?.trim() || null;
   if (updates.avatarUrl !== undefined) payload.avatar_url = updates.avatarUrl;
   if (updates.bannerUrl !== undefined) payload.banner_url = updates.bannerUrl;
   if (updates.themeColor !== undefined) payload.theme_color = updates.themeColor;
-  if (updates.location !== undefined) payload.location = updates.location;
+  if (updates.location !== undefined) payload.location = updates.location?.trim() || null;
   if (updates.age !== undefined) payload.age = updates.age;
   if (updates.starSign !== undefined) payload.star_sign = updates.starSign;
-  if (updates.belief !== undefined) payload.belief = updates.belief;
+  if (updates.belief !== undefined) payload.belief = updates.belief?.trim() || null;
   if (updates.socialLinks !== undefined) {
-    payload.social_links = updates.socialLinks as unknown as Record<string, string | null>;
+    const { facebook, x, youtube, xbox, playstation, steam, epicGames, reddit } = updates.socialLinks;
+    payload.social_links = { facebook, x, youtube, xbox, playstation, steam, epicGames, reddit };
   }
   if (updates.visibility !== undefined) {
     payload.visibility = updates.visibility;
     payload.allow_profile_discovery = updates.visibility === 'public';
   }
   if (updates.privacy !== undefined) {
-    payload.privacy = updates.privacy as unknown as Record<string, boolean>;
-    payload.allow_direct_messages = updates.privacy.allowDirectMessages;
+    const { bio, location, age, starSign, belief, socialLinks, allowDirectMessages } = updates.privacy;
+    payload.privacy = { bio, location, age, starSign, belief, socialLinks, allowDirectMessages };
+    payload.allow_direct_messages = allowDirectMessages;
   }
 
   if (Object.keys(payload).length === 0) {

@@ -9,14 +9,21 @@ import styles from './AdsConsent.module.css';
 const publisherId = ADSENSE_CLIENT_ID;
 const configured = isValidAdsenseClientId(publisherId);
 
+interface AdsConsentProps {
+  enabled?: boolean;
+}
+
 /**
  * Consent-gated AdSense loader.
  *
  * The script is never injected until the visitor grants advertising consent.
+ * The server layout also requires the explicit AdSense flag and a Vercel
+ * Production deployment before mounting this component.
+ *
  * Production deployments in the EEA/UK must also use a Google-certified CMP;
  * this local banner is the minimum gate for non-regulated deployments.
  */
-export function AdsConsent() {
+export function AdsConsent({ enabled = false }: AdsConsentProps) {
   const [decision, setDecision] = useState<AdsConsent | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -31,7 +38,7 @@ export function AdsConsent() {
     return () => window.removeEventListener(ADS_CONSENT_EVENT, handleChange);
   }, []);
 
-  if (!configured || !ready) return null;
+  if (!enabled || !configured || !ready) return null;
 
   if (decision === 'granted') {
     return (

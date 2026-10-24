@@ -70,9 +70,13 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   return (
     <main className={styles.inbox}>
       <p className={styles.eyebrow}>PRIVATE MESSAGES</p>
-      <h1>Your conversations</h1>
-      <p className={styles.description}>Start a private conversation from a public profile.</p>
-      <button className={styles.actionButton} type="button" onClick={onDiscoverPeople}>Find people</button>
+      <h1>Messages</h1>
+      <p className={styles.description}>Choose a one-to-one conversation or start a group chat.</p>
+      <section className={styles.groups} aria-labelledby="direct-title">
+        <h2 id="direct-title">Start a one-to-one conversation</h2>
+        <p className={styles.description}>Find a public profile and choose Message to start a private chat.</p>
+        <button className={styles.actionButton} type="button" onClick={onDiscoverPeople}>Find someone to message</button>
+      </section>
       <section className={styles.groups} aria-labelledby="group-title">
         <h2 id="group-title">Start a group conversation</h2>
         <form onSubmit={(event) => void handleCreateGroup(event)}>

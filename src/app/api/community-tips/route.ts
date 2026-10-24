@@ -1,11 +1,22 @@
 import { NextResponse } from 'next/server';
 
-/**
- * Payments are deliberately unavailable until an end-to-end provider, webhook,
- * fulfillment, and reconciliation implementation has been reviewed.
- */
+function getProductionDonationUrl(): string | null {
+  if (process.env.VERCEL_ENV !== 'production' || process.env.STRIPE_DONATION_LINK_ENABLED !== 'true') {
+    return null;
+  }
+
+  try {
+    const url = new URL(process.env.STRIPE_DONATION_URL ?? '');
+    return url.protocol === 'https:' && url.hostname === 'buy.stripe.com' ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Return the public donation link only for explicitly enabled production deployments. */
 export async function GET() {
   return NextResponse.json({
+    stripeDonationUrl: getProductionDonationUrl(),
     stripeTipsEnabled: false,
     lemonSqueezyCheckoutUrl: null,
     monzoContributionUrl: null,

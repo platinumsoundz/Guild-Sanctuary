@@ -15,8 +15,9 @@ interface ShortState {
 }
 
 export function ShortsFeed() {
-  const { currentUser } = useAppContext();
+  const { currentUser, isGuest } = useAppContext();
   const viewerId = currentUser?.user.id ?? '';
+  const canEngage = Boolean(viewerId) && !isGuest;
   const [videos, setVideos] = useState<ShortVideo[]>([]);
   const [engagement, setEngagement] = useState<Record<string, ShortState>>({});
   const [commentsByVideo, setCommentsByVideo] = useState<Record<string, SocialComment[]>>({});
@@ -93,6 +94,10 @@ export function ShortsFeed() {
   }, [videos]);
 
   const handleLike = async (videoId: string) => {
+    if (!canEngage) {
+      setError('Sign in with your Sanctuary account to like Shorts.');
+      return;
+    }
     try {
       const result = await toggleShortLike(videoId, viewerId);
       setEngagement((current) => ({
@@ -106,6 +111,10 @@ export function ShortsFeed() {
   };
 
   const showComments = async (videoId: string) => {
+    if (!canEngage) {
+      setError('Sign in with your Sanctuary account to view and comment on Shorts.');
+      return;
+    }
     const nextId = openCommentsId === videoId ? null : videoId;
     setOpenCommentsId(nextId);
     if (nextId && !commentsByVideo[nextId]) {
@@ -120,6 +129,10 @@ export function ShortsFeed() {
 
   const handleComment = async (event: FormEvent<HTMLFormElement>, videoId: string) => {
     event.preventDefault();
+    if (!canEngage) {
+      setError('Sign in with your Sanctuary account to comment on Shorts.');
+      return;
+    }
     try {
       const comment = await addShortComment(videoId, viewerId, draft);
       setCommentsByVideo((current) => ({ ...current, [videoId]: [...(current[videoId] ?? []), comment] }));
@@ -205,7 +218,11 @@ export function ShortsFeed() {
 
   const handlePublishVideo = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!viewerId || !videoDraft || !videoFile) {
+    if (!canEngage) {
+      setError('Sign in with your Sanctuary account to publish a Short.');
+      return;
+    }
+    if (!videoDraft || !videoFile) {
       setError('Choose a video file before publishing.');
       return;
     }
@@ -228,6 +245,10 @@ export function ShortsFeed() {
   };
 
   const handleDeleteVideo = async (videoId: string) => {
+    if (!canEngage) {
+      setError('Sign in with your Sanctuary account to delete a Short.');
+      return;
+    }
     if (!window.confirm('Delete this video and its uploaded media? This cannot be undone.')) return;
     try {
       await deleteShortVideo(videoId, viewerId);
@@ -254,23 +275,27 @@ export function ShortsFeed() {
         <div><p>COMMUNITY CLIPS</p><h1>Shorts</h1></div>
         <span>Scroll or swipe to explore</span>
       </header>
-      <form className={styles.videoComposer} onSubmit={(event) => void handlePublishVideo(event)}>
-        <label>
-          <span>Video caption</span>
-          <input value={captionDraft} onChange={(event) => setCaptionDraft(event.currentTarget.value)} maxLength={500} placeholder="Add a caption…" />
-        </label>
-        <label className={styles.videoPicker}>
-          <span>{videoFileName || 'Choose a short video (up to 5 MB)'}</span>
-          <input type="file" accept="video/*" onChange={(event) => void handleVideoFile(event)} />
-        </label>
-        <button type="button" onClick={() => void (isRecording ? stopRecording() : startRecording())}>
-          {isRecording ? 'Stop recording' : 'Record a clip'}
-        </button>
-        {isRecording && <p className={styles.recordingStatus} role="status">Recording… camera and microphone are active.</p>}
-        {isRecording && <video ref={recordingPreviewRef} className={styles.videoDraftPreview} autoPlay muted playsInline />}
-        {videoDraft && !isRecording && <video className={styles.videoDraftPreview} src={videoDraft} controls muted playsInline />}
-        <button type="submit" disabled={!videoDraft}>Publish short</button>
-      </form>
+      {canEngage ? (
+        <form className={styles.videoComposer} onSubmit={(event) => void handlePublishVideo(event)}>
+          <label>
+            <span>Video caption</span>
+            <input value={captionDraft} onChange={(event) => setCaptionDraft(event.currentTarget.value)} maxLength={500} placeholder="Add a caption…" />
+          </label>
+          <label className={styles.videoPicker}>
+            <span>{videoFileName || 'Choose a short video (up to 5 MB)'}</span>
+            <input type="file" accept="video/*" onChange={(event) => void handleVideoFile(event)} />
+          </label>
+          <button type="button" onClick={() => void (isRecording ? stopRecording() : startRecording())}>
+            {isRecording ? 'Stop recording' : 'Record a clip'}
+          </button>
+          {isRecording && <p className={styles.recordingStatus} role="status">Recording… camera and microphone are active.</p>}
+          {isRecording && <video ref={recordingPreviewRef} className={styles.videoDraftPreview} autoPlay muted playsInline />}
+          {videoDraft && !isRecording && <video className={styles.videoDraftPreview} src={videoDraft} controls muted playsInline />}
+          <button type="submit" disabled={!videoDraft}>Publish short</button>
+        </form>
+      ) : (
+        <p className={styles.empty} role="status">Sign in with your Sanctuary account to publish, like, or comment on Shorts.</p>
+      )}
       {error && <p className={styles.error} role="alert">{error}</p>}
       <div className={styles.feed} ref={feedRef}>
         {videos.map((video, index) => {
@@ -285,16 +310,16 @@ export function ShortsFeed() {
                 <p>{video.caption}</p>
               </div>
               <div className={styles.actions}>
-                <button type="button" aria-pressed={stats.liked} aria-label={`${stats.liked ? 'Unlike' : 'Like'} short, ${stats.likesCount} likes`} onClick={() => void handleLike(video.id)}>
+                <button type="button" disabled={!canEngage} aria-pressed={stats.liked} aria-label={`${stats.liked ? 'Unlike' : 'Like'} short, ${stats.likesCount} likes`} onClick={() => void handleLike(video.id)}>
                   <Heart fill={stats.liked ? 'currentColor' : 'none'} />
                   <span>{stats.likesCount}</span>
                 </button>
-                <button type="button" aria-expanded={isCommentsOpen} aria-label={`Comments, ${stats.commentsCount}`} onClick={() => void showComments(video.id)}>
+                <button type="button" disabled={!canEngage} aria-expanded={isCommentsOpen} aria-label={`Comments, ${stats.commentsCount}`} onClick={() => void showComments(video.id)}>
                   <MessageCircle />
                   <span>{stats.commentsCount}</span>
                 </button>
                 {video.authorId === viewerId && (
-                  <button type="button" aria-label="Delete your short video" onClick={() => void handleDeleteVideo(video.id)}>
+                  <button type="button" disabled={!canEngage} aria-label="Delete your short video" onClick={() => void handleDeleteVideo(video.id)}>
                     <Trash2 />
                     <span>Delete</span>
                   </button>
@@ -310,8 +335,8 @@ export function ShortsFeed() {
                     )) : <p>Be the first to comment.</p>}
                   </div>
                   <form onSubmit={(event) => void handleComment(event, video.id)}>
-                    <input value={draft} onChange={(event) => setDraft(event.currentTarget.value)} maxLength={1000} placeholder="Add a comment…" required />
-                    <button type="submit">Post</button>
+                    <input value={draft} onChange={(event) => setDraft(event.currentTarget.value)} maxLength={1000} placeholder="Add a comment…" required disabled={!canEngage} />
+                    <button type="submit" disabled={!canEngage}>Post</button>
                   </form>
                 </aside>
               )}

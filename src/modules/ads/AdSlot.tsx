@@ -27,7 +27,8 @@ export function AdSlot({ placement }: AdSlotProps) {
   const slotId = slotIds[placement];
   const adRef = useRef<HTMLModElement>(null);
   const publisherId = ADSENSE_CLIENT_ID;
-  const configured = isValidAdsenseClientId(publisherId) && Boolean(slotId && /^\d+$/.test(slotId));
+  const adsEnabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED === 'true';
+  const configured = adsEnabled && isValidAdsenseClientId(publisherId) && Boolean(slotId && /^\d+$/.test(slotId));
   const [consented, setConsented] = useState(false);
 
   useEffect(() => {
