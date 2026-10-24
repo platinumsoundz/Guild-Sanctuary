@@ -108,7 +108,7 @@ Do not call this a production release until all of the following are complete:
 
 ## Messaging status and handoff
 
-Direct one-to-one messages already exist in the demo flow: Messages → Find people → search a public profile → Message. Group creation is also available in Messages and requires at least two other selected members. `src/modules/messages/service.ts`, `MessagesInbox.tsx`, `DirectMessageThread.tsx`, and `useDirectMessages.ts` implement the active in-memory UI. `src/modules/messages/supabaseRepository.ts` is an optional adapter, not used by that UI; durable Supabase messaging, realtime, RLS verification, and production abuse/moderation/retention decisions remain unfinished. The current inbox emphasizes the group form, so a small UX improvement is to make the one-to-one entry point explicit. Do not describe messaging as persistent or end-to-end encrypted.
+Direct one-to-one messages exist in the demo flow: Messages → Find someone to message → Discover → search a public profile → Message. Group creation is also available in Messages and requires at least two other selected members. The inbox now presents separate one-to-one and group sections to make both paths explicit. `src/modules/messages/service.ts`, `MessagesInbox.tsx`, `DirectMessageThread.tsx`, and `useDirectMessages.ts` implement the active in-memory UI. `src/modules/messages/supabaseRepository.ts` is an optional adapter, not used by that UI; durable Supabase messaging, realtime, RLS verification, and production abuse/moderation/retention decisions remain unfinished. The UX change is unvalidated. Do not describe messaging as persistent or end-to-end encrypted.
 
 ## Deployment and verification note
 
