@@ -153,6 +153,14 @@
   overflow-wrap: anywhere;
 }
 
+.profileActions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.viewButton,
 .messageButton {
   min-height: 34px;
   padding: 6px 11px;
@@ -164,6 +172,11 @@
   font-family: Arial, sans-serif;
   font-size: 10px;
   font-weight: 700;
+}
+
+.viewButton {
+  border-color: var(--line);
+  color: var(--ink);
 }
 
 .messageButton:disabled {
@@ -186,7 +199,7 @@
     flex-wrap: wrap;
   }
 
-  .messageButton {
+  .profileActions {
     margin-left: 62px;
   }
 }
