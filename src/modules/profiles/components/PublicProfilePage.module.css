@@ -1,0 +1,144 @@
+.page {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 18px;
+  padding: 28px clamp(16px, 4vw, 44px) 48px;
+}
+
+.header,
+.sectionHeading,
+.actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header h1,
+.sectionHeading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 25px;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.posts {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-raised);
+}
+
+.sectionHeading > span,
+.state {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+.state {
+  margin: 0;
+  padding: 12px 0;
+  line-height: 1.5;
+}
+
+.postGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+  gap: 10px;
+}
+
+.post {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.post time {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+}
+
+.post p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.post img,
+.post video {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  border-radius: 3px;
+  object-fit: contain;
+}
+
+.post audio {
+  width: 100%;
+}
+
+.tag {
+  width: fit-content;
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+}
+
+.secondaryButton,
+.primaryButton {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.primaryButton {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 580px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+}
