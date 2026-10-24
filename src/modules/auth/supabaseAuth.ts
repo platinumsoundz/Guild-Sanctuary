@@ -16,6 +16,7 @@ const emptyLinks: SocialLinks = {
   facebook: null,
   x: null,
   youtube: null,
+  instagram: null,
   xbox: null,
   playstation: null,
   steam: null,
