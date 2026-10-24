@@ -44,6 +44,16 @@ function getCheckoutConfig() {
   return { ready, mode, secretKey, appBaseUrl, prices }
 }
 
+function isAllowedAppOrigin(req: Request, appBaseUrl: string): boolean {
+  const origin = req.headers.get('origin')
+  if (!origin) return false
+  try {
+    return origin === new URL(appBaseUrl).origin
+  } catch {
+    return false
+  }
+}
+
 async function isExpectedPrice(stripe: Stripe, priceId: string, bundleId: BundleId, mode: string | undefined): Promise<boolean> {
   try {
     const price = await stripe.prices.retrieve(priceId)
@@ -72,6 +82,9 @@ export default {
     }
 
     const config = getCheckoutConfig()
+    if (!isAllowedAppOrigin(req, config.appBaseUrl)) {
+      return Response.json({ error: 'Token checkout is only available from the configured Sanctuary origin.' }, { status: 403 })
+    }
     if (body.action === 'status') {
       if (!config.ready) return Response.json({ enabled: false })
       try {
