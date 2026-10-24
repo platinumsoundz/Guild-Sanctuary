@@ -13,13 +13,19 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         <div className={styles.bannerFallback} style={{ backgroundColor: `${profile.themeColor}20` }} />
       )}
       <div className={styles.profileIdentity}>
-        <div className={styles.avatar} aria-hidden="true" style={{ borderColor: profile.themeColor }}>
+        <div
+          className={styles.avatar}
+          data-frame={profile.equippedFrame ?? undefined}
+          aria-hidden="true"
+          style={{ borderColor: profile.equippedFrame === 'profile_frame_sanctuary' ? '#d4af37' : profile.themeColor }}
+        >
           {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
         </div>
         <div className={styles.profileDetails}>
           <p className={styles.eyebrow}>COMMUNITY PROFILE</p>
           <h1>{profile.displayName}</h1>
           <p className={styles.username}>@{profile.username}</p>
+          {profile.equippedFrame && <span className={styles.frameBadge}>Sanctuary supporter</span>}
           <p className={styles.bio}>{profile.bio ?? 'No profile introduction yet.'}</p>
           <div className={styles.personalDetails}>
             {profile.location && <span>{profile.location}</span>}

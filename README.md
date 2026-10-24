@@ -28,7 +28,7 @@ npm run build
 
 Cloudflare Workers is the currently observed preview/deployment target; the last reported Worker build for commit `b08d405622bc32207050824e8af8c80719d867aa` was still in progress, so deployment is unconfirmed. Vercel is also supported for the web app, including PR previews and `@vercel/analytics`. Keep personal/production data and live payment credentials out of previews.
 
-The repository's donation and AdSense safety checks use Vercel-specific environment variables. Do not assume those guards fail closed on Cloudflare; keep live payment/ad configuration disabled until host-specific safeguards are reviewed and tested.
+The donation guard remains Vercel-specific. AdSense now uses a host-aware production gate: Vercel supplies `VERCEL_ENV=production`, while Cloudflare Workers and other hosts must set `NEXT_PUBLIC_DEPLOYMENT_ENV=production` in the production build. Keep live payment/ad configuration disabled until the actual host's environment and deployment checks are verified.
 
 Copy `.env.example` to `.env.local` for local work. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as public build/runtime configuration; keep Supabase secret keys, Stripe secrets, and webhook secrets server-side only. Set `APP_BASE_URL` to the exact canonical HTTPS origin used by the deployed environment. The donation link is served only when `VERCEL_ENV=production` and `STRIPE_DONATION_LINK_ENABLED=true`; configure `STRIPE_DONATION_URL` and the enable flag in Vercel Production only, with system environment variables enabled. Preview/local builds fail closed and hide it. Token checkout also checks the request origin against the Edge Function's `APP_BASE_URL`, so use a stable staging origin for test purchases; do not point previews at live functions. Set `NEXT_TELEMETRY_DISABLED=1` in Vercel's build environment as well as CI. Next.js inlines `NEXT_PUBLIC_*` values at build time, so configure them in Vercel before building each environment. Never commit `.env.local` or put private values in `NEXT_PUBLIC_*`.
 
@@ -63,15 +63,15 @@ The app uses Supabase Auth, Postgres, Storage, and Realtime when the public Supa
 
 - Email sign-in/up supports the confirmation link or a numeric email OTP, depending on the Supabase email template. The callback route is `/auth/callback`; allow the deployed origin and that path in Supabase Authentication → URL Configuration.
 - `src/proxy.ts` is the Next.js 16 proxy (the renamed middleware convention) and refreshes Supabase session cookies on each request.
-- Profiles, discovery, settings, events, RSVPs, likes, comments, conversations, messages, and media use Supabase adapters. The local/in-memory stores remain available only as a demo fallback when Supabase is not configured.
+- Profiles, discovery, settings, events, RSVPs, likes, comments, conversations, messages, and media use Supabase adapters. The local/in-memory stores remain available only as a demo fallback when Supabase is not configured. Discover lists public profiles on load and searches username/display name; it can only find other accounts when Supabase is configured and those profiles are public with discovery enabled. The profile page is display-first, with settings in an “Edit profile” dialog and the user’s posts/media shown below the profile card.
 - Shorts likes/counts use the `get_short_engagement_stats` and `toggle_short_like` RPCs; comment reads/posts depend on the social schema/RLS and `20261011000000_repair_social_engagement_insert_policies.sql`.
 - Moderator/admin roles must be assigned through trusted SQL or a server-side administrative process. `profiles.role` is not client-updatable.
 - Account deletion is handled by `POST /api/account/delete`. It verifies the current session, email, `DELETE` phrase, and TOTP code when 2FA is enabled, removes the user's media, then deletes the auth user (database rows cascade). The service-role key must be set on the server for this route.
 - The private profile vault encrypts optional details in the browser with AES-GCM and a PBKDF2-derived key. The server stores ciphertext and salt only. There is no passphrase recovery.
 - Messaging is not end-to-end encrypted. Database/TLS encryption is not E2EE; do not describe it as such.
-- The token wallet stores balances and purchase history in Supabase. Wallet balances are read-only to clients; grants happen only through the verified webhook path.
+- The token wallet stores balances, purchase history, and spend history in Supabase. Wallet balances are read-only to clients. Purchases are granted by the verified webhook path, new profiles receive a 100-token signup grant, and spending goes through the server-owned, idempotent `spend_tokens` RPC. The first sink is a 300-token permanent profile frame.
 
-Apply `supabase/migrations/` to a disposable project first, then staging, then production after a backup. See [supabase/README.md](supabase/README.md). The wallet migration, social-policy repair, Shorts RPC migration, and aggregate-view/storage hardening have not been applied or deployed by this repository change.
+Apply `supabase/migrations/` to a disposable project first, then staging, then production after a backup. See [supabase/README.md](supabase/README.md). The wallet migration, token-spending migration, signup-bonus migration, social-policy repair, Shorts RPC migration, and aggregate-view/storage hardening have not been applied or deployed by this repository change.
 
 ## Advertising
 
@@ -86,6 +86,7 @@ Native AdMob placements live in `src/modules/ads/native.ts` and are imported onl
 - **Shorts:** engagement RPCs and types are in the repository, but the migration is not confirmed applied and no staging end-to-end check has run. Guest engagement controls are disabled.
 - **Messaging:** direct and group flows are available. The service uses the Supabase repository when configured and falls back to the in-memory demo otherwise; staging RLS/Realtime and retention/abuse checks remain unfinished.
 - **PWA:** manifest, generated icons, and browser-specific install guidance are present. They have not been browser/device tested; there is no service worker or offline cache, so installation does not imply offline support.
+- **Economy/profile/discovery:** token spending, the 100-token signup grant, the profile-frame sink, the Edit-profile dialog, and the Discover list/search changes are in the repository but not applied to Supabase. Live checkout remains disabled.
 - **Terms:** `TERMS_AND_CONDITIONS_DRAFT.md` is a non-final draft. The signup checkbox and durable version/timestamp record are not implemented.
 
 ## Architecture
@@ -99,8 +100,8 @@ Native AdMob placements live in `src/modules/ads/native.ts` and are imported onl
 
 ## Current limits
 
-- The token wallet supports balance display and verified bundle grants only. Checkout is staged and disabled by default. Token spending, transfers, trading, marketplace, cash-out, VIP, cosmetics, gifts, and promotions are not implemented.
-- Guest mode is read-only. Guest and local-demo accounts cannot buy tokens or change wallet balances.
+- The token wallet supports balance/history, verified bundle grants, a 100-token signup grant, and one permanent profile-frame sink (300 tokens). Checkout is staged and disabled by default. Transfers, trading, marketplace, cash-out, VIP, gifts, chat items, and promotions are not implemented.
+- Guest mode is read-only. Guest and local-demo accounts cannot buy or spend tokens or change wallet balances.
 - Location/radius filtering is an experimental module and is not mounted.
 - Content moderation, media scanning, rate limiting, pagination, retention, and abuse operations still need production hardening.
 - Refund/chargeback reconciliation is not implemented. Do not enable live token sales until the product owner defines that policy and staging validation is complete.

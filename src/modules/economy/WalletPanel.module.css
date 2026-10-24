@@ -78,11 +78,82 @@
   border-top: 1px solid var(--line);
 }
 
-.bundleGrid {
+.bundleGrid,
+.spendGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   margin-top: 16px;
+}
+
+.spendGrid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+.spendCard {
+  display: flex;
+  min-height: 190px;
+  flex-direction: column;
+  gap: 9px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+.spendCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.spendCard h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.spendCard p {
+  margin: 0;
+  color: var(--muted);
+  font: 12px/1.55 Arial, sans-serif;
+}
+
+.spendPrice {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font: 700 12px Arial, sans-serif;
+}
+
+.ownedBadge {
+  width: fit-content;
+  margin-top: auto;
+  padding: 6px 9px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-radius: 999px;
+  color: var(--accent);
+  font: 700 10px Arial, sans-serif;
+}
+
+.confirmBox {
+  display: grid;
+  gap: 9px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.confirmActions .buyButton {
+  width: auto;
+  margin-top: 0;
 }
 
 .bundleCard {

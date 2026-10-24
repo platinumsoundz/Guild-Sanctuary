@@ -68,6 +68,7 @@ export async function createUser(input: CreateUserInput): Promise<{ user: User; 
     socialLinks: { facebook: null, x: null, youtube: null, xbox: null, playstation: null, steam: null, epicGames: null, reddit: null },
     visibility: 'public',
     role: 'member',
+    equippedFrame: null,
   };
   users.push(user);
   profiles.push(profile);

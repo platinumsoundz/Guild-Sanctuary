@@ -4,7 +4,19 @@ export {
   checkTokenCheckoutEnabled,
   fetchWallet,
   isSupabaseWalletConfigured,
+  spendTokens,
   startTokenCheckout,
   tokenBundles,
 } from './service';
-export type { TokenBundle, TokenBundleId, TokenLedgerEntry, WalletSnapshot } from './service';
+export type {
+  TokenBundle,
+  TokenBundleId,
+  TokenEntitlement,
+  TokenLedgerEntry,
+  TokenLedgerKind,
+  TokenSpendEntry,
+  TokenSpendItem,
+  TokenSpendItemKind,
+  TokenSpendResult,
+  WalletSnapshot,
+} from './service';

@@ -83,6 +83,7 @@ export interface Profile {
   socialLinks: SocialLinks;
   visibility: ProfileVisibility;
   role: UserRole;
+  equippedFrame: string | null;
 }
 
 export interface PublicProfile {
@@ -102,6 +103,7 @@ export interface PublicProfile {
   socialLinks: SocialLinks;
   allowDirectMessages: boolean;
   role: UserRole;
+  equippedFrame: string | null;
 }
 
 export interface Post {

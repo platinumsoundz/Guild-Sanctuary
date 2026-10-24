@@ -94,6 +94,7 @@ function normalizeSession(value: unknown): AuthSession | null {
       themeColor: typeof profile.themeColor === 'string' && /^#[0-9a-fA-F]{6}$/.test(profile.themeColor)
         ? profile.themeColor
         : '#52765c',
+      equippedFrame: typeof profile.equippedFrame === 'string' ? profile.equippedFrame : null,
       location: typeof profile.location === 'string' ? profile.location : null,
       age: typeof profile.age === 'number' && Number.isInteger(profile.age) ? profile.age : null,
       starSign: typeof profile.starSign === 'string' ? profile.starSign : null,
@@ -139,6 +140,7 @@ function normalizeSession(value: unknown): AuthSession | null {
     (typeof normalizedProfile.avatarUrl !== 'string' && normalizedProfile.avatarUrl !== null) ||
     (typeof normalizedProfile.bannerUrl !== 'string' && normalizedProfile.bannerUrl !== null) ||
     typeof normalizedProfile.themeColor !== 'string' ||
+    (typeof normalizedProfile.equippedFrame !== 'string' && normalizedProfile.equippedFrame !== null) ||
     (typeof normalizedProfile.location !== 'string' && normalizedProfile.location !== null) ||
     (typeof normalizedProfile.age !== 'number' && normalizedProfile.age !== null) ||
     (typeof normalizedProfile.starSign !== 'string' && normalizedProfile.starSign !== null) ||
@@ -212,6 +214,7 @@ function createSession(input: SignUpInput): AuthSession {
       socialLinks: { facebook: null, x: null, youtube: null, xbox: null, playstation: null, steam: null, epicGames: null, reddit: null },
       visibility: 'public',
       role: 'member',
+      equippedFrame: null,
     },
     permissions: [...allowedPermissions],
   };
@@ -310,6 +313,7 @@ function toPublicProfile(session: AuthSession): PublicProfile {
     },
     allowDirectMessages: profile.privacy.allowDirectMessages,
     role: profile.role,
+    equippedFrame: profile.equippedFrame,
   };
 }
 
@@ -320,19 +324,21 @@ export function getLocalPublicProfileById(userId: string): PublicProfile | null 
   return session ? toPublicProfile(session) : null;
 }
 
+export function listLocalPublicProfiles(): PublicProfile[] {
+  return parseSessions(getStorage().getItem(accountsKey))
+    .filter((account) => account.user.emailVerified && account.profile.visibility === 'public')
+    .map(toPublicProfile);
+}
+
 export function searchLocalPublicProfiles(query: string): PublicProfile[] {
   const normalizedQuery = query.trim().toLowerCase();
   if (normalizedQuery.length < 2) {
     return [];
   }
 
-  return parseSessions(getStorage().getItem(accountsKey))
-    .filter((account) => (
-      account.user.emailVerified &&
-      account.profile.visibility === 'public' &&
-      `${account.profile.username} ${account.profile.displayName}`.toLowerCase().includes(normalizedQuery)
-    ))
-    .map(toPublicProfile);
+  return listLocalPublicProfiles().filter((profile) => (
+    `${profile.username} ${profile.displayName}`.toLowerCase().includes(normalizedQuery)
+  ));
 }
 
 export function updateLocalProfile(

@@ -1,6 +1,6 @@
 # Token catalog proposal — for product approval
 
-**Status:** proposal only. None of these items, prices, durations, or effects are approved or purchasable. Existing checkout remains disabled by default; no token redemption should be implemented or enabled until the refund/chargeback and reversal policy is approved.
+**Status:** the profile-frame row is implemented as the first server-owned sink. The rest of the catalog remains a proposal only. Existing checkout remains disabled by default; do not expand redemption or enable live sales until the refund/chargeback and reversal policy is approved.
 
 ## Scope
 
@@ -18,7 +18,7 @@ Transfers, trading, a marketplace, and cash-out remain out of scope unless the p
 
 | Sink | Example | Proposed price | Duration / effect |
 | --- | --- | ---: | --- |
-| Profile cosmetics | Profile frame | 300 tokens | Permanent account unlock; one active frame at a time |
+| Profile cosmetics | Profile frame | 300 tokens | **Implemented:** permanent account unlock; one active frame at a time |
 | Profile cosmetics | Banner design | 600 tokens | Permanent account unlock; replaceable at any time |
 | Chat items | Chat-bubble theme | 300 tokens | Permanent account unlock; cosmetic only |
 | Chat items | Emote pack | 250 tokens | Permanent account unlock; subject to moderation rules |
@@ -27,7 +27,7 @@ Transfers, trading, a marketplace, and cash-out remain out of scope unless the p
 | VIP | 30-day VIP access | 600 tokens | Time-limited; exact benefits and stacking/renewal rules need approval |
 | Post promotion | 24-hour promoted placement | 500 tokens | Clearly labeled promotion; no guaranteed views, engagement, or ranking outcome |
 
-Prices are merely a starting proposal relative to the existing 100/600/1,200-token bundles. Before approval, decide whether purchases are permanent or consumable, whether gifts can be sent to blocked users, VIP benefits/renewal, promotion eligibility and labeling, and what happens when content is removed or an account is suspended.
+Prices are merely a starting proposal relative to the existing 100/600/1,200-token bundles. The implemented frame uses the server-owned `token_spend_catalog`; its price is not client-supplied. Before approving the rest, decide whether purchases are permanent or consumable, whether gifts can be sent to blocked users, VIP benefits/renewal, promotion eligibility and labeling, and what happens when content is removed or an account is suspended.
 
 ## Safety and fulfillment rules required for implementation
 

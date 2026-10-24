@@ -29,6 +29,7 @@ export type ProfileRow = {
   allow_direct_messages: boolean;
   allow_profile_discovery: boolean;
   visibility: 'public' | 'private';
+  equipped_frame: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -48,6 +49,7 @@ export type PublicProfileRow = {
   belief: string | null;
   social_links: Record<string, string | null>;
   allow_direct_messages: boolean;
+  equipped_frame: string | null;
 }
 
 export type PrivateProfileVaultRow = {
@@ -161,7 +163,7 @@ export interface Database {
       token_ledger: Table<{
         id: string;
         user_id: string;
-        bundle_id: 'tokens_100' | 'tokens_600' | 'tokens_1200';
+        bundle_id: 'tokens_100' | 'tokens_600' | 'tokens_1200' | 'signup_bonus';
         tokens_delta: number;
         amount_total: number;
         currency: 'gbp';
@@ -169,6 +171,29 @@ export interface Database {
         checkout_session_id: string;
         livemode: boolean;
         created_at: string;
+      }>;
+      token_spend_catalog: Table<{
+        item_id: string;
+        name: string;
+        description: string;
+        price_tokens: number;
+        kind: 'profile_frame' | 'chat_item' | 'gift' | 'vip' | 'promotion';
+        enabled: boolean;
+        created_at: string;
+      }>;
+      token_spend_ledger: Table<{
+        id: string;
+        user_id: string;
+        item_id: string;
+        item_name: string;
+        tokens_delta: number;
+        idempotency_key: string;
+        created_at: string;
+      }>;
+      token_entitlements: Table<{
+        user_id: string;
+        item_id: string;
+        granted_at: string;
       }>;
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
@@ -374,6 +399,17 @@ export interface Database {
           requested_livemode: boolean;
         };
         Returns: number;
+      };
+      spend_tokens: {
+        Args: {
+          requested_item_id: string;
+          requested_idempotency_key: string;
+        };
+        Returns: {
+          balance_tokens: number;
+          item_id: string;
+          already_applied: boolean;
+        }[];
       };
     };
     Enums: {

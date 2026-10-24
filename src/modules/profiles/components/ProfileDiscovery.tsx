@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import type { PublicProfile } from '@/types/database';
 import { Globe2, MapPin, Sparkles } from 'lucide-react';
-import { searchPublicProfiles } from '../service';
+import { isSupabaseAuthConfigured } from '@/modules/auth';
+import { listPublicProfiles, searchPublicProfiles } from '../service';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
@@ -15,12 +16,13 @@ interface ProfileDiscoveryProps {
 export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryProps) {
   const [query, setQuery] = useState('');
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSearching, setIsSearching] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabaseConfigured = isSupabaseAuthConfigured();
 
   useEffect(() => {
     const normalizedQuery = query.trim();
-    if (normalizedQuery.length < 2) {
+    if (normalizedQuery.length === 1) {
       setProfiles([]);
       setError(null);
       setIsSearching(false);
@@ -29,17 +31,23 @@ export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryP
 
     let cancelled = false;
     setIsSearching(true);
-    const timeout = setTimeout(() => {
-      searchPublicProfiles(normalizedQuery)
+    setError(null);
+
+    const load = () => {
+      const request = normalizedQuery.length >= 2
+        ? searchPublicProfiles(normalizedQuery)
+        : listPublicProfiles();
+
+      request
         .then((results) => {
           if (!cancelled) {
             setProfiles(results.filter((profile) => profile.userId !== currentUserId));
-            setError(null);
           }
         })
-        .catch(() => {
+        .catch((loadError) => {
           if (!cancelled) {
-            setError('Profiles could not be searched right now.');
+            setProfiles([]);
+            setError(loadError instanceof Error ? loadError.message : 'Profiles could not be loaded right now.');
           }
         })
         .finally(() => {
@@ -47,11 +55,14 @@ export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryP
             setIsSearching(false);
           }
         });
-    }, 180);
+    };
+
+    const timeout = normalizedQuery.length >= 2 ? setTimeout(load, 180) : undefined;
+    if (!timeout) load();
 
     return () => {
       cancelled = true;
-      clearTimeout(timeout);
+      if (timeout) clearTimeout(timeout);
     };
   }, [currentUserId, query]);
 
@@ -62,7 +73,11 @@ export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryP
           <p className={styles.eyebrow}>MEET YOUR COMMUNITY</p>
           <h1>Find people</h1>
         </div>
-        <p className={styles.privacyNote}>Searches public usernames and display names only.</p>
+        <p className={styles.privacyNote}>
+          {supabaseConfigured
+            ? 'Public profiles with discovery enabled are shown.'
+            : 'Supabase is not configured. This browser only shows local demo profiles.'}
+        </p>
       </header>
       <label className={styles.searchField} htmlFor="profile-search">
         <span>Username or display name</span>
@@ -75,19 +90,23 @@ export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryP
           placeholder="Search by handle or name"
         />
       </label>
-      {query.trim().length < 2 ? (
-        <p className={styles.stateMessage}>Enter at least two characters to search.</p>
+      {query.trim().length === 1 ? (
+        <p className={styles.stateMessage}>Enter one more character to search.</p>
       ) : isSearching ? (
-        <p className={styles.stateMessage} role="status">Searching public profiles...</p>
+        <p className={styles.stateMessage} role="status">{query.trim() ? 'Searching public profiles...' : 'Loading public profiles...'}</p>
       ) : error ? (
         <p className={styles.error} role="alert">{error}</p>
       ) : profiles.length === 0 ? (
-        <p className={styles.stateMessage}>No public profiles match that search.</p>
+        <p className={styles.stateMessage}>
+          {query.trim()
+            ? 'No public profiles match that search.'
+            : 'No public profiles are discoverable yet. A profile must be public and have discovery enabled.'}
+        </p>
       ) : (
         <div className={styles.results}>
           {profiles.map((profile) => (
             <article className={styles.profileRow} key={profile.profileId}>
-              <div className={styles.avatar} aria-hidden="true">
+              <div className={styles.avatar} data-frame={profile.equippedFrame ?? undefined} aria-hidden="true">
                 {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
               </div>
               <div className={styles.profileCopy}>
@@ -97,14 +116,14 @@ export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryP
                 </div>
                 <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
                 <ProfileSocialLinks links={profile.socialLinks} />
-                                {(profile.location || profile.age || profile.starSign || profile.belief) && (
-                                  <div className={styles.publicDetails}>
-                                    {profile.location && <span><MapPin size={12} />{profile.location}</span>}
-                                    {profile.age && <span>{profile.age}</span>}
-                                    {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
-                                    {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
-                                  </div>
-                                )}
+                {(profile.location || profile.age || profile.starSign || profile.belief) && (
+                  <div className={styles.publicDetails}>
+                    {profile.location && <span><MapPin size={12} />{profile.location}</span>}
+                    {profile.age && <span>{profile.age}</span>}
+                    {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
+                    {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
+                  </div>
+                )}
               </div>
               <button
                 className={styles.messageButton}

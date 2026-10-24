@@ -1,6 +1,8 @@
 import { getSupabaseBrowserClient } from '@/services/supabase';
 
 export type TokenBundleId = 'tokens_100' | 'tokens_600' | 'tokens_1200';
+export type TokenLedgerKind = TokenBundleId | 'signup_bonus';
+export type TokenSpendItemKind = 'profile_frame' | 'chat_item' | 'gift' | 'vip' | 'promotion';
 
 export interface TokenBundle {
   id: TokenBundleId;
@@ -11,16 +13,47 @@ export interface TokenBundle {
 
 export interface TokenLedgerEntry {
   id: string;
-  bundleId: TokenBundleId;
+  bundleId: TokenLedgerKind;
   tokensDelta: number;
   amountMinor: number;
   createdAt: string;
+}
+
+export interface TokenSpendItem {
+  itemId: string;
+  name: string;
+  description: string;
+  priceTokens: number;
+  kind: TokenSpendItemKind;
+  enabled: boolean;
+}
+
+export interface TokenEntitlement {
+  itemId: string;
+  grantedAt: string;
+}
+
+export interface TokenSpendEntry {
+  id: string;
+  itemId: string;
+  itemName: string;
+  tokensDelta: number;
+  createdAt: string;
+}
+
+export interface TokenSpendResult {
+  balanceTokens: number;
+  itemId: string;
+  alreadyApplied: boolean;
 }
 
 export interface WalletSnapshot {
   userId: string;
   balanceTokens: number;
   ledger: TokenLedgerEntry[];
+  spends: TokenSpendEntry[];
+  catalog: TokenSpendItem[];
+  entitlements: TokenEntitlement[];
 }
 
 export const tokenBundles: TokenBundle[] = [
@@ -43,16 +76,32 @@ async function requireSignedInUser(expectedUserId: string): Promise<void> {
 export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
   await requireSignedInUser(userId);
   const client = getSupabaseBrowserClient();
-  const [walletResult, ledgerResult] = await Promise.all([
+  const [walletResult, ledgerResult, catalogResult, entitlementResult, spendResult] = await Promise.all([
     client.from('token_wallets').select('balance_tokens').eq('user_id', userId).maybeSingle(),
     client.from('token_ledger')
       .select('id,bundle_id,tokens_delta,amount_total,created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(20),
+    client.from('token_spend_catalog')
+      .select('item_id,name,description,price_tokens,kind,enabled')
+      .eq('enabled', true)
+      .order('price_tokens', { ascending: true }),
+    client.from('token_entitlements')
+      .select('item_id,granted_at')
+      .eq('user_id', userId)
+      .order('granted_at', { ascending: false }),
+    client.from('token_spend_ledger')
+      .select('id,item_id,item_name,tokens_delta,created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(20),
   ]);
   if (walletResult.error) throw new Error(`Token balance could not be loaded: ${walletResult.error.message}`);
   if (ledgerResult.error) throw new Error(`Token history could not be loaded: ${ledgerResult.error.message}`);
+  if (catalogResult.error) throw new Error(`Token spending could not be loaded: ${catalogResult.error.message}`);
+  if (entitlementResult.error) throw new Error(`Token unlocks could not be loaded: ${entitlementResult.error.message}`);
+  if (spendResult.error) throw new Error(`Token spending history could not be loaded: ${spendResult.error.message}`);
 
   return {
     userId,
@@ -64,6 +113,47 @@ export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
       amountMinor: entry.amount_total,
       createdAt: entry.created_at,
     })),
+    spends: (spendResult.data ?? []).map((entry) => ({
+      id: entry.id,
+      itemId: entry.item_id,
+      itemName: entry.item_name,
+      tokensDelta: entry.tokens_delta,
+      createdAt: entry.created_at,
+    })),
+    catalog: (catalogResult.data ?? []).map((item) => ({
+      itemId: item.item_id,
+      name: item.name,
+      description: item.description,
+      priceTokens: item.price_tokens,
+      kind: item.kind,
+      enabled: item.enabled,
+    })),
+    entitlements: (entitlementResult.data ?? []).map((entry) => ({
+      itemId: entry.item_id,
+      grantedAt: entry.granted_at,
+    })),
+  };
+}
+
+export async function spendTokens(
+  userId: string,
+  itemId: string,
+  idempotencyKey: string,
+): Promise<TokenSpendResult> {
+  await requireSignedInUser(userId);
+  const { data, error } = await getSupabaseBrowserClient().rpc('spend_tokens', {
+    requested_item_id: itemId,
+    requested_idempotency_key: idempotencyKey,
+  });
+  if (error) throw new Error(error.message || 'The tokens could not be spent.');
+  const result = Array.isArray(data) ? data[0] : data;
+  if (!result || typeof result.balance_tokens !== 'number') {
+    throw new Error('The token spend did not return a wallet balance.');
+  }
+  return {
+    balanceTokens: result.balance_tokens,
+    itemId: result.item_id,
+    alreadyApplied: Boolean(result.already_applied),
   };
 }
 

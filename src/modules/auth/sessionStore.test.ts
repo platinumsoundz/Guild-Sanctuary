@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   deleteLocalAccount,
   getLocalPublicProfileById,
+  listLocalPublicProfiles,
   persistActiveSession,
   registerLocalAccount,
   searchLocalPublicProfiles,
@@ -97,6 +98,7 @@ describe('local session store', () => {
     storage.setItem('guild-sanctuary:accounts:v1', JSON.stringify([verified, privateAccount]));
 
     expect(getLocalPublicProfileById(publicAccount.user.id)?.username).toBe('public_one');
+    expect(listLocalPublicProfiles()).toHaveLength(1);
     expect(searchLocalPublicProfiles('public')).toHaveLength(1);
 
     const hidden = updateLocalProfile(publicAccount.user.id, { visibility: 'private' });

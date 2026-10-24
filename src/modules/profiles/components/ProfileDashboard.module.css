@@ -34,6 +34,105 @@
   font-weight: 400;
 }
 
+.editButton {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--profile-color);
+  border-radius: 4px;
+  background: var(--profile-color);
+  color: #fff;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.editButton:focus-visible,
+.closeButton:focus-visible,
+.cancelButton:focus-visible,
+.saveButton:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--profile-color) 45%, transparent);
+  outline-offset: 3px;
+}
+
+.savedNotice {
+  display: inline-block;
+  margin-top: 5px;
+  color: var(--profile-color);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.editorOverlay {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  overflow-y: auto;
+  place-items: center;
+  padding: 24px 16px;
+  background: rgb(8 15 12 / 72%);
+  backdrop-filter: blur(3px);
+}
+
+.editorDialog {
+  display: grid;
+  width: min(100%, 900px);
+  max-height: min(90vh, 980px);
+  gap: 16px;
+  overflow-y: auto;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
+}
+
+.editorHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.editorHeader h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.closeButton {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.cancelButton {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .themeControl {
   display: inline-flex;
   align-items: center;
@@ -52,7 +151,6 @@
   background: var(--surface-raised);
 }
 
-.editor,
 .showcase {
   min-width: 0;
   padding: 18px;
@@ -63,6 +161,7 @@
 
 .editor {
   display: grid;
+  min-width: 0;
   gap: 18px;
 }
 

@@ -11,6 +11,7 @@ export {
 	registerLocalAccount,
 	restoreSession,
 	setLocalTwoFactor,
+	listLocalPublicProfiles,
 	searchLocalPublicProfiles,
 	getLocalPublicProfileById,
 	updateLocalProfile,

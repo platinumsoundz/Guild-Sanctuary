@@ -8,7 +8,7 @@ When Supabase is configured, the app uses Supabase Auth:
 - The callback route exchanges PKCE `code` values or verifies token-hash links and writes SSR session cookies.
 - `src/proxy.ts` refreshes the session cookies on subsequent requests.
 - A verified TOTP factor upgrades the session to `aal2`; community writes and account deletion require that assurance when 2FA is enabled.
-- The profile row is created by a database trigger from auth metadata and loaded into the session.
+- The profile row is created by a database trigger from auth metadata and loaded into the session. The economy migration adds a separate profile-insert trigger that grants the 100-token welcome bonus and records it in the token ledger.
 
 In Supabase Authentication → URL Configuration, allow the deployed origin's `/auth/callback` URL and the local development callback. Open links in the browser/device where signup started so the PKCE verifier is available.
 

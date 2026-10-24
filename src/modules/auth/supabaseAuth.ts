@@ -61,6 +61,7 @@ export function mapProfileRow(row: ProfileRow): Profile {
     socialLinks: { ...emptyLinks, ...socialLinks },
     visibility: row.visibility,
     role: row.role,
+    equippedFrame: row.equipped_frame ?? null,
   };
 }
 
@@ -82,6 +83,7 @@ export function mapPublicProfileRow(row: PublicProfileRow): PublicProfile {
     socialLinks: { ...emptyLinks, ...(row.social_links as Partial<SocialLinks>) },
     allowDirectMessages: row.allow_direct_messages,
     role: 'member',
+    equippedFrame: row.equipped_frame ?? null,
   };
 }
 

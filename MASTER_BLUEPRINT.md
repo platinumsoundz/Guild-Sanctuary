@@ -28,16 +28,16 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `profiles` / `settings` | Profile, discovery, privacy, preferences, encrypted vault | Supabase when configured; browser-local demo fallback |
 | `moderation` | Report UI and moderator workflow | Supabase RPCs; navigation visible only to moderators/admins |
 | `support` | Optional community support and external donation link | Donation link is returned only on explicitly enabled Vercel Production deployments; no app-side reconciliation |
-| `economy` | Persistent token wallet and bundle purchase foundation | Supabase wallet/ledger migration and Edge Functions staged; checkout disabled by default; no spending/transfers yet |
+| `economy` | Persistent token wallet, bundle purchase foundation, 100-token signup grant, permanent profile-frame sink | Supabase wallet/ledger/spend migrations and Edge Functions staged; checkout disabled by default; transfers/trading/marketplace/cash-out still deferred |
 | `locations` | Experimental radius filtering | Not mounted; no durable location store |
-| `ads` | Consent-gated web display slots plus native AdMob entry point | AdSense requires an explicit flag plus Vercel Production; IDs come from public build-time environment; native module excluded from web bundle |
+| `ads` | Consent-gated web display slots plus native AdMob entry point | AdSense requires an explicit flag plus a production-marked deployment (`VERCEL_ENV=production` or `NEXT_PUBLIC_DEPLOYMENT_ENV=production`); IDs come from public build-time environment; native module excluded from web bundle |
 
 ## Supabase cutover
 
 The browser adapters are active when `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are present:
 
-- Profiles load from `profiles`; public discovery uses the `public_profiles` view and trigram indexes.
-- Settings load and save through `account_settings`; the profile privacy and social-link controls update `profiles`.
+- Profiles load from `profiles`; public discovery uses the `public_profiles` view and trigram indexes. Discover lists all public, discovery-enabled profiles on load and filters by username/display name. It cannot find other accounts unless Supabase is configured and those profiles are eligible; the UI now states which data source is active and surfaces missing-view errors.
+- Settings load and save through `account_settings`; the profile privacy and social-link controls update `profiles`. The profile page is display-first: profile card and own posts/media, with all settings inside an “Edit profile” dialog.
 - Messages use the persistent repository and subscribe to Realtime INSERT events when Supabase is configured.
 - Events, RSVPs, likes, and comments use the database. Aggregate RSVP and like counts come from `event_rsvp_counts` and `social_like_counts` views so the app does not expose who reacted.
 - Shorts likes/counts use `get_short_engagement_stats` and `toggle_short_like` RPCs so counts are not truncated by client-side RLS. Comment reads/posts remain browser Supabase queries and depend on the social schema/RLS plus `20261011000000_repair_social_engagement_insert_policies.sql`.
@@ -75,7 +75,7 @@ Web display units are consent-gated by `src/modules/ads/AdsConsent.tsx`. The ser
 - Token bundles use separate Supabase Edge Functions: authenticated `token-checkout` creates a Checkout Session from server-side Price IDs and requires the request Origin to exactly match the configured `APP_BASE_URL`; `stripe-token-webhook` verifies the raw Stripe signature and calls an idempotent, service-role-only database RPC.
 - `TOKEN_CHECKOUT_ENABLED` defaults to `false`. Enable it only in isolated test-mode staging after migration, Edge Functions, mode-matched Price IDs, webhook secrets, and end-to-end checks are confirmed. Keep live checkout disabled until refund/chargeback handling and a customer-support policy are decided. Keep preview environments free of live payment configuration.
 - The shared Stripe Payment Link is not used for token purchases because it cannot securely associate a session with the signed-in account.
-- The initial token release supports balance display and bundle grants only. No spending, transfers, trading, marketplace, cash-out, VIP, promotions, or cosmetics are active. Automatic refund/chargeback reconciliation is not implemented; decide and implement that lifecycle before live sales, token redemption, or trading.
+- The current token release supports balance/history, verified bundle grants, a 100-token signup grant, and one permanent profile-frame sink (300 tokens). Spending is atomic and idempotent through `spend_tokens`; the client sends only a catalog item ID. Transfers, trading, marketplace, cash-out, VIP, gifts, chat items, and promotions remain deferred. Automatic refund/chargeback reconciliation is not implemented; decide and implement that lifecycle before live sales, token redemption, or trading.
 
 Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do not represent this staged code as production-ready until migration/RLS, webhook idempotency, refund/dispute handling, backups, and staging tests are complete.
 
@@ -86,6 +86,9 @@ Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do
 - Wallet navigation and page with persistent balance/history UI and fixed £1/£5/£10 bundle cards. Purchase status is origin-bound; preview URLs do not use a production checkout origin.
 - Supabase wallet/ledger migration with owner-read-only policies and service-role-only transactional/idempotent purchase fulfillment.
 - Authenticated Checkout Session Edge Function and raw-body Stripe-signature webhook. Checkout validates the configured Stripe Prices' mode, amount, currency, and active one-time status.
+- `20261024000000_token_spending.sql` adds the server-owned spend catalog, spend ledger, entitlements, `profiles.equipped_frame`, and the idempotent `spend_tokens` RPC. The first enabled item is `profile_frame_sanctuary` at 300 tokens.
+- `20261024000001_signup_token_bonus.sql` grants 100 tokens to each new profile, records a `signup_bonus` ledger entry, and backfills existing profiles that have no wallet. It also extends the ledger constraints to allow the signup grant.
+- The profile card and Discover avatar render the equipped frame; the Wallet page shows the catalog, confirmation, spend history, and signup-bonus activity.
 - Purchase checkout remains disabled by default. A test-mode staging enablement is allowed only after staging migration, functions, Price IDs, webhook, and end-to-end test are configured.
 
 ### Blocking before live token sales
@@ -97,14 +100,14 @@ Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do
 
 ### Planned product scope and current status
 
-The product owner confirmed the intended future token sinks: profile cosmetics, chat items, gifts, VIP access, and post promotion. `TOKEN_CATALOG_PROPOSAL.md` contains an illustrative catalog and prices for approval only; no price or effect is approved, and no spending/redemption is implemented. Transfers, trading, marketplace, and cash-out remain deferred. Keep token checkout disabled and do not enable redemption until refund/chargeback and reversal rules are approved and tested. Guest mode remains read-only. Account deletion currently cascades wallet and purchase history; balance treatment must be finalized before real-money sales.
+The product owner confirmed the intended token sinks: profile cosmetics, chat items, gifts, VIP access, and post promotion. One profile frame is implemented and enabled in the server catalog; the remaining catalog in `TOKEN_CATALOG_PROPOSAL.md` is illustrative and unapproved. Transfers, trading, marketplace, and cash-out remain deferred. Keep token checkout disabled and do not expand redemption until refund/chargeback and reversal rules are approved and tested. Guest mode remains read-only. Account deletion currently cascades wallet, spend history, and unlocks; balance treatment must be finalized before real-money sales.
 
 `TERMS_AND_CONDITIONS_DRAFT.md` is a starter draft with placeholders, not final legal terms. The product owner requested a Terms button plus required signup checkbox and version/timestamp record. Implement consent UI and durable acceptance recording, but do not present placeholder terms as final or enable production signup/sales until operator, contact, jurisdiction, age, privacy, user-content, deletion, support, and refund language are approved and legally reviewed.
 
 ## Supabase status
 
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` enable browser clients only. Supabase Edge Function secrets and the Next.js server-only service-role key remain server-side.
-- The wallet migration (`20261012000000_token_wallet_and_fulfillment.sql`), social-policy repair (`20261011000000_repair_social_engagement_insert_policies.sql`), Shorts engagement RPC migration (`20261013000000_short_engagement_stats.sql`), and aggregate-view/storage hardening (`20261023000000_harden_policies_and_views.sql`) are not confirmed applied to the user's project. From the repository, link the intended staging project, inspect `supabase migration list`, run `supabase db push --dry-run`, then `supabase db push` only after reviewing all pending migrations. `db push` applies every pending local migration, not just the wallet migration. A PostgREST cache refresh (`NOTIFY pgrst, 'reload schema';`) does not create missing tables or functions.
+- The wallet migration (`20261012000000_token_wallet_and_fulfillment.sql`), token-spending migration (`20261024000000_token_spending.sql`), signup-bonus migration (`20261024000001_signup_token_bonus.sql`), social-policy repair (`20261011000000_repair_social_engagement_insert_policies.sql`), Shorts engagement RPC migration (`20261013000000_short_engagement_stats.sql`), and aggregate-view/storage hardening (`20261023000000_harden_policies_and_views.sql`) are not confirmed applied to the user's project. From the repository, link the intended staging project, inspect `supabase migration list`, run `supabase db push --dry-run`, then `supabase db push` only after reviewing all pending migrations. `db push` applies every pending local migration, not just the wallet migration. A PostgREST cache refresh (`NOTIFY pgrst, 'reload schema';`) does not create missing tables or functions.
 - Local demo auth is not production authentication; mock code `000000` is development-only.
 - Production cutover requires Supabase Auth configuration, profile-creation handling, RLS/policy tests, persistent repository wiring, storage policies, session refresh/middleware strategy, and migration/restore validation.
 - Never expose a Supabase secret/service-role credential to the web client. `POST /api/account/delete` uses `SUPABASE_SERVICE_ROLE_KEY` server-side; token Edge Functions use the platform-provided admin context (`ctx.supabaseAdmin`).
@@ -117,7 +120,7 @@ Do not call this a production release until all of the following are complete:
 2. Validate Supabase Auth Site URL/redirect settings, email templates (link and OTP), TOTP enrollment, session refresh through `src/proxy.ts`, and Realtime authorization.
 3. Validate storage upload/read/delete policies, signed URL lifetime, media scanning, size limits, and lifecycle cleanup.
 4. Test account deletion end to end, including media removal, database cascades, wallet-history cascade, and the service-role key boundary.
-5. Keep live token checkout disabled until the staging flow is verified and refund/chargeback handling is implemented; keep token spending/redemption/trading disabled until reversals and account-deletion behavior are tested. The Next.js payment API routes remain disabled. Publish approved Terms and Privacy Notice, require explicit signup acceptance, and record the accepted terms version and server-side timestamp before production signup.
+5. Keep live token checkout disabled until the staging flow is verified and refund/chargeback handling is implemented. The profile-frame spend path is implemented but unapplied; test it in staging, and keep broader redemption/trading disabled until reversal and account-deletion behavior are tested. The Next.js payment API routes remain disabled. Publish approved Terms and Privacy Notice, require explicit signup acceptance, and record the accepted terms version and server-side timestamp before production signup.
 6. Validate ad consent, placements, `ads.txt`, and production IDs in relevant territories; keep ads disabled until approval and site policies are in place.
 7. Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and the repository's Deno check after changes; then manually test responsive navigation, auth, feed, Shorts engagement/comments, direct and group messaging, events, moderation, support, wallet, and PWA installation states.
 
@@ -127,7 +130,7 @@ Direct one-to-one messages and group conversations are available in the UI. The 
 
 ## Deployment and verification note
 
-Cloudflare Workers is the currently observed deployment/preview target. The last observed Workers build for commit `b08d405622bc32207050824e8af8c80719d867aa` was still in progress; deployment is unconfirmed. The repository's Support and AdSense production guards use Vercel-specific environment variables. Do not assume those fail closed on Cloudflare; keep live payment/ad configuration disabled until the environment guards are reviewed and tested for the actual host.
+Cloudflare Workers is the currently observed deployment/preview target. The last observed Workers build for commit `b08d405622bc32207050824e8af8c80719d867aa` was still in progress; deployment is unconfirmed. The Support donation guard remains Vercel-specific. AdSense gating is host-aware and requires either `VERCEL_ENV=production` or `NEXT_PUBLIC_DEPLOYMENT_ENV=production`; keep live payment/ad configuration disabled until the environment guards and actual host build are verified. The deployed Worker must also be rebuilt with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` for Discover to search real accounts.
 
 ## Local development
 

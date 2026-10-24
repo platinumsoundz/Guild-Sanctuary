@@ -36,6 +36,7 @@ export function AppWorkspace() {
     setTwoFactorEnabled,
     setActiveNavigation,
     updateProfile,
+    refreshProfile,
     signup,
     verifyEmailCode,
     verifyTwoFactorCode,
@@ -105,7 +106,7 @@ export function AppWorkspace() {
     <>
       {activeNavigation === 'wallet' ? (
         <main className={styles.supportPage}>
-          <WalletPanel userId={currentUser.user.id} isGuest={isGuest} />
+          <WalletPanel userId={currentUser.user.id} isGuest={isGuest} onSpendComplete={refreshProfile} />
         </main>
       ) : activeNavigation === 'feed' ? (
         <>

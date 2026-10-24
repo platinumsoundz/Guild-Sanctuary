@@ -49,6 +49,7 @@ interface AppContextValue {
   verifyTwoFactorCode: (code: string) => Promise<void>;
   setTwoFactorEnabled: (enabled: boolean) => void;
   updateProfile: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => Promise<void>;
+  refreshProfile: () => Promise<void>;
   cancelAuthChallenge: () => void;
   logout: () => void;
   deleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => Promise<void>;
@@ -156,6 +157,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         },
         visibility: 'public',
         role: 'member',
+        equippedFrame: null,
       },
       permissions: [],
     };
@@ -289,6 +291,16 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     setCurrentUser(session);
   };
 
+  const refreshProfile = async () => {
+    if (!currentUser || isGuest || !isSupabaseAuthConfigured()) {
+      return;
+    }
+    // Server-owned changes such as an equipped token frame are not writable by
+    // the client. Re-read the profile after a purchase so the UI reflects them.
+    const profile = await updateSupabaseProfile(currentUser.user.id, {});
+    setCurrentUser((session) => session ? { ...session, profile } : session);
+  };
+
   const cancelAuthChallenge = () => {
     if (isSupabaseAuthConfigured()) {
       void getSupabaseBrowserClient().auth.signOut().then(({ error }) => {
@@ -369,6 +381,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         verifyTwoFactorCode,
         setTwoFactorEnabled,
         updateProfile,
+        refreshProfile,
         cancelAuthChallenge,
         logout,
         deleteAccount,

@@ -49,6 +49,25 @@
   object-fit: cover;
 }
 
+.avatar[data-frame='profile_frame_sanctuary'] {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #d4af37 32%, transparent);
+}
+
+.frameBadge {
+  display: inline-block;
+  margin: 4px 0 0;
+  padding: 3px 7px;
+  border: 1px solid color-mix(in srgb, #d4af37 55%, var(--line));
+  border-radius: 999px;
+  color: #d4af37;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
 .profileDetails {
   min-width: 0;
   flex: 1;

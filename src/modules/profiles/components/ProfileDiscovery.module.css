@@ -101,6 +101,11 @@
   object-fit: cover;
 }
 
+.avatar[data-frame='profile_frame_sanctuary'] {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #d4af37 32%, transparent);
+}
+
 .profileCopy {
   min-width: 0;
   flex: 1;
