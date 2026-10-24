@@ -1,4 +1,4 @@
 export { ProfileDiscovery } from './components/ProfileDiscovery';
-export { ProfileDashboard } from './components/ProfileDashboard';
+export { ProfileDashboard } from './components/ProfileDashboard';\nexport { PublicProfilePage } from './components/PublicProfilePage';
 export { ProfileCard } from './components/ProfileCard';
-export { searchPublicProfiles } from './service';
+export { searchPublicProfiles, fetchPublicProfileById } from './service';
