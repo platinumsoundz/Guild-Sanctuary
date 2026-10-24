@@ -107,6 +107,10 @@
   align-self: flex-start;
 }
 
+.pendingMessage {
+  opacity: 0.62;
+}
+
 .ownMessage p,
 .peerMessage p {
   margin: 0;

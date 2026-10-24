@@ -6,8 +6,10 @@ import { getPublicProfileById } from '@/services/publicProfiles';
 import {
   createPersistentConversation,
   fetchPersistentConversations,
+  fetchPersistentMessagesSince,
   fetchPersistentThread,
   sendPersistentMessage,
+  type MessageCursor,
 } from './supabaseRepository';
 
 export interface ConversationThread {
@@ -152,6 +154,36 @@ export async function fetchConversationThread(conversationId: string, userId: st
 
 export async function fetchConversationMessages(conversationId: string, userId: string): Promise<Message[]> {
   return (await fetchConversationThread(conversationId, userId)).messages;
+}
+
+export function messagesAfterCursor(items: Message[], after: MessageCursor | null): Message[] {
+  return items
+    .filter((message) => !after ||
+      message.sentAt > after.sentAt ||
+      (message.sentAt === after.sentAt && message.id > after.id))
+    .sort((first, second) => first.sentAt.localeCompare(second.sentAt) || first.id.localeCompare(second.id))
+    .map((message) => ({ ...message }));
+}
+
+/**
+ * Fetches messages newer than the last item the client already has. This is the
+ * reconnect path for a realtime subscription; it is not a full-history fetch.
+ */
+export async function fetchConversationMessagesSince(
+  conversationId: string,
+  userId: string,
+  after: MessageCursor | null,
+): Promise<Message[]> {
+  if (isSupabaseAuthConfigured()) {
+    return fetchPersistentMessagesSince(conversationId, after);
+  }
+
+  requireParticipant(conversationId, userId);
+  await delay();
+  return messagesAfterCursor(
+    messages.filter((message) => message.conversationId === conversationId),
+    after,
+  );
 }
 
 export async function sendConversationMessage(conversationId: string, senderId: string, body: string): Promise<Message> {

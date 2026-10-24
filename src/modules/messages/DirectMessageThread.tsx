@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { PublicProfile } from '@/types/database';
 import type { Conversation } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
@@ -16,8 +16,22 @@ interface DirectMessageThreadProps {
 
 export function DirectMessageThread({ peer, conversation, onBack }: DirectMessageThreadProps) {
   const { currentUser } = useAppContext();
-  const { messages, isLoading, isSending, error, send } = useDirectMessages(peer?.userId ?? null, conversation?.id ?? null);
+  const { messages, isLoading, isSending, pendingMessageIds, error, send } = useDirectMessages(peer?.userId ?? null, conversation?.id ?? null);
   const [draft, setDraft] = useState('');
+  const listRef = useRef<HTMLElement>(null);
+  const wasLoadingRef = useRef(isLoading);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const wasLoading = wasLoadingRef.current;
+    wasLoadingRef.current = isLoading;
+    const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 120;
+    if (wasLoading || nearBottom) {
+      list.scrollTop = list.scrollHeight;
+    }
+  }, [isLoading, messages.length]);
+
   const title = conversation?.kind === 'group' ? conversation.name ?? 'Group conversation' : peer?.displayName ?? 'Direct conversation';
   const subtitle = conversation?.kind === 'group'
     ? `${conversation.participantIds.length} members`
@@ -42,17 +56,24 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
           </div>
         </div>
       </header>
-      <section className={styles.messageList} aria-label={`Conversation: ${title}`} aria-live="polite">
+      <section ref={listRef} className={styles.messageList} aria-label={`Conversation: ${title}`} aria-live="polite">
         {isLoading ? <p className={styles.emptyMessage}>Opening conversation...</p> : messages.length === 0 ? (
           <p className={styles.emptyMessage}>This is the beginning of your conversation.</p>
-        ) : messages.map((message) => (
-          <article className={message.senderId === currentUser?.user.id ? styles.ownMessage : styles.peerMessage} key={message.id}>
-            {conversation?.kind === 'group' && message.senderId !== currentUser?.user.id && <span className={styles.senderName}>{message.senderId}</span>}
-            <p>{message.body}</p>
-            <time dateTime={message.sentAt}>{message.sentAt.slice(11, 16)} UTC</time>
-            {message.senderId !== currentUser?.user.id && <ReportContentButton targetType="message" targetId={message.id} />}
-          </article>
-        ))}
+        ) : messages.map((message) => {
+          const isPending = pendingMessageIds.includes(message.id);
+          return (
+            <article
+              className={`${message.senderId === currentUser?.user.id ? styles.ownMessage : styles.peerMessage} ${isPending ? styles.pendingMessage : ''}`}
+              key={message.id}
+              aria-busy={isPending}
+            >
+              {conversation?.kind === 'group' && message.senderId !== currentUser?.user.id && <span className={styles.senderName}>{message.senderId}</span>}
+              <p>{message.body}</p>
+              <time dateTime={message.sentAt}>{isPending ? 'Sending…' : `${message.sentAt.slice(11, 16)} UTC`}</time>
+              {!isPending && message.senderId !== currentUser?.user.id && <ReportContentButton targetType="message" targetId={message.id} />}
+            </article>
+          );
+        })}
       </section>
       {error && <p className={styles.error} role="alert">{error}</p>}
       <form className={styles.composer} onSubmit={handleSubmit}>

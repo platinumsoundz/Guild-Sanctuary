@@ -7,6 +7,11 @@ export interface PersistentConversationThread {
   messages: Message[];
 }
 
+export interface MessageCursor {
+  sentAt: string;
+  id: string;
+}
+
 function toConversation(row: ConversationRow, participantIds: string[]): Conversation {
   return {
     id: row.id,
@@ -125,6 +130,59 @@ export async function fetchPersistentThread(
   };
 }
 
+/**
+ * Realtime subscriptions can miss messages while a tab is suspended or the
+ * socket reconnects. This fetches everything after the newest message we
+ * already have. Passing no cursor returns the newest page, which is the right
+ * recovery path for an empty thread.
+ */
+export async function fetchPersistentMessagesSince(
+  conversationId: string,
+  after: MessageCursor | null,
+  pageSize = 500,
+): Promise<Message[]> {
+  const client = getSupabaseBrowserClient();
+
+  if (!after) {
+    const { data, error } = await client
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .eq('state', 'visible')
+      .order('sent_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(pageSize);
+    if (error) throw new Error(`Messages could not be synced: ${error.message}`);
+    return data.reverse().map(toMessage);
+  }
+
+  const collected: Message[] = [];
+  let cursor: MessageCursor = after;
+
+  // A reconnect should normally need one page. The loop caps a long outage so
+  // a very large gap cannot turn into an unbounded request.
+  for (let page = 0; page < 10; page += 1) {
+    const { data, error } = await client
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .eq('state', 'visible')
+      .or(`sent_at.gt.${cursor.sentAt},and(sent_at.eq.${cursor.sentAt},id.gt.${cursor.id})`)
+      .order('sent_at', { ascending: true })
+      .order('id', { ascending: true })
+      .limit(pageSize);
+    if (error) throw new Error(`Messages could not be synced: ${error.message}`);
+
+    collected.push(...data.map(toMessage));
+    if (data.length < pageSize) break;
+    const last = data.at(-1);
+    if (!last) break;
+    cursor = { sentAt: last.sent_at, id: last.id };
+  }
+
+  return collected;
+}
+
 export async function sendPersistentMessage(conversationId: string, body: string): Promise<Message> {
   const normalizedBody = body.trim();
   if (normalizedBody.length < 1 || normalizedBody.length > 2000) {
@@ -148,6 +206,7 @@ export function subscribeToPersistentMessages(
   conversationId: string,
   onMessage: (message: Message) => void,
   onError: (message: string) => void,
+  onSubscribed?: () => void,
 ): () => void {
   const client = getSupabaseBrowserClient();
   const channel = client
@@ -161,7 +220,9 @@ export function subscribeToPersistentMessages(
       onMessage(toMessage(payload.new as MessageRow));
     })
     .subscribe((status, error) => {
-      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+      if (status === 'SUBSCRIBED') {
+        onSubscribed?.();
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         onError(error?.message ?? `Message subscription ${status.toLowerCase()}.`);
       }
     });
