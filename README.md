@@ -69,9 +69,9 @@ The app uses Supabase Auth, Postgres, Storage, and Realtime when the public Supa
 - Account deletion is handled by `POST /api/account/delete`. It verifies the current session, email, `DELETE` phrase, and TOTP code when 2FA is enabled, removes the user's media, then deletes the auth user (database rows cascade). The service-role key must be set on the server for this route.
 - The private profile vault encrypts optional details in the browser with AES-GCM and a PBKDF2-derived key. The server stores ciphertext and salt only. There is no passphrase recovery.
 - Messaging is not end-to-end encrypted. Database/TLS encryption is not E2EE; do not describe it as such.
-- The token wallet stores balances, purchase history, and spend history in Supabase. Wallet balances are read-only to clients. Purchases are granted by the verified webhook path, new profiles receive a 100-token signup grant, and spending goes through the server-owned, idempotent `spend_tokens` RPC. The first sink is a 300-token permanent profile frame.
+- The token wallet stores balances, purchase history, and spend history in Supabase. Wallet balances are read-only to clients. Purchases are granted by the verified webhook path, new profiles receive a 100-token signup grant, and spending goes through the server-owned, idempotent `spend_tokens` RPC. The current sink is a 12-item permanent profile-cosmetics catalog (frames, effects, emoji badges, and curated GIF banners).
 
-Apply `supabase/migrations/` to a disposable project first, then staging, then production after a backup. See [supabase/README.md](supabase/README.md). The wallet migration, token-spending migration, signup-bonus migration, social-policy repair, Shorts RPC migration, and aggregate-view/storage hardening have not been applied or deployed by this repository change.
+Apply `supabase/migrations/` to a disposable project first, then staging, then production after a backup. See [supabase/README.md](supabase/README.md). For the Dashboard SQL Editor, use [SUPABASE_SQL_HANDOFF.md](SUPABASE_SQL_HANDOFF.md) and `supabase/handoff/`; `economy_migrations.sql` combines the four economy migrations, `all_migrations.sql` is for a fresh project, and the `verify_*.sql` files are read-only checks. The wallet migration, token-spending migration, signup-bonus migration, social-policy repair, Shorts RPC migration, and aggregate-view/storage hardening have not been applied or deployed by this repository change.
 
 ## Advertising
 
@@ -86,8 +86,9 @@ Native AdMob placements live in `src/modules/ads/native.ts` and are imported onl
 - **Shorts:** engagement RPCs and types are in the repository, but the migration is not confirmed applied and no staging end-to-end check has run. Guest engagement controls are disabled.
 - **Messaging:** direct and group flows are available. The service uses the Supabase repository when configured and falls back to the in-memory demo otherwise; staging RLS/Realtime and retention/abuse checks remain unfinished.
 - **PWA:** manifest, generated icons, and browser-specific install guidance are present. They have not been browser/device tested; there is no service worker or offline cache, so installation does not imply offline support.
-- **Economy/profile/discovery:** token spending, the 100-token signup grant, the profile-frame sink, the Edit-profile dialog, and the Discover list/search changes are in the repository but not applied to Supabase. Live checkout remains disabled.
-- **Terms:** `TERMS_AND_CONDITIONS_DRAFT.md` is a non-final draft. The signup checkbox and durable version/timestamp record are not implemented.
+- **Economy/profile/discovery:** token spending, the 100-token signup grant, the 12-item permanent cosmetic catalog, the Edit-profile dialog, and the Discover list/search changes are in the repository but not applied to Supabase. The Wallet page supports kind/owned filters, a collection summary, equip, and remove. Live checkout remains disabled.
+- **Terms and guidelines:** `TERMS_AND_CONDITIONS_DRAFT.md` is a non-final draft. `/terms` is a clearly marked `noindex` draft page, and `/guidelines` publishes the community rules and safety paths. The signup checkbox and durable version/timestamp record are not implemented.
+- **Comparison research:** `PLATFORM_COMPARISON_AND_LEGAL_NOTES.md` compares Meta, TikTok, Discord, Reddit, Patreon, Substack, Meetup, Insight Timer, and 7 Cups, and records the UK legal baseline and launch gaps.
 
 ## Architecture
 
@@ -100,7 +101,7 @@ Native AdMob placements live in `src/modules/ads/native.ts` and are imported onl
 
 ## Current limits
 
-- The token wallet supports balance/history, verified bundle grants, a 100-token signup grant, and one permanent profile-frame sink (300 tokens). Checkout is staged and disabled by default. Transfers, trading, marketplace, cash-out, VIP, gifts, chat items, and promotions are not implemented.
+- The token wallet supports balance/history, verified bundle grants, a 100-token signup grant, and 12 permanent profile cosmetics (frames, effects, emoji badges, and curated GIF banners). Checkout is staged and disabled by default. Transfers, trading, marketplace, cash-out, VIP, gifts, chat items, and promotions are not implemented.
 - Guest mode is read-only. Guest and local-demo accounts cannot buy or spend tokens or change wallet balances.
 - Location/radius filtering is an experimental module and is not mounted.
 - Content moderation, media scanning, rate limiting, pagination, retention, and abuse operations still need production hardening.

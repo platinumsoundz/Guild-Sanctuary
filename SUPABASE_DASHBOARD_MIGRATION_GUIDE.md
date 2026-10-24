@@ -2,6 +2,8 @@
 
 This guide applies the token-wallet, token-spending, signup-bonus, and profile-cosmetics migrations through the Supabase Dashboard. It is written for the current project, which contains test data only.
 
+> **Paste-ready files:** `supabase/handoff/economy_migrations.sql` contains the four economy migrations in one transaction. `supabase/handoff/all_migrations.sql` contains all 12 migrations for a fresh project. The full handoff, including verification queries and error fixes, is in `SUPABASE_SQL_HANDOFF.md`.
+
 > **Stop before applying if this project contains real user accounts or real payment data.** Use a separate staging project instead. Do not enable live Stripe checkout during this setup.
 
 ## 1. Before you start
@@ -45,7 +47,7 @@ For each migration:
 6. Wait for the success message. A successful schema migration usually says **“Success. No rows returned.”**
 7. Do not paste the next file until the current one succeeds.
 
-If you cannot open the files yourself, ask OpenCode to paste the next migration into the chat. Copy the entire code block, including `begin;` and `commit;`.
+If you cannot open the files yourself, use the plain `.sql` files in `supabase/handoff/` or ask OpenCode to print the next migration. Copy only the SQL text. Do not copy Markdown fences, three backticks, or a language label; those cause `syntax error at or near "```"` in the SQL Editor.
 
 ### File 1 — wallet and Stripe fulfilment
 

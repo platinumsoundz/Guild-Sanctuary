@@ -53,9 +53,17 @@ export default function PrivacyPage() {
         </p>
       </section>
 
-      <Link className="mt-10 inline-flex rounded-full border border-neutral-700 px-5 py-2 text-sm text-neutral-200 hover:border-emerald-300 hover:text-white" href="/">
-        Back to The Sanctuary
-      </Link>
+      <div className="mt-10 flex flex-wrap gap-3">
+        <Link className="inline-flex rounded-full border border-neutral-700 px-5 py-2 text-sm text-neutral-200 hover:border-emerald-300 hover:text-white" href="/guidelines">
+          Community guidelines
+        </Link>
+        <Link className="inline-flex rounded-full border border-neutral-700 px-5 py-2 text-sm text-neutral-200 hover:border-emerald-300 hover:text-white" href="/terms">
+          Terms draft
+        </Link>
+        <Link className="inline-flex rounded-full border border-neutral-700 px-5 py-2 text-sm text-neutral-200 hover:border-emerald-300 hover:text-white" href="/">
+          Back to The Sanctuary
+        </Link>
+      </div>
     </main>
   );
 }

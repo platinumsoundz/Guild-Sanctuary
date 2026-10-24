@@ -183,6 +183,12 @@ export function SupportPanel() {
       )}
 
       <p className={styles.privacy}>
+        The Sanctuary is not a crisis service. If you or someone else is in immediate danger, contact local
+        emergency services. In the UK call 999; Samaritans is available on 116 123. Read the{' '}
+        <a href="/guidelines">community guidelines</a> for reporting, appeals, and safety paths.
+      </p>
+
+      <p className={styles.privacy}>
         Contributions are optional and do not affect community visibility. External payment providers process
         transactions under their own terms. Voluntary contributions are not linked to your account; digital
         purchases do not grant in-app entitlements until that service is implemented. Web advertising is off

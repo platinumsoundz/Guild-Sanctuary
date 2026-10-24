@@ -294,12 +294,68 @@
 
 .ownedBadge {
   width: fit-content;
-  margin-top: auto;
   padding: 6px 9px;
   border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
   border-radius: 999px;
   color: var(--accent);
   font: 700 10px Arial, sans-serif;
+}
+
+.collectionSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.collectionSummary span {
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font: 700 10px Arial, sans-serif;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.filterButton {
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: 700 10px Arial, sans-serif;
+}
+
+.filterButton:hover,
+.filterButton[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.filterButton:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.equippedActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.equippedActions .refreshButton {
+  min-height: 32px;
+  padding: 6px 10px;
 }
 
 .confirmBox {

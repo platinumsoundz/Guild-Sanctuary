@@ -1,8 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getCosmeticSlot } from './catalog';
 import {
   checkTokenCheckoutEnabled,
+  clearProfileCosmetic,
   equipProfileCosmetic,
   fetchWallet,
   isSupabaseWalletConfigured,
@@ -13,6 +15,7 @@ import {
   type TokenBundleId,
   type TokenEntitlement,
   type TokenSpendItem,
+  type TokenSpendItemKind,
   type TokenSpendResult,
   type WalletSnapshot,
 } from './service';
@@ -27,11 +30,13 @@ interface UseWalletResult {
   isStartingCheckout: boolean;
   spendingItemId: string | null;
   equippingItemId: string | null;
+  clearingItemId: string | null;
   error: string | null;
   refresh: () => Promise<void>;
   buyBundle: (bundleId: TokenBundleId) => Promise<void>;
   spendItem: (itemId: string) => Promise<TokenSpendResult | null>;
   equipItem: (itemId: string) => Promise<boolean>;
+  clearItem: (itemId: string, kind: TokenSpendItemKind) => Promise<boolean>;
 }
 
 function createIdempotencyKey(): string {
@@ -48,6 +53,7 @@ export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
   const [isStartingCheckout, setIsStartingCheckout] = useState(false);
   const [spendingItemId, setSpendingItemId] = useState<string | null>(null);
   const [equippingItemId, setEquippingItemId] = useState<string | null>(null);
+  const [clearingItemId, setClearingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const pendingSpendKeys = useRef<Record<string, string>>({});
   const canUseWallet = !isGuest && isSupabaseWalletConfigured();
@@ -143,6 +149,32 @@ export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
     }
   };
 
+  const clearItem = async (itemId: string, kind: TokenSpendItemKind): Promise<boolean> => {
+    if (!canUseWallet) {
+      setError('Sign in with your Sanctuary account before changing cosmetics.');
+      return false;
+    }
+
+    const slot = getCosmeticSlot(kind);
+    if (!slot) {
+      setError('That item cannot be removed from a profile slot.');
+      return false;
+    }
+
+    setClearingItemId(itemId);
+    setError(null);
+    try {
+      await clearProfileCosmetic(userId, slot);
+      await refresh();
+      return true;
+    } catch (clearError) {
+      setError(clearError instanceof Error ? clearError.message : 'The cosmetic could not be removed.');
+      return false;
+    } finally {
+      setClearingItemId(null);
+    }
+  };
+
   return {
     snapshot,
     bundles: tokenBundles,
@@ -153,10 +185,12 @@ export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
     isStartingCheckout,
     spendingItemId,
     equippingItemId,
+    clearingItemId,
     error,
     refresh,
     buyBundle,
     spendItem,
     equipItem,
+    clearItem,
   };
 }

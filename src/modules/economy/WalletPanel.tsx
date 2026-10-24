@@ -2,6 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import type { Profile } from '@/types/database';
+import {
+  cosmeticFilterLabel,
+  cosmeticKindLabel,
+  filterCosmetics,
+  getEquippedCosmeticId,
+  summarizeCosmetics,
+  type CosmeticFilter,
+} from './catalog';
 import { isSupabaseWalletConfigured, type TokenSpendItem } from './service';
 import { useWallet } from './useWallet';
 import styles from './WalletPanel.module.css';
@@ -26,24 +34,24 @@ export function WalletPanel({ userId, profile, isGuest, onSpendComplete }: Walle
     isStartingCheckout,
     spendingItemId,
     equippingItemId,
+    clearingItemId,
     error,
     refresh,
     buyBundle,
     spendItem,
     equipItem,
+    clearItem,
   } = useWallet(userId, isGuest);
   const [notice, setNotice] = useState<string | null>(null);
   const [confirmingItemId, setConfirmingItemId] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<CosmeticFilter>('all');
   const hasSupabaseAccount = !isGuest && isSupabaseWalletConfigured();
   const entitledItemIds = new Set(entitlements.map((entry) => entry.itemId));
+  const summary = summarizeCosmetics(catalog, entitledItemIds, profile);
+  const visibleCatalog = filterCosmetics(catalog, activeFilter, entitledItemIds);
+  const filters: CosmeticFilter[] = ['all', 'owned', 'profile_frame', 'profile_effect', 'profile_badge', 'profile_banner'];
 
-  const isEquipped = (item: TokenSpendItem) => {
-    if (item.kind === 'profile_frame') return profile.equippedFrame === item.itemId;
-    if (item.kind === 'profile_effect') return profile.equippedEffect === item.itemId;
-    if (item.kind === 'profile_badge') return profile.equippedBadge === item.itemId;
-    if (item.kind === 'profile_banner') return profile.equippedBanner === item.itemId;
-    return false;
-  };
+  const isEquipped = (item: TokenSpendItem) => getEquippedCosmeticId(profile, item.kind) === item.itemId;
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -85,12 +93,15 @@ export function WalletPanel({ userId, profile, isGuest, onSpendComplete }: Walle
     }
   };
 
-  const cosmeticKindLabel = (kind: TokenSpendItem['kind']) => {
-    if (kind === 'profile_frame') return 'Frame';
-    if (kind === 'profile_effect') return 'Effect';
-    if (kind === 'profile_badge') return 'Badge';
-    if (kind === 'profile_banner') return 'GIF banner';
-    return 'Cosmetic';
+  const handleClear = async (item: TokenSpendItem) => {
+    const cleared = await clearItem(item.itemId, item.kind);
+    if (!cleared) return;
+    setNotice(`${item.name} removed. You can equip it again at any time.`);
+    try {
+      await onSpendComplete?.();
+    } catch {
+      // The clear succeeded; a profile refresh failure should not look like a failure.
+    }
   };
 
   const renderPreview = (item: TokenSpendItem) => {
@@ -167,8 +178,34 @@ export function WalletPanel({ userId, profile, isGuest, onSpendComplete }: Walle
         ) : catalog.length === 0 ? (
           <p className={styles.disclaimer}>No token spend items are enabled yet. Apply the profile-cosmetics migration to load the catalog.</p>
         ) : (
-          <div className={styles.spendGrid}>
-            {catalog.map((item) => {
+          <>
+            <div className={styles.collectionSummary} aria-live="polite">
+              <span>{summary.total} curated cosmetics</span>
+              <span>{summary.owned} owned</span>
+              <span>{summary.equipped} equipped</span>
+            </div>
+            <div className={styles.filterRow} role="group" aria-label="Filter cosmetics">
+              {filters.map((filter) => (
+                <button
+                  key={filter}
+                  className={styles.filterButton}
+                  type="button"
+                  aria-pressed={activeFilter === filter}
+                  onClick={() => setActiveFilter(filter)}
+                >
+                  {cosmeticFilterLabel(filter)}
+                </button>
+              ))}
+            </div>
+            {visibleCatalog.length === 0 ? (
+              <p className={styles.disclaimer}>
+                {activeFilter === 'owned'
+                  ? 'You do not own any cosmetics in this view yet. Spend tokens to start your collection.'
+                  : 'No cosmetics match this filter.'}
+              </p>
+            ) : (
+              <div className={styles.spendGrid}>
+                {visibleCatalog.map((item) => {
               const owned = entitledItemIds.has(item.itemId);
               const equipped = isEquipped(item);
               const affordable = (snapshot?.balanceTokens ?? 0) >= item.priceTokens;
@@ -188,7 +225,17 @@ export function WalletPanel({ userId, profile, isGuest, onSpendComplete }: Walle
                   <p>{item.description}</p>
                   {owned ? (
                     equipped ? (
-                      <span className={styles.ownedBadge}>Equipped</span>
+                      <div className={styles.equippedActions}>
+                        <span className={styles.ownedBadge}>Equipped</span>
+                        <button
+                          className={styles.refreshButton}
+                          type="button"
+                          disabled={clearingItemId === item.itemId}
+                          onClick={() => void handleClear(item)}
+                        >
+                          {clearingItemId === item.itemId ? 'Removing…' : 'Remove'}
+                        </button>
+                      </div>
                     ) : (
                       <button
                         className={styles.refreshButton}
@@ -236,8 +283,10 @@ export function WalletPanel({ userId, profile, isGuest, onSpendComplete }: Walle
                   )}
                 </article>
               );
-            })}
-          </div>
+                })}
+              </div>
+            )}
+          </>
         )}
         <p className={styles.disclaimer}>Only enabled server-side catalog items can be bought. Tokens are account-bound and have no cash value.</p>
       </section>

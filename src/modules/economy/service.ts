@@ -182,6 +182,17 @@ export async function equipProfileCosmetic(userId: string, itemId: string): Prom
   if (error) throw new Error(error.message || 'The cosmetic could not be equipped.');
 }
 
+export async function clearProfileCosmetic(
+  userId: string,
+  slot: 'frame' | 'effect' | 'badge' | 'banner',
+): Promise<void> {
+  await requireSignedInUser(userId);
+  const { error } = await getSupabaseBrowserClient().rpc('clear_profile_cosmetic', {
+    requested_slot: slot,
+  });
+  if (error) throw new Error(error.message || 'The cosmetic could not be removed.');
+}
+
 export async function checkTokenCheckoutEnabled(userId: string): Promise<boolean> {
   await requireSignedInUser(userId);
   const { data, error } = await getSupabaseBrowserClient().functions.invoke('token-checkout', {

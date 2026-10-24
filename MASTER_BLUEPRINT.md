@@ -32,6 +32,17 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `locations` | Experimental radius filtering | Not mounted; no durable location store |
 | `ads` | Consent-gated web display slots plus native AdMob entry point | AdSense requires an explicit flag plus a production-marked deployment (`VERCEL_ENV=production` or `NEXT_PUBLIC_DEPLOYMENT_ENV=production`); IDs come from public build-time environment; native module excluded from web bundle |
 
+## Community content and legal paths
+
+- `src/app/guidelines/page.tsx` publishes community guidelines for conduct, spiritual/wellbeing boundaries, age, tokens, reporting, appeals, and deletion. It is a community guide, not legal terms.
+- `src/app/terms/page.tsx` is a clearly marked draft Terms page with `noindex` and a “not in force” banner. It must not be presented as accepted terms at signup until the operator details, jurisdiction, consumer wording, and legal review are complete.
+- `src/app/privacy/page.tsx` remains the public privacy notice and now links to the guidelines and draft terms.
+- `PLATFORM_COMPARISON_AND_LEGAL_NOTES.md` compares Meta, TikTok, Discord, Reddit, Patreon, Substack, Meetup, Insight Timer, and 7 Cups. It records age rules, virtual-goods/refund stances, moderation and appeal paths, the UK consumer/online-safety/privacy baseline, and the remaining launch gaps.
+
+## SQL handoff
+
+`SUPABASE_SQL_HANDOFF.md` and `supabase/handoff/` are the durable, paste-ready SQL path for the Dashboard SQL Editor. `economy_migrations.sql` combines the four economy migrations; `all_migrations.sql` combines all 12 migrations for a fresh project; `verify_economy.sql` and `verify_all.sql` are read-only checks. The earlier `syntax error at or near "```"` failures were caused by copying Markdown fences, not by SQL syntax. No SQL has been applied to the user’s project.
+
 ## Supabase cutover
 
 The browser adapters are active when `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are present:
@@ -89,7 +100,7 @@ Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do
 - `20261024000000_token_spending.sql` adds the server-owned spend catalog, spend ledger, entitlements, `profiles.equipped_frame`, and the idempotent `spend_tokens` RPC. The first enabled item is `profile_frame_sanctuary` at 300 tokens.
 - `20261024000001_signup_token_bonus.sql` grants 100 tokens to each new profile, records a `signup_bonus` ledger entry, and backfills existing profiles that have no wallet. It also extends the ledger constraints to allow the signup grant.
 - `20261024000002_profile_cosmetics.sql` adds the cosmetic catalog columns, three new equipped slots (`equipped_effect`, `equipped_badge`, `equipped_banner`), the 12-item curated catalog, updated `spend_tokens`, and the `equip_profile_cosmetic`/`clear_profile_cosmetic` RPCs. The three GIF banners live in `public/cosmetics/`.
-- The profile card and Discover avatar render the equipped frame, effect, and emoji badge; the profile card also renders a curated GIF banner. The Wallet page shows cosmetic previews, purchase confirmation, owned/equipped state, spend history, and signup-bonus activity.
+- The profile card and Discover avatar render the equipped frame, effect, and emoji badge; the profile card also renders a curated GIF banner. The Wallet page shows cosmetic previews, filters by kind/owned state, a total/owned/equipped summary, purchase confirmation, owned/equipped state, remove controls, spend history, and signup-bonus activity. `catalog.ts` owns the filter/slot/summary helpers and is covered by `catalog.test.ts`.
 - Purchase checkout remains disabled by default. A test-mode staging enablement is allowed only after staging migration, functions, Price IDs, webhook, and end-to-end test are configured.
 
 ### Blocking before live token sales
@@ -102,7 +113,7 @@ Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do
 
 ### Planned product scope and current status
 
-The product owner confirmed the intended token sinks: profile cosmetics, chat items, gifts, VIP access, and post promotion. Profile cosmetics are implemented in code with a 12-item curated catalog: frames at 300 tokens, effects at 200–250, emoji badges at 150, and GIF banners at 300. The three abstract GIF banners were generated locally in `public/cosmetics/`; no third-party GIF provider or user-upload path is used. The owner must approve every curated GIF and emoji badge before launch. Chat emoji packs are the next expression feature. The remaining catalog in `TOKEN_CATALOG_PROPOSAL.md` is illustrative and unapproved. Transfers, trading, marketplace, and cash-out remain deferred. Keep token checkout disabled and do not expand redemption until refund/chargeback and reversal rules are implemented and tested. Guest mode remains read-only.
+The product owner confirmed the intended token sinks: profile cosmetics, chat items, gifts, VIP access, and post promotion. Profile cosmetics are implemented in code with a 12-item curated catalog: frames at 300 tokens, effects at 200–250, emoji badges at 150, and GIF banners at 300. The three abstract GIF banners were generated locally in `public/cosmetics/`; no third-party GIF provider or user-upload path is used. The owner must approve every curated GIF and emoji badge before launch. Chat emoji packs are the next expression feature. The remaining catalog in `TOKEN_CATALOG_PROPOSAL.md` is illustrative and unapproved. Transfers, trading, marketplace, and cash-out remain deferred. Keep token checkout disabled and do not expand redemption until refund/chargeback and reversal rules are implemented and tested. Guest mode remains read-only. `PLATFORM_COMPARISON_AND_LEGAL_NOTES.md` records the comparable-platform research and recommends a “connection first, content second, commerce last” product stance.
 
 ### Launch and policy decisions (2026-10-24)
 
@@ -119,7 +130,7 @@ Account deletion currently cascades wallet, spend history, and unlocks; the 7-da
 ## Supabase status
 
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` enable browser clients only. Supabase Edge Function secrets and the Next.js server-only service-role key remain server-side.
-- The wallet migration (`20261012000000_token_wallet_and_fulfillment.sql`), token-spending migration (`20261024000000_token_spending.sql`), signup-bonus migration (`20261024000001_signup_token_bonus.sql`), profile-cosmetics migration (`20261024000002_profile_cosmetics.sql`), social-policy repair (`20261011000000_repair_social_engagement_insert_policies.sql`), Shorts engagement RPC migration (`20261013000000_short_engagement_stats.sql`), and aggregate-view/storage hardening (`20261023000000_harden_policies_and_views.sql`) are not confirmed applied to the user's project. A Dashboard SQL walkthrough is in `SUPABASE_DASHBOARD_MIGRATION_GUIDE.md`. From the repository, link the intended staging project, inspect `supabase migration list`, run `supabase db push --dry-run`, then `supabase db push` only after reviewing all pending migrations. `db push` applies every pending local migration, not just the wallet migration. A PostgREST cache refresh (`NOTIFY pgrst, 'reload schema';`) does not create missing tables or functions.
+- The wallet migration (`20261012000000_token_wallet_and_fulfillment.sql`), token-spending migration (`20261024000000_token_spending.sql`), signup-bonus migration (`20261024000001_signup_token_bonus.sql`), profile-cosmetics migration (`20261024000002_profile_cosmetics.sql`), social-policy repair (`20261011000000_repair_social_engagement_insert_policies.sql`), Shorts engagement RPC migration (`20261013000000_short_engagement_stats.sql`), and aggregate-view/storage hardening (`20261023000000_harden_policies_and_views.sql`) are not confirmed applied to the user's project. Use `SUPABASE_SQL_HANDOFF.md` and `supabase/handoff/` for the paste-ready Dashboard path, or `SUPABASE_DASHBOARD_MIGRATION_GUIDE.md` for the longer walkthrough. From the repository, link the intended staging project, inspect `supabase migration list`, run `supabase db push --dry-run`, then `supabase db push` only after reviewing all pending migrations. `db push` applies every pending local migration, not just the wallet migration. A PostgREST cache refresh (`NOTIFY pgrst, 'reload schema';`) does not create missing tables or functions.
 - Local demo auth is not production authentication; mock code `000000` is development-only.
 - Production cutover requires Supabase Auth configuration, profile-creation handling, RLS/policy tests, persistent repository wiring, storage policies, session refresh/middleware strategy, and migration/restore validation.
 - Never expose a Supabase secret/service-role credential to the web client. `POST /api/account/delete` uses `SUPABASE_SERVICE_ROLE_KEY` server-side; token Edge Functions use the platform-provided admin context (`ctx.supabaseAdmin`).
