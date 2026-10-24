@@ -29,6 +29,7 @@ import type { Profile } from '@/types/database';
 import { deleteDemoAccount } from '@/services/accountDeletion';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { Database } from '@/services/supabase/database.types';
+import { normalizeSocialLinks } from '@/lib/socialLinks';
 
 export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'wallet' | 'support' | 'settings';
 
@@ -250,6 +251,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     }
     if (isSupabaseAuthConfigured()) {
       const databaseUpdates: Database['public']['Tables']['profiles']['Update'] = {};
+      if ('username' in updates && updates.username !== undefined) databaseUpdates.username = updates.username.trim();
       if ('displayName' in updates && updates.displayName !== undefined) databaseUpdates.display_name = updates.displayName.trim();
       if ('bio' in updates) databaseUpdates.bio = updates.bio?.trim() || null;
       if ('statusMessage' in updates) databaseUpdates.status_message = updates.statusMessage?.trim() || null;
@@ -261,8 +263,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       if ('starSign' in updates) databaseUpdates.star_sign = updates.starSign;
       if ('belief' in updates) databaseUpdates.belief = updates.belief?.trim() || null;
       if ('socialLinks' in updates && updates.socialLinks) {
-        const { facebook, x, youtube, xbox, playstation, steam, epicGames, reddit } = updates.socialLinks;
-        databaseUpdates.social_links = { facebook, x, youtube, xbox, playstation, steam, epicGames, reddit };
+        databaseUpdates.social_links = normalizeSocialLinks(updates.socialLinks);
       }
       if ('privacy' in updates && updates.privacy) {
         const { bio, location, age, starSign, belief, socialLinks, allowDirectMessages } = updates.privacy;
