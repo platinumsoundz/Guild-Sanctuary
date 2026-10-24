@@ -11,10 +11,8 @@ const tipOptions = [
 
 type TipOption = (typeof tipOptions)[number]['id'];
 
-// A public, provider-hosted voluntary donation link; this is not a credential.
-const stripeDonationUrl = 'https://buy.stripe.com/eVq9AV61h15k6ydgcmfbq01';
-
 interface SupportOptions {
+  stripeDonationUrl: string | null;
   stripeTipsEnabled: boolean;
   lemonSqueezyCheckoutUrl: string | null;
   monzoContributionUrl: string | null;
@@ -22,6 +20,7 @@ interface SupportOptions {
 
 function isSupportOptions(value: unknown): value is SupportOptions {
   if (typeof value !== 'object' || value === null) return false;
+  if (!('stripeDonationUrl' in value) || (value.stripeDonationUrl !== null && typeof value.stripeDonationUrl !== 'string')) return false;
   if (!('stripeTipsEnabled' in value) || typeof value.stripeTipsEnabled !== 'boolean') return false;
   if (!('lemonSqueezyCheckoutUrl' in value) || !('monzoContributionUrl' in value)) return false;
 
@@ -109,20 +108,25 @@ export function SupportPanel() {
         <p className={styles.status} role="status">Checking contribution options…</p>
       ) : (
         <div className={styles.providers}>
-          <section className={styles.provider}>
-            <h2>One-time community contribution</h2>
-            <a
-              className={styles.providerLink}
-              href={stripeDonationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Choose an amount with Stripe
-            </a>
-            <p className={styles.providerNote}>
-              Voluntary contributions do not purchase tokens or grant account perks.
-            </p>
-          </section>
+          {options.stripeDonationUrl && (
+            <section className={styles.provider}>
+              <h2>One-time community contribution</h2>
+              <a
+                className={styles.providerLink}
+                href={options.stripeDonationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Choose an amount with Stripe
+              </a>
+              <p className={styles.providerNote}>
+                Voluntary contributions do not purchase tokens or grant account perks.
+              </p>
+            </section>
+          )}
+          {!options.stripeDonationUrl && (
+            <p className={styles.status} role="status">External contribution links are disabled for previews and local development.</p>
+          )}
 
           {options.lemonSqueezyCheckoutUrl && (
             <section className={styles.provider}>
