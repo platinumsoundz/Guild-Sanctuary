@@ -1,6 +1,6 @@
 # The Sanctuary — Master Blueprint
 
-Last updated: 2026-10-12
+Last updated: 2026-10-24
 
 ## Product decision
 
@@ -23,7 +23,7 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `feeds` | Unified post feed, media metadata, likes, comments | In-memory or optional Supabase adapter |
 | `shorts` | Unified short video feed and engagement | In-memory or optional Supabase adapter |
 | `events` | Community events and RSVPs | In-memory |
-| `messages` | Direct/group conversations and threads | In-memory; optional Supabase repository is not active UI |
+| `messages` | Direct one-to-one/group conversations and threads | Active UI uses in-memory demo service; optional Supabase repository is not wired into the UI |
 | `profiles` / `settings` | Profile, discovery, privacy, local preferences | Browser-local demo store |
 | `moderation` | Report UI and moderator workflow contracts | Supabase-dependent when configured |
 | `support` | Optional community support | Stripe donation link returned only on explicitly enabled Vercel Production deployments; no app-side reconciliation |
@@ -35,6 +35,18 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 The application contracts and local repositories have been unified: `worldType`, `activeWorld`, `entryWorld`, world switching, and per-world local stores were removed.
 
 `supabase/migrations/20261010000000_unify_sanctuary_scope.sql` is an **expand migration** for existing databases. It normalizes legacy records to `sanctuary`, makes legacy scope columns default to `sanctuary`, and adds `create_sanctuary_conversation`. It intentionally does not drop the old columns or enum in the same release. Drop them only after the deployed application, generated database types, historical clients, RLS policies, indexes, and restore procedure have been reviewed and migrated together.
+
+## Shorts engagement status
+
+- Shorts likes/counts use `get_short_engagement_stats` and `toggle_short_like` RPCs in `src/modules/shorts/service.ts`; the functions are defined in `supabase/migrations/20261013000000_short_engagement_stats.sql` so counts are not truncated by client-side RLS.
+- Comment reads/posts remain browser Supabase queries and depend on `supabase/migrations/20261011000000_repair_social_engagement_insert_policies.sql` plus the existing social schema/RLS. Signed-in engagement controls are disabled in guest mode.
+- These migrations are repository code only and are not confirmed applied. No staging end-to-end check has been run; verify like/unlike, counts, comment fetch/post, RLS, and guest browsing after applying the pending migrations.
+
+## PWA installation
+
+- Added a web manifest, generated app/Apple icons, and an install-help panel with Chromium install prompts plus iOS/macOS and other-browser instructions.
+- The install experience is browser-dependent; it does not promise a universal install button. No service worker or offline cache is included, so installation does not imply offline support.
+- PWA assets and install prompts have not been validated on devices/browsers or deployed. Confirm the generated icon routes and manifest in the Cloudflare Worker build before claiming install support is verified.
 
 ## Advertising
 
@@ -64,7 +76,7 @@ Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do
 
 ### Blocking before live token sales
 
-1. Run `npm run typecheck` and `npm run build` in an environment with dependencies and command execution; neither has been run for this work yet.
+1. Run `npm run typecheck`, `npm run build`, and the separate Deno check in an environment with dependencies and command execution. A GitHub `validate` run was reported passing for commit `b08d405622bc32207050824e8af8c80719d867aa`, before the latest Shorts/PWA edits; the current edits have not been validated. Do not treat that earlier result as validation for current code.
 2. Apply the wallet migration and deploy both Edge Functions in an isolated staging project; verify RLS, paid and unpaid sessions, duplicate webhook delivery, wrong mode/price, and invalid signatures.
 3. Decide and implement refund/chargeback behavior. Ask the product owner about full vs partial refunds, disputes, support/manual review, and reversal if tokens have already been spent; do not guess this policy.
 4. Only then configure production-mode Price IDs/secrets/webhook and consider enabling live checkout. The migration has not been applied and the functions have not been deployed to the user's project.
@@ -78,6 +90,7 @@ The product owner confirmed the intended future token sinks: profile cosmetics, 
 ## Supabase status
 
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` enable browser clients only. Supabase Edge Function secrets remain server-side.
+- The wallet migration (`20261012000000_token_wallet_and_fulfillment.sql`), social-policy repair (`20261011000000_repair_social_engagement_insert_policies.sql`), and Shorts engagement RPC migration (`20261013000000_short_engagement_stats.sql`) are not confirmed applied to the user's project. From the repository, link the intended staging project, inspect `supabase migration list`, run `supabase db push --dry-run`, then `supabase db push` only after reviewing all pending migrations. `db push` applies every pending local migration, not just the wallet migration. A PostgREST cache refresh (`NOTIFY pgrst, 'reload schema';`) does not create missing tables or functions.
 - Local demo auth is not production authentication; mock code `000000` is development-only.
 - Production cutover requires Supabase Auth configuration, profile-creation handling, RLS/policy tests, persistent repository wiring, storage policies, session refresh/middleware strategy, and migration/restore validation.
 - Never expose a Supabase secret/service-role credential to the web client. The token Edge Functions use the platform-provided admin context (`ctx.supabaseAdmin`); no service-role key belongs in the Next.js runtime.
@@ -91,7 +104,16 @@ Do not call this a production release until all of the following are complete:
 3. Complete media validation, scanning, storage, moderation, rate limits, and abuse controls.
 4. Keep live token checkout disabled until the staging flow is verified and refund/chargeback handling is implemented; keep token spending/redemption/trading disabled until reversals and account-deletion behavior are tested. Publish approved Terms and Privacy Notice, require explicit signup acceptance, and record the accepted terms version and server-side timestamp before production signup.
 5. Validate ad consent, placements, and production IDs in relevant territories; keep ads disabled until approval and site policies are in place.
-6. Run `npm run typecheck` and `npm run build` after code changes, then manually test responsive navigation, auth, feed, event, message, and support states.
+6. Run `npm run typecheck`, `npm run build`, and the repository's Deno check after changes; then manually test responsive navigation, auth, feed, Shorts engagement/comments, direct and group messaging, events, support, wallet, and PWA installation. The current Shorts/PWA edits have not passed these checks.
+
+## Messaging status and handoff
+
+Direct one-to-one messages already exist in the demo flow: Messages → Find people → search a public profile → Message. Group creation is also available in Messages and requires at least two other selected members. `src/modules/messages/service.ts`, `MessagesInbox.tsx`, `DirectMessageThread.tsx`, and `useDirectMessages.ts` implement the active in-memory UI. `src/modules/messages/supabaseRepository.ts` is an optional adapter, not used by that UI; durable Supabase messaging, realtime, RLS verification, and production abuse/moderation/retention decisions remain unfinished. The current inbox emphasizes the group form, so a small UX improvement is to make the one-to-one entry point explicit. Do not describe messaging as persistent or end-to-end encrypted.
+
+## Deployment and verification note
+
+Cloudflare Workers is the currently observed deployment/preview target. The last observed Workers build for commit `b08d405622bc32207050824e8af8c80719d867aa` was still in progress; deployment is unconfirmed. The repository's Support and AdSense production guards use Vercel-specific environment variables. Do not assume those fail closed on Cloudflare; keep live payment/ad configuration disabled until the environment guards are reviewed and tested for the actual host.
+
 
 ## Local development
 
