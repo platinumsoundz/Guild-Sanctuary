@@ -69,9 +69,11 @@ Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do
 3. Decide and implement refund/chargeback behavior. Ask the product owner about full vs partial refunds, disputes, support/manual review, and reversal if tokens have already been spent; do not guess this policy.
 4. Only then configure production-mode Price IDs/secrets/webhook and consider enabling live checkout. The migration has not been applied and the functions have not been deployed to the user's project.
 
-### Deferred product scope
+### Planned product scope and current status
 
-Token spending and entitlements (profile cosmetics, chat items, gifts, VIP, post promotion), transfers, trading, marketplace, and cash-out are not implemented. Keep them deferred until purchase, refund, and ledger rules are complete. Guest mode remains read-only. Account deletion currently cascades wallet and purchase history; the UI discloses this behavior.
+The product owner confirmed the intended future token sinks: profile cosmetics, chat items, gifts, VIP access, and post promotion. `TOKEN_CATALOG_PROPOSAL.md` contains an illustrative catalog and prices for approval only; no price or effect is approved, and no spending/redemption is implemented. Transfers, trading, marketplace, and cash-out remain deferred. Keep token checkout disabled and do not enable redemption until refund/chargeback and reversal rules are approved and tested. Guest mode remains read-only. Account deletion currently cascades wallet and purchase history; balance treatment must be finalized before real-money sales.
+
+`TERMS_AND_CONDITIONS_DRAFT.md` is a starter draft with placeholders, not final legal terms. The product owner requested a Terms button plus required signup checkbox and version/timestamp record. Implement consent UI and durable acceptance recording, but do not present placeholder terms as final or enable production signup/sales until operator, contact, jurisdiction, age, privacy, user-content, deletion, support, and refund language are approved and legally reviewed.
 
 ## Supabase status
 
@@ -87,7 +89,7 @@ Do not call this a production release until all of the following are complete:
 1. Replace local/mock authentication and data with tested authenticated APIs or RLS-protected browser access.
 2. Test Supabase migrations, RLS policies, backup restore, and forward/rollback behavior in staging.
 3. Complete media validation, scanning, storage, moderation, rate limits, and abuse controls.
-4. Keep live token checkout disabled until the staging flow is verified and refund/chargeback handling is implemented; keep token spending/trading disabled until reversals and account-deletion behavior are tested.
+4. Keep live token checkout disabled until the staging flow is verified and refund/chargeback handling is implemented; keep token spending/redemption/trading disabled until reversals and account-deletion behavior are tested. Publish approved Terms and Privacy Notice, require explicit signup acceptance, and record the accepted terms version and server-side timestamp before production signup.
 5. Validate ad consent, placements, and production IDs in relevant territories; keep ads disabled until approval and site policies are in place.
 6. Run `npm run typecheck` and `npm run build` after code changes, then manually test responsive navigation, auth, feed, event, message, and support states.
 
