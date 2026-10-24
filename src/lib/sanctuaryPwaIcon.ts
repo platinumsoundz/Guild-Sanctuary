@@ -36,7 +36,6 @@ export function createSanctuaryPwaIcon(size: number): ReactElement {
         {
           style: {
             color: '#f4efe1',
-            fontFamily: 'serif',
             fontSize: Math.round(size * 0.48),
             fontWeight: 700,
             lineHeight: 1,
