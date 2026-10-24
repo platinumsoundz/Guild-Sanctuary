@@ -126,7 +126,7 @@ export function SupportPanel() {
             </section>
           )}
           {!options.stripeDonationUrl && (
-            <p className={styles.status} role="status">External contribution links are disabled for previews and local development.</p>
+            <p className={styles.status} role="status">External contribution links are disabled in this deployment.</p>
           )}
 
           {options.lemonSqueezyCheckoutUrl && (
