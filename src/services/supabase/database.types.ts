@@ -258,6 +258,22 @@ export interface Database {
         };
         Returns: string | null;
       };
+      get_short_engagement_stats: {
+        Args: { requested_short_id: string };
+        Returns: {
+          liked: boolean;
+          likes_count: number;
+          comments_count: number;
+        }[];
+      };
+      toggle_short_like: {
+        Args: { requested_short_id: string };
+        Returns: {
+          liked: boolean;
+          likes_count: number;
+          comments_count: number;
+        }[];
+      };
       is_moderator: {
         Args: Record<string, never>;
         Returns: boolean;
