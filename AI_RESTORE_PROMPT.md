@@ -5,9 +5,9 @@ Read `MASTER_BLUEPRINT.md` and `README.md` first; they are the product and techn
 ## Session checkpoint
 
 - Branch: `audit/fixes-2026-10-23`. This work is committed on top of `6880216`; run `git log -1` for the exact current hash.
-- Current work adds the durable SQL handoff (`SUPABASE_SQL_HANDOFF.md`, `supabase/handoff/`), the public community-guidelines page (`/guidelines`), the marked draft Terms page (`/terms`), the platform/legal comparison (`PLATFORM_COMPARISON_AND_LEGAL_NOTES.md`), Wallet catalog filters/unequip plus `catalog.test.ts`, and the AdSense switch-on layout (`ADSENSE_SETUP.md`, feed side rail / mobile bottom, Settings opt-in, no ad-view token rewards).
-- Checks actually run for this work: `npm run lint`, `npm run typecheck`, `npm run check:sql-handoff`, `npm test -- --run` (13/13), and `npm run build` passed.
-- Still not done: AdSense custom domain/site approval/live slot IDs/UK/EEA certified CMP, SQL applied to Supabase, Edge Functions deployed, staging validation, refund/chargeback clawback, 18+ purchase gate, 7-day deletion grace period, full admin dashboard, legal acceptance, chat emoji packs.
+- Current work adds the durable SQL handoff (`SUPABASE_SQL_HANDOFF.md`, `supabase/handoff/`), the public community-guidelines page (`/guidelines`), the marked draft Terms page (`/terms`), the platform/legal comparison (`PLATFORM_COMPARISON_AND_LEGAL_NOTES.md`), Wallet catalog filters/unequip plus `catalog.test.ts`, the AdSense switch-on layout (`ADSENSE_SETUP.md`, feed side rail / mobile bottom, Settings opt-in, no ad-view token rewards), keyset feed pagination with “Load more,” and optimistic direct messages with realtime gap recovery.
+- Checks actually run for this work: `npm run lint`, `npm run typecheck`, `npm run check:sql-handoff`, `npm test -- --run` (17/17), and `npm run build` passed.
+- Still not done: AdSense custom domain/site approval/live slot IDs/UK/EEA certified CMP, SQL applied to Supabase, Edge Functions deployed, staging validation, refund/chargeback clawback, 18+ purchase gate, 7-day deletion grace period, full admin dashboard, legal acceptance, chat emoji packs, message read receipts/unread counts, and the open-source systems comparison/roadmap document.
 - Next three actions: (1) follow `ADSENSE_SETUP.md` for the custom domain, AdSense slots, and UK/EEA CMP, (2) apply `supabase/handoff/economy_migrations.sql` in the Supabase Dashboard and run `verify_economy.sql`, (3) implement the 18+ purchase gate and refund/chargeback clawback.
 - Push is still blocked until the GitHub PAT has `workflow` scope.
 

@@ -49,7 +49,8 @@ The browser adapters are active when `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC
 
 - Profiles load from `profiles`; public discovery uses the `public_profiles` view and trigram indexes. Discover lists all public, discovery-enabled profiles on load and filters by username/display name. It cannot find other accounts unless Supabase is configured and those profiles are eligible; the UI now states which data source is active and surfaces missing-view errors.
 - Settings load and save through `account_settings`; the profile privacy and social-link controls update `profiles`. The profile page is display-first: profile card and own posts/media, with all settings inside an “Edit profile” dialog.
-- Messages use the persistent repository and subscribe to Realtime INSERT events when Supabase is configured.
+- The feed uses keyset pagination on `created_at desc, id desc` with 20-item pages and a “Load more” control, so older posts are not loaded in one request and a newly published post cannot duplicate the next page.
+- Messages use the persistent repository and subscribe to Realtime INSERT events when Supabase is configured. Sends are optimistic, and the hook re-fetches messages newer than the last persisted item after reconnect, browser `online`, or tab visibility recovery. Read receipts/unread counts are not implemented yet.
 - Events, RSVPs, likes, and comments use the database. Aggregate RSVP and like counts come from `event_rsvp_counts` and `social_like_counts` views so the app does not expose who reacted.
 - Shorts likes/counts use `get_short_engagement_stats` and `toggle_short_like` RPCs so counts are not truncated by client-side RLS. Comment reads/posts remain browser Supabase queries and depend on the social schema/RLS plus `20261011000000_repair_social_engagement_insert_policies.sql`.
 - Account deletion uses `POST /api/account/delete` with the server-only service-role key. It verifies the session, email, `DELETE` phrase, and TOTP when enabled, removes stored media, then deletes the auth user.
@@ -149,7 +150,7 @@ Do not call this a production release until all of the following are complete:
 
 ## Messaging status and handoff
 
-Direct one-to-one messages and group conversations are available in the UI. The active service is wired to the Supabase repository when Supabase is configured and falls back to the in-memory demo store otherwise. `src/modules/messages/service.ts`, `MessagesInbox.tsx`, `DirectMessageThread.tsx`, and `useDirectMessages.ts` own the flow; `supabaseRepository.ts` supplies persistent conversations/messages and Realtime subscriptions. Staging verification of conversation creation, membership policies, RLS, Realtime reconnect/duplicate events, and retention/abuse controls remains unfinished. Do not describe messaging as end-to-end encrypted; database/TLS encryption is not E2EE.
+Direct one-to-one messages and group conversations are available in the UI. The active service is wired to the Supabase repository when Supabase is configured and falls back to the in-memory demo store otherwise. `src/modules/messages/service.ts`, `MessagesInbox.tsx`, `DirectMessageThread.tsx`, and `useDirectMessages.ts` own the flow; `supabaseRepository.ts` supplies persistent conversations/messages and Realtime subscriptions. Optimistic sends, reconnect gap recovery, duplicate de-duplication, and bottom-following scroll are implemented. Staging verification of conversation creation, membership policies, RLS, Realtime reconnect/duplicate events, and retention/abuse controls remains unfinished. Read receipts/unread counts still need a messages update policy and a mark-as-read path. Do not describe messaging as end-to-end encrypted; database/TLS encryption is not E2EE.
 
 ## Deployment and verification note
 
