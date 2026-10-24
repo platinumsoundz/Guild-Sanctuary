@@ -3,10 +3,12 @@ import { ADSENSE_CLIENT_ID, isValidAdsenseClientId } from './config';
 
 const publisherId = ADSENSE_CLIENT_ID;
 const validPublisherId = isValidAdsenseClientId(publisherId);
+const adsEnabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED === 'true';
+const isProductionDeployment = process.env.VERCEL_ENV === 'production';
 
-/** Loads Google AdSense only when a valid public publisher ID is configured. */
+/** Loads Google AdSense only when explicitly enabled for a Vercel Production deployment. */
 export function AdSenseScript() {
-  if (!validPublisherId) return null;
+  if (!adsEnabled || !isProductionDeployment || !validPublisherId) return null;
 
   return (
     <Script
