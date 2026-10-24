@@ -6,6 +6,7 @@ export {
   createPost,
   deletePost,
   fetchFeed,
+  fetchFeedPage,
   fetchPostComments,
   fetchPostsByAuthor,
   getPostEngagement,
@@ -13,4 +14,4 @@ export {
   togglePostLike,
   updatePost,
 } from './service';
-export type { CreatePostInput } from './service';
+export type { CreatePostInput, FeedCursor, FeedPage } from './service';

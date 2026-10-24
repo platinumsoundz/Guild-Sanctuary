@@ -14,7 +14,18 @@ const PLACEHOLDER_MESSAGE = 'Thoughts and reflections from your community will f
 
 export function FeedContent() {
   const { currentUser, isGuest } = useAppContext();
-  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(isGuest ? null : currentUser?.user.id ?? null);
+  const {
+    posts,
+    isLoading,
+    isLoadingMore,
+    error,
+    loadMoreError,
+    nextCursor,
+    loadMore,
+    publishPost,
+    editPost,
+    removePost,
+  } = useFeed(isGuest ? null : currentUser?.user.id ?? null);
   const [draft, setDraft] = useState('');
   const [attachmentUrl, setAttachmentUrl] = useState('');
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
@@ -246,6 +257,23 @@ export function FeedContent() {
               </div>
             </article>
           ))}
+        </div>
+      )}
+      {!isLoading && posts.length > 0 && (
+        <div className={styles.pagination}>
+          {loadMoreError && <p className={styles.error} role="alert">{loadMoreError}</p>}
+          {nextCursor ? (
+            <button
+              className={styles.actionButton}
+              type="button"
+              disabled={isLoadingMore}
+              onClick={() => void loadMore()}
+            >
+              {isLoadingMore ? 'Loading more...' : 'Load more'}
+            </button>
+          ) : (
+            <p className={styles.feedStatus}>You are all caught up.</p>
+          )}
         </div>
       )}
     </section>
