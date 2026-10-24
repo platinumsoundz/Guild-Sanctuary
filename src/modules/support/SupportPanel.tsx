@@ -30,6 +30,7 @@ function isSupportOptions(value: unknown): value is SupportOptions {
 
 export function SupportPanel() {
   const [options, setOptions] = useState<SupportOptions>({
+    stripeDonationUrl: null,
     stripeTipsEnabled: false,
     lemonSqueezyCheckoutUrl: null,
     monzoContributionUrl: null,
