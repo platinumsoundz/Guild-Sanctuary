@@ -128,13 +128,6 @@ export function FeedContent() {
 
   return (
     <section className={styles.content} aria-live="polite" aria-labelledby="feed-heading">
-      <div className={styles.sectionHeading}>
-        <div>
-          <p className={styles.sectionEyebrow}>COMMUNITY</p>
-          <h2 id="feed-heading">Your feed</h2>
-        </div>
-        <span className={styles.sortLabel}>LATEST</span>
-      </div>
       {currentUser && !isGuest && <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
         <label className={styles.composerLabel} htmlFor="post-content">Share with Sanctuary</label>
         <textarea
@@ -182,6 +175,13 @@ export function FeedContent() {
           <button className={styles.actionButton} type="submit">Publish</button>
         </div>
       </form>}
+      <div className={styles.sectionHeading}>
+        <div>
+          <p className={styles.sectionEyebrow}>COMMUNITY</p>
+          <h2 id="feed-heading">Everyone’s posts</h2>
+        </div>
+        <span className={styles.sortLabel}>LATEST</span>
+      </div>
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isLoading && <p className={styles.feedStatus}>Loading your feed...</p>}
       {!isLoading && posts.length === 0 && (
