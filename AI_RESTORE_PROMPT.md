@@ -9,7 +9,7 @@ Read `MASTER_BLUEPRINT.md` first; it is the product and technical roadmap. Prese
 - Wallet scope for the first release is: persistent balance, purchase history, and fixed token bundles only.
 - No transfers, trading, marketplace, cash-out, token spending, cosmetics, VIP, gifts, or post promotion are in the first release.
 - Tokens have no cash value. Account deletion currently cascades to the wallet and purchase ledger; the wallet UI discloses this.
-- The voluntary Stripe donation link is external and does not grant tokens or account benefits.
+- The voluntary Stripe donation link is external and does not grant tokens or account benefits. It is served only when `VERCEL_ENV=production` and `STRIPE_DONATION_LINK_ENABLED=true`; preview/local deployments fail closed.
 - Do not use the shareable Stripe token Payment Link for in-app purchases: it cannot safely attribute a payment to the signed-in Sanctuary account. In-app checkout is a server-created Stripe Checkout Session tied to the authenticated user.
 
 ## Wallet implementation status
@@ -20,7 +20,7 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 - Bundles: `tokens_100` (£1), `tokens_600` (£5), `tokens_1200` (£10).
 - Supabase migration: `supabase/migrations/20261012000000_token_wallet_and_fulfillment.sql`. It creates owner-read-only wallet/ledger tables, and a service-role-only, transactional/idempotent purchase RPC. Account deletion cascades wallet history.
 - Edge Functions: `supabase/functions/token-checkout/index.ts` requires an authenticated active profile, server-side fixed Price IDs, and checks Price amount/currency/mode before creating a Stripe Checkout Session. `supabase/functions/stripe-token-webhook/index.ts` verifies the raw Stripe signature and grants tokens only for valid paid sessions.
-- `supabase/config.toml` keeps JWT verification on for checkout and off for the Stripe webhook (the webhook verifies Stripe signatures itself).
+- `supabase/config.toml` keeps JWT verification on for checkout and off for the Stripe webhook (the webhook verifies Stripe signatures itself). The checkout function also requires `Origin` to exactly match the configured `APP_BASE_URL`, preventing preview deployments from using production checkout.
 - `TOKEN_CHECKOUT_ENABLED=false` is the default. Staging may enable it only with Stripe test configuration after deployment and setup. Keep live checkout disabled until refund/chargeback handling and customer support policy are implemented and reviewed.
 - Refunds and chargebacks are **not implemented**. Before building that flow, ask the product owner how to handle partial refunds, full refunds, disputes, and cases where tokens may already have been spent. Do not invent a token-reversal policy.
 - The Supabase migration has not been applied to the user's project. Functions are not deployed. No Stripe Price IDs, keys, or webhook secret were provided or configured.
@@ -31,7 +31,7 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 1. Review current wallet code and these docs before editing. Fix any static/type/build issues found when validation is available.
 2. Keep live purchases disabled. Refund/chargeback behavior is a launch blocker; ask for the desired business rule before implementing it.
 3. The user must apply the migration to staging, deploy `token-checkout` and `stripe-token-webhook`, configure test-mode Price IDs/secrets, and create a Stripe test webhook for `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
-4. Verify staging: one purchase per bundle grants the right amount once; duplicate webhook deliveries do not double-credit; invalid signatures, unpaid sessions, wrong mode, and wrong/inactive Prices do not credit.
+4. Use a stable staging app origin (not an ephemeral preview URL) for test checkout. Verify one purchase per bundle grants the right amount once; duplicate webhook deliveries do not double-credit; invalid signatures, unpaid sessions, wrong mode, and wrong/inactive Prices do not credit. Confirm preview builds hide external donation links and cannot invoke production checkout due to the Origin check.
 5. Do not enable live purchases until staging passes and refunds/chargebacks are addressed. The user's Stripe/Supabase credentials must stay private; never ask them to paste secrets into chat.
 6. Defer token spending and all future token sinks until the purchase/refund ledger rules are complete. Transfers and cash-out remain out of scope.
 
