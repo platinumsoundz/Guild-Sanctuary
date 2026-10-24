@@ -2,7 +2,15 @@ import { getSupabaseBrowserClient } from '@/services/supabase';
 
 export type TokenBundleId = 'tokens_100' | 'tokens_600' | 'tokens_1200';
 export type TokenLedgerKind = TokenBundleId | 'signup_bonus';
-export type TokenSpendItemKind = 'profile_frame' | 'chat_item' | 'gift' | 'vip' | 'promotion';
+export type TokenSpendItemKind =
+  | 'profile_frame'
+  | 'profile_effect'
+  | 'profile_badge'
+  | 'profile_banner'
+  | 'chat_item'
+  | 'gift'
+  | 'vip'
+  | 'promotion';
 
 export interface TokenBundle {
   id: TokenBundleId;
@@ -26,6 +34,10 @@ export interface TokenSpendItem {
   priceTokens: number;
   kind: TokenSpendItemKind;
   enabled: boolean;
+  assetUrl: string | null;
+  assetText: string | null;
+  effectKey: string | null;
+  sortOrder: number;
 }
 
 export interface TokenEntitlement {
@@ -84,8 +96,9 @@ export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
       .order('created_at', { ascending: false })
       .limit(20),
     client.from('token_spend_catalog')
-      .select('item_id,name,description,price_tokens,kind,enabled')
+      .select('item_id,name,description,price_tokens,kind,enabled,asset_url,asset_text,effect_key,sort_order')
       .eq('enabled', true)
+      .order('sort_order', { ascending: true })
       .order('price_tokens', { ascending: true }),
     client.from('token_entitlements')
       .select('item_id,granted_at')
@@ -127,6 +140,10 @@ export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
       priceTokens: item.price_tokens,
       kind: item.kind,
       enabled: item.enabled,
+      assetUrl: item.asset_url ?? null,
+      assetText: item.asset_text ?? null,
+      effectKey: item.effect_key ?? null,
+      sortOrder: item.sort_order,
     })),
     entitlements: (entitlementResult.data ?? []).map((entry) => ({
       itemId: entry.item_id,
@@ -155,6 +172,14 @@ export async function spendTokens(
     itemId: result.item_id,
     alreadyApplied: Boolean(result.already_applied),
   };
+}
+
+export async function equipProfileCosmetic(userId: string, itemId: string): Promise<void> {
+  await requireSignedInUser(userId);
+  const { error } = await getSupabaseBrowserClient().rpc('equip_profile_cosmetic', {
+    requested_item_id: itemId,
+  });
+  if (error) throw new Error(error.message || 'The cosmetic could not be equipped.');
 }
 
 export async function checkTokenCheckoutEnabled(userId: string): Promise<boolean> {

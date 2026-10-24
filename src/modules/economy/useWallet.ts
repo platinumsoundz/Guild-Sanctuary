@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   checkTokenCheckoutEnabled,
+  equipProfileCosmetic,
   fetchWallet,
   isSupabaseWalletConfigured,
   spendTokens,
@@ -25,10 +26,12 @@ interface UseWalletResult {
   isLoading: boolean;
   isStartingCheckout: boolean;
   spendingItemId: string | null;
+  equippingItemId: string | null;
   error: string | null;
   refresh: () => Promise<void>;
   buyBundle: (bundleId: TokenBundleId) => Promise<void>;
   spendItem: (itemId: string) => Promise<TokenSpendResult | null>;
+  equipItem: (itemId: string) => Promise<boolean>;
 }
 
 function createIdempotencyKey(): string {
@@ -44,6 +47,7 @@ export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
   const [isLoading, setIsLoading] = useState(true);
   const [isStartingCheckout, setIsStartingCheckout] = useState(false);
   const [spendingItemId, setSpendingItemId] = useState<string | null>(null);
+  const [equippingItemId, setEquippingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const pendingSpendKeys = useRef<Record<string, string>>({});
   const canUseWallet = !isGuest && isSupabaseWalletConfigured();
@@ -119,6 +123,26 @@ export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
     }
   };
 
+  const equipItem = async (itemId: string): Promise<boolean> => {
+    if (!canUseWallet) {
+      setError('Sign in with your Sanctuary account before equipping cosmetics.');
+      return false;
+    }
+
+    setEquippingItemId(itemId);
+    setError(null);
+    try {
+      await equipProfileCosmetic(userId, itemId);
+      await refresh();
+      return true;
+    } catch (equipError) {
+      setError(equipError instanceof Error ? equipError.message : 'The cosmetic could not be equipped.');
+      return false;
+    } finally {
+      setEquippingItemId(null);
+    }
+  };
+
   return {
     snapshot,
     bundles: tokenBundles,
@@ -128,9 +152,11 @@ export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
     isLoading,
     isStartingCheckout,
     spendingItemId,
+    equippingItemId,
     error,
     refresh,
     buyBundle,
     spendItem,
+    equipItem,
   };
 }

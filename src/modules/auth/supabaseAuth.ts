@@ -62,6 +62,9 @@ export function mapProfileRow(row: ProfileRow): Profile {
     visibility: row.visibility,
     role: row.role,
     equippedFrame: row.equipped_frame ?? null,
+    equippedEffect: row.equipped_effect ?? null,
+    equippedBadge: row.equipped_badge ?? null,
+    equippedBanner: row.equipped_banner ?? null,
   };
 }
 
@@ -84,6 +87,9 @@ export function mapPublicProfileRow(row: PublicProfileRow): PublicProfile {
     allowDirectMessages: row.allow_direct_messages,
     role: 'member',
     equippedFrame: row.equipped_frame ?? null,
+    equippedEffect: row.equipped_effect ?? null,
+    equippedBadge: row.equipped_badge ?? null,
+    equippedBanner: row.equipped_banner ?? null,
   };
 }
 

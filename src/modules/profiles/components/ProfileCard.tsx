@@ -1,4 +1,5 @@
 import type { Profile } from '@/types/database';
+import { profileCosmeticMeta } from '@/modules/economy';
 import styles from './Profiles.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
@@ -7,25 +8,35 @@ interface ProfileCardProps {
 }
 
 export function ProfileCard({ profile }: ProfileCardProps) {
+  const frame = profile.equippedFrame ? profileCosmeticMeta[profile.equippedFrame] : undefined;
+  const effect = profile.equippedEffect ? profileCosmeticMeta[profile.equippedEffect] : undefined;
+  const badge = profile.equippedBadge ? profileCosmeticMeta[profile.equippedBadge] : undefined;
+  const equippedBanner = profile.equippedBanner ? profileCosmeticMeta[profile.equippedBanner] : undefined;
+  const bannerUrl = equippedBanner?.bannerUrl ?? profile.bannerUrl;
+
   return (
     <article className={styles.profileCard} style={{ borderColor: profile.themeColor }}>
-      {profile.bannerUrl ? <img className={styles.banner} src={profile.bannerUrl} alt="" /> : (
+      {bannerUrl ? <img className={styles.banner} src={bannerUrl} alt="" /> : (
         <div className={styles.bannerFallback} style={{ backgroundColor: `${profile.themeColor}20` }} />
       )}
       <div className={styles.profileIdentity}>
         <div
           className={styles.avatar}
-          data-frame={profile.equippedFrame ?? undefined}
+          data-frame={frame?.effectKey}
+          data-effect={effect?.effectKey}
           aria-hidden="true"
-          style={{ borderColor: profile.equippedFrame === 'profile_frame_sanctuary' ? '#d4af37' : profile.themeColor }}
+          style={frame ? undefined : { borderColor: profile.themeColor }}
         >
           {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
         </div>
         <div className={styles.profileDetails}>
           <p className={styles.eyebrow}>COMMUNITY PROFILE</p>
-          <h1>{profile.displayName}</h1>
+          <h1>
+            {profile.displayName}
+            {badge?.badgeText && <span className={styles.profileBadge} aria-label="Profile badge">{badge.badgeText}</span>}
+          </h1>
           <p className={styles.username}>@{profile.username}</p>
-          {profile.equippedFrame && <span className={styles.frameBadge}>Sanctuary supporter</span>}
+          {frame?.label && <span className={styles.frameBadge}>{frame.label}</span>}
           <p className={styles.bio}>{profile.bio ?? 'No profile introduction yet.'}</p>
           <div className={styles.personalDetails}>
             {profile.location && <span>{profile.location}</span>}

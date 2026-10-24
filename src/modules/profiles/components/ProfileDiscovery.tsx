@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { PublicProfile } from '@/types/database';
 import { Globe2, MapPin, Sparkles } from 'lucide-react';
 import { isSupabaseAuthConfigured } from '@/modules/auth';
+import { profileCosmeticMeta } from '@/modules/economy';
 import { listPublicProfiles, searchPublicProfiles } from '../service';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
@@ -104,38 +105,46 @@ export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryP
         </p>
       ) : (
         <div className={styles.results}>
-          {profiles.map((profile) => (
-            <article className={styles.profileRow} key={profile.profileId}>
-              <div className={styles.avatar} data-frame={profile.equippedFrame ?? undefined} aria-hidden="true">
-                {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
-              </div>
-              <div className={styles.profileCopy}>
-                <div className={styles.nameLine}>
-                  <h2>{profile.displayName}</h2>
-                  <span>@{profile.username}</span>
+          {profiles.map((profile) => {
+            const frame = profile.equippedFrame ? profileCosmeticMeta[profile.equippedFrame] : undefined;
+            const effect = profile.equippedEffect ? profileCosmeticMeta[profile.equippedEffect] : undefined;
+            const badge = profile.equippedBadge ? profileCosmeticMeta[profile.equippedBadge] : undefined;
+            return (
+              <article className={styles.profileRow} key={profile.profileId}>
+                <div className={styles.avatar} data-frame={frame?.effectKey} data-effect={effect?.effectKey} aria-hidden="true">
+                  {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
                 </div>
-                <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
-                <ProfileSocialLinks links={profile.socialLinks} />
-                {(profile.location || profile.age || profile.starSign || profile.belief) && (
-                  <div className={styles.publicDetails}>
-                    {profile.location && <span><MapPin size={12} />{profile.location}</span>}
-                    {profile.age && <span>{profile.age}</span>}
-                    {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
-                    {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
+                <div className={styles.profileCopy}>
+                  <div className={styles.nameLine}>
+                    <h2>
+                      {profile.displayName}
+                      {badge?.badgeText && <span className={styles.profileBadge} aria-label="Profile badge">{badge.badgeText}</span>}
+                    </h2>
+                    <span>@{profile.username}</span>
                   </div>
-                )}
-              </div>
-              <button
-                className={styles.messageButton}
-                type="button"
-                disabled={!profile.allowDirectMessages}
-                title={profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
-                onClick={() => onMessage(profile)}
-              >
-                {profile.allowDirectMessages ? 'Message' : 'Messages closed'}
-              </button>
-            </article>
-          ))}
+                  <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
+                  <ProfileSocialLinks links={profile.socialLinks} />
+                  {(profile.location || profile.age || profile.starSign || profile.belief) && (
+                    <div className={styles.publicDetails}>
+                      {profile.location && <span><MapPin size={12} />{profile.location}</span>}
+                      {profile.age && <span>{profile.age}</span>}
+                      {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
+                      {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
+                    </div>
+                  )}
+                </div>
+                <button
+                  className={styles.messageButton}
+                  type="button"
+                  disabled={!profile.allowDirectMessages}
+                  title={profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
+                  onClick={() => onMessage(profile)}
+                >
+                  {profile.allowDirectMessages ? 'Message' : 'Messages closed'}
+                </button>
+              </article>
+            );
+          })}
         </div>
       )}
     </main>

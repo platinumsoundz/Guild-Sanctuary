@@ -158,6 +158,9 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         visibility: 'public',
         role: 'member',
         equippedFrame: null,
+        equippedEffect: null,
+        equippedBadge: null,
+        equippedBanner: null,
       },
       permissions: [],
     };

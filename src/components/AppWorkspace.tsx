@@ -106,7 +106,7 @@ export function AppWorkspace() {
     <>
       {activeNavigation === 'wallet' ? (
         <main className={styles.supportPage}>
-          <WalletPanel userId={currentUser.user.id} isGuest={isGuest} onSpendComplete={refreshProfile} />
+          <WalletPanel userId={currentUser.user.id} profile={currentUser.profile} isGuest={isGuest} onSpendComplete={refreshProfile} />
         </main>
       ) : activeNavigation === 'feed' ? (
         <>

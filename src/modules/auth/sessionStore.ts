@@ -95,6 +95,9 @@ function normalizeSession(value: unknown): AuthSession | null {
         ? profile.themeColor
         : '#52765c',
       equippedFrame: typeof profile.equippedFrame === 'string' ? profile.equippedFrame : null,
+      equippedEffect: typeof profile.equippedEffect === 'string' ? profile.equippedEffect : null,
+      equippedBadge: typeof profile.equippedBadge === 'string' ? profile.equippedBadge : null,
+      equippedBanner: typeof profile.equippedBanner === 'string' ? profile.equippedBanner : null,
       location: typeof profile.location === 'string' ? profile.location : null,
       age: typeof profile.age === 'number' && Number.isInteger(profile.age) ? profile.age : null,
       starSign: typeof profile.starSign === 'string' ? profile.starSign : null,
@@ -141,6 +144,9 @@ function normalizeSession(value: unknown): AuthSession | null {
     (typeof normalizedProfile.bannerUrl !== 'string' && normalizedProfile.bannerUrl !== null) ||
     typeof normalizedProfile.themeColor !== 'string' ||
     (typeof normalizedProfile.equippedFrame !== 'string' && normalizedProfile.equippedFrame !== null) ||
+    (typeof normalizedProfile.equippedEffect !== 'string' && normalizedProfile.equippedEffect !== null) ||
+    (typeof normalizedProfile.equippedBadge !== 'string' && normalizedProfile.equippedBadge !== null) ||
+    (typeof normalizedProfile.equippedBanner !== 'string' && normalizedProfile.equippedBanner !== null) ||
     (typeof normalizedProfile.location !== 'string' && normalizedProfile.location !== null) ||
     (typeof normalizedProfile.age !== 'number' && normalizedProfile.age !== null) ||
     (typeof normalizedProfile.starSign !== 'string' && normalizedProfile.starSign !== null) ||
@@ -215,6 +221,9 @@ function createSession(input: SignUpInput): AuthSession {
       visibility: 'public',
       role: 'member',
       equippedFrame: null,
+      equippedEffect: null,
+      equippedBadge: null,
+      equippedBanner: null,
     },
     permissions: [...allowedPermissions],
   };
@@ -314,6 +323,9 @@ function toPublicProfile(session: AuthSession): PublicProfile {
     allowDirectMessages: profile.privacy.allowDirectMessages,
     role: profile.role,
     equippedFrame: profile.equippedFrame,
+    equippedEffect: profile.equippedEffect,
+    equippedBadge: profile.equippedBadge,
+    equippedBanner: profile.equippedBanner,
   };
 }
 

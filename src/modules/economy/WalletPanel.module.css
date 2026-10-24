@@ -101,6 +101,171 @@
   background: var(--surface);
 }
 
+.cosmeticPreview {
+  display: flex;
+  min-height: 86px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface-raised) 78%, transparent);
+}
+
+.cosmeticAvatarPreview {
+  position: relative;
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--accent);
+  font: 22px Georgia, serif;
+}
+
+.cosmeticAvatarPreview img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cosmeticAvatarPreview[data-preview-frame='sanctuary'] {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #d4af37 32%, transparent);
+}
+
+.cosmeticAvatarPreview[data-preview-frame='aurora'] {
+  animation: walletAuroraFrame 6s linear infinite;
+}
+
+.cosmeticAvatarPreview[data-preview-frame='ember'] {
+  animation: walletEmberFrame 4.5s ease-in-out infinite;
+}
+
+.cosmeticAvatarPreview[data-preview-effect='glow'] {
+  animation: walletSoftGlow 3.2s ease-in-out infinite;
+}
+
+.cosmeticAvatarPreview[data-preview-effect='sparkle']::before,
+.cosmeticAvatarPreview[data-preview-effect='sparkle']::after {
+  position: absolute;
+  color: #f6e7a6;
+  content: '✦';
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+  text-shadow: 0 0 8px rgba(246, 231, 166, 0.8);
+  animation: walletSparkleDrift 2.8s ease-in-out infinite;
+}
+
+.cosmeticAvatarPreview[data-preview-effect='sparkle']::before {
+  top: -4px;
+  right: -2px;
+}
+
+.cosmeticAvatarPreview[data-preview-effect='sparkle']::after {
+  bottom: -3px;
+  left: -2px;
+  font-size: 9px;
+  animation-delay: 1.2s;
+}
+
+.cosmeticBannerPreview {
+  display: block;
+  width: 100%;
+  max-height: 86px;
+  aspect-ratio: 5 / 1;
+  object-fit: cover;
+}
+
+.cosmeticBadgePreview {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  font-size: 30px;
+}
+
+.cosmeticGenericPreview {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  font: 700 18px Arial, sans-serif;
+}
+
+.cosmeticKind {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--accent);
+  font: 700 9px Arial, sans-serif;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+@keyframes walletAuroraFrame {
+  0%, 100% {
+    border-color: #5eead4;
+    box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.28), 0 0 16px rgba(167, 139, 250, 0.35);
+  }
+  33% {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.3), 0 0 18px rgba(94, 234, 212, 0.35);
+  }
+  66% {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.28), 0 0 18px rgba(167, 139, 250, 0.35);
+  }
+}
+
+@keyframes walletEmberFrame {
+  0%, 100% {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.28), 0 0 14px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.28), 0 0 18px rgba(245, 158, 11, 0.4);
+  }
+}
+
+@keyframes walletSoftGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.16), 0 0 12px rgba(148, 163, 184, 0.22);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(148, 163, 184, 0.22), 0 0 22px rgba(148, 163, 184, 0.38);
+  }
+}
+
+@keyframes walletSparkleDrift {
+  0%, 100% {
+    opacity: 0.25;
+    transform: translateY(0) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cosmeticAvatarPreview[data-preview-frame],
+  .cosmeticAvatarPreview[data-preview-effect],
+  .cosmeticAvatarPreview[data-preview-effect='sparkle']::before,
+  .cosmeticAvatarPreview[data-preview-effect='sparkle']::after {
+    animation: none;
+  }
+}
+
 .spendCardHeader {
   display: flex;
   align-items: flex-start;

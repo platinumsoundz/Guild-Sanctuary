@@ -1,19 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { Profile } from '@/types/database';
 import { isSupabaseWalletConfigured, type TokenSpendItem } from './service';
 import { useWallet } from './useWallet';
 import styles from './WalletPanel.module.css';
 
 interface WalletPanelProps {
   userId: string;
+  profile: Profile;
   isGuest: boolean;
   onSpendComplete?: () => void | Promise<void>;
 }
 
 const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 
-export function WalletPanel({ userId, isGuest, onSpendComplete }: WalletPanelProps) {
+export function WalletPanel({ userId, profile, isGuest, onSpendComplete }: WalletPanelProps) {
   const {
     snapshot,
     bundles,
@@ -23,15 +25,25 @@ export function WalletPanel({ userId, isGuest, onSpendComplete }: WalletPanelPro
     isLoading,
     isStartingCheckout,
     spendingItemId,
+    equippingItemId,
     error,
     refresh,
     buyBundle,
     spendItem,
+    equipItem,
   } = useWallet(userId, isGuest);
   const [notice, setNotice] = useState<string | null>(null);
   const [confirmingItemId, setConfirmingItemId] = useState<string | null>(null);
   const hasSupabaseAccount = !isGuest && isSupabaseWalletConfigured();
   const entitledItemIds = new Set(entitlements.map((entry) => entry.itemId));
+
+  const isEquipped = (item: TokenSpendItem) => {
+    if (item.kind === 'profile_frame') return profile.equippedFrame === item.itemId;
+    if (item.kind === 'profile_effect') return profile.equippedEffect === item.itemId;
+    if (item.kind === 'profile_badge') return profile.equippedBadge === item.itemId;
+    if (item.kind === 'profile_banner') return profile.equippedBanner === item.itemId;
+    return false;
+  };
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -60,6 +72,48 @@ export function WalletPanel({ userId, isGuest, onSpendComplete }: WalletPanelPro
     } catch {
       // The spend succeeded; a profile refresh failure should not look like a charge failure.
     }
+  };
+
+  const handleEquip = async (item: TokenSpendItem) => {
+    const equipped = await equipItem(item.itemId);
+    if (!equipped) return;
+    setNotice(`${item.name} equipped.`);
+    try {
+      await onSpendComplete?.();
+    } catch {
+      // The equip succeeded; a profile refresh failure should not look like an equip failure.
+    }
+  };
+
+  const cosmeticKindLabel = (kind: TokenSpendItem['kind']) => {
+    if (kind === 'profile_frame') return 'Frame';
+    if (kind === 'profile_effect') return 'Effect';
+    if (kind === 'profile_badge') return 'Badge';
+    if (kind === 'profile_banner') return 'GIF banner';
+    return 'Cosmetic';
+  };
+
+  const renderPreview = (item: TokenSpendItem) => {
+    if (item.kind === 'profile_banner') {
+      return item.assetUrl
+        ? <img className={styles.cosmeticBannerPreview} src={item.assetUrl} alt="" />
+        : <span className={styles.cosmeticGenericPreview}>GIF</span>;
+    }
+    if (item.kind === 'profile_badge') {
+      return <span className={styles.cosmeticBadgePreview}>{item.assetText ?? '✨'}</span>;
+    }
+    if (item.kind === 'profile_frame' || item.kind === 'profile_effect') {
+      return (
+        <span
+          className={styles.cosmeticAvatarPreview}
+          data-preview-frame={item.kind === 'profile_frame' ? item.effectKey ?? undefined : undefined}
+          data-preview-effect={item.kind === 'profile_effect' ? item.effectKey ?? undefined : undefined}
+        >
+          {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
+        </span>
+      );
+    }
+    return <span className={styles.cosmeticGenericPreview}>{item.name.slice(0, 1).toUpperCase()}</span>;
   };
 
   const activity = [
@@ -107,27 +161,44 @@ export function WalletPanel({ userId, isGuest, onSpendComplete }: WalletPanelPro
             <h2 id="spend-title">Profile cosmetics</h2>
           </div>
         </div>
-        <p className={styles.intro}>Unlock permanent profile frames. The server owns the price and applies the unlock atomically.</p>
+        <p className={styles.intro}>Unlock permanent animated frames, effects, emoji badges, and curated GIF banners. The server owns the price and applies the unlock atomically.</p>
         {!hasSupabaseAccount ? (
           <p className={styles.disclaimer}>Sign in with a Supabase account to spend tokens.</p>
         ) : catalog.length === 0 ? (
-          <p className={styles.disclaimer}>No token spend items are enabled yet. Apply the token-spending migration to load the catalog.</p>
+          <p className={styles.disclaimer}>No token spend items are enabled yet. Apply the profile-cosmetics migration to load the catalog.</p>
         ) : (
           <div className={styles.spendGrid}>
             {catalog.map((item) => {
               const owned = entitledItemIds.has(item.itemId);
+              const equipped = isEquipped(item);
               const affordable = (snapshot?.balanceTokens ?? 0) >= item.priceTokens;
               const confirming = confirmingItemId === item.itemId;
               const spending = spendingItemId === item.itemId;
+              const equipping = equippingItemId === item.itemId;
               return (
                 <article className={styles.spendCard} key={item.itemId}>
+                  <div className={styles.cosmeticPreview}>{renderPreview(item)}</div>
                   <div className={styles.spendCardHeader}>
-                    <h3>{item.name}</h3>
+                    <div>
+                      <span className={styles.cosmeticKind}>{cosmeticKindLabel(item.kind)}</span>
+                      <h3>{item.name}</h3>
+                    </div>
                     <span className={styles.spendPrice}>{item.priceTokens.toLocaleString('en-GB')} tokens</span>
                   </div>
                   <p>{item.description}</p>
                   {owned ? (
-                    <span className={styles.ownedBadge}>Unlocked</span>
+                    equipped ? (
+                      <span className={styles.ownedBadge}>Equipped</span>
+                    ) : (
+                      <button
+                        className={styles.refreshButton}
+                        type="button"
+                        disabled={equipping}
+                        onClick={() => void handleEquip(item)}
+                      >
+                        {equipping ? 'Equipping…' : 'Equip'}
+                      </button>
+                    )
                   ) : confirming ? (
                     <div className={styles.confirmBox}>
                       <p>
@@ -209,7 +280,7 @@ export function WalletPanel({ userId, isGuest, onSpendComplete }: WalletPanelPro
       <section className={styles.section} aria-labelledby="future-uses-title">
         <p className={styles.eyebrow}>TOKEN USES</p>
         <h2 id="future-uses-title">What tokens unlock</h2>
-        <p className={styles.intro}>Profile frames are available now. Chat items, gifts, VIP status, and post promotion remain planned and are not purchasable yet.</p>
+        <p className={styles.intro}>Animated frames, effects, emoji badges, and curated GIF banners are available now. Chat emoji packs are planned next; gifts, VIP status, and post promotion remain planned and are not purchasable yet.</p>
         <p className={styles.disclaimer}>Gifts, transfers, and token trading are not enabled. Tokens have no cash value and cannot be redeemed for money.</p>
       </section>
 

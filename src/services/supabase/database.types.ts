@@ -30,6 +30,9 @@ export type ProfileRow = {
   allow_profile_discovery: boolean;
   visibility: 'public' | 'private';
   equipped_frame: string | null;
+  equipped_effect: string | null;
+  equipped_badge: string | null;
+  equipped_banner: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -50,6 +53,9 @@ export type PublicProfileRow = {
   social_links: Record<string, string | null>;
   allow_direct_messages: boolean;
   equipped_frame: string | null;
+  equipped_effect: string | null;
+  equipped_badge: string | null;
+  equipped_banner: string | null;
 }
 
 export type PrivateProfileVaultRow = {
@@ -177,8 +183,12 @@ export interface Database {
         name: string;
         description: string;
         price_tokens: number;
-        kind: 'profile_frame' | 'chat_item' | 'gift' | 'vip' | 'promotion';
+        kind: 'profile_frame' | 'profile_effect' | 'profile_badge' | 'profile_banner' | 'chat_item' | 'gift' | 'vip' | 'promotion';
         enabled: boolean;
+        asset_url: string | null;
+        asset_text: string | null;
+        effect_key: string | null;
+        sort_order: number;
         created_at: string;
       }>;
       token_spend_ledger: Table<{
@@ -410,6 +420,21 @@ export interface Database {
           item_id: string;
           already_applied: boolean;
         }[];
+      };
+      equip_profile_cosmetic: {
+        Args: {
+          requested_item_id: string;
+        };
+        Returns: {
+          item_id: string;
+          kind: string;
+        }[];
+      };
+      clear_profile_cosmetic: {
+        Args: {
+          requested_slot: 'frame' | 'effect' | 'badge' | 'banner';
+        };
+        Returns: undefined;
       };
     };
     Enums: {

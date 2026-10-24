@@ -12,14 +12,21 @@ The shareable Stripe Payment Link is not used for wallet purchases because it ca
 
 Every new profile receives 100 tokens through a database trigger. The grant is recorded in `token_ledger` as a `signup_bonus` entry so the wallet history explains the starting balance. Existing profiles without a wallet are backfilled once by `20261024000001_signup_token_bonus.sql`; profiles that already have a wallet are not changed.
 
-## Spending
+## Spending and profile cosmetics
 
-The first sink is a permanent profile frame, `profile_frame_sanctuary`, priced at 300 tokens in the server-owned `token_spend_catalog`. The client sends only the catalog item ID and an idempotency key to the `spend_tokens` RPC. The RPC locks the wallet, rejects insufficient balances, writes the spend ledger, updates the balance, grants the entitlement, and equips a profile frame atomically. Repeating the same idempotency key does not double-charge, and a permanent frame cannot be bought twice.
+The enabled catalog contains 12 permanent profile cosmetics:
 
-The profile card and Discover avatar render the equipped frame. The Wallet page shows a confirmation step, the resulting balance, spend history, and the welcome-bonus entry.
+- animated frames at 300 tokens
+- animated effects at 200–250 tokens
+- emoji badges at 150 tokens
+- curated animated GIF banners at 300 tokens
+
+The client sends only the catalog item ID and an idempotency key to the `spend_tokens` RPC. The RPC locks the wallet, rejects insufficient balances, writes the spend ledger, updates the balance, grants the entitlement, and auto-equips the purchased cosmetic atomically. Repeating the same idempotency key does not double-charge, and a permanent cosmetic cannot be bought twice. Owned cosmetics can be switched through `equip_profile_cosmetic`; `clear_profile_cosmetic` supports frame, effect, badge, and banner slots.
+
+`src/modules/economy/cosmetics.ts` maps catalog item IDs to client presentation. The profile card and Discover avatar render the equipped frame, effect, and badge; the profile card also renders the equipped GIF banner. The Wallet page shows previews, a confirmation step, the resulting balance, owned/equipped state, spend history, and the welcome-bonus entry. The three banner assets are in `public/cosmetics/` and were generated locally; there is no third-party GIF provider or user-upload path. The owner must approve every curated GIF and emoji badge before launch.
 
 ## Deferred
 
-Transfers, trading, marketplace, cash-out, VIP, gifts, chat items, and post promotion are not implemented. Those are planned extensions and must be implemented with server-side ledger transactions and clear product rules before use. The wallet and ledger are account-bound; deleting an account deletes its stored wallet, spend history, and unlocks. The system currently records verified purchases, signup grants, and catalog spends only; refund/chargeback reconciliation must be added before enabling live sales or broader redemption.
+Transfers, trading, marketplace, cash-out, VIP, gifts, chat items, and post promotion are not implemented. Chat emoji packs are the next expression feature. Those are planned extensions and must be implemented with server-side ledger transactions and clear product rules before use. The wallet and ledger are account-bound; deleting an account currently deletes its stored wallet, spend history, and unlocks. The approved 7-day deletion grace period is not implemented. The system currently records verified purchases, signup grants, and catalog spends only; refund/chargeback reconciliation must be added before enabling live sales or broader redemption.
 
-Status: the migrations have not been applied and the Edge Functions have not been deployed or validated in this workspace. `TOKEN_CHECKOUT_ENABLED` defaults to `false`. Before live sales, ask the product owner how to handle full/partial refunds, disputes, manual support, and reversals when tokens have already been spent; do not guess that policy.
+Status: the migrations have not been applied and the Edge Functions have not been deployed or validated in this workspace. `TOKEN_CHECKOUT_ENABLED` defaults to `false`. The approved refund/chargeback policy is to claw back unspent tokens and flag spent-token cases for manual support review; implementation is still pending. Token purchases are 18+, but the age gate is not implemented. Do not enable live sales until refund handling, the 18+ gate, the 7-day deletion grace period, the admin dashboard, and legal review are complete.

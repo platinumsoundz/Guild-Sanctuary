@@ -84,6 +84,9 @@ export interface Profile {
   visibility: ProfileVisibility;
   role: UserRole;
   equippedFrame: string | null;
+  equippedEffect: string | null;
+  equippedBadge: string | null;
+  equippedBanner: string | null;
 }
 
 export interface PublicProfile {
@@ -104,6 +107,9 @@ export interface PublicProfile {
   allowDirectMessages: boolean;
   role: UserRole;
   equippedFrame: string | null;
+  equippedEffect: string | null;
+  equippedBadge: string | null;
+  equippedBanner: string | null;
 }
 
 export interface Post {

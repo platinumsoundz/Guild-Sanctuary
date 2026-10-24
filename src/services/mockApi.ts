@@ -69,6 +69,9 @@ export async function createUser(input: CreateUserInput): Promise<{ user: User; 
     visibility: 'public',
     role: 'member',
     equippedFrame: null,
+    equippedEffect: null,
+    equippedBadge: null,
+    equippedBanner: null,
   };
   users.push(user);
   profiles.push(profile);
