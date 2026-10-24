@@ -9,7 +9,7 @@ Read `MASTER_BLUEPRINT.md` first; it is the product and technical roadmap. Prese
 - Wallet scope for the first release is: persistent balance, purchase history, and fixed token bundles only.
 - The initial release remains wallet balance/history and fixed token bundles only. The product owner confirmed the future token sinks to design: profile cosmetics, chat items, gifts, VIP, and post promotion. No spending is implemented or enabled; transfers, trading, marketplace, and cash-out remain deferred. See `TOKEN_CATALOG_PROPOSAL.md` for unapproved illustrative suggestions.
 - Tokens have no cash value. Account deletion currently cascades to the wallet and purchase ledger; the wallet UI discloses this.
-- The voluntary Stripe donation link is external and does not grant tokens or account benefits. It is served only when `VERCEL_ENV=production` and `STRIPE_DONATION_LINK_ENABLED=true`; preview/local deployments fail closed. AdSense is likewise disabled by default and requires an explicit flag plus production environment.
+- The voluntary Stripe donation link is external and does not grant tokens or account benefits. It is served only when `VERCEL_ENV=production` and `STRIPE_DONATION_LINK_ENABLED=true`; preview/local deployments fail closed under Vercel. AdSense is likewise disabled by default and requires an explicit flag plus production environment. Cloudflare is the current observed hosting target, so do not assume Vercel-specific guards are safe there; keep live config disabled until host-specific guards are reviewed.
 - Do not use the shareable Stripe token Payment Link for in-app purchases: it cannot safely attribute a payment to the signed-in Sanctuary account. In-app checkout is a server-created Stripe Checkout Session tied to the authenticated user.
 
 ## Wallet implementation status
@@ -25,16 +25,34 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 - Refunds and chargebacks are **not implemented**. Before building that flow, ask the product owner how to handle partial refunds, full refunds, disputes, and cases where tokens may already have been spent. Do not invent a token-reversal policy. Redemption remains disabled until this is decided and tested.
 - The user requested Terms and Conditions access plus a required signup checkbox and durable version/time acceptance record. `TERMS_AND_CONDITIONS_DRAFT.md` is a placeholder draft, not production-ready legal text. Obtain approval/legal review for the operator, contact, jurisdiction, age, content license, privacy, deletion, support, and refund terms before presenting it as final or launching production signup.
 - The Supabase migration has not been applied to the user's project. Functions are not deployed. No Stripe Price IDs, keys, or webhook secret were provided or configured.
-- `npm run typecheck` and `npm run build` were not run: the prior workspace had no shell/command tool and no `node_modules`. Do not claim they passed. Run them if the next environment permits.
+- The earlier GitHub `validate` workflow was reported passing for commit `b08d405622bc32207050824e8af8c80719d867aa`; this predates the latest Shorts/PWA code. The current edits have not been typechecked, built, browser-tested, or deployed. The prior workspace had no shell/command tool and no `node_modules`; do not claim current checks passed.
 
-## Handoff: next agent actions
+## Latest changes and exact status
 
-1. Review current wallet code and these docs before editing. Fix any static/type/build issues found when validation is available.
-2. Keep live purchases disabled. Refund/chargeback behavior is a launch blocker; ask for the desired business rule before implementing it.
-3. The user must apply the migration to staging, deploy `token-checkout` and `stripe-token-webhook`, configure test-mode Price IDs/secrets, and create a Stripe test webhook for `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
-4. Use a stable staging app origin (not an ephemeral preview URL) for test checkout. Verify one purchase per bundle grants the right amount once; duplicate webhook deliveries do not double-credit; invalid signatures, unpaid sessions, wrong mode, and wrong/inactive Prices do not credit. Confirm previews hide donation links and AdSense, and cannot invoke production checkout due to the Origin check.
-5. Do not enable live purchases until staging passes and refunds/chargebacks are addressed. The user's Stripe/Supabase credentials must stay private; never ask them to paste secrets into chat.
-6. The product owner confirmed the five future sinks listed in `TOKEN_CATALOG_PROPOSAL.md`; prices/effects there are proposals only and need approval. Do not implement or enable token redemption until refund/chargeback and reversal policy is approved. Transfers and cash-out remain out of scope. Implement the requested signup Terms control and durable acceptance record only with approved, versioned Terms; keep the current placeholder draft clearly non-final.
+- Shorts: `supabase/migrations/20261013000000_short_engagement_stats.sql` adds server-side `get_short_engagement_stats` and `toggle_short_like`. `src/modules/shorts/service.ts`, `ShortsFeed.tsx`, and generated DB types use those RPCs for aggregate likes/counts. Comment reads/posts still use Supabase browser queries and depend on the existing social schema/RLS plus `20261011000000_repair_social_engagement_insert_policies.sql`. Guest engagement controls are disabled. The migrations are not confirmed applied; no staging like/comment check has run.
+- Wallet: the reported `public.token_wallets` schema-cache error means the wallet migration is not applied to that Supabase project. A PostgREST cache reload cannot create the missing table.
+- Messaging: both direct and group flows exist in the demo UI. Direct path: Messages → Find people → search a public profile → Message. Group creation is in Messages and requires two other members. Active files are `src/modules/messages/MessagesInbox.tsx`, `DirectMessageThread.tsx`, `useDirectMessages.ts`, and `service.ts`. The active UI still uses the in-memory demo service; `supabaseRepository.ts` is not wired in. Persistent storage, realtime, RLS end-to-end checks, and production abuse/retention policy are unfinished. The current inbox visually emphasizes the group form; make the one-to-one entry point clearer as a small isolated UX task.
+- PWA: code has been added in `src/app/manifest.ts`, `src/app/icon.tsx`, `src/app/apple-icon.tsx`, `src/app/pwa-icons/`, `src/lib/sanctuaryPwaIcon.ts`, `src/components/PwaInstallHelp.tsx`, and its CSS. It includes generated icons and browser-specific install guidance. No service worker/offline cache is included; installability is not offline support. No device/browser test or deployment has confirmed it, and Cloudflare compatibility of generated icon routes must be checked.
+- Terms acceptance: Terms draft exists but the signup checkbox and durable accepted-version/time recording are not implemented. The Terms draft is not final legal advice.
+- Hosting/validation: last known Workers build for `b08d405622bc32207050824e8af8c80719d867aa` was still in progress; deployment is unconfirmed. The reported CI pass for that commit predates current Shorts/PWA edits. Re-check current CI and Cloudflare status rather than repeating that old result.
+
+## Handoff: next agent actions (small, modular tasks)
+
+1. **Validate current code first.** Read this handoff, `MASTER_BLUEPRINT.md`, and applicable project/Next docs. Run `npm run typecheck`, `npm run build`, and the Deno Edge Function check if shell/dependencies are available. Fix only observed failures; keep each change focused in its feature module. Report exact commands/results.
+2. **Apply staging migrations safely.** From the repository, use the intended staging project only:
+   ```sh
+   supabase link --project-ref <STAGING_PROJECT_REF>
+   supabase migration list
+   supabase db push --dry-run
+   supabase db push
+   ```
+   Review the dry run first: `db push` applies *all* pending local migrations, not only the wallet migration. Pending work may include `20261011000000_repair_social_engagement_insert_policies.sql`, `20261012000000_token_wallet_and_fulfillment.sql`, and `20261013000000_short_engagement_stats.sql`. Never run against production without explicit approval. `NOTIFY pgrst, 'reload schema';` only refreshes the API cache after schema changes; it does not create tables/functions.
+3. **Verify Shorts on staging.** With signed-in test accounts, check like/unlike, visible counts across users, comment load/post/count, RLS rejection for non-members/inactive users, and guest read-only behavior. Record failures and fix one service/RPC/policy area at a time. Do not claim comments are fixed end-to-end before this passes.
+4. **Improve messaging in bounded steps.** First make direct messaging unmistakable in `MessagesInbox` (separate one-to-one entry point from group creation). Then, as a separate task, wire `MessagesInbox`/thread hooks to `supabaseRepository.ts` only after reviewing auth, `create_sanctuary_conversation`, membership/message policies, Realtime publication, and migration state. Test direct and group participants, unauthorized reads/writes, offline/reconnect, duplicate subscription events, and profile privacy. Keep files small and module-owned; do not combine the UX and persistence rewrites.
+5. **Verify PWA separately.** Check manifest/192/512/Apple icon responses and install prompt behavior on Chromium desktop/Android, iOS Safari, and macOS Safari. Confirm behavior on the actual Cloudflare Worker build. No service worker is present: do not promise offline use. Keep browser-specific manual instructions and never promise an install prompt in every browser.
+6. **Complete legal consent only after approval.** Obtain approved, versioned Terms and Privacy text first; implement explicit signup acceptance and durable version/timestamp recording in a focused auth migration/UI task. Do not ship placeholder terms as final.
+7. **Check hosting and release gates.** Inspect the latest GitHub validation and Cloudflare Workers deployment; distinguish an Actions pass from a deployed worker. Review Vercel-specific Support/AdSense guards for Cloudflare before configuring any live values. Keep all live token checkout disabled.
+8. **Ask the product owner before policy work.** Confirm full/partial refund behavior, disputes/manual support, and reversal when tokens were spent. No spending/redemption until those rules are approved. Never ask for Stripe/Supabase secrets in chat.
 
 ## Required collaboration rules
 
@@ -42,4 +60,5 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 - Keep Supabase RLS enabled. No client-side wallet writes, client-supplied prices, user IDs, or fulfillment claims. Never expose Stripe or Supabase secret keys.
 - Keep guest mode read-only. Never treat local demo balances or mock authentication as real accounts.
 - Distinguish code added from SQL applied, functions deployed, and payments tested. Report only validations actually run.
+- Keep changes beginner-maintainable: prefer small feature-owned components/services and focused migrations; avoid long all-in-one files and unrelated edits. Update the module README, `MASTER_BLUEPRINT.md`, and this handoff when behavior/status changes.
 - Ask the user when a product, refund, chargeback, deletion, or spending policy is underspecified.
