@@ -347,6 +347,19 @@ export function updateLocalProfile(
     throw new Error('The account could not be found in this browser.');
   }
 
+  if (updates.username !== undefined) {
+    const username = updates.username.trim();
+    if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) {
+      throw new Error('Use 3 to 24 letters, numbers, or underscores for your username.');
+    }
+    const duplicate = parseSessions(getStorage().getItem(accountsKey)).some((account) => (
+      account.user.id !== userId && account.profile.username.toLowerCase() === username.toLowerCase()
+    ));
+    if (duplicate) throw new Error('That username is already in use. Choose another.');
+  }
+  if (updates.displayName !== undefined && (updates.displayName.trim().length < 1 || updates.displayName.trim().length > 50)) {
+    throw new Error('Display name must be between 1 and 50 characters.');
+  }
   if (updates.themeColor !== undefined && !/^#[0-9a-fA-F]{6}$/.test(updates.themeColor)) {
     throw new Error('Choose a valid theme color.');
   }
@@ -383,7 +396,16 @@ export function updateLocalProfile(
     }
   }
 
-  const updated: AuthSession = { ...session, profile: { ...session.profile, ...updates } };
+  const updated: AuthSession = {
+    ...session,
+    profile: {
+      ...session.profile,
+      ...updates,
+      ...(updates.username !== undefined ? { username: updates.username.trim() } : {}),
+      ...(updates.displayName !== undefined ? { displayName: updates.displayName.trim() } : {}),
+      ...(updates.socialLinks ? { socialLinks: normalizeSocialLinks(updates.socialLinks) } : {}),
+    },
+  };
   saveAccount(updated);
   if (restoreSession()?.user.id === userId) {
     persistActiveSession(updated);
