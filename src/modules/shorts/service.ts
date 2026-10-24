@@ -175,26 +175,13 @@ export async function updateShortVideo(shortId: string, authorId: string, captio
 export async function toggleShortLike(shortId: string, userId: string): Promise<{ liked: boolean; count: number }> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
-    const client = getSupabaseBrowserClient();
-    const { data: existing, error: existingError } = await client
-      .from('social_likes')
-      .select('id')
-      .eq('target_type', 'short')
-      .eq('target_id', shortId)
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (existingError) throw new Error(`Your reaction could not be checked: ${existingError.message}`);
-    const mutation = existing
-      ? await client.from('social_likes').delete().eq('id', existing.id)
-      : await client.from('social_likes').insert({ target_type: 'short', target_id: shortId, user_id: userId });
-    if (mutation.error) throw new Error(`Your reaction could not be saved: ${mutation.error.message}`);
-    const { count, error } = await client
-      .from('social_likes')
-      .select('id', { count: 'exact', head: true })
-      .eq('target_type', 'short')
-      .eq('target_id', shortId);
-    if (error) throw new Error(`Reaction count could not be loaded: ${error.message}`);
-    return { liked: !existing, count: count ?? 0 };
+    const { data, error } = await getSupabaseBrowserClient().rpc('toggle_short_like', {
+      requested_short_id: shortId,
+    });
+    if (error) throw new Error(`Your reaction could not be saved: ${error.message}`);
+    const stats = data[0];
+    if (!stats) throw new Error('This short video is unavailable for reactions.');
+    return { liked: stats.liked, count: stats.likes_count };
   }
   if (!userId || !findShort(shortId)) {
     throw new Error('This short video is unavailable.');
@@ -284,16 +271,17 @@ export async function addShortComment(shortId: string, authorId: string, body: s
 export async function getShortEngagement(shortId: string, userId: string) {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
-    const client = getSupabaseBrowserClient();
-    const [like, likesCount, commentsCount] = await Promise.all([
-      client.from('social_likes').select('id').eq('target_type', 'short').eq('target_id', shortId).eq('user_id', userId).maybeSingle(),
-      client.from('social_likes').select('id', { count: 'exact', head: true }).eq('target_type', 'short').eq('target_id', shortId),
-      client.from('social_comments').select('id', { count: 'exact', head: true }).eq('target_type', 'short').eq('target_id', shortId).eq('state', 'visible'),
-    ]);
-    if (like.error || likesCount.error || commentsCount.error) {
-      throw new Error(`Short video reactions could not be loaded: ${like.error?.message ?? likesCount.error?.message ?? commentsCount.error?.message}`);
-    }
-    return { liked: Boolean(like.data), likesCount: likesCount.count ?? 0, commentsCount: commentsCount.count ?? 0 };
+    const { data, error } = await getSupabaseBrowserClient().rpc('get_short_engagement_stats', {
+      requested_short_id: shortId,
+    });
+    if (error) throw new Error(`Short video reactions could not be loaded: ${error.message}`);
+    const stats = data[0];
+    if (!stats) throw new Error('This short video is unavailable for reactions.');
+    return {
+      liked: stats.liked,
+      likesCount: stats.likes_count,
+      commentsCount: stats.comments_count,
+    };
   }
   return {
     liked: likes.some((like) => like.targetId === shortId && like.userId === userId),
