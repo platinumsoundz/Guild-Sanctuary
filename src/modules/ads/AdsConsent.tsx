@@ -59,8 +59,8 @@ export function AdsConsent({ enabled = false }: AdsConsentProps) {
       <div>
         <strong>Advertising choice</strong>
         <p>
-          We can show privacy-respecting ads to keep the community free. Ads are off until you choose.
-          Read the <a href="/privacy" className={styles.link}>privacy notice</a>.
+          We use Google AdSense to show ads. Ads stay off until you allow them. You can change this
+          later in Settings. Read the <a href="/privacy" className={styles.link}>privacy notice</a>.
         </p>
       </div>
       <div className={styles.actions}>

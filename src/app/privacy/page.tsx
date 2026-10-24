@@ -30,9 +30,11 @@ export default function PrivacyPage() {
         <h2 className="text-2xl font-semibold text-white">Advertising</h2>
         <p>
           Web advertising is disabled until you allow it. If you allow ads, Google AdSense may use
-          cookies or similar technologies to serve and measure ads. You can change your choice by
-          clearing this site&apos;s storage, or use your browser&apos;s privacy controls. Deployments
-          serving the EEA or UK must use a Google-certified consent management platform.
+          cookies or similar technologies to serve and measure ads. Signed-in members can change
+          this choice at any time in Settings; otherwise you can clear this site&apos;s storage or use
+          your browser&apos;s privacy controls. We do not offer tokens or other rewards for viewing
+          ads. Deployments serving the EEA or UK must use a Google-certified consent management
+          platform.
         </p>
       </section>
 

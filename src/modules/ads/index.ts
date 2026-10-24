@@ -1,6 +1,7 @@
 export { AdsConsent } from './AdsConsent';
 export { AdSlot } from './AdSlot';
-export type { AdSlotPlacement } from './AdSlot';
+export { FeedAdLayout } from './FeedAdLayout';
+export type { AdSlotPlacement, AdSlotVariant } from './AdSlot';
 
 /*
  * Native AdMob placements are intentionally not re-exported from this barrel.

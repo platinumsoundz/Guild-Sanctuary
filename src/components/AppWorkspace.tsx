@@ -12,7 +12,7 @@ import { Feed } from '@/modules/feeds';
 import { MeetupCalendarPlaceholder } from '@/modules/events';
 import { ProfileDashboard, ProfileDiscovery } from '@/modules/profiles';
 import { SupportPanel } from '@/modules/support';
-import { AdSlot } from '@/modules/ads/AdSlot';
+import { AdSlot, FeedAdLayout } from '@/modules/ads';
 import { DirectMessageThread, MessagesInbox } from '@/modules/messages';
 import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
@@ -109,11 +109,9 @@ export function AppWorkspace() {
           <WalletPanel userId={currentUser.user.id} profile={currentUser.profile} isGuest={isGuest} onSpendComplete={refreshProfile} />
         </main>
       ) : activeNavigation === 'feed' ? (
-        <>
-          <AdSlot placement="feed-inline" />
+        <FeedAdLayout>
           <Feed />
-          <AdSlot placement="feed-sidebar" />
-        </>
+        </FeedAdLayout>
       ) : activeNavigation === 'events' ? (
         <MeetupCalendarPlaceholder />
       ) : activeNavigation === 'profile' ? (
@@ -141,8 +139,8 @@ export function AppWorkspace() {
         />
       ) : activeNavigation === 'shorts' ? (
         <>
-          <AdSlot placement="shorts" />
           <ShortsFeed />
+          <AdSlot placement="shorts" variant="bottom" />
         </>
       ) : activeNavigation === 'moderation' ? (
         <ModerationDashboard />

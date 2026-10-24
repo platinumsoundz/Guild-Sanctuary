@@ -4,17 +4,18 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './AdSlot.module.css';
 import {
   ADSENSE_CLIENT_ID,
-  ADSENSE_ENABLED,
   ADS_CONSENT_EVENT,
-  isAdsProductionDeployment,
-  isValidAdsenseClientId,
+  isAdsenseConfigured,
+  isValidAdSlotId,
 } from './config';
 import { hasAdsConsent, type AdsConsent } from './consent';
 
-export type AdSlotPlacement = 'feed-inline' | 'feed-sidebar' | 'shorts';
+export type AdSlotPlacement = 'feed-sidebar' | 'shorts';
+export type AdSlotVariant = 'rail' | 'bottom';
 
 interface AdSlotProps {
   placement: AdSlotPlacement;
+  variant?: AdSlotVariant;
 }
 
 declare global {
@@ -24,20 +25,15 @@ declare global {
 }
 
 const slotIds: Record<AdSlotPlacement, string | undefined> = {
-  'feed-inline': process.env.NEXT_PUBLIC_ADSENSE_SLOT_FEED_INLINE,
   'feed-sidebar': process.env.NEXT_PUBLIC_ADSENSE_SLOT_FEED_SIDEBAR,
   shorts: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SHORTS,
 };
 
-export function AdSlot({ placement }: AdSlotProps) {
+export function AdSlot({ placement, variant = 'bottom' }: AdSlotProps) {
   const slotId = slotIds[placement];
   const adRef = useRef<HTMLModElement>(null);
   const publisherId = ADSENSE_CLIENT_ID;
-  const configured =
-    ADSENSE_ENABLED &&
-    isAdsProductionDeployment() &&
-    isValidAdsenseClientId(publisherId) &&
-    Boolean(slotId && /^\d+$/.test(slotId));
+  const configured = isAdsenseConfigured() && isValidAdSlotId(slotId);
   const [consented, setConsented] = useState(false);
 
   useEffect(() => {
@@ -63,7 +59,8 @@ export function AdSlot({ placement }: AdSlotProps) {
   if (!configured || !consented) return null;
 
   return (
-    <aside className={styles.container} aria-label="Advertisement">
+    <aside className={`${styles.container} ${styles[variant]}`} aria-label="Advertisement">
+      <span className={styles.label}>Advertisement</span>
       <ins
         ref={adRef}
         className={`adsbygoogle ${styles.unit}`}

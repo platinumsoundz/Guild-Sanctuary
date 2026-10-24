@@ -2,17 +2,49 @@
 
 ## Web: Google AdSense
 
-`AdsConsent` is mounted in the root layout. The server layout only enables it when `NEXT_PUBLIC_ADSENSE_ENABLED=true`, the deployment is explicitly marked as production, and the publisher ID is valid. Vercel supplies `VERCEL_ENV=production`; Cloudflare Workers and other hosts must set `NEXT_PUBLIC_DEPLOYMENT_ENV=production` in the production build. Preview and local deployments fail closed, even if an ad flag is accidentally enabled there. Configure the enable flag only in production and leave it unset/false for previews and development. There is no default publisher ID; set `NEXT_PUBLIC_ADSENSE_CLIENT_ID` explicitly.
+The web ad system is deliberately fail-closed. It only runs when all of these are true:
 
-When enabled, the layout also renders the `google-adsense-account` meta tag for site verification. After that gate passes, `AdsConsent` still does not load the AdSense library until the visitor chooses “Allow ads”; the choice is stored in `localStorage`. `AdSlot` renders responsive display units only when the enable flag, production marker, publisher ID, the relevant numeric slot ID, and advertising consent are all present:
+- `NEXT_PUBLIC_ADSENSE_ENABLED=true`
+- the deployment is explicitly marked production (`VERCEL_ENV=production` or `NEXT_PUBLIC_DEPLOYMENT_ENV=production`)
+- `NEXT_PUBLIC_ADSENSE_CLIENT_ID` is a valid `ca-pub-…` publisher ID
+- the placement's numeric slot ID is configured
+- the visitor has allowed advertising
 
-- `NEXT_PUBLIC_ADSENSE_SLOT_FEED_INLINE`
+`AdsConsent` is mounted in the root layout. It does not inject the AdSense script until the visitor chooses **Allow ads**. The choice is stored in `localStorage` and can be changed later in **Settings → Advertising**. The layout also emits the `google-adsense-account` meta tag for site verification when the gates pass.
+
+### Placements
+
+- `feed-sidebar` — one responsive unit for the feed. On wide screens it sits in a non-sticky right-hand rail; below 1100px the same unit moves to the bottom of the feed. It never overlays content.
+- `shorts` — a responsive unit below the Shorts feed, not an interstitial or overlay.
+
+The feed rail only reserves space when an ad is actually rendered. Missing consent, a missing slot ID, a preview build, or an ad blocker leaves the feed at full width.
+
+Configured slot variables:
+
 - `NEXT_PUBLIC_ADSENSE_SLOT_FEED_SIDEBAR`
 - `NEXT_PUBLIC_ADSENSE_SLOT_SHORTS`
 
-These values are public and must be set in the relevant hosting environment **before its build**, since Next.js inlines `NEXT_PUBLIC_*` values at build time. Enable the flag and set live slot IDs only in production. Empty or malformed slot IDs leave placements absent. `public/ads.txt` contains the publisher authorization line; update it if the publisher ID changes.
+These values are public and must be set in the hosting environment **before its build**, because Next.js inlines `NEXT_PUBLIC_*` values at build time. Empty or malformed slot IDs leave placements absent. `public/ads.txt` contains the publisher authorization line; update it if the publisher ID changes.
 
-For verification, deploy the current build to the exact domain registered in AdSense and confirm the homepage is publicly reachable. AdSense verifies domains, not shared platform subdomains such as `*.workers.dev`; attach a custom domain before applying. Confirm `/ads.txt` returns the expected publisher line and that the page head contains the `google-adsense-account` meta tag. Because the ad script is consent-gated, verification may require temporarily granting consent in the browser or using an approved CMP. Confirm `robots.txt`, firewall rules, or access controls do not block Google's crawler. Complete any required site review and configure an approved consent-management platform for applicable regions before serving production ads.
+### Policy: no rewards for ad views
+
+Do **not** offer tokens, points, perks, or any other compensation for viewing, clicking, or interacting with ads. Google AdSense prohibits compensating users for ad views or searches and prohibits language such as “support us” or “click the ads” next to ad units. A token reward for ad opt-in would put the publisher account at risk. The Settings copy therefore states that no tokens or rewards are offered for viewing ads.
+
+The opt-in is only a privacy/consent choice: it lets ads load or keeps them off.
+
+### UK/EEA consent
+
+The local banner is a minimum gate for non-regulated deployments. It is not a Google-certified CMP. Before serving ads to UK/EEA visitors, configure a Google-certified consent management platform (for example through AdSense Privacy & Messaging) and use that as the consent gate. Do not enable live ads in those regions until the CMP is verified.
+
+### Verification checklist
+
+1. Attach the exact custom domain that is registered in AdSense. AdSense does not verify shared platform subdomains such as `*.workers.dev`.
+2. Deploy the production build with the ad flag, publisher ID, and slot IDs.
+3. Confirm `/ads.txt` returns the expected publisher line and the page head contains the `google-adsense-account` meta tag.
+4. Grant consent in the browser and confirm the feed rail and Shorts unit render without covering content.
+5. Confirm `robots.txt`, firewall rules, and access controls do not block Google's crawler.
+6. Complete site review and the UK/EEA CMP requirement before serving live ads.
+7. Never click your own ads or ask community members to do so.
 
 Ad blockers, consent state, site review, and policy controls can prevent an ad from appearing. The app does not treat an empty slot as an error or an impression.
 

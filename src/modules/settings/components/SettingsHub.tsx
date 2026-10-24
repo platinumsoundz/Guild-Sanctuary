@@ -9,6 +9,8 @@ import {
   unlockPrivateProfileVault,
   type PrivateProfileData,
 } from '@/modules/auth';
+import { ADS_CONSENT_EVENT, isAdsenseConfigured } from '@/modules/ads/config';
+import { getAdsConsent, setAdsConsent, type AdsConsent } from '@/modules/ads/consent';
 import { useAccountSettings } from '../useAccountSettings';
 import styles from './SettingsHub.module.css';
 
@@ -74,11 +76,27 @@ export function SettingsHub({
   const [vaultError, setVaultError] = useState<string | null>(null);
   const [vaultStatus, setVaultStatus] = useState<string | null>(null);
   const [isVaultBusy, setIsVaultBusy] = useState(false);
+  const [adsConsent, setAdsConsentState] = useState<AdsConsent | null>(null);
+  const adsAvailable = isAdsenseConfigured();
   const vaultConfigured = isSupabaseAuthConfigured();
 
   useEffect(() => {
     document.documentElement.dataset.layout = settings.preferences.layout;
   }, [settings.preferences.layout]);
+
+  useEffect(() => {
+    setAdsConsentState(getAdsConsent());
+    const handleConsent = (event: Event) => {
+      setAdsConsentState((event as CustomEvent<AdsConsent>).detail);
+    };
+    window.addEventListener(ADS_CONSENT_EVENT, handleConsent);
+    return () => window.removeEventListener(ADS_CONSENT_EVENT, handleConsent);
+  }, []);
+
+  const updateAdsConsent = (value: AdsConsent) => {
+    setAdsConsent(value);
+    setAdsConsentState(value);
+  };
 
   const updatePreference = async (key: keyof typeof preferenceLabels, value: boolean) => {
     try {
@@ -215,6 +233,38 @@ export function SettingsHub({
               ))}
             </div>
           </section>
+
+          {adsAvailable && (
+            <section className={styles.panel} aria-labelledby="ads-title">
+              <h2 id="ads-title">Advertising</h2>
+              <p className={styles.hint}>
+                Google AdSense helps keep The Sanctuary free. Ads are off until you allow them.
+                Your choice is stored on this device and can be changed at any time. We do not offer
+                tokens or other rewards for viewing ads.
+              </p>
+              <div className={styles.layoutChoices} role="radiogroup" aria-label="Advertising choice">
+                <label>
+                  <input
+                    type="radio"
+                    name="ads-consent"
+                    checked={adsConsent === 'granted'}
+                    onChange={() => updateAdsConsent('granted')}
+                  />
+                  Allow ads
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="ads-consent"
+                    checked={adsConsent === 'denied'}
+                    onChange={() => updateAdsConsent('denied')}
+                  />
+                  No ads
+                </label>
+              </div>
+              {adsConsent === null && <p className={styles.hint}>No choice yet. Ads remain off.</p>}
+            </section>
+          )}
 
           <section className={styles.panel} aria-labelledby="privacy-title">
             <h2 id="privacy-title">Profile privacy</h2>

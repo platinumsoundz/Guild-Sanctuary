@@ -1,11 +1,49 @@
 .container {
   width: 100%;
   min-width: 0;
-  margin: 1rem auto;
   overflow: hidden;
   text-align: center;
 }
 
+.rail {
+  max-width: 300px;
+  margin: 0;
+}
+
+.bottom {
+  max-width: 728px;
+  margin: 1.25rem auto 0;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--muted, #68776c);
+  font: 700 8px/1.2 Arial, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .unit {
+  width: 100%;
   min-height: 0;
+}
+
+.rail .unit {
+  min-height: 250px;
+}
+
+.bottom .unit {
+  min-height: 90px;
+}
+
+@media (max-width: 1100px) {
+  .rail {
+    max-width: 728px;
+    margin: 0 auto;
+  }
+
+  .rail .unit {
+    min-height: 90px;
+  }
 }

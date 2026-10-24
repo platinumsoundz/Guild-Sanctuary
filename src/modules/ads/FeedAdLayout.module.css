@@ -1,0 +1,40 @@
+.layout {
+  width: 100%;
+  min-width: 0;
+}
+
+/*
+ * Only reserve a rail when an ad is actually rendered. Consent, missing slot
+ * IDs, preview builds, and ad blockers all leave the feed at full width.
+ */
+.layout:has(.rail > aside) {
+  display: grid;
+  width: min(100%, 1440px);
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  align-items: start;
+  gap: 24px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.feed {
+  min-width: 0;
+}
+
+.rail {
+  min-width: 0;
+  padding-top: 48px;
+}
+
+@media (max-width: 1100px) {
+  .layout:has(.rail > aside) {
+    display: block;
+    padding: 0;
+  }
+
+  .rail {
+    width: min(calc(100% - 32px), 728px);
+    margin: 0 auto;
+    padding: 0 0 28px;
+  }
+}
