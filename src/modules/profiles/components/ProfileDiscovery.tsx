@@ -10,9 +10,10 @@ import { ProfileSocialLinks } from './ProfileSocialLinks';
 interface ProfileDiscoveryProps {
   currentUserId: string;
   onMessage: (profile: PublicProfile) => void;
+  onView: (profile: PublicProfile) => void;
 }
 
-export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryProps) {
+export function ProfileDiscovery({ currentUserId, onMessage, onView }: ProfileDiscoveryProps) {
   const [query, setQuery] = useState('');
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -97,24 +98,27 @@ export function ProfileDiscovery({ currentUserId, onMessage }: ProfileDiscoveryP
                 </div>
                 <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
                 <ProfileSocialLinks links={profile.socialLinks} />
-                                {(profile.location || profile.age || profile.starSign || profile.belief) && (
-                                  <div className={styles.publicDetails}>
-                                    {profile.location && <span><MapPin size={12} />{profile.location}</span>}
-                                    {profile.age && <span>{profile.age}</span>}
-                                    {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
-                                    {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
-                                  </div>
-                                )}
+                {(profile.location || profile.age || profile.starSign || profile.belief) && (
+                  <div className={styles.publicDetails}>
+                    {profile.location && <span><MapPin size={12} />{profile.location}</span>}
+                    {profile.age && <span>{profile.age}</span>}
+                    {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
+                    {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
+                  </div>
+                )}
               </div>
-              <button
-                className={styles.messageButton}
-                type="button"
-                disabled={!profile.allowDirectMessages}
-                title={profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
-                onClick={() => onMessage(profile)}
-              >
-                {profile.allowDirectMessages ? 'Message' : 'Messages closed'}
-              </button>
+              <div className={styles.profileActions}>
+                <button className={styles.viewButton} type="button" onClick={() => onView(profile)}>View profile</button>
+                <button
+                  className={styles.messageButton}
+                  type="button"
+                  disabled={!profile.allowDirectMessages}
+                  title={profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
+                  onClick={() => onMessage(profile)}
+                >
+                  {profile.allowDirectMessages ? 'Message' : 'Messages closed'}
+                </button>
+              </div>
             </article>
           ))}
         </div>
