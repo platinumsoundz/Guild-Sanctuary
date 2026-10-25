@@ -1,6 +1,6 @@
 # Beta token shop proposal — for product approval
 
-**Status:** planning draft only. No new grant, shop, redemption, or refund workflow is implemented or enabled. Every item, price, duration, and effect below is illustrative and requires product approval.
+**Status:** the product owner approved the listed cosmetics and token prices for isolated Stripe test-mode staging only. No grant, shop, redemption, or refund workflow is implemented or enabled. These are not approved for production/live sales.
 
 ## Owner-confirmed beta direction
 
@@ -12,7 +12,7 @@
 
 ## Starter cosmetic catalog (illustrative)
 
-Proposed initial categories are frames, borders, profile themes/skins, and colour palettes. All items are cosmetic only, account-bound, non-transferable, and would be permanent unlocks unless stated otherwise. Prices and effects are not approved.
+Proposed initial categories are frames, borders, profile themes/skins, and colour palettes. All items are cosmetic only, account-bound, non-transferable, and would be permanent unlocks unless stated otherwise. Items/prices are approved for staging tests only; production prices and terms are not approved.
 
 | Category | Draft item | Proposed price | Draft effect / rule |
 | --- | --- | ---: | --- |
@@ -38,4 +38,4 @@ Proposed initial categories are frames, borders, profile themes/skins, and colou
 
 ## Still awaiting approval
 
-Approve or edit every catalog item, price, effect, and permanence rule above. Review the refund/dispute direction with counsel before publishing terms or enabling real-money purchases. No item is purchasable until the necessary schema, server-side transaction, support review process, and staging tests exist.
+The catalog and prices are approved for isolated staging tests. Confirm any changes before implementation; production terms/prices still require approval and legal review. No item is purchasable until the necessary schema, server-side transaction, support review process, and staging tests exist.
