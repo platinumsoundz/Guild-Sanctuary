@@ -1,43 +1,41 @@
-# Token catalog proposal — for product approval
+# Beta token shop proposal — for product approval
 
-**Status:** proposal only. None of these items, prices, durations, or effects are approved or purchasable. Existing checkout remains disabled by default; no token redemption should be implemented or enabled until the refund/chargeback and reversal policy is approved.
+**Status:** planning draft only. No new grant, shop, redemption, or refund workflow is implemented or enabled. Every item, price, duration, and effect below is illustrative and requires product approval.
 
-## Scope
+## Owner-confirmed beta direction
 
-The planned token sinks named in the roadmap are:
+- Test with a small friend group first, then open the beta publicly.
+- Token checkout must use Stripe **test mode in isolated staging only**. Do not expose live payment or donation URLs in previews, and do not enable production charges.
+- The first 100 **verified new accounts after the beta opens** should receive a one-time 1,000-token bonus. This must be fulfilled server-side and atomically; no signup bonus exists in code yet.
+- The first shop should sell only Sanctuary-provided cosmetics. No user listings, transfers, trading, or cash-out.
+- Product-owner policy direction: free beta tokens are non-refundable and have no cash value. Purchases/donations are non-refundable by default unless reported for review. During a dispute/report review, pause further token spending; decide case by case whether to issue a full/partial refund and reverse remaining tokens or revoke the item. Do not create an automatic negative balance. This is not final legal language or an implemented workflow.
 
-1. Profile cosmetics
-2. Chat cosmetics/items
-3. Gifts
-4. VIP access
-5. Post promotion
+## Starter cosmetic catalog (illustrative)
 
-Transfers, trading, a marketplace, and cash-out remain out of scope unless the product owner explicitly reopens them.
+Proposed initial categories are frames, borders, profile themes/skins, and colour palettes. All items are cosmetic only, account-bound, non-transferable, and would be permanent unlocks unless stated otherwise. Prices and effects are not approved.
 
-## Suggested first catalog (illustrative prices)
-
-| Sink | Example | Proposed price | Duration / effect |
+| Category | Draft item | Proposed price | Draft effect / rule |
 | --- | --- | ---: | --- |
-| Profile cosmetics | Profile frame | 300 tokens | Permanent account unlock; one active frame at a time |
-| Profile cosmetics | Banner design | 600 tokens | Permanent account unlock; replaceable at any time |
-| Chat items | Chat-bubble theme | 300 tokens | Permanent account unlock; cosmetic only |
-| Chat items | Emote pack | 250 tokens | Permanent account unlock; subject to moderation rules |
-| Gifts | Small digital gift | 100 tokens | One-time send to another account; no token-balance transfer |
-| Gifts | Celebration gift | 300 tokens | One-time send; recipient gets a visible gift, not cash or transferable tokens |
-| VIP | 30-day VIP access | 600 tokens | Time-limited; exact benefits and stacking/renewal rules need approval |
-| Post promotion | 24-hour promoted placement | 500 tokens | Clearly labeled promotion; no guaranteed views, engagement, or ranking outcome |
+| Frame | Moonlit Halo | 250 tokens | Permanent profile-frame unlock; one frame active at a time |
+| Frame | Wildflower Wreath | 400 tokens | Permanent profile-frame unlock; one frame active at a time |
+| Border | Aurora Line | 200 tokens | Permanent profile-card border; visual only |
+| Border | Gilded Laurel | 350 tokens | Permanent profile-card border; visual only |
+| Profile theme | Tidal Glass | 400 tokens | Permanent profile-card colour/background theme |
+| Profile theme | Twilight Garden | 600 tokens | Permanent profile-card colour/background theme |
+| Colour palette | Sanctuary Colour Pack | 150 tokens | Unlock a curated set of accessible accent colours |
+| Colour customization | Custom Accent Picker | 500 tokens | Unlock user-selected accent colours, subject to contrast/accessibility limits |
 
-Prices are merely a starting proposal relative to the existing 100/600/1,200-token bundles. Before approval, decide whether purchases are permanent or consumable, whether gifts can be sent to blocked users, VIP benefits/renewal, promotion eligibility and labeling, and what happens when content is removed or an account is suspended.
+“Custom” here means configuring a first-party profile appearance; it does not include user-uploaded shop assets or a user-to-user marketplace. Confirm the catalog, visual effects, prices, permanence, and whether palette changes are free after unlock before implementation.
 
-## Safety and fulfillment rules required for implementation
+## Implementation and release gates
 
-- Catalog and prices must be server-owned; the client sends only a stable item ID.
-- Spend and entitlement grant must happen atomically in a database transaction, with idempotency protection and an immutable ledger entry.
-- The UI must show the item, exact token cost, duration/expiry, and resulting balance before confirmation.
-- No negative balance, client-side balance mutation, or direct transfer of token balances.
-- Add refund/chargeback reversal behavior before allowing real-money purchases or redemptions. Keep live checkout disabled; do not test with live Stripe configuration.
-- Gifts and post promotion need abuse/moderation controls; VIP benefits must not bypass safety or moderation.
+- The current wallet migration supports positive purchase credits only; it has no bonus-grant, cosmetic-inventory, spend, refund, or reversal records. Do not write wallet balances from the browser.
+- Any first-100 bonus needs a verified-account check, a concurrency-safe global limit, one grant per account, and an auditable server-side ledger entry.
+- Each shop purchase must validate a server-owned item ID and price, check the authenticated user's balance, deduct tokens and grant the entitlement atomically, and be idempotent.
+- A report or chargeback must pause spending for review. Implement the approved case-by-case refund/reversal workflow and test spent-token cases before enabling redemption.
+- Run the purchase and webhook flow using test-mode Stripe prices in isolated staging only. Keep live checkout disabled until migrations, Edge Functions, RLS, end-to-end tests, and approved/legal-reviewed terms are complete.
+- The existing shareable Stripe Payment Link must not be used for wallet purchases; it cannot safely attribute fulfillment to an account. External donations remain unassociated with accounts and are not reconciled by the app.
 
-## Questions still open
+## Still awaiting approval
 
-Approve or edit the example catalog/prices; specify VIP benefits; define gift visibility/recipient controls; define promotion placement, eligibility and labeling; decide whether cosmetics are permanent; and approve refund/dispute/reversal policy before redemption is enabled.
+Approve or edit every catalog item, price, effect, and permanence rule above. Review the refund/dispute direction with counsel before publishing terms or enabling real-money purchases. No item is purchasable until the necessary schema, server-side transaction, support review process, and staging tests exist.
