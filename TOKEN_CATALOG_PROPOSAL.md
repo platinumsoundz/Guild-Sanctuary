@@ -8,7 +8,7 @@
 - Token checkout must use Stripe **test mode in isolated staging only**. Do not expose live payment or donation URLs in previews, and do not enable production charges.
 - The first 100 **verified new accounts after the beta opens** should receive a one-time 1,000-token bonus. This must be fulfilled server-side and atomically; no signup bonus exists in code yet.
 - The first shop should sell only Sanctuary-provided cosmetics. No user listings, transfers, trading, or cash-out.
-- Product-owner policy direction: free beta tokens are non-refundable and have no cash value. Purchases/donations are non-refundable by default unless reported for review. During a dispute/report review, pause further token spending; decide case by case whether to issue a full/partial refund and reverse remaining tokens or revoke the item. Do not create an automatic negative balance. This is not final legal language or an implemented workflow.
+- Product-owner policy direction for planning: free beta tokens have no cash value and are non-refundable. Token purchases and external donations are intended to be non-refundable by default except a report/chargeback sent for manual review. For token-purchase cases, pause further spending during review; decide case by case on a full/partial refund and whether to reverse remaining tokens or revoke the item. Do not create an automatic negative balance. Donations are not associated with wallets/items and are not reconciled by the app. This is not final legal language or an implemented workflow.
 
 ## Starter cosmetic catalog (illustrative)
 
