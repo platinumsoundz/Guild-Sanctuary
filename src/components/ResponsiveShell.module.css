@@ -4,50 +4,10 @@
   padding: 0 30px 24px;
 }
 
-.toolbar {
-  display: flex;
-  width: min(100%, 1500px);
-  min-height: 66px;
-  align-items: center;
-  justify-content: flex-start;
-  margin: 0 auto;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-
-.brandMark {
-  display: grid;
-  width: 29px;
-  height: 29px;
-  place-items: center;
-  border: 1px solid #829184;
-  border-radius: 50%;
-  color: #3f6049;
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.brandName {
-  color: #4c5b50;
-  font-family: Arial, sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-}
-
-.brandName span {
-  padding: 0 4px;
-  color: #a78339;
-}
-
 .stage {
   width: 100%;
-  min-height: calc(100vh - 66px);
-  min-height: calc(100svh - 66px);
+  min-height: 100vh;
+  min-height: 100svh;
   margin: 0 auto;
 }
 
@@ -57,28 +17,98 @@
   background: #fbfcf9;
 }
 
+.installBanner {
+  display: flex;
+  width: min(100%, 1500px);
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 auto 12px;
+  padding: 10px 14px;
+  border: 1px solid #dce5dc;
+  border-radius: 10px;
+  background: #f4f8f2;
+  color: #203528;
+}
+
+.installCopy,
+.installActions {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.installCopy { min-width: 0; }
+
+.installIcon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 9px;
+  background: #e4eee2;
+  color: #3f6049;
+}
+
+.installTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.installDescription {
+  margin: 3px 0 0;
+  color: #647268;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.installButton {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 7px;
+  background: #315a3d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.hideInstallButton {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #536558;
+  cursor: pointer;
+}
+
+.installButton:focus-visible,
+.hideInstallButton:focus-visible {
+  outline: 2px solid #315a3d;
+  outline-offset: 2px;
+}
+
 @media (max-width: 640px) {
-  .workspace {
-    padding: 0;
+  .workspace { padding: 0 0 16px; }
+  .installBanner {
+    width: auto;
+    margin: 8px 10px 10px;
+    padding: 10px;
+    gap: 8px;
   }
-
-  .toolbar {
-    min-height: 58px;
-    padding: 0 12px;
-  }
-
-  .brand {
-    gap: 7px;
-  }
-
-  .brandMark {
-    width: 25px;
-    height: 25px;
-    font-size: 13px;
-  }
-
-  .brandName {
-    font-size: 8px;
-    letter-spacing: 0.7px;
-  }
+  .installCopy { gap: 8px; }
+  .installIcon { width: 32px; height: 32px; }
+  .installTitle { font-size: 12px; }
+  .installDescription { font-size: 10px; }
+  .installActions { gap: 3px; }
+  .installButton { min-height: 34px; padding: 0 10px; }
 }
