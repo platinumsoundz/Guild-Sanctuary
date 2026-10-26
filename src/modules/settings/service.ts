@@ -1,6 +1,6 @@
 import type { AccountPreferences, AccountSettings } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
-import { isSupabaseCommunityStorageConfigured, requireCommunityStorageUser } from '@/services/supabase/communityMedia';
+import { isSupabaseCommunityStorageConfigured } from '@/services/supabase/communityMedia';
 
 const storagePrefix = 'guild-sanctuary:settings:v1:';
 
@@ -28,6 +28,17 @@ function getStorage(): Storage {
   }
 }
 
+
+async function hasMatchingSupabaseUser(userId: string): Promise<boolean> {
+  const { data, error } = await getSupabaseBrowserClient().auth.getUser();
+  if (error) throw new Error(`Your account session could not be verified: ${error.message}`);
+  if (!data.user) return false;
+  if (data.user.id !== userId) {
+    throw new Error('Your active Sanctuary session does not match these settings. Sign out and sign in again.');
+  }
+  return true;
+}
+
 function normalizePreferences(value: unknown): AccountPreferences {
   const record = isRecord(value) ? value : {};
   return {
@@ -44,8 +55,7 @@ export async function fetchAccountSettings(userId: string): Promise<AccountSetti
   if (!userId) {
     throw new Error('Sign in to view account settings.');
   }
-  if (isSupabaseCommunityStorageConfigured()) {
-    await requireCommunityStorageUser(userId);
+  if (isSupabaseCommunityStorageConfigured() && await hasMatchingSupabaseUser(userId)) {
     const { data, error } = await getSupabaseBrowserClient().from('account_settings')
       .select('preferences,updated_at').eq('user_id', userId).maybeSingle();
     if (error) throw new Error(`Account settings could not be loaded from your account: ${error.message}`);
