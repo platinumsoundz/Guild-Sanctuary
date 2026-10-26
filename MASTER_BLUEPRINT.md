@@ -144,3 +144,11 @@ Verification and deployment:
 - Follow-up/handoff: `docs/handoffs/2026-10-26-sanctuary-ui-release.md`.
 
 .
+
+## PWA offline fallback — implementation in review
+
+- The install prompt and manifest do not by themselves provide offline behavior. A minimal service worker now provides a dedicated offline page when a navigation request fails.
+- The worker intentionally does **not** cache application HTML, API responses, auth/session data, messages, or user-specific content. It only precaches the static offline fallback and handles same-origin GET navigations when the network fails.
+- Service-worker registration is production-only and non-blocking; browsers without service-worker support continue to use the normal online app.
+- A repository smoke check verifies the required PWA files and that the worker remains navigation-only. This is a static guard, not a substitute for browser/device testing.
+- Release follow-up: validate install and offline behavior on Android Chrome and iOS Safari; confirm online sign-in and navigation recover after reconnecting. Do not describe offline app data as available.
