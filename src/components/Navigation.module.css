@@ -431,3 +431,26 @@
     scroll-behavior: auto;
   }
 }
+/* Unified header controls */
+.notificationButton {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
+}
+.notificationButton:hover,
+.notificationButton:focus-visible { border-color: var(--accent); }
+.accountButtonLabel { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (min-width: 1px) {
+  .desktopNavigation { display: none; }
+}
+@media (max-width: 380px) {
+  .notificationButton { width: 36px; height: 36px; }
+  .accountButtonLabel { max-width: 76px; }
+}
