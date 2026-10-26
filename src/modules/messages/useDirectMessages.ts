@@ -78,7 +78,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
   useEffect(() => {
     if (!conversationId || !userId) return;
     let cancelled = false;
-    let unsubscribe = () => undefined;
+    let unsubscribe: () => void = () => {};
 
     void subscribeToConversationMessages(
       conversationId,
