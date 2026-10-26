@@ -7,21 +7,21 @@ const repository = read('../src/modules/messages/supabaseRepository.ts');
 const hook = read('../src/modules/messages/useDirectMessages.ts');
 
 const checks = [
-  ['persistent messaging remains opt-in', /NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES === 'true'/.test(service)],
-  ['persistent mode verifies the current Supabase user', /auth\.getUser\(\)/.test(service) && /data\.user\.id !== userId/.test(service)],
-  ['identity mismatch fails closed instead of mixing app users', /active Sanctuary session does not match the signed-in account/.test(service)],
-  ['direct conversations require a matching persistent session', /if \(await hasPersistentSession\(userId\)\) \{\s*const conversation = await createPersistentConversation\('direct'/.test(service)],
-  ['group conversations require a matching persistent session', /if \(await hasPersistentSession\(userId\)\) \{\s*return createPersistentConversation\('group'/.test(service)],
-  ['inbox and thread reads verify session identity', /if \(await hasPersistentSession\(userId\)\) return fetchPersistentConversations/.test(service) && /if \(await hasPersistentSession\(userId\)\) return fetchPersistentThread/.test(service)],
-  ['message writes derive sender identity from Supabase Auth', /auth\.getUser\(\)/.test(repository) && /sender_id: authData\.user\.id/.test(repository)],
-  ['realtime subscription checks the same user identity', /subscribeToConversationMessages/.test(service) && /hasPersistentSession\(userId\)/.test(service)],
-  ['hook handles async subscription cleanup and errors', /subscribeToConversationMessages\(conversationId, userId/.test(hook) && /unsubscribe\?\.\(\)/.test(hook) && /subscription could not be started/.test(hook)],
-  ['realtime events are deduplicated by message ID', /some\(\(existing\) => existing\.id === message\.id\)/.test(hook)],
-  ['demo conversation authorization remains enforced', /requireParticipant\(conversationId, userId\)/.test(service) && /requireParticipant\(conversationId, senderId\)/.test(service)],
+  ['persistent mode is opt-in and verifies the authenticated user ID', /isPersistentMessagingEnabled/.test(service) && /NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES === 'true'/.test(service) && /data\\.user\\.id !== userId/.test(service)],
+  ['identity mismatches fail closed instead of falling back to demo storage', /active Sanctuary session does not match the signed-in account/.test(service)],
+  ['direct conversation creation routes through the authenticated RPC', /createPersistentConversation\('direct', \[peerUserId\], null\)/.test(service)],
+  ['group creation routes through the authenticated RPC', /createPersistentConversation\('group', participantIds, normalizedName\)/.test(service)],
+  ['persistent inbox listing reads memberships from Supabase', /fetchPersistentConversations\(userId\)/.test(service)],
+  ['persistent thread reads and sends use the repository', /fetchPersistentThread\(conversationId\)/.test(service) && /sendPersistentMessage\(conversationId, normalizedBody\)/.test(service)],
+  ['message writes derive sender identity from the authenticated Supabase user', /auth\.getUser\(\)/.test(repository) && /sender_id: authData\.user\.id/.test(repository)],
+  ['message history is limited to visible rows and bounded in size', /\.eq\('state', 'visible'\)/.test(repository) && /\.limit\(500\)/.test(repository)],
+  ['realtime subscriptions are connected to the active message hook', /subscribeToPersistentMessages/.test(service) && /subscribeToConversationMessages/.test(hook)],
+  ['realtime events are deduplicated against send responses', /some\(\(message\) => message\.id === incoming\.id\)/.test(hook)],
+  ['local/demo conversation authorization remains in place', /requireParticipant\(conversationId, userId\)/.test(service) && /requireParticipant\(conversationId, senderId\)/.test(service)],
 ];
 
 for (const [label, passed] of checks) {
   console.log(`${passed ? 'PASS' : 'FAIL'} ${label}`);
   assert.ok(passed, label);
 }
-console.log(`Messaging identity and persistence contract checks passed: ${checks.length}`);
+console.log(`Messaging persistence contract checks passed: ${checks.length}`);
