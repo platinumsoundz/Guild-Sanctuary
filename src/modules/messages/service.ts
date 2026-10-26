@@ -45,10 +45,15 @@ function isPersistentMessagingEnabled(): boolean {
  * conversations from Supabase.
  */
 async function hasPersistentSession(userId: string): Promise<boolean> {
-  if (!isPersistentMessagingEnabled() || !userId) return false;
+  if (!isPersistentMessagingEnabled()) return false;
+  if (!userId) throw new Error('Sign in before using persistent messaging.');
   const { data, error } = await getSupabaseBrowserClient().auth.getUser();
   if (error) throw new Error(`Authentication could not be verified: ${error.message}`);
-  return data.user?.id === userId;
+  if (!data.user) return false;
+  if (data.user.id !== userId) {
+    throw new Error('Your active Sanctuary session does not match the signed-in account. Sign out and sign in again.');
+  }
+  return true;
 }
 
 function requireParticipant(conversationId: string, userId: string): Conversation {
