@@ -21,7 +21,7 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 
 | Module | Scope | Current persistence |
 | --- | --- | --- |
-| `auth` | Email-code sign-in/up, mock 2FA, session lifecycle | Browser-local demo store; optional Supabase browser flow |
+| `auth` | Email-code and password sign-in/up, Supabase TOTP challenge flow, session lifecycle | Browser-local demo store; optional Supabase browser flow; TOTP password challenge recently hardened and still needs CI/end-to-end verification |
 | `feeds` | Unified post feed, media metadata, likes, comments | In-memory or optional Supabase adapter |
 | `shorts` | Unified short video feed and engagement | In-memory or optional Supabase adapter |
 | `events` | Community events and RSVPs | In-memory |
