@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Activity, BellRing, CheckCircle2, CircleDashed, Clock3, Gamepad2, ShieldCheck, WalletCards } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import styles from './SanctuaryRoadmap.module.css';
 
 type Status = 'Available' | 'Preview' | 'Planned' | 'Security gated';
