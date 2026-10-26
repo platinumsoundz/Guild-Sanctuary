@@ -1,6 +1,6 @@
 # The Sanctuary — Master Blueprint
 
-Last updated: 2026-10-24
+Last updated: 2026-10-26
 
 ## Product decision
 
@@ -129,3 +129,9 @@ npm run build
 ```
 
 Copy `.env.example` to `.env.local`. Public Supabase URL/key values are not secrets. Never commit `.env.local`, service-role keys, Stripe keys, or webhook secrets.
+
+## Runtime resilience and privacy (2026-10-26)
+
+- The App Router route error boundary presents a calm, generic recovery message and does not render raw exception text to visitors. Production console diagnostics are limited to the optional framework digest; detailed errors are logged only in development.
+- The route loading state announces progress accessibly, includes a reduced-motion-safe spinner, and gives users a clear sense that the Sanctuary is opening.
+- These changes are committed to `build/sanctuary-error-recovery` and have **not** been typechecked, built, browser-tested, or deployed in this session. Treat them as an implementation draft until the verification batch is green.
