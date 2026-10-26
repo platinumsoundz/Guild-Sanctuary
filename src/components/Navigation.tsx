@@ -43,6 +43,7 @@ interface NavigationProps {
   activeNavigation: NavigationState;
   currentUser: AuthSession | null;
   isGuest: boolean;
+  onExploreAsGuest: () => void;
   pendingEmail: string | null;
   isSessionReady: boolean;
   onNavigate: (navigation: NavigationState) => void;
@@ -60,6 +61,7 @@ export function Navigation({
   activeNavigation,
   currentUser,
   isGuest,
+  onExploreAsGuest,
   pendingEmail,
   isSessionReady,
   onNavigate,
@@ -148,6 +150,8 @@ export function Navigation({
           {!isSessionReady ? (
             <span className={styles.accountPlaceholder} role="status">Restoring session</span>
           ) : (
+            <>
+            {!currentUser && !isGuest && <button className={styles.guestButton} type="button" onClick={onExploreAsGuest}>Explore as Guest</button>}
             <button
               className={styles.accountButton}
               type="button"
@@ -161,6 +165,7 @@ export function Navigation({
                 </>
               ) : isGuest ? 'Guest · Sign in' : 'Sign in / Register'}
             </button>
+            </>
           )}
         </div>
       </header>
