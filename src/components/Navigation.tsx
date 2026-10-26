@@ -38,6 +38,7 @@ interface NavigationProps {
   currentUser: AuthSession | null;
   isGuest: boolean;
   pendingEmail: string | null;
+  pendingTwoFactorEmail: string | null;
   isSessionReady: boolean;
   onNavigate: (navigation: NavigationState) => void;
   onLogin: (email: string, password: string) => boolean | void | Promise<boolean | void>;
@@ -55,6 +56,7 @@ export function Navigation({
   currentUser,
   isGuest,
   pendingEmail,
+  pendingTwoFactorEmail,
   isSessionReady,
   onNavigate,
   onLogin,
@@ -241,6 +243,7 @@ export function Navigation({
           currentUser={currentUser}
           isGuest={isGuest}
           pendingEmail={pendingEmail}
+          pendingTwoFactorEmail={pendingTwoFactorEmail}
           onClose={closeAuthModal}
           onLogin={onLogin}
           onSignup={onSignup}
