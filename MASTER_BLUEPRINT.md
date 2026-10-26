@@ -129,3 +129,12 @@ npm run build
 ```
 
 Copy `.env.example` to `.env.local`. Public Supabase URL/key values are not secrets. Never commit `.env.local`, service-role keys, Stripe keys, or webhook secrets.
+
+
+## Unified navigation and notifications UI upgrade — 2026-10-26
+
+PR [#22](https://github.com/platinumsoundz/Guild-Sanctuary/pull/22) on branch `feat/unified-navigation-notifications` implements a shared top-left navigation trigger, a dedicated Notifications destination/full-page view, top-right notification shortcut, clearer Guest Mode entry, responsive header controls, and removal of the duplicate landing-page title/guest header. The existing notification component and Supabase query path are reused; no auth/data-layer redesign is intended.
+
+Latest reviewed commit: `b4713fe012eb11cccd2f37bcc9a4b03cf8bbfe78`. CI validation, typecheck, production build, and Cloudflare adapter build passed. The PR-triggered deployment workflow skipped actual deployment as expected. Two parallel Cloudflare Workers Builds checks (`the-sanctuary` and `guild-sanctuary`) failed; their dashboard build logs have not yet been inspected. PR is still open/unmerged, and live deployment is unconfirmed. Do not mark this upgrade shipped until those failures are understood, the PR is safely merged, the main-branch deployment succeeds, and the production UI is smoke-tested.
+
+Detailed next-agent instructions and build IDs: `docs/handoffs/2026-10-26-sanctuary-ui-release.md`.
