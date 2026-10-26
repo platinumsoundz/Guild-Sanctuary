@@ -61,3 +61,13 @@ A feature is not “done” merely because source code exists. Mark it complete 
 - Keep existing accounts and records. No user deletion or role mutation is authorized by this handoff.
 - Keep token purchases, token spending/redemption, transfers, marketplace, and cash-out disabled until staging, support/refund handling, and legal review are complete.
 - Do not expose secrets, apply unreviewed SQL, or change story canon based on inference.
+
+
+## Live handoff update — 2026-10-26 22:10 UTC
+
+- PR #31 compact-header/PWA source change is merged; the current Vercel production alias still points to commit `8486da390b59183cf6de5a322c80e4497b755d3e`. Vercel reported the daily deployment quota limit, so do not claim the Vercel URL has the new header.
+- PR #34 is merged as `db7ec76c228945c7fd748124142a083139857d6e`. The Systems & Roadmap page now lists Guild Sanctuary, The 5 Sleeves 2D and The 5 Sleeves 3D, with disabled visible placeholder actions for planned, preview and security-gated systems. GitHub CI and the Cloudflare build passed; the GitHub Cloudflare deploy step was skipped, so a production Worker update is not confirmed.
+- PR #35 is merged as `19698353311ad2f1bfe03edc6fc56f8bd3533c0f`. Persistent messaging remains disabled by default because the live database schema is still missing the expected conversation/message tables. Do not turn on `NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES` until schema, RLS, Realtime and two-account staging checks are verified.
+- The 2D main-branch scheduled suite on commit `b360d0654c7db3dff040d606fd2b2ae3ef3a9153` failed 4 of 145 tests: spawn/canon count (expected 5, actual 6), compact HUD bounds at phone size, fullscreen settings control expectation, and sleeve sprite channel placement. The report artifact is attached to run [40368414521](https://github.com/platinumsoundz/The-5-Sleeves/actions/runs/40368414521). Keep game-code changes on hold until the separate “branch - project access check” verdict is recovered.
+- The 2D and 3D README project-name corrections are merged in their respective repositories. Existing 3D save-recovery PR #1 remains untouched.
+- No production database, accounts, roles, token balances, Stripe settings or user data were changed.
