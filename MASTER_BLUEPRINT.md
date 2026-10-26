@@ -152,3 +152,10 @@ Verification and deployment:
 - Service-worker registration is production-only and non-blocking; browsers without service-worker support continue to use the normal online app.
 - A repository smoke check verifies the required PWA files and that the worker remains navigation-only. This is a static guard, not a substitute for browser/device testing.
 - Release follow-up: validate install and offline behavior on Android Chrome and iOS Safari; confirm online sign-in and navigation recover after reconnecting. Do not describe offline app data as available.
+
+
+## Notification reliability follow-up — 2026-10-26
+
+- The connected Supabase project has the `notifications` table and both social-like/comment notification triggers installed; the schema and trigger count were verified read-only. The table contained zero notification rows at the time of the check, so real user-event delivery still needs an end-to-end test.
+- The UI reads per-user notifications and persists `read_at`; it refreshes while signed in. This is polling, not realtime push.
+- Fixed the notification error-state ordering so a failed query shows the actual error and a retry action instead of the generic sign-in prompt. This does not change RLS, migrations, or database data.
