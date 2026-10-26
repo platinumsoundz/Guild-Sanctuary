@@ -214,3 +214,27 @@
     display: none;
   }
 }
+
+.fullPage {
+  position: relative;
+  top: auto;
+  z-index: 1;
+  min-height: 420px;
+  border: 0;
+  background: transparent;
+}
+.fullPage .inner { display: none; }
+.fullPage .panel {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: min(760px, 100%);
+  max-height: none;
+  margin: 0 auto;
+  overflow: visible;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 8%);
+}
+.fullPage .panelHeader { padding: 22px 24px; }
+.fullPage .panelHeader h2 { font-size: 24px; }
+.fullPage .item { padding: 17px 22px; }
