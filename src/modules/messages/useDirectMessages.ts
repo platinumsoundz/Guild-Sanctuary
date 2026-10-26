@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Message } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
-import { fetchConversationThread, createDirectConversation, sendConversationMessage, isPersistentMessagingEnabled } from './service';
-import { subscribeToPersistentMessages } from './supabaseRepository';
+import { fetchConversationThread, createDirectConversation, sendConversationMessage, subscribeToConversationMessages } from './service';
 
 interface UseDirectMessagesResult {
   messages: Message[];
@@ -77,16 +76,33 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
   useEffect(() => { void refresh(); }, [refresh]);
 
   useEffect(() => {
-    if (!isPersistentMessagingEnabled() || !conversationId) return;
-    return subscribeToPersistentMessages(conversationId, (message) => {
-      setMessages((currentMessages) => {
-        if (currentMessages.some((existing) => existing.id === message.id)) return currentMessages;
-        return [...currentMessages, message].sort((a, b) => a.sentAt.localeCompare(b.sentAt));
-      });
-    }, (subscriptionError) => {
-      setError(subscriptionError);
+    if (!conversationId || !userId) return;
+    let cancelled = false;
+    let unsubscribe: () => void = () => {};
+
+    void subscribeToConversationMessages(
+      conversationId,
+      userId,
+      (incoming) => {
+        setMessages((currentMessages) => currentMessages.some((message) => message.id === incoming.id)
+          ? currentMessages
+          : [...currentMessages, incoming]);
+      },
+      (subscriptionError) => setError(subscriptionError),
+    ).then((stop) => {
+      if (cancelled) stop();
+      else unsubscribe = stop;
+    }).catch((subscriptionError) => {
+      if (!cancelled) setError(subscriptionError instanceof Error
+        ? subscriptionError.message
+        : 'Live message updates could not be connected.');
     });
-  }, [conversationId]);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [conversationId, userId]);
 
   return { messages, isLoading, isSending, error, send };
 }
