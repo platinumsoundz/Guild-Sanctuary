@@ -77,27 +77,30 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
 
   useEffect(() => {
     if (!conversationId || !userId) return;
-    let active = true;
-    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+    let unsubscribe: () => void = () => {};
 
-    void subscribeToConversationMessages(conversationId, userId, (message) => {
-      if (!active) return;
-      setMessages((currentMessages) => {
-        if (currentMessages.some((existing) => existing.id === message.id)) return currentMessages;
-        return [...currentMessages, message].sort((a, b) => a.sentAt.localeCompare(b.sentAt));
-      });
-    }, (subscriptionError) => {
-      if (active) setError(subscriptionError);
-    }).then((stop) => {
-      if (active) unsubscribe = stop;
-      else stop();
+    void subscribeToConversationMessages(
+      conversationId,
+      userId,
+      (incoming) => {
+        setMessages((currentMessages) => currentMessages.some((message) => message.id === incoming.id)
+          ? currentMessages
+          : [...currentMessages, incoming]);
+      },
+      (subscriptionError) => setError(subscriptionError),
+    ).then((stop) => {
+      if (cancelled) stop();
+      else unsubscribe = stop;
     }).catch((subscriptionError) => {
-      if (active) setError(subscriptionError instanceof Error ? subscriptionError.message : 'Message subscription could not be started.');
+      if (!cancelled) setError(subscriptionError instanceof Error
+        ? subscriptionError.message
+        : 'Live message updates could not be connected.');
     });
 
     return () => {
-      active = false;
-      unsubscribe?.();
+      cancelled = true;
+      unsubscribe();
     };
   }, [conversationId, userId]);
 
