@@ -10,7 +10,7 @@ type Status = 'Available' | 'Preview' | 'Planned' | 'Security gated';
 const systems: { title: string; group: string; status: Status; description: string }[] = [
   { title: 'Community feed', group: 'Community', status: 'Available', description: 'Browse and share community posts.' },
   { title: 'Profiles and discovery', group: 'Community', status: 'Available', description: 'Manage your profile and discover other members.' },
-  { title: 'Private messages', group: 'Community', status: 'Available', description: 'Open conversations and message threads.' },
+  { title: 'Private messages', group: 'Community', status: 'Preview', description: 'Messaging interface is available, but conversations use demo storage until the live schema, access policies and Realtime are verified.' },
   { title: 'Short-form video', group: 'Community', status: 'Available', description: 'The Shorts experience and media feed.' },
   { title: 'Events and meetups', group: 'Community', status: 'Preview', description: 'Calendar and meetup tools; parts of the experience remain placeholders.' },
   { title: 'Notifications centre', group: 'Community', status: 'Preview', description: 'Database-backed likes/comments and persistent read state are wired, with periodic refresh while signed in. Realtime push and full end-to-end production verification remain outstanding.' },
@@ -47,6 +47,21 @@ const systems: { title: string; group: string; status: Status; description: stri
   { title: 'Account data export and deletion', group: 'Safety', status: 'Planned', description: 'Visible placeholder for privacy requests, export and deletion workflows; retention rules require verification.' },
   { title: 'PWA installation and offline status', group: 'Operations', status: 'Preview', description: 'Visible install placeholder with browser-dependent availability; offline data is not promised.' },
   { title: 'Accessibility and reduced-motion settings', group: 'Operations', status: 'Planned', description: 'Visible placeholder for accessible display preferences and reduced-motion controls.' },
+  { title: 'Patch notes and release announcements', group: 'Operations', status: 'Planned', description: 'Visible placeholder for version notes, planned downtime, feature announcements and maintenance notices.' },
+  { title: 'Service status dashboard', group: 'Operations', status: 'Planned', description: 'Visible placeholder for current service health, incidents and component availability backed by real checks.' },
+  { title: 'Backup and recovery controls', group: 'Operations', status: 'Security gated', description: 'Visible placeholder for backup verification and recovery runbooks; no destructive recovery action is exposed.' },
+  { title: 'Moderation audit history', group: 'Safety', status: 'Planned', description: 'Visible placeholder for traceable moderation actions, reason codes and review history.' },
+  { title: 'Member block and mute controls', group: 'Safety', status: 'Planned', description: 'Visible placeholder for blocking, muting and per-member safety preferences.' },
+  { title: 'Community guidelines and appeals', group: 'Safety', status: 'Planned', description: 'Visible placeholder for published rules, enforcement explanations and appeal tracking.' },
+  { title: 'Profile themes and avatar frames', group: 'Community', status: 'Planned', description: 'Visible placeholder for cosmetic profile customisation, preview and ownership checks.' },
+  { title: 'Media upload and processing status', group: 'Community', status: 'Planned', description: 'Visible placeholder for upload progress, validation, processing and failure recovery.' },
+  { title: 'Search and saved filters', group: 'Community', status: 'Planned', description: 'Visible placeholder for global search, saved filters and result privacy.' },
+  { title: 'Localization and language preferences', group: 'Operations', status: 'Planned', description: 'Visible placeholder for language selection and locale-aware dates and numbers.' },
+  { title: 'Beta feedback and bug reports', group: 'Safety', status: 'Planned', description: 'Visible placeholder for submitting feedback with optional diagnostics and status tracking.' },
+  { title: 'Account session and device management', group: 'Safety', status: 'Planned', description: 'Visible placeholder for session review, sign-out-other-devices and security alerts.' },
+  { title: 'Email delivery diagnostics', group: 'Operations', status: 'Security gated', description: 'Visible placeholder for controlled auth-email smoke tests and delivery status; never expose tokens or private email content.' },
+  { title: 'Game save conflict recovery', group: 'Connected systems', status: 'Planned', description: 'Visible placeholder for comparing save timestamps and resolving conflicts without silently overwriting progress.' },
+  { title: 'Seasonal events and limited rewards', group: 'Games', status: 'Planned', description: 'Visible placeholder for scheduled events, eligibility and auditable rewards.' },
 ];
 
 
