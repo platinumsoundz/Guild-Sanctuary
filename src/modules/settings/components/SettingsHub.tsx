@@ -19,12 +19,14 @@ interface SettingsHubProps {
 const preferenceLabels = {
   allowProfileDiscovery: 'Include my profile in community discovery',
   allowDirectMessages: 'Allow direct messages',
-  showOnlineStatus: 'Show my online status',
-  emailNotifications: 'Email notifications',
-  personalizedFeed: 'Personalize my feed',
+  showOnlineStatus: 'Show my online status · coming soon',
+  emailNotifications: 'Email notifications · coming soon',
+  personalizedFeed: 'Personalize my feed · coming soon',
 } as const;
 
 type ProfilePrivacyDisplayKey = Exclude<keyof ProfilePrivacy, 'allowDirectMessages'>;
+
+const placeholderPreferenceKeys = new Set<keyof typeof preferenceLabels>(['showOnlineStatus', 'emailNotifications', 'personalizedFeed']);
 
 const privacyLabels: Record<ProfilePrivacyDisplayKey, string> = {
   bio: 'Show my bio',
@@ -70,7 +72,7 @@ export function SettingsHub({
 
   const updatePreference = async (key: keyof typeof preferenceLabels, value: boolean) => {
     try {
-      updatePreferences({ [key]: value });
+      await updatePreferences({ [key]: value });
       if (key === 'allowProfileDiscovery') {
         await onUpdateProfile({ visibility: value ? 'public' : 'private' });
       }
@@ -158,7 +160,7 @@ export function SettingsHub({
               {(Object.entries(preferenceLabels) as [keyof typeof preferenceLabels, string][]).map(([key, label]) => (
                 <label className={styles.toggleRow} key={key}>
                   <span>{label}</span>
-                  <input type="checkbox" checked={settings.preferences[key]} onChange={(event) => void updatePreference(key, event.currentTarget.checked)} />
+                  <input type="checkbox" checked={settings.preferences[key]} disabled={placeholderPreferenceKeys.has(key)} aria-label={placeholderPreferenceKeys.has(key) ? `${label}, coming soon` : label} onChange={(event) => void updatePreference(key, event.currentTarget.checked)} />
                 </label>
               ))}
             </div>
@@ -173,7 +175,9 @@ export function SettingsHub({
                 if (selectedVisibility !== 'public' && selectedVisibility !== 'private') return;
                 const nextVisibility = selectedVisibility;
                 try {
-                  updatePreferences({ allowProfileDiscovery: nextVisibility === 'public' });
+                  void updatePreferences({ allowProfileDiscovery: nextVisibility === 'public' }).catch((saveError) => {
+                    setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
+                  });
                   void Promise.resolve(onUpdateProfile({ visibility: nextVisibility })).catch((saveError) => {
                     setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
                   });
@@ -233,8 +237,8 @@ export function SettingsHub({
           <section className={styles.panel} aria-labelledby="layout-title">
             <h2 id="layout-title">Layout arrangement</h2>
             <div className={styles.layoutChoices}>
-              <label><input type="radio" name="layout" value="comfortable" checked={settings.preferences.layout === 'comfortable'} onChange={() => updatePreferences({ layout: 'comfortable' })} /> Comfortable</label>
-              <label><input type="radio" name="layout" value="compact" checked={settings.preferences.layout === 'compact'} onChange={() => updatePreferences({ layout: 'compact' })} /> Compact</label>
+              <label><input type="radio" name="layout" value="comfortable" checked={settings.preferences.layout === 'comfortable'} onChange={() => void updatePreferences({ layout: 'comfortable' }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Comfortable</label>
+              <label><input type="radio" name="layout" value="compact" checked={settings.preferences.layout === 'compact'} onChange={() => void updatePreferences({ layout: 'compact' }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Compact</label>
             </div>
           </section>
 

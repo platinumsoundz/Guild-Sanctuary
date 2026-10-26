@@ -16,7 +16,7 @@ import { AdSlot } from '@/modules/ads';
 import { DirectMessageThread, MessagesInbox } from '@/modules/messages';
 import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
-import { WalletPanel } from '@/modules/economy';
+import { TokenShopPanel, WalletPanel } from '@/modules/economy';
 import { GamesHub } from '@/components/GamesHub';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { NotificationBar } from '@/components/NotificationBar';
@@ -119,6 +119,8 @@ export function AppWorkspace() {
         <main className={styles.supportPage}>
           <WalletPanel userId={currentUser.user.id} isGuest={isGuest} />
         </main>
+      ) : activeNavigation === 'shop' ? (
+        <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} />
       ) : activeNavigation === 'games' ? (
         <GamesHub />
       ) : activeNavigation === 'admin' ? (

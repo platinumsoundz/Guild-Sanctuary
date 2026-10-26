@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Heart, MessageCircle, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { ReportContentButton } from '@/modules/moderation';
 import type { ShortVideo, SocialComment } from '@/types/database';
-import { addShortComment, createShortVideo, deleteShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike } from '../service';
+import { addShortComment, createShortVideo, deleteShortComment, deleteShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike, updateShortComment } from '../service';
 import styles from './ShortsFeed.module.css';
 
 interface ShortState {
@@ -23,6 +23,8 @@ export function ShortsFeed() {
   const [commentsByVideo, setCommentsByVideo] = useState<Record<string, SocialComment[]>>({});
   const [openCommentsId, setOpenCommentsId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingBody, setEditingBody] = useState('');
   const [captionDraft, setCaptionDraft] = useState('');
   const [videoDraft, setVideoDraft] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -141,6 +143,40 @@ export function ShortsFeed() {
       setError(null);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Your comment could not be posted.');
+    }
+  };
+
+
+  const saveShortCommentEdit = async (videoId: string, commentId: string) => {
+    try {
+      const updated = await updateShortComment(commentId, viewerId, editingBody);
+      setCommentsByVideo((current) => ({
+        ...current,
+        [videoId]: (current[videoId] ?? []).map((comment) => comment.id === commentId ? updated : comment),
+      }));
+      setEditingCommentId(null);
+      setEditingBody('');
+      setError(null);
+    } catch (editError) {
+      setError(editError instanceof Error ? editError.message : 'Your comment could not be updated.');
+    }
+  };
+
+  const removeShortComment = async (videoId: string, commentId: string) => {
+    if (!window.confirm('Delete your comment? This cannot be undone.')) return;
+    try {
+      await deleteShortComment(commentId, viewerId);
+      setCommentsByVideo((current) => ({
+        ...current,
+        [videoId]: (current[videoId] ?? []).filter((comment) => comment.id !== commentId),
+      }));
+      setEngagement((current) => ({
+        ...current,
+        [videoId]: { ...current[videoId], commentsCount: Math.max(0, (current[videoId]?.commentsCount ?? 0) - 1) },
+      }));
+      setError(null);
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : 'Your comment could not be deleted.');
     }
   };
 
@@ -331,7 +367,23 @@ export function ShortsFeed() {
                   <h2>Comments</h2>
                   <div className={styles.commentList}>
                     {(commentsByVideo[video.id] ?? []).length ? commentsByVideo[video.id].map((comment) => (
-                      <p key={comment.id}><strong>{comment.authorId === viewerId ? 'You' : comment.authorId}</strong> {comment.body}</p>
+                      <article className={styles.commentItem} key={comment.id}>
+                        <p><strong>{comment.authorId === viewerId ? 'You' : comment.authorId}</strong></p>
+                        {editingCommentId === comment.id ? (
+                          <div className={styles.commentEdit}>
+                            <textarea value={editingBody} maxLength={1000} onChange={(event) => setEditingBody(event.currentTarget.value)} aria-label="Edit your comment" />
+                            <button type="button" onClick={() => void saveShortCommentEdit(video.id, comment.id)}>Save</button>
+                            <button type="button" onClick={() => { setEditingCommentId(null); setEditingBody(''); }}>Cancel</button>
+                          </div>
+                        ) : <p>{comment.body}</p>}
+                        <div className={styles.commentTools}>
+                          {comment.authorId === viewerId && editingCommentId !== comment.id && <>
+                            <button type="button" onClick={() => { setEditingCommentId(comment.id); setEditingBody(comment.body); }} aria-label="Edit your comment"><Pencil size={12} /> Edit</button>
+                            <button type="button" onClick={() => void removeShortComment(video.id, comment.id)} aria-label="Delete your comment"><Trash2 size={12} /> Delete</button>
+                          </>}
+                          <ReportContentButton targetType="comment" targetId={comment.id} />
+                        </div>
+                      </article>
                     )) : <p>Be the first to comment.</p>}
                   </div>
                   <form onSubmit={(event) => void handleComment(event, video.id)}>

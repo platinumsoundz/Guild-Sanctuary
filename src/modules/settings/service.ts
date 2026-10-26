@@ -1,4 +1,6 @@
 import type { AccountPreferences, AccountSettings } from '@/types/database';
+import { getSupabaseBrowserClient } from '@/services/supabase';
+import { isSupabaseCommunityStorageConfigured } from '@/services/supabase/communityMedia';
 
 const storagePrefix = 'guild-sanctuary:settings:v1:';
 
@@ -26,6 +28,17 @@ function getStorage(): Storage {
   }
 }
 
+
+async function hasMatchingSupabaseUser(userId: string): Promise<boolean> {
+  const { data, error } = await getSupabaseBrowserClient().auth.getUser();
+  if (error) throw new Error(`Your account session could not be verified: ${error.message}`);
+  if (!data.user) return false;
+  if (data.user.id !== userId) {
+    throw new Error('Your active Sanctuary session does not match these settings. Sign out and sign in again.');
+  }
+  return true;
+}
+
 function normalizePreferences(value: unknown): AccountPreferences {
   const record = isRecord(value) ? value : {};
   return {
@@ -38,9 +51,21 @@ function normalizePreferences(value: unknown): AccountPreferences {
   };
 }
 
-export function fetchAccountSettings(userId: string): AccountSettings {
+export async function fetchAccountSettings(userId: string): Promise<AccountSettings> {
   if (!userId) {
     throw new Error('Sign in to view account settings.');
+  }
+  if (isSupabaseCommunityStorageConfigured() && await hasMatchingSupabaseUser(userId)) {
+    const { data, error } = await getSupabaseBrowserClient().from('account_settings')
+      .select('preferences,updated_at').eq('user_id', userId).maybeSingle();
+    if (error) throw new Error(`Account settings could not be loaded from your account: ${error.message}`);
+    if (data) return { userId, preferences: normalizePreferences(data.preferences), updatedAt: data.updated_at };
+    const preferences = { ...defaultAccountPreferences };
+    const { data: created, error: createError } = await getSupabaseBrowserClient().from('account_settings')
+      .upsert({ user_id: userId, preferences: { ...preferences } as Record<string, unknown> }, { onConflict: 'user_id' })
+      .select('preferences,updated_at').single();
+    if (createError) throw new Error(`Account settings could not be initialized: ${createError.message}`);
+    return { userId, preferences: normalizePreferences(created.preferences), updatedAt: created.updated_at };
   }
   let stored: unknown;
   try {
@@ -61,12 +86,19 @@ export function fetchAccountSettings(userId: string): AccountSettings {
   };
 }
 
-export function saveAccountPreferences(userId: string, preferences: AccountPreferences): AccountSettings {
+export async function saveAccountPreferences(userId: string, preferences: AccountPreferences): Promise<AccountSettings> {
   if (!userId) {
     throw new Error('Sign in before changing account settings.');
   }
   if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') {
     throw new Error('Choose a supported layout arrangement.');
+  }
+  if (isSupabaseCommunityStorageConfigured() && await hasMatchingSupabaseUser(userId)) {
+    const { data, error } = await getSupabaseBrowserClient().from('account_settings')
+      .upsert({ user_id: userId, preferences: { ...preferences } as Record<string, unknown>, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      .select('preferences,updated_at').single();
+    if (error) throw new Error(`Account settings could not be saved to your account: ${error.message}`);
+    return { userId, preferences: normalizePreferences(data.preferences), updatedAt: data.updated_at };
   }
   const settings: AccountSettings = {
     userId,

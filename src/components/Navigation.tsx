@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   UserRound,
   Wallet,
+  ShoppingBag,
   HeartHandshake,
   Gamepad2,
   Map,
@@ -35,6 +36,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'roadmap', label: 'Systems & Roadmap', icon: Map },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
+  { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
   { id: 'settings', label: 'Settings', icon: Settings },
   { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
@@ -75,7 +77,7 @@ export function Navigation({
   onSetTwoFactorEnabled,
   onLogout,
 }: NavigationProps) {
-  const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || Boolean(currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role)));
+  const visibleNavigationItems = navigationItems;
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);

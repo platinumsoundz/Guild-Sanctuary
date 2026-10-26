@@ -70,7 +70,7 @@ export type MessageRow = {
 export type ContentReportRow = {
   id: string;
   reporter_id: string;
-  target_type: 'post' | 'short' | 'event' | 'message';
+  target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
   target_id: string;
   reason: string;
   details: string | null;
@@ -111,6 +111,16 @@ export interface Database {
         checkout_session_id: string;
         livemode: boolean;
         created_at: string;
+      }>;
+      token_spend_catalog: Table<{
+        item_id: string; name: string; description: string; price_tokens: number; kind: string; enabled: boolean;
+        created_at: string; asset_url: string | null; asset_text: string | null; effect_key: string | null; sort_order: number;
+      }>;
+      token_spend_ledger: Table<{
+        id: string; user_id: string; item_id: string; item_name: string; tokens_delta: number; idempotency_key: string; created_at: string;
+      }>;
+      token_entitlements: Table<{
+        user_id: string; item_id: string; granted_at: string;
       }>;
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
@@ -201,7 +211,7 @@ export interface Database {
         id: string;
         report_id: string | null;
         actor_id: string;
-        target_type: 'post' | 'short' | 'event' | 'message' | 'user';
+        target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
         target_id: string;
         action: ModerationAction;
         rationale: string;
@@ -263,7 +273,7 @@ export interface Database {
       };
       submit_content_report: {
         Args: {
-          requested_target_type: 'post' | 'short' | 'event' | 'message';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
           requested_target_id: string;
           requested_reason: string;
           requested_details?: string | null;
@@ -273,7 +283,7 @@ export interface Database {
       apply_moderation_action: {
         Args: {
           requested_report_id: string | null;
-          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'user';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
           requested_target_id: string;
           requested_action: ModerationAction;
           requested_rationale: string;
@@ -283,7 +293,7 @@ export interface Database {
       };
       get_report_target_owner: {
         Args: {
-          requested_target_type: 'post' | 'short' | 'event' | 'message';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
           requested_target_id: string;
         };
         Returns: string | null;
@@ -303,6 +313,18 @@ export interface Database {
           likes_count: number;
           comments_count: number;
         }[];
+      };
+      spend_tokens: {
+        Args: { requested_item_id: string; requested_idempotency_key: string };
+        Returns: { balance_tokens: number; item_id: string; already_applied: boolean }[];
+      };
+      equip_profile_cosmetic: {
+        Args: { requested_item_id: string };
+        Returns: { item_id: string; kind: string }[];
+      };
+      clear_profile_cosmetic: {
+        Args: { requested_slot: 'frame' | 'effect' | 'badge' | 'banner' };
+        Returns: undefined;
       };
       is_moderator: {
         Args: Record<string, never>;
@@ -346,7 +368,7 @@ export interface Database {
       conversation_kind: 'direct' | 'group';
       content_state: 'visible' | 'hidden' | 'removed';
       report_status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
-      report_target_type: 'post' | 'short' | 'event' | 'message';
+      report_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
       moderation_action_type: ModerationAction;
     };
     CompositeTypes: Record<string, never>;

@@ -1,0 +1,195 @@
+.shop {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 40px);
+  color: var(--ink);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(30px, 5vw, 44px);
+  font-weight: 600;
+}
+
+.header p:last-child {
+  max-width: 660px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font: 13px/1.7 Arial, sans-serif;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font: 700 10px Arial, sans-serif;
+  letter-spacing: 1.2px;
+}
+
+.balance {
+  display: grid;
+  min-width: 190px;
+  gap: 6px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  text-align: right;
+}
+
+.balance span {
+  color: var(--muted);
+  font: 11px Arial, sans-serif;
+}
+
+.balance strong {
+  color: var(--accent);
+  font: 700 17px Arial, sans-serif;
+}
+
+.releaseNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.releaseNotice strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.releaseNotice p,
+.status,
+.error,
+.footerNote {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font: 12px/1.65 Arial, sans-serif;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+
+.art {
+  display: grid;
+  min-height: 110px;
+  place-items: center;
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 60%), var(--surface);
+  color: var(--accent);
+  font-size: 36px;
+}
+
+.cardBody {
+  padding: 16px;
+}
+
+.kind {
+  margin: 0;
+  color: var(--accent);
+  font: 700 9px Arial, sans-serif;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+}
+
+.card h2 {
+  margin: 7px 0 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.description {
+  min-height: 58px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font: 12px/1.6 Arial, sans-serif;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.cardFooter strong {
+  font: 700 12px Arial, sans-serif;
+  color: var(--ink);
+}
+
+.buyButton {
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--muted);
+  font: 700 10px Arial, sans-serif;
+  cursor: not-allowed;
+}
+
+.ownedNote {
+  margin: 8px 0 0;
+  color: var(--accent);
+  font: 10px Arial, sans-serif;
+}
+
+.error {
+  color: #b33b32;
+}
+
+.footerNote {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 20px;
+  font-size: 10px;
+}
+
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .balance {
+    width: 100%;
+    text-align: left;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .description {
+    min-height: 0;
+  }
+}

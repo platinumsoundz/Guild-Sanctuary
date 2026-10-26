@@ -290,6 +290,43 @@ export async function getShortEngagement(shortId: string, userId: string) {
   };
 }
 
+
+export async function updateShortComment(commentId: string, authorId: string, body: string): Promise<SocialComment> {
+  const normalizedBody = body.trim();
+  if (!authorId || normalizedBody.length < 1 || normalizedBody.length > 1000) {
+    throw new Error('Comments must contain 1 to 1,000 characters.');
+  }
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser(authorId);
+    const { data, error } = await getSupabaseBrowserClient().from('social_comments')
+      .update({ body: normalizedBody })
+      .eq('id', commentId).eq('author_id', authorId).eq('target_type', 'short')
+      .select('*').single();
+    if (error) throw new Error(`Your comment could not be updated: ${error.message}`);
+    return { id: data.id, targetType: 'short', targetId: data.target_id, authorId: data.author_id, body: data.body, createdAt: data.created_at };
+  }
+  const comment = comments.find((item) => item.id === commentId && item.authorId === authorId && item.targetType === 'short');
+  if (!comment) throw new Error('You can only edit your own comment.');
+  await delay();
+  comment.body = normalizedBody;
+  return { ...comment };
+}
+
+export async function deleteShortComment(commentId: string, authorId: string): Promise<void> {
+  if (!authorId) throw new Error('Sign in before deleting a comment.');
+  if (isSupabaseCommunityStorageConfigured()) {
+    await requireCommunityStorageUser(authorId);
+    const { error } = await getSupabaseBrowserClient().from('social_comments').delete()
+      .eq('id', commentId).eq('author_id', authorId).eq('target_type', 'short');
+    if (error) throw new Error(`Your comment could not be deleted: ${error.message}`);
+    return;
+  }
+  const index = comments.findIndex((item) => item.id === commentId && item.authorId === authorId && item.targetType === 'short');
+  if (index < 0) throw new Error('You can only delete your own comment.');
+  await delay();
+  comments.splice(index, 1);
+}
+
 export function removeUserShortData(userId: string): void {
   const removedShortIds = new Set(videos.filter((video) => video.authorId === userId).map((video) => video.id));
   for (let index = videos.length - 1; index >= 0; index -= 1) {
