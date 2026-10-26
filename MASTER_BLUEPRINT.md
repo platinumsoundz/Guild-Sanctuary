@@ -141,3 +141,13 @@ Copy `.env.example` to `.env.local`. Public Supabase URL/key values are not secr
 - Guest mode remains browse-only and does not receive personal notification data.
 - The database migration is applied to the connected Supabase project and is tracked in `supabase/migrations/20261026103000_social_notifications.sql`.
 - Validation is pending. Notifications currently refresh on load/open rather than relying on Supabase Realtime, and this work has not been merged or deployed.
+
+
+### 2026-10-26 — Games hub and token shop preview
+
+- Added Games and Token Shop navigation entries.
+- Added a Games Hub with embedded launchers for The 5 Sleeves Online and the commit-pinned 3D Training Ground. Both games remain hosted separately; this is an in-app launcher, not a merged runtime or shared login.
+- Added a token shop catalogue preview backed by the existing Supabase `token_spend_catalog`, `token_entitlements`, and `token_wallets` tables.
+- Token spending remains disabled in the UI. The current connected project is not confirmed isolated staging, and the cross-game identity bridge, server-authoritative game spend API, reversal workflow, and staging tests are not complete.
+- Updated shared database types for the existing token shop tables and RPCs.
+- Validation is pending. The token shop schema/functions exist in the connected database but require a checked-in reproducible migration before fresh environments can use them.
