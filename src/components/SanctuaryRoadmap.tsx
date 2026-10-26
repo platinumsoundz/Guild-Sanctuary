@@ -12,7 +12,7 @@ const systems: { title: string; group: string; status: Status; description: stri
   { title: 'Private messages', group: 'Community', status: 'Available', description: 'Open conversations and message threads.' },
   { title: 'Short-form video', group: 'Community', status: 'Available', description: 'The Shorts experience and media feed.' },
   { title: 'Events and meetups', group: 'Community', status: 'Preview', description: 'Calendar and meetup tools; parts of the experience remain placeholders.' },
-  { title: 'Notifications centre', group: 'Community', status: 'Preview', description: 'Visible notification interface. Live event delivery and persistent read state are not connected yet.' },
+  { title: 'Notifications centre', group: 'Community', status: 'Preview', description: 'Database-backed likes/comments and persistent read state are wired, with periodic refresh while signed in. Realtime push and full end-to-end production verification remain outstanding.' },
   { title: 'Games Hub', group: 'Games', status: 'Preview', description: 'A single place to open The 5 Sleeves game experiences.' },
   { title: 'The 5 Sleeves Online', group: 'Games', status: 'Planned', description: 'The verified production host must be configured before launch is enabled.' },
   { title: '3D Training Ground', group: 'Games', status: 'Preview', description: 'Hosted prototype; full device and gameplay verification remains outstanding.' },
