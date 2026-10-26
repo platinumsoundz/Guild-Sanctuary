@@ -77,7 +77,7 @@ export function Navigation({
   onSetTwoFactorEnabled,
   onLogout,
 }: NavigationProps) {
-  const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || Boolean(currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role)));
+  const visibleNavigationItems = navigationItems;
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
