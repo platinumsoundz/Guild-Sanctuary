@@ -84,3 +84,18 @@ A feature is not “done” merely because source code exists. Mark it complete 
 - The latest The 5 Sleeves 2D main-branch suite still fails 4 of 145 tests: canon/world spawn count, compact phone HUD bounds, fullscreen settings expectation, and sleeve sprite channel placement. See [run 40410217327](https://github.com/platinumsoundz/The-5-Sleeves/actions/runs/40410217327). Game-code edits remain on hold pending recovery of the “branch - project access check” verdict.
 - The 5 Sleeves 2D and The 5 Sleeves 3D naming corrections are merged. The existing 3D save-recovery draft PR #1 remains untouched pending browser/device checks.
 - No production database migrations, account/role changes, wallet changes, payment activation or user-data changes were made.
+
+
+## Read-only security review — 2026-10-26 22:34 UTC
+
+Live catalog and ACL checks on the linked Supabase project confirmed:
+
+- `is_active_user()`, `is_moderator()`, `search_members_for_admin(text)`, and `set_member_role(uuid,text)` are SECURITY DEFINER functions with an empty search path. Their ACLs grant execution to `authenticated` and `service_role`, not `anon` or `PUBLIC`.
+- `search_members_for_admin` checks that the caller is an active admin, developer, or owner and bounds the search query. `set_member_role` rejects self-role changes, validates target roles, requires an active caller, enforces rank-based authorization, and records role changes in `audit_events`.
+- `profiles` has RLS enabled; authenticated users can read their own profile, insert only a basic active profile, and update their own profile only through the active-user gate.
+- `notifications` has RLS enabled and authenticated read/update policies are scoped to `recipient_id = auth.uid()`.
+- `token_wallets`, `token_ledger`, and `token_entitlements` have RLS enabled, authenticated table privileges are read-only, and their policies scope reads to the authenticated user's own `user_id`.
+- `game_wallet_sessions` has RLS enabled, no client-facing policies, and table ACLs grant access only to `postgres` and `service_role`. This is consistent with a service-role-only design; do not add authenticated policies without reviewing its server-side call path.
+- The Supabase advisor still reports leaked-password protection disabled. It remains a release-hardening task; this review did not change Auth settings.
+
+No SQL, grants, policies, account roles, token balances or user data were changed during this read-only review. The findings are evidence for the next hardening step, not authorization for automatic production mutations.
