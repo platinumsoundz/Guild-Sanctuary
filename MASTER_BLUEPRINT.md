@@ -159,3 +159,12 @@ Verification and deployment:
 - The connected Supabase project has the `notifications` table and both social-like/comment notification triggers installed; the schema and trigger count were verified read-only. The table contained zero notification rows at the time of the check, so real user-event delivery still needs an end-to-end test.
 - The UI reads per-user notifications and persists `read_at`; it refreshes while signed in. This is polling, not realtime push.
 - Fixed the notification error-state ordering so a failed query shows the actual error and a retry action instead of the generic sign-in prompt. This does not change RLS, migrations, or database data.
+
+
+## Admin panel, role hierarchy, and community game links
+
+- Added a Sanctuary Admin & Moderation entry for active moderator/admin/developer/owner roles. The existing report queue remains database-backed and records moderation actions.
+- The intended role hierarchy is `user` (Basic User), `vip`, `moderator`, `admin`, `developer`, and `owner`. The new migration replaces the legacy `member` role, updates moderator checks, and adds database-enforced role changes plus a limited member-search RPC. Role changes are audited.
+- Role assignment is deliberately fail-closed. Only active admins/developers/owners can search the member list; rank checks prevent assigning or modifying equal/higher roles unless the caller is an owner, and users cannot change their own role. The first owner must be assigned once by an operator after verifying the correct Supabase Auth UUID; there is no public owner self-claim.
+- The admin feature is not operational in production until the migration is applied to the connected Supabase project and the first owner is bootstrapped. Local/demo authentication is not sufficient for privileged operations.
+- Games Hub now links to the owner's supplied Roblox experience and displays copyable Java and Bedrock Minecraft server addresses. The Minecraft hostname links are convenience links only; joining still happens through the Minecraft client, and no server port was supplied or invented.
