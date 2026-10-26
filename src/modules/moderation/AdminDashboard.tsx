@@ -35,12 +35,7 @@ function RoleManagement() {
       const client = getSupabaseBrowserClient();
       const { data: authData, error: authError } = await client.auth.getUser();
       if (authError || !authData.user) throw new Error('Sign in with your Sanctuary account first.');
-      const { data, error } = await client
-        .from('profiles')
-        .select('id,username,display_name,role,status')
-        .ilike('username', `%${query.trim().replace(/[%_]/g, '')}%`)
-        .order('username')
-        .limit(25);
+      const { data, error } = await client.rpc('search_members_for_admin', { requested_query: query.trim() });
       if (error) throw new Error(error.message);
       setMembers((data ?? []) as MemberRow[]);
       if (!data?.length) setMessage('No matching members found.');
@@ -115,7 +110,7 @@ export function AdminDashboard({ role }: { role: string }) {
   const canModerate = ['moderator', 'admin', 'developer', 'owner'].includes(role);
 
   return (
-    <main className={styles.dashboard}>
+    <div className={styles.dashboard}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>SANCTUARY CONTROL CENTRE</p>
         <h1><ShieldCheck size={27} aria-hidden="true" /> Admin & Moderation</h1>
@@ -125,6 +120,6 @@ export function AdminDashboard({ role }: { role: string }) {
       {canManageRoles && <RoleManagement />}
       {canModerate && <ModerationDashboard />}
       <footer className={styles.footer}>Role changes and moderation actions must be validated by the connected Supabase project. If access is denied, confirm that the security migration is applied and your account has been assigned its role.</footer>
-    </main>
+    </div>
   );
 }
