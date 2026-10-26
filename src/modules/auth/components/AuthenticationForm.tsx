@@ -37,6 +37,7 @@ export function AuthenticationForm({
   const [verificationCode, setVerificationCode] = useState('');
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -186,6 +187,27 @@ export function AuthenticationForm({
                       required
                     />
                   </label>
+                  <div className={styles.termsConsent}>
+                    <label className={styles.termsCheckbox} htmlFor="auth-terms-accepted">
+                      <input
+                        id="auth-terms-accepted"
+                        name="termsAccepted"
+                        type="checkbox"
+                        checked={termsAccepted}
+                        onChange={(event) => setTermsAccepted(event.currentTarget.checked)}
+                        required
+                      />
+                      <span>
+                        I have read and agree to the{' '}
+                        <a href="https://github.com/platinumsoundz/Guild-Sanctuary/blob/automation/free-scheduled-ci-foundation/TERMS_AND_CONDITIONS_DRAFT.md" target="_blank" rel="noreferrer">
+                          Terms and Conditions draft
+                        </a>.
+                      </span>
+                    </label>
+                    <p className={styles.termsWarning}>
+                      Draft only — these terms are not final or approved for production use.
+                    </p>
+                  </div>
                 </>
               )}
             </>
