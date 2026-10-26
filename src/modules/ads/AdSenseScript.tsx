@@ -3,12 +3,13 @@ import { ADSENSE_CLIENT_ID, isValidAdsenseClientId } from './config';
 
 const publisherId = ADSENSE_CLIENT_ID;
 const validPublisherId = isValidAdsenseClientId(publisherId);
+// Host-neutral, explicit opt-in: set true only for the approved production build.
+// Keep this false/unset in previews and local development on every hosting provider.
 const adsEnabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED === 'true';
-const isProductionDeployment = process.env.VERCEL_ENV === 'production';
 
-/** Loads Google AdSense only when explicitly enabled for a Vercel Production deployment. */
+/** Loads Google AdSense only when explicitly enabled in the deployment's build environment. */
 export function AdSenseScript() {
-  if (!adsEnabled || !isProductionDeployment || !validPublisherId) return null;
+  if (!adsEnabled || !validPublisherId) return null;
 
   return (
     <Script
