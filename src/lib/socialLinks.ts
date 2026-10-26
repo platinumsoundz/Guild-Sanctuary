@@ -47,7 +47,7 @@ export function normalizeSocialLink(value: unknown, provider: keyof SocialLinks)
 }
 
 export function normalizeSocialLinks(input: Partial<SocialLinks>): SocialLinks {
-  const normalized = Object.fromEntries(socialLinkFields.map(({ key }) => [key, null])) as SocialLinks;
+  const normalized = Object.fromEntries(socialLinkFields.map(({ key }) => [key, null])) as unknown as SocialLinks;
   for (const { key, label } of socialLinkFields) {
     const value = input[key];
     if (value == null || !value.trim()) continue;
