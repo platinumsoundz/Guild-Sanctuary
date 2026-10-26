@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { AppContextProvider } from '@/context/AppContext'
 import { PwaInstallHelp } from '@/components/PwaInstallHelp'
+import { NotificationBar } from '@/components/NotificationBar'
 import { AdSenseScript } from '@/modules/ads/AdSenseScript'
 
 export const metadata: Metadata = {
@@ -31,6 +32,7 @@ export default function RootLayout({
         <AdSenseScript />
         <PwaInstallHelp />
         <AppContextProvider>
+          <NotificationBar />
           {children}
         </AppContextProvider>
       </body>
