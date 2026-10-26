@@ -23,6 +23,10 @@ create table if not exists public.account_deletion_requests (
   purge_after timestamptz not null,
   prior_visibility text not null check (prior_visibility in ('public', 'private')),
   prior_allow_profile_discovery boolean not null,
+  -- Restoring must not launder a moderation suspension or ban. These capture
+  -- the profile's status at request time so cancellation can put it back.
+  prior_status text not null default 'active' check (prior_status in ('active', 'suspended', 'banned')),
+  prior_suspended_until timestamptz,
   cancelled_at timestamptz,
   purge_attempted_at timestamptz,
   created_at timestamptz not null default now()
@@ -82,15 +86,19 @@ begin
   end if;
 
   insert into public.account_deletion_requests (
-    user_id, requested_at, purge_after, prior_visibility, prior_allow_profile_discovery, cancelled_at
+    user_id, requested_at, purge_after, prior_visibility, prior_allow_profile_discovery,
+    prior_status, prior_suspended_until, cancelled_at
   ) values (
-    caller_id, now(), purge_after, caller_profile.visibility, caller_profile.allow_profile_discovery, null
+    caller_id, now(), purge_after, caller_profile.visibility, caller_profile.allow_profile_discovery,
+    caller_profile.status, caller_profile.suspended_until, null
   )
   on conflict (user_id) do update
   set requested_at = excluded.requested_at,
       purge_after = excluded.purge_after,
       prior_visibility = excluded.prior_visibility,
       prior_allow_profile_discovery = excluded.prior_allow_profile_discovery,
+      prior_status = excluded.prior_status,
+      prior_suspended_until = excluded.prior_suspended_until,
       cancelled_at = null,
       purge_attempted_at = null;
 
@@ -184,8 +192,8 @@ begin
       deletion_purge_after = null,
       visibility = existing_request.prior_visibility,
       allow_profile_discovery = existing_request.prior_allow_profile_discovery,
-      status = 'active',
-      suspended_until = null,
+      status = existing_request.prior_status,
+      suspended_until = existing_request.prior_suspended_until,
       updated_at = now()
   where id = caller_id;
 

@@ -193,6 +193,8 @@ export type AccountDeletionRequestRow = {
   purge_after: string;
   prior_visibility: 'public' | 'private';
   prior_allow_profile_discovery: boolean;
+  prior_status: 'active' | 'suspended' | 'banned';
+  prior_suspended_until: string | null;
   cancelled_at: string | null;
   purge_attempted_at: string | null;
   created_at: string;

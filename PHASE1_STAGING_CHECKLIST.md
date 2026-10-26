@@ -127,6 +127,7 @@ creates it yet. Decide the policy before live sales.
 | Delete with 2FA enabled and no/incorrect code | Rejected with 403. |
 | Delete correctly | `account_deletion_requests` row with `purge_after` seven days out; profile and posts hidden immediately. |
 | Sign in during the grace period | `AccountDeletionNotice` shows the purge date; "Restore" clears `cancelled_at` and the account is visible again. |
+| Suspended member restores | The previous moderation status and `suspended_until` come back; restoring never clears a suspension or a ban. |
 | `POST /api/account/purge` without the secret | 401. |
 | `POST /api/account/purge` with the secret before `purge_after` | Nothing purged. |
 | `POST /api/account/purge` after `purge_after` | Media removed from storage, auth user deleted, wallet/ledger/unlocks cascade away. |

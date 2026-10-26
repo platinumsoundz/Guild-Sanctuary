@@ -389,11 +389,30 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       throw new Error('Account restoration is only available for Supabase accounts.');
     }
     await cancelAccountDeletion();
+    try {
+      // Rebuild the session so the restored moderation status is accurate
+      // instead of assuming the account is active again.
+      const restored = await restoreSupabaseSession();
+      if (restored) {
+        setCurrentUser(restored);
+        setActiveNavigation('feed');
+        return;
+      }
+    } catch (error) {
+      // The deletion request is cancelled even when the rebuilt session is
+      // rejected (for example a restored suspension or ban). Drop the stale
+      // notice and surface the real reason.
+      setCurrentUser((session) => session ? {
+        ...session,
+        user: { ...session.user, deletionPurgeAfter: null },
+      } : session);
+      throw error;
+    }
     const profile = await updateSupabaseProfile(currentUser.user.id, {});
     setCurrentUser((session) => session ? {
       ...session,
       profile,
-      user: { ...session.user, status: 'active', deletionPurgeAfter: null },
+      user: { ...session.user, deletionPurgeAfter: null },
     } : session);
     setActiveNavigation('feed');
   };
