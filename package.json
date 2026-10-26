@@ -9,7 +9,8 @@
     "start": "next start",
     "cap:sync:android": "cap sync android",
     "android:bundle": "CAPACITOR_RELEASE_BUILD=true cap sync android && cd android && ./gradlew bundleRelease",
-    "android:apk": "CAPACITOR_RELEASE_BUILD=true cap sync android && cd android && ./gradlew assembleRelease"
+    "android:apk": "CAPACITOR_RELEASE_BUILD=true cap sync android && cd android && ./gradlew assembleRelease",
+    "check:pwa": "node scripts/check-pwa-assets.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
