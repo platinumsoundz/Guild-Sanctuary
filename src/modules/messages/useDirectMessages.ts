@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Message } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
-import { fetchConversationThread, createDirectConversation, sendConversationMessage } from './service';
+import { fetchConversationThread, createDirectConversation, sendConversationMessage, subscribeToConversationMessages } from './service';
 
 interface UseDirectMessagesResult {
   messages: Message[];
@@ -74,5 +74,35 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
   };
 
   useEffect(() => { void refresh(); }, [refresh]);
+
+  useEffect(() => {
+    if (!conversationId || !userId) return;
+    let cancelled = false;
+    let unsubscribe = () => undefined;
+
+    void subscribeToConversationMessages(
+      conversationId,
+      userId,
+      (incoming) => {
+        setMessages((currentMessages) => currentMessages.some((message) => message.id === incoming.id)
+          ? currentMessages
+          : [...currentMessages, incoming]);
+      },
+      (subscriptionError) => setError(subscriptionError),
+    ).then((stop) => {
+      if (cancelled) stop();
+      else unsubscribe = stop;
+    }).catch((subscriptionError) => {
+      if (!cancelled) setError(subscriptionError instanceof Error
+        ? subscriptionError.message
+        : 'Live message updates could not be connected.');
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [conversationId, userId]);
+
   return { messages, isLoading, isSending, error, send };
 }
