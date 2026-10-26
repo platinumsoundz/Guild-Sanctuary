@@ -310,7 +310,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
 
   const cancelAuthChallenge = () => {
     if (isSupabaseAuthConfigured()) {
-      void getSupabaseBrowserClient().auth.signOut().then(({ error }) => {
+      void getSupabaseBrowserClient().auth.signOut({ scope: 'local' }).then(({ error }) => {
         if (error) setSessionError(`The pending sign-in could not be cleared: ${error.message}`);
       });
     }
@@ -322,7 +322,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   const logout = () => {
     if (currentUser && !isGuest) lockPrivateProfileVault(currentUser.user.id);
     if (isSupabaseAuthConfigured() && !isGuest) {
-      void getSupabaseBrowserClient().auth.signOut().then(({ error }) => {
+      void getSupabaseBrowserClient().auth.signOut({ scope: 'local' }).then(({ error }) => {
         if (error) setSessionError(`Sign-out could not be confirmed: ${error.message}`);
       });
     }
