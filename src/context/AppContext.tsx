@@ -263,7 +263,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       if ('starSign' in updates) databaseUpdates.star_sign = updates.starSign;
       if ('belief' in updates) databaseUpdates.belief = updates.belief?.trim() || null;
       if ('socialLinks' in updates && updates.socialLinks) {
-        databaseUpdates.social_links = normalizeSocialLinks(updates.socialLinks);
+        databaseUpdates.social_links = { ...normalizeSocialLinks(updates.socialLinks) };
       }
       if ('privacy' in updates && updates.privacy) {
         const { bio, location, age, starSign, belief, socialLinks, allowDirectMessages } = updates.privacy;
