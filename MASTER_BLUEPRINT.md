@@ -168,3 +168,13 @@ Copy `.env.example` to `.env.local`. Public Supabase URL/key values are not secr
 - Applied the migration to the connected Supabase project. Existing catalogue entries were preserved by `ON CONFLICT DO NOTHING`.
 - The migration intentionally revokes execution of token spending and cosmetic mutation RPCs from public, anon, authenticated, and service_role until the staged wallet bridge and reversal/deletion checks are approved.
 - Validation of the live schema/grants is being checked; app CI will run on the updated pull request.
+
+
+### 2026-10-26 — Game wallet session bridge foundation
+
+- Added `game_wallet_sessions`, storing only SHA-256 hashes of short-lived game-scoped session tokens, with a 30-minute expiry and service-role-only table access.
+- Added `supabase/functions/game-wallet/index.ts` for authenticated session issuance, wallet-balance reads, and session revocation. It validates active Sanctuary accounts and only accepts the two registered game IDs.
+- Updated the Games Hub to issue a scoped session from a verified Supabase sign-in, display the authoritative wallet balance in the game player header, and answer iframe balance requests only when both the iframe source and origin match the selected game.
+- The app sends only balance/session metadata to the iframe; it does not send the user's Supabase access token or the scoped session token into game JavaScript.
+- Applied the session-table migration to the connected Supabase project. The Edge Function is **not deployed** and the game repositories have not been modified. Full in-game display still requires client message listeners; spending still requires a game-specific purchase/redeem flow and a user-approved token-to-game-credit rule.
+- Validation is pending; CI now includes the new Edge Function.
