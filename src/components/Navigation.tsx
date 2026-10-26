@@ -15,6 +15,7 @@ import {
   Wallet,
   HeartHandshake,
   Gamepad2,
+  Map,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -29,6 +30,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
   { id: 'games', label: 'Games', icon: Gamepad2 },
+  { id: 'roadmap', label: 'Systems & Roadmap', icon: Map },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },

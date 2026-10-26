@@ -56,7 +56,11 @@
 .accountArea {
   grid-column: 3;
   grid-row: 1;
+  display: flex;
+  align-items: center;
   justify-self: end;
+  gap: 9px;
+  min-width: 0;
 }
 
 .accountButton {
@@ -114,8 +118,11 @@
 .desktopNavigationItems {
   display: flex;
   min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
   align-self: stretch;
-  gap: 22px;
+  gap: 14px;
+  scrollbar-width: thin;
 }
 
 .desktopNavigationButton {

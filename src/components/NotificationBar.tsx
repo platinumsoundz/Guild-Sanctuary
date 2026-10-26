@@ -98,6 +98,24 @@ export function NotificationBar() {
     void loadNotifications();
   }, [loadNotifications]);
 
+  // Keep the unread badge current while the user is signed in, without requiring
+  // the notification panel to be opened again. Pause background refreshes when
+  // the tab is hidden and refresh promptly when the user returns.
+  useEffect(() => {
+    if (!currentUser || isGuest) return;
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') void loadNotifications();
+    };
+    const intervalId = window.setInterval(refreshWhenVisible, 30_000);
+    window.addEventListener('focus', refreshWhenVisible);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', refreshWhenVisible);
+    };
+  }, [currentUser, isGuest, loadNotifications]);
+
   const unreadCount = items.filter((item) => !item.read_at).length;
 
   const markRead = async (item: NotificationItem) => {
@@ -141,7 +159,6 @@ export function NotificationBar() {
     setActiveNavigation(destinationFor[item.target_type]);
   };
 
-  if (!currentUser || isGuest) return null;
 
   return (
     <aside className={styles.bar} aria-label="Notifications">
