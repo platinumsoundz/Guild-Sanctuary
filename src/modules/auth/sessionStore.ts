@@ -23,10 +23,13 @@ export interface AuthSession {
   permissions: UserPermission[];
 }
 
+export const CURRENT_TERMS_VERSION = 'sanctuary-terms-draft-2026-10-26';
+
 export interface SignUpInput {
   email: string;
   username: string;
   displayName: string;
+  termsVersion?: string;
 }
 
 export const MOCK_EMAIL_CODE = '000000';
