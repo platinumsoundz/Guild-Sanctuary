@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b2b20">
+  <title>You're offline · The Sanctuary</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #090f0c; color: #f3f5f3; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
+    main { width: min(100%, 440px); padding: 28px; border: 1px solid #30463a; border-radius: 18px; background: #101a14; box-sizing: border-box; }
+    .mark { color: #b7d4bc; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 18px 0 10px; font-size: clamp(1.7rem, 7vw, 2.2rem); }
+    p { line-height: 1.6; color: #c6d0c8; }
+    button { margin-top: 12px; padding: 12px 16px; border: 0; border-radius: 10px; background: #b7d4bc; color: #102016; font: inherit; font-weight: 650; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="mark">The Sanctuary</div>
+    <h1>You're offline</h1>
+    <p>Your connection seems to have dropped. Your private pages and community content haven't been stored for offline use.</p>
+    <p>Reconnect to the internet, then try again.</p>
+    <button type="button" onclick="window.location.reload()">Try again</button>
+  </main>
+</body>
+</html>
