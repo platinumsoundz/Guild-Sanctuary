@@ -1122,6 +1122,12 @@ create policy "moderators read token purchase reviews"
       and (p.status = 'active' or (p.status = 'suspended' and p.suspended_until <= now()))
   ));
 
+-- A refund reduces the member's balance, so the member must be able to see the
+-- entry. Without this the balance drops with no history row.
+create policy "members read own token refund events"
+  on public.token_refund_events for select to authenticated
+  using (user_id = (select auth.uid()));
+
 grant select on public.token_refund_events, public.token_purchase_reviews to authenticated;
 revoke insert, update, delete, truncate
   on public.token_refund_events, public.token_purchase_reviews

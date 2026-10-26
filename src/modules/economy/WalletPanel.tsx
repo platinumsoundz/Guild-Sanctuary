@@ -156,6 +156,17 @@ export function WalletPanel({ userId, profile, isGuest, purchaseAgeVerifiedAt = 
       amountMinor: null,
       createdAt: entry.createdAt,
     })),
+    ...(snapshot?.refunds ?? []).map((entry) => ({
+      id: `refund-${entry.id}`,
+      label: entry.reason === 'dispute'
+        ? 'Chargeback clawback'
+        : entry.reviewRequired
+          ? 'Refund clawback (under review)'
+          : 'Refund clawback',
+      tokensDelta: entry.tokensDelta,
+      amountMinor: null,
+      createdAt: entry.createdAt,
+    })),
   ].sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
 
   return (
@@ -403,7 +414,7 @@ export function WalletPanel({ userId, profile, isGuest, purchaseAgeVerifiedAt = 
         ) : isLoading ? (
           <p className={styles.disclaimer}>Loading transaction history…</p>
         ) : (
-          <p className={styles.disclaimer}>Purchases and unlocks will appear here.</p>
+          <p className={styles.disclaimer}>Purchases, refunds, and unlocks will appear here.</p>
         )}
       </section>
     </main>

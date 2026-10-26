@@ -20,7 +20,7 @@ where table_schema = 'public'
   )
 order by table_name;
 
--- 3. Economy functions. Expected: five rows.
+-- 3. Economy functions. Expected: six rows.
 select routine_name
 from information_schema.routines
 where routine_schema = 'public'
@@ -29,7 +29,8 @@ where routine_schema = 'public'
     'spend_tokens',
     'equip_profile_cosmetic',
     'clear_profile_cosmetic',
-    'grant_signup_token_bonus'
+    'grant_signup_token_bonus',
+    'confirm_token_purchase_age'
   )
 order by routine_name;
 

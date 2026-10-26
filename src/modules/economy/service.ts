@@ -59,11 +59,21 @@ export interface TokenSpendResult {
   alreadyApplied: boolean;
 }
 
+export interface TokenRefundEntry {
+  id: string;
+  reason: 'refund' | 'dispute';
+  tokensDelta: number;
+  shortfallTokens: number;
+  reviewRequired: boolean;
+  createdAt: string;
+}
+
 export interface WalletSnapshot {
   userId: string;
   balanceTokens: number;
   ledger: TokenLedgerEntry[];
   spends: TokenSpendEntry[];
+  refunds: TokenRefundEntry[];
   catalog: TokenSpendItem[];
   entitlements: TokenEntitlement[];
 }
@@ -88,7 +98,7 @@ async function requireSignedInUser(expectedUserId: string): Promise<void> {
 export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
   await requireSignedInUser(userId);
   const client = getSupabaseBrowserClient();
-  const [walletResult, ledgerResult, catalogResult, entitlementResult, spendResult] = await Promise.all([
+  const [walletResult, ledgerResult, catalogResult, entitlementResult, spendResult, refundResult] = await Promise.all([
     client.from('token_wallets').select('balance_tokens').eq('user_id', userId).maybeSingle(),
     client.from('token_ledger')
       .select('id,bundle_id,tokens_delta,amount_total,created_at')
@@ -106,6 +116,13 @@ export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
       .order('granted_at', { ascending: false }),
     client.from('token_spend_ledger')
       .select('id,item_id,item_name,tokens_delta,created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(20),
+    // Refund rows are supplementary history. If the refund migration has not
+    // been applied yet, the wallet should still load.
+    client.from('token_refund_events')
+      .select('id,reason,clawed_back_tokens,shortfall_tokens,review_required,created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(20),
@@ -131,6 +148,14 @@ export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
       itemId: entry.item_id,
       itemName: entry.item_name,
       tokensDelta: entry.tokens_delta,
+      createdAt: entry.created_at,
+    })),
+    refunds: (refundResult.error ? [] : refundResult.data ?? []).map((entry) => ({
+      id: entry.id,
+      reason: entry.reason,
+      tokensDelta: -entry.clawed_back_tokens,
+      shortfallTokens: entry.shortfall_tokens,
+      reviewRequired: entry.review_required,
       createdAt: entry.created_at,
     })),
     catalog: (catalogResult.data ?? []).map((item) => ({

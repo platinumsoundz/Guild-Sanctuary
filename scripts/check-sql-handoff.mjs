@@ -53,4 +53,49 @@ if (allSources.length !== migrationFiles.length) {
 const missing = migrationFiles.filter((file) => !allSources.includes(file));
 if (missing.length > 0) fail(`all_migrations.sql is missing: ${missing.join(', ')}`);
 
+// A stale verify file is worse than no verify file: it tells the operator to
+// expect an object that the migrations no longer create. Cross-check every
+// function and table named in the read-only checks against the migrations.
+function quotedIdentifiers(sql, listPattern) {
+  const names = new Set();
+  for (const match of sql.matchAll(listPattern)) {
+    for (const name of match[1].matchAll(/'([a-z0-9_]+)'/gi)) names.add(name[1]);
+  }
+  return [...names];
+}
+
+function definedFunctions(sql) {
+  return new Set(
+    [...sql.matchAll(/create (?:or replace )?function public\.([a-z0-9_]+)\s*\(/gi)].map((match) => match[1]),
+  );
+}
+
+function definedTables(sql) {
+  return new Set(
+    [...sql.matchAll(/create (?:or replace )?(?:table|view) (?:if not exists )?public\.([a-z0-9_]+)/gi)]
+      .map((match) => match[1]),
+  );
+}
+
+const functions = definedFunctions(all);
+const tables = definedTables(all);
+
+for (const file of ['verify_all.sql', 'verify_economy.sql']) {
+  const sql = read(file);
+  const referencedFunctions = quotedIdentifiers(sql, /(?:proname|routine_name)\s+in\s*\(([^)]*)\)/gi);
+  for (const name of referencedFunctions) {
+    if (!functions.has(name)) fail(`${file} checks for function ${name}, but no migration creates it`);
+  }
+
+  const bucketReferences = new Set();
+  for (const list of quotedIdentifiers(sql, /(?:\btable_name|tablename)\s+in\s*\(([^)]*)\)/gi)) {
+    bucketReferences.add(list);
+  }
+  for (const name of bucketReferences) {
+    if (!tables.has(name)) {
+      fail(`${file} checks for table ${name}, but no migration creates it`);
+    }
+  }
+}
+
 console.log(`SQL handoff check passed: ${migrationFiles.length} migrations, no Markdown fences.`);

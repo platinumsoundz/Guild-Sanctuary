@@ -125,7 +125,7 @@ Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do
 
 1. Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and the separate Deno Edge Function check in an environment with dependencies. Do not claim current checks passed unless they were actually run for this revision.
 2. Apply the wallet migration and deploy both Edge Functions in an isolated staging project; verify RLS, paid and unpaid sessions, duplicate webhook delivery, wrong mode/price, invalid signatures, and Origin rejection.
-3. Refund/chargeback handling is implemented in code (`record_token_refund` and the webhook refund/dispute branch): claw back unspent tokens, never create a negative balance, and flag spent-token and partial-refund cases for manual review. The migration is unapplied and the webhook is undeployed.
+3. Refund/chargeback handling is implemented in code (`record_token_refund` and the webhook refund/dispute branch): claw back unspent tokens, never create a negative balance, and flag spent-token and partial-refund cases for manual review. Refund clawbacks appear as negative entries in the member's Wallet history. The migration is unapplied and the webhook is undeployed.
 4. The 18+ purchase gate, the 7-day deletion grace period, the full admin dashboard, and the terms-acceptance record are implemented in code. Their migrations are unapplied, and the terms gate defaults off until approved legal text replaces the draft. Live sales still wait on staging verification of every gate.
 5. Only then configure production-mode Price IDs/secrets/webhook and consider enabling live checkout. The migrations have not been applied and the functions have not been deployed to the user's project.
 
