@@ -8,6 +8,7 @@ import {
   fetchPersistentConversations,
   fetchPersistentThread,
   sendPersistentMessage,
+  subscribeToPersistentMessages,
 } from './supabaseRepository';
 
 export interface ConversationThread {
@@ -193,6 +194,16 @@ export async function sendConversationMessage(conversationId: string, senderId: 
 }
 
 export const sendDirectMessage = sendConversationMessage;
+
+export async function subscribeToConversationMessages(
+  conversationId: string,
+  userId: string,
+  onMessage: (message: Message) => void,
+  onError: (message: string) => void,
+): Promise<() => void> {
+  if (!(await hasPersistentSession(userId))) return () => undefined;
+  return subscribeToPersistentMessages(conversationId, onMessage, onError);
+}
 
 export function removeUserConversationData(userId: string): void {
   // This cleanup only affects local/demo data. Persistent account deletion and
