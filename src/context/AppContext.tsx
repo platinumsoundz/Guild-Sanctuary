@@ -31,7 +31,7 @@ import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { Database } from '@/services/supabase/database.types';
 import { normalizeSocialLinks } from '@/lib/socialLinks';
 
-export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'wallet' | 'support' | 'settings';
+export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings';
 
 export type UserSession = AuthSession;
 
