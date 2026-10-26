@@ -29,6 +29,7 @@ export function AppWorkspace() {
     currentUser,
     isAuthenticated,
     isGuest,
+    loginAsGuest,
     isSessionReady,
     sessionError,
     login,
@@ -210,6 +211,7 @@ export function AppWorkspace() {
           activeNavigation={activeNavigation}
           currentUser={currentUser}
           isGuest={isGuest}
+          onExploreAsGuest={loginAsGuest}
           pendingEmail={pendingEmail}
           isSessionReady={isSessionReady}
           onNavigate={openNavigation}
