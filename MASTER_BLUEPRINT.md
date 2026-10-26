@@ -133,8 +133,14 @@ Copy `.env.example` to `.env.local`. Public Supabase URL/key values are not secr
 
 ## Unified navigation and notifications UI upgrade — 2026-10-26
 
-PR [#22](https://github.com/platinumsoundz/Guild-Sanctuary/pull/22) on branch `feat/unified-navigation-notifications` implements a shared top-left navigation trigger, a dedicated Notifications destination/full-page view, top-right notification shortcut, clearer Guest Mode entry, responsive header controls, and removal of the duplicate landing-page title/guest header. The existing notification component and Supabase query path are reused; no auth/data-layer redesign is intended.
+PR [#22](https://github.com/platinumsoundz/Guild-Sanctuary/pull/22) was merged to `main` at `35cfc132c366f88ed1ce158c1415b8995f579ea5`. It implements the shared top-left navigation trigger, dedicated Notifications destination/full-page view, top-right notification shortcut, Guest Mode entry, responsive header controls, and removal of the duplicate landing-page title/guest header.
 
-Latest reviewed commit: `b4713fe012eb11cccd2f37bcc9a4b03cf8bbfe78`. CI validation, typecheck, production build, and Cloudflare adapter build passed. The PR-triggered deployment workflow skipped actual deployment as expected. Two parallel Cloudflare Workers Builds checks (`the-sanctuary` and `guild-sanctuary`) failed; their dashboard build logs have not yet been inspected. PR is still open/unmerged, and live deployment is unconfirmed. Do not mark this upgrade shipped until those failures are understood, the PR is safely merged, the main-branch deployment succeeds, and the production UI is smoke-tested.
+Verification and deployment:
+- GitHub CI passed on the merge commit: Deno checks, TypeScript typecheck, and Next.js build.
+- GitHub Actions' direct Cloudflare deployment path failed during asset upload with `401 Unauthorized`; its `CLOUDFLARE_API_TOKEN` secret requires permission review/replacement.
+- Cloudflare Workers Builds config was corrected to install the pinned OpenNext Cloudflare adapter and run `npx opennextjs-cloudflare build` followed by the appropriate OpenNext deploy command.
+- Canonical Worker `guild-sanctuary` deployed successfully from merge commit `35cfc132c366f88ed1ce158c1415b8995f579ea5`; successful Cloudflare build ID `435cec83-e591-4d85-b235-30c199fc0ea3`; deployed version `ae7b20ec-6734-4e7e-90fe-2cdfbe4c51f9`; URL: https://guild-sanctuary.thesmarthub.workers.dev.
+- Browser-level interactive smoke testing remains unverified in this environment. Confirm signed-out/guest navigation, notifications, and mobile layout before considering the UX fully QA-approved.
+- Follow-up/handoff: `docs/handoffs/2026-10-26-sanctuary-ui-release.md`.
 
-Detailed next-agent instructions and build IDs: `docs/handoffs/2026-10-26-sanctuary-ui-release.md`.
+.
