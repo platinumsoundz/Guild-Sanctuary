@@ -112,7 +112,7 @@ export function TokenShopPanel({ userId, isGuest }: TokenShopPanelProps) {
       {isLoading ? (
         <p className={styles.status} role="status">Loading shop items…</p>
       ) : items.length === 0 ? (
-        <p className={styles.status}>The live catalogue is only available to a connected Sanctuary account.</p>
+        <p className={styles.status}>No shop items are currently enabled in the live catalogue. The shop is connected, but purchases remain disabled until the catalogue and redemption checks are ready.</p>
       ) : (
         <section className={styles.grid} aria-label="Cosmetic catalogue">
           {items.map((item) => {
