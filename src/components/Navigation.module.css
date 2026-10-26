@@ -447,9 +447,6 @@
 .notificationButton:hover,
 .notificationButton:focus-visible { border-color: var(--accent); }
 .accountButtonLabel { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (min-width: 1px) {
-  .desktopNavigation { display: none; }
-}
 @media (max-width: 380px) {
   .notificationButton { width: 36px; height: 36px; }
   .accountButtonLabel { max-width: 76px; }
