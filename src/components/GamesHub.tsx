@@ -11,7 +11,7 @@ const games: {
   title: string;
   description: string;
   genre: string;
-  url: string;
+  url: string | null;
   badge: string;
 }[] = [
   {
@@ -19,7 +19,8 @@ const games: {
     title: 'The 5 Sleeves Online',
     description: 'A browser-based multiplayer action RPG. Explore the settlements and dangerous roads, fight Rust Wardens, develop your operative, and clear regional towers.',
     genre: 'Multiplayer action RPG',
-    url: 'https://the-5-sleeves.onrender.com/',
+    // Configure this with the verified Render URL; never guess a production host.
+    url: process.env.NEXT_PUBLIC_5_SLEEVES_2D_URL?.trim() || null,
     badge: 'Online world',
   },
   {
@@ -52,27 +53,33 @@ export function GamesHub() {
               <h2>{selectedGame.title}</h2>
             </div>
             <div className={styles.playerActions}>
-              <a href={selectedGame.url} target="_blank" rel="noreferrer" className={styles.iconButton} aria-label="Open game in a new tab">
+              {selectedGame.url && <a href={selectedGame.url} target="_blank" rel="noopener noreferrer" className={styles.iconButton} aria-label="Open game in a new tab">
                 <ExternalLink size={17} aria-hidden="true" />
-              </a>
+              </a>}
               <button type="button" className={styles.iconButton} onClick={() => setActiveGame(null)} aria-label="Close game">
                 <X size={18} aria-hidden="true" />
               </button>
             </div>
           </div>
-          <div className={styles.frameWrap}>
-            <iframe
-              className={styles.frame}
-              src={selectedGame.url}
-              title={selectedGame.title}
-              loading="lazy"
-              allow="fullscreen; gamepad; pointer-lock"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"
-            />
-          </div>
-          <p className={styles.hint}>If the host blocks embedding or a game control behaves differently inside the app, use the open-in-new-tab button.</p>
+          {selectedGame.url ? (
+            <>
+              <div className={styles.frameWrap}>
+                <iframe
+                  className={styles.frame}
+                  src={selectedGame.url}
+                  title={selectedGame.title}
+                  loading="lazy"
+                  allow="fullscreen; gamepad; pointer-lock"
+                  allowFullScreen
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen"
+                />
+              </div>
+              <p className={styles.hint}>If the host blocks embedding or a game control behaves differently inside the app, use the open-in-new-tab button.</p>
+            </>
+          ) : (
+            <p className={styles.hint}>The verified Render address has not been configured yet. The game launch is paused to avoid sending you to an unverified address.</p>
+          )}
         </section>
       ) : (
         <section className={styles.grid} aria-label="Available games">
@@ -87,12 +94,16 @@ export function GamesHub() {
                 <p className={styles.genre}>{game.genre}</p>
                 <p className={styles.description}>{game.description}</p>
                 <div className={styles.cardActions}>
-                  <button type="button" className={styles.playButton} onClick={() => setActiveGame(game.id)}>
+                  <button type="button" className={styles.playButton} onClick={() => setActiveGame(game.id)} disabled={!game.url}>
                     <Gamepad2 size={17} aria-hidden="true" /> Play in Sanctuary
                   </button>
-                  <a href={game.url} target="_blank" rel="noreferrer" className={styles.externalLink}>
-                    Open separately <ExternalLink size={14} aria-hidden="true" />
-                  </a>
+                  {game.url ? (
+                    <a href={game.url} target="_blank" rel="noopener noreferrer" className={styles.externalLink}>
+                      Open separately <ExternalLink size={14} aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <span className={styles.hint}>Host URL needs configuration</span>
+                  )}
                 </div>
               </div>
             </article>
