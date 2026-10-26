@@ -88,7 +88,10 @@ async function buildSession(): Promise<AuthSession> {
   if (!user?.email || !user.email_confirmed_at) throw new Error('Verify your email before continuing.');
   const profileRow = await getProfileRow(user.id);
   const { data: factors, error: factorError } = await client.auth.mfa.listFactors();
-  if (factorError) throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
+  if (factorError) {
+    await clearUnverifiedAuthSession(client);
+    throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
+  }
   const twoFactorEnabled = factors.totp.some((factor) => factor.status === 'verified');
   return {
     user: {
@@ -123,6 +126,12 @@ export type SupabasePasswordSignIn = {
   challenge: { factorId: string; challengeId: string } | null;
 };
 
+async function clearUnverifiedAuthSession(client: ReturnType<typeof getSupabaseBrowserClient>): Promise<void> {
+  // Password/OTP verification may establish an AAL1 provider session before the app
+  // finishes its profile and MFA checks. Never leave that partial session active on failure.
+  await client.auth.signOut();
+}
+
 export async function signInWithSupabasePassword(
   email: string,
   password: string,
@@ -142,15 +151,26 @@ export async function signInWithSupabasePassword(
 
   if (factor) {
     const { data: assurance, error: assuranceError } = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (assuranceError) throw new Error(`Your authentication assurance could not be verified: ${assuranceError.message}`);
+    if (assuranceError) {
+      await clearUnverifiedAuthSession(client);
+      throw new Error(`Your authentication assurance could not be verified: ${assuranceError.message}`);
+    }
     if (assurance.currentLevel !== 'aal2') {
       const { data: challenge, error: challengeError } = await client.auth.mfa.challenge({ factorId: factor.id });
-      if (challengeError) throw new Error(`A two-factor challenge could not be started: ${challengeError.message}`);
+      if (challengeError) {
+        await clearUnverifiedAuthSession(client);
+        throw new Error(`A two-factor challenge could not be started: ${challengeError.message}`);
+      }
       return { session: null, challenge: { factorId: factor.id, challengeId: challenge.id } };
     }
   }
 
-  return { session: await buildSession(), challenge: null };
+  try {
+    return { session: await buildSession(), challenge: null };
+  } catch (error) {
+    await clearUnverifiedAuthSession(client);
+    throw error;
+  }
 }
 
 export async function signUpWithSupabasePassword(
@@ -210,10 +230,18 @@ export async function verifySupabaseEmailCode(
   const factor = factors.totp.find((item) => item.status === 'verified');
   if (factor) {
     const { data: challenge, error: challengeError } = await client.auth.mfa.challenge({ factorId: factor.id });
-    if (challengeError) throw new Error(`A two-factor challenge could not be started: ${challengeError.message}`);
+    if (challengeError) {
+      await clearUnverifiedAuthSession(client);
+      throw new Error(`A two-factor challenge could not be started: ${challengeError.message}`);
+    }
     return { session: null, challenge: { factorId: factor.id, challengeId: challenge.id } };
   }
-  return { session: await buildSession(), challenge: null };
+  try {
+    return { session: await buildSession(), challenge: null };
+  } catch (error) {
+    await clearUnverifiedAuthSession(client);
+    throw error;
+  }
 }
 
 export async function verifySupabaseTotpCode(
@@ -223,7 +251,12 @@ export async function verifySupabaseTotpCode(
 ): Promise<AuthSession> {
   const { error } = await getSupabaseBrowserClient().auth.mfa.verify({ factorId, challengeId, code });
   if (error) throw new Error(`Two-factor verification failed: ${error.message}`);
-  return buildSession();
+  try {
+    return await buildSession();
+  } catch (sessionError) {
+    await clearUnverifiedAuthSession(getSupabaseBrowserClient());
+    throw sessionError;
+  }
 }
 
 export async function restoreSupabaseSession(): Promise<AuthSession | null> {
