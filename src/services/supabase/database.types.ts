@@ -112,6 +112,33 @@ export interface Database {
         livemode: boolean;
         created_at: string;
       }>;
+      token_spend_catalog: Table<{
+        item_id: string;
+        name: string;
+        description: string;
+        price_tokens: number;
+        kind: string;
+        enabled: boolean;
+        created_at: string;
+        asset_url: string | null;
+        asset_text: string | null;
+        effect_key: string | null;
+        sort_order: number;
+      }>;
+      token_spend_ledger: Table<{
+        id: string;
+        user_id: string;
+        item_id: string;
+        item_name: string;
+        tokens_delta: number;
+        idempotency_key: string;
+        created_at: string;
+      }>;
+      token_entitlements: Table<{
+        user_id: string;
+        item_id: string;
+        granted_at: string;
+      }>;
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
         user_id: string;
@@ -303,6 +330,18 @@ export interface Database {
           likes_count: number;
           comments_count: number;
         }[];
+      };
+      spend_tokens: {
+        Args: { requested_item_id: string; requested_idempotency_key: string };
+        Returns: { balance_tokens: number; item_id: string; already_applied: boolean }[];
+      };
+      equip_profile_cosmetic: {
+        Args: { requested_item_id: string };
+        Returns: { item_id: string; kind: string }[];
+      };
+      clear_profile_cosmetic: {
+        Args: { requested_slot: 'frame' | 'effect' | 'badge' | 'banner' };
+        Returns: undefined;
       };
       is_moderator: {
         Args: Record<string, never>;
