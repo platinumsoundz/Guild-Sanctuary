@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Message } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { fetchConversationThread, createDirectConversation, sendConversationMessage } from './service';
-import { isSupabaseAuthConfigured } from '@/modules/auth';
+import { isPersistentMessagingEnabled } from './service';
 import { subscribeToPersistentMessages } from './supabaseRepository';
 
 interface UseDirectMessagesResult {
@@ -78,7 +78,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
   useEffect(() => { void refresh(); }, [refresh]);
 
   useEffect(() => {
-    if (!isSupabaseAuthConfigured() || !conversationId) return;
+    if (!isPersistentMessagingEnabled() || !conversationId) return;
     return subscribeToPersistentMessages(conversationId, (message) => {
       setMessages((currentMessages) => {
         if (currentMessages.some((existing) => existing.id === message.id)) return currentMessages;
