@@ -36,6 +36,7 @@ export function AppWorkspace() {
     setActiveNavigation,
     updateProfile,
     signup,
+    resetPassword,
     verifyEmailCode,
     verifyTwoFactorCode,
     cancelAuthChallenge,
@@ -179,6 +180,7 @@ export function AppWorkspace() {
       initialError={sessionError}
       onLogin={login}
       onSignup={signup}
+      onResetPassword={resetPassword}
       onVerifyEmailCode={verifyEmailCode}
       onVerifyTwoFactorCode={verifyTwoFactorCode}
       onCancelChallenge={cancelAuthChallenge}
@@ -202,6 +204,7 @@ export function AppWorkspace() {
           onNavigate={openNavigation}
           onLogin={login}
           onSignup={signup}
+          onResetPassword={resetPassword}
           onVerifyEmailCode={verifyEmailCode}
           onVerifyTwoFactorCode={verifyTwoFactorCode}
           onCancelChallenge={cancelAuthChallenge}

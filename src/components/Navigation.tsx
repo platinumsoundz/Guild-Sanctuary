@@ -40,8 +40,9 @@ interface NavigationProps {
   pendingEmail: string | null;
   isSessionReady: boolean;
   onNavigate: (navigation: NavigationState) => void;
-  onLogin: (email: string) => void | Promise<void>;
-  onSignup: (input: SignUpInput) => void | Promise<void>;
+  onLogin: (email: string, password: string) => void | Promise<void>;
+  onSignup: (input: SignUpInput, password: string) => boolean | Promise<boolean>;
+  onResetPassword: (email: string) => void | Promise<void>;
   onVerifyEmailCode: (code: string) => boolean | Promise<boolean>;
   onVerifyTwoFactorCode: (code: string) => void | Promise<void>;
   onCancelChallenge: () => void;
@@ -58,6 +59,7 @@ export function Navigation({
   onNavigate,
   onLogin,
   onSignup,
+  onResetPassword,
   onVerifyEmailCode,
   onVerifyTwoFactorCode,
   onCancelChallenge,
@@ -242,6 +244,7 @@ export function Navigation({
           onClose={closeAuthModal}
           onLogin={onLogin}
           onSignup={onSignup}
+          onResetPassword={onResetPassword}
           onVerifyEmailCode={onVerifyEmailCode}
           onVerifyTwoFactorCode={onVerifyTwoFactorCode}
           onCancelChallenge={onCancelChallenge}

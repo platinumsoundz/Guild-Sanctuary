@@ -1,12 +1,19 @@
 import { createBrowserClient } from '@supabase/ssr'
 
+let browserClient: ReturnType<typeof createBrowserClient> | null = null
+
 export function createClient() {
-  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (browserClient) return browserClient
 
-  // Fallback to safe placeholders if the env vars are missing, empty, or invalid
-  const supabaseUrl = (rawUrl && rawUrl.startsWith('http')) ? rawUrl : 'https://xgpzvmhldyoyrwwebcic.supabase.co'
-  const supabaseAnonKey = (rawKey && rawKey.length > 10) ? rawKey : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  return createBrowserClient(supabaseUrl, supabaseAnonKey)
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in the deployment environment.'
+    )
+  }
+
+  browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
+  return browserClient
 }
