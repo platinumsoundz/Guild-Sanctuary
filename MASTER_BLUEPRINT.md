@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-26
 
-See [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) for the detailed build, security, staging, and release checklist. Treat checklist items as evidence-driven gates; a green CI build does not equal production readiness.
+See [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) for the detailed build, security, staging, and release checklist; [BETA_RELEASE_RUNBOOK.md](BETA_RELEASE_RUNBOOK.md) for the staged operational sequence; and [SECURITY_ACCEPTANCE_TEST_MATRIX.md](SECURITY_ACCEPTANCE_TEST_MATRIX.md) for repeatable acceptance/security tests. Treat every check as evidence-driven: a green build does not equal production readiness.
 
 ## Product decision
 
@@ -100,6 +100,13 @@ The product owner has now directed the beta scope: friends first, then public; t
 - Local demo auth is not production authentication; mock code `000000` is development-only.
 - Production cutover requires Supabase Auth configuration, profile-creation handling, RLS/policy tests, persistent repository wiring, storage policies, session refresh/middleware strategy, and migration/restore validation.
 - Never expose a Supabase secret/service-role credential to the web client. The token Edge Functions use the platform-provided admin context (`ctx.supabaseAdmin`); no service-role key belongs in the Next.js runtime.
+
+## Release execution artifacts — 2026-10-26
+
+- `BETA_RELEASE_RUNBOOK.md` defines the candidate record, environment parity, auth smoke tests, RLS/database review, feature persistence checks, isolated test-mode payment gates, PWA/accessibility checks, legal/operations review, go/no-go decision, and rollback notes.
+- `SECURITY_ACCEPTANCE_TEST_MATRIX.md` gives stable test IDs for auth/session, direct database authorization, persistence, checkout/bonus, hosting, and accessibility scenarios. All entries begin as **Not run**; no test is considered passed until executed against a named commit and environment.
+- The PR merge-check's Cloudflare OpenNext build completed, but deployment was skipped because this was a pull-request run and the environment used placeholder Supabase config/no Cloudflare credentials. It is not a live Worker deployment.
+- The earlier CI pass remains scoped to the MFA code commit; new documentation commits require a fresh run before claiming current-head validation.
 
 ## Security and release gates
 
