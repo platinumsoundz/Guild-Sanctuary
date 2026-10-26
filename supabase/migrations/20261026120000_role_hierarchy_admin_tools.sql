@@ -5,9 +5,10 @@
 -- Do not expose a public self-claim function for owner access.
 
 alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles drop constraint if exists profiles_role_values_check;
 update public.profiles set role = 'user' where role = 'member';
 alter table public.profiles alter column role set default 'user';
-alter table public.profiles add constraint profiles_role_check
+alter table public.profiles add constraint profiles_role_values_check
   check (role in ('user', 'vip', 'moderator', 'admin', 'developer', 'owner'));
 
 drop policy if exists "users insert own profile" on public.profiles;
