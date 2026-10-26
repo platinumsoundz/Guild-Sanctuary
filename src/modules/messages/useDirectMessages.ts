@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Message } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
-import { fetchConversationThread, createDirectConversation, sendConversationMessage } from './service';
-import { isPersistentMessagingEnabled } from './service';
+import { fetchConversationThread, createDirectConversation, sendConversationMessage, isPersistentMessagingEnabled } from './service';
 import { subscribeToPersistentMessages } from './supabaseRepository';
 
 interface UseDirectMessagesResult {
