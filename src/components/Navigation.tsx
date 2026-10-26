@@ -12,7 +12,6 @@ import {
   Search,
   Settings,
   ShieldCheck,
-  Sun,
   UserRound,
   Wallet,
   HeartHandshake,
@@ -139,10 +138,6 @@ export function Navigation({
               <Menu size={21} strokeWidth={1.8} aria-hidden="true" />
             </button>
           )}
-          <div className="flex items-center gap-2">
-            <Sun size={18} className="text-amber-400" />
-            <p className={styles.headerLabel}>THE SANCTUARY</p>
-          </div>
         </div>
         <div className={styles.accountArea}>
           {isSessionReady && (
