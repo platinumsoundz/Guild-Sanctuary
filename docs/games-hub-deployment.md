@@ -75,3 +75,9 @@ The hub currently links to the two existing game deployments. It does not provid
 - 2D Socket.IO smoke test: https://github.com/platinumsoundz/The-5-Sleeves/pull/3
 - 3D hosting contract: https://github.com/platinumsoundz/The-5-Sleeves-3D/pull/2
 - 3D static smoke tests: https://github.com/platinumsoundz/The-5-Sleeves-3D/pull/3
+
+
+### Latest deployment check — 26 October 2026
+- Cloudflare OpenNext build and Wrangler dry-run completed successfully for the tested commit. The output bundle was created, and Wrangler recognized the `WORKER_SELF_REFERENCE`, `IMAGES`, and `ASSETS` bindings. This was a dry run only; it did not deploy the Worker.
+- Cloudflare emitted a configuration warning: Wrangler config says Worker name `sanctuary-web-auto`, while the connected build expects `guild-sanctuary`. The CI system overrode the name for the dry run. Confirm the intended production Worker name and align `name` plus the self-reference service binding in a reviewed follow-up before an actual deployment.
+- GitHub's Vercel status for the latest documentation commit reports a deployment rate limit and says to retry in 24 hours. This is a hosting-plan/build-limit status, not a TypeScript/build error. Do not repeatedly trigger Vercel builds; wait for the limit window or use the successful Cloudflare dry-run evidence while keeping production unchanged.
