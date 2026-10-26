@@ -18,6 +18,7 @@ import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
 import { WalletPanel } from '@/modules/economy';
 import { GamesHub } from '@/components/GamesHub';
+import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import styles from './AppWorkspace.module.css';
 
@@ -113,6 +114,8 @@ export function AppWorkspace() {
         </main>
       ) : activeNavigation === 'games' ? (
         <GamesHub />
+      ) : activeNavigation === 'roadmap' ? (
+        <SanctuaryRoadmap />
       ) : activeNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
