@@ -70,7 +70,7 @@ export function SettingsHub({
 
   const updatePreference = async (key: keyof typeof preferenceLabels, value: boolean) => {
     try {
-      updatePreferences({ [key]: value });
+      await updatePreferences({ [key]: value });
       if (key === 'allowProfileDiscovery') {
         await onUpdateProfile({ visibility: value ? 'public' : 'private' });
       }
