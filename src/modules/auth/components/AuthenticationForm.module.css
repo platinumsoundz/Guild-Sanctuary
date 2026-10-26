@@ -179,3 +179,40 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.termsConsent {
+  display: grid;
+  gap: 7px;
+  color: var(--muted, #68776c);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.termsCheckbox {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  color: var(--ink, #25372c);
+  cursor: pointer;
+}
+
+.termsCheckbox input {
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  accent-color: var(--accent, #52765c);
+}
+
+.termsCheckbox a {
+  color: var(--accent, #52765c);
+  text-underline-offset: 3px;
+}
+
+.termsWarning {
+  margin: 0 0 0 25px;
+  color: #8a5b25;
+  font-size: 10px;
+}
