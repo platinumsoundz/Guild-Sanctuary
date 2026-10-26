@@ -312,6 +312,10 @@ export interface Database {
         Args: { requested_user_id: string; requested_role: 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner' };
         Returns: undefined;
       };
+      search_members_for_admin: {
+        Args: { requested_query: string };
+        Returns: { id: string; username: string; display_name: string; role: 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner'; status: 'active' | 'suspended' | 'banned' }[];
+      };
       record_community_tip: {
         Args: {
           requested_event_id: string;
