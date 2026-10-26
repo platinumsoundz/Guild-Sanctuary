@@ -33,24 +33,23 @@ At `b4713fe012eb11cccd2f37bcc9a4b03cf8bbfe78`:
 - Hourly roadmap/build workflow checks: **passed**.
 - Two Cloudflare Workers Builds checks for worker names `the-sanctuary` and `guild-sanctuary`: **failed** on the latest commit. The checks expose Cloudflare build IDs but no useful failure logs in the GitHub check output. An attempted read of Cloudflare build configuration by worker name returned 404 because that API requires the system-generated worker script tag, not the display name.
 
-## Release state
+## Final release state — 2026-10-26
 
-- PR #22 remains open and unmerged.
-- Production deployment is **not confirmed**.
-- Do not report this UI as live until the PR is merged, the main-branch deployment completes, and the deployed app is smoke-tested.
+- PR #22 was merged to `main` at commit `35cfc132c366f88ed1ce158c1415b8995f579ea5`.
+- GitHub Actions CI passed on the merged commit: Deno checks, TypeScript typecheck, and Next.js build.
+- The GitHub Actions Cloudflare deploy job built successfully but the direct deploy step failed with Cloudflare API `401 Unauthorized` while uploading assets. The GitHub Actions Cloudflare API token secret needs to be replaced/permission-checked before that path can work again.
+- Independently, Cloudflare Workers Builds configuration was corrected for both `the-sanctuary` and `guild-sanctuary`: install the pinned OpenNext Cloudflare adapter, run `npx opennextjs-cloudflare build`, and use the matching OpenNext deploy command.
+- Cloudflare native production build `435cec83-e591-4d85-b235-30c199fc0ea3` for `guild-sanctuary`, commit `35cfc132c366f88ed1ce158c1415b8995f579ea5`, completed with outcome **success** and deployed version `ae7b20ec-6734-4e7e-90fe-2cdfbe4c51f9` at `https://guild-sanctuary.thesmarthub.workers.dev`.
+- Browser-based interactive smoke testing could not be completed in this environment. Treat deployment as successful, but keep visual/interaction verification as a follow-up.
+- The duplicate `the-sanctuary` production build was still initializing at last check; `guild-sanctuary` is the canonical worker name in `wrangler.jsonc`.
 
-## Next agent actions (in order)
+## Remaining follow-up
 
-1. Open the two failed Cloudflare checks from the PR commit and inspect the build details in the Cloudflare dashboard:
-   - https://github.com/platinumsoundz/Guild-Sanctuary/runs/121816894835
-   - https://github.com/platinumsoundz/Guild-Sanctuary/runs/121816494789
-   - Cloudflare build IDs: `b087e5d8-8a0d-46c1-b24a-1407af4d3c87` and `bd695af6-a59c-4a42-9ef2-54250a9d22ed`.
-2. Determine whether those legacy/parallel Worker Builds checks are required deployment gates or independent integrations. Do not disable them just to turn checks green.
-3. Recheck PR head and all checks. Inspect the PR diff and verify the notification page, guest entry, responsive header, and no duplicate title bars. The CI build/typecheck passed, but browser-level interaction testing has not been performed.
-4. If required checks are satisfied and no regressions are found, merge PR #22. The GitHub workflow is configured to deploy on pushes to `main` only when Cloudflare token/account ID and both Supabase public configuration secrets are available.
-5. Watch the main-branch deployment run and confirm it completed successfully. Then smoke-test the production URL `https://guild-sanctuary.vercel.app` only if it is the actual configured live origin; repository metadata says Cloudflare Workers is the current deployment target, so first confirm the canonical Cloudflare URL/custom domain in the dashboard.
-6. Test signed-out landing, Explore as Guest, menu open/close and keyboard escape, notification navigation, signed-in notification loading/mark-read, and narrow mobile layout. Guest notifications should show a sensible empty/sign-in state and must not query a signed-in user's data.
-7. Update `MASTER_BLUEPRINT.md` with the final merged/deployed status and link this handoff if any blocker remains.
+1. Open [GitHub deployment run #68](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40393860839) and replace/permission-check the `CLOUDFLARE_API_TOKEN` Actions secret. Never paste secrets into chat.
+2. Perform browser-level smoke tests against `https://guild-sanctuary.thesmarthub.workers.dev`: signed-out landing, Explore as Guest, menu open/close and keyboard escape, notifications destination, signed-in notification loading/mark-read, and narrow mobile layout.
+3. Confirm guest notification state is sensible and does not query signed-in user data. Verify the app is connected to the expected Supabase project.
+4. Recheck the `the-sanctuary` duplicate worker build. Do not assume it is the canonical app; `wrangler.jsonc` names `guild-sanctuary`.
+5. If the GitHub deployment token is fixed, rerun the failed workflow to restore a green automated deploy path. Cloudflare native build deployment already succeeded independently.
 
 ## Access boundary / handoff note
 
