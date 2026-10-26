@@ -55,7 +55,10 @@ export async function fetchAccountSettings(userId: string): Promise<AccountSetti
   if (!userId) {
     throw new Error('Sign in to view account settings.');
   }
-  if (isSupabaseCommunityStorageConfigured() && await hasMatchingSupabaseUser(userId)) {
+  if (isSupabaseCommunityStorageConfigured()) {
+    if (!(await hasMatchingSupabaseUser(userId))) {
+      throw new Error('Sign in with the connected Sanctuary account to view account settings.');
+    }
     const { data, error } = await getSupabaseBrowserClient().from('account_settings')
       .select('preferences,updated_at').eq('user_id', userId).maybeSingle();
     if (error) throw new Error(`Account settings could not be loaded from your account: ${error.message}`);
@@ -93,7 +96,10 @@ export async function saveAccountPreferences(userId: string, preferences: Accoun
   if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') {
     throw new Error('Choose a supported layout arrangement.');
   }
-  if (isSupabaseCommunityStorageConfigured() && await hasMatchingSupabaseUser(userId)) {
+  if (isSupabaseCommunityStorageConfigured()) {
+    if (!(await hasMatchingSupabaseUser(userId))) {
+      throw new Error('Sign in with the connected Sanctuary account to save account settings.');
+    }
     const { data, error } = await getSupabaseBrowserClient().from('account_settings')
       .upsert({ user_id: userId, preferences: { ...preferences } as Record<string, unknown>, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
       .select('preferences,updated_at').single();
