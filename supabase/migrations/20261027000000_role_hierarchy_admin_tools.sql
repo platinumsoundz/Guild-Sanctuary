@@ -10,6 +10,11 @@ alter table public.profiles alter column role set default 'user';
 alter table public.profiles add constraint profiles_role_check
   check (role in ('user', 'vip', 'moderator', 'admin', 'developer', 'owner'));
 
+drop policy if exists "users insert own profile" on public.profiles;
+create policy "users insert own profile"
+  on public.profiles for insert to authenticated
+  with check (id = (select auth.uid()) and role = 'user' and status = 'active');
+
 create or replace function public.is_moderator()
 returns boolean
 language sql
@@ -89,3 +94,36 @@ $$;
 
 revoke all on function public.set_member_role(uuid, text) from public;
 grant execute on function public.set_member_role(uuid, text) to authenticated;
+
+
+create or replace function public.search_members_for_admin(requested_query text)
+returns table(id uuid, username text, display_name text, role text, status text)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  caller_role text;
+  clean_query text := btrim(coalesce(requested_query, ''));
+begin
+  select p.role into caller_role
+    from public.profiles p
+    where p.id = (select auth.uid()) and p.status = 'active';
+  if caller_role not in ('admin', 'developer', 'owner') then
+    raise exception 'Only active admins, developers, and owners can search members for role management.';
+  end if;
+  if char_length(clean_query) < 1 or char_length(clean_query) > 24 then
+    raise exception 'Enter a username search of 1 to 24 characters.';
+  end if;
+  return query
+    select p.id, p.username, p.display_name, p.role, p.status
+    from public.profiles p
+    where p.username ilike ('%' || replace(replace(replace(clean_query, '%', ''), '_', ''), E'\\', '') || '%')
+    order by p.username
+    limit 25;
+end;
+$$;
+
+revoke all on function public.search_members_for_admin(text) from public;
+grant execute on function public.search_members_for_admin(text) to authenticated;
