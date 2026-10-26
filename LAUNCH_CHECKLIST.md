@@ -14,6 +14,7 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 - [x] Latest OTP metadata fix received a successful Vercel check before subsequent auth-flow changes.
 - [x] Found and fixed a password-sign-in MFA gap: accounts with verified TOTP factors now receive a challenge before the app activates the session.
 - [x] Wired the password sign-in challenge through AppContext and the auth form/gateway.
+- [x] Closing the account modal with Escape, the close button, or backdrop now cancels a pending TOTP challenge instead of leaving a half-authenticated session behind.
 - [x] GitHub CI passed Deno checks, `npm run typecheck`, and `npm run build` for the MFA change on commit `15e93e6a4b88bdb3f384b251e4b6156e0787631f`.
 - [ ] Confirm the Cloudflare Worker build/deploy run finishes successfully; do not infer deployment success from CI alone.
 - [ ] Vercel's status check still reports a build-rate-limit issue; recheck the Vercel preview when its build capacity is available.
@@ -38,6 +39,7 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 - [ ] Confirm reset links fail safely when expired, malformed, reused, or opened without a recovery session.
 - [ ] Test unverified email behavior and verify that an unconfirmed account cannot access authenticated features.
 - [ ] Test TOTP-enabled password sign-in, verify the challenge is shown, and verify AAL2 is required before protected actions.
+- [ ] Audit RLS policies for sensitive mutations so accounts with enrolled TOTP cannot bypass AAL2 by calling Supabase directly before completing the challenge.
 - [ ] Review generic authentication error messages to avoid revealing whether an email account exists.
 - [ ] Confirm no local demo password or mock code is accepted as real production authentication.
 - [ ] Confirm guest mode is read-only and cannot access authenticated mutations.
