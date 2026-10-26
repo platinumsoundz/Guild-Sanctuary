@@ -51,9 +51,10 @@ Apply in filename order. These are the current migration files:
 14. `20261026000100_token_refund_clawback.sql` — refund/dispute events, `record_token_refund`, purchase-review queue.
 15. `20261026000200_account_deletion_grace_period.sql` — seven-day deletion schedule/restore/purge and content visibility flags.
 16. `20261026000400_admin_dashboard.sql` — appeals, internal notes, member search/overview, role management, audit browsing, terms view.
-17. `20261026113205_terms_acceptance_records.sql` — `terms_acceptances` table, owner-only policies, server-generated timestamp.
-18. `20261026113229_restrict_terms_acceptance_columns.sql` — clients may insert only `user_id` and `terms_version`.
-19. `20261027000000_admin_terms_acceptances.sql` — `admin_list_terms_acceptances` moderator read path.
+17. `20261026000500_moderation_action_guards.sql` — prevents a moderator from suspending/banning an administrator or their own account.
+18. `20261026113205_terms_acceptance_records.sql` — `terms_acceptances` table, owner-only policies, server-generated timestamp.
+19. `20261026113229_restrict_terms_acceptance_columns.sql` — clients may insert only `user_id` and `terms_version`.
+20. `20261027000000_admin_terms_acceptances.sql` — `admin_list_terms_acceptances` moderator read path.
 
 ## Immediate economy path
 
@@ -78,7 +79,7 @@ This only refreshes the API schema cache. It does not create tables or functions
 
 ## Fresh-project path
 
-Use `all_migrations.sql` only on an empty project. It wraps all 19 migrations in one transaction and strips the inner `begin;`/`commit;` pairs. If any statement fails, the whole transaction rolls back.
+Use `all_migrations.sql` only on an empty project. It wraps all 20 migrations in one transaction and strips the inner `begin;`/`commit;` pairs. If any statement fails, the whole transaction rolls back.
 
 After it succeeds, run `verify_all.sql`, then `notify pgrst, 'reload schema';`.
 

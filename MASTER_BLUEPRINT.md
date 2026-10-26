@@ -45,7 +45,7 @@ The launch gates requested for Phase 1 are implemented in the repository but not
 - Refund/chargeback clawback: `20261026000100_token_refund_clawback.sql`; the Stripe webhook handles `charge.refunded` and `charge.dispute.created`.
 - Seven-day account deletion grace period: `20261026000200_account_deletion_grace_period.sql`, `POST /api/account/delete`, and the secret-protected `POST /api/account/purge`.
 - Terms acceptance record: `terms_acceptances` (`20261026113205` and `20261026113229`, contributed by the parallel database/auth branch) plus the `NEXT_PUBLIC_TERMS_REQUIRED` gate, which defaults to `false`.
-- Admin and moderation dashboard: `20261026000400_admin_dashboard.sql` plus the Reports, Members, Appeals, Refund reviews, and Audit log tabs.
+- Admin and moderation dashboard: `20261026000400_admin_dashboard.sql` plus the Reports, Members, Appeals, Refund reviews, and Audit log tabs. `20261026000500_moderation_action_guards.sql` stops a moderator from suspending or banning an administrator or their own account.
 
 Do not describe these as live until the migrations are applied, the Edge Functions and webhook are deployed, `ACCOUNT_PURGE_SECRET` and a scheduler are configured, and staging checks have actually run.
 

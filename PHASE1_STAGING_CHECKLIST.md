@@ -173,6 +173,8 @@ migration and a client release together.
 | Plain member navigates to Moderation | Not in navigation; the dashboard refuses access. |
 | Moderator | Reports, Members, Appeals, Refund reviews, Audit log. Role controls are admin-only. |
 | Admin changes a role | Applied and audited. An admin cannot change their own role. The last admin cannot be demoted. |
+| Moderator tries to suspend or ban an administrator | Rejected with a permissions error; no moderation action is recorded. |
+| Any moderator tries to suspend or ban their own account | Rejected. |
 | Member submits an appeal from Settings | Visible in the moderator Appeals tab with status. One open appeal at a time. |
 | Moderator resolves an appeal | Status and resolution notes appear for the member. |
 | Refund review resolved or dismissed | Row leaves the open queue and the decision is audited. |

@@ -12,7 +12,7 @@ Open the handoff folder:
 
 - `supabase/handoff/README.md` — step-by-step guide, file chooser, copy-paste rules, troubleshooting.
 - `supabase/handoff/economy_migrations.sql` — the six token-wallet/economy migrations in one transaction (wallet, spending, signup bonus, cosmetics, 18+ age gate, refund clawback). Use this when the social schema already exists and `public.token_wallets` is missing.
-- `supabase/handoff/all_migrations.sql` — all 19 migrations in one transaction. Use this only on a brand-new project.
+- `supabase/handoff/all_migrations.sql` — all 20 migrations in one transaction. Use this only on a brand-new project.
 - `supabase/handoff/verify_economy.sql` — read-only checks for the economy tables, functions, columns, catalog, RLS, and wallets.
 - `supabase/handoff/verify_all.sql` — read-only checks for the full schema, views, functions, RLS, indexes, and storage buckets.
 
@@ -72,9 +72,10 @@ Only use this on an empty project. If any Sanctuary table already exists, use th
 | 14 | `20261026000100_token_refund_clawback.sql` | refund/dispute events, `record_token_refund`, purchase reviews |
 | 15 | `20261026000200_account_deletion_grace_period.sql` | seven-day deletion schedule/restore/purge, content visibility flags |
 | 16 | `20261026000400_admin_dashboard.sql` | appeals, notes, member search/overview, roles, audit browsing |
-| 17 | `20261026113205_terms_acceptance_records.sql` | `terms_acceptances` table, owner-only policies, server timestamp |
-| 18 | `20261026113229_restrict_terms_acceptance_columns.sql` | clients may insert only `user_id`, `terms_version` |
-| 19 | `20261027000000_admin_terms_acceptances.sql` | `admin_list_terms_acceptances` moderator read path |
+| 17 | `20261026000500_moderation_action_guards.sql` | account-action guards: no self-ban, no admin ban by a non-admin |
+| 18 | `20261026113205_terms_acceptance_records.sql` | `terms_acceptances` table, owner-only policies, server timestamp |
+| 19 | `20261026113229_restrict_terms_acceptance_columns.sql` | clients may insert only `user_id`, `terms_version` |
+| 20 | `20261027000000_admin_terms_acceptances.sql` | `admin_list_terms_acceptances` moderator read path |
 
 ## Verification expectations
 

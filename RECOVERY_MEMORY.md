@@ -272,6 +272,7 @@ The user is tired and wants to resume later. Avoid repeating completed checks, l
 - `supabase/migrations/20261026113205_terms_acceptance_records.sql` and `20261026113229_restrict_terms_acceptance_columns.sql` (from the parallel database/auth branch) — `public.terms_acceptances`, owner-only policies, server-generated timestamp.
 - `supabase/migrations/20261027000000_admin_terms_acceptances.sql` — `admin_list_terms_acceptances` moderator read path used by the Members tab.
 - `supabase/migrations/20261026000400_admin_dashboard.sql` — appeals, notes, member search/overview, role management, audit browsing, purchase-review RPCs.
+- `supabase/migrations/20261026000500_moderation_action_guards.sql` — no self-suspend/ban, and only an admin can suspend or ban an admin.
 - App: age-gated Wallet, terms gate (`NEXT_PUBLIC_TERMS_REQUIRED`, default false), deletion notice/restore, Settings appeals panel, moderation tabs, Games hub, Token Shop catalogue.
 - Edge Functions: checkout requires stored 18+ verification; webhook handles `charge.refunded` and `charge.dispute.created`.
 
@@ -286,7 +287,7 @@ The user is tired and wants to resume later. Avoid repeating completed checks, l
 - `npm run typecheck` passed.
 - `npm run lint` passed.
 - `npm test -- --run` passed (27/27).
-- `npm run check:sql-handoff` passed (19 migrations, and it now compares every marked section body against its migration).
+- `npm run check:sql-handoff` passed (20 migrations, and it now compares every marked section body against its migration).
 - `npm run build` passed.
 
 ### Latest hardening after the first checkpoint

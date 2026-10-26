@@ -24,6 +24,7 @@ export function MembersPanel({ role, currentUserId }: MembersPanelProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [overview, setOverview] = useState<AdminMemberOverview | null>(null);
   const [terms, setTerms] = useState<MemberTermsAcceptance[]>([]);
+  const [termsUnavailable, setTermsUnavailable] = useState(false);
   const [rationale, setRationale] = useState('');
   const [note, setNote] = useState('');
   const [roleDraft, setRoleDraft] = useState<'member' | 'moderator' | 'admin'>('member');
@@ -51,18 +52,27 @@ export function MembersPanel({ role, currentUserId }: MembersPanelProps) {
     setSelectedId(member.id);
     setOverview(null);
     setTerms([]);
+    setTermsUnavailable(false);
     setError(null);
     setNotice(null);
     setRoleDraft(member.role);
-    try {
-      const [nextOverview, nextTerms] = await Promise.all([
-        fetchMemberOverview(member.id),
-        fetchMemberTerms(member.id),
-      ]);
-      setOverview(nextOverview);
-      setTerms(nextTerms);
-    } catch (loadError) {
+    // The Terms read path is separate so the overview still loads on a project
+    // where that migration has not been applied. Do not report a failed read as
+    // "no recorded acceptance".
+    const [overviewResult, termsResult] = await Promise.allSettled([
+      fetchMemberOverview(member.id),
+      fetchMemberTerms(member.id),
+    ]);
+    if (overviewResult.status === 'rejected') {
+      const loadError = overviewResult.reason;
       setError(loadError instanceof Error ? loadError.message : 'The member overview could not be loaded.');
+      return;
+    }
+    setOverview(overviewResult.value);
+    if (termsResult.status === 'fulfilled') {
+      setTerms(termsResult.value);
+    } else {
+      setTermsUnavailable(true);
     }
   };
 
@@ -205,6 +215,8 @@ export function MembersPanel({ role, currentUserId }: MembersPanelProps) {
                   <p className={styles.details}>
                     Terms: {terms.map((entry) => `${entry.terms_version} (${new Date(entry.accepted_at).toLocaleDateString('en-GB')})`).join(', ')}
                   </p>
+                ) : termsUnavailable ? (
+                  <p className={styles.warning}>Terms: the acceptance record could not be loaded.</p>
                 ) : (
                   <p className={styles.details}>Terms: no recorded acceptance</p>
                 )}
