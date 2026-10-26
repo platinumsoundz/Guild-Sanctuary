@@ -1,0 +1,42 @@
+name: Scheduled Free Health Check
+
+on:
+  schedule:
+    # GitHub schedules can be delayed during high load; this is a target cadence, not an exact timer.
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scheduled-health-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Deno, TypeScript and production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check Supabase Edge Functions
+        run: deno check supabase/functions/token-checkout/index.ts supabase/functions/stripe-token-webhook/index.ts
+      - name: Type-check
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
