@@ -121,6 +121,52 @@ export function GamesHub() {
         </section>
       )}
 
+      <section className={styles.futureSection} aria-labelledby="arcade-roadmap-title">
+        <header className={styles.header}>
+          <p className={styles.eyebrow}>IN DEVELOPMENT</p>
+          <h2 id="arcade-roadmap-title">More ways to play together</h2>
+          <p>These systems are visible early so you can see what is planned. Each stays disabled until its implementation and security checks are complete.</p>
+        </header>
+        <div className={styles.futureGrid}>
+          <article className={styles.futureCard}>
+            <span className={styles.futureStatus}>Coming soon</span>
+            <h3>Shared Sanctuary account</h3>
+            <p>Link game identity to your Sanctuary profile after consent, session and account-recovery flows are verified.</p>
+            <button type="button" className={styles.placeholderButton} disabled>Account linking · coming soon</button>
+          </article>
+          <article className={styles.futureCard}>
+            <span className={styles.futureStatus}>Coming soon</span>
+            <h3>Cloud saves and progression</h3>
+            <p>Securely sync supported game progress without replacing the games’ existing save and recovery paths.</p>
+            <button type="button" className={styles.placeholderButton} disabled>Cloud saves · coming soon</button>
+          </article>
+          <article className={styles.futureCard}>
+            <span className={styles.futureStatus}>Coming soon</span>
+            <h3>Guilds and parties</h3>
+            <p>Form groups, invite friends and coordinate sessions across supported Sanctuary games.</p>
+            <button type="button" className={styles.placeholderButton} disabled>Groups · coming soon</button>
+          </article>
+          <article className={styles.futureCard}>
+            <span className={styles.futureStatus}>Coming soon</span>
+            <h3>Quests, achievements and rankings</h3>
+            <p>Track milestones and leaderboards using verified game events, not client-reported scores.</p>
+            <button type="button" className={styles.placeholderButton} disabled>Progression · coming soon</button>
+          </article>
+          <article className={styles.futureCard}>
+            <span className={styles.futureStatus}>Security gated</span>
+            <h3>Cosmetics and rewards</h3>
+            <p>Profile themes, borders and supported game cosmetics will require server-side ownership checks.</p>
+            <button type="button" className={styles.placeholderButton} disabled>Locked · checks required</button>
+          </article>
+          <article className={styles.futureCard}>
+            <span className={styles.futureStatus}>Security gated</span>
+            <h3>Sanctuary Tokens in games</h3>
+            <p>Shared balances and spending remain unavailable until server-authoritative integration and abuse tests pass.</p>
+            <button type="button" className={styles.placeholderButton} disabled>Wallet bridge · locked</button>
+          </article>
+        </div>
+      </section>
+
       <section aria-labelledby="community-games-title">
         <header className={styles.header}>
           <p className={styles.eyebrow}>COMMUNITY WORLDS</p>
