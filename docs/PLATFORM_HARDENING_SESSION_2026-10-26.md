@@ -35,7 +35,7 @@ This is the operational handoff for the next coordinated build session. It suppl
 4. Add focused tests for unauthorized role escalation, cross-user data access, guest read-only behavior, and owner/admin operations.
 
 ### P2 — Durable community features
-1. Wire the existing Supabase messaging repository into the active Messages UI behind a small service boundary; keep demo mode explicit when configuration is absent.
+1. Persistent messaging repository/UI wiring and the authenticated-session identity guard are merged behind an opt-in flag. A guarded schema-repair migration is checked in, but staging/RLS/Realtime validation remains before activation.
 2. Verify direct and group conversation membership, read receipts/unread state, realtime delivery, and RLS using two distinct test accounts.
 3. Ensure notifications are persisted, recipient-scoped, and link to the right in-app destination.
 4. Validate feed/Shorts likes and comments with the latest applied migrations and signed-in/guest roles.
@@ -63,7 +63,7 @@ A feature is not “done” merely because source code exists. Mark it complete 
 - Do not expose secrets, apply unreviewed SQL, or change story canon based on inference.
 
 
-## Live handoff update — 2026-10-26 22:10 UTC
+## Historical handoff snapshot — 2026-10-26 22:10 UTC
 
 - PR #31 compact-header/PWA source change is merged; the current Vercel production alias still points to commit `8486da390b59183cf6de5a322c80e4497b755d3e`. Vercel reported the daily deployment quota limit, so do not claim the Vercel URL has the new header.
 - PR #34 is merged as `db7ec76c228945c7fd748124142a083139857d6e`. The Systems & Roadmap page now lists Guild Sanctuary, The 5 Sleeves 2D and The 5 Sleeves 3D, with disabled visible placeholder actions for planned, preview and security-gated systems. GitHub CI and the Cloudflare build passed; the GitHub Cloudflare deploy step was skipped, so a production Worker update is not confirmed.
@@ -71,3 +71,16 @@ A feature is not “done” merely because source code exists. Mark it complete 
 - The 2D main-branch scheduled suite on commit `b360d0654c7db3dff040d606fd2b2ae3ef3a9153` failed 4 of 145 tests: spawn/canon count (expected 5, actual 6), compact HUD bounds at phone size, fullscreen settings control expectation, and sleeve sprite channel placement. The report artifact is attached to run [40368414521](https://github.com/platinumsoundz/The-5-Sleeves/actions/runs/40368414521). Keep game-code changes on hold until the separate “branch - project access check” verdict is recovered.
 - The 2D and 3D README project-name corrections are merged in their respective repositories. Existing 3D save-recovery PR #1 remains untouched.
 - No production database, accounts, roles, token balances, Stripe settings or user data were changed.
+
+
+## Verified build update — 2026-10-26 22:33 UTC
+
+- **Cloudflare production Worker deployed:** `https://guild-sanctuary.thesmarthub.workers.dev`. GitHub workflow [40412968808](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40412968808) completed successfully; its log confirms the OpenNext build and `wrangler deploy`. The deployed source commit at that point was `2c29679eef11da783c0824db1d7422d6bd47a13`.
+- **GitHub CI passed on that commit:** PWA checks, auth-flow contract checks, messaging persistence/identity checks, Deno checks for token checkout/webhook functions, TypeScript typecheck and Next.js production build.
+- PR #36 is merged: roadmap cards now show disabled placeholder actions for every non-Available system, with status-specific text. The unconfigured The 5 Sleeves 2D launch button says Coming soon. Private messaging is correctly marked Preview until persistent storage is verified.
+- PR #39 is merged as `93c43602b56748dcd76742ba78f6222d6bd47a13`: a guarded, idempotent schema-repair migration and staging-first runbook are in Git. **The migration has not been applied to production.** The live catalog still lacks the expected messaging tables, so keep `NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES=false`.
+- PR #44 is merged as `2c29679eef11da783c0824db1d7422d6bd47a13`: persistent messaging now fails closed when the app's user ID does not match the authenticated Supabase user, and CI asserts this behavior.
+- **Vercel remains blocked:** the Vercel deployment API returned HTTP 402 because the free-tier daily deployment limit was exceeded for 24 hours. The `guild-sanctuary.vercel.app` alias still points to the older deployment. No billing or plan settings were changed. Use the verified Cloudflare Worker URL above while the Vercel limit is unresolved.
+- The latest The 5 Sleeves 2D main-branch suite still fails 4 of 145 tests: canon/world spawn count, compact phone HUD bounds, fullscreen settings expectation, and sleeve sprite channel placement. See [run 40410217327](https://github.com/platinumsoundz/The-5-Sleeves/actions/runs/40410217327). Game-code edits remain on hold pending recovery of the “branch - project access check” verdict.
+- The 5 Sleeves 2D and The 5 Sleeves 3D naming corrections are merged. The existing 3D save-recovery draft PR #1 remains untouched pending browser/device checks.
+- No production database migrations, account/role changes, wallet changes, payment activation or user-data changes were made.
