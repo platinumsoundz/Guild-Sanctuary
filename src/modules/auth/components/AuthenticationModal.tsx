@@ -10,7 +10,7 @@ interface AuthenticationModalProps {
   isGuest: boolean;
   pendingEmail: string | null;
   onClose: () => void;
-  onLogin: (email: string, password: string) => void | Promise<void>;
+  onLogin: (email: string, password: string) => boolean | void | Promise<boolean | void>;
   onSignup: (input: SignUpInput, password: string) => boolean | Promise<boolean>;
   onResetPassword: (email: string) => void | Promise<void>;
   onVerifyEmailCode: (code: string) => boolean | Promise<boolean>;
