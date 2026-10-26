@@ -1,6 +1,7 @@
 'use client';
 
 import type { AuthSession } from './sessionStore';
+import { CURRENT_TERMS_VERSION } from './terms';
 import type { Profile, ProfilePrivacy, PublicProfile, SocialLinks } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { ProfileRow, PublicProfileRow } from '@/services/supabase/database.types';
@@ -131,6 +132,23 @@ async function buildSession(): Promise<AuthSession> {
   const user = userResult.user;
   if (!user?.email || !user.email_confirmed_at) throw new Error('Verify your email before continuing.');
   const profileRow = await getProfileRow(user.id);
+  if (user.user_metadata?.terms_version === CURRENT_TERMS_VERSION) {
+    // The table grants insert on (user_id, terms_version) only; PostgreSQL
+    // generates the id and the accepted_at timestamp.
+    const { error: termsError } = await client
+      .from('terms_acceptances')
+      .insert({ user_id: user.id, terms_version: CURRENT_TERMS_VERSION });
+    if (termsError && termsError.code !== '23505') {
+      throw new Error(`Your Terms acceptance could not be recorded: ${termsError.message}`);
+    }
+  }
+  const { data: termsRecord, error: termsReadError } = await client
+    .from('terms_acceptances')
+    .select('terms_version, accepted_at')
+    .eq('user_id', user.id)
+    .eq('terms_version', CURRENT_TERMS_VERSION)
+    .maybeSingle();
+  if (termsReadError) throw new Error(`Your Terms record could not be loaded: ${termsReadError.message}`);
   const { data: factors, error: factorError } = await client.auth.mfa.listFactors();
   if (factorError) throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
   const twoFactorEnabled = factors.totp.some((factor) => factor.status === 'verified');
@@ -142,8 +160,8 @@ async function buildSession(): Promise<AuthSession> {
       twoFactorEnabled,
       status: isProfileActive(profileRow) ? 'active' : 'suspended',
       purchaseAgeVerifiedAt: profileRow.purchase_age_verified_at ?? null,
-      termsVersion: profileRow.terms_version ?? null,
-      termsAcceptedAt: profileRow.terms_accepted_at ?? null,
+      termsVersion: termsRecord?.terms_version ?? null,
+      termsAcceptedAt: termsRecord?.accepted_at ?? null,
       deletionPurgeAfter: profileRow.deletion_purge_after ?? null,
       createdAt: user.created_at,
       updatedAt: user.updated_at ?? user.created_at,
@@ -220,7 +238,7 @@ export async function requestSupabaseEmailCode(
         data: {
           username: signup.username,
           displayName: signup.displayName,
-          ...(signup.termsVersion ? { termsVersion: signup.termsVersion } : {}),
+          ...(signup.termsVersion ? { terms_version: signup.termsVersion } : {}),
         },
       } : {}),
     },

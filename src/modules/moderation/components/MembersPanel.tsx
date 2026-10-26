@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import type { AdminMemberOverview } from '@/services/supabase/database.types';
+import type { AdminMemberOverview, MemberTermsAcceptance } from '@/services/supabase/database.types';
 import {
   addMemberNote,
   fetchMemberOverview,
+  fetchMemberTerms,
   searchMembers,
   setMemberRole,
   type MemberSearchResult,
@@ -22,6 +23,7 @@ export function MembersPanel({ role, currentUserId }: MembersPanelProps) {
   const [results, setResults] = useState<MemberSearchResult[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [overview, setOverview] = useState<AdminMemberOverview | null>(null);
+  const [terms, setTerms] = useState<MemberTermsAcceptance[]>([]);
   const [rationale, setRationale] = useState('');
   const [note, setNote] = useState('');
   const [roleDraft, setRoleDraft] = useState<'member' | 'moderator' | 'admin'>('member');
@@ -48,11 +50,17 @@ export function MembersPanel({ role, currentUserId }: MembersPanelProps) {
   const selectMember = async (member: MemberSearchResult) => {
     setSelectedId(member.id);
     setOverview(null);
+    setTerms([]);
     setError(null);
     setNotice(null);
     setRoleDraft(member.role);
     try {
-      setOverview(await fetchMemberOverview(member.id));
+      const [nextOverview, nextTerms] = await Promise.all([
+        fetchMemberOverview(member.id),
+        fetchMemberTerms(member.id),
+      ]);
+      setOverview(nextOverview);
+      setTerms(nextTerms);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'The member overview could not be loaded.');
     }
@@ -193,8 +201,12 @@ export function MembersPanel({ role, currentUserId }: MembersPanelProps) {
                   {overview.profile.status}
                   {overview.profile.suspended_until ? ` until ${new Date(overview.profile.suspended_until).toLocaleString()}` : ''}
                 </p>
-                {overview.profile.terms_version && (
-                  <p className={styles.details}>Terms: {overview.profile.terms_version}</p>
+                {terms.length > 0 ? (
+                  <p className={styles.details}>
+                    Terms: {terms.map((entry) => `${entry.terms_version} (${new Date(entry.accepted_at).toLocaleDateString('en-GB')})`).join(', ')}
+                  </p>
+                ) : (
+                  <p className={styles.details}>Terms: no recorded acceptance</p>
                 )}
                 {overview.profile.deletion_purge_after && (
                   <p className={styles.warning}>Deletion scheduled for {new Date(overview.profile.deletion_purge_after).toLocaleString()}</p>

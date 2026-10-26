@@ -1,5 +1,5 @@
 import { getSupabaseBrowserClient } from '@/services/supabase';
-import type { AdminMemberOverview } from '@/services/supabase/database.types';
+import type { AdminMemberOverview, MemberTermsAcceptance } from '@/services/supabase/database.types';
 
 export interface MemberSearchResult {
   id: string;
@@ -50,6 +50,14 @@ export async function fetchMemberOverview(userId: string): Promise<AdminMemberOv
     throw new Error('The member overview returned no data.');
   }
   return data as AdminMemberOverview;
+}
+
+export async function fetchMemberTerms(userId: string): Promise<MemberTermsAcceptance[]> {
+  const { data, error } = await getSupabaseBrowserClient().rpc('admin_list_terms_acceptances', {
+    requested_user_id: userId,
+  });
+  if (error) throw new Error(error.message || "The member's Terms records could not be loaded.");
+  return Array.isArray(data) ? (data as MemberTermsAcceptance[]) : [];
 }
 
 export async function setMemberRole(

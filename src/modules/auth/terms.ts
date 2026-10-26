@@ -6,8 +6,11 @@
  * jurisdiction, age, consumer, refund, and privacy wording have been approved
  * and confirmed by qualified review. Turning the flag on requires the approved
  * page to replace the draft first.
+ *
+ * The version string is pinned by a CHECK constraint on
+ * public.terms_acceptances, so changing it requires a migration.
  */
-export const CURRENT_TERMS_VERSION = '2026-10-26-draft';
+export const CURRENT_TERMS_VERSION = 'sanctuary-terms-draft-2026-10-26';
 
 export function isTermsAcceptanceRequired(): boolean {
   return process.env.NEXT_PUBLIC_TERMS_REQUIRED === 'true';

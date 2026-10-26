@@ -269,7 +269,8 @@ The user is tired and wants to resume later. Avoid repeating completed checks, l
 - `supabase/migrations/20261026000000_token_purchase_age_gate.sql` — 18+ date-of-birth verification; stores only `profiles.purchase_age_verified_at`; adds `log_audit_event`.
 - `supabase/migrations/20261026000100_token_refund_clawback.sql` — `record_token_refund`, refund/dispute event tables, purchase-review queue; never creates a negative balance.
 - `supabase/migrations/20261026000200_account_deletion_grace_period.sql` — seven-day deletion schedule/restore/purge, `hidden_for_deletion` flags.
-- `supabase/migrations/20261026000300_terms_acceptance.sql` — `terms_version`/`terms_accepted_at`, signup metadata carry-through, `record_terms_acceptance`.
+- `supabase/migrations/20261026113205_terms_acceptance_records.sql` and `20261026113229_restrict_terms_acceptance_columns.sql` (from the parallel database/auth branch) — `public.terms_acceptances`, owner-only policies, server-generated timestamp.
+- `supabase/migrations/20261027000000_admin_terms_acceptances.sql` — `admin_list_terms_acceptances` moderator read path used by the Members tab.
 - `supabase/migrations/20261026000400_admin_dashboard.sql` — appeals, notes, member search/overview, role management, audit browsing, purchase-review RPCs.
 - App: age-gated Wallet, terms gate (`NEXT_PUBLIC_TERMS_REQUIRED`, default false), deletion notice/restore, Settings appeals panel, moderation tabs, Games hub, Token Shop catalogue.
 - Edge Functions: checkout requires stored 18+ verification; webhook handles `charge.refunded` and `charge.dispute.created`.
@@ -285,5 +286,5 @@ The user is tired and wants to resume later. Avoid repeating completed checks, l
 - `npm run typecheck` passed.
 - `npm run lint` passed.
 - `npm test -- --run` passed (17/17).
-- `npm run check:sql-handoff` passed (17 migrations).
+- `npm run check:sql-handoff` passed (19 migrations).
 - `npm run build` passed.

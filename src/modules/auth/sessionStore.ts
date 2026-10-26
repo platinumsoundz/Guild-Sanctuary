@@ -9,6 +9,7 @@
  */
 export type { AuthSession, SignUpInput } from './sessionSchema';
 export { MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE } from './sessionSchema';
+export { CURRENT_TERMS_VERSION } from './terms';
 export {
   clearStoredSession,
   persistActiveSession,

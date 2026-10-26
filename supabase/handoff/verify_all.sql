@@ -71,7 +71,6 @@ where routine_schema = 'public'
     'clear_profile_cosmetic',
     'grant_signup_token_bonus',
     'confirm_token_purchase_age',
-    'record_terms_acceptance',
     'record_token_refund',
     'request_account_deletion',
     'cancel_account_deletion',
@@ -85,6 +84,7 @@ where routine_schema = 'public'
     'admin_set_member_role',
     'admin_add_member_note',
     'admin_list_audit_events',
+    'admin_list_terms_acceptances',
     'admin_list_purchase_reviews',
     'admin_resolve_purchase_review'
   )
@@ -120,7 +120,8 @@ where schemaname = 'public'
     'token_purchase_reviews',
     'account_deletion_requests',
     'moderation_appeals',
-    'moderation_notes'
+    'moderation_notes',
+    'terms_acceptances'
   )
 order by tablename;
 
@@ -150,19 +151,24 @@ where table_schema = 'public'
   and column_name like 'equipped_%'
 order by column_name;
 
--- 10. Launch-gate columns on profiles. Expected: five rows.
+-- 10. Launch-gate columns on profiles. Expected: three rows.
 select column_name, data_type
 from information_schema.columns
 where table_schema = 'public'
   and table_name = 'profiles'
   and column_name in (
     'purchase_age_verified_at',
-    'terms_version',
-    'terms_accepted_at',
     'deletion_requested_at',
     'deletion_purge_after'
   )
 order by column_name;
+
+-- 10a. Terms acceptance storage. Expected: id, user_id, terms_version, accepted_at.
+select column_name, data_type
+from information_schema.columns
+where table_schema = 'public'
+  and table_name = 'terms_acceptances'
+order by ordinal_position;
 
 -- 11. Deletion visibility flags. Expected: hidden_for_deletion on all four.
 select table_name, column_name
@@ -172,7 +178,7 @@ where table_schema = 'public'
   and column_name = 'hidden_for_deletion'
 order by table_name;
 
--- 12. New RLS policies. Expected: appeals, notes, deletion requests, refunds.
+-- 12. New RLS policies. Expected: appeals, notes, deletion requests, refunds, terms.
 select tablename, policyname, cmd, roles
 from pg_policies
 where schemaname = 'public'
@@ -181,6 +187,7 @@ where schemaname = 'public'
     'token_purchase_reviews',
     'account_deletion_requests',
     'moderation_appeals',
-    'moderation_notes'
+    'moderation_notes',
+    'terms_acceptances'
   )
 order by tablename, policyname;

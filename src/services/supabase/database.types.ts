@@ -34,8 +34,6 @@ export type ProfileRow = {
   equipped_badge: string | null;
   equipped_banner: string | null;
   purchase_age_verified_at: string | null;
-  terms_version: string | null;
-  terms_accepted_at: string | null;
   deletion_requested_at: string | null;
   deletion_purge_after: string | null;
   created_at: string;
@@ -200,6 +198,11 @@ export type AccountDeletionRequestRow = {
   created_at: string;
 };
 
+export type MemberTermsAcceptance = {
+  terms_version: string;
+  accepted_at: string;
+};
+
 export type AdminMemberOverview = {
   profile: ProfileRow;
   balance_tokens: number;
@@ -233,6 +236,12 @@ export interface Database {
   public: {
     Tables: {
       profiles: Table<ProfileRow>;
+      terms_acceptances: Table<{
+        id: string;
+        user_id: string;
+        terms_version: string;
+        accepted_at: string;
+      }, { user_id: string; terms_version: string }, never>;
       community_tips: Table<{
         stripe_event_id: string;
         checkout_session_id: string;
@@ -571,13 +580,6 @@ export interface Database {
           requested_at: string;
         }[];
       };
-      record_terms_acceptance: {
-        Args: { requested_version: string };
-        Returns: {
-          terms_version: string;
-          terms_accepted_at: string;
-        }[];
-      };
       admin_search_members: {
         Args: { requested_query: string; requested_limit?: number };
         Returns: {
@@ -614,6 +616,13 @@ export interface Database {
           subject_id: string | null;
           details: Record<string, unknown>;
           created_at: string;
+        }[];
+      };
+      admin_list_terms_acceptances: {
+        Args: { requested_user_id: string };
+        Returns: {
+          terms_version: string;
+          accepted_at: string;
         }[];
       };
       submit_moderation_appeal: {

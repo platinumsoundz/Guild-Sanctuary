@@ -17,8 +17,10 @@ The schema is defined in `supabase/migrations/`:
 - `20261026000000_token_purchase_age_gate.sql` — 18+ purchase verification time, `log_audit_event`, and `confirm_token_purchase_age`.
 - `20261026000100_token_refund_clawback.sql` — refund/dispute event ledger, purchase-review queue, and `record_token_refund`.
 - `20261026000200_account_deletion_grace_period.sql` — seven-day deletion requests, restore, purge, and `hidden_for_deletion` visibility flags.
-- `20261026000300_terms_acceptance.sql` — terms version/timestamp, signup metadata carry-through, and `record_terms_acceptance`.
 - `20261026000400_admin_dashboard.sql` — appeals, internal notes, member search/overview, role management, audit browsing, and purchase-review RPCs.
+- `20261026113205_terms_acceptance_records.sql` — `terms_acceptances` table with a server-generated timestamp and an owner-only read/insert policy.
+- `20261026113229_restrict_terms_acceptance_columns.sql` — restricts clients to inserting only `user_id` and `terms_version`.
+- `20261027000000_admin_terms_acceptances.sql` — moderator-facing `admin_list_terms_acceptances` read path.
 
 These migrations have not been certified for production. Apply them to a disposable project first, then staging, then production after a backup. For the Dashboard SQL Editor, use `../SUPABASE_SQL_HANDOFF.md` and `handoff/`; `economy_migrations.sql` combines the six economy migrations, `all_migrations.sql` is for a fresh project, and `verify_economy.sql`/`verify_all.sql` are read-only checks. Run `npm run check:sql-handoff` after changing a migration.
 
