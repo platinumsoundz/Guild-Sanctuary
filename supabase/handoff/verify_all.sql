@@ -85,6 +85,7 @@ where routine_schema = 'public'
     'admin_add_member_note',
     'admin_list_audit_events',
     'admin_list_terms_acceptances',
+    'current_moderation_role',
     'admin_list_purchase_reviews',
     'admin_resolve_purchase_review'
   )
@@ -191,3 +192,34 @@ where schemaname = 'public'
     'terms_acceptances'
   )
 order by tablename, policyname;
+
+-- 13. Terms acceptance column privileges. Expected: authenticated may INSERT
+-- only user_id and terms_version, SELECT the table, and anon has nothing.
+select grantee, privilege_type, column_name
+from information_schema.column_privileges
+where table_schema = 'public'
+  and table_name = 'terms_acceptances'
+  and grantee in ('authenticated', 'anon')
+order by grantee, privilege_type, column_name;
+
+-- 14. Moderation RPC grants. Expected: authenticated only, never anon.
+select routine_name, grantee, privilege_type
+from information_schema.routine_privileges
+where routine_schema = 'public'
+  and routine_name in (
+    'current_moderation_role',
+    'submit_moderation_appeal',
+    'admin_list_appeals',
+    'admin_resolve_appeal',
+    'admin_search_members',
+    'admin_member_overview',
+    'admin_set_member_role',
+    'admin_add_member_note',
+    'admin_list_audit_events',
+    'admin_list_terms_acceptances',
+    'admin_list_purchase_reviews',
+    'admin_resolve_purchase_review',
+    'purge_due_account_deletions'
+  )
+  and grantee in ('anon', 'authenticated', 'service_role')
+order by routine_name, grantee;

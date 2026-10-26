@@ -143,6 +143,13 @@ delete an account early. `removeUserMedia` lists the `<userId>/` prefix in
 upload path stops using a `userId` prefix (for example an avatar bucket), the
 purge list must be extended or those objects will be orphaned.
 
+Scheduling it: any scheduler that can send an `Authorization: Bearer
+<ACCOUNT_PURGE_SECRET>` POST to `/api/account/purge` will do (Cloudflare Cron
+Trigger, an external cron, or a Supabase scheduled function). Run it daily at
+most; it processes up to 20 accounts per call and returns `{ purged, failed }`.
+Do not put the secret in `NEXT_PUBLIC_*` values or client code, and do not
+expose the route to the browser.
+
 ## 6. Terms acceptance
 
 | Step | Expected |

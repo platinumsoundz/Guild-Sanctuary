@@ -39,6 +39,10 @@ export function TermsAcceptanceGate({ version, onAccept, onSignOut }: TermsAccep
         <li><Link className="underline underline-offset-4" href="/privacy" target="_blank">Privacy Notice</Link></li>
         <li><Link className="underline underline-offset-4" href="/guidelines" target="_blank">Community Guidelines</Link></li>
       </ul>
+      <p className="mt-3 text-xs text-neutral-500">
+        Document version <code className="text-neutral-400">{version}</code> will be stored with a
+        server-recorded time against your account.
+      </p>
       <label className="mt-7 flex items-start gap-3 text-sm text-neutral-300">
         <input
           className="mt-1 h-4 w-4 accent-emerald-500"
