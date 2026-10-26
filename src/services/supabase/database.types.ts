@@ -86,6 +86,12 @@ export interface Database {
   public: {
     Tables: {
       profiles: Table<ProfileRow>;
+      terms_acceptances: Table<{
+        id: string;
+        user_id: string;
+        terms_version: string;
+        accepted_at: string;
+      }, { user_id: string; terms_version: string }, never>;
       community_tips: Table<{
         stripe_event_id: string;
         checkout_session_id: string;
