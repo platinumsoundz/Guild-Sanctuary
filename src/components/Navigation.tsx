@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   CalendarDays,
+  Bell,
   Clapperboard,
   Menu,
   MessageSquare,
@@ -28,6 +29,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'events', label: 'Events', icon: CalendarDays },
   { id: 'discover', label: 'Discover', icon: Search },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
   { id: 'games', label: 'Games', icon: Gamepad2 },
   { id: 'roadmap', label: 'Systems & Roadmap', icon: Map },
@@ -119,7 +121,7 @@ export function Navigation({
     <>
       <header className={styles.header}>
         <div className={styles.headerIdentity}>
-          {currentUser && (
+          {isSessionReady && (
             <button
               ref={menuButtonRef}
               className={styles.menuButton}
@@ -138,6 +140,11 @@ export function Navigation({
           </div>
         </div>
         <div className={styles.accountArea}>
+          {isSessionReady && (
+            <button className={styles.notificationButton} type="button" aria-label="Open notifications" onClick={() => onNavigate('notifications')}>
+              <Bell size={19} strokeWidth={1.8} aria-hidden="true" />
+            </button>
+          )}
           {!isSessionReady ? (
             <span className={styles.accountPlaceholder} role="status">Restoring session</span>
           ) : (
@@ -149,12 +156,10 @@ export function Navigation({
             >
               {currentUser ? (
                 <>
-                  <span className={styles.accountMark} aria-hidden="true">
-                    <UserRound size={15} strokeWidth={1.8} />
-                  </span>
-                  <span>{currentUser.profile.displayName}</span>
+                  <span className={styles.accountMark} aria-hidden="true"><UserRound size={15} strokeWidth={1.8} /></span>
+                  <span className={styles.accountButtonLabel}>{currentUser.profile.displayName}</span>
                 </>
-              ) : 'Sign in / Register'}
+              ) : isGuest ? 'Guest · Sign in' : 'Sign in / Register'}
             </button>
           )}
         </div>
