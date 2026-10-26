@@ -146,7 +146,10 @@ export async function signInWithSupabasePassword(
     : `Sign-in failed: ${error.message}`);
 
   const { data: factors, error: factorError } = await client.auth.mfa.listFactors();
-  if (factorError) throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
+  if (factorError) {
+    await clearUnverifiedAuthSession(client);
+    throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
+  }
   const factor = factors.totp.find((item) => item.status === 'verified');
 
   if (factor) {
@@ -226,7 +229,10 @@ export async function verifySupabaseEmailCode(
   if (verifyError) throw new Error(`Email verification failed: ${verifyError.message}`);
 
   const { data: factors, error: factorError } = await client.auth.mfa.listFactors();
-  if (factorError) throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
+  if (factorError) {
+    await clearUnverifiedAuthSession(client);
+    throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
+  }
   const factor = factors.totp.find((item) => item.status === 'verified');
   if (factor) {
     const { data: challenge, error: challengeError } = await client.auth.mfa.challenge({ factorId: factor.id });
