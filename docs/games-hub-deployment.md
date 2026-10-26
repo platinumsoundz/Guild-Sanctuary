@@ -31,3 +31,47 @@ The hub currently links to the two existing game deployments. It does not provid
 - [ ] Iframe and separate-tab behavior are checked automatically where feasible.
 - [ ] CSP, CORS, authentication, session expiry and replay rejection are covered before account linking.
 - [ ] Human mobile performance check remains pending; do not describe automated checks as device verification.
+
+
+## Handover log — 26 October 2026
+
+### Done on working branches
+- Games entry wired into Sanctuary navigation/workspace.
+- Responsive Games Hub added with embedded launch and open-in-new-tab fallback.
+- 3D target set to the known Pages URL: `https://the-5-sleeves-3d.pages.dev/`.
+- 2D target deliberately uses `NEXT_PUBLIC_5_SLEEVES_2D_URL`; the value remains unset until the canonical Render URL is verified.
+- Cloudflare Wrangler config includes an Images preview binding.
+- Dedicated Cloudflare build trigger corrected to use `npx opennextjs-cloudflare build` and `npx wrangler deploy --dry-run`. Dry-run is not a production deployment.
+- 2D Socket.IO handshake smoke test added in its own PR; the isolated test job passed.
+- 3D static asset/module smoke tests added in their own PR; CI passed.
+
+### Build/test caveats
+- Sanctuary app build/type checks passed before the most recent Cloudflare build-trigger correction.
+- Cloudflare build `354e7c4f-a58d-4338-9634-591e0e8e748b` was still running at the last poll and used commit `2acc9c4d4e9e07bb961c1de96dcee9e75e2c5a97`. It may not include the latest Wrangler config commit; confirm its final result and rerun on the current branch head.
+- The broader 2D test suite has four pre-existing failures to investigate: biome expectations, compact HUD bounds, fullscreen-settings assertion, and sprite sleeve positioning. Do not change gameplay behavior until expected behavior is established.
+- Cloudflare Pages deployment API reported success for the 3D site, but external browser/device verification was not independently confirmed by the automation environment.
+- No manual mobile QA is claimed.
+
+### Remaining checklist
+- [ ] Confirm the Cloudflare build outcome and run a fresh dry-run against the latest Sanctuary branch head.
+- [ ] Verify the canonical 2D Render URL in Render/deployment settings; configure the public environment variable and rebuild.
+- [ ] Run external HTTP checks for 3D Pages assets/PWA/save recovery and 2D health/Socket.IO.
+- [ ] Verify iframe and new-tab launch, keyboard input, pointer lock, fullscreen, CSP/frame policy and mobile layout.
+- [ ] Inspect existing Supabase auth and game-server authority before designing account linking. Do not send long-lived auth credentials in URLs.
+- [ ] Before shared identity/progression/economy, implement server-verified short-lived scoped tokens, expiry, revocation, replay protection, idempotency, audit logs, origin allowlists and negative security tests.
+- [ ] Keep shared rewards/spending disabled until end-to-end staging and security checks pass.
+- [ ] Review all draft PRs and merge only after CI and deployment gates pass.
+
+### Explicitly not implemented
+- No shared SSO, shared saves, inventory, progression, Sanctuary Token balance or cross-game entitlement bridge.
+- No verified 2D Render URL configured.
+- No production deployment performed by this integration work.
+- No claim of real-device/manual QA.
+
+### Related draft PRs
+- Sanctuary Games Hub: https://github.com/platinumsoundz/Guild-Sanctuary/pull/17
+- Sanctuary integration contract: https://github.com/platinumsoundz/Guild-Sanctuary/pull/16
+- 2D host contract: https://github.com/platinumsoundz/The-5-Sleeves/pull/2
+- 2D Socket.IO smoke test: https://github.com/platinumsoundz/The-5-Sleeves/pull/3
+- 3D hosting contract: https://github.com/platinumsoundz/The-5-Sleeves-3D/pull/2
+- 3D static smoke tests: https://github.com/platinumsoundz/The-5-Sleeves-3D/pull/3
