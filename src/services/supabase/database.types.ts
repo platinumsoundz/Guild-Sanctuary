@@ -23,7 +23,7 @@ export type ProfileRow = {
   belief: string | null;
   social_links: Record<string, string | null>;
   privacy: Record<string, boolean>;
-  role: 'member' | 'moderator' | 'admin';
+  role: 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner';
   status: 'active' | 'suspended' | 'banned';
   suspended_until: string | null;
   allow_direct_messages: boolean;
@@ -307,6 +307,10 @@ export interface Database {
       is_moderator: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      set_member_role: {
+        Args: { requested_user_id: string; requested_role: 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner' };
+        Returns: undefined;
       };
       record_community_tip: {
         Args: {
