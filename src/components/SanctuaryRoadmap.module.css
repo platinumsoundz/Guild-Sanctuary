@@ -1,0 +1,31 @@
+.page {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 42px);
+  color: var(--ink);
+}
+.header { max-width: 850px; margin-bottom: 24px; }
+.eyebrow { margin: 0 0 8px; color: var(--accent); font: 700 10px Arial, sans-serif; letter-spacing: 1.3px; }
+.header h1 { margin: 0; font-size: clamp(29px, 5vw, 44px); font-weight: 650; }
+.header > p:not(.eyebrow) { color: var(--muted); font: 13px/1.75 Arial, sans-serif; }
+.notice { display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font: 12px/1.65 Arial, sans-serif; background: var(--surface); }
+.notice svg { flex: 0 0 auto; color: var(--accent); margin-top: 1px; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 22px 0; }
+.filter, .filterActive { min-height: 36px; padding: 7px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface); cursor: pointer; font: 11px Arial, sans-serif; }
+.filterActive { color: var(--ink); border-color: var(--accent); background: var(--accent-soft); }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-raised); }
+.cardTop { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.group { color: var(--muted); text-transform: uppercase; letter-spacing: .8px; font: 700 9px Arial, sans-serif; }
+.statusAvailable, .statusPreview, .statusPlanned, .statusGated { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border: 1px solid var(--line); border-radius: 999px; font: 10px Arial, sans-serif; }
+.statusAvailable { color: var(--accent); }
+.statusPreview { color: #b6a16d; }
+.statusPlanned { color: var(--muted); }
+.statusGated { color: #d7a09a; }
+.card h2 { margin: 13px 0 7px; font-size: 15px; font-weight: 650; }
+.card p { margin: 0; color: var(--muted); font: 12px/1.7 Arial, sans-serif; }
+.footer { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font: 11px/1.7 Arial, sans-serif; }
+.footer span { flex: 1 1 240px; }
+.footer svg { flex: 0 0 auto; color: var(--accent); }
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 580px) { .page { padding: 20px 14px; } .grid { grid-template-columns: 1fr; } }
