@@ -129,7 +129,7 @@ export type SupabasePasswordSignIn = {
 async function clearUnverifiedAuthSession(client: ReturnType<typeof getSupabaseBrowserClient>): Promise<void> {
   // Password/OTP verification may establish an AAL1 provider session before the app
   // finishes its profile and MFA checks. Never leave that partial session active on failure.
-  await client.auth.signOut();
+  await client.auth.signOut({ scope: 'local' });
 }
 
 export async function signInWithSupabasePassword(
