@@ -87,7 +87,7 @@ begin
     where id = requested_user_id;
 
   insert into public.audit_events (actor_id, event_type, subject_type, subject_id, details)
-    values (caller_id, 'member_role_changed', 'profile', requested_user_id::text,
+    values (caller_id, 'member_role_changed', 'profile', requested_user_id,
       jsonb_build_object('previous_role', target_role, 'new_role', requested_role));
 end;
 $$;
