@@ -27,6 +27,8 @@ import styles from './Navigation.module.css';
 
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
   { id: 'feed', label: 'Feed', icon: Newspaper },
+  { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
+  { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
   { id: 'events', label: 'Events', icon: CalendarDays },
   { id: 'discover', label: 'Discover', icon: Search },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
@@ -36,10 +38,8 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'roadmap', label: 'Systems & Roadmap', icon: Map },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
-  { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
   { id: 'settings', label: 'Settings', icon: Settings },
-  { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
 ];
 
 interface NavigationProps {
