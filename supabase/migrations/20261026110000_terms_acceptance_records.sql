@@ -25,8 +25,9 @@ create policy "users record own terms acceptance"
   for insert to authenticated
   with check (user_id = (select auth.uid()));
 
-revoke all on public.terms_acceptances from public, anon;
-revoke update, delete, truncate on public.terms_acceptances from authenticated;
-grant select, insert on public.terms_acceptances to authenticated;
+revoke all on public.terms_acceptances from public, anon, authenticated;
+grant select on public.terms_acceptances to authenticated;
+-- Clients may provide only their own user ID and the fixed version; id and accepted_at are server-generated.
+grant insert (user_id, terms_version) on public.terms_acceptances to authenticated;
 
 commit;
