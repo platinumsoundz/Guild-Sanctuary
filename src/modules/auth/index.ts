@@ -17,7 +17,7 @@ export {
 	verifyLocalEmail,
 	verifyLocalTwoFactor,
 } from './sessionStore';
-export { MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE } from './sessionStore';
+export { CURRENT_TERMS_VERSION, MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE } from './sessionStore';
 export type { AuthSession, SignUpInput } from './sessionStore';
 export {
   isPrivateProfileVaultUnlocked,
