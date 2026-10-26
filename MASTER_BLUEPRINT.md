@@ -1,6 +1,8 @@
 # The Sanctuary — Master Blueprint
 
-Last updated: 2026-10-24
+Last updated: 2026-10-26
+
+See [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) for the detailed build, security, staging, and release checklist. Treat checklist items as evidence-driven gates; a green CI build does not equal production readiness.
 
 ## Product decision
 
