@@ -23,7 +23,7 @@ export type ProfileRow = {
   belief: string | null;
   social_links: Record<string, string | null>;
   privacy: Record<string, boolean>;
-  role: 'member' | 'moderator' | 'admin';
+  role: 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner';
   status: 'active' | 'suspended' | 'banned';
   suspended_until: string | null;
   allow_direct_messages: boolean;
@@ -113,31 +113,14 @@ export interface Database {
         created_at: string;
       }>;
       token_spend_catalog: Table<{
-        item_id: string;
-        name: string;
-        description: string;
-        price_tokens: number;
-        kind: string;
-        enabled: boolean;
-        created_at: string;
-        asset_url: string | null;
-        asset_text: string | null;
-        effect_key: string | null;
-        sort_order: number;
+        item_id: string; name: string; description: string; price_tokens: number; kind: string; enabled: boolean;
+        created_at: string; asset_url: string | null; asset_text: string | null; effect_key: string | null; sort_order: number;
       }>;
       token_spend_ledger: Table<{
-        id: string;
-        user_id: string;
-        item_id: string;
-        item_name: string;
-        tokens_delta: number;
-        idempotency_key: string;
-        created_at: string;
+        id: string; user_id: string; item_id: string; item_name: string; tokens_delta: number; idempotency_key: string; created_at: string;
       }>;
       token_entitlements: Table<{
-        user_id: string;
-        item_id: string;
-        granted_at: string;
+        user_id: string; item_id: string; granted_at: string;
       }>;
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
@@ -346,6 +329,14 @@ export interface Database {
       is_moderator: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      set_member_role: {
+        Args: { requested_user_id: string; requested_role: 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner' };
+        Returns: undefined;
+      };
+      search_members_for_admin: {
+        Args: { requested_query: string };
+        Returns: { id: string; username: string; display_name: string; role: 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner'; status: 'active' | 'suspended' | 'banned' }[];
       };
       record_community_tip: {
         Args: {
