@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
-import { SanctuaryNotifications } from '@/components/SanctuaryNotifications';
 import styles from './Navigation.module.css';
 
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
@@ -139,7 +138,6 @@ export function Navigation({
           </div>
         </div>
         <div className={styles.accountArea}>
-          <SanctuaryNotifications />
           {!isSessionReady ? (
             <span className={styles.accountPlaceholder} role="status">Restoring session</span>
           ) : (
