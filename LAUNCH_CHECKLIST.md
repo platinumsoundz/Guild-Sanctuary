@@ -159,6 +159,8 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 - [ ] Add token purchase idempotency/replay tests and wallet invariant tests.
 - [ ] Add basic end-to-end tests for feed, Shorts, events, messages, profile/settings, notifications, and guest mode.
 - [ ] Test mobile viewport and common desktop breakpoints.
+- [ ] Investigate the critical-severity vulnerability reported by `npm ci` audit; identify the exact package/advisory and apply a reviewed, lockfile-preserving fix. Do not run `npm audit fix --force` blindly.
+- [ ] Review the additional high-severity audit findings introduced by the Cloudflare workflow's temporary adapter/Wrangler install; pin safe versions and verify the workflow without deploying production.
 - [ ] Review dependency audit output and pin/update risky packages with lockfile changes and CI verification.
 - [ ] Add structured server-side error logging that excludes passwords, tokens, secrets, private messages, and sensitive personal data.
 - [ ] Add uptime/health monitoring and alerts for failed builds, failed Edge Functions, webhook errors, and auth failure spikes.
