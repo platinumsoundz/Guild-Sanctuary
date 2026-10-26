@@ -118,6 +118,53 @@ export async function requestSupabaseEmailCode(email: string, signup?: { usernam
   if (error) throw new Error(`A verification code could not be sent: ${error.message}`);
 }
 
+export async function signInWithSupabasePassword(email: string, password: string): Promise<AuthSession> {
+  const { error } = await getSupabaseBrowserClient().auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password,
+  });
+  if (error) throw new Error(error.message.includes('Invalid login credentials')
+    ? 'Email or password is incorrect.'
+    : `Sign-in failed: ${error.message}`);
+
+  return buildSession();
+}
+
+export async function signUpWithSupabasePassword(
+  input: { email: string; username: string; displayName: string },
+  password: string,
+): Promise<{ needsEmailConfirmation: boolean }> {
+  if (password.length < 10) throw new Error('Use a password with at least 10 characters.');
+  const client = getSupabaseBrowserClient();
+  const { data, error } = await client.auth.signUp({
+    email: input.email.trim().toLowerCase(),
+    password,
+    options: {
+      emailRedirectTo: `${window.location.origin}/auth/callback`,
+      data: { username: input.username.trim(), display_name: input.displayName.trim() },
+    },
+  });
+  if (error) throw new Error(`Account creation failed: ${error.message}`);
+  if (!data.user) throw new Error('Supabase did not return an account. Please try again.');
+
+  // Existing deployments may have a profile-creation trigger. Do not duplicate profiles here.
+  return { needsEmailConfirmation: !data.session };
+}
+
+export async function sendSupabasePasswordReset(email: string): Promise<void> {
+  const { error } = await getSupabaseBrowserClient().auth.resetPasswordForEmail(
+    email.trim().toLowerCase(),
+    { redirectTo: `${window.location.origin}/reset-password` },
+  );
+  if (error) throw new Error(`Password reset email could not be sent: ${error.message}`);
+}
+
+export async function updateSupabasePassword(password: string): Promise<void> {
+  if (password.length < 10) throw new Error('Use a password with at least 10 characters.');
+  const { error } = await getSupabaseBrowserClient().auth.updateUser({ password });
+  if (error) throw new Error(`Password could not be changed: ${error.message}`);
+}
+
 export type SupabaseEmailVerification = {
   session: AuthSession | null;
   challenge: { factorId: string; challengeId: string } | null;
