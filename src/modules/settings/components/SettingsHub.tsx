@@ -39,6 +39,7 @@ const linkLabels: { key: keyof SocialLinks; label: string; host: string }[] = [
   { key: 'facebook', label: 'Facebook', host: 'facebook.com' },
   { key: 'x', label: 'X / Twitter', host: 'x.com or twitter.com' },
   { key: 'youtube', label: 'YouTube', host: 'youtube.com' },
+  { key: 'instagram', label: 'Instagram', host: 'instagram.com' },
   { key: 'xbox', label: 'Xbox gamertag', host: 'gamertag or xbox.com profile URL' },
   { key: 'playstation', label: 'PlayStation ID', host: 'Online ID or playstation.com profile URL' },
   { key: 'steam', label: 'Steam', host: 'username or steamcommunity.com profile URL' },
