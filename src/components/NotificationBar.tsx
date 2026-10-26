@@ -37,10 +37,12 @@ export function NotificationBar({ fullPage = false }: { fullPage?: boolean }) {
       setItems([]);
       setIsConnected(false);
       setIsLoading(false);
+      setError(null);
       return;
     }
 
     setIsLoading(true);
+    setError(null);
     try {
       const client = getSupabaseBrowserClient();
       const { data: authData, error: authError } = await client.auth.getUser();
@@ -207,12 +209,17 @@ export function NotificationBar({ fullPage = false }: { fullPage?: boolean }) {
 
           {isGuest ? (
             <p className={styles.emptyState}>Guest mode is for exploring. Sign in to receive personal notifications.</p>
-          ) : !isConnected && !isLoading ? (
-            <p className={styles.emptyState}>Sign in with your connected Sanctuary account to enable notifications.</p>
           ) : isLoading && items.length === 0 ? (
             <p className={styles.emptyState}>Loading notifications…</p>
           ) : error ? (
-            <p className={styles.error} role="alert">{error}</p>
+            <div>
+              <p className={styles.error} role="alert">{error}</p>
+              <button type="button" className={styles.markAllButton} onClick={() => void loadNotifications()} disabled={isLoading}>
+                Retry loading notifications
+              </button>
+            </div>
+          ) : !isConnected ? (
+            <p className={styles.emptyState}>Sign in with your connected Sanctuary account to enable notifications.</p>
           ) : items.length === 0 ? (
             <p className={styles.emptyState}>You're all caught up. New likes and comments will appear here.</p>
           ) : (
