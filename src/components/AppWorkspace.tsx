@@ -40,7 +40,8 @@ export function AppWorkspace() {
     verifyTwoFactorCode,
     cancelAuthChallenge,
   } = useAppContext();
-  const [messagePeer, setMessagePeer] = useState<PublicProfile | null>(null);\n  const [viewedProfile, setViewedProfile] = useState<PublicProfile | null>(null);
+  const [messagePeer, setMessagePeer] = useState<PublicProfile | null>(null);
+  const [viewedProfile, setViewedProfile] = useState<PublicProfile | null>(null);
   const [messageConversation, setMessageConversation] = useState<Conversation | null>(null);
   const [profilePosts, setProfilePosts] = useState<import('@/types/database').Post[]>([]);
   const [isProfilePostsLoading, setIsProfilePostsLoading] = useState(false);
@@ -83,13 +84,15 @@ export function AppWorkspace() {
   }, [activeNavigation, currentUser]);
 
   const openMessage = (profile: PublicProfile) => {
-    setViewedProfile(null);\n    setMessageConversation(null);
+    setViewedProfile(null);
+    setMessageConversation(null);
     setMessagePeer(profile);
     setActiveNavigation('messages');
   };
 
   const openNavigation = (navigation: NavigationState) => {
-    setViewedProfile(null);\n    if (navigation === 'messages') {
+    setViewedProfile(null);
+    if (navigation === 'messages') {
       setMessagePeer(null);
       setMessageConversation(null);
     }
