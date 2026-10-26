@@ -70,7 +70,7 @@ export type MessageRow = {
 export type ContentReportRow = {
   id: string;
   reporter_id: string;
-  target_type: 'post' | 'short' | 'event' | 'message';
+  target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
   target_id: string;
   reason: string;
   details: string | null;
@@ -201,7 +201,7 @@ export interface Database {
         id: string;
         report_id: string | null;
         actor_id: string;
-        target_type: 'post' | 'short' | 'event' | 'message' | 'user';
+        target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
         target_id: string;
         action: ModerationAction;
         rationale: string;
@@ -263,7 +263,7 @@ export interface Database {
       };
       submit_content_report: {
         Args: {
-          requested_target_type: 'post' | 'short' | 'event' | 'message';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
           requested_target_id: string;
           requested_reason: string;
           requested_details?: string | null;
@@ -273,7 +273,7 @@ export interface Database {
       apply_moderation_action: {
         Args: {
           requested_report_id: string | null;
-          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'user';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
           requested_target_id: string;
           requested_action: ModerationAction;
           requested_rationale: string;
@@ -283,7 +283,7 @@ export interface Database {
       };
       get_report_target_owner: {
         Args: {
-          requested_target_type: 'post' | 'short' | 'event' | 'message';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
           requested_target_id: string;
         };
         Returns: string | null;
@@ -346,7 +346,7 @@ export interface Database {
       conversation_kind: 'direct' | 'group';
       content_state: 'visible' | 'hidden' | 'removed';
       report_status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
-      report_target_type: 'post' | 'short' | 'event' | 'message';
+      report_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
       moderation_action_type: ModerationAction;
     };
     CompositeTypes: Record<string, never>;
