@@ -20,6 +20,10 @@ import {
   lockPrivateProfileVault,
   isSupabaseAuthConfigured,
   requestSupabaseEmailCode,
+  signInWithSupabasePassword,
+  signUpWithSupabasePassword,
+  sendSupabasePasswordReset,
+  updateSupabasePassword,
   restoreSupabaseSession,
   verifySupabaseEmailCode,
   verifySupabaseTotpCode,
@@ -44,8 +48,10 @@ interface AppContextValue {
   pendingTwoFactorEmail: string | null;
   activeNavigation: NavigationState;
   isGuest: boolean;
-  login: (email: string) => Promise<void>;
-  signup: (input: SignUpInput) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (input: SignUpInput, password: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<void>;
+  changePassword: (password: string) => Promise<void>;
   verifyEmailCode: (code: string) => Promise<boolean>;
   verifyTwoFactorCode: (code: string) => Promise<void>;
   setTwoFactorEnabled: (enabled: boolean) => void;
@@ -135,44 +141,47 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     setSessionError(null);
   };
 
-  const signup = async (input: SignUpInput) => {
+  const signup = async (input: SignUpInput, password: string): Promise<boolean> => {
     if (isSupabaseAuthConfigured()) {
-      await requestSupabaseEmailCode(input.email, input);
-      setPendingEmail(input.email.trim().toLowerCase());
+      const result = await signUpWithSupabasePassword(input, password);
       setPendingTwoFactorEmail(null);
       setPendingTotp(null);
-      return;
+      if (result.needsEmailConfirmation) {
+        setPendingEmail(input.email.trim().toLowerCase());
+        return true;
+      }
+      const session = await restoreSupabaseSession();
+      if (!session) throw new Error('Your account was created, but its profile or session is not ready yet. Please check your email for confirmation, or try signing in.');
+      activateSession(session, false);
+      return false;
     }
     if (process.env.NODE_ENV === 'production') {
       throw new Error('Production sign-up is disabled until Supabase Auth is configured.');
     }
-    const session = registerLocalAccount(input);
-    setPendingEmail(session.user.email);
-    setPendingTwoFactorEmail(null);
+    throw new Error('Password accounts are not available in local demo mode. Configure Supabase Auth to create a secure account.');
   };
 
-  const login = async (email: string) => {
+  const login = async (email: string, password: string) => {
     if (isSupabaseAuthConfigured()) {
-      await requestSupabaseEmailCode(email);
-      setPendingEmail(email.trim().toLowerCase());
-      setPendingTwoFactorEmail(null);
-      setPendingTotp(null);
+      const session = await signInWithSupabasePassword(email, password);
+      if (session.user.status !== 'active') throw new Error('This account is currently unavailable. Contact support for help.');
+      activateSession(session, false);
       return;
     }
     if (process.env.NODE_ENV === 'production') {
-      throw new Error('Production sign-in is disabled until Supabase Auth is configured.');
+      throw new Error('Sign-in is unavailable because Supabase Auth is not configured.');
     }
-    const session = findLocalAccountByEmail(email);
+    throw new Error('Password sign-in is not available in local demo mode. Configure Supabase Auth to use secure password accounts.');
+  };
 
-    if (!session) {
-      throw new Error('No saved account uses that email. Create an account first.');
-    }
-    if (session.user.status !== 'active') {
-      throw new Error('This account is currently unavailable. Contact support for help.');
-    }
+  const resetPassword = async (email: string) => {
+    if (!isSupabaseAuthConfigured()) throw new Error('Password reset requires Supabase Auth to be configured.');
+    await sendSupabasePasswordReset(email);
+  };
 
-    setPendingEmail(session.user.email);
-    setPendingTwoFactorEmail(null);
+  const changePassword = async (password: string) => {
+    if (!isSupabaseAuthConfigured()) throw new Error('Password changes require Supabase Auth to be configured.');
+    await updateSupabasePassword(password);
   };
 
   const verifyEmailCode = async (code: string) => {
@@ -348,6 +357,8 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         isGuest,
         login,
         signup,
+        resetPassword,
+        changePassword,
         verifyEmailCode,
         verifyTwoFactorCode,
         setTwoFactorEnabled,
