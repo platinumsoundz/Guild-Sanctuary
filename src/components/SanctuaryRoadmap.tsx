@@ -31,6 +31,37 @@ const systems: { title: string; group: string; status: Status; description: stri
   { title: 'Deployment safety and release gates', group: 'Operations', status: 'Planned', description: 'Build verification, deployment checks and safer rollback procedures.' },
 ];
 
+
+const projects = [
+  {
+    name: 'Guild Sanctuary',
+    scope: 'Community platform',
+    status: 'Active build',
+    summary: 'Community, identity, moderation, notifications and the shared project roadmap.',
+    next: 'Verify the compact-header release on production, then complete the real password-reset email smoke test.',
+    repo: 'https://github.com/platinumsoundz/Guild-Sanctuary',
+    plan: 'https://github.com/platinumsoundz/Guild-Sanctuary/blob/main/MASTER_BLUEPRINT.md',
+  },
+  {
+    name: 'The 5 Sleeves Online',
+    scope: '2D multiplayer RPG',
+    status: 'Playable · verification pending',
+    summary: 'Village-scale world, six safe cities, wilderness roads, tower rooms, PvE/PvP modes and character progression.',
+    next: 'Build one owner-approved gameplay system at a time; verify wilderness balancing, durable account progress and live hosting before calling them complete.',
+    repo: 'https://github.com/platinumsoundz/The-5-Sleeves',
+    plan: 'https://github.com/platinumsoundz/The-5-Sleeves/blob/main/ROADMAP.md',
+  },
+  {
+    name: 'The 5 Sleeves 3D',
+    scope: '3D browser training game',
+    status: 'Prototype · device checks pending',
+    summary: 'Playable training settlement, sparring, wilderness test route, progression, inventory, skills and First Tower prototype.',
+    next: 'Run an owner device/browser pass on the newer progression, tower, scan and minimap systems before expanding the feature set.',
+    repo: 'https://github.com/platinumsoundz/The-5-Sleeves-3D',
+    plan: 'https://github.com/platinumsoundz/The-5-Sleeves-3D/blob/main/docs/roadmap.md',
+  },
+] as const;
+
 const groups = ['All systems', 'Community', 'Games', 'Connected systems', 'Economy', 'Safety', 'Operations'];
 
 function StatusIcon({ status }: { status: Status }) {
@@ -52,12 +83,48 @@ export function SanctuaryRoadmap() {
       <header className={styles.header}>
         <p className={styles.eyebrow}>THE SANCTUARY BLUEPRINT</p>
         <h1>Systems &amp; Roadmap</h1>
-        <p>Every known major system is listed here, including features still being built. Status labels distinguish working interfaces from planned integrations and security-gated functionality.</p>
+        <p>One command centre for Sanctuary and both 5 Sleeves projects. This view separates implemented work from prototypes, planned integrations and release checks still outstanding.</p>
         <div className={styles.notice} role="note">
           <CircleDashed size={17} aria-hidden="true" />
-          <span>This is a transparent roadmap, not a claim that every listed system is live. Placeholder interfaces do not create real accounts, balances, notifications or cross-game data.</span>
+          <span>Statuses are based on repository documentation and available build evidence. A passing code check is not proof of live email delivery, production data persistence, or device-tested gameplay.</span>
         </div>
       </header>
+      <section className={styles.projectsSection} aria-labelledby="projects-heading">
+        <div className={styles.sectionHeading}>
+          <div>
+            <p className={styles.eyebrow}>CONNECTED WORKSTREAMS</p>
+            <h2 id="projects-heading">Three projects. One roadmap.</h2>
+          </div>
+          <span className={styles.projectCount}>3 tracked projects</span>
+        </div>
+        <div className={styles.projectGrid}>
+          {projects.map((project) => (
+            <article className={styles.projectCard} key={project.name}>
+              <div className={styles.projectTop}>
+                <span className={styles.projectScope}>{project.scope}</span>
+                <span className={styles.projectStatus}><Activity size={13} aria-hidden="true" />{project.status}</span>
+              </div>
+              <h3>{project.name}</h3>
+              <p className={styles.projectSummary}>{project.summary}</p>
+              <div className={styles.nextAction}>
+                <span>Next milestone</span>
+                <p>{project.next}</p>
+              </div>
+              <div className={styles.projectLinks}>
+                <a href={project.repo} target="_blank" rel="noreferrer">Repository <ExternalLink size={13} aria-hidden="true" /></a>
+                <a href={project.plan} target="_blank" rel="noreferrer">Project roadmap <ExternalLink size={13} aria-hidden="true" /></a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+      <div className={styles.sectionHeading}>
+        <div>
+          <p className={styles.eyebrow}>PLATFORM CAPABILITIES</p>
+          <h2>Sanctuary systems</h2>
+        </div>
+        <span className={styles.projectCount}>{visibleSystems.length} systems shown</span>
+      </div>
       <nav className={styles.filters} aria-label="Filter roadmap systems">
         {groups.map((group) => (
           <button key={group} type="button" aria-pressed={selectedGroup === group} className={selectedGroup === group ? styles.filterActive : styles.filter} onClick={() => setSelectedGroup(group)}>
@@ -81,7 +148,7 @@ export function SanctuaryRoadmap() {
       </section>
       <footer className={styles.footer}>
         <Gamepad2 size={17} aria-hidden="true" />
-        <span>Roadmap scope: Sanctuary website, community systems, games, economy, safety and operations. Status changes only when implementation evidence is available.</span>
+        <span>Build rule: one focused, testable change per project at a time. Protect active branches, record evidence, and never describe a prototype or planned integration as live.</span>
         <WalletCards size={17} aria-hidden="true" />
         <BellRing size={17} aria-hidden="true" />
       </footer>
