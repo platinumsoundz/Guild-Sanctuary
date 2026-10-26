@@ -32,6 +32,7 @@ export function AppWorkspace() {
     logout,
     deleteAccount,
     pendingEmail,
+    pendingTwoFactorEmail,
     setTwoFactorEnabled,
     setActiveNavigation,
     updateProfile,
@@ -200,6 +201,7 @@ export function AppWorkspace() {
           currentUser={currentUser}
           isGuest={isGuest}
           pendingEmail={pendingEmail}
+          pendingTwoFactorEmail={pendingTwoFactorEmail}
           isSessionReady={isSessionReady}
           onNavigate={openNavigation}
           onLogin={login}
