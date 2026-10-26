@@ -84,13 +84,15 @@ export function AppWorkspace() {
   }, [activeNavigation, currentUser]);
 
   const openMessage = (profile: PublicProfile) => {
-    setViewedProfile(null);\n    setMessageConversation(null);
+    setViewedProfile(null);
+    setMessageConversation(null);
     setMessagePeer(profile);
     setActiveNavigation('messages');
   };
 
   const openNavigation = (navigation: NavigationState) => {
-    setViewedProfile(null);\n    if (navigation === 'messages') {
+    setViewedProfile(null);
+    if (navigation === 'messages') {
       setMessagePeer(null);
       setMessageConversation(null);
     }
