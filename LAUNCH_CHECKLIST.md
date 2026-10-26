@@ -16,6 +16,7 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 - [x] Wired the password sign-in challenge through AppContext and the auth form/gateway.
 - [x] Closing the account modal with Escape, the close button, or backdrop now cancels a pending TOTP challenge instead of leaving a half-authenticated session behind.
 - [x] Harden auth failure handling: if MFA factor lookup, assurance verification, challenge creation, or post-auth profile/session construction fails, attempt to clear the partially established Supabase session rather than leaving an AAL1 session active.
+- [x] Scope auth-failure cleanup, pending-challenge cancellation, and ordinary sign-out to the current Supabase browser session (`scope: 'local'`) rather than unintentionally revoking sessions on other devices.
 - [x] GitHub CI passed Deno checks, `npm run typecheck`, and `npm run build` for the MFA hardening commit `ce4e87b9156c93193ec0f620547186e6bfe72cf4`; the PR merge-check Cloudflare build also completed, but deployment was skipped.
 - [x] Confirm the Cloudflare OpenNext build completed successfully on the PR merge-check run; actual deployment was skipped because this was a pull-request run and Cloudflare credentials/Supabase config were placeholders. No Worker deployment was confirmed.
 - [ ] Vercel's status check still reports a build-rate-limit issue; recheck the Vercel preview when its build capacity is available.
@@ -29,7 +30,7 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 ## Current build batch — 2026-10-26
 
 - Added [BETA_RELEASE_RUNBOOK.md](BETA_RELEASE_RUNBOOK.md) and [SECURITY_ACCEPTANCE_TEST_MATRIX.md](SECURITY_ACCEPTANCE_TEST_MATRIX.md).
-- Hardened `src/modules/auth/supabaseAuth.ts` to attempt sign-out when post-credential MFA checks or session/profile validation fail; this reduces risk of a partially established AAL1 provider session lingering after the UI rejects sign-in. This code change requires fresh CI and end-to-end verification.
+- Hardened `src/modules/auth/supabaseAuth.ts` to attempt local sign-out when post-credential MFA checks or session/profile validation fail; `AppContext` now scopes challenge cancellation and normal sign-out to the current browser session rather than revoking other devices. This code change requires fresh CI and end-to-end verification.
 - Cloudflare OpenNext build completed successfully in the PR merge-check workflow; deploy step was skipped as intended for a pull request with placeholder Supabase config and no Cloudflare credentials. This is build evidence only, not a deployment.
 - Vercel status still reports build-rate-limit; Vercel preview deployment and email-flow tests remain pending.
 - The latest documentation commits have not yet been validated by a fresh CI run. The earlier green run applies to the MFA code commit only.
