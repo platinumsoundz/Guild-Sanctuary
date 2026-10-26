@@ -7,7 +7,7 @@ const repository = read('../src/modules/messages/supabaseRepository.ts');
 const hook = read('../src/modules/messages/useDirectMessages.ts');
 
 const checks = [
-  ['persistent mode is opt-in and requires a matching authenticated user ID', /isPersistentMessagingEnabled/.test(service) && /NEXT_PUBLIC_PERSISTENT_MESSAGING_ENABLED === 'true'/.test(service) && /data\\.user\\?\\.id === userId/.test(service)],
+  ['persistent mode is opt-in and requires a matching authenticated user ID', /isPersistentMessagingEnabled/.test(service) && /NEXT_PUBLIC_PERSISTENT_MESSAGING_ENABLED === 'true'/.test(service) && /data\.user\?\.id === userId/.test(service)],
   ['direct conversation creation routes through the authenticated RPC', /createPersistentConversation\('direct', \[peerUserId\], null\)/.test(service)],
   ['group creation routes through the authenticated RPC', /createPersistentConversation\('group', participantIds, normalizedName\)/.test(service)],
   ['persistent inbox listing reads memberships from Supabase', /fetchPersistentConversations\(userId\)/.test(service)],
