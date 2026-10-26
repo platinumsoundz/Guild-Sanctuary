@@ -14,7 +14,9 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 - [x] Latest OTP metadata fix received a successful Vercel check before subsequent auth-flow changes.
 - [x] Found and fixed a password-sign-in MFA gap: accounts with verified TOTP factors now receive a challenge before the app activates the session.
 - [x] Wired the password sign-in challenge through AppContext and the auth form/gateway.
-- [ ] Run typecheck/build for the MFA change; latest Vercel status is blocked by a build-rate-limit error, not a reported source compilation failure.
+- [x] GitHub CI passed Deno checks, `npm run typecheck`, and `npm run build` for the MFA change on commit `15e93e6a4b88bdb3f384b251e4b6156e0787631f`.
+- [ ] Confirm the Cloudflare Worker build/deploy run finishes successfully; do not infer deployment success from CI alone.
+- [ ] Vercel's status check still reports a build-rate-limit issue; recheck the Vercel preview when its build capacity is available.
 - [x] Create a reminder to manually test Vercel email confirmation and password reset on 2026-10-27 at 15:00 Europe/London.
 - [ ] Manually test the Vercel email flow. The flow worked previously on Cloudflare; assume it is likely okay for continued development, but do not mark this check complete until tested on Vercel.
 - [ ] Record the actual Vercel deployment URL and the exact commit it serves after the next deployment.
