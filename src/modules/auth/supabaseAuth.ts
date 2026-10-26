@@ -118,8 +118,17 @@ export async function requestSupabaseEmailCode(email: string, signup?: { usernam
   if (error) throw new Error(`A verification code could not be sent: ${error.message}`);
 }
 
-export async function signInWithSupabasePassword(email: string, password: string): Promise<AuthSession> {
-  const { error } = await getSupabaseBrowserClient().auth.signInWithPassword({
+export type SupabasePasswordSignIn = {
+  session: AuthSession | null;
+  challenge: { factorId: string; challengeId: string } | null;
+};
+
+export async function signInWithSupabasePassword(
+  email: string,
+  password: string,
+): Promise<SupabasePasswordSignIn> {
+  const client = getSupabaseBrowserClient();
+  const { error } = await client.auth.signInWithPassword({
     email: email.trim().toLowerCase(),
     password,
   });
@@ -127,7 +136,21 @@ export async function signInWithSupabasePassword(email: string, password: string
     ? 'Email or password is incorrect.'
     : `Sign-in failed: ${error.message}`);
 
-  return buildSession();
+  const { data: factors, error: factorError } = await client.auth.mfa.listFactors();
+  if (factorError) throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
+  const factor = factors.totp.find((item) => item.status === 'verified');
+
+  if (factor) {
+    const { data: assurance, error: assuranceError } = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assuranceError) throw new Error(`Your authentication assurance could not be verified: ${assuranceError.message}`);
+    if (assurance.currentLevel !== 'aal2') {
+      const { data: challenge, error: challengeError } = await client.auth.mfa.challenge({ factorId: factor.id });
+      if (challengeError) throw new Error(`A two-factor challenge could not be started: ${challengeError.message}`);
+      return { session: null, challenge: { factorId: factor.id, challengeId: challenge.id } };
+    }
+  }
+
+  return { session: await buildSession(), challenge: null };
 }
 
 export async function signUpWithSupabasePassword(
