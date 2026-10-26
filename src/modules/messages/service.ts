@@ -30,8 +30,12 @@ function participantKey(userId: string, peerUserId: string): string {
   return [userId, peerUserId].sort().join(':');
 }
 
-function isSupabaseConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+function isPersistentMessagingEnabled(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+    process.env.NEXT_PUBLIC_PERSISTENT_MESSAGING_ENABLED === 'true',
+  );
 }
 
 /**
@@ -41,7 +45,7 @@ function isSupabaseConfigured(): boolean {
  * conversations from Supabase.
  */
 async function hasPersistentSession(userId: string): Promise<boolean> {
-  if (!isSupabaseConfigured() || !userId) return false;
+  if (!isPersistentMessagingEnabled() || !userId) return false;
   const { data, error } = await getSupabaseBrowserClient().auth.getUser();
   if (error) throw new Error(`Authentication could not be verified: ${error.message}`);
   return data.user?.id === userId;
