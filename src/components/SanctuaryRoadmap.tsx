@@ -63,9 +63,9 @@ const projects = [
   {
     name: 'The 5 Sleeves 2D',
     scope: '2D multiplayer RPG',
-    status: 'Playable · verification pending',
+    status: 'Build failing · 4 tests',
     summary: 'Village-scale world, six safe cities, wilderness roads, tower rooms, PvE/PvP modes and character progression.',
-    next: 'Build one owner-approved gameplay system at a time; verify wilderness balancing, durable account progress and live hosting before calling them complete.',
+    next: 'Latest scheduled main-branch suite: 141/145 passed, 4 failed (spawn/canon count, phone HUD bounds, fullscreen setting, sleeve sprite channels). Resolve after the active branch-access check is confirmed.',
     repo: 'https://github.com/platinumsoundz/The-5-Sleeves',
     plan: 'https://github.com/platinumsoundz/The-5-Sleeves/blob/main/ROADMAP.md',
   },
