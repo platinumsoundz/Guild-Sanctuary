@@ -154,7 +154,7 @@ export async function signUpWithSupabasePassword(
 export async function sendSupabasePasswordReset(email: string): Promise<void> {
   const { error } = await getSupabaseBrowserClient().auth.resetPasswordForEmail(
     email.trim().toLowerCase(),
-    { redirectTo: `${window.location.origin}/reset-password` },
+    { redirectTo: `${window.location.origin}/auth/callback?next=/reset-password` },
   );
   if (error) throw new Error(`Password reset email could not be sent: ${error.message}`);
 }
