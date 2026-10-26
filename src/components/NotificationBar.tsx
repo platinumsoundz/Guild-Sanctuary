@@ -159,7 +159,6 @@ export function NotificationBar() {
     setActiveNavigation(destinationFor[item.target_type]);
   };
 
-  if (!currentUser || isGuest) return null;
 
   return (
     <aside className={styles.bar} aria-label="Notifications">
