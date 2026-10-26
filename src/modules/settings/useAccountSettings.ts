@@ -19,19 +19,19 @@ export function useAccountSettings(userId: string) {
       setError('Sign in to manage account settings.');
       return;
     }
-    try {
-      setSettings(fetchAccountSettings(userId));
-      setError(null);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'Account settings could not be loaded.');
-    } finally {
-      setIsLoading(false);
-    }
+    let cancelled = false;
+    setIsLoading(true);
+    fetchAccountSettings(userId).then((saved) => {
+      if (!cancelled) { setSettings(saved); setError(null); }
+    }).catch((loadError) => {
+      if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Account settings could not be loaded.');
+    }).finally(() => { if (!cancelled) setIsLoading(false); });
+    return () => { cancelled = true; };
   }, [userId]);
 
-  const updatePreferences = useCallback((updates: Partial<AccountPreferences>) => {
+  const updatePreferences = useCallback(async (updates: Partial<AccountPreferences>) => {
     const preferences = { ...settings.preferences, ...updates };
-    const saved = saveAccountPreferences(userId, preferences);
+    const saved = await saveAccountPreferences(userId, preferences);
     setSettings(saved);
     setError(null);
     return saved;
