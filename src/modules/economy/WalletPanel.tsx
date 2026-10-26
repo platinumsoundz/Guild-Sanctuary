@@ -161,7 +161,9 @@ export function WalletPanel({ userId, profile, isGuest, purchaseAgeVerifiedAt = 
       label: entry.reason === 'dispute'
         ? 'Chargeback clawback'
         : entry.reviewRequired
-          ? 'Refund clawback (under review)'
+          ? entry.tokensDelta === 0
+            ? 'Refund under review (no debit)'
+            : 'Refund clawback (under review)'
           : 'Refund clawback',
       tokensDelta: entry.tokensDelta,
       amountMinor: null,

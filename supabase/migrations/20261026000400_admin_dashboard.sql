@@ -5,7 +5,8 @@
 -- Depends on:
 --   * public.profiles (moderation foundation)
 --   * public.log_audit_event(...) (20261026000000_token_purchase_age_gate.sql)
---   * public.token_purchase_reviews (20261026000100_token_refund_clawback.sql)
+--   * public.token_refund_events and public.token_purchase_reviews
+--     (20261026000100_token_refund_clawback.sql)
 --
 -- Role checks are inline in a small helper rather than the older
 -- public.is_moderator(), because that helper is missing on some partially
@@ -373,6 +374,18 @@ begin
       ) order by s.created_at desc)
       from public.token_spend_ledger s
       where s.user_id = requested_user_id
+    ), '[]'::jsonb),
+    'refunds', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'id', r.id,
+        'reason', r.reason,
+        'clawed_back_tokens', r.clawed_back_tokens,
+        'shortfall_tokens', r.shortfall_tokens,
+        'review_required', r.review_required,
+        'created_at', r.created_at
+      ) order by r.created_at desc)
+      from public.token_refund_events r
+      where r.user_id = requested_user_id
     ), '[]'::jsonb),
     'notes', coalesce((
       select jsonb_agg(to_jsonb(n) order by n.created_at desc)

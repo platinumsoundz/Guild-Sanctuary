@@ -257,7 +257,19 @@ export function MembersPanel({ role, currentUserId }: MembersPanelProps) {
                       <td>{new Date(entry.created_at).toLocaleDateString('en-GB')}</td>
                     </tr>
                   ))}
-                  {overview.ledger.length === 0 && overview.spends.length === 0 && (
+                  {overview.refunds.map((entry) => (
+                    <tr key={`refund-${entry.id}`}>
+                      <td>{entry.reason === 'dispute' ? 'Chargeback' : 'Refund'}</td>
+                      <td>
+                        clawback
+                        {entry.shortfall_tokens > 0 ? ` · shortfall ${entry.shortfall_tokens.toLocaleString('en-GB')}` : ''}
+                        {entry.review_required ? ' · under review' : ''}
+                      </td>
+                      <td>-{entry.clawed_back_tokens.toLocaleString('en-GB')}</td>
+                      <td>{new Date(entry.created_at).toLocaleDateString('en-GB')}</td>
+                    </tr>
+                  ))}
+                  {overview.ledger.length === 0 && overview.spends.length === 0 && overview.refunds.length === 0 && (
                     <tr><td colSpan={4}>No token activity.</td></tr>
                   )}
                 </tbody>

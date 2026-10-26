@@ -222,6 +222,14 @@ export type AdminMemberOverview = {
     tokens_delta: number;
     created_at: string;
   }[];
+  refunds: {
+    id: string;
+    reason: 'refund' | 'dispute';
+    clawed_back_tokens: number;
+    shortfall_tokens: number;
+    review_required: boolean;
+    created_at: string;
+  }[];
   notes: ModerationNoteRow[];
   appeals: ModerationAppealRow[];
   purchase_reviews: TokenPurchaseReviewRow[];

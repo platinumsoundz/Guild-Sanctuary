@@ -160,7 +160,7 @@ expose the route to the browser.
 | Accepting twice | The unique `(user_id, terms_version)` constraint keeps one row; no error is shown. |
 | Insert with a different `terms_version` | Rejected by the `terms_acceptances` CHECK constraint. |
 | Client tries to set `id` or `accepted_at` | Rejected: only `user_id` and `terms_version` are insertable. |
-| Moderator opens Members → the member | The Terms line lists the recorded version and date, or "no recorded acceptance". |
+| Moderator opens Members → the member | The Terms line lists the recorded version and date, or "no recorded acceptance". Token history includes refund/chargeback clawbacks and the shortfall/review flags. |
 
 The version string is pinned in three places: `src/modules/auth/terms.ts`,
 the migration CHECK constraint, and the signup metadata. Changing it needs a
