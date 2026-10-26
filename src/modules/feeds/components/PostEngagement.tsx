@@ -5,6 +5,7 @@ import { Heart, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { ReportContentButton } from '@/modules/moderation';
 import type { SocialComment } from '@/types/database';
 import { addPostComment, deletePostComment, fetchPostComments, getPostEngagement, togglePostLike, updatePostComment } from '../service';
+import { getCommentEngagement, toggleCommentLike } from '../commentEngagement';
 import styles from './PostEngagement.module.css';
 
 interface PostEngagementProps {
@@ -20,6 +21,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
   const [error, setError] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingBody, setEditingBody] = useState('');
+  const [commentEngagement, setCommentEngagement] = useState<Record<string, { liked: boolean; count: number }>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -36,7 +38,13 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
     setIsOpen(nextIsOpen);
     if (nextIsOpen && comments.length === 0) {
       try {
-        setComments(await fetchPostComments(postId));
+        const items = await fetchPostComments(postId);
+        setComments(items);
+        const engagement = await Promise.all(items.map(async (comment) => [
+          comment.id,
+          await getCommentEngagement(comment.id, userId),
+        ] as const));
+        setCommentEngagement((current) => ({ ...current, ...Object.fromEntries(engagement) }));
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Comments could not be loaded.');
       }
@@ -78,11 +86,22 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
     }
   };
 
+  const handleCommentLike = async (commentId: string) => {
+    try {
+      const result = await toggleCommentLike(commentId, userId);
+      setCommentEngagement((current) => ({ ...current, [commentId]: result }));
+      setError(null);
+    } catch (likeError) {
+      setError(likeError instanceof Error ? likeError.message : 'Comment reaction could not be saved.');
+    }
+  };
+
   const handleComment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const comment = await addPostComment(postId, userId, draft);
       setComments((current) => [...current, comment]);
+      setCommentEngagement((current) => ({ ...current, [comment.id]: { liked: false, count: 0 } }));
       setStats((current) => ({ ...current, commentsCount: current.commentsCount + 1 }));
       setDraft('');
       setError(null);
@@ -114,6 +133,9 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
                 </div>
               ) : <p className={styles.commentBody}>{comment.body}</p>}
               <div className={styles.commentTools}>
+                <button type="button" aria-pressed={commentEngagement[comment.id]?.liked ?? false} onClick={() => void handleCommentLike(comment.id)} aria-label={`${commentEngagement[comment.id]?.liked ? 'Unlike' : 'Like'} comment`}>
+                  <Heart size={12} fill={commentEngagement[comment.id]?.liked ? 'currentColor' : 'none'} /> Like <span>{commentEngagement[comment.id]?.count ?? 0}</span>
+                </button>
                 {comment.authorId === userId && editingCommentId !== comment.id && <>
                   <button type="button" onClick={() => { setEditingCommentId(comment.id); setEditingBody(comment.body); }} aria-label="Edit your comment"><Pencil size={12} /> Edit</button>
                   <button type="button" onClick={() => void removeComment(comment.id)} aria-label="Delete your comment"><Trash2 size={12} /> Delete</button>
