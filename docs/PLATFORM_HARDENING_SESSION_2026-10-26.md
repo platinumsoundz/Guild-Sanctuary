@@ -42,7 +42,7 @@ This is the operational handoff for the next coordinated build session. It suppl
 
 ### P3 — Cross-project roadmap
 1. Keep The 5 Sleeves narrative repository canonical for lore and story; do not silently rewrite canon from the playable prototype.
-2. Treat The 5 Sleeves 3D/training-ground repository as a playable slice; test-only Cipher equipment, test-world geography, and prototype economy must remain labelled as non-canon.
+2. Treat The 5 Sleeves 3D repository as a playable prototype; test-only Cipher equipment, prototype geography, and prototype economy must remain labelled as non-canon.
 3. Recover and inspect the “branch - project access check” work state before touching its active files. Do not overwrite work in progress.
 4. Stagger project tasks and report each project's chosen task, changed files, checks, blockers, and next step in the Sanctuary roadmap. Do not claim a background build ran unless an automation run or workflow record proves it.
 
