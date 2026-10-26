@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import { MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE, type SignUpInput } from '../sessionStore';
+import { CURRENT_TERMS_VERSION, MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE, type SignUpInput } from '../sessionStore';
 import styles from './AuthenticationForm.module.css';
 
 export type AuthMode = 'login' | 'signup';
@@ -53,7 +53,7 @@ export function AuthenticationForm({
     try {
       if (step === 'email-link') {
         if (mode === 'signup') {
-          await onSignup({ email: email.trim(), username: username.trim(), displayName: displayName.trim() });
+          await onSignup({ email: email.trim(), username: username.trim(), displayName: displayName.trim(), termsVersion: CURRENT_TERMS_VERSION });
         } else {
           await onLogin(email.trim());
         }
@@ -78,10 +78,12 @@ export function AuthenticationForm({
       }
 
       if (mode === 'signup') {
+        if (!termsAccepted) throw new Error('Please accept the Terms draft before creating an account.');
         await onSignup({
           email: email.trim(),
           username: username.trim(),
           displayName: displayName.trim(),
+          termsVersion: CURRENT_TERMS_VERSION,
         });
       } else {
         await onLogin(email.trim());
