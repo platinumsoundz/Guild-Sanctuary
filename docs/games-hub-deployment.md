@@ -89,3 +89,11 @@ The hub currently links to the two existing game deployments. It does not provid
 - Added a notification bell and panel with clearly labelled sample/system-preview items and a local mark-as-read interaction.
 - **Not yet connected:** real-time/persisted notification delivery, message and wallet event subscriptions, push/email notifications, cross-device read state, and notification preferences. Do not represent preview items as real account activity.
 - The roadmap is a curated inventory of major known systems, not an automatically generated exhaustive inventory of every code path or private operational control. Update it as roadmap scope changes.
+
+
+### Cross-host mismatch investigation — 26 October 2026
+- Vercel's latest inspected build was a Preview deployment from `feature/public-roadmap-notifications`; this is not proof that the production alias is running that build.
+- Vercel has `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` entries targeted at production, preview and development. Their values have not been compared with the actual Cloudflare build inputs.
+- The Cloudflare deployment workflow used fallback Supabase placeholder values when GitHub Actions secrets were absent, while its deploy gate checked only Cloudflare credentials. This could publish a build with placeholder Supabase configuration. Deployment is now gated on both Supabase secrets being present.
+- The checked-in Wrangler config named the Worker `sanctuary-web-auto`, but the existing live Worker is `guild-sanctuary`. Deploying with that config could update/create the wrong Worker and leave the site users visit stale. The config and self-reference binding now target `guild-sanctuary`.
+- Next verification: CI/typecheck/build, then confirm the actual Vercel production alias and Cloudflare Worker deployment both use the intended commit and real Supabase URL/key pair. Do not claim parity until both hosts are checked.
