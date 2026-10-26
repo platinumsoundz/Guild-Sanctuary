@@ -451,3 +451,19 @@
   .notificationButton { width: 36px; height: 36px; }
   .accountButtonLabel { max-width: 76px; }
 }
+
+.guestButton {
+  min-height: 38px;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  font: 600 12px Arial, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.guestButton:hover, .guestButton:focus-visible { border-color: var(--accent); }
+@media (max-width: 420px) {
+  .guestButton { padding-inline: 8px; font-size: 11px; }
+}
