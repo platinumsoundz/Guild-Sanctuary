@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Copy, ExternalLink, Gamepad2, Maximize2, X } from 'lucide-react';
 import styles from './GamesHub.module.css';
 
-type GameId = 'online' | 'training3d';
+type GameId = 'sleeves2d' | 'sleeves3d';
 
 const games: {
   id: GameId;
@@ -15,7 +15,7 @@ const games: {
   badge: string;
 }[] = [
   {
-    id: 'online',
+    id: 'sleeves2d',
     title: 'The 5 Sleeves 2D',
     description: 'A browser-based multiplayer action RPG. Explore the settlements and dangerous roads, fight Rust Wardens, develop your operative, and clear regional towers.',
     genre: 'Multiplayer action RPG',
@@ -24,7 +24,7 @@ const games: {
     badge: 'Online world',
   },
   {
-    id: 'training3d',
+    id: 'sleeves3d',
     title: 'The 5 Sleeves 3D',
     description: 'A third-person 3D game prototype. Practice with Sensei, explore the outpost, and reach the First Tower.',
     genre: 'Third-person 3D prototype',
@@ -104,15 +104,15 @@ export function GamesHub() {
                 <p className={styles.genre}>{game.genre}</p>
                 <p className={styles.description}>{game.description}</p>
                 <div className={styles.cardActions}>
-                  <button type="button" className={styles.playButton} onClick={() => setActiveGame(game.id)} disabled={!game.url}>
-                    <Gamepad2 size={17} aria-hidden="true" /> Play in Sanctuary
+                  <button type="button" className={styles.playButton} onClick={() => setActiveGame(game.id)} disabled={!game.url} aria-label={!game.url ? `${game.title} launch coming soon: host URL is not configured` : `Play ${game.title} in Sanctuary`}>
+                    <Gamepad2 size={17} aria-hidden="true" /> {game.url ? 'Play in Sanctuary' : 'Coming soon'}
                   </button>
                   {game.url ? (
                     <a href={game.url} target="_blank" rel="noopener noreferrer" className={styles.externalLink}>
                       Open separately <ExternalLink size={14} aria-hidden="true" />
                     </a>
                   ) : (
-                    <span className={styles.hint}>Host URL needs configuration</span>
+                    <span className={styles.hint}>Placeholder · waiting for a verified host URL</span>
                   )}
                 </div>
               </div>
