@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
     verificationError = new Error('The email confirmation link is invalid or incomplete.');
   }
 
-  const destination = new URL(!verificationError && requestedType === 'recovery' ? '/reset-password' : '/', request.url);
+  const nextPath = request.nextUrl.searchParams.get('next');
+  const destination = new URL(!verificationError && (requestedType === 'recovery' || nextPath === '/reset-password') ? '/reset-password' : '/', request.url);
   destination.searchParams.set('auth', verificationError ? 'confirmation-error' : 'confirmed');
   return NextResponse.redirect(destination);
 }
