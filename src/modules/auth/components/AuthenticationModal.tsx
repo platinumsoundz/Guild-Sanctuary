@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { AuthSession, SignUpInput } from '../sessionStore';
 import { AuthenticationForm } from './AuthenticationForm';
 import styles from './AuthenticationModal.module.css';
@@ -9,6 +9,7 @@ interface AuthenticationModalProps {
   currentUser: AuthSession | null;
   isGuest: boolean;
   pendingEmail: string | null;
+  pendingTwoFactorEmail: string | null;
   onClose: () => void;
   onLogin: (email: string, password: string) => boolean | void | Promise<boolean | void>;
   onSignup: (input: SignUpInput, password: string) => boolean | Promise<boolean>;
@@ -24,6 +25,7 @@ export function AuthenticationModal({
   currentUser,
   isGuest,
   pendingEmail,
+  pendingTwoFactorEmail,
   onClose,
   onLogin,
   onSignup,
@@ -35,6 +37,10 @@ export function AuthenticationModal({
   onLogout,
 }: AuthenticationModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const handleDismiss = useCallback(() => {
+    if (pendingTwoFactorEmail) onCancelChallenge();
+    onClose();
+  }, [pendingTwoFactorEmail, onCancelChallenge, onClose]);
 
   useEffect(() => {
     const modal = modalRef.current;
@@ -43,7 +49,7 @@ export function AuthenticationModal({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        handleDismiss();
         return;
       }
 
@@ -74,14 +80,14 @@ export function AuthenticationModal({
       document.removeEventListener('keydown', handleKeyDown);
       previouslyFocused?.focus();
     };
-  }, [onClose]);
+  }, [handleDismiss]);
 
   return (
     <div
       className={styles.backdrop}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
-          onClose();
+          handleDismiss();
         }
       }}
     >
@@ -98,7 +104,7 @@ export function AuthenticationModal({
             <p className={styles.eyebrow}>MEMBER ACCESS</p>
             <h2 id="auth-modal-title">Your account</h2>
           </div>
-          <button className={styles.closeButton} type="button" onClick={onClose}>
+          <button className={styles.closeButton} type="button" onClick={handleDismiss}>
             Close
           </button>
         </div>
