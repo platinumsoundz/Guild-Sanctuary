@@ -5,6 +5,7 @@ import type { Profile, ProfilePrivacy, SocialLinks } from '@/types/database';
 import { useAccountSettings } from '../useAccountSettings';
 import type { PreferenceKey, ProfileUpdate } from './settingsData';
 import { AdvertisingPanel } from './panels/AdvertisingPanel';
+import { AppealsPanel } from './panels/AppealsPanel';
 import { DeleteAccountPanel } from './panels/DeleteAccountPanel';
 import { LayoutPanel } from './panels/LayoutPanel';
 import { PreferencesPanel } from './panels/PreferencesPanel';
@@ -84,6 +85,7 @@ export function SettingsHub({
             onError={setError}
           />
           <PrivateVaultPanel userId={userId} />
+          <AppealsPanel onError={setError} />
           <LayoutPanel
             layout={settings.preferences.layout}
             updatePreferences={updatePreferences}

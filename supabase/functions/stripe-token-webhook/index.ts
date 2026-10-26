@@ -62,6 +62,40 @@ export default {
       return Response.json({ error: 'Stripe event mode does not match the configured token mode.' }, { status: 400 })
     }
 
+    if (event.type === 'charge.refunded' || event.type === 'charge.dispute.created') {
+      const reason = event.type === 'charge.refunded' ? 'refund' : 'dispute'
+      const charge = event.type === 'charge.refunded' ? event.data.object as Stripe.Charge : null
+      const dispute = event.type === 'charge.dispute.created' ? event.data.object as Stripe.Dispute : null
+      const paymentIntentValue = charge?.payment_intent ?? dispute?.payment_intent
+      const paymentIntentId = typeof paymentIntentValue === 'string' ? paymentIntentValue : paymentIntentValue?.id
+      if (!paymentIntentId) return Response.json({ received: true })
+
+      let checkoutSessionId: string | null = null
+      try {
+        const stripe = new Stripe(config.secretKey)
+        const sessions = await stripe.checkout.sessions.list({ payment_intent: paymentIntentId, limit: 1 })
+        const session = sessions.data[0]
+        if (session && session.metadata?.sanctuary_purchase === 'token_bundle') {
+          checkoutSessionId = session.id
+        }
+      } catch {
+        return Response.json({ error: 'The refunded token purchase could not be matched.' }, { status: 502 })
+      }
+      if (!checkoutSessionId) return Response.json({ received: true, unmatched: true })
+
+      const isFullRefund = Boolean(charge && charge.amount_refunded >= charge.amount)
+      const { data, error } = await ctx.supabaseAdmin.rpc('record_token_refund', {
+        requested_event_id: event.id,
+        requested_event_type: event.type,
+        requested_checkout_session_id: checkoutSessionId,
+        requested_reason: reason,
+        requested_is_full: reason === 'dispute' || isFullRefund,
+      })
+      if (error) return Response.json({ error: 'The token refund could not be recorded.' }, { status: 500 })
+      const result = Array.isArray(data) ? data[0] : data
+      return Response.json({ received: true, ...(result ?? {}) })
+    }
+
     if (event.type !== 'checkout.session.completed' && event.type !== 'checkout.session.async_payment_succeeded') {
       return Response.json({ received: true })
     }

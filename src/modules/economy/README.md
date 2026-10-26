@@ -25,8 +25,18 @@ The client sends only the catalog item ID and an idempotency key to the `spend_t
 
 `src/modules/economy/cosmetics.ts` maps catalog item IDs to client presentation. `src/modules/economy/catalog.ts` owns the slot, filter, and summary helpers and is covered by `catalog.test.ts`. The profile card and Discover avatar render the equipped frame, effect, and badge; the profile card also renders the equipped GIF banner. The Wallet page shows previews, a confirmation step, the resulting balance, owned/equipped state, remove controls, kind/owned filters, a total/owned/equipped summary, spend history, and the welcome-bonus entry. The three banner assets are in `public/cosmetics/` and were generated locally; there is no third-party GIF provider or user-upload path. The owner must approve every curated GIF and emoji badge before launch.
 
+## 18+ purchase gate and refunds
+
+Token purchases require a one-time server-side age confirmation. `WalletPanel` collects a date of birth, `confirm_token_purchase_age` validates it in Postgres, and only `profiles.purchase_age_verified_at` is stored. Bundle buttons stay disabled until the session carries a verification, and `token-checkout` rejects accounts without one.
+
+Refunds and chargebacks are handled by `record_token_refund` from the Stripe webhook. The approved policy is to claw back unspent tokens, never create a negative balance, flag spent-token and partial-refund cases for manual review, and never reverse a purchased cosmetic. Both migrations are unapplied and the webhook is undeployed.
+
+## Token Shop page
+
+`TokenShopPanel` is the navigation-level catalogue. It reads enabled rows from the server-owned catalogue and the signed-in member's balance/entitlements, shows owned state, and routes purchases to Wallet so the age gate and idempotent spend path stay in one place. It does not deduct tokens itself. Guest sessions can browse the preview but see no personal balance or inventory.
+
 ## Deferred
 
-Transfers, trading, marketplace, cash-out, VIP, gifts, chat items, and post promotion are not implemented. Chat emoji packs are the next expression feature. Those are planned extensions and must be implemented with server-side ledger transactions and clear product rules before use. The wallet and ledger are account-bound; deleting an account currently deletes its stored wallet, spend history, and unlocks. The approved 7-day deletion grace period is not implemented. The system currently records verified purchases, signup grants, and catalog spends only; refund/chargeback reconciliation must be added before enabling live sales or broader redemption.
+Transfers, trading, marketplace, cash-out, VIP, gifts, chat items, and post promotion are not implemented. Chat emoji packs are the next expression feature. Those are planned extensions and must be implemented with server-side ledger transactions and clear product rules before use. The wallet and ledger are account-bound. Deleting an account schedules a seven-day grace period; after the purge date the wallet, spend history, and unlocks are deleted with the account.
 
-Status: the migrations have not been applied and the Edge Functions have not been deployed or validated in this workspace. `TOKEN_CHECKOUT_ENABLED` defaults to `false`. The approved refund/chargeback policy is to claw back unspent tokens and flag spent-token cases for manual support review; implementation is still pending. Token purchases are 18+, but the age gate is not implemented. Do not enable live sales until refund handling, the 18+ gate, the 7-day deletion grace period, the admin dashboard, and legal review are complete.
+Status: the migrations have not been applied and the Edge Functions have not been deployed or validated in this workspace. `TOKEN_CHECKOUT_ENABLED` defaults to `false`. The 18+ gate, refund/chargeback clawback, seven-day deletion grace period, and admin dashboard are implemented in code but have not been applied or staging-tested. Do not enable live sales until those gates, the purge scheduler, and legal review are complete.

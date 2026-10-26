@@ -980,4 +980,310 @@ $$;
 revoke all on function public.clear_profile_cosmetic(text) from public, anon, authenticated;
 grant execute on function public.clear_profile_cosmetic(text) to authenticated;
 
+-- ============================================================================
+-- Source: supabase/migrations/20261026000000_token_purchase_age_gate.sql
+-- ============================================================================
+-- Shared defensive audit helper. The audit_events table is restored by the
+-- moderation foundation migration on projects where it is missing; logging
+-- must never make an account action fail outright.
+create or replace function public.log_audit_event(
+  requested_actor_id uuid,
+  requested_event_type text,
+  requested_subject_type text,
+  requested_subject_id uuid,
+  requested_details jsonb default '{}'::jsonb
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if to_regclass('public.audit_events') is null then
+    return;
+  end if;
+  insert into public.audit_events (actor_id, event_type, subject_type, subject_id, details)
+  values (requested_actor_id, requested_event_type, requested_subject_type, requested_subject_id, coalesce(requested_details, '{}'::jsonb));
+exception when others then
+  -- Audit logging must not roll back the account action that is being logged.
+  null;
+end;
+$$;
+
+revoke all on function public.log_audit_event(uuid, text, text, uuid, jsonb) from public, anon, authenticated;
+
+alter table public.profiles
+  add column if not exists purchase_age_verified_at timestamptz;
+
+create or replace function public.confirm_token_purchase_age(requested_date_of_birth date)
+returns timestamptz
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  verified_at timestamptz := now();
+begin
+  if caller_id is null then
+    raise exception 'Sign in before confirming your age.' using errcode = '42501';
+  end if;
+
+  if not public.is_active_user() then
+    raise exception 'This account is not active.' using errcode = '42501';
+  end if;
+
+  if requested_date_of_birth is null
+    or requested_date_of_birth > current_date
+    or requested_date_of_birth < (current_date - interval '120 years')::date
+  then
+    raise exception 'Enter a valid date of birth.' using errcode = '22023';
+  end if;
+
+  if requested_date_of_birth > (current_date - interval '18 years')::date then
+    raise exception 'Token purchases are only available to members aged 18 or over.' using errcode = '22023';
+  end if;
+
+  update public.profiles
+  set purchase_age_verified_at = verified_at,
+      updated_at = now()
+  where id = caller_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'account.purchase_age_verified',
+    'user',
+    caller_id,
+    jsonb_build_object('method', 'date_of_birth')
+  );
+
+  return verified_at;
+end;
+$$;
+
+revoke all on function public.confirm_token_purchase_age(date) from public, anon, authenticated;
+grant execute on function public.confirm_token_purchase_age(date) to authenticated;
+
+-- ============================================================================
+-- Source: supabase/migrations/20261026000100_token_refund_clawback.sql
+-- ============================================================================
+create table if not exists public.token_refund_events (
+  id uuid primary key default gen_random_uuid(),
+  stripe_event_id text not null unique,
+  stripe_event_type text not null check (stripe_event_type in ('charge.refunded', 'charge.dispute.created')),
+  checkout_session_id text not null,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  reason text not null check (reason in ('refund', 'dispute')),
+  purchased_tokens bigint not null check (purchased_tokens > 0),
+  clawed_back_tokens bigint not null check (clawed_back_tokens >= 0),
+  shortfall_tokens bigint not null check (shortfall_tokens >= 0),
+  review_required boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists token_refund_events_user_created_idx
+  on public.token_refund_events (user_id, created_at desc);
+
+create table if not exists public.token_purchase_reviews (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  checkout_session_id text not null,
+  refund_event_id uuid references public.token_refund_events(id) on delete set null,
+  reason text not null check (reason in ('spent_tokens', 'partial_refund', 'partial_dispute', 'dispute_won', 'unmatched')),
+  shortfall_tokens bigint not null default 0 check (shortfall_tokens >= 0),
+  status text not null default 'open' check (status in ('open', 'resolved', 'dismissed')),
+  notes text,
+  resolved_by uuid references public.profiles(id) on delete set null,
+  resolved_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists token_purchase_reviews_status_idx
+  on public.token_purchase_reviews (status, created_at);
+
+alter table public.token_refund_events enable row level security;
+alter table public.token_purchase_reviews enable row level security;
+
+create policy "moderators read token refund events"
+  on public.token_refund_events for select to authenticated
+  using (exists (
+    select 1 from public.profiles p
+    where p.id = (select auth.uid())
+      and p.role in ('moderator', 'admin')
+      and (p.status = 'active' or (p.status = 'suspended' and p.suspended_until <= now()))
+  ));
+
+create policy "moderators read token purchase reviews"
+  on public.token_purchase_reviews for select to authenticated
+  using (exists (
+    select 1 from public.profiles p
+    where p.id = (select auth.uid())
+      and p.role in ('moderator', 'admin')
+      and (p.status = 'active' or (p.status = 'suspended' and p.suspended_until <= now()))
+  ));
+
+grant select on public.token_refund_events, public.token_purchase_reviews to authenticated;
+revoke insert, update, delete, truncate
+  on public.token_refund_events, public.token_purchase_reviews
+  from public, anon, authenticated;
+grant select, insert, update on public.token_refund_events, public.token_purchase_reviews to service_role;
+
+create or replace function public.record_token_refund(
+  requested_event_id text,
+  requested_event_type text,
+  requested_checkout_session_id text,
+  requested_reason text,
+  requested_is_full boolean
+)
+returns table (
+  matched boolean,
+  clawed_back_tokens bigint,
+  shortfall_tokens bigint,
+  review_required boolean
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  purchase public.token_ledger%rowtype;
+  existing_event public.token_refund_events%rowtype;
+  wallet_balance bigint;
+  prior_clawback bigint;
+  clawback bigint := 0;
+  shortfall bigint := 0;
+  needs_review boolean := false;
+  new_event_id uuid;
+  review_reason text;
+begin
+  if requested_event_id is null or requested_event_id = ''
+    or requested_event_type is null
+    or requested_event_type not in ('charge.refunded', 'charge.dispute.created')
+    or requested_checkout_session_id is null or requested_checkout_session_id = ''
+    or requested_reason is null
+    or requested_reason not in ('refund', 'dispute')
+    or requested_is_full is null
+  then
+    raise exception 'Invalid token refund event' using errcode = '22023';
+  end if;
+
+  select * into existing_event
+  from public.token_refund_events
+  where stripe_event_id = requested_event_id;
+
+  if found then
+    return query select true, existing_event.clawed_back_tokens, existing_event.shortfall_tokens, existing_event.review_required;
+    return;
+  end if;
+
+  select * into purchase
+  from public.token_ledger
+  where checkout_session_id = requested_checkout_session_id;
+
+  if not found then
+    return query select false, 0::bigint, 0::bigint, false;
+    return;
+  end if;
+
+  select coalesce(sum(events.clawed_back_tokens), 0)
+  into prior_clawback
+  from public.token_refund_events as events
+  where events.checkout_session_id = requested_checkout_session_id;
+
+  -- Partial refunds and partial disputes are never auto-debited because the
+  -- product owner has not approved a proportional policy. Flag for review.
+  if not requested_is_full then
+    review_reason := case requested_reason when 'refund' then 'partial_refund' else 'partial_dispute' end;
+    insert into public.token_refund_events (
+      stripe_event_id, stripe_event_type, checkout_session_id, user_id, reason,
+      purchased_tokens, clawed_back_tokens, shortfall_tokens, review_required
+    ) values (
+      requested_event_id, requested_event_type, requested_checkout_session_id, purchase.user_id, requested_reason,
+      purchase.tokens_delta, 0, 0, true
+    ) returning id into new_event_id;
+    insert into public.token_purchase_reviews (
+      user_id, checkout_session_id, refund_event_id, reason
+    ) values (
+      purchase.user_id, requested_checkout_session_id, new_event_id, review_reason
+    );
+    perform public.log_audit_event(
+      null,
+      'token.refund_review_required',
+      'user',
+      purchase.user_id,
+      jsonb_build_object('checkoutSessionId', requested_checkout_session_id, 'reason', review_reason)
+    );
+    return query select true, 0::bigint, 0::bigint, true;
+    return;
+  end if;
+
+  if prior_clawback > 0 then
+    insert into public.token_refund_events (
+      stripe_event_id, stripe_event_type, checkout_session_id, user_id, reason,
+      purchased_tokens, clawed_back_tokens, shortfall_tokens, review_required
+    ) values (
+      requested_event_id, requested_event_type, requested_checkout_session_id, purchase.user_id, requested_reason,
+      purchase.tokens_delta, 0, 0, false
+    );
+    return query select true, 0::bigint, 0::bigint, false;
+    return;
+  end if;
+
+  select wallets.balance_tokens
+  into wallet_balance
+  from public.token_wallets as wallets
+  where wallets.user_id = purchase.user_id
+  for update;
+
+  if wallet_balance is null then
+    wallet_balance := 0;
+  end if;
+
+  clawback := least(greatest(wallet_balance, 0), purchase.tokens_delta);
+  shortfall := purchase.tokens_delta - clawback;
+  needs_review := shortfall > 0;
+
+  if clawback > 0 then
+    update public.token_wallets
+    set balance_tokens = balance_tokens - clawback,
+        updated_at = now()
+    where user_id = purchase.user_id;
+  end if;
+
+  insert into public.token_refund_events (
+    stripe_event_id, stripe_event_type, checkout_session_id, user_id, reason,
+    purchased_tokens, clawed_back_tokens, shortfall_tokens, review_required
+  ) values (
+    requested_event_id, requested_event_type, requested_checkout_session_id, purchase.user_id, requested_reason,
+    purchase.tokens_delta, clawback, shortfall, needs_review
+  ) returning id into new_event_id;
+
+  if needs_review then
+    insert into public.token_purchase_reviews (
+      user_id, checkout_session_id, refund_event_id, reason, shortfall_tokens
+    ) values (
+      purchase.user_id, requested_checkout_session_id, new_event_id, 'spent_tokens', shortfall
+    );
+  end if;
+
+  perform public.log_audit_event(
+    null,
+    'token.refund_processed',
+    'user',
+    purchase.user_id,
+    jsonb_build_object(
+      'checkoutSessionId', requested_checkout_session_id,
+      'reason', requested_reason,
+      'clawedBackTokens', clawback,
+      'shortfallTokens', shortfall
+    )
+  );
+
+  return query select true, clawback, shortfall, needs_review;
+end;
+$$;
+
+revoke all on function public.record_token_refund(text, text, text, text, boolean) from public, anon, authenticated;
+grant execute on function public.record_token_refund(text, text, text, text, boolean) to service_role;
+
 commit;

@@ -14,8 +14,13 @@ The schema is defined in `supabase/migrations/`:
 - `20261024000000_token_spending.sql` — server-owned spend catalog, spend ledger, entitlements, equipped profile frame, and the idempotent `spend_tokens` RPC.
 - `20261024000001_signup_token_bonus.sql` — 100-token welcome grant for new profiles, `signup_bonus` ledger entries, and a one-time backfill for existing profiles without a wallet.
 - `20261024000002_profile_cosmetics.sql` — 12-item permanent cosmetic catalog, equipped effect/badge/banner slots, updated `spend_tokens`, and the `equip_profile_cosmetic`/`clear_profile_cosmetic` RPCs.
+- `20261026000000_token_purchase_age_gate.sql` — 18+ purchase verification time, `log_audit_event`, and `confirm_token_purchase_age`.
+- `20261026000100_token_refund_clawback.sql` — refund/dispute event ledger, purchase-review queue, and `record_token_refund`.
+- `20261026000200_account_deletion_grace_period.sql` — seven-day deletion requests, restore, purge, and `hidden_for_deletion` visibility flags.
+- `20261026000300_terms_acceptance.sql` — terms version/timestamp, signup metadata carry-through, and `record_terms_acceptance`.
+- `20261026000400_admin_dashboard.sql` — appeals, internal notes, member search/overview, role management, audit browsing, and purchase-review RPCs.
 
-These migrations have not been certified for production. Apply them to a disposable project first, then staging, then production after a backup. For the Dashboard SQL Editor, use `../SUPABASE_SQL_HANDOFF.md` and `handoff/`; `economy_migrations.sql` combines the four economy migrations, `all_migrations.sql` is for a fresh project, and `verify_economy.sql`/`verify_all.sql` are read-only checks. Run `npm run check:sql-handoff` after changing a migration.
+These migrations have not been certified for production. Apply them to a disposable project first, then staging, then production after a backup. For the Dashboard SQL Editor, use `../SUPABASE_SQL_HANDOFF.md` and `handoff/`; `economy_migrations.sql` combines the six economy migrations, `all_migrations.sql` is for a fresh project, and `verify_economy.sql`/`verify_all.sql` are read-only checks. Run `npm run check:sql-handoff` after changing a migration.
 
 ## Configure a project
 

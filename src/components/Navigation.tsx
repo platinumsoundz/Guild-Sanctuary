@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import Link from 'next/link';
 import {
   CalendarDays,
   Clapperboard,
@@ -15,6 +16,8 @@ import {
   UserRound,
   Wallet,
   HeartHandshake,
+  Gamepad2,
+  ShoppingBag,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -22,14 +25,22 @@ import type { NavigationState } from '@/context/AppContext';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
 import styles from './Navigation.module.css';
 
+const legalLinks = [
+  { href: '/guidelines', label: 'Guidelines' },
+  { href: '/terms', label: 'Terms' },
+  { href: '/privacy', label: 'Privacy' },
+];
+
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
   { id: 'feed', label: 'Feed', icon: Newspaper },
   { id: 'events', label: 'Events', icon: CalendarDays },
   { id: 'discover', label: 'Discover', icon: Search },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
+  { id: 'games', label: 'Games', icon: Gamepad2 },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
+  { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
   { id: 'moderation', label: 'Moderation', icon: ShieldCheck },
   { id: 'settings', label: 'Settings', icon: Settings },
@@ -72,12 +83,27 @@ export function Navigation({
   const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'moderation' || canModerate);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const desktopItemsRef = useRef<HTMLDivElement>(null);
   const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const closeMenuAndRestoreFocus = useCallback(() => {
     closeMenu();
     menuButtonRef.current?.focus();
   }, [closeMenu]);
+
+  useEffect(() => {
+    const container = desktopItemsRef.current;
+    if (!container) return;
+    const active = container.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!active) return;
+    const left = active.offsetLeft;
+    const right = left + active.offsetWidth;
+    if (left < container.scrollLeft) {
+      container.scrollLeft = Math.max(0, left - 12);
+    } else if (right > container.scrollLeft + container.clientWidth) {
+      container.scrollLeft = right - container.clientWidth + 12;
+    }
+  }, [activeNavigation]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -92,7 +118,7 @@ export function Navigation({
       }
       if (event.key === 'Tab') {
         const drawer = document.getElementById('mobile-navigation-drawer');
-        const focusableElements = drawer?.querySelectorAll<HTMLElement>('button:not([disabled])');
+        const focusableElements = drawer?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]');
         if (!focusableElements?.length) return;
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
@@ -160,7 +186,7 @@ export function Navigation({
       {currentUser && (
         <>
           <nav className={styles.desktopNavigation} aria-label="Main navigation">
-            <div className={styles.desktopNavigationItems}>
+            <div className={styles.desktopNavigationItems} ref={desktopItemsRef}>
               {visibleNavigationItems.map((item) => (
                 <button
                   key={item.id}
@@ -174,7 +200,16 @@ export function Navigation({
                 </button>
               ))}
             </div>
-            <span className={styles.accountName}>{currentUser.profile.displayName}</span>
+            <div className={styles.desktopNavigationTrailing}>
+              <div className={styles.desktopLegalLinks}>
+                {legalLinks.map((link) => (
+                  <Link key={link.href} href={link.href} className={styles.desktopLegalLink}>
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+              <span className={styles.accountName}>{currentUser.profile.displayName}</span>
+            </div>
           </nav>
           <AnimatePresence>
             {isMenuOpen && (
@@ -231,7 +266,21 @@ export function Navigation({
                       ))}
                     </div>
                   </nav>
-                  <p className={styles.drawerAccountName}>{currentUser.profile.displayName}</p>
+                  <div className={styles.drawerFooter}>
+                    <p className={styles.drawerAccountName}>{currentUser.profile.displayName}</p>
+                    <div className={styles.drawerLegalLinks}>
+                      {legalLinks.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className={styles.drawerLegalLink}
+                          onClick={closeMenu}
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </motion.aside>
               </>
             )}

@@ -5,6 +5,7 @@ import { getCosmeticSlot } from './catalog';
 import {
   checkTokenCheckoutEnabled,
   clearProfileCosmetic,
+  confirmTokenPurchaseAge,
   equipProfileCosmetic,
   fetchWallet,
   isSupabaseWalletConfigured,
@@ -26,13 +27,16 @@ interface UseWalletResult {
   catalog: TokenSpendItem[];
   entitlements: TokenEntitlement[];
   checkoutEnabled: boolean;
+  ageVerified: boolean;
   isLoading: boolean;
   isStartingCheckout: boolean;
+  isConfirmingAge: boolean;
   spendingItemId: string | null;
   equippingItemId: string | null;
   clearingItemId: string | null;
   error: string | null;
   refresh: () => Promise<void>;
+  confirmAge: (dateOfBirth: string) => Promise<boolean>;
   buyBundle: (bundleId: TokenBundleId) => Promise<void>;
   spendItem: (itemId: string) => Promise<TokenSpendResult | null>;
   equipItem: (itemId: string) => Promise<boolean>;
@@ -46,17 +50,23 @@ function createIdempotencyKey(): string {
   throw new Error('This browser cannot create a secure spend request. Update your browser and try again.');
 }
 
-export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
+export function useWallet(userId: string, isGuest: boolean, initialAgeVerifiedAt: string | null = null): UseWalletResult {
   const [snapshot, setSnapshot] = useState<WalletSnapshot | null>(null);
   const [checkoutEnabled, setCheckoutEnabled] = useState(false);
+  const [ageVerifiedAt, setAgeVerifiedAt] = useState<string | null>(initialAgeVerifiedAt);
   const [isLoading, setIsLoading] = useState(true);
   const [isStartingCheckout, setIsStartingCheckout] = useState(false);
+  const [isConfirmingAge, setIsConfirmingAge] = useState(false);
   const [spendingItemId, setSpendingItemId] = useState<string | null>(null);
   const [equippingItemId, setEquippingItemId] = useState<string | null>(null);
   const [clearingItemId, setClearingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const pendingSpendKeys = useRef<Record<string, string>>({});
   const canUseWallet = !isGuest && isSupabaseWalletConfigured();
+
+  useEffect(() => {
+    setAgeVerifiedAt(initialAgeVerifiedAt);
+  }, [initialAgeVerifiedAt]);
 
   const refresh = useCallback(async () => {
     if (!canUseWallet) {
@@ -89,9 +99,32 @@ export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
     void refresh();
   }, [refresh]);
 
+  const confirmAge = async (dateOfBirth: string): Promise<boolean> => {
+    if (!canUseWallet) {
+      setError('Sign in with your Sanctuary account before confirming your age.');
+      return false;
+    }
+    setIsConfirmingAge(true);
+    setError(null);
+    try {
+      const verifiedAt = await confirmTokenPurchaseAge(userId, dateOfBirth);
+      setAgeVerifiedAt(verifiedAt);
+      return true;
+    } catch (ageError) {
+      setError(ageError instanceof Error ? ageError.message : 'Your age could not be verified.');
+      return false;
+    } finally {
+      setIsConfirmingAge(false);
+    }
+  };
+
   const buyBundle = async (bundleId: TokenBundleId) => {
     if (!canUseWallet || !checkoutEnabled) {
       setError('Secure token checkout is still being configured.');
+      return;
+    }
+    if (!ageVerifiedAt) {
+      setError('Confirm that you are 18 or older before buying tokens.');
       return;
     }
     setIsStartingCheckout(true);
@@ -181,13 +214,16 @@ export function useWallet(userId: string, isGuest: boolean): UseWalletResult {
     catalog: snapshot?.catalog ?? [],
     entitlements: snapshot?.entitlements ?? [],
     checkoutEnabled,
+    ageVerified: Boolean(ageVerifiedAt),
     isLoading,
     isStartingCheckout,
+    isConfirmingAge,
     spendingItemId,
     equippingItemId,
     clearingItemId,
     error,
     refresh,
+    confirmAge,
     buyBundle,
     spendItem,
     equipItem,

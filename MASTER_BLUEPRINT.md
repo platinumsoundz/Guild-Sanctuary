@@ -28,9 +28,26 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `profiles` / `settings` | Profile, discovery, privacy, preferences, encrypted vault | Supabase when configured; browser-local demo fallback |
 | `moderation` | Report UI and moderator workflow | Supabase RPCs; navigation visible only to moderators/admins |
 | `support` | Optional community support and external donation link | Donation link is returned only on explicitly enabled Vercel Production deployments; no app-side reconciliation |
-| `economy` | Persistent token wallet, bundle purchase foundation, 100-token signup grant, permanent profile cosmetics (frames, effects, emoji badges, curated GIF banners) | Supabase wallet/ledger/spend/cosmetics migrations and Edge Functions staged; checkout disabled by default; transfers/trading/marketplace/cash-out still deferred |
+| `economy` | Persistent token wallet, bundle purchase foundation, 100-token signup grant, permanent profile cosmetics (frames, effects, emoji badges, curated GIF banners), and the Token Shop catalogue page | Supabase wallet/ledger/spend/cosmetics migrations and Edge Functions staged; checkout disabled by default; transfers/trading/marketplace/cash-out still deferred |
+| `games` | In-app Games hub that launches The 5 Sleeves games on their existing hosts | No merged runtime, shared login, or shared wallet yet; rendering is client-only |
 | `locations` | Experimental radius filtering | Not mounted; no durable location store |
 | `ads` | Consent-gated web display slots plus native AdMob entry point | AdSense requires an explicit flag plus a production-marked deployment (`VERCEL_ENV=production` or `NEXT_PUBLIC_DEPLOYMENT_ENV=production`); IDs come from public build-time environment; native module excluded from web bundle |
+
+## Navigation pages
+
+The single Sanctuary navigation exposes Feed, Events, Discover, Messages, Shorts, Games, Profile, Wallet, Token Shop, Support, Settings, and Moderation. Moderation is filtered to active moderators/admins. Games is an in-app launcher for The 5 Sleeves games, which stay hosted separately. The Token Shop mirrors the server-owned cosmetic catalogue and routes purchases to Wallet so the 18+ gate and idempotent spend path stay in one place. Guest mode can browse the Games and Token Shop preview but cannot buy or spend. The navigation bar and mobile drawer also link to the public `/guidelines`, `/terms`, and `/privacy` pages; the desktop item row scrolls horizontally and keeps the active page in view. `locations` remains intentionally unmounted.
+
+## Phase 1 launch gates — code status
+
+The launch gates requested for Phase 1 are implemented in the repository but not applied to any Supabase project and not deployed:
+
+- 18+ token purchase gate: `20261026000000_token_purchase_age_gate.sql`; the checkout function also rejects accounts without a stored verification.
+- Refund/chargeback clawback: `20261026000100_token_refund_clawback.sql`; the Stripe webhook handles `charge.refunded` and `charge.dispute.created`.
+- Seven-day account deletion grace period: `20261026000200_account_deletion_grace_period.sql`, `POST /api/account/delete`, and the secret-protected `POST /api/account/purge`.
+- Terms acceptance record: `20261026000300_terms_acceptance.sql` and the `NEXT_PUBLIC_TERMS_REQUIRED` gate, which defaults to `false`.
+- Admin and moderation dashboard: `20261026000400_admin_dashboard.sql` plus the Reports, Members, Appeals, Refund reviews, and Audit log tabs.
+
+Do not describe these as live until the migrations are applied, the Edge Functions and webhook are deployed, `ACCOUNT_PURGE_SECRET` and a scheduler are configured, and staging checks have actually run.
 
 ## Community content and legal paths
 
@@ -53,7 +70,7 @@ The browser adapters are active when `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC
 - Messages use the persistent repository and subscribe to Realtime INSERT events when Supabase is configured. Sends are optimistic, and the hook re-fetches messages newer than the last persisted item after reconnect, browser `online`, or tab visibility recovery. Read receipts/unread counts are not implemented yet.
 - Events, RSVPs, likes, and comments use the database. Aggregate RSVP and like counts come from `event_rsvp_counts` and `social_like_counts` views so the app does not expose who reacted.
 - Shorts likes/counts use `get_short_engagement_stats` and `toggle_short_like` RPCs so counts are not truncated by client-side RLS. Comment reads/posts remain browser Supabase queries and depend on the social schema/RLS plus `20261011000000_repair_social_engagement_insert_policies.sql`.
-- Account deletion uses `POST /api/account/delete` with the server-only service-role key. It verifies the session, email, `DELETE` phrase, and TOTP when enabled, removes stored media, then deletes the auth user.
+- Account deletion uses `POST /api/account/delete` with the server-only Supabase session. It verifies the session, email, `DELETE` phrase, and TOTP when enabled, then schedules a seven-day grace period. The profile and posts/Shorts/events/comments are hidden immediately; the owner can restore by signing in before the purge date. A separate secret-protected `POST /api/account/purge` route removes stored media and deletes the auth user once the grace period ends. Neither route is deployed or validated against a live project yet.
 - The private profile vault stores AES-GCM ciphertext and a PBKDF2 salt. The passphrase never leaves the browser; there is no recovery.
 
 The local demo stores remain only as a fallback when Supabase is not configured. Production sign-in is disabled without Supabase. The local demo code `000000` must never be used for real accounts.
@@ -108,8 +125,8 @@ Never trust client-provided prices, amounts, user IDs, or fulfillment status. Do
 
 1. Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and the separate Deno Edge Function check in an environment with dependencies. Do not claim current checks passed unless they were actually run for this revision.
 2. Apply the wallet migration and deploy both Edge Functions in an isolated staging project; verify RLS, paid and unpaid sessions, duplicate webhook delivery, wrong mode/price, invalid signatures, and Origin rejection.
-3. Implement the approved refund/chargeback behavior: claw back unspent tokens; flag spent-token cases for manual support review. Do not silently create a negative balance or reverse a purchased cosmetic.
-4. Implement the 18+ purchase gate, the 7-day deletion grace period, the full admin dashboard, and approved legal acceptance before live sales.
+3. Refund/chargeback handling is implemented in code (`record_token_refund` and the webhook refund/dispute branch): claw back unspent tokens, never create a negative balance, and flag spent-token and partial-refund cases for manual review. The migration is unapplied and the webhook is undeployed.
+4. The 18+ purchase gate, the 7-day deletion grace period, the full admin dashboard, and the terms-acceptance record are implemented in code. Their migrations are unapplied, and the terms gate defaults off until approved legal text replaces the draft. Live sales still wait on staging verification of every gate.
 5. Only then configure production-mode Price IDs/secrets/webhook and consider enabling live checkout. The migrations have not been applied and the functions have not been deployed to the user's project.
 
 ### Planned product scope and current status
@@ -119,14 +136,14 @@ The product owner confirmed the intended token sinks: profile cosmetics, chat it
 ### Launch and policy decisions (2026-10-24)
 
 - Launch publicly with the 100-token signup grant first. Live token checkout stays disabled until Stripe test-mode validation, refund/chargeback handling, legal review, and the 18+ purchase gate are complete.
-- Token purchases are 18+ even though the community is 13+. The age gate is not implemented yet.
-- Refund/chargeback policy: claw back unspent tokens. If tokens were already spent, flag the account for manual support review instead of silently creating a negative balance or reversing purchased cosmetics. Implementation is still pending.
-- Account deletion: hide the profile immediately, allow the owner to restore by signing in within 7 days, then purge after 7 days. Current code still uses the existing immediate-deletion flow; the grace period is not implemented.
-- The admin dashboard must include report review, suspend/ban, wallet/token history, audit log, appeals/notes, and role management. It is not implemented.
-- Legal documents use templates and still need qualified review. `TERMS_AND_CONDITIONS_DRAFT.md` is a starter draft with placeholders, not final legal terms. Implement explicit signup acceptance and durable version/timestamp recording only after approved text exists.
+- Token purchases are 18+ even though the community is 13+. The age gate is implemented in code (date of birth validated server-side; only `purchase_age_verified_at` is stored), but the migration is unapplied.
+- Refund/chargeback policy: claw back unspent tokens. If tokens were already spent, flag the account for manual support review instead of silently creating a negative balance or reversing purchased cosmetics. Implemented in code; unapplied and undeployed.
+- Account deletion: hide the profile immediately, allow the owner to restore by signing in within 7 days, then purge after 7 days. Implemented in code; the migration and purge scheduler are unapplied.
+- The admin dashboard includes report review, suspend/ban, wallet/token history, audit log, appeals/notes, and role management. Implemented in code; its migration is unapplied.
+- Legal documents use templates and still need qualified review. `TERMS_AND_CONDITIONS_DRAFT.md` and `/terms` are starter drafts with placeholders, not final legal terms. Signup acceptance and durable version/timestamp recording are implemented behind `NEXT_PUBLIC_TERMS_REQUIRED`, which defaults to `false` until approved text exists.
 - AdSense code is ready to switch on, but live ads remain blocked on a custom domain, AdSense site approval, live slot IDs, and a Google-certified CMP for UK/EEA traffic. The current `workers.dev` host cannot be used for AdSense verification. See `ADSENSE_SETUP.md`.
 
-Account deletion currently cascades wallet, spend history, and unlocks; the 7-day grace period must be implemented and tested before real-money sales.
+Account deletion now schedules a seven-day grace period in code. After the purge date, deletion cascades the wallet, spend history, and unlocks. The migration, purge route, and scheduler must be tested before real-money sales.
 
 ## Supabase status
 
@@ -146,7 +163,7 @@ Do not call this a production release until all of the following are complete:
 4. Implement and test the 7-day account-deletion grace period: hide the profile immediately, allow restore on sign-in, purge after 7 days, and define what happens to posts, media, messages, wallet history, and cosmetic unlocks. Test media removal, database cascades, and the service-role key boundary.
 5. Keep live token checkout disabled until the staging flow is verified and the approved refund/chargeback behavior is implemented. The profile-cosmetics spend path is implemented but unapplied; test it in staging, and keep broader redemption/trading disabled until reversal and account-deletion behavior are tested. Add the 18+ purchase gate and the full admin dashboard before live sales. The Next.js payment API routes remain disabled. Publish approved Terms and Privacy Notice, require explicit signup acceptance, and record the accepted terms version and server-side timestamp before production signup.
 6. Validate ad consent, placements, `ads.txt`, and production IDs in relevant territories; keep ads disabled until approval and site policies are in place.
-7. Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and the repository's Deno check after changes; then manually test responsive navigation, auth, feed, Shorts engagement/comments, direct and group messaging, events, moderation, support, wallet, and PWA installation states.
+7. Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and the repository's Deno check after changes; then manually test responsive navigation, auth, feed, Shorts engagement/comments, direct and group messaging, events, moderation, support, wallet, games, token shop, and PWA installation states.
 
 ## Messaging status and handoff
 

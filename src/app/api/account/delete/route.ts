@@ -1,42 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient, isSupabaseServerConfigured } from '@/lib/supabase/server';
-import { createAdminClient, isSupabaseAdminConfigured } from '@/lib/supabase/admin';
-
-const mediaBucket = 'community-media';
-
-async function listAllObjects(
-  admin: ReturnType<typeof createAdminClient>,
-  prefix: string,
-): Promise<string[]> {
-  const paths: string[] = [];
-  let offset = 0;
-
-  while (true) {
-    const { data, error } = await admin.storage
-      .from(mediaBucket)
-      .list(prefix, { limit: 1000, offset });
-    if (error) throw error;
-    if (!data || data.length === 0) break;
-
-    for (const item of data) {
-      const childPath = prefix ? `${prefix}/${item.name}` : item.name;
-      // Folders have no id; recurse into them.
-      if (!item.id) {
-        paths.push(...await listAllObjects(admin, childPath));
-      } else {
-        paths.push(childPath);
-      }
-    }
-
-    if (data.length < 1000) break;
-    offset += data.length;
-  }
-
-  return paths;
-}
 
 export async function POST(request: Request) {
-  if (!isSupabaseServerConfigured() || !isSupabaseAdminConfigured()) {
+  if (!isSupabaseServerConfigured()) {
     return NextResponse.json(
       { error: 'Account deletion is not configured on this deployment.' },
       { status: 503, headers: { 'Cache-Control': 'no-store' } },
@@ -111,30 +77,15 @@ export async function POST(request: Request) {
       }
     }
 
-    const admin = createAdminClient();
-
-    // Remove stored media before deleting the auth user. Database rows cascade
-    // from auth.users, but storage objects do not.
-    try {
-      const objects = await listAllObjects(admin, user.id);
-      for (let index = 0; index < objects.length; index += 100) {
-        const batch = objects.slice(index, index + 100);
-        if (batch.length > 0) {
-          const { error: removeError } = await admin.storage.from(mediaBucket).remove(batch);
-          if (removeError) throw removeError;
-        }
-      }
-    } catch (storageError) {
-      // Do not block account deletion forever on an orphaned media object, but
-      // surface the failure so an operator can clean it up.
-      console.error('Account media cleanup failed during deletion.', storageError);
-    }
-
-    const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
-    if (deleteError) throw new Error(`Your account could not be deleted: ${deleteError.message}`);
+    // Schedule a seven-day grace period. The profile is hidden immediately by
+    // the RPC; permanent media removal and auth-user deletion happen in the
+    // separate, secret-protected purge route.
+    const { data: purgeAfter, error: scheduleError } = await supabase.rpc('request_account_deletion');
+    if (scheduleError) throw new Error(`Account deletion could not be scheduled: ${scheduleError.message}`);
+    if (typeof purgeAfter !== 'string') throw new Error('Account deletion did not return a purge date.');
 
     return NextResponse.json(
-      { deleted: true },
+      { deletionScheduled: true, purgeAfter },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {

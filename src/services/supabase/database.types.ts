@@ -33,6 +33,11 @@ export type ProfileRow = {
   equipped_effect: string | null;
   equipped_badge: string | null;
   equipped_banner: string | null;
+  purchase_age_verified_at: string | null;
+  terms_version: string | null;
+  terms_accepted_at: string | null;
+  deletion_requested_at: string | null;
+  deletion_purge_after: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -130,6 +135,7 @@ export type SocialCommentRow = {
   author_id: string;
   body: string;
   state: 'visible' | 'hidden' | 'removed';
+  hidden_for_deletion: boolean;
   created_at: string;
 };
 
@@ -147,6 +153,81 @@ export type ContentReportRow = {
 }
 
 export type ModerationAction = 'warn' | 'hide' | 'remove' | 'restore' | 'suspend' | 'ban';
+
+export type ModerationAppealRow = {
+  id: string;
+  user_id: string;
+  report_id: string | null;
+  action_id: string | null;
+  message: string;
+  status: 'open' | 'reviewing' | 'resolved' | 'denied';
+  resolution_notes: string | null;
+  resolved_by: string | null;
+  resolved_at: string | null;
+  created_at: string;
+};
+
+export type ModerationNoteRow = {
+  id: string;
+  author_id: string;
+  subject_user_id: string;
+  body: string;
+  created_at: string;
+};
+
+export type TokenPurchaseReviewRow = {
+  id: string;
+  user_id: string;
+  checkout_session_id: string;
+  refund_event_id: string | null;
+  reason: 'spent_tokens' | 'partial_refund' | 'partial_dispute' | 'dispute_won' | 'unmatched';
+  shortfall_tokens: number;
+  status: 'open' | 'resolved' | 'dismissed';
+  notes: string | null;
+  resolved_by: string | null;
+  resolved_at: string | null;
+  created_at: string;
+};
+
+export type AccountDeletionRequestRow = {
+  user_id: string;
+  requested_at: string;
+  purge_after: string;
+  prior_visibility: 'public' | 'private';
+  prior_allow_profile_discovery: boolean;
+  cancelled_at: string | null;
+  purge_attempted_at: string | null;
+  created_at: string;
+};
+
+export type AdminMemberOverview = {
+  profile: ProfileRow;
+  balance_tokens: number;
+  ledger: {
+    id: string;
+    bundle_id: string;
+    tokens_delta: number;
+    amount_total: number;
+    created_at: string;
+  }[];
+  spends: {
+    id: string;
+    item_id: string;
+    item_name: string;
+    tokens_delta: number;
+    created_at: string;
+  }[];
+  notes: ModerationNoteRow[];
+  appeals: ModerationAppealRow[];
+  purchase_reviews: TokenPurchaseReviewRow[];
+  moderation_actions: {
+    id: string;
+    action: ModerationAction;
+    rationale: string;
+    expires_at: string | null;
+    created_at: string;
+  }[];
+};
 
 export interface Database {
   public: {
@@ -220,6 +301,7 @@ export interface Database {
         media_type: 'image' | 'audio' | 'video' | null;
         story_tag: string | null;
         state: 'visible' | 'hidden' | 'removed';
+        hidden_for_deletion: boolean;
         created_at: string;
         updated_at: string;
       }>;
@@ -230,6 +312,7 @@ export interface Database {
         video_url: string;
         caption: string;
         state: 'visible' | 'hidden' | 'removed';
+        hidden_for_deletion: boolean;
         created_at: string;
       }>;
       events: Table<{
@@ -243,6 +326,7 @@ export interface Database {
         starts_at: string;
         ends_at: string | null;
         state: 'visible' | 'hidden' | 'removed';
+        hidden_for_deletion: boolean;
         created_at: string;
       }>;
       event_rsvps: Table<{
@@ -299,6 +383,23 @@ export interface Database {
         details: Record<string, unknown>;
         created_at: string;
       }>;
+      account_deletion_requests: Table<AccountDeletionRequestRow>;
+      token_refund_events: Table<{
+        id: string;
+        stripe_event_id: string;
+        stripe_event_type: string;
+        checkout_session_id: string;
+        user_id: string;
+        reason: 'refund' | 'dispute';
+        purchased_tokens: number;
+        clawed_back_tokens: number;
+        shortfall_tokens: number;
+        review_required: boolean;
+        created_at: string;
+      }>;
+      token_purchase_reviews: Table<TokenPurchaseReviewRow>;
+      moderation_appeals: Table<ModerationAppealRow>;
+      moderation_notes: Table<ModerationNoteRow>;
     };
     Views: {
       public_profiles: {
@@ -435,6 +536,130 @@ export interface Database {
           requested_slot: 'frame' | 'effect' | 'badge' | 'banner';
         };
         Returns: undefined;
+      };
+      confirm_token_purchase_age: {
+        Args: { requested_date_of_birth: string };
+        Returns: string;
+      };
+      record_token_refund: {
+        Args: {
+          requested_event_id: string;
+          requested_event_type: string;
+          requested_checkout_session_id: string;
+          requested_reason: 'refund' | 'dispute';
+          requested_is_full: boolean;
+        };
+        Returns: {
+          matched: boolean;
+          clawed_back_tokens: number;
+          shortfall_tokens: number;
+          review_required: boolean;
+        }[];
+      };
+      request_account_deletion: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      cancel_account_deletion: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      purge_due_account_deletions: {
+        Args: { requested_limit?: number };
+        Returns: {
+          user_id: string;
+          requested_at: string;
+        }[];
+      };
+      record_terms_acceptance: {
+        Args: { requested_version: string };
+        Returns: {
+          terms_version: string;
+          terms_accepted_at: string;
+        }[];
+      };
+      admin_search_members: {
+        Args: { requested_query: string; requested_limit?: number };
+        Returns: {
+          id: string;
+          username: string;
+          display_name: string;
+          role: 'member' | 'moderator' | 'admin';
+          status: 'active' | 'suspended' | 'banned';
+          suspended_until: string | null;
+          balance_tokens: number;
+          created_at: string;
+        }[];
+      };
+      admin_member_overview: {
+        Args: { requested_user_id: string };
+        Returns: AdminMemberOverview;
+      };
+      admin_set_member_role: {
+        Args: { requested_user_id: string; requested_role: 'member' | 'moderator' | 'admin' };
+        Returns: undefined;
+      };
+      admin_add_member_note: {
+        Args: { requested_user_id: string; requested_body: string };
+        Returns: string;
+      };
+      admin_list_audit_events: {
+        Args: { requested_limit?: number; requested_offset?: number };
+        Returns: {
+          id: number;
+          actor_id: string | null;
+          actor_username: string | null;
+          event_type: string;
+          subject_type: string;
+          subject_id: string | null;
+          details: Record<string, unknown>;
+          created_at: string;
+        }[];
+      };
+      submit_moderation_appeal: {
+        Args: { requested_report_id: string | null; requested_message: string };
+        Returns: string;
+      };
+      admin_list_appeals: {
+        Args: { requested_status?: 'open' | 'reviewing' | 'resolved' | 'denied' | null };
+        Returns: {
+          id: string;
+          user_id: string;
+          username: string;
+          display_name: string;
+          report_id: string | null;
+          action_id: string | null;
+          message: string;
+          status: 'open' | 'reviewing' | 'resolved' | 'denied';
+          resolution_notes: string | null;
+          resolved_by: string | null;
+          resolved_at: string | null;
+          created_at: string;
+        }[];
+      };
+      admin_resolve_appeal: {
+        Args: {
+          requested_appeal_id: string;
+          requested_status: 'reviewing' | 'resolved' | 'denied';
+          requested_notes: string;
+        };
+        Returns: undefined;
+      };
+      admin_list_purchase_reviews: {
+        Args: { requested_status?: 'open' | 'resolved' | 'dismissed' | null };
+        Returns: TokenPurchaseReviewRow[];
+      };
+      admin_resolve_purchase_review: {
+        Args: {
+          requested_review_id: string;
+          requested_status: 'resolved' | 'dismissed';
+          requested_notes: string;
+        };
+        Returns: undefined;
+      };
+      fetch_my_moderation_appeals: {
+        Args: Record<string, never>;
+        Returns: ModerationAppealRow[];
       };
     };
     Enums: {

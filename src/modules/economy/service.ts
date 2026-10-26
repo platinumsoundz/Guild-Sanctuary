@@ -193,8 +193,17 @@ export async function clearProfileCosmetic(
   if (error) throw new Error(error.message || 'The cosmetic could not be removed.');
 }
 
-export async function checkTokenCheckoutEnabled(userId: string): Promise<boolean> {
+export async function confirmTokenPurchaseAge(userId: string, dateOfBirth: string): Promise<string> {
   await requireSignedInUser(userId);
+  const { data, error } = await getSupabaseBrowserClient().rpc('confirm_token_purchase_age', {
+    requested_date_of_birth: dateOfBirth,
+  });
+  if (error) throw new Error(error.message || 'Your age could not be verified.');
+  if (typeof data !== 'string') throw new Error('Age verification did not return a confirmation time.');
+  return data;
+}
+
+export async function checkTokenCheckoutEnabled(userId: string): Promise<boolean> {  await requireSignedInUser(userId);
   const { data, error } = await getSupabaseBrowserClient().functions.invoke('token-checkout', {
     body: { action: 'status' },
   });

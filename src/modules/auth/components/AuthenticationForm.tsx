@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
+import Link from 'next/link';
 import { MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE, type SignUpInput } from '../sessionStore';
+import { CURRENT_TERMS_VERSION, isTermsAcceptanceRequired } from '../terms';
 import styles from './AuthenticationForm.module.css';
 
 export type AuthMode = 'login' | 'signup';
@@ -37,12 +39,21 @@ export function AuthenticationForm({
   const [verificationCode, setVerificationCode] = useState('');
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const termsRequired = isTermsAcceptanceRequired();
 
   useEffect(() => {
     if (initialError) setError(initialError);
   }, [initialError]);
+
+  const signupInput = (): SignUpInput => ({
+    email: email.trim(),
+    username: username.trim(),
+    displayName: displayName.trim(),
+    termsVersion: termsRequired && termsAccepted ? CURRENT_TERMS_VERSION : null,
+  });
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -52,7 +63,7 @@ export function AuthenticationForm({
     try {
       if (step === 'email-link') {
         if (mode === 'signup') {
-          await onSignup({ email: email.trim(), username: username.trim(), displayName: displayName.trim() });
+          await onSignup(signupInput());
         } else {
           await onLogin(email.trim());
         }
@@ -77,11 +88,10 @@ export function AuthenticationForm({
       }
 
       if (mode === 'signup') {
-        await onSignup({
-          email: email.trim(),
-          username: username.trim(),
-          displayName: displayName.trim(),
-        });
+        if (termsRequired && !termsAccepted) {
+          throw new Error('Accept the Terms, Privacy Notice, and Community Guidelines before creating an account.');
+        }
+        await onSignup(signupInput());
       } else {
         await onLogin(email.trim());
       }
@@ -186,6 +196,27 @@ export function AuthenticationForm({
                       required
                     />
                   </label>
+                  {termsRequired ? (
+                    <label className={styles.termsCheck}>
+                      <input
+                        type="checkbox"
+                        checked={termsAccepted}
+                        onChange={(event) => setTermsAccepted(event.currentTarget.checked)}
+                        required
+                      />
+                      <span>
+                        I am 13 or older and accept the{' '}
+                        <Link href="/terms" target="_blank">Terms</Link>,{' '}
+                        <Link href="/privacy" target="_blank">Privacy Notice</Link>, and{' '}
+                        <Link href="/guidelines" target="_blank">Community Guidelines</Link>.
+                      </span>
+                    </label>
+                  ) : (
+                    <p className={styles.termsDraftNote}>
+                      The <Link href="/terms" target="_blank">Terms</Link> are still a marked draft and are not
+                      yet in force. No acceptance is recorded while the gate is disabled.
+                    </p>
+                  )}
                 </>
               )}
             </>
@@ -245,7 +276,7 @@ export function AuthenticationForm({
 
           {error && <p className={styles.error} role="alert">{error}</p>}
 
-          <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
+          <button className={styles.submitButton} type="submit" disabled={isSubmitting || (step === 'credentials' && mode === 'signup' && termsRequired && !termsAccepted)}>
             {isSubmitting ? 'Please wait…' : step === 'email-link' ? 'Resend email link' : step === 'email-code' ? 'Verify email' : step === 'two-factor-code' ? 'Verify and continue' : mode === 'signup' ? 'Continue to email verification' : 'Continue with email'}
           </button>
         </form>

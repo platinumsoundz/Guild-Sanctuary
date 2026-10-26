@@ -21,6 +21,17 @@ export {
 export { MOCK_EMAIL_CODE, MOCK_TWO_FACTOR_CODE } from './sessionStore';
 export type { AuthSession, SignUpInput } from './sessionStore';
 export {
+  cancelAccountDeletion,
+  recordTermsAcceptance,
+  requestAccountDeletion,
+} from './accountLifecycle';
+export type { TermsAcceptance } from './accountLifecycle';
+export {
+  CURRENT_TERMS_VERSION,
+  isApprovedTermsVersion,
+  isTermsAcceptanceRequired,
+} from './terms';
+export {
   isPrivateProfileVaultUnlocked,
   lockPrivateProfileVault,
   savePrivateProfileVault,

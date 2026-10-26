@@ -256,3 +256,34 @@ Safety requirements:
 
 ### Working preference
 The user is tired and wants to resume later. Avoid repeating completed checks, long speculative audits, or fragile shell pipelines. Use short, actionable steps and explain any failure clearly.
+
+## SESSION CHECKPOINT — 2026-10-26 (Phase 1 launch gates and navigation)
+
+### Branch isolation
+- Work is isolated on `feature/phase1-trust-safety`, created from `audit/fixes-2026-10-23`.
+- A separate agent is working on password sign-in, database/domain work, and Cloudflare/Vercel/Supabase configuration. Its branches include `main`, `feature/domain-database-improvements`, `fix/supabase-signin-recovery`, `security/supabase-function-and-view-grants`, and `build/cloudflare-ads-host-neutral`.
+- The Phase 1 feature content is not duplicated on those branches, but they touch the same auth, migration, and Supabase type files. Review `git diff` for both sides before any merge or rebase.
+- Nothing has been committed or pushed from this checkpoint yet.
+
+### Added in code (not applied or deployed)
+- `supabase/migrations/20261026000000_token_purchase_age_gate.sql` — 18+ date-of-birth verification; stores only `profiles.purchase_age_verified_at`; adds `log_audit_event`.
+- `supabase/migrations/20261026000100_token_refund_clawback.sql` — `record_token_refund`, refund/dispute event tables, purchase-review queue; never creates a negative balance.
+- `supabase/migrations/20261026000200_account_deletion_grace_period.sql` — seven-day deletion schedule/restore/purge, `hidden_for_deletion` flags.
+- `supabase/migrations/20261026000300_terms_acceptance.sql` — `terms_version`/`terms_accepted_at`, signup metadata carry-through, `record_terms_acceptance`.
+- `supabase/migrations/20261026000400_admin_dashboard.sql` — appeals, notes, member search/overview, role management, audit browsing, purchase-review RPCs.
+- App: age-gated Wallet, terms gate (`NEXT_PUBLIC_TERMS_REQUIRED`, default false), deletion notice/restore, Settings appeals panel, moderation tabs, Games hub, Token Shop catalogue.
+- Edge Functions: checkout requires stored 18+ verification; webhook handles `charge.refunded` and `charge.dispute.created`.
+
+### Not done
+- No Phase 1 migration has been applied to the linked project.
+- `token-checkout` and `stripe-token-webhook` have not been deployed.
+- `ACCOUNT_PURGE_SECRET` and its scheduler are not configured.
+- No staging test has verified refunds, disputes, deletion, restore, purge, roles, appeals, or the terms gate.
+- `/terms` is still a marked draft; keep the terms gate off.
+
+### Checks actually run
+- `npm run typecheck` passed.
+- `npm run lint` passed.
+- `npm test -- --run` passed (17/17).
+- `npm run check:sql-handoff` passed (17 migrations).
+- `npm run build` passed.

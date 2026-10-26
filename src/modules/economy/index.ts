@@ -1,8 +1,10 @@
 export { WalletPanel } from './WalletPanel';
+export { TokenShopPanel } from './TokenShopPanel';
 export { useWallet } from './useWallet';
 export {
   checkTokenCheckoutEnabled,
   clearProfileCosmetic,
+  confirmTokenPurchaseAge,
   equipProfileCosmetic,
   fetchWallet,
   isSupabaseWalletConfigured,

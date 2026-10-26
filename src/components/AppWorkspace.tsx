@@ -7,7 +7,9 @@ import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import type { CSSProperties } from 'react';
 import type { Conversation, PublicProfile } from '@/types/database';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
-import { AuthenticationGateway } from '@/modules/auth';
+import { AuthenticationGateway, CURRENT_TERMS_VERSION, isTermsAcceptanceRequired } from '@/modules/auth';
+import { AccountDeletionNotice } from '@/components/AccountDeletionNotice';
+import { TermsAcceptanceGate } from '@/components/TermsAcceptanceGate';
 import { Feed } from '@/modules/feeds';
 import { MeetupCalendarPlaceholder } from '@/modules/events';
 import { ProfileDashboard, ProfileDiscovery } from '@/modules/profiles';
@@ -17,7 +19,8 @@ import { DirectMessageThread, MessagesInbox } from '@/modules/messages';
 import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
 import { ModerationDashboard } from '@/modules/moderation';
-import { WalletPanel } from '@/modules/economy';
+import { TokenShopPanel, WalletPanel } from '@/modules/economy';
+import { GamesHub } from '@/modules/games';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import styles from './AppWorkspace.module.css';
 
@@ -32,6 +35,8 @@ export function AppWorkspace() {
     login,
     logout,
     deleteAccount,
+    restoreAccount,
+    acceptTerms,
     pendingEmail,
     setTwoFactorEnabled,
     setActiveNavigation,
@@ -98,7 +103,22 @@ export function AppWorkspace() {
     setActiveNavigation(navigation);
   };
 
-  const authenticatedContent = activeNavigation === 'support' ? (
+  const pendingDeletion = Boolean(isAuthenticated && currentUser && !isGuest && currentUser.user.deletionPurgeAfter);
+  const termsGate = Boolean(isAuthenticated && currentUser && !isGuest && isTermsAcceptanceRequired() && !currentUser.user.termsVersion);
+
+  const authenticatedContent = pendingDeletion && currentUser ? (
+    <AccountDeletionNotice
+      purgeAfter={currentUser.user.deletionPurgeAfter as string}
+      onRestore={restoreAccount}
+      onSignOut={logout}
+    />
+  ) : termsGate && currentUser ? (
+    <TermsAcceptanceGate
+      version={CURRENT_TERMS_VERSION}
+      onAccept={acceptTerms}
+      onSignOut={logout}
+    />
+  ) : activeNavigation === 'support' ? (
     <main className={styles.supportPage}>
       <SupportPanel />
     </main>
@@ -106,8 +126,18 @@ export function AppWorkspace() {
     <>
       {activeNavigation === 'wallet' ? (
         <main className={styles.supportPage}>
-          <WalletPanel userId={currentUser.user.id} profile={currentUser.profile} isGuest={isGuest} onSpendComplete={refreshProfile} />
+          <WalletPanel userId={currentUser.user.id} profile={currentUser.profile} isGuest={isGuest} purchaseAgeVerifiedAt={currentUser.user.purchaseAgeVerifiedAt} onSpendComplete={refreshProfile} />
         </main>
+      ) : activeNavigation === 'shop' ? (
+        <main className={styles.supportPage}>
+          <TokenShopPanel
+            userId={currentUser.user.id}
+            isGuest={isGuest}
+            onOpenWallet={() => setActiveNavigation('wallet')}
+          />
+        </main>
+      ) : activeNavigation === 'games' ? (
+        <GamesHub />
       ) : activeNavigation === 'feed' ? (
         <FeedAdLayout>
           <Feed />

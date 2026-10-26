@@ -39,8 +39,9 @@ export function DeleteAccountPanel({
     <section className={`${styles.panel} ${styles.dangerPanel}`} aria-labelledby="delete-title">
       <h2 id="delete-title">Delete account</h2>
       <p className={styles.hint}>
-        This permanently removes your account, profile, posts, messages, and stored media, then
-        signs you out. This cannot be undone.
+        Your profile, posts, Shorts, events, and comments are hidden immediately. You then have seven
+        days to sign in and restore the account. After the grace period, the account, wallet, unlocks,
+        messages, and stored media are permanently purged. This cannot be undone after that date.
       </p>
       <form className={styles.linksForm} onSubmit={handleDelete}>
         <label className={styles.field}>
@@ -83,7 +84,7 @@ export function DeleteAccountPanel({
             (twoFactorEnabled && deleteCode.length !== 6)
           }
         >
-          Permanently delete account
+          {isDeleting ? 'Scheduling deletion…' : 'Schedule account deletion'}
         </button>
       </form>
     </section>

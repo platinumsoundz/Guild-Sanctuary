@@ -47,19 +47,25 @@ Apply in filename order. These are the current migration files:
 10. `20261024000000_token_spending.sql` — spend catalog, spend ledger, entitlements, `spend_tokens`.
 11. `20261024000001_signup_token_bonus.sql` — 100-token signup grant and pre-live backfill.
 12. `20261024000002_profile_cosmetics.sql` — 12-item cosmetic catalog, equipped slots, equip/clear RPCs, public profile view.
+13. `20261026000000_token_purchase_age_gate.sql` — 18+ purchase verification, `log_audit_event`, `confirm_token_purchase_age`.
+14. `20261026000100_token_refund_clawback.sql` — refund/dispute events, `record_token_refund`, purchase-review queue.
+15. `20261026000200_account_deletion_grace_period.sql` — seven-day deletion schedule/restore/purge and content visibility flags.
+16. `20261026000300_terms_acceptance.sql` — terms version/timestamp, signup carry-through, `record_terms_acceptance`.
+17. `20261026000400_admin_dashboard.sql` — appeals, internal notes, member search/overview, role management, audit browsing.
 
 ## Immediate economy path
 
-If the only known error is `relation "public.token_wallets" does not exist`, use `economy_migrations.sql`. It contains migrations 7, 10, 11, and 12 in one transaction. It assumes the social schema and `profiles` table already exist.
+If the only known error is `relation "public.token_wallets" does not exist`, use `economy_migrations.sql`. It contains migrations 7, 10, 11, 12, 13, and 14 in one transaction. It assumes the social schema and `profiles` table already exist.
 
 After it succeeds, run `verify_economy.sql`. Expected results:
 
-- five economy tables
-- five economy functions
+- seven economy tables (including refund events and purchase reviews)
+- six economy functions (including `record_token_refund`)
+- the `purchase_age_verified_at` column on `profiles`
 - four `equipped_*` columns on `profiles`
 - four `equipped_*` columns on `public_profiles`
 - 12 enabled catalog rows
-- RLS enabled on all five economy tables
+- RLS enabled on the seven economy tables
 - existing test profiles with a 100-token wallet
 
 Then run:
@@ -70,7 +76,7 @@ This only refreshes the API schema cache. It does not create tables or functions
 
 ## Fresh-project path
 
-Use `all_migrations.sql` only on an empty project. It wraps all 12 migrations in one transaction and strips the inner `begin;`/`commit;` pairs. If any statement fails, the whole transaction rolls back.
+Use `all_migrations.sql` only on an empty project. It wraps all 17 migrations in one transaction and strips the inner `begin;`/`commit;` pairs. If any statement fails, the whole transaction rolls back.
 
 After it succeeds, run `verify_all.sql`, then `notify pgrst, 'reload schema';`.
 

@@ -109,12 +109,18 @@ export default {
 
     const { data: profile, error: profileError } = await ctx.supabase
       .from('profiles')
-      .select('status')
+      .select('status,purchase_age_verified_at')
       .eq('id', userId)
       .maybeSingle()
     if (profileError) return Response.json({ error: 'Your account could not be verified.' }, { status: 500 })
     if (!profile || profile.status !== 'active') {
       return Response.json({ error: 'An active Sanctuary account is required to buy tokens.' }, { status: 403 })
+    }
+    if (!profile.purchase_age_verified_at) {
+      return Response.json(
+        { error: 'Confirm that you are 18 or older in the wallet before buying tokens.', code: 'AGE_VERIFICATION_REQUIRED' },
+        { status: 403 },
+      )
     }
 
     try {

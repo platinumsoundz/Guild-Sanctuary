@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import type { Profile } from '@/types/database';
 import {
   cosmeticFilterLabel,
@@ -18,33 +18,38 @@ interface WalletPanelProps {
   userId: string;
   profile: Profile;
   isGuest: boolean;
+  purchaseAgeVerifiedAt?: string | null;
   onSpendComplete?: () => void | Promise<void>;
 }
 
 const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 
-export function WalletPanel({ userId, profile, isGuest, onSpendComplete }: WalletPanelProps) {
+export function WalletPanel({ userId, profile, isGuest, purchaseAgeVerifiedAt = null, onSpendComplete }: WalletPanelProps) {
   const {
     snapshot,
     bundles,
     catalog,
     entitlements,
     checkoutEnabled,
+    ageVerified,
     isLoading,
     isStartingCheckout,
+    isConfirmingAge,
     spendingItemId,
     equippingItemId,
     clearingItemId,
     error,
     refresh,
+    confirmAge,
     buyBundle,
     spendItem,
     equipItem,
     clearItem,
-  } = useWallet(userId, isGuest);
+  } = useWallet(userId, isGuest, purchaseAgeVerifiedAt);
   const [notice, setNotice] = useState<string | null>(null);
   const [confirmingItemId, setConfirmingItemId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<CosmeticFilter>('all');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const hasSupabaseAccount = !isGuest && isSupabaseWalletConfigured();
   const entitledItemIds = new Set(entitlements.map((entry) => entry.itemId));
   const summary = summarizeCosmetics(catalog, entitledItemIds, profile);
@@ -101,6 +106,15 @@ export function WalletPanel({ userId, profile, isGuest, onSpendComplete }: Walle
       await onSpendComplete?.();
     } catch {
       // The clear succeeded; a profile refresh failure should not look like a failure.
+    }
+  };
+
+  const handleConfirmAge = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const confirmed = await confirmAge(dateOfBirth);
+    if (confirmed) {
+      setDateOfBirth('');
+      setNotice('Age confirmed. Token purchases are now available for this account.');
     }
   };
 
@@ -312,14 +326,47 @@ export function WalletPanel({ userId, profile, isGuest, onSpendComplete }: Walle
               <button
                 className={styles.buyButton}
                 type="button"
-                disabled={!hasSupabaseAccount || !checkoutEnabled || isLoading || isStartingCheckout}
+                disabled={!hasSupabaseAccount || !checkoutEnabled || !ageVerified || isLoading || isStartingCheckout}
                 onClick={() => void buyBundle(bundle.id)}
               >
-                {isStartingCheckout ? 'Opening Stripe…' : !hasSupabaseAccount ? 'Sign in to buy' : checkoutEnabled ? 'Buy with Stripe' : 'Purchases not enabled'}
+                {isStartingCheckout
+                  ? 'Opening Stripe…'
+                  : !hasSupabaseAccount
+                    ? 'Sign in to buy'
+                    : !checkoutEnabled
+                      ? 'Purchases not enabled'
+                      : !ageVerified
+                        ? 'Confirm you are 18+'
+                        : 'Buy with Stripe'}
               </button>
             </article>
           ))}
         </div>
+        {hasSupabaseAccount && (
+          ageVerified ? (
+            <p className={styles.disclaimer}>Age confirmed. Token purchases are restricted to members aged 18 or over.</p>
+          ) : (
+            <form className={styles.ageGate} onSubmit={(event) => void handleConfirmAge(event)}>
+              <div>
+                <strong>Token purchases are 18+</strong>
+                <p>Confirm your date of birth once. The server verifies your age and stores only the verification time, not your date of birth.</p>
+              </div>
+              <label className={styles.ageField}>
+                <span>Date of birth</span>
+                <input
+                  type="date"
+                  value={dateOfBirth}
+                  max={new Date().toISOString().slice(0, 10)}
+                  onChange={(event) => setDateOfBirth(event.currentTarget.value)}
+                  required
+                />
+              </label>
+              <button className={styles.refreshButton} type="submit" disabled={isConfirmingAge || !dateOfBirth}>
+                {isConfirmingAge ? 'Confirming…' : 'Confirm age'}
+              </button>
+            </form>
+          )
+        )}
         {hasSupabaseAccount && !isLoading && !checkoutEnabled && (
           <p className={styles.disclaimer}>Purchases stay disabled until Stripe prices, webhook verification, and token fulfillment are configured.</p>
         )}

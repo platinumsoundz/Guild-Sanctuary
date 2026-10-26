@@ -1,6 +1,6 @@
 # Supabase SQL handoff
 
-Last updated: 2026-10-24
+Last updated: 2026-10-26
 
 This is the durable handoff for every SQL command the project currently knows about. It is written for the Supabase Dashboard SQL Editor. The project owner does not need to open individual migration files.
 
@@ -11,8 +11,8 @@ This is the durable handoff for every SQL command the project currently knows ab
 Open the handoff folder:
 
 - `supabase/handoff/README.md` — step-by-step guide, file chooser, copy-paste rules, troubleshooting.
-- `supabase/handoff/economy_migrations.sql` — the four token-wallet/economy migrations in one transaction. Use this when the social schema already exists and `public.token_wallets` is missing.
-- `supabase/handoff/all_migrations.sql` — all 12 migrations in one transaction. Use this only on a brand-new project.
+- `supabase/handoff/economy_migrations.sql` — the six token-wallet/economy migrations in one transaction (wallet, spending, signup bonus, cosmetics, 18+ age gate, refund clawback). Use this when the social schema already exists and `public.token_wallets` is missing.
+- `supabase/handoff/all_migrations.sql` — all 17 migrations in one transaction. Use this only on a brand-new project.
 - `supabase/handoff/verify_economy.sql` — read-only checks for the economy tables, functions, columns, catalog, RLS, and wallets.
 - `supabase/handoff/verify_all.sql` — read-only checks for the full schema, views, functions, RLS, indexes, and storage buckets.
 
@@ -68,18 +68,26 @@ Only use this on an empty project. If any Sanctuary table already exists, use th
 | 10 | `20261024000000_token_spending.sql` | spend catalog/ledger/entitlements, `spend_tokens` |
 | 11 | `20261024000001_signup_token_bonus.sql` | 100-token signup grant, backfill |
 | 12 | `20261024000002_profile_cosmetics.sql` | 12-item cosmetic catalog, equipped slots, equip/clear RPCs |
+| 13 | `20261026000000_token_purchase_age_gate.sql` | 18+ purchase verification, `log_audit_event` |
+| 14 | `20261026000100_token_refund_clawback.sql` | refund/dispute events, `record_token_refund`, purchase reviews |
+| 15 | `20261026000200_account_deletion_grace_period.sql` | seven-day deletion schedule/restore/purge, content visibility flags |
+| 16 | `20261026000300_terms_acceptance.sql` | terms version/timestamp, `record_terms_acceptance` |
+| 17 | `20261026000400_admin_dashboard.sql` | appeals, notes, member search/overview, roles, audit browsing |
 
 ## Verification expectations
 
 Economy checks:
 
-- five tables: `token_wallets`, `token_ledger`, `token_spend_catalog`, `token_spend_ledger`, `token_entitlements`
-- five functions: `record_token_bundle_purchase`, `spend_tokens`, `equip_profile_cosmetic`, `clear_profile_cosmetic`, `grant_signup_token_bonus`
+- seven tables: `token_wallets`, `token_ledger`, `token_spend_catalog`, `token_spend_ledger`, `token_entitlements`, `token_refund_events`, `token_purchase_reviews`
+- six functions: `record_token_bundle_purchase`, `spend_tokens`, `equip_profile_cosmetic`, `clear_profile_cosmetic`, `grant_signup_token_bonus`, `record_token_refund`
+- `purchase_age_verified_at` on `profiles`
 - four profile columns: `equipped_frame`, `equipped_effect`, `equipped_badge`, `equipped_banner`
 - four matching columns on `public_profiles`
 - 12 enabled catalog rows
-- RLS enabled on all five economy tables
+- RLS enabled on the seven economy tables
 - existing test profiles with a 100-token wallet
+
+Full-schema checks also cover `account_deletion_requests`, `moderation_appeals`, `moderation_notes`, the terms columns, the deletion visibility flags, and the admin RPCs.
 
 ## Known error → fix
 

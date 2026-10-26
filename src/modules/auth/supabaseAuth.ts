@@ -102,6 +102,12 @@ function isProfileActive(profile: ProfileRow): boolean {
   );
 }
 
+function isProfileUsable(profile: ProfileRow): boolean {
+  // A scheduled deletion suspends the profile while still allowing the owner
+  // to sign in and restore within the grace period.
+  return isProfileActive(profile) || Boolean(profile.deletion_purge_after);
+}
+
 async function getProfileRow(userId: string) {
   const { data, error } = await getSupabaseBrowserClient()
     .from('profiles')
@@ -114,7 +120,7 @@ async function getProfileRow(userId: string) {
     }
     throw new Error(`Your account profile could not be loaded: ${error.message}`);
   }
-  if (!isProfileActive(data)) throw new Error('This account is not active. Contact support for help.');
+  if (!isProfileUsable(data)) throw new Error('This account is not active. Contact support for help.');
   return data;
 }
 
@@ -135,6 +141,10 @@ async function buildSession(): Promise<AuthSession> {
       emailVerified: true,
       twoFactorEnabled,
       status: isProfileActive(profileRow) ? 'active' : 'suspended',
+      purchaseAgeVerifiedAt: profileRow.purchase_age_verified_at ?? null,
+      termsVersion: profileRow.terms_version ?? null,
+      termsAcceptedAt: profileRow.terms_accepted_at ?? null,
+      deletionPurgeAfter: profileRow.deletion_purge_after ?? null,
       createdAt: user.created_at,
       updatedAt: user.updated_at ?? user.created_at,
     },
@@ -196,14 +206,23 @@ export async function updateSupabaseProfile(
   return mapProfileRow(data);
 }
 
-export async function requestSupabaseEmailCode(email: string, signup?: { username: string; displayName: string }): Promise<void> {
+export async function requestSupabaseEmailCode(
+  email: string,
+  signup?: { username: string; displayName: string; termsVersion?: string | null },
+): Promise<void> {
   const client = getSupabaseBrowserClient();
   const { error } = await client.auth.signInWithOtp({
     email: email.trim().toLowerCase(),
     options: {
       shouldCreateUser: Boolean(signup),
       emailRedirectTo: `${window.location.origin}/auth/callback`,
-      ...(signup ? { data: { username: signup.username, displayName: signup.displayName } } : {}),
+      ...(signup ? {
+        data: {
+          username: signup.username,
+          displayName: signup.displayName,
+          ...(signup.termsVersion ? { termsVersion: signup.termsVersion } : {}),
+        },
+      } : {}),
     },
   });
   if (error) throw new Error(`A verification code could not be sent: ${error.message}`);

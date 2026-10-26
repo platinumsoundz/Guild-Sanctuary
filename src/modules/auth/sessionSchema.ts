@@ -23,6 +23,8 @@ export interface SignUpInput {
   email: string;
   username: string;
   displayName: string;
+  /** Approved version accepted at signup; null/omitted while terms are still a draft. */
+  termsVersion?: string | null;
 }
 
 export const MOCK_EMAIL_CODE = '000000';
@@ -131,6 +133,10 @@ export function normalizeSession(value: unknown): AuthSession | null {
     (user.status !== 'active' && user.status !== 'suspended') ||
     typeof user.createdAt !== 'string' ||
     typeof user.updatedAt !== 'string' ||
+    (typeof user.purchaseAgeVerifiedAt !== 'string' && user.purchaseAgeVerifiedAt !== null) ||
+    (typeof user.termsVersion !== 'string' && user.termsVersion !== null) ||
+    (typeof user.termsAcceptedAt !== 'string' && user.termsAcceptedAt !== null) ||
+    (typeof user.deletionPurgeAfter !== 'string' && user.deletionPurgeAfter !== null) ||
     typeof normalizedProfile.id !== 'string' ||
     typeof normalizedProfile.userId !== 'string' ||
     typeof normalizedProfile.username !== 'string' ||

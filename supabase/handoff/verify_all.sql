@@ -32,7 +32,12 @@ where table_schema = 'public'
     'token_ledger',
     'token_spend_catalog',
     'token_spend_ledger',
-    'token_entitlements'
+    'token_entitlements',
+    'token_refund_events',
+    'token_purchase_reviews',
+    'account_deletion_requests',
+    'moderation_appeals',
+    'moderation_notes'
   )
 order by table_name;
 
@@ -64,7 +69,24 @@ where routine_schema = 'public'
     'spend_tokens',
     'equip_profile_cosmetic',
     'clear_profile_cosmetic',
-    'grant_signup_token_bonus'
+    'grant_signup_token_bonus',
+    'confirm_token_purchase_age',
+    'record_terms_acceptance',
+    'record_token_refund',
+    'request_account_deletion',
+    'cancel_account_deletion',
+    'purge_due_account_deletions',
+    'submit_moderation_appeal',
+    'fetch_my_moderation_appeals',
+    'admin_list_appeals',
+    'admin_resolve_appeal',
+    'admin_search_members',
+    'admin_member_overview',
+    'admin_set_member_role',
+    'admin_add_member_note',
+    'admin_list_audit_events',
+    'admin_list_purchase_reviews',
+    'admin_resolve_purchase_review'
   )
 order by routine_name;
 
@@ -93,7 +115,12 @@ where schemaname = 'public'
     'token_ledger',
     'token_spend_catalog',
     'token_spend_ledger',
-    'token_entitlements'
+    'token_entitlements',
+    'token_refund_events',
+    'token_purchase_reviews',
+    'account_deletion_requests',
+    'moderation_appeals',
+    'moderation_notes'
   )
 order by tablename;
 
@@ -122,3 +149,38 @@ where table_schema = 'public'
   and table_name = 'profiles'
   and column_name like 'equipped_%'
 order by column_name;
+
+-- 10. Launch-gate columns on profiles. Expected: five rows.
+select column_name, data_type
+from information_schema.columns
+where table_schema = 'public'
+  and table_name = 'profiles'
+  and column_name in (
+    'purchase_age_verified_at',
+    'terms_version',
+    'terms_accepted_at',
+    'deletion_requested_at',
+    'deletion_purge_after'
+  )
+order by column_name;
+
+-- 11. Deletion visibility flags. Expected: hidden_for_deletion on all four.
+select table_name, column_name
+from information_schema.columns
+where table_schema = 'public'
+  and table_name in ('posts', 'short_videos', 'events', 'social_comments')
+  and column_name = 'hidden_for_deletion'
+order by table_name;
+
+-- 12. New RLS policies. Expected: appeals, notes, deletion requests, refunds.
+select tablename, policyname, cmd, roles
+from pg_policies
+where schemaname = 'public'
+  and tablename in (
+    'token_refund_events',
+    'token_purchase_reviews',
+    'account_deletion_requests',
+    'moderation_appeals',
+    'moderation_notes'
+  )
+order by tablename, policyname;

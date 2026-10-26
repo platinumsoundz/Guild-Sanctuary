@@ -113,9 +113,16 @@
 
 .desktopNavigationItems {
   display: flex;
+  flex: 1 1 auto;
   min-width: 0;
   align-self: stretch;
   gap: 22px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.desktopNavigationItems::-webkit-scrollbar {
+  display: none;
 }
 
 .desktopNavigationButton {
@@ -131,6 +138,7 @@
   cursor: pointer;
   font-family: Arial, sans-serif;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .desktopNavigationButton svg {
@@ -156,6 +164,34 @@
   color: var(--muted);
   font-family: Arial, sans-serif;
   font-size: 11px;
+}
+
+.desktopNavigationTrailing {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 14px;
+}
+
+.desktopLegalLinks {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 14px;
+  border-right: 1px solid var(--line);
+}
+
+.desktopLegalLink {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.desktopLegalLink:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .drawerOverlay,
@@ -251,6 +287,25 @@
   color: var(--muted);
   font-family: Arial, sans-serif;
   font-size: 13px;
+}
+
+.drawerLegalLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 12px;
+}
+
+.drawerLegalLink {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.drawerLegalLink:hover {
+  color: var(--ink);
 }
 
 .worldButton {

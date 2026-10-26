@@ -53,6 +53,13 @@ export interface User {
   emailVerified: boolean;
   twoFactorEnabled: boolean;
   status: UserStatus;
+  /** When the member confirmed they are 18+ for token purchases. */
+  purchaseAgeVerifiedAt: string | null;
+  /** Approved terms version accepted at signup or later. */
+  termsVersion: string | null;
+  termsAcceptedAt: string | null;
+  /** Set while a 7-day account-deletion grace period is active. */
+  deletionPurgeAfter: string | null;
   createdAt: string;
   updatedAt: string;
 }

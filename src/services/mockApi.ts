@@ -47,6 +47,10 @@ export async function createUser(input: CreateUserInput): Promise<{ user: User; 
     emailVerified: false,
     twoFactorEnabled: false,
     status: 'active',
+    purchaseAgeVerifiedAt: null,
+    termsVersion: null,
+    termsAcceptedAt: null,
+    deletionPurgeAfter: null,
     createdAt: timestamp,
     updatedAt: timestamp,
   };

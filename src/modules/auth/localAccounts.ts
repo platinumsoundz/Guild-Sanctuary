@@ -28,6 +28,10 @@ function createSession(input: SignUpInput): AuthSession {
       status: 'active',
       createdAt: timestamp,
       updatedAt: timestamp,
+      purchaseAgeVerifiedAt: null,
+      termsVersion: input.termsVersion ?? null,
+      termsAcceptedAt: input.termsVersion ? timestamp : null,
+      deletionPurgeAfter: null,
     },
     profile: {
       id: `profile-${crypto.randomUUID()}`,

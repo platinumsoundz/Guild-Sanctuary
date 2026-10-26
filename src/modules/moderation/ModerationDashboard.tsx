@@ -1,28 +1,38 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { ModerationAction } from '@/services/supabase';
-import { fetchModerationQueue, takeModerationAction, type ModerationQueueItem } from './service';
+import { fetchModerationAccess, type ModerationAccess } from './service';
+import { AppealsPanel } from './components/AppealsPanel';
+import { AuditPanel } from './components/AuditPanel';
+import { MembersPanel } from './components/MembersPanel';
+import { ReportsPanel } from './components/ReportsPanel';
+import { ReviewsPanel } from './components/ReviewsPanel';
 import styles from './ModerationDashboard.module.css';
 
+type ModerationTab = 'reports' | 'members' | 'appeals' | 'reviews' | 'audit';
+
+const tabs: { id: ModerationTab; label: string }[] = [
+  { id: 'reports', label: 'Reports' },
+  { id: 'members', label: 'Members' },
+  { id: 'appeals', label: 'Appeals' },
+  { id: 'reviews', label: 'Refund reviews' },
+  { id: 'audit', label: 'Audit log' },
+];
+
 export function ModerationDashboard() {
-  const [reports, setReports] = useState<ModerationQueueItem[]>([]);
-  const [rationales, setRationales] = useState<Record<string, string>>({});
+  const [access, setAccess] = useState<ModerationAccess | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [busyReportId, setBusyReportId] = useState<string | null>(null);
+  const [tab, setTab] = useState<ModerationTab>('reports');
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
     try {
-      const queue = await fetchModerationQueue();
-      setReports(queue);
-      setIsAuthorized(true);
+      setAccess(await fetchModerationAccess());
       setError(null);
     } catch (loadError) {
-      setIsAuthorized(false);
-      setError(loadError instanceof Error ? loadError.message : 'Moderation queue could not be loaded.');
+      setAccess(null);
+      setError(loadError instanceof Error ? loadError.message : 'Moderation access could not be checked.');
     } finally {
       setIsLoading(false);
     }
@@ -30,61 +40,41 @@ export function ModerationDashboard() {
 
   useEffect(() => { void refresh(); }, [refresh]);
 
-  const act = async (report: ModerationQueueItem, action: ModerationAction, temporarySuspension = false) => {
-    setBusyReportId(report.id);
-    setError(null);
-    try {
-      await takeModerationAction({ report, action, rationale: rationales[report.id] ?? '', temporarySuspension });
-      setReports((current) => current.filter((item) => item.id !== report.id));
-    } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : 'Moderation action could not be applied.');
-    } finally {
-      setBusyReportId(null);
-    }
-  };
-
   return (
     <main className={styles.dashboard}>
       <header>
-        <p className={styles.eyebrow}>TRUST & SAFETY</p>
-        <h1>Moderation queue</h1>
-        <p>Review community reports. Every action requires a rationale and is written to the audit log.</p>
+        <p className={styles.eyebrow}>TRUST &amp; SAFETY</p>
+        <h1>Moderation &amp; administration</h1>
+        <p>Review reports, manage members and roles, handle appeals and refund reviews, and inspect the audit log.</p>
       </header>
-      {error && <p className={styles.error} role="alert">{error}</p>}
-      {isLoading ? <p role="status">Loading moderation access…</p> : !isAuthorized ? (
-        <p className={styles.notice}>This area is restricted to active moderators and administrators.</p>
-      ) : reports.length === 0 ? (
-        <p className={styles.notice}>No open reports.</p>
+
+      {isLoading ? (
+        <p role="status">Loading moderation access…</p>
+      ) : !access ? (
+        <>
+          {error && <p className={styles.error} role="alert">{error}</p>}
+          <p className={styles.notice}>This area is restricted to active moderators and administrators.</p>
+        </>
       ) : (
-        <section className={styles.queue} aria-label="Open reports">
-          {reports.map((report) => (
-            <article className={styles.report} key={report.id}>
-              <div className={styles.reportHeader}>
-                <strong>{report.target_type} report</strong>
-                <time dateTime={report.created_at}>{new Date(report.created_at).toLocaleString()}</time>
-              </div>
-              <p><b>Reason:</b> {report.reason}</p>
-              {report.details && <p className={styles.details}>{report.details}</p>}
-              <label className={styles.rationale}>
-                <span>Action rationale</span>
-                <textarea
-                  value={rationales[report.id] ?? ''}
-                  onChange={(event) => setRationales((current) => ({ ...current, [report.id]: event.currentTarget.value }))}
-                  minLength={3}
-                  maxLength={1000}
-                  rows={2}
-                />
-              </label>
-              <div className={styles.actions}>
-                <button disabled={busyReportId === report.id || !rationales[report.id]?.trim()} onClick={() => void act(report, 'hide')}>Hide content</button>
-                <button disabled={busyReportId === report.id || !rationales[report.id]?.trim()} onClick={() => void act(report, 'remove')}>Remove content</button>
-                <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'warn')}>Warn member</button>
-                <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'suspend', true)}>Suspend 24 hours</button>
-                <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'ban')}>Ban member</button>
-              </div>
-            </article>
-          ))}
-        </section>
+        <>
+          <nav className={styles.tabs} aria-label="Moderation sections">
+            {tabs.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={tab === item.id}
+                onClick={() => setTab(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+          {tab === 'reports' && <ReportsPanel />}
+          {tab === 'members' && <MembersPanel role={access.role} currentUserId={access.userId} />}
+          {tab === 'appeals' && <AppealsPanel />}
+          {tab === 'reviews' && <ReviewsPanel />}
+          {tab === 'audit' && <AuditPanel />}
+        </>
       )}
     </main>
   );

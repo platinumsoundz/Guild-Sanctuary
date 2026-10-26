@@ -2382,5 +2382,1295 @@ $$;
 revoke all on function public.clear_profile_cosmetic(text) from public, anon, authenticated;
 grant execute on function public.clear_profile_cosmetic(text) to authenticated;
 
+-- ============================================================================
+-- Source: supabase/migrations/20261026000000_token_purchase_age_gate.sql
+-- ============================================================================
+-- Shared defensive audit helper. The audit_events table is restored by the
+-- moderation foundation migration on projects where it is missing; logging
+-- must never make an account action fail outright.
+create or replace function public.log_audit_event(
+  requested_actor_id uuid,
+  requested_event_type text,
+  requested_subject_type text,
+  requested_subject_id uuid,
+  requested_details jsonb default '{}'::jsonb
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if to_regclass('public.audit_events') is null then
+    return;
+  end if;
+  insert into public.audit_events (actor_id, event_type, subject_type, subject_id, details)
+  values (requested_actor_id, requested_event_type, requested_subject_type, requested_subject_id, coalesce(requested_details, '{}'::jsonb));
+exception when others then
+  -- Audit logging must not roll back the account action that is being logged.
+  null;
+end;
+$$;
+
+revoke all on function public.log_audit_event(uuid, text, text, uuid, jsonb) from public, anon, authenticated;
+
+alter table public.profiles
+  add column if not exists purchase_age_verified_at timestamptz;
+
+create or replace function public.confirm_token_purchase_age(requested_date_of_birth date)
+returns timestamptz
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  verified_at timestamptz := now();
+begin
+  if caller_id is null then
+    raise exception 'Sign in before confirming your age.' using errcode = '42501';
+  end if;
+
+  if not public.is_active_user() then
+    raise exception 'This account is not active.' using errcode = '42501';
+  end if;
+
+  if requested_date_of_birth is null
+    or requested_date_of_birth > current_date
+    or requested_date_of_birth < (current_date - interval '120 years')::date
+  then
+    raise exception 'Enter a valid date of birth.' using errcode = '22023';
+  end if;
+
+  if requested_date_of_birth > (current_date - interval '18 years')::date then
+    raise exception 'Token purchases are only available to members aged 18 or over.' using errcode = '22023';
+  end if;
+
+  update public.profiles
+  set purchase_age_verified_at = verified_at,
+      updated_at = now()
+  where id = caller_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'account.purchase_age_verified',
+    'user',
+    caller_id,
+    jsonb_build_object('method', 'date_of_birth')
+  );
+
+  return verified_at;
+end;
+$$;
+
+revoke all on function public.confirm_token_purchase_age(date) from public, anon, authenticated;
+grant execute on function public.confirm_token_purchase_age(date) to authenticated;
+
+-- ============================================================================
+-- Source: supabase/migrations/20261026000100_token_refund_clawback.sql
+-- ============================================================================
+create table if not exists public.token_refund_events (
+  id uuid primary key default gen_random_uuid(),
+  stripe_event_id text not null unique,
+  stripe_event_type text not null check (stripe_event_type in ('charge.refunded', 'charge.dispute.created')),
+  checkout_session_id text not null,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  reason text not null check (reason in ('refund', 'dispute')),
+  purchased_tokens bigint not null check (purchased_tokens > 0),
+  clawed_back_tokens bigint not null check (clawed_back_tokens >= 0),
+  shortfall_tokens bigint not null check (shortfall_tokens >= 0),
+  review_required boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists token_refund_events_user_created_idx
+  on public.token_refund_events (user_id, created_at desc);
+
+create table if not exists public.token_purchase_reviews (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  checkout_session_id text not null,
+  refund_event_id uuid references public.token_refund_events(id) on delete set null,
+  reason text not null check (reason in ('spent_tokens', 'partial_refund', 'partial_dispute', 'dispute_won', 'unmatched')),
+  shortfall_tokens bigint not null default 0 check (shortfall_tokens >= 0),
+  status text not null default 'open' check (status in ('open', 'resolved', 'dismissed')),
+  notes text,
+  resolved_by uuid references public.profiles(id) on delete set null,
+  resolved_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists token_purchase_reviews_status_idx
+  on public.token_purchase_reviews (status, created_at);
+
+alter table public.token_refund_events enable row level security;
+alter table public.token_purchase_reviews enable row level security;
+
+create policy "moderators read token refund events"
+  on public.token_refund_events for select to authenticated
+  using (exists (
+    select 1 from public.profiles p
+    where p.id = (select auth.uid())
+      and p.role in ('moderator', 'admin')
+      and (p.status = 'active' or (p.status = 'suspended' and p.suspended_until <= now()))
+  ));
+
+create policy "moderators read token purchase reviews"
+  on public.token_purchase_reviews for select to authenticated
+  using (exists (
+    select 1 from public.profiles p
+    where p.id = (select auth.uid())
+      and p.role in ('moderator', 'admin')
+      and (p.status = 'active' or (p.status = 'suspended' and p.suspended_until <= now()))
+  ));
+
+grant select on public.token_refund_events, public.token_purchase_reviews to authenticated;
+revoke insert, update, delete, truncate
+  on public.token_refund_events, public.token_purchase_reviews
+  from public, anon, authenticated;
+grant select, insert, update on public.token_refund_events, public.token_purchase_reviews to service_role;
+
+create or replace function public.record_token_refund(
+  requested_event_id text,
+  requested_event_type text,
+  requested_checkout_session_id text,
+  requested_reason text,
+  requested_is_full boolean
+)
+returns table (
+  matched boolean,
+  clawed_back_tokens bigint,
+  shortfall_tokens bigint,
+  review_required boolean
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  purchase public.token_ledger%rowtype;
+  existing_event public.token_refund_events%rowtype;
+  wallet_balance bigint;
+  prior_clawback bigint;
+  clawback bigint := 0;
+  shortfall bigint := 0;
+  needs_review boolean := false;
+  new_event_id uuid;
+  review_reason text;
+begin
+  if requested_event_id is null or requested_event_id = ''
+    or requested_event_type is null
+    or requested_event_type not in ('charge.refunded', 'charge.dispute.created')
+    or requested_checkout_session_id is null or requested_checkout_session_id = ''
+    or requested_reason is null
+    or requested_reason not in ('refund', 'dispute')
+    or requested_is_full is null
+  then
+    raise exception 'Invalid token refund event' using errcode = '22023';
+  end if;
+
+  select * into existing_event
+  from public.token_refund_events
+  where stripe_event_id = requested_event_id;
+
+  if found then
+    return query select true, existing_event.clawed_back_tokens, existing_event.shortfall_tokens, existing_event.review_required;
+    return;
+  end if;
+
+  select * into purchase
+  from public.token_ledger
+  where checkout_session_id = requested_checkout_session_id;
+
+  if not found then
+    return query select false, 0::bigint, 0::bigint, false;
+    return;
+  end if;
+
+  select coalesce(sum(events.clawed_back_tokens), 0)
+  into prior_clawback
+  from public.token_refund_events as events
+  where events.checkout_session_id = requested_checkout_session_id;
+
+  -- Partial refunds and partial disputes are never auto-debited because the
+  -- product owner has not approved a proportional policy. Flag for review.
+  if not requested_is_full then
+    review_reason := case requested_reason when 'refund' then 'partial_refund' else 'partial_dispute' end;
+    insert into public.token_refund_events (
+      stripe_event_id, stripe_event_type, checkout_session_id, user_id, reason,
+      purchased_tokens, clawed_back_tokens, shortfall_tokens, review_required
+    ) values (
+      requested_event_id, requested_event_type, requested_checkout_session_id, purchase.user_id, requested_reason,
+      purchase.tokens_delta, 0, 0, true
+    ) returning id into new_event_id;
+    insert into public.token_purchase_reviews (
+      user_id, checkout_session_id, refund_event_id, reason
+    ) values (
+      purchase.user_id, requested_checkout_session_id, new_event_id, review_reason
+    );
+    perform public.log_audit_event(
+      null,
+      'token.refund_review_required',
+      'user',
+      purchase.user_id,
+      jsonb_build_object('checkoutSessionId', requested_checkout_session_id, 'reason', review_reason)
+    );
+    return query select true, 0::bigint, 0::bigint, true;
+    return;
+  end if;
+
+  if prior_clawback > 0 then
+    insert into public.token_refund_events (
+      stripe_event_id, stripe_event_type, checkout_session_id, user_id, reason,
+      purchased_tokens, clawed_back_tokens, shortfall_tokens, review_required
+    ) values (
+      requested_event_id, requested_event_type, requested_checkout_session_id, purchase.user_id, requested_reason,
+      purchase.tokens_delta, 0, 0, false
+    );
+    return query select true, 0::bigint, 0::bigint, false;
+    return;
+  end if;
+
+  select wallets.balance_tokens
+  into wallet_balance
+  from public.token_wallets as wallets
+  where wallets.user_id = purchase.user_id
+  for update;
+
+  if wallet_balance is null then
+    wallet_balance := 0;
+  end if;
+
+  clawback := least(greatest(wallet_balance, 0), purchase.tokens_delta);
+  shortfall := purchase.tokens_delta - clawback;
+  needs_review := shortfall > 0;
+
+  if clawback > 0 then
+    update public.token_wallets
+    set balance_tokens = balance_tokens - clawback,
+        updated_at = now()
+    where user_id = purchase.user_id;
+  end if;
+
+  insert into public.token_refund_events (
+    stripe_event_id, stripe_event_type, checkout_session_id, user_id, reason,
+    purchased_tokens, clawed_back_tokens, shortfall_tokens, review_required
+  ) values (
+    requested_event_id, requested_event_type, requested_checkout_session_id, purchase.user_id, requested_reason,
+    purchase.tokens_delta, clawback, shortfall, needs_review
+  ) returning id into new_event_id;
+
+  if needs_review then
+    insert into public.token_purchase_reviews (
+      user_id, checkout_session_id, refund_event_id, reason, shortfall_tokens
+    ) values (
+      purchase.user_id, requested_checkout_session_id, new_event_id, 'spent_tokens', shortfall
+    );
+  end if;
+
+  perform public.log_audit_event(
+    null,
+    'token.refund_processed',
+    'user',
+    purchase.user_id,
+    jsonb_build_object(
+      'checkoutSessionId', requested_checkout_session_id,
+      'reason', requested_reason,
+      'clawedBackTokens', clawback,
+      'shortfallTokens', shortfall
+    )
+  );
+
+  return query select true, clawback, shortfall, needs_review;
+end;
+$$;
+
+revoke all on function public.record_token_refund(text, text, text, text, boolean) from public, anon, authenticated;
+grant execute on function public.record_token_refund(text, text, text, text, boolean) to service_role;
+
+-- ============================================================================
+-- Source: supabase/migrations/20261026000200_account_deletion_grace_period.sql
+-- ============================================================================
+alter table public.profiles
+  add column if not exists deletion_requested_at timestamptz,
+  add column if not exists deletion_purge_after timestamptz;
+
+alter table public.posts
+  add column if not exists hidden_for_deletion boolean not null default false;
+alter table public.short_videos
+  add column if not exists hidden_for_deletion boolean not null default false;
+alter table public.events
+  add column if not exists hidden_for_deletion boolean not null default false;
+alter table public.social_comments
+  add column if not exists hidden_for_deletion boolean not null default false;
+
+create table if not exists public.account_deletion_requests (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  requested_at timestamptz not null default now(),
+  purge_after timestamptz not null,
+  prior_visibility text not null check (prior_visibility in ('public', 'private')),
+  prior_allow_profile_discovery boolean not null,
+  cancelled_at timestamptz,
+  purge_attempted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists account_deletion_requests_due_idx
+  on public.account_deletion_requests (purge_after)
+  where cancelled_at is null;
+
+alter table public.account_deletion_requests enable row level security;
+
+create policy "users read own deletion request"
+  on public.account_deletion_requests for select to authenticated
+  using (user_id = (select auth.uid()));
+
+create policy "moderators read deletion requests"
+  on public.account_deletion_requests for select to authenticated
+  using (exists (
+    select 1 from public.profiles p
+    where p.id = (select auth.uid())
+      and p.role in ('moderator', 'admin')
+      and (p.status = 'active' or (p.status = 'suspended' and p.suspended_until <= now()))
+  ));
+
+grant select on public.account_deletion_requests to authenticated;
+grant select, insert, update on public.account_deletion_requests to service_role;
+revoke insert, update, delete, truncate on public.account_deletion_requests from public, anon, authenticated;
+
+create or replace function public.request_account_deletion()
+returns timestamptz
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  caller_profile public.profiles%rowtype;
+  existing_request public.account_deletion_requests%rowtype;
+  purge_after timestamptz := now() + interval '7 days';
+begin
+  if caller_id is null then
+    raise exception 'Sign in before deleting your account.' using errcode = '42501';
+  end if;
+
+  select * into caller_profile from public.profiles where id = caller_id;
+  if not found then
+    raise exception 'Your profile could not be found.' using errcode = 'P0002';
+  end if;
+
+  select * into existing_request
+  from public.account_deletion_requests
+  where user_id = caller_id
+    and cancelled_at is null;
+
+  if found and existing_request.purge_after > now() then
+    return existing_request.purge_after;
+  end if;
+
+  insert into public.account_deletion_requests (
+    user_id, requested_at, purge_after, prior_visibility, prior_allow_profile_discovery, cancelled_at
+  ) values (
+    caller_id, now(), purge_after, caller_profile.visibility, caller_profile.allow_profile_discovery, null
+  )
+  on conflict (user_id) do update
+  set requested_at = excluded.requested_at,
+      purge_after = excluded.purge_after,
+      prior_visibility = excluded.prior_visibility,
+      prior_allow_profile_discovery = excluded.prior_allow_profile_discovery,
+      cancelled_at = null,
+      purge_attempted_at = null;
+
+  update public.posts
+  set state = 'hidden', hidden_for_deletion = true, updated_at = now()
+  where author_id = caller_id and state = 'visible';
+
+  update public.short_videos
+  set state = 'hidden', hidden_for_deletion = true
+  where author_id = caller_id and state = 'visible';
+
+  update public.events
+  set state = 'hidden', hidden_for_deletion = true
+  where creator_id = caller_id and state = 'visible';
+
+  update public.social_comments
+  set state = 'hidden', hidden_for_deletion = true
+  where author_id = caller_id and state = 'visible';
+
+  update public.profiles
+  set deletion_requested_at = now(),
+      deletion_purge_after = purge_after,
+      visibility = 'private',
+      allow_profile_discovery = false,
+      status = 'suspended',
+      suspended_until = purge_after,
+      updated_at = now()
+  where id = caller_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'account.deletion_requested',
+    'user',
+    caller_id,
+    jsonb_build_object('purgeAfter', purge_after)
+  );
+
+  return purge_after;
+end;
+$$;
+
+revoke all on function public.request_account_deletion() from public, anon, authenticated;
+grant execute on function public.request_account_deletion() to authenticated;
+
+create or replace function public.cancel_account_deletion()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  existing_request public.account_deletion_requests%rowtype;
+begin
+  if caller_id is null then
+    raise exception 'Sign in before restoring your account.' using errcode = '42501';
+  end if;
+
+  select * into existing_request
+  from public.account_deletion_requests
+  where user_id = caller_id
+    and cancelled_at is null
+  for update;
+
+  if not found then
+    raise exception 'No account deletion request is pending.' using errcode = 'P0002';
+  end if;
+
+  if existing_request.purge_after <= now() then
+    raise exception 'The seven-day restoration window has ended. Contact support.' using errcode = '22023';
+  end if;
+
+  update public.posts
+  set state = 'visible', hidden_for_deletion = false, updated_at = now()
+  where author_id = caller_id and hidden_for_deletion and state = 'hidden';
+
+  update public.short_videos
+  set state = 'visible', hidden_for_deletion = false
+  where author_id = caller_id and hidden_for_deletion and state = 'hidden';
+
+  update public.events
+  set state = 'visible', hidden_for_deletion = false
+  where creator_id = caller_id and hidden_for_deletion and state = 'hidden';
+
+  update public.social_comments
+  set state = 'visible', hidden_for_deletion = false
+  where author_id = caller_id and hidden_for_deletion and state = 'hidden';
+
+  update public.profiles
+  set deletion_requested_at = null,
+      deletion_purge_after = null,
+      visibility = existing_request.prior_visibility,
+      allow_profile_discovery = existing_request.prior_allow_profile_discovery,
+      status = 'active',
+      suspended_until = null,
+      updated_at = now()
+  where id = caller_id;
+
+  update public.account_deletion_requests
+  set cancelled_at = now()
+  where user_id = caller_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'account.deletion_cancelled',
+    'user',
+    caller_id,
+    jsonb_build_object('purgeAfter', existing_request.purge_after)
+  );
+end;
+$$;
+
+revoke all on function public.cancel_account_deletion() from public, anon, authenticated;
+grant execute on function public.cancel_account_deletion() to authenticated;
+
+create or replace function public.purge_due_account_deletions(requested_limit integer default 20)
+returns table (user_id uuid, requested_at timestamptz)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if requested_limit is null or requested_limit < 1 or requested_limit > 100 then
+    raise exception 'The purge limit must be between 1 and 100.' using errcode = '22023';
+  end if;
+
+  return query
+  with due as (
+    select requests.user_id, requests.requested_at
+    from public.account_deletion_requests as requests
+    where requests.cancelled_at is null
+      and requests.purge_after <= now()
+    order by requests.purge_after asc
+    limit requested_limit
+    for update skip locked
+  )
+  update public.account_deletion_requests as requests
+  set purge_attempted_at = now()
+  from due
+  where requests.user_id = due.user_id
+  returning requests.user_id, due.requested_at;
+
+  perform public.log_audit_event(
+    null,
+    'account.deletions_due',
+    'system',
+    null,
+    jsonb_build_object('limit', requested_limit)
+  );
+end;
+$$;
+
+revoke all on function public.purge_due_account_deletions(integer) from public, anon, authenticated;
+grant execute on function public.purge_due_account_deletions(integer) to service_role;
+
+-- ============================================================================
+-- Source: supabase/migrations/20261026000300_terms_acceptance.sql
+-- ============================================================================
+alter table public.profiles
+  add column if not exists terms_version text,
+  add column if not exists terms_accepted_at timestamptz;
+
+alter table public.profiles
+  drop constraint if exists profiles_terms_version_format;
+alter table public.profiles
+  add constraint profiles_terms_version_format check (
+    terms_version is null or terms_version ~ '^[A-Za-z0-9._-]{4,40}$'
+  );
+
+-- Carry the accepted version through signup metadata so the profile row is
+-- created already stamped. The trigger stays security definer, so the narrow
+-- authenticated insert grant on profiles is unchanged.
+create or replace function public.create_profile_for_auth_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  requested_username text := new.raw_user_meta_data ->> 'username';
+  requested_display_name text := new.raw_user_meta_data ->> 'displayName';
+  requested_terms_version text := nullif(trim(new.raw_user_meta_data ->> 'termsVersion'), '');
+begin
+  if requested_username is null or requested_username !~ '^[A-Za-z0-9_]{3,24}$' then
+    raise exception 'A valid username is required' using errcode = '22023';
+  end if;
+  if requested_display_name is null or char_length(trim(requested_display_name)) not between 1 and 50 then
+    raise exception 'A valid display name is required' using errcode = '22023';
+  end if;
+  if requested_terms_version is not null
+    and requested_terms_version !~ '^[A-Za-z0-9._-]{4,40}$'
+  then
+    raise exception 'The terms version is invalid' using errcode = '22023';
+  end if;
+
+  insert into public.profiles (id, username, display_name, terms_version, terms_accepted_at)
+  values (
+    new.id,
+    requested_username,
+    trim(requested_display_name),
+    requested_terms_version,
+    case when requested_terms_version is null then null else now() end
+  );
+  insert into public.account_settings (user_id) values (new.id);
+  return new;
+end;
+$$;
+
+-- Lets an existing member accept a newly approved version without re-creating
+-- the account. Returns the stored version and timestamp so the client can
+-- update its session without guessing.
+create or replace function public.record_terms_acceptance(requested_version text)
+returns table (terms_version text, terms_accepted_at timestamptz)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  normalized_version text := trim(coalesce(requested_version, ''));
+  accepted_at timestamptz := now();
+begin
+  if caller_id is null then
+    raise exception 'Sign in before accepting the terms.' using errcode = '42501';
+  end if;
+
+  if not public.is_active_user() then
+    raise exception 'This account is not active.' using errcode = '42501';
+  end if;
+
+  if normalized_version !~ '^[A-Za-z0-9._-]{4,40}$' then
+    raise exception 'The terms version is invalid.' using errcode = '22023';
+  end if;
+
+  update public.profiles
+  set terms_version = normalized_version,
+      terms_accepted_at = accepted_at,
+      updated_at = now()
+  where id = caller_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'account.terms_accepted',
+    'user',
+    caller_id,
+    jsonb_build_object('termsVersion', normalized_version)
+  );
+
+  return query select normalized_version, accepted_at;
+end;
+$$;
+
+revoke all on function public.record_terms_acceptance(text) from public, anon, authenticated;
+grant execute on function public.record_terms_acceptance(text) to authenticated;
+
+-- ============================================================================
+-- Source: supabase/migrations/20261026000400_admin_dashboard.sql
+-- ============================================================================
+create or replace function public.current_moderation_role()
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select p.role
+  from public.profiles p
+  where p.id = (select auth.uid())
+    and p.role in ('moderator', 'admin')
+    and (p.status = 'active' or (p.status = 'suspended' and p.suspended_until <= now()));
+$$;
+
+revoke all on function public.current_moderation_role() from public, anon, authenticated;
+
+create table if not exists public.moderation_appeals (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  report_id uuid,
+  action_id uuid,
+  message text not null check (char_length(message) between 10 and 2000),
+  status text not null default 'open' check (status in ('open', 'reviewing', 'resolved', 'denied')),
+  resolution_notes text check (resolution_notes is null or char_length(resolution_notes) between 3 and 2000),
+  resolved_by uuid references public.profiles(id) on delete set null,
+  resolved_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists moderation_appeals_status_created_idx
+  on public.moderation_appeals (status, created_at);
+create index if not exists moderation_appeals_user_created_idx
+  on public.moderation_appeals (user_id, created_at desc);
+-- One live appeal per member keeps the queue readable; a denied member can
+-- submit again after the decision.
+create unique index if not exists moderation_appeals_one_open_per_user_idx
+  on public.moderation_appeals (user_id)
+  where status in ('open', 'reviewing');
+
+create table if not exists public.moderation_notes (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  subject_user_id uuid not null references public.profiles(id) on delete cascade,
+  body text not null check (char_length(body) between 2 and 2000),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists moderation_notes_subject_created_idx
+  on public.moderation_notes (subject_user_id, created_at desc);
+
+alter table public.moderation_appeals enable row level security;
+alter table public.moderation_notes enable row level security;
+
+create policy "members read own appeals"
+  on public.moderation_appeals for select to authenticated
+  using (user_id = (select auth.uid()));
+
+create policy "moderators read all appeals"
+  on public.moderation_appeals for select to authenticated
+  using (public.current_moderation_role() is not null);
+
+create policy "moderators read member notes"
+  on public.moderation_notes for select to authenticated
+  using (public.current_moderation_role() is not null);
+
+grant select on public.moderation_appeals to authenticated;
+grant select on public.moderation_notes to authenticated;
+revoke insert, update, delete, truncate
+  on public.moderation_appeals, public.moderation_notes
+  from public, anon, authenticated;
+grant select, insert, update, delete
+  on public.moderation_appeals, public.moderation_notes
+  to service_role;
+
+create or replace function public.submit_moderation_appeal(
+  requested_report_id uuid,
+  requested_message text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  normalized_message text := trim(coalesce(requested_message, ''));
+  new_id uuid;
+begin
+  if caller_id is null then
+    raise exception 'Sign in before submitting an appeal.' using errcode = '42501';
+  end if;
+
+  if not public.is_active_user() then
+    raise exception 'This account is not active.' using errcode = '42501';
+  end if;
+
+  if char_length(normalized_message) < 10 or char_length(normalized_message) > 2000 then
+    raise exception 'Explain your appeal in 10 to 2,000 characters.' using errcode = '22023';
+  end if;
+
+  if requested_report_id is not null then
+    if not exists (
+      select 1 from public.content_reports r
+      where r.id = requested_report_id
+        and r.reporter_id = caller_id
+    ) and not exists (
+      select 1 from public.moderation_actions a
+      where a.report_id = requested_report_id
+        and a.target_type = 'user'
+        and a.target_id = caller_id
+    ) then
+      raise exception 'You can only appeal a decision that involves your account.' using errcode = '42501';
+    end if;
+  end if;
+
+  insert into public.moderation_appeals (user_id, report_id, message)
+  values (caller_id, requested_report_id, normalized_message)
+  returning id into new_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'moderation.appeal_submitted',
+    'user',
+    caller_id,
+    jsonb_build_object('appealId', new_id, 'reportId', requested_report_id)
+  );
+
+  return new_id;
+end;
+$$;
+
+revoke all on function public.submit_moderation_appeal(uuid, text) from public, anon, authenticated;
+grant execute on function public.submit_moderation_appeal(uuid, text) to authenticated;
+
+create or replace function public.fetch_my_moderation_appeals()
+returns table (
+  id uuid,
+  user_id uuid,
+  report_id uuid,
+  action_id uuid,
+  message text,
+  status text,
+  resolution_notes text,
+  resolved_by uuid,
+  resolved_at timestamptz,
+  created_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select a.id, a.user_id, a.report_id, a.action_id, a.message, a.status,
+         a.resolution_notes, a.resolved_by, a.resolved_at, a.created_at
+  from public.moderation_appeals a
+  where a.user_id = (select auth.uid())
+  order by a.created_at desc;
+$$;
+
+revoke all on function public.fetch_my_moderation_appeals() from public, anon, authenticated;
+grant execute on function public.fetch_my_moderation_appeals() to authenticated;
+
+create or replace function public.admin_list_appeals(requested_status text default 'open')
+returns table (
+  id uuid,
+  user_id uuid,
+  username text,
+  display_name text,
+  report_id uuid,
+  action_id uuid,
+  message text,
+  status text,
+  resolution_notes text,
+  resolved_by uuid,
+  resolved_at timestamptz,
+  created_at timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if public.current_moderation_role() is null then
+    raise exception 'Moderator access is required.' using errcode = '42501';
+  end if;
+
+  if requested_status is not null
+    and requested_status not in ('open', 'reviewing', 'resolved', 'denied')
+  then
+    raise exception 'Unknown appeal status.' using errcode = '22023';
+  end if;
+
+  return query
+  select a.id, a.user_id, p.username, p.display_name, a.report_id, a.action_id,
+         a.message, a.status, a.resolution_notes, a.resolved_by, a.resolved_at,
+         a.created_at
+  from public.moderation_appeals a
+  join public.profiles p on p.id = a.user_id
+  where requested_status is null or a.status = requested_status
+  order by a.created_at asc;
+end;
+$$;
+
+revoke all on function public.admin_list_appeals(text) from public, anon, authenticated;
+grant execute on function public.admin_list_appeals(text) to authenticated;
+
+create or replace function public.admin_resolve_appeal(
+  requested_appeal_id uuid,
+  requested_status text,
+  requested_notes text
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  normalized_notes text := nullif(trim(coalesce(requested_notes, '')), '');
+  current_appeal public.moderation_appeals%rowtype;
+begin
+  if public.current_moderation_role() is null then
+    raise exception 'Moderator access is required.' using errcode = '42501';
+  end if;
+
+  if requested_status is null or requested_status not in ('reviewing', 'resolved', 'denied') then
+    raise exception 'Unknown appeal status.' using errcode = '22023';
+  end if;
+
+  if requested_status <> 'reviewing'
+    and (normalized_notes is null or char_length(normalized_notes) < 3)
+  then
+    raise exception 'Add resolution notes of at least 3 characters.' using errcode = '22023';
+  end if;
+
+  select * into current_appeal
+  from public.moderation_appeals
+  where id = requested_appeal_id
+  for update;
+
+  if not found then
+    raise exception 'The appeal could not be found.' using errcode = 'P0002';
+  end if;
+
+  if current_appeal.status in ('resolved', 'denied') then
+    raise exception 'This appeal is already closed.' using errcode = '22023';
+  end if;
+
+  update public.moderation_appeals
+  set status = requested_status,
+      resolution_notes = coalesce(normalized_notes, resolution_notes),
+      resolved_by = case when requested_status = 'reviewing' then null else caller_id end,
+      resolved_at = case when requested_status = 'reviewing' then null else now() end
+  where id = requested_appeal_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'moderation.appeal_' || requested_status,
+    'user',
+    current_appeal.user_id,
+    jsonb_build_object('appealId', requested_appeal_id, 'notes', normalized_notes)
+  );
+end;
+$$;
+
+revoke all on function public.admin_resolve_appeal(uuid, text, text) from public, anon, authenticated;
+grant execute on function public.admin_resolve_appeal(uuid, text, text) to authenticated;
+
+create or replace function public.admin_search_members(
+  requested_query text,
+  requested_limit integer default 25
+)
+returns table (
+  id uuid,
+  username text,
+  display_name text,
+  role text,
+  status text,
+  suspended_until timestamptz,
+  balance_tokens bigint,
+  created_at timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  normalized_query text := trim(coalesce(requested_query, ''));
+  safe_limit integer := least(greatest(coalesce(requested_limit, 25), 1), 50);
+begin
+  if public.current_moderation_role() is null then
+    raise exception 'Moderator access is required.' using errcode = '42501';
+  end if;
+
+  return query
+  select p.id, p.username, p.display_name, p.role, p.status,
+         p.suspended_until, coalesce(w.balance_tokens, 0), p.created_at
+  from public.profiles p
+  left join public.token_wallets w on w.user_id = p.id
+  where normalized_query = ''
+     or p.username ilike '%' || normalized_query || '%'
+     or p.display_name ilike '%' || normalized_query || '%'
+  order by p.created_at desc
+  limit safe_limit;
+end;
+$$;
+
+revoke all on function public.admin_search_members(text, integer) from public, anon, authenticated;
+grant execute on function public.admin_search_members(text, integer) to authenticated;
+
+create or replace function public.admin_member_overview(requested_user_id uuid)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  target_profile public.profiles%rowtype;
+  overview jsonb;
+begin
+  if public.current_moderation_role() is null then
+    raise exception 'Moderator access is required.' using errcode = '42501';
+  end if;
+
+  select * into target_profile from public.profiles where id = requested_user_id;
+  if not found then
+    raise exception 'The member could not be found.' using errcode = 'P0002';
+  end if;
+
+  select jsonb_build_object(
+    'profile', to_jsonb(target_profile),
+    'balance_tokens', coalesce((
+      select w.balance_tokens from public.token_wallets w where w.user_id = requested_user_id
+    ), 0),
+    'ledger', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'id', l.id,
+        'bundle_id', l.bundle_id,
+        'tokens_delta', l.tokens_delta,
+        'amount_total', l.amount_total,
+        'created_at', l.created_at
+      ) order by l.created_at desc)
+      from public.token_ledger l
+      where l.user_id = requested_user_id
+    ), '[]'::jsonb),
+    'spends', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'id', s.id,
+        'item_id', s.item_id,
+        'item_name', s.item_name,
+        'tokens_delta', s.tokens_delta,
+        'created_at', s.created_at
+      ) order by s.created_at desc)
+      from public.token_spend_ledger s
+      where s.user_id = requested_user_id
+    ), '[]'::jsonb),
+    'notes', coalesce((
+      select jsonb_agg(to_jsonb(n) order by n.created_at desc)
+      from public.moderation_notes n
+      where n.subject_user_id = requested_user_id
+    ), '[]'::jsonb),
+    'appeals', coalesce((
+      select jsonb_agg(to_jsonb(a) order by a.created_at desc)
+      from public.moderation_appeals a
+      where a.user_id = requested_user_id
+    ), '[]'::jsonb),
+    'purchase_reviews', coalesce((
+      select jsonb_agg(to_jsonb(r) order by r.created_at desc)
+      from public.token_purchase_reviews r
+      where r.user_id = requested_user_id
+    ), '[]'::jsonb),
+    'moderation_actions', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'id', m.id,
+        'action', m.action,
+        'rationale', m.rationale,
+        'expires_at', m.expires_at,
+        'created_at', m.created_at
+      ) order by m.created_at desc)
+      from public.moderation_actions m
+      where m.target_type = 'user' and m.target_id = requested_user_id
+    ), '[]'::jsonb)
+  ) into overview;
+
+  return overview;
+end;
+$$;
+
+revoke all on function public.admin_member_overview(uuid) from public, anon, authenticated;
+grant execute on function public.admin_member_overview(uuid) to authenticated;
+
+create or replace function public.admin_set_member_role(
+  requested_user_id uuid,
+  requested_role text
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  previous_role text;
+begin
+  if public.current_moderation_role() is distinct from 'admin' then
+    raise exception 'Administrator access is required.' using errcode = '42501';
+  end if;
+
+  if requested_role is null or requested_role not in ('member', 'moderator', 'admin') then
+    raise exception 'Unknown role.' using errcode = '22023';
+  end if;
+
+  if requested_user_id = caller_id then
+    raise exception 'Administrators cannot change their own role.' using errcode = '42501';
+  end if;
+
+  select role into previous_role from public.profiles where id = requested_user_id for update;
+  if not found then
+    raise exception 'The member could not be found.' using errcode = 'P0002';
+  end if;
+
+  -- Never strand the platform without an administrator.
+  if previous_role = 'admin' and requested_role <> 'admin' then
+    if not exists (
+      select 1 from public.profiles p
+      where p.role = 'admin' and p.id <> requested_user_id
+    ) then
+      raise exception 'At least one administrator must remain.' using errcode = '22023';
+    end if;
+  end if;
+
+  update public.profiles
+  set role = requested_role,
+      updated_at = now()
+  where id = requested_user_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'admin.member_role_changed',
+    'user',
+    requested_user_id,
+    jsonb_build_object('previousRole', previous_role, 'nextRole', requested_role)
+  );
+end;
+$$;
+
+revoke all on function public.admin_set_member_role(uuid, text) from public, anon, authenticated;
+grant execute on function public.admin_set_member_role(uuid, text) to authenticated;
+
+create or replace function public.admin_add_member_note(
+  requested_user_id uuid,
+  requested_body text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  normalized_body text := trim(coalesce(requested_body, ''));
+  new_id uuid;
+begin
+  if public.current_moderation_role() is null then
+    raise exception 'Moderator access is required.' using errcode = '42501';
+  end if;
+
+  if char_length(normalized_body) < 2 or char_length(normalized_body) > 2000 then
+    raise exception 'Add a note between 2 and 2,000 characters.' using errcode = '22023';
+  end if;
+
+  if not exists (select 1 from public.profiles where id = requested_user_id) then
+    raise exception 'The member could not be found.' using errcode = 'P0002';
+  end if;
+
+  insert into public.moderation_notes (author_id, subject_user_id, body)
+  values (caller_id, requested_user_id, normalized_body)
+  returning id into new_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'admin.member_note_added',
+    'user',
+    requested_user_id,
+    jsonb_build_object('noteId', new_id)
+  );
+
+  return new_id;
+end;
+$$;
+
+revoke all on function public.admin_add_member_note(uuid, text) from public, anon, authenticated;
+grant execute on function public.admin_add_member_note(uuid, text) to authenticated;
+
+create or replace function public.admin_list_audit_events(
+  requested_limit integer default 50,
+  requested_offset integer default 0
+)
+returns table (
+  id bigint,
+  actor_id uuid,
+  actor_username text,
+  event_type text,
+  subject_type text,
+  subject_id uuid,
+  details jsonb,
+  created_at timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  safe_limit integer := least(greatest(coalesce(requested_limit, 50), 1), 200);
+  safe_offset integer := greatest(coalesce(requested_offset, 0), 0);
+begin
+  if public.current_moderation_role() is null then
+    raise exception 'Moderator access is required.' using errcode = '42501';
+  end if;
+
+  return query
+  select e.id, e.actor_id, p.username, e.event_type, e.subject_type,
+         e.subject_id, e.details, e.created_at
+  from public.audit_events e
+  left join public.profiles p on p.id = e.actor_id
+  order by e.created_at desc, e.id desc
+  limit safe_limit
+  offset safe_offset;
+end;
+$$;
+
+revoke all on function public.admin_list_audit_events(integer, integer) from public, anon, authenticated;
+grant execute on function public.admin_list_audit_events(integer, integer) to authenticated;
+
+create or replace function public.admin_list_purchase_reviews(requested_status text default 'open')
+returns table (
+  id uuid,
+  user_id uuid,
+  checkout_session_id text,
+  refund_event_id uuid,
+  reason text,
+  shortfall_tokens bigint,
+  status text,
+  notes text,
+  resolved_by uuid,
+  resolved_at timestamptz,
+  created_at timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if public.current_moderation_role() is null then
+    raise exception 'Moderator access is required.' using errcode = '42501';
+  end if;
+
+  if requested_status is not null
+    and requested_status not in ('open', 'resolved', 'dismissed')
+  then
+    raise exception 'Unknown review status.' using errcode = '22023';
+  end if;
+
+  return query
+  select r.id, r.user_id, r.checkout_session_id, r.refund_event_id, r.reason,
+         r.shortfall_tokens, r.status, r.notes, r.resolved_by, r.resolved_at,
+         r.created_at
+  from public.token_purchase_reviews r
+  where requested_status is null or r.status = requested_status
+  order by r.created_at asc;
+end;
+$$;
+
+revoke all on function public.admin_list_purchase_reviews(text) from public, anon, authenticated;
+grant execute on function public.admin_list_purchase_reviews(text) to authenticated;
+
+create or replace function public.admin_resolve_purchase_review(
+  requested_review_id uuid,
+  requested_status text,
+  requested_notes text
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := (select auth.uid());
+  normalized_notes text := nullif(trim(coalesce(requested_notes, '')), '');
+  review_user_id uuid;
+begin
+  if public.current_moderation_role() is null then
+    raise exception 'Moderator access is required.' using errcode = '42501';
+  end if;
+
+  if requested_status is null or requested_status not in ('resolved', 'dismissed') then
+    raise exception 'Unknown review status.' using errcode = '22023';
+  end if;
+
+  if normalized_notes is null or char_length(normalized_notes) < 3 then
+    raise exception 'Add resolution notes of at least 3 characters.' using errcode = '22023';
+  end if;
+
+  select user_id into review_user_id
+  from public.token_purchase_reviews
+  where id = requested_review_id
+  for update;
+
+  if not found then
+    raise exception 'The review could not be found.' using errcode = 'P0002';
+  end if;
+
+  update public.token_purchase_reviews
+  set status = requested_status,
+      notes = normalized_notes,
+      resolved_by = caller_id,
+      resolved_at = now()
+  where id = requested_review_id;
+
+  perform public.log_audit_event(
+    caller_id,
+    'token.purchase_review_' || requested_status,
+    'user',
+    review_user_id,
+    jsonb_build_object('reviewId', requested_review_id, 'notes', normalized_notes)
+  );
+end;
+$$;
+
+revoke all on function public.admin_resolve_purchase_review(uuid, text, text) from public, anon, authenticated;
+grant execute on function public.admin_resolve_purchase_review(uuid, text, text) to authenticated;
 
 commit;

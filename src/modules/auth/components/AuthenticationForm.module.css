@@ -66,6 +66,47 @@
   outline-offset: 2px;
 }
 
+.termsCheck {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  color: var(--muted, #68776c);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.termsCheck input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  accent-color: var(--accent, #52765c);
+}
+
+.termsCheck a {
+  color: var(--accent, #52765c);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.termsDraftNote {
+  margin: 0;
+  padding: 8px 10px;
+  border-left: 2px solid var(--line, #d8e0d9);
+  color: var(--muted, #68776c);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.termsDraftNote a {
+  color: var(--accent, #52765c);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .entryFieldset {
   min-width: 0;
   margin: 0;

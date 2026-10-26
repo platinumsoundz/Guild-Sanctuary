@@ -2,9 +2,36 @@ import type { ContentReportRow, ModerationAction } from '@/services/supabase';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 
 export type ReportTarget = ContentReportRow['target_type'];
+export type ModerationRole = 'moderator' | 'admin';
 
 export interface ModerationQueueItem extends ContentReportRow {
   targetOwnerId: string | null;
+}
+
+export interface ModerationAccess {
+  userId: string;
+  role: ModerationRole;
+}
+
+export async function fetchModerationAccess(): Promise<ModerationAccess> {
+  const client = getSupabaseBrowserClient();
+  const { data: userData, error: authError } = await client.auth.getUser();
+  if (authError) throw new Error(`Your account could not be verified: ${authError.message}`);
+  if (!userData.user) throw new Error('Sign in with your platform account to access moderation.');
+
+  const { data: profile, error: profileError } = await client
+    .from('profiles')
+    .select('role,status,suspended_until')
+    .eq('id', userData.user.id)
+    .single();
+  if (profileError) throw new Error(`Your moderation permissions could not be checked: ${profileError.message}`);
+  const suspensionExpired = profile.status === 'suspended'
+    && profile.suspended_until !== null
+    && Date.parse(profile.suspended_until) <= Date.now();
+  if (!['moderator', 'admin'].includes(profile.role) || (profile.status !== 'active' && !suspensionExpired)) {
+    throw new Error('This account is not authorized to use moderation tools.');
+  }
+  return { userId: userData.user.id, role: profile.role as ModerationRole };
 }
 
 export async function submitContentReport(input: {
@@ -29,23 +56,8 @@ export async function submitContentReport(input: {
 }
 
 export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
+  await fetchModerationAccess();
   const client = getSupabaseBrowserClient();
-  const { data: userData, error: authError } = await client.auth.getUser();
-  if (authError) throw new Error(`Your account could not be verified: ${authError.message}`);
-  if (!userData.user) throw new Error('Sign in with your platform account to access moderation.');
-
-  const { data: profile, error: profileError } = await client
-    .from('profiles')
-    .select('role,status,suspended_until')
-    .eq('id', userData.user.id)
-    .single();
-  if (profileError) throw new Error(`Your moderation permissions could not be checked: ${profileError.message}`);
-  const suspensionExpired = profile.status === 'suspended'
-    && profile.suspended_until !== null
-    && Date.parse(profile.suspended_until) <= Date.now();
-  if (!['moderator', 'admin'].includes(profile.role) || (profile.status !== 'active' && !suspensionExpired)) {
-    throw new Error('This account is not authorized to use moderation tools.');
-  }
 
   const { data: reports, error } = await client
     .from('content_reports')
@@ -91,4 +103,27 @@ export async function takeModerationAction(input: {
       : null,
   });
   if (error) throw new Error(`Moderation action could not be applied: ${error.message}`);
+}
+
+export async function takeMemberAction(input: {
+  userId: string;
+  action: 'warn' | 'suspend' | 'ban';
+  rationale: string;
+  temporarySuspension?: boolean;
+}): Promise<void> {
+  const rationale = input.rationale.trim();
+  if (rationale.length < 3 || rationale.length > 1000) {
+    throw new Error('Add a moderation rationale between 3 and 1,000 characters.');
+  }
+  const { error } = await getSupabaseBrowserClient().rpc('apply_moderation_action', {
+    requested_report_id: null,
+    requested_target_type: 'user',
+    requested_target_id: input.userId,
+    requested_action: input.action,
+    requested_rationale: rationale,
+    requested_expires_at: input.temporarySuspension
+      ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      : null,
+  });
+  if (error) throw new Error(`Account action could not be applied: ${error.message}`);
 }

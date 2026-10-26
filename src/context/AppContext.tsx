@@ -8,9 +8,11 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  cancelAccountDeletion,
   findLocalAccountByEmail,
   persistActiveSession,
   clearStoredSession,
+  recordTermsAcceptance,
   registerLocalAccount,
   restoreSession,
   setLocalTwoFactor,
@@ -30,7 +32,7 @@ import type { Profile } from '@/types/database';
 import { deleteDemoAccount } from '@/services/accountDeletion';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 
-export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'profile' | 'wallet' | 'support' | 'settings' | 'moderation';
+export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'moderation';
 
 export type UserSession = AuthSession;
 
@@ -53,6 +55,8 @@ interface AppContextValue {
   cancelAuthChallenge: () => void;
   logout: () => void;
   deleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => Promise<void>;
+  restoreAccount: () => Promise<void>;
+  acceptTerms: (version: string) => Promise<void>;
   setActiveNavigation: (navigation: NavigationState) => void;
   loginAsGuest: () => void;
 }
@@ -119,6 +123,10 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         status: 'active',
         emailVerified: true,
         twoFactorEnabled: false,
+        purchaseAgeVerifiedAt: null,
+        termsVersion: null,
+        termsAcceptedAt: null,
+        deletionPurgeAfter: null,
         createdAt: timestamp,
         updatedAt: timestamp,
       },
@@ -352,11 +360,19 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
           : 'Your account could not be deleted.';
         throw new Error(message);
       }
-      await getSupabaseBrowserClient().auth.signOut({ scope: 'local' }).catch(() => undefined);
-    } else {
-      deleteDemoAccount(currentUser.user.id, emailConfirmation, phrase, twoFactorCode);
+      const purgeAfter = typeof result === 'object' && result !== null && 'purgeAfter' in result && typeof result.purgeAfter === 'string'
+        ? result.purgeAfter
+        : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const profile = await updateSupabaseProfile(currentUser.user.id, {});
+      setCurrentUser((session) => session ? {
+        ...session,
+        profile,
+        user: { ...session.user, status: 'suspended', deletionPurgeAfter: purgeAfter },
+      } : session);
+      return;
     }
 
+    deleteDemoAccount(currentUser.user.id, emailConfirmation, phrase, twoFactorCode);
     lockPrivateProfileVault(currentUser.user.id);
     clearStoredSession();
     setCurrentUser(null);
@@ -365,6 +381,34 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     setPendingEmail(null);
     setPendingTwoFactorEmail(null);
     setPendingTotp(null);
+  };
+
+  const restoreAccount = async () => {
+    if (!currentUser) throw new Error('Sign in before restoring your account.');
+    if (!isSupabaseAuthConfigured()) {
+      throw new Error('Account restoration is only available for Supabase accounts.');
+    }
+    await cancelAccountDeletion();
+    const profile = await updateSupabaseProfile(currentUser.user.id, {});
+    setCurrentUser((session) => session ? {
+      ...session,
+      profile,
+      user: { ...session.user, status: 'active', deletionPurgeAfter: null },
+    } : session);
+    setActiveNavigation('feed');
+  };
+
+  const acceptTerms = async (version: string) => {
+    if (!currentUser) throw new Error('Sign in before accepting the terms.');
+    const acceptance = await recordTermsAcceptance(version);
+    setCurrentUser((session) => session ? {
+      ...session,
+      user: {
+        ...session.user,
+        termsVersion: acceptance.termsVersion,
+        termsAcceptedAt: acceptance.termsAcceptedAt,
+      },
+    } : session);
   };
 
   return (
@@ -388,6 +432,8 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         cancelAuthChallenge,
         logout,
         deleteAccount,
+        restoreAccount,
+        acceptTerms,
         setActiveNavigation,
         loginAsGuest,
       }}

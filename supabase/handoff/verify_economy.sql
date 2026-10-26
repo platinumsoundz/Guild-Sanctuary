@@ -55,7 +55,7 @@ select item_id, kind, price_tokens, enabled, sort_order
 from public.token_spend_catalog
 order by sort_order, price_tokens;
 
--- 7. Row-level security. Expected: rowsecurity = true for all five tables.
+-- 7. Row-level security. Expected: rowsecurity = true for every listed table.
 select tablename, rowsecurity
 from pg_tables
 where schemaname = 'public'
@@ -64,7 +64,9 @@ where schemaname = 'public'
     'token_ledger',
     'token_spend_catalog',
     'token_spend_ledger',
-    'token_entitlements'
+    'token_entitlements',
+    'token_refund_events',
+    'token_purchase_reviews'
   )
 order by tablename;
 
@@ -93,3 +95,23 @@ from public.token_ledger
 where bundle_id = 'signup_bonus'
 order by created_at desc
 limit 20;
+
+-- 11. Refund and dispute tables. Expected: two rows.
+select table_name
+from information_schema.tables
+where table_schema = 'public'
+  and table_name in ('token_refund_events', 'token_purchase_reviews')
+order by table_name;
+
+-- 12. Refund RPC. Expected: record_token_refund.
+select routine_name
+from information_schema.routines
+where routine_schema = 'public'
+  and routine_name = 'record_token_refund';
+
+-- 13. Purchase-age column on profiles. Expected: one row.
+select column_name, data_type
+from information_schema.columns
+where table_schema = 'public'
+  and table_name = 'profiles'
+  and column_name = 'purchase_age_verified_at';
