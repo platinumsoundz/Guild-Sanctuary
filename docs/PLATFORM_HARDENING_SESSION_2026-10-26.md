@@ -7,8 +7,8 @@ This is the operational handoff for the next coordinated build session. It suppl
 ### Sanctuary app
 - Main repository: [Guild-Sanctuary](https://github.com/platinumsoundz/Guild-Sanctuary).
 - The password-reset contract checks are merged to `main` (PR #30). They validate source-level wiring, not delivery of real emails or a real-account reset.
-- PR #31, [compact header and single install prompt](https://github.com/platinumsoundz/Guild-Sanctuary/pull/31), is open. It removes the redundant global install-help panel and shortens the header/navigation. GitHub CI passed, including PWA/auth checks, Deno checks, TypeScript typecheck, and production build. The Cloudflare workflow also completed successfully for the PR. Vercel preview deployment is blocked by its daily deployment limit, so don't infer a Vercel preview or production rollout from these checks.
-- The app's current messaging UI is still primarily in-memory/demo-backed. The Supabase repository exists but is not connected to the active UI. Do not advertise messages as durable or real-time until the repository is wired and tested end-to-end.
+- PR #31, [compact header and single install prompt](https://github.com/platinumsoundz/Guild-Sanctuary/pull/31), is merged. It removes the redundant global install-help panel and shortens the header/navigation. Source checks passed, but the Vercel production alias still points at an older commit because the Vercel API daily deployment limit was reached; do not infer a live Vercel rollout from CI.
+- The active messaging service now has an opt-in persistent repository path with authenticated-session identity checks and Realtime subscription handling. The flag `NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES` remains `false`: the linked database has no expected conversation/message tables, and two-account RLS/Realtime staging checks have not passed. Continue to label messaging as demo-backed and not durable until those gates pass.
 - Social engagement and PWA browser/device checks still need a real staging smoke test.
 
 ### Supabase production project
@@ -24,7 +24,7 @@ This is the operational handoff for the next coordinated build session. It suppl
 ## Priority order for the next build session
 
 ### P0 — Preserve deployability and recoverability
-1. Keep PR #31 isolated until the branch's checks are green and deployment implications are understood. Do not merge merely to bypass the Vercel preview limit.
+1. PR #31 is merged; verify the actual deployed commit before claiming the compact header is live. Vercel's daily deployment limit is a separate platform blocker.
 2. Reconcile Supabase migration drift against the repo; capture the actual applied migration SQL into version control through a reviewed migration-history recovery plan. Never reset or recreate the production project to resolve drift.
 3. Verify the production Auth redirect allowlist, email provider/template, and one controlled password-reset smoke test with an account whose owner can access the mailbox. Keep the account and existing user records intact.
 
@@ -35,7 +35,7 @@ This is the operational handoff for the next coordinated build session. It suppl
 4. Add focused tests for unauthorized role escalation, cross-user data access, guest read-only behavior, and owner/admin operations.
 
 ### P2 — Durable community features
-1. Wire the existing Supabase messaging repository into the active Messages UI behind a small service boundary; keep demo mode explicit when configuration is absent.
+1. Keep the persistent messaging path disabled until schema reconciliation, RLS review, Realtime configuration and two-account staging checks pass; the service wiring and identity guard are now in source.
 2. Verify direct and group conversation membership, read receipts/unread state, realtime delivery, and RLS using two distinct test accounts.
 3. Ensure notifications are persisted, recipient-scoped, and link to the right in-app destination.
 4. Validate feed/Shorts likes and comments with the latest applied migrations and signed-in/guest roles.
@@ -71,3 +71,14 @@ A feature is not “done” merely because source code exists. Mark it complete 
 - The 2D main-branch scheduled suite on commit `b360d0654c7db3dff040d606fd2b2ae3ef3a9153` failed 4 of 145 tests: spawn/canon count (expected 5, actual 6), compact HUD bounds at phone size, fullscreen settings control expectation, and sleeve sprite channel placement. The report artifact is attached to run [40368414521](https://github.com/platinumsoundz/The-5-Sleeves/actions/runs/40368414521). Keep game-code changes on hold until the separate “branch - project access check” verdict is recovered.
 - The 2D and 3D README project-name corrections are merged in their respective repositories. Existing 3D save-recovery PR #1 remains untouched.
 - No production database, accounts, roles, token balances, Stripe settings or user data were changed.
+
+
+## Session continuation — 2026-10-26 22:30 UTC
+
+- PR #37 merged the Arcade's visible, disabled future-system placeholders. Current CI, PWA/auth checks, Deno checks, typecheck and production build passed for the source changes.
+- PR #38 merged `docs/SUPABASE_MIGRATION_DRIFT_INVENTORY_2026-10-26.md`, recording exact live-only and repository-only migration versions, the current public table inventory, and a safe reconciliation sequence.
+- PR #40 added the persistent-messaging identity guard and CI contract checks. PR #44 tightened the guard to fail closed when the active app user and authenticated Supabase user differ. Both are source-only changes with persistent messaging still disabled.
+- PR #43 changed the Cloudflare GitHub workflow to deploy automatically on non-PR events only when the existing Cloudflare token, account ID and real Supabase configuration are present. The first main-branch run after that change must be inspected to confirm whether the secrets are configured and deployment actually succeeds.
+- Vercel API deployment attempts are currently blocked by the free daily deployment quota (HTTP 402, retry after 24 hours). The Vercel production alias last verified still points to `8486da390b59183cf6de5a322c80e4497b755d3e`; do not claim it contains the new UI until a new production deployment is verified.
+- The 3D repository now has static hosting/PWA smoke tests on main; its automated suite passed. The 2D main-branch suite still reports the same four failures (spawn/canon count, phone HUD bounds, fullscreen settings expectation, sleeve sprite channel placement). The active “branch - project access check” verdict was not recoverable, so game-code edits remain on hold.
+- No production database, user accounts, roles, token balances, payment settings, or story canon were changed.
