@@ -48,7 +48,7 @@ interface AppContextValue {
   pendingTwoFactorEmail: string | null;
   activeNavigation: NavigationState;
   isGuest: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   signup: (input: SignUpInput, password: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<void>;
   changePassword: (password: string) => Promise<void>;
@@ -161,12 +161,19 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     throw new Error('Password accounts are not available in local demo mode. Configure Supabase Auth to create a secure account.');
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     if (isSupabaseAuthConfigured()) {
-      const session = await signInWithSupabasePassword(email, password);
-      if (session.user.status !== 'active') throw new Error('This account is currently unavailable. Contact support for help.');
-      activateSession(session, false);
-      return;
+      const result = await signInWithSupabasePassword(email, password);
+      if (result.challenge) {
+        setPendingEmail(null);
+        setPendingTwoFactorEmail(email.trim().toLowerCase());
+        setPendingTotp(result.challenge);
+        return true;
+      }
+      if (!result.session) throw new Error('Sign-in completed without an active session.');
+      if (result.session.user.status !== 'active') throw new Error('This account is currently unavailable. Contact support for help.');
+      activateSession(result.session, false);
+      return false;
     }
     if (process.env.NODE_ENV === 'production') {
       throw new Error('Sign-in is unavailable because Supabase Auth is not configured.');
