@@ -16,7 +16,7 @@ const games: {
 }[] = [
   {
     id: 'online',
-    title: 'The 5 Sleeves Online',
+    title: 'The 5 Sleeves 2D',
     description: 'A browser-based multiplayer action RPG. Explore the settlements and dangerous roads, fight Rust Wardens, develop your operative, and clear regional towers.',
     genre: 'Multiplayer action RPG',
     // Configure this with the verified Render URL; never guess a production host.
@@ -25,8 +25,8 @@ const games: {
   },
   {
     id: 'training3d',
-    title: 'The 5 Sleeves — 3D Training Ground',
-    description: 'A third-person training and wilderness prototype. Practice with Sensei, explore the outpost, and reach the First Tower.',
+    title: 'The 5 Sleeves 3D',
+    description: 'A third-person 3D game prototype. Practice with Sensei, explore the outpost, and reach the First Tower.',
     genre: 'Third-person 3D prototype',
     url: 'https://the-5-sleeves-3d.pages.dev/',
     badge: '3D prototype',
