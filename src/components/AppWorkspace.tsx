@@ -19,6 +19,7 @@ import { SettingsHub } from '@/modules/settings';
 import { WalletPanel } from '@/modules/economy';
 import { GamesHub } from '@/components/GamesHub';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
+import { NotificationBar } from '@/components/NotificationBar';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import styles from './AppWorkspace.module.css';
 
@@ -102,7 +103,11 @@ export function AppWorkspace() {
     setActiveNavigation(navigation);
   };
 
-  const authenticatedContent = activeNavigation === 'support' ? (
+  const authenticatedContent = activeNavigation === 'notifications' ? (
+    <main className={styles.supportPage}>
+      <NotificationBar fullPage />
+    </main>
+  ) : activeNavigation === 'support' ? (
     <main className={styles.supportPage}>
       <SupportPanel />
     </main>
