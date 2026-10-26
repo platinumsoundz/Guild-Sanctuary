@@ -164,7 +164,7 @@ export function Navigation({
           )}
         </div>
       </header>
-      {currentUser && (
+      {isSessionReady && (
         <>
           <nav className={styles.desktopNavigation} aria-label="Main navigation">
             <div className={styles.desktopNavigationItems}>
@@ -181,7 +181,7 @@ export function Navigation({
                 </button>
               ))}
             </div>
-            <span className={styles.accountName}>{currentUser.profile.displayName}</span>
+            <span className={styles.accountName}>{currentUser?.profile.displayName ?? (isGuest ? 'Guest mode' : '')}</span>
           </nav>
           <AnimatePresence>
             {isMenuOpen && (
@@ -238,7 +238,7 @@ export function Navigation({
                       ))}
                     </div>
                   </nav>
-                  <p className={styles.drawerAccountName}>{currentUser.profile.displayName}</p>
+                  <p className={styles.drawerAccountName}>{currentUser?.profile.displayName ?? (isGuest ? 'Guest mode · exploring' : 'Welcome to the Sanctuary')}</p>
                 </motion.aside>
               </>
             )}
