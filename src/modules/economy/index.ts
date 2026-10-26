@@ -1,3 +1,4 @@
+export { TokenShopPanel } from './TokenShopPanel';
 export { WalletPanel } from './WalletPanel';
 export { useWallet } from './useWallet';
 export {
