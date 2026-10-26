@@ -279,3 +279,10 @@
     border-radius: 7px;
   }
 }
+
+.commentItem { padding: 7px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.commentItem p { margin: 3px 0; }
+.commentTools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.commentTools > button, .commentEdit > button { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0; border: 0; background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; }
+.commentEdit { display: grid; gap: 6px; margin: 6px 0; }
+.commentEdit textarea { width: 100%; min-height: 56px; padding: 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); }
