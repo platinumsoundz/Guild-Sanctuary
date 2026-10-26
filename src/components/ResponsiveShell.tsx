@@ -77,7 +77,7 @@ export function ResponsiveShell({ children }: ResponsiveShellProps) {
             </div>
           </div>
           <div className={styles.installActions}>
-            <button className={styles.installButton} type="button" onClick={installApp}>
+            <button className={styles.installButton} type="button" onClick={installHelp ? hideInstallBanner : installApp}>
               {installHelp ? 'Got it' : 'Install'}
             </button>
             <button className={styles.hideInstallButton} type="button" aria-label="Hide install option" onClick={hideInstallBanner}>
