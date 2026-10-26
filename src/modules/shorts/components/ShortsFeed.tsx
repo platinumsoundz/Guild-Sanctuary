@@ -6,6 +6,7 @@ import { useAppContext } from '@/context/AppContext';
 import { ReportContentButton } from '@/modules/moderation';
 import type { ShortVideo, SocialComment } from '@/types/database';
 import { addShortComment, createShortVideo, deleteShortComment, deleteShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike, updateShortComment } from '../service';
+import { getCommentEngagement, toggleCommentLike } from '@/modules/feeds/commentEngagement';
 import styles from './ShortsFeed.module.css';
 
 interface ShortState {
@@ -25,6 +26,7 @@ export function ShortsFeed() {
   const [draft, setDraft] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingBody, setEditingBody] = useState('');
+  const [commentEngagement, setCommentEngagement] = useState<Record<string, { liked: boolean; count: number }>>({});
   const [captionDraft, setCaptionDraft] = useState('');
   const [videoDraft, setVideoDraft] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -123,9 +125,25 @@ export function ShortsFeed() {
       try {
         const items = await fetchShortComments(nextId);
         setCommentsByVideo((current) => ({ ...current, [nextId]: items }));
+        const engagement = await Promise.all(items.map(async (comment) => [
+          comment.id,
+          await getCommentEngagement(comment.id, viewerId),
+        ] as const));
+        setCommentEngagement((current) => ({ ...current, ...Object.fromEntries(engagement) }));
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Comments could not be loaded.');
       }
+    }
+  };
+
+  const handleCommentLike = async (commentId: string) => {
+    if (!canEngage) return;
+    try {
+      const result = await toggleCommentLike(commentId, viewerId);
+      setCommentEngagement((current) => ({ ...current, [commentId]: result }));
+      setError(null);
+    } catch (likeError) {
+      setError(likeError instanceof Error ? likeError.message : 'Comment reaction could not be saved.');
     }
   };
 
@@ -138,6 +156,7 @@ export function ShortsFeed() {
     try {
       const comment = await addShortComment(videoId, viewerId, draft);
       setCommentsByVideo((current) => ({ ...current, [videoId]: [...(current[videoId] ?? []), comment] }));
+      setCommentEngagement((current) => ({ ...current, [comment.id]: { liked: false, count: 0 } }));
       setEngagement((current) => ({ ...current, [videoId]: { ...current[videoId], commentsCount: (current[videoId]?.commentsCount ?? 0) + 1 } }));
       setDraft('');
       setError(null);
@@ -377,6 +396,9 @@ export function ShortsFeed() {
                           </div>
                         ) : <p>{comment.body}</p>}
                         <div className={styles.commentTools}>
+                          <button type="button" aria-pressed={commentEngagement[comment.id]?.liked ?? false} onClick={() => void handleCommentLike(comment.id)} aria-label={`${commentEngagement[comment.id]?.liked ? 'Unlike' : 'Like'} comment`}>
+                            <Heart size={12} fill={commentEngagement[comment.id]?.liked ? 'currentColor' : 'none'} /> Like <span>{commentEngagement[comment.id]?.count ?? 0}</span>
+                          </button>
                           {comment.authorId === viewerId && editingCommentId !== comment.id && <>
                             <button type="button" onClick={() => { setEditingCommentId(comment.id); setEditingBody(comment.body); }} aria-label="Edit your comment"><Pencil size={12} /> Edit</button>
                             <button type="button" onClick={() => void removeShortComment(video.id, comment.id)} aria-label="Delete your comment"><Trash2 size={12} /> Delete</button>

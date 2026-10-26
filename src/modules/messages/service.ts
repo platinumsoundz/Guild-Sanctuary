@@ -45,23 +45,22 @@ function isPersistentMessagingEnabled(): boolean {
  * conversations from Supabase.
  */
 async function hasPersistentSession(userId: string): Promise<boolean> {
-  if (!userId) throw new Error('Sign in before using persistent messaging.');
-  if (!isPersistentMessagingEnabled()) {
-    const hasSupabaseConfiguration = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-    if (!hasSupabaseConfiguration) return false;
-    const { data, error } = await getSupabaseBrowserClient().auth.getUser();
-    if (error) throw new Error(`Authentication could not be verified: ${error.message}`);
-    if (data.user?.id === userId) {
-      throw new Error('Direct messaging is not connected to the live conversation database yet. Your recipient’s settings have not blocked this message; messaging will be available after the conversation schema is verified.');
-    }
-    if (data.user && data.user.id !== userId) throw new Error('Your active Sanctuary session does not match the signed-in account. Sign out and sign in again.');
-    return false;
-  }
+  if (!userId) throw new Error('Sign in before using direct messages.');
+  const hasSupabaseConfiguration = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
+  if (!hasSupabaseConfiguration) return false;
+
   const { data, error } = await getSupabaseBrowserClient().auth.getUser();
   if (error) throw new Error(`Authentication could not be verified: ${error.message}`);
-  if (!data.user) return false;
+  if (!data.user) {
+    throw new Error('Direct messages require a connected Sanctuary account. Sign in again before sending messages.');
+  }
   if (data.user.id !== userId) {
     throw new Error('Your active Sanctuary session does not match the signed-in account. Sign out and sign in again.');
+  }
+  if (!isPersistentMessagingEnabled()) {
+    throw new Error('Direct messaging is not connected to the live conversation database yet. Your recipient’s settings have not blocked this message; messaging will be available after the conversation schema is verified.');
   }
   return true;
 }
@@ -86,7 +85,10 @@ export async function createDirectConversation(userId: string, peerUserId: strin
   }
 
   const peerProfile = getLocalPublicProfileById(peerUserId);
-  if (!peerProfile || !peerProfile.allowDirectMessages) {
+  if (!peerProfile) {
+    throw new Error('This recipient is not available in local demo mode. Connect the live Sanctuary account to check their actual direct-message settings.');
+  }
+  if (!peerProfile.allowDirectMessages) {
     throw new Error('This member is not accepting direct messages.');
   }
 
@@ -132,7 +134,11 @@ export async function createGroupConversation(userId: string, participantIds: st
     return createPersistentConversation('group', participantIds, normalizedName);
   }
 
-  if (participantIds.some((participantId) => !getLocalPublicProfileById(participantId)?.allowDirectMessages)) {
+  const localMembers = participantIds.map((participantId) => getLocalPublicProfileById(participantId));
+  if (localMembers.some((profile) => !profile)) {
+    throw new Error('One or more recipients are not available in local demo mode. Connect the live Sanctuary account to verify their settings.');
+  }
+  if (localMembers.some((profile) => !profile?.allowDirectMessages)) {
     throw new Error('Every group member must have direct messages enabled.');
   }
   await delay();
@@ -194,8 +200,14 @@ export async function sendConversationMessage(conversationId: string, senderId: 
   const peerUserId = conversation.kind === 'direct'
     ? conversation.participantIds.find((participantId) => participantId !== senderId)
     : undefined;
-  if (peerUserId && !getLocalPublicProfileById(peerUserId)?.allowDirectMessages) {
-    throw new Error('This member is not accepting direct messages.');
+  if (peerUserId) {
+    const peerProfile = getLocalPublicProfileById(peerUserId);
+    if (!peerProfile) {
+      throw new Error('This recipient is not available in local demo mode. Connect the live Sanctuary account to check their actual direct-message settings.');
+    }
+    if (!peerProfile.allowDirectMessages) {
+      throw new Error('This member is not accepting direct messages.');
+    }
   }
 
   await delay();

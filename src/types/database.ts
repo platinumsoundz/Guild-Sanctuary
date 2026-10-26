@@ -7,7 +7,7 @@ export type ProfileVisibility = 'public' | 'private';
 export type EventRsvpStatus = 'going' | 'interested' | 'cancelled';
 export type PostMediaType = 'image' | 'audio' | 'video';
 export type ConversationKind = 'direct' | 'group';
-export type EngagementTargetType = 'post' | 'event' | 'short';
+export type EngagementTargetType = 'post' | 'event' | 'short' | 'comment';
 export type AccountLayout = 'comfortable' | 'compact';
 
 export interface SocialLinks {
