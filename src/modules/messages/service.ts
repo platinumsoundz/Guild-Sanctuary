@@ -45,8 +45,18 @@ function isPersistentMessagingEnabled(): boolean {
  * conversations from Supabase.
  */
 async function hasPersistentSession(userId: string): Promise<boolean> {
-  if (!isPersistentMessagingEnabled()) return false;
   if (!userId) throw new Error('Sign in before using persistent messaging.');
+  if (!isPersistentMessagingEnabled()) {
+    const hasSupabaseConfiguration = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    if (!hasSupabaseConfiguration) return false;
+    const { data, error } = await getSupabaseBrowserClient().auth.getUser();
+    if (error) throw new Error(`Authentication could not be verified: ${error.message}`);
+    if (data.user?.id === userId) {
+      throw new Error('Direct messaging is not connected to the live conversation database yet. Your recipient’s settings have not blocked this message; messaging will be available after the conversation schema is verified.');
+    }
+    if (data.user && data.user.id !== userId) throw new Error('Your active Sanctuary session does not match the signed-in account. Sign out and sign in again.');
+    return false;
+  }
   const { data, error } = await getSupabaseBrowserClient().auth.getUser();
   if (error) throw new Error(`Authentication could not be verified: ${error.message}`);
   if (!data.user) return false;
