@@ -116,7 +116,12 @@ export function AdminDashboard({ role }: { role: string }) {
         <h1><ShieldCheck size={27} aria-hidden="true" /> Admin & Moderation</h1>
         <p>Manage reports and member permissions with server-enforced access checks.</p>
       </header>
-      {!canModerate && <p className={styles.notice} role="alert">This account does not have moderation access.</p>}
+      {!canModerate && (
+        <section className={styles.notice} role="status" aria-label="Admin access requirements">
+          <strong>This account does not have moderation access.</strong>
+          <p>Admin and moderation permissions are assigned by an authorized owner. They cannot be claimed from this screen. During initial setup, the first owner must be assigned out of band after the target Sanctuary account is verified.</p>
+        </section>
+      )}
       {canManageRoles && <RoleManagement />}
       {canModerate && <ModerationDashboard />}
       <footer className={styles.footer}>Role changes and moderation actions must be validated by the connected Supabase project. If access is denied, confirm that the security migration is applied and your account has been assigned its role.</footer>
