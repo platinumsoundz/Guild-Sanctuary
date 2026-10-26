@@ -43,9 +43,9 @@ jobs:
         run: npx opennextjs-cloudflare build
 
       - name: Deploy to Cloudflare Workers
-        if: github.event_name != 'pull_request' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' && env.HAS_SUPABASE_CONFIG == 'true'
+        if: github.event_name != 'pull_request' && vars.ENABLE_GITHUB_CLOUDFLARE_DEPLOY == 'true' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' && env.HAS_SUPABASE_CONFIG == 'true'
         run: npx opennextjs-cloudflare deploy
 
       - name: Explain skipped deployment
-        if: github.event_name != 'pull_request' && (env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' || env.HAS_SUPABASE_CONFIG != 'true')
-        run: echo "::notice::Build passed, but production deployment was skipped because Cloudflare credentials or Supabase configuration are missing. Configure the repository secrets before expecting a live rollout."
+        if: github.event_name != 'pull_request' && (vars.ENABLE_GITHUB_CLOUDFLARE_DEPLOY != 'true' || env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' || env.HAS_SUPABASE_CONFIG != 'true')
+        run: echo "::notice::Build passed. Production deployment is gated separately from CI. After explicit release approval, set ENABLE_GITHUB_CLOUDFLARE_DEPLOY=true and verify the Cloudflare token has Workers Scripts/Assets write permissions."
