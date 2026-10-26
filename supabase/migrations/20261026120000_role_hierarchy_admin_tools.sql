@@ -50,7 +50,7 @@ begin
   if caller_id is null then
     raise exception 'Sign in is required to change member roles.';
   end if;
-  if requested_role not in ('user', 'vip', 'moderator', 'admin', 'developer', 'owner') then
+  if requested_role is null or requested_role not in ('user', 'vip', 'moderator', 'admin', 'developer', 'owner') then
     raise exception 'Unknown role requested.';
   end if;
   if requested_user_id is null or requested_user_id = caller_id then
@@ -110,7 +110,7 @@ begin
   select p.role into caller_role
     from public.profiles p
     where p.id = (select auth.uid()) and p.status = 'active';
-  if caller_role not in ('admin', 'developer', 'owner') then
+  if caller_role is null or caller_role not in ('admin', 'developer', 'owner') then
     raise exception 'Only active admins, developers, and owners can search members for role management.';
   end if;
   if char_length(clean_query) < 1 or char_length(clean_query) > 24 then
