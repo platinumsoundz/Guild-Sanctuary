@@ -120,6 +120,11 @@
   text-decoration: none;
 }
 
+.playButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .externalLink {
   display: inline-flex;
   align-items: center;
