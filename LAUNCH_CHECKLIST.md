@@ -15,13 +15,23 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 - [x] Found and fixed a password-sign-in MFA gap: accounts with verified TOTP factors now receive a challenge before the app activates the session.
 - [x] Wired the password sign-in challenge through AppContext and the auth form/gateway.
 - [x] Closing the account modal with Escape, the close button, or backdrop now cancels a pending TOTP challenge instead of leaving a half-authenticated session behind.
-- [x] GitHub CI passed Deno checks, `npm run typecheck`, and `npm run build` for the MFA change on commit `15e93e6a4b88bdb3f384b251e4b6156e0787631f`.
-- [ ] Confirm the Cloudflare Worker build/deploy run finishes successfully; do not infer deployment success from CI alone.
+- [x] GitHub CI passed Deno checks, `npm run typecheck`, and `npm run build` for the MFA hardening commit `ce4e87b9156c93193ec0f620547186e6bfe72cf4`; the PR merge-check Cloudflare build also completed, but deployment was skipped.
+- [x] Confirm the Cloudflare OpenNext build completed successfully on the PR merge-check run; actual deployment was skipped because this was a pull-request run and Cloudflare credentials/Supabase config were placeholders. No Worker deployment was confirmed.
 - [ ] Vercel's status check still reports a build-rate-limit issue; recheck the Vercel preview when its build capacity is available.
 - [x] Create a reminder to manually test Vercel email confirmation and password reset on 2026-10-27 at 15:00 Europe/London.
 - [ ] Manually test the Vercel email flow. The flow worked previously on Cloudflare; assume it is likely okay for continued development, but do not mark this check complete until tested on Vercel.
 - [ ] Record the actual Vercel deployment URL and the exact commit it serves after the next deployment.
+- [x] Add `BETA_RELEASE_RUNBOOK.md` with the staged release, deployment, auth, RLS, persistence, payments, accessibility, legal, and go/no-go sequence.
+- [x] Add `SECURITY_ACCEPTANCE_TEST_MATRIX.md` with explicit authentication, RLS, persistence, payment/bonus, hosting, and accessibility test cases; all tests remain Not run until executed against a named build.
 - [ ] Update this checklist and `MASTER_BLUEPRINT.md` as roadmap work is completed.
+
+## Current build batch — 2026-10-26
+
+- Added [BETA_RELEASE_RUNBOOK.md](BETA_RELEASE_RUNBOOK.md) and [SECURITY_ACCEPTANCE_TEST_MATRIX.md](SECURITY_ACCEPTANCE_TEST_MATRIX.md).
+- Cloudflare OpenNext build completed successfully in the PR merge-check workflow; deploy step was skipped as intended for a pull request with placeholder Supabase config and no Cloudflare credentials. This is build evidence only, not a deployment.
+- Vercel status still reports build-rate-limit; Vercel preview deployment and email-flow tests remain pending.
+- The latest documentation commits have not yet been validated by a fresh CI run. The earlier green run applies to the MFA code commit only.
+- The npm install audit still reports one critical issue in the project dependency tree and four high issues after temporary Cloudflare adapter/Wrangler installation. Exact advisories are not yet identified; do not run force-upgrades blindly.
 
 ## P0 — Safe authentication and release configuration
 
