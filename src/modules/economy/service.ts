@@ -228,7 +228,8 @@ export async function confirmTokenPurchaseAge(userId: string, dateOfBirth: strin
   return data;
 }
 
-export async function checkTokenCheckoutEnabled(userId: string): Promise<boolean> {  await requireSignedInUser(userId);
+export async function checkTokenCheckoutEnabled(userId: string): Promise<boolean> {
+  await requireSignedInUser(userId);
   const { data, error } = await getSupabaseBrowserClient().functions.invoke('token-checkout', {
     body: { action: 'status' },
   });

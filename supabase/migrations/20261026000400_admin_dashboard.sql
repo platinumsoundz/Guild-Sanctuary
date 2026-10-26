@@ -610,6 +610,7 @@ declare
   caller_id uuid := (select auth.uid());
   normalized_notes text := nullif(trim(coalesce(requested_notes, '')), '');
   review_user_id uuid;
+  current_status text;
 begin
   if public.current_moderation_role() is null then
     raise exception 'Moderator access is required.' using errcode = '42501';
@@ -623,13 +624,18 @@ begin
     raise exception 'Add resolution notes of at least 3 characters.' using errcode = '22023';
   end if;
 
-  select user_id into review_user_id
+  select user_id, status into review_user_id, current_status
   from public.token_purchase_reviews
   where id = requested_review_id
   for update;
 
   if not found then
     raise exception 'The review could not be found.' using errcode = 'P0002';
+  end if;
+
+  -- Decisions are final so the audit log cannot be rewritten by re-resolving.
+  if current_status <> 'open' then
+    raise exception 'This review is already closed.' using errcode = '22023';
   end if;
 
   update public.token_purchase_reviews

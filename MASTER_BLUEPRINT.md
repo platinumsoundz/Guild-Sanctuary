@@ -165,6 +165,38 @@ Do not call this a production release until all of the following are complete:
 6. Validate ad consent, placements, `ads.txt`, and production IDs in relevant territories; keep ads disabled until approval and site policies are in place.
 7. Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and the repository's Deno check after changes; then manually test responsive navigation, auth, feed, Shorts engagement/comments, direct and group messaging, events, moderation, support, wallet, games, token shop, and PWA installation states.
 
+### Known gaps in the Phase 1 code
+
+These are understood limitations, not unfinished wiring. Do not report them as
+fixed.
+
+- **Ban evasion through deletion.** A banned member can request deletion, wait
+  seven days (or restore and instead register again with a different email), and
+  return with a new account. Nothing binds an account to an identity, device, or
+  payment instrument, and the purge removes the moderation record along with the
+  account. Mitigating this needs an out-of-band identifier (payment fingerprint
+  or manual allowlist), which is a product decision.
+- **Appeals need a signed-in account.** Suspended and banned members cannot
+  sign in (`isProfileUsable` only admits active accounts and accounts inside a
+  deletion grace period), so the in-app Appeals panel is only reachable by
+  active members who were warned or had content removed. A suspension or ban
+  has to be appealed out of band until there is a restricted sign-in state.
+  `submit_moderation_appeal` also requires `is_active_user()`, which matches
+  the UI but means the RPC cannot serve a suspended member.
+- **Suspended members may still request deletion.** `request_account_deletion`
+  does not call `is_active_user()`, so a suspended or banned member can hide
+  their content and schedule a purge. This is intentional: data erasure should
+  not depend on standing, and the purge is still the only permanent deletion
+  path.
+- **A won dispute is not re-credited.** `dispute_won` exists in the review
+  reason list, but no handler restores the clawback. Treat disputes as final
+  until that is implemented.
+- **Concurrent duplicate refund events.** `record_token_refund` checks for a
+  prior clawback without locking the session, so two identical full-refund
+  events delivered at the same instant could debit twice. Stripe delivers
+  webhooks sequentially in practice; the idempotency test in
+  `PHASE1_STAGING_CHECKLIST.md` covers the sequential case only.
+
 ## Messaging status and handoff
 
 Direct one-to-one messages and group conversations are available in the UI. The active service is wired to the Supabase repository when Supabase is configured and falls back to the in-memory demo store otherwise. `src/modules/messages/service.ts`, `MessagesInbox.tsx`, `DirectMessageThread.tsx`, and `useDirectMessages.ts` own the flow; `supabaseRepository.ts` supplies persistent conversations/messages and Realtime subscriptions. Optimistic sends, reconnect gap recovery, duplicate de-duplication, and bottom-following scroll are implemented. Staging verification of conversation creation, membership policies, RLS, Realtime reconnect/duplicate events, and retention/abuse controls remains unfinished. Read receipts/unread counts still need a messages update policy and a mark-as-read path. Do not describe messaging as end-to-end encrypted; database/TLS encryption is not E2EE.

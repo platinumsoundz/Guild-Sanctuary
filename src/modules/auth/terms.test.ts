@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CURRENT_TERMS_VERSION, isApprovedTermsVersion, isTermsAcceptanceRequired } from './terms';
+import {
+  CURRENT_TERMS_VERSION,
+  isApprovedTermsVersion,
+  isMissingTermsTableError,
+  isTermsAcceptanceRequired,
+} from './terms';
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -55,5 +60,29 @@ describe('isApprovedTermsVersion', () => {
 
   it('ignores surrounding whitespace', () => {
     expect(isApprovedTermsVersion('  2026-10-26  ')).toBe(true);
+  });
+});
+
+describe('isMissingTermsTableError', () => {
+  it('treats an absent remote flag and null error as not missing', () => {
+    expect(isMissingTermsTableError(null)).toBe(false);
+  });
+
+  it('recognises both PostgREST and PostgreSQL missing-table errors', () => {
+    expect(isMissingTermsTableError({ code: 'PGRST205', message: 'Could not find the table' })).toBe(true);
+    expect(isMissingTermsTableError({ code: '42P01', message: 'relation does not exist' })).toBe(true);
+    expect(isMissingTermsTableError({
+      message: "Could not find the table 'public.terms_acceptances' in the schema cache",
+    })).toBe(true);
+    expect(isMissingTermsTableError({
+      message: 'relation "public.terms_acceptances" does not exist',
+    })).toBe(true);
+  });
+
+  it('does not hide unrelated failures such as a permission error', () => {
+    expect(isMissingTermsTableError({ code: '42501', message: 'permission denied for table terms_acceptances' }))
+      .toBe(false);
+    expect(isMissingTermsTableError({ code: '23505', message: 'duplicate key value violates unique constraint' }))
+      .toBe(false);
   });
 });

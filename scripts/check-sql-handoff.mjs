@@ -53,6 +53,65 @@ if (allSources.length !== migrationFiles.length) {
 const missing = migrationFiles.filter((file) => !allSources.includes(file));
 if (missing.length > 0) fail(`all_migrations.sql is missing: ${missing.join(', ')}`);
 
+// Every marked handoff section must match its migration. Editing a migration
+// without regenerating the handoff silently ships a different schema than the
+// one a human reviewer reads.
+function normalizeSql(sql) {
+  // Compare statements only. Handoff sections keep or drop header comments
+  // inconsistently, so comment-only differences are not drift.
+  return sql
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .filter((line) => line.trim().length > 0)
+    .filter((line) => !line.trim().startsWith('--'))
+    .filter((line) => !/^\s*(begin|commit);\s*$/i.test(line))
+    .join('\n');
+}
+
+function markedSections(sql) {
+  const result = [];
+  let current = null;
+  let skipNextSeparator = false;
+  for (const line of sql.split('\n')) {
+    const source = line.match(/^-- Source: supabase\/migrations\/(.+\.sql)$/);
+    if (source) {
+      if (current && /^-- =+$/.test((current.body.at(-1) ?? '').trim())) current.body.pop();
+      current = { file: source[1], body: [] };
+      result.push(current);
+      skipNextSeparator = true;
+      continue;
+    }
+    if (skipNextSeparator) {
+      skipNextSeparator = false;
+      if (/^-- =+$/.test(line.trim())) continue;
+    }
+    if (current) current.body.push(line);
+  }
+  return result.map((section) => ({ file: section.file, body: normalizeSql(section.body.join('\n')) }));
+}
+
+for (const [name, sql] of [['all_migrations.sql', all], ['economy_migrations.sql', economy]]) {
+  for (const section of markedSections(sql)) {
+    const path = join(migrationsDir, section.file);
+    let expected;
+    try {
+      expected = normalizeSql(readFileSync(path, 'utf8'));
+    } catch {
+      fail(`${name} references ${section.file}, which does not exist`);
+    }
+    if (section.body !== expected) {
+      const actualLines = section.body.split('\n');
+      const expectedLines = expected.split('\n');
+      const index = actualLines.findIndex((line, position) => line !== expectedLines[position]);
+      fail(
+        `${name} section for ${section.file} differs from the migration at line ${index + 1}: `
+        + `"${(actualLines[index] ?? '').slice(0, 80)}"`,
+      );
+    }
+  }
+}
+
 // A stale verify file is worse than no verify file: it tells the operator to
 // expect an object that the migrations no longer create. Cross-check every
 // function and table named in the read-only checks against the migrations.

@@ -328,9 +328,9 @@ export function MembersPanel({ role, currentUserId }: MembersPanelProps) {
               />
             </label>
             <div className={styles.actions}>
-              <button disabled={isBusy || rationale.trim().length < 3} onClick={() => void act('warn')}>Warn</button>
-              <button disabled={isBusy || rationale.trim().length < 3} onClick={() => void act('suspend')}>Suspend 24h</button>
-              <button disabled={isBusy || rationale.trim().length < 3} onClick={() => void act('ban')}>Ban</button>
+              <button type="button" disabled={isBusy || rationale.trim().length < 3} onClick={() => void act('warn')}>Warn</button>
+              <button type="button" disabled={isBusy || rationale.trim().length < 3} onClick={() => void act('suspend')}>Suspend 24h</button>
+              <button type="button" disabled={isBusy || rationale.trim().length < 3} onClick={() => void act('ban')}>Ban</button>
             </div>
           </>
         )}

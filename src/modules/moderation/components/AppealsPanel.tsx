@@ -65,9 +65,9 @@ export function AppealsPanel() {
             />
           </label>
           <div className={styles.actions}>
-            <button disabled={busyId === appeal.id || (notes[appeal.id]?.trim().length ?? 0) < 3} onClick={() => void resolve(appeal, 'resolved')}>Uphold appeal</button>
-            <button disabled={busyId === appeal.id || (notes[appeal.id]?.trim().length ?? 0) < 3} onClick={() => void resolve(appeal, 'denied')}>Deny appeal</button>
-            <button disabled={busyId === appeal.id} onClick={() => void resolve(appeal, 'reviewing')}>Mark reviewing</button>
+            <button type="button" disabled={busyId === appeal.id || (notes[appeal.id]?.trim().length ?? 0) < 3} onClick={() => void resolve(appeal, 'resolved')}>Uphold appeal</button>
+            <button type="button" disabled={busyId === appeal.id || (notes[appeal.id]?.trim().length ?? 0) < 3} onClick={() => void resolve(appeal, 'denied')}>Deny appeal</button>
+            <button type="button" disabled={busyId === appeal.id} onClick={() => void resolve(appeal, 'reviewing')}>Mark reviewing</button>
           </div>
         </article>
       ))}

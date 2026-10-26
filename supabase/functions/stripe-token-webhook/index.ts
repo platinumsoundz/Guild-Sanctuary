@@ -93,7 +93,13 @@ export default {
       })
       if (error) return Response.json({ error: 'The token refund could not be recorded.' }, { status: 500 })
       const result = Array.isArray(data) ? data[0] : data
-      return Response.json({ received: true, ...(result ?? {}) })
+      if (!result?.matched) {
+        // The refund or dispute reached us before the purchase ledger row
+        // existed. Acknowledge nothing and let Stripe retry, otherwise the
+        // clawback is lost permanently.
+        return Response.json({ error: 'The refund is not linked to a recorded token purchase yet.' }, { status: 500 })
+      }
+      return Response.json({ received: true, ...result })
     }
 
     if (event.type !== 'checkout.session.completed' && event.type !== 'checkout.session.async_payment_succeeded') {

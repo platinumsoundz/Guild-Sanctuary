@@ -1,7 +1,7 @@
 'use client';
 
 import type { AuthSession } from './sessionStore';
-import { CURRENT_TERMS_VERSION } from './terms';
+import { CURRENT_TERMS_VERSION, isMissingTermsTableError, isTermsAcceptanceRequired } from './terms';
 import type { Profile, ProfilePrivacy, PublicProfile, SocialLinks } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { ProfileRow, PublicProfileRow } from '@/services/supabase/database.types';
@@ -138,17 +138,29 @@ async function buildSession(): Promise<AuthSession> {
     const { error: termsError } = await client
       .from('terms_acceptances')
       .insert({ user_id: user.id, terms_version: CURRENT_TERMS_VERSION });
-    if (termsError && termsError.code !== '23505') {
+    if (termsError && termsError.code !== '23505' && !isMissingTermsTableError(termsError)) {
       throw new Error(`Your Terms acceptance could not be recorded: ${termsError.message}`);
     }
   }
-  const { data: termsRecord, error: termsReadError } = await client
+  let termsRecord: { terms_version: string; accepted_at: string } | null = null;
+  const { data: termsData, error: termsReadError } = await client
     .from('terms_acceptances')
     .select('terms_version, accepted_at')
     .eq('user_id', user.id)
     .eq('terms_version', CURRENT_TERMS_VERSION)
     .maybeSingle();
-  if (termsReadError) throw new Error(`Your Terms record could not be loaded: ${termsReadError.message}`);
+  if (termsReadError && !isMissingTermsTableError(termsReadError)) {
+    throw new Error(`Your Terms record could not be loaded: ${termsReadError.message}`);
+  }
+  if (termsReadError && isMissingTermsTableError(termsReadError)) {
+    // A partially migrated project must not lock every member out of a feature
+    // that is disabled by default. When acceptance is required, fail loudly.
+    if (isTermsAcceptanceRequired()) {
+      throw new Error('Terms acceptance is enabled, but public.terms_acceptances has not been created yet.');
+    }
+  } else {
+    termsRecord = termsData;
+  }
   const { data: factors, error: factorError } = await client.auth.mfa.listFactors();
   if (factorError) throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
   const twoFactorEnabled = factors.totp.some((factor) => factor.status === 'verified');

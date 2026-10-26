@@ -69,8 +69,8 @@ export function ReviewsPanel() {
             />
           </label>
           <div className={styles.actions}>
-            <button disabled={busyId === review.id || (notes[review.id]?.trim().length ?? 0) < 3} onClick={() => void resolve(review, 'resolved')}>Resolve</button>
-            <button disabled={busyId === review.id || (notes[review.id]?.trim().length ?? 0) < 3} onClick={() => void resolve(review, 'dismissed')}>Dismiss</button>
+            <button type="button" disabled={busyId === review.id || (notes[review.id]?.trim().length ?? 0) < 3} onClick={() => void resolve(review, 'resolved')}>Resolve</button>
+            <button type="button" disabled={busyId === review.id || (notes[review.id]?.trim().length ?? 0) < 3} onClick={() => void resolve(review, 'dismissed')}>Dismiss</button>
           </div>
         </article>
       ))}

@@ -2469,6 +2469,12 @@ grant execute on function public.confirm_token_purchase_age(date) to authenticat
 -- ============================================================================
 -- Source: supabase/migrations/20261026000100_token_refund_clawback.sql
 -- ============================================================================
+-- Phase 1 launch gate: refund and chargeback handling.
+-- Approved policy: claw back unspent tokens, never create a negative balance,
+-- and flag spent-token or partial-refund cases for manual review. Purchased
+-- cosmetics are never reversed automatically.
+begin;
+
 create table if not exists public.token_refund_events (
   id uuid primary key default gen_random_uuid(),
   stripe_event_id text not null unique,
@@ -2822,8 +2828,10 @@ begin
       deletion_purge_after = purge_after,
       visibility = 'private',
       allow_profile_discovery = false,
+      -- Do not let the scheduled suspension expire while a late purge run is
+      -- still pending; that would make the account look active again.
       status = 'suspended',
-      suspended_until = purge_after,
+      suspended_until = null,
       updated_at = now()
   where id = caller_id;
 
@@ -2956,6 +2964,20 @@ grant execute on function public.purge_due_account_deletions(integer) to service
 -- ============================================================================
 -- Source: supabase/migrations/20261026000400_admin_dashboard.sql
 -- ============================================================================
+-- Phase 1 admin and moderation dashboard.
+-- Adds member appeals, internal notes, member search/overview, role management,
+-- audit-log browsing, and refund/dispute review RPCs.
+--
+-- Depends on:
+--   * public.profiles (moderation foundation)
+--   * public.log_audit_event(...) (20261026000000_token_purchase_age_gate.sql)
+--   * public.token_purchase_reviews (20261026000100_token_refund_clawback.sql)
+--
+-- Role checks are inline in a small helper rather than the older
+-- public.is_moderator(), because that helper is missing on some partially
+-- migrated projects.
+begin;
+
 create or replace function public.current_moderation_role()
 returns text
 language sql
@@ -2971,6 +2993,9 @@ as $$
 $$;
 
 revoke all on function public.current_moderation_role() from public, anon, authenticated;
+-- RLS policies evaluate as the querying user, so they must be allowed to call
+-- this security-definer helper. It only reveals the caller's own role.
+grant execute on function public.current_moderation_role() to authenticated;
 
 create table if not exists public.moderation_appeals (
   id uuid primary key default gen_random_uuid(),
@@ -3551,6 +3576,7 @@ declare
   caller_id uuid := (select auth.uid());
   normalized_notes text := nullif(trim(coalesce(requested_notes, '')), '');
   review_user_id uuid;
+  current_status text;
 begin
   if public.current_moderation_role() is null then
     raise exception 'Moderator access is required.' using errcode = '42501';
@@ -3564,13 +3590,18 @@ begin
     raise exception 'Add resolution notes of at least 3 characters.' using errcode = '22023';
   end if;
 
-  select user_id into review_user_id
+  select user_id, status into review_user_id, current_status
   from public.token_purchase_reviews
   where id = requested_review_id
   for update;
 
   if not found then
     raise exception 'The review could not be found.' using errcode = 'P0002';
+  end if;
+
+  -- Decisions are final so the audit log cannot be rewritten by re-resolving.
+  if current_status <> 'open' then
+    raise exception 'This review is already closed.' using errcode = '22023';
   end if;
 
   update public.token_purchase_reviews
@@ -3592,7 +3623,6 @@ $$;
 
 revoke all on function public.admin_resolve_purchase_review(uuid, text, text) from public, anon, authenticated;
 grant execute on function public.admin_resolve_purchase_review(uuid, text, text) to authenticated;
-
 
 -- ============================================================================
 -- Source: supabase/migrations/20261026113205_terms_acceptance_records.sql

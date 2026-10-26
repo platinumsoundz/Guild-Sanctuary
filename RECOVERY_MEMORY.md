@@ -263,7 +263,7 @@ The user is tired and wants to resume later. Avoid repeating completed checks, l
 - Work is isolated on `feature/phase1-trust-safety`, created from `audit/fixes-2026-10-23`.
 - A separate agent is working on password sign-in, database/domain work, and Cloudflare/Vercel/Supabase configuration. Its branches include `main`, `feature/domain-database-improvements`, `fix/supabase-signin-recovery`, `security/supabase-function-and-view-grants`, and `build/cloudflare-ads-host-neutral`.
 - The Phase 1 feature content is not duplicated on those branches, but they touch the same auth, migration, and Supabase type files. Review `git diff` for both sides before any merge or rebase.
-- Nothing has been committed or pushed from this checkpoint yet.
+- Nothing has been pushed. The work is committed locally on `feature/phase1-trust-safety` (latest commits include the refund/clawback history, the staging runbook, and the restore-suspension fix).
 
 ### Added in code (not applied or deployed)
 - `supabase/migrations/20261026000000_token_purchase_age_gate.sql` — 18+ date-of-birth verification; stores only `profiles.purchase_age_verified_at`; adds `log_audit_event`.
@@ -285,6 +285,16 @@ The user is tired and wants to resume later. Avoid repeating completed checks, l
 ### Checks actually run
 - `npm run typecheck` passed.
 - `npm run lint` passed.
-- `npm test -- --run` passed (17/17).
-- `npm run check:sql-handoff` passed (19 migrations).
+- `npm test -- --run` passed (27/27).
+- `npm run check:sql-handoff` passed (19 migrations, and it now compares every marked section body against its migration).
 - `npm run build` passed.
+
+### Latest hardening after the first checkpoint
+- Members can read their own `token_refund_events`; refund and chargeback clawbacks appear as negative Wallet history entries.
+- `cancel_account_deletion` restores `prior_status`/`prior_suspended_until` instead of forcing `active`; a failed session rebuild signs the member out rather than leaving a banned shell.
+- A deletion suspension no longer has an end date, so an overdue purge cannot make the account look active again.
+- The purge route retries on the next run when media removal fails, instead of deleting the auth user and orphaning objects.
+- Sign-in no longer hard-fails when `public.terms_acceptances` is missing while the terms flag is off; it fails loudly when the flag is on.
+- "Mark reviewing" no longer requires resolution notes; closing an appeal still does.
+- Purchase reviews cannot be re-resolved after a decision, and moderation panel buttons are explicitly `type="button"`.
+- `MASTER_BLUEPRINT.md` records the known gaps: ban evasion through deletion, no in-app appeal for a suspended/banned account, a won dispute is not re-credited, and a theoretical concurrent duplicate refund.

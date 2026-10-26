@@ -400,21 +400,16 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       }
     } catch (error) {
       // The deletion request is cancelled even when the rebuilt session is
-      // rejected (for example a restored suspension or ban). Drop the stale
-      // notice and surface the real reason.
-      setCurrentUser((session) => session ? {
-        ...session,
-        user: { ...session.user, deletionPurgeAfter: null },
-      } : session);
+      // rejected (for example a restored suspension or ban). End the session
+      // entirely: leaving a signed-in shell would let a banned account browse
+      // the app after clearing its deletion notice.
+      logout();
       throw error;
     }
-    const profile = await updateSupabaseProfile(currentUser.user.id, {});
-    setCurrentUser((session) => session ? {
-      ...session,
-      profile,
-      user: { ...session.user, deletionPurgeAfter: null },
-    } : session);
-    setActiveNavigation('feed');
+    // No session means the member is no longer signed in; end the session and
+    // report it rather than leaving a half-restored state.
+    logout();
+    throw new Error('Your account could not be restored. Sign in again or contact support.');
   };
 
   const acceptTerms = async (version: string) => {

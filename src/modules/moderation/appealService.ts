@@ -53,7 +53,8 @@ export async function resolveAppeal(
   notes: string,
 ): Promise<void> {
   const trimmed = notes.trim();
-  if (trimmed.length < 3 || trimmed.length > 2000) {
+  // "Reviewing" may be set without notes; closing an appeal requires them.
+  if (trimmed.length > 2000 || (status !== 'reviewing' && trimmed.length < 3)) {
     throw new Error('Add resolution notes between 3 and 2,000 characters.');
   }
   const { error } = await getSupabaseBrowserClient().rpc('admin_resolve_appeal', {

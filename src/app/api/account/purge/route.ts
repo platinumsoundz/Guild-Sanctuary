@@ -47,12 +47,16 @@ export async function POST(request: Request) {
     const failed: { userId: string; error: string }[] = [];
     for (const entry of due) {
       try {
+        // Remove media first. If it fails, keep the account queued (the request
+        // row is the only remaining pointer to the storage prefix) and retry on
+        // the next run instead of deleting the auth user and orphaning objects.
         try {
           await removeUserMedia(admin, entry.user_id);
         } catch (mediaError) {
-          // Do not block the auth-user purge forever on an orphaned object, but
-          // surface the failure so an operator can clean it up.
+          const message = mediaError instanceof Error ? mediaError.message : 'Unknown storage error.';
           console.error('Account media cleanup failed during purge.', entry.user_id, mediaError);
+          failed.push({ userId: entry.user_id, error: `Media cleanup failed: ${message}` });
+          continue;
         }
         const { error: deleteError } = await admin.auth.admin.deleteUser(entry.user_id);
         if (deleteError) throw new Error(deleteError.message);

@@ -111,7 +111,8 @@ Record the wallet balance, ledger rows, and history rows before each case.
 | Dispute created | Treated as a full clawback; a `dispute` history entry. |
 | Same Stripe event delivered twice | `record_token_refund` returns the stored result; the balance changes once. |
 | Second full refund event for the same session | No second debit. |
-| Refund for a session that is not a token purchase | No balance change. |
+| Refund for a session that is not a token purchase | No balance change; the webhook acknowledges it because the Checkout Session metadata is not a token bundle. |
+| Refund event arrives before the purchase ledger row | The webhook returns 5xx so Stripe retries; the clawback is recorded on the retry instead of being acknowledged and lost. |
 
 Confirm the purchased cosmetic is still owned and equipped in every case.
 
@@ -127,14 +128,20 @@ creates it yet. Decide the policy before live sales.
 | Delete with 2FA enabled and no/incorrect code | Rejected with 403. |
 | Delete correctly | `account_deletion_requests` row with `purge_after` seven days out; profile and posts hidden immediately. |
 | Sign in during the grace period | `AccountDeletionNotice` shows the purge date; "Restore" clears `cancelled_at` and the account is visible again. |
-| Suspended member restores | The previous moderation status and `suspended_until` come back; restoring never clears a suspension or a ban. |
+| Suspended member restores | The previous moderation status and `suspended_until` come back; restoring never clears a suspension or a ban, and the session ends instead of staying signed in as a shell. |
 | `POST /api/account/purge` without the secret | 401. |
 | `POST /api/account/purge` with the secret before `purge_after` | Nothing purged. |
 | `POST /api/account/purge` after `purge_after` | Media removed from storage, auth user deleted, wallet/ledger/unlocks cascade away. |
-| Force a media-deletion failure | The auth user is still purged and the failure is logged; check for orphaned objects. |
+| No purge run for days after `purge_after` | The account does not become usable again: the grace-period suspension has no end date, the profile stays private, and content stays hidden. Only the deletion notice is reachable. |
+| Force a media-deletion failure | The account stays hidden and queued; the run reports it under `failed`; the next run retries. No orphaned objects and no deleted auth user pointing at them. |
 
 The purge route is the only permanent deletion path. Signing in must never
-delete an account early.
+delete an account early. `removeUserMedia` lists the `<userId>/` prefix in
+`community-media`; uploads are written as
+`<userId>/<posts|shorts>/<uuid>.<ext>` in
+`src/services/supabase/communityMedia.ts`, so the prefix matches. If a future
+upload path stops using a `userId` prefix (for example an avatar bucket), the
+purge list must be extended or those objects will be orphaned.
 
 ## 6. Terms acceptance
 

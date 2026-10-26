@@ -16,7 +16,7 @@ Open the handoff folder:
 - `supabase/handoff/verify_economy.sql` — read-only checks for the economy tables, functions, columns, catalog, RLS, and wallets.
 - `supabase/handoff/verify_all.sql` — read-only checks for the full schema, views, functions, RLS, indexes, and storage buckets.
 
-The migration files themselves remain the source of truth in `supabase/migrations/`. The handoff files are generated copies for paste-ready use. Run `npm run check:sql-handoff` after changing either source: it fails if a combined file contains a Markdown fence, does not start with `begin;`/end with `commit;`, or omits a migration.
+The migration files themselves remain the source of truth in `supabase/migrations/`. The handoff files are generated copies for paste-ready use. Run `npm run check:sql-handoff` after changing either source: it fails if a combined file contains a Markdown fence, does not start with `begin;`/end with `commit;`, omits a migration, or has a `-- Source:` section whose statements no longer match the migration (comment-only differences are ignored). It also cross-checks every function and table named in `verify_all.sql`/`verify_economy.sql` against the migrations.
 
 ## The one rule that caused the earlier failures
 

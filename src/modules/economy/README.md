@@ -29,7 +29,7 @@ The client sends only the catalog item ID and an idempotency key to the `spend_t
 
 Token purchases require a one-time server-side age confirmation. `WalletPanel` collects a date of birth, `confirm_token_purchase_age` validates it in Postgres, and only `profiles.purchase_age_verified_at` is stored. Bundle buttons stay disabled until the session carries a verification, and `token-checkout` rejects accounts without one.
 
-Refunds and chargebacks are handled by `record_token_refund` from the Stripe webhook. The approved policy is to claw back unspent tokens, never create a negative balance, flag spent-token and partial-refund cases for manual review, and never reverse a purchased cosmetic. A refund clawback appears in the member's Wallet history as a negative entry (the member has a read policy on their own `token_refund_events`), so a balance drop is never unexplained. Both migrations are unapplied and the webhook is undeployed.
+Refunds and chargebacks are handled by `record_token_refund` from the Stripe webhook. The approved policy is to claw back unspent tokens, never create a negative balance, flag spent-token and partial-refund cases for manual review, and never reverse a purchased cosmetic. A refund clawback appears in the member's Wallet history as a negative entry (the member has a read policy on their own `token_refund_events`), so a balance drop is never unexplained. If a refund or dispute touches a token session whose grant has not been recorded yet, the webhook returns 5xx so Stripe retries rather than acknowledging and losing the clawback. Both migrations are unapplied and the webhook is undeployed.
 
 ## Token Shop page
 

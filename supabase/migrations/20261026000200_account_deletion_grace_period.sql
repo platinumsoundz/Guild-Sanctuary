@@ -123,8 +123,10 @@ begin
       deletion_purge_after = purge_after,
       visibility = 'private',
       allow_profile_discovery = false,
+      -- Do not let the scheduled suspension expire while a late purge run is
+      -- still pending; that would make the account look active again.
       status = 'suspended',
-      suspended_until = purge_after,
+      suspended_until = null,
       updated_at = now()
   where id = caller_id;
 

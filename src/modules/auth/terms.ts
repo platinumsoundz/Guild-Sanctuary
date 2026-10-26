@@ -20,3 +20,14 @@ export function isApprovedTermsVersion(value: string | null | undefined): boolea
   if (typeof value !== 'string') return false;
   return /^[A-Za-z0-9._-]{4,40}$/.test(value.trim());
 }
+
+/**
+ * Detect a project where public.terms_acceptances has not been applied yet.
+ * PostgREST reports a missing table through its schema cache before Postgres
+ * ever sees the query, so both codes matter.
+ */
+export function isMissingTermsTableError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  if (error.code === 'PGRST205' || error.code === '42P01') return true;
+  return /could not find the table|relation .* does not exist/i.test(error.message ?? '');
+}
