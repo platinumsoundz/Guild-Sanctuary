@@ -112,7 +112,7 @@ export async function requestSupabaseEmailCode(email: string, signup?: { usernam
     options: {
       shouldCreateUser: Boolean(signup),
       emailRedirectTo: `${window.location.origin}/auth/callback`,
-      ...(signup ? { data: { username: signup.username, displayName: signup.displayName } } : {}),
+      ...(signup ? { data: { username: signup.username, display_name: signup.displayName } } : {}),
     },
   });
   if (error) throw new Error(`A verification code could not be sent: ${error.message}`);
