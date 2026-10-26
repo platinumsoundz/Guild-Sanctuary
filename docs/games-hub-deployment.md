@@ -81,3 +81,11 @@ The hub currently links to the two existing game deployments. It does not provid
 - Cloudflare OpenNext build and Wrangler dry-run completed successfully for the tested commit. The output bundle was created, and Wrangler recognized the `WORKER_SELF_REFERENCE`, `IMAGES`, and `ASSETS` bindings. This was a dry run only; it did not deploy the Worker.
 - Cloudflare emitted a configuration warning: Wrangler config says Worker name `sanctuary-web-auto`, while the connected build expects `guild-sanctuary`. The CI system overrode the name for the dry run. Confirm the intended production Worker name and align `name` plus the self-reference service binding in a reviewed follow-up before an actual deployment.
 - GitHub's Vercel status for the latest documentation commit reports a deployment rate limit and says to retry in 24 hours. This is a hosting-plan/build-limit status, not a TypeScript/build error. Do not repeatedly trigger Vercel builds; wait for the limit window or use the successful Cloudflare dry-run evidence while keeping production unchanged.
+
+
+### Public roadmap and notification preview — 26 October 2026
+- Added a **Systems & Roadmap** destination to the authenticated Sanctuary navigation so known current and planned systems are visible, including placeholders and security-gated features.
+- Roadmap status labels intentionally distinguish **Available**, **Preview**, **Planned**, and **Security gated**. Listing a feature is not a claim that its backend or deployment is complete.
+- Added a notification bell and panel with clearly labelled sample/system-preview items and a local mark-as-read interaction.
+- **Not yet connected:** real-time/persisted notification delivery, message and wallet event subscriptions, push/email notifications, cross-device read state, and notification preferences. Do not represent preview items as real account activity.
+- The roadmap is a curated inventory of major known systems, not an automatically generated exhaustive inventory of every code path or private operational control. Update it as roadmap scope changes.
