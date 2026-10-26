@@ -7,7 +7,9 @@ import {
   fetchPersistentConversations,
   fetchPersistentThread,
   sendPersistentMessage,
+  subscribeToPersistentMessages,
 } from './supabaseRepository';
+import { getSupabaseBrowserClient } from '@/services/supabase';
 
 export interface ConversationThread {
   conversation: Conversation;
@@ -21,6 +23,23 @@ const conversationKeys = new Map<string, string>(); // Keyed by participant pair
 /** Enable only after the persistent messaging schema and RLS are verified in the target environment. */
 export function isPersistentMessagingEnabled(): boolean {
   return isSupabaseAuthConfigured() && process.env.NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES === 'true';
+}
+
+/**
+ * Never mix a local/demo app identity with a different authenticated Supabase user.
+ * Demo sessions may continue using the in-memory service when no Supabase user is signed in.
+ */
+async function hasPersistentSession(userId: string): Promise<boolean> {
+  if (!isPersistentMessagingEnabled()) return false;
+  if (!userId) throw new Error('Sign in before using persistent messaging.');
+
+  const { data, error } = await getSupabaseBrowserClient().auth.getUser();
+  if (error) throw new Error(`Authentication could not be verified: ${error.message}`);
+  if (!data.user) return false;
+  if (data.user.id !== userId) {
+    throw new Error('Your active Sanctuary session does not match the signed-in account. Sign out and sign in again.');
+  }
+  return true;
 }
 let nextConversationId = 1;
 let nextMessageId = 1;
@@ -45,7 +64,7 @@ export async function createDirectConversation(userId: string, peerUserId: strin
   if (!userId || !peerUserId || userId === peerUserId) {
     throw new Error('Choose another community member to start a conversation.');
   }
-  if (isPersistentMessagingEnabled()) {
+  if (await hasPersistentSession(userId)) {
     const conversation = await createPersistentConversation('direct', [peerUserId], null);
     return fetchPersistentThread(conversation.id);
   }
@@ -91,8 +110,8 @@ export async function createGroupConversation(userId: string, participantIds: st
   if (normalizedName.length < 2 || normalizedName.length > 60) {
     throw new Error('Group names must be between 2 and 60 characters.');
   }
-  if (isPersistentMessagingEnabled()) {
-    return createPersistentConversation('group', members, normalizedName);
+  if (await hasPersistentSession(userId)) {
+    return createPersistentConversation('group', participantIds, normalizedName);
   }
   if (participantIds.some((participantId) => !getLocalPublicProfileById(participantId)?.allowDirectMessages)) {
     throw new Error('Every group member must have direct messages enabled.');
@@ -115,7 +134,7 @@ export async function fetchUserConversations(userId: string): Promise<Conversati
   if (!userId) {
     throw new Error('Sign in to view your conversations.');
   }
-  if (isPersistentMessagingEnabled()) return fetchPersistentConversations(userId);
+  if (await hasPersistentSession(userId)) return fetchPersistentConversations(userId);
   await delay();
   return [...conversations.values()]
     .filter((conversation) => conversation.participantIds.includes(userId))
@@ -124,7 +143,7 @@ export async function fetchUserConversations(userId: string): Promise<Conversati
 }
 
 export async function fetchConversationThread(conversationId: string, userId: string): Promise<ConversationThread> {
-  if (isPersistentMessagingEnabled()) return fetchPersistentThread(conversationId);
+  if (await hasPersistentSession(userId)) return fetchPersistentThread(conversationId);
   const conversation = requireParticipant(conversationId, userId);
   await delay();
   return {
@@ -138,7 +157,7 @@ export async function fetchConversationMessages(conversationId: string, userId: 
 }
 
 export async function sendConversationMessage(conversationId: string, senderId: string, body: string): Promise<Message> {
-  if (isPersistentMessagingEnabled()) return sendPersistentMessage(conversationId, body);
+  if (await hasPersistentSession(senderId)) return sendPersistentMessage(conversationId, body);
   const conversation = requireParticipant(conversationId, senderId);
   const peerUserId = conversation.kind === 'direct'
     ? conversation.participantIds.find((participantId) => participantId !== senderId)
@@ -166,6 +185,16 @@ export async function sendConversationMessage(conversationId: string, senderId: 
 }
 
 export const sendDirectMessage = sendConversationMessage;
+
+export async function subscribeToConversationMessages(
+  conversationId: string,
+  userId: string,
+  onMessage: (message: Message) => void,
+  onError: (message: string) => void,
+): Promise<() => void> {
+  if (!(await hasPersistentSession(userId))) return () => undefined;
+  return subscribeToPersistentMessages(conversationId, onMessage, onError);
+}
 
 export function removeUserConversationData(userId: string): void {
   for (const [key] of conversationKeys) {
