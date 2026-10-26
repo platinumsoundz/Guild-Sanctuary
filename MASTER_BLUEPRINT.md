@@ -23,7 +23,7 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `feeds` | Unified post feed, media metadata, likes, comments | In-memory or optional Supabase adapter |
 | `shorts` | Unified short video feed and engagement | In-memory or optional Supabase adapter |
 | `events` | Community events and RSVPs | In-memory |
-| `messages` | Direct one-to-one/group conversations and threads | Hybrid: in-memory for local/demo sessions; authenticated Supabase sessions route through the persistent repository; staging migration/RLS/realtime validation pending |
+| `messages` | Direct one-to-one/group conversations and threads | Hybrid: in-memory by default; opt-in persistent Supabase repository behind a disabled-by-default feature flag; staging migration/RLS/realtime validation pending |
 | `profiles` / `settings` | Profile, discovery, privacy, local preferences | Browser-local demo store |
 | `moderation` | Report UI and moderator workflow contracts | Supabase-dependent when configured |
 | `support` | Optional community support | Stripe donation link returned only on explicitly enabled Vercel Production deployments; no app-side reconciliation |
@@ -172,7 +172,7 @@ Verification and deployment:
 
 ## Persistent messaging integration — implementation in review (2026-10-26)
 
-- Authenticated sessions whose Supabase user ID matches the app session now use the persistent repository for direct/group conversation creation, inbox listing, thread reads, and message sends.
-- Local/demo sessions remain on the in-memory service; the app does not silently mix local IDs with Supabase UUIDs.
+- Authenticated sessions whose Supabase user ID matches the app session can use the persistent repository for direct/group conversation creation, inbox listing, thread reads, and message sends when `NEXT_PUBLIC_PERSISTENT_MESSAGING_ENABLED=true`.
+- `NEXT_PUBLIC_PERSISTENT_MESSAGING_ENABLED` defaults to `false`; local/demo sessions remain on the in-memory service, and the app does not silently mix local IDs with Supabase UUIDs.
 - The active thread hook subscribes to message INSERT events and deduplicates messages that arrive both from the send response and realtime.
 - Required verification before enabling broadly: confirm the conversation RPC and message policies are applied in staging; test two distinct accounts, direct-message privacy, group membership, unauthorized thread access, send/read after reload, realtime reconnect/error behavior, and guest/demo isolation. Confirm Supabase Realtime publication and RLS for messages. No migrations were applied by this code change.
