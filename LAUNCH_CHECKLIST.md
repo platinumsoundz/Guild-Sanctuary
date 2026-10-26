@@ -11,7 +11,10 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 - [x] Confirm the branch's previous CI run passed dependency installation, Deno checks, TypeScript checks, and build.
 - [x] Fix OTP signup metadata key: `displayName` is now sent as `display_name`, matching the profile trigger.
 - [x] Re-fetch the changed authentication file and confirm the correction.
-- [x] Latest fix commit received a successful Vercel check.
+- [x] Latest OTP metadata fix received a successful Vercel check before subsequent auth-flow changes.
+- [x] Found and fixed a password-sign-in MFA gap: accounts with verified TOTP factors now receive a challenge before the app activates the session.
+- [x] Wired the password sign-in challenge through AppContext and the auth form/gateway.
+- [ ] Run typecheck/build for the MFA change; latest Vercel status is blocked by a build-rate-limit error, not a reported source compilation failure.
 - [x] Create a reminder to manually test Vercel email confirmation and password reset on 2026-10-27 at 15:00 Europe/London.
 - [ ] Manually test the Vercel email flow. The flow worked previously on Cloudflare; assume it is likely okay for continued development, but do not mark this check complete until tested on Vercel.
 - [ ] Record the actual Vercel deployment URL and the exact commit it serves after the next deployment.
@@ -32,7 +35,7 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 - [ ] Test forgot-password request, email link, callback, new password, old-password rejection, and sign-in with the new password.
 - [ ] Confirm reset links fail safely when expired, malformed, reused, or opened without a recovery session.
 - [ ] Test unverified email behavior and verify that an unconfirmed account cannot access authenticated features.
-- [ ] Test TOTP-enabled account sign-in and verify AAL2 is required before protected actions.
+- [ ] Test TOTP-enabled password sign-in, verify the challenge is shown, and verify AAL2 is required before protected actions.
 - [ ] Review generic authentication error messages to avoid revealing whether an email account exists.
 - [ ] Confirm no local demo password or mock code is accepted as real production authentication.
 - [ ] Confirm guest mode is read-only and cannot access authenticated mutations.
@@ -151,7 +154,7 @@ This is the working checklist for the Sanctuary roadmap. Keep it updated as work
 ## P2 — Quality, observability, and release readiness
 
 - [ ] Run `npm ci`, `npm run typecheck`, `npm run build`, and the repository's Deno checks on the latest branch commit.
-- [ ] Add automated tests for auth metadata, signup, profile trigger expectations, callback routing, reset flow, and failure states.
+- [ ] Add automated tests for auth metadata, signup, password sign-in with and without TOTP, profile trigger expectations, callback routing, reset flow, and failure states.
 - [ ] Add integration tests for RLS ownership and security-definer permissions.
 - [ ] Add token purchase idempotency/replay tests and wallet invariant tests.
 - [ ] Add basic end-to-end tests for feed, Shorts, events, messages, profile/settings, notifications, and guest mode.
