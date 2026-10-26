@@ -11,6 +11,7 @@ import {
   Newspaper,
   Search,
   Settings,
+  ShieldCheck,
   Sun,
   UserRound,
   Wallet,
@@ -37,6 +38,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
   { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
 ];
 
 interface NavigationProps {
@@ -74,6 +76,7 @@ export function Navigation({
   onSetTwoFactorEnabled,
   onLogout,
 }: NavigationProps) {
+  const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || Boolean(currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role)));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -173,7 +176,7 @@ export function Navigation({
         <>
           <nav className={styles.desktopNavigation} aria-label="Main navigation">
             <div className={styles.desktopNavigationItems}>
-              {navigationItems.map((item) => (
+              {visibleNavigationItems.map((item) => (
                 <button
                   key={item.id}
                   className={styles.desktopNavigationButton}
