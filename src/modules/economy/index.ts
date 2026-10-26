@@ -1,4 +1,5 @@
 export { WalletPanel } from './WalletPanel';
+export { TokenShopPanel } from './TokenShopPanel';
 export { useWallet } from './useWallet';
 export {
   checkTokenCheckoutEnabled,
