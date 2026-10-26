@@ -40,7 +40,7 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
     .eq('id', userData.user.id)
     .single();
   if (profileError) throw new Error(`Your moderation permissions could not be checked: ${profileError.message}`);
-  if (!['moderator', 'admin'].includes(profile.role) || profile.status !== 'active') {
+  if (!['moderator', 'admin', 'developer', 'owner'].includes(profile.role) || profile.status !== 'active') {
     throw new Error('This account is not authorized to use moderation tools.');
   }
 

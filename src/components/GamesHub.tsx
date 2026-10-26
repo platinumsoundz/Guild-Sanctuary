@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ExternalLink, Gamepad2, Maximize2, X } from 'lucide-react';
+import { Copy, ExternalLink, Gamepad2, Maximize2, X } from 'lucide-react';
 import styles from './GamesHub.module.css';
 
 type GameId = 'online' | 'training3d';
@@ -35,6 +35,16 @@ const games: {
 
 export function GamesHub() {
   const [activeGame, setActiveGame] = useState<GameId | null>(null);
+  const [copiedServer, setCopiedServer] = useState<string | null>(null);
+
+  const copyServerAddress = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopiedServer(address);
+    } catch {
+      setCopiedServer(null);
+    }
+  };
   const selectedGame = games.find((game) => game.id === activeGame);
 
   return (
@@ -110,6 +120,55 @@ export function GamesHub() {
           ))}
         </section>
       )}
+
+      <section aria-labelledby="community-games-title">
+        <header className={styles.header}>
+          <p className={styles.eyebrow}>COMMUNITY WORLDS</p>
+          <h2 id="community-games-title">Play with the community</h2>
+          <p>Your Roblox experience and Platinum Survival Minecraft server are linked here for quick access.</p>
+        </header>
+        <div className={styles.grid}>
+          <article className={styles.card}>
+            <div className={styles.art} aria-hidden="true"><Gamepad2 size={44} strokeWidth={1.2} /></div>
+            <div className={styles.cardBody}>
+              <span className={styles.gameBadge}>Roblox · Experience</span>
+              <h2>My Roblox World</h2>
+              <p className={styles.description}>Jump straight into the Roblox experience.</p>
+              <div className={styles.cardActions}>
+                <a className={styles.playButton} href="https://www.roblox.com/share?code=569803cb5f9abd4aa9c44b092aa7130d&type=ExperienceDetails&stamp=1793047846576" target="_blank" rel="noopener noreferrer">Open Roblox <ExternalLink size={15} aria-hidden="true" /></a>
+              </div>
+            </div>
+          </article>
+          <article className={styles.card}>
+            <div className={styles.art} aria-hidden="true"><Gamepad2 size={44} strokeWidth={1.2} /></div>
+            <div className={styles.cardBody}>
+              <span className={styles.gameBadge}>Minecraft · Java</span>
+              <h2>Platinum Survival</h2>
+              <p className={styles.description}>Join the Minecraft server using this address in the Multiplayer server field.</p>
+              <p><strong>Server address</strong></p>
+              <code>platinumsurvival.minekeep.gg</code>
+              <div className={styles.cardActions}>
+                <button type="button" className={styles.playButton} onClick={() => void copyServerAddress('platinumsurvival.minekeep.gg')}><Copy size={15} aria-hidden="true" /> {copiedServer === 'platinumsurvival.minekeep.gg' ? 'Copied address' : 'Copy address'}</button>
+                <a className={styles.externalLink} href="https://platinumsurvival.minekeep.gg" target="_blank" rel="noopener noreferrer">Open host <ExternalLink size={14} aria-hidden="true" /></a>
+              </div>
+            </div>
+          </article>
+          <article className={styles.card}>
+            <div className={styles.art} aria-hidden="true"><Gamepad2 size={44} strokeWidth={1.2} /></div>
+            <div className={styles.cardBody}>
+              <span className={styles.gameBadge}>Minecraft · Bedrock</span>
+              <h2>Platinum Survival Bedrock</h2>
+              <p className={styles.description}>Use this Bedrock server address in the Servers tab. Add a port if your host panel specifies one.</p>
+              <p><strong>Server address</strong></p>
+              <code>platinumsurvival.bedrock.minekeep.gg</code>
+              <div className={styles.cardActions}>
+                <button type="button" className={styles.playButton} onClick={() => void copyServerAddress('platinumsurvival.bedrock.minekeep.gg')}><Copy size={15} aria-hidden="true" /> {copiedServer === 'platinumsurvival.bedrock.minekeep.gg' ? 'Copied address' : 'Copy address'}</button>
+                <a className={styles.externalLink} href="https://platinumsurvival.bedrock.minekeep.gg" target="_blank" rel="noopener noreferrer">Open host <ExternalLink size={14} aria-hidden="true" /></a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
 
       <aside className={styles.walletNotice}>
         <Maximize2 size={18} aria-hidden="true" />

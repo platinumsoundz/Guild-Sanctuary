@@ -20,6 +20,7 @@ import { WalletPanel } from '@/modules/economy';
 import { GamesHub } from '@/components/GamesHub';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { NotificationBar } from '@/components/NotificationBar';
+import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import styles from './AppWorkspace.module.css';
 
@@ -120,6 +121,8 @@ export function AppWorkspace() {
         </main>
       ) : activeNavigation === 'games' ? (
         <GamesHub />
+      ) : activeNavigation === 'admin' ? (
+        <AdminDashboard role={currentUser.profile.role} />
       ) : activeNavigation === 'roadmap' ? (
         <SanctuaryRoadmap />
       ) : activeNavigation === 'feed' ? (
