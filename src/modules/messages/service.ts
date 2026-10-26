@@ -1,7 +1,13 @@
 'use client';
 
 import type { Conversation, Message, PublicProfile } from '@/types/database';
-import { getLocalPublicProfileById } from '@/modules/auth';
+import { getLocalPublicProfileById, isSupabaseAuthConfigured } from '@/modules/auth';
+import {
+  createPersistentConversation,
+  fetchPersistentConversations,
+  fetchPersistentThread,
+  sendPersistentMessage,
+} from './supabaseRepository';
 
 export interface ConversationThread {
   conversation: Conversation;
@@ -11,6 +17,11 @@ export interface ConversationThread {
 const conversations = new Map<string, Conversation>();
 const messages: Message[] = [];
 const conversationKeys = new Map<string, string>(); // Keyed by participant pair string
+
+/** Enable only after the persistent messaging schema and RLS are verified in the target environment. */
+export function isPersistentMessagingEnabled(): boolean {
+  return isSupabaseAuthConfigured() && process.env.NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES === 'true';
+}
 let nextConversationId = 1;
 let nextMessageId = 1;
 
@@ -34,6 +45,11 @@ export async function createDirectConversation(userId: string, peerUserId: strin
   if (!userId || !peerUserId || userId === peerUserId) {
     throw new Error('Choose another community member to start a conversation.');
   }
+  if (isPersistentMessagingEnabled()) {
+    const conversation = await createPersistentConversation('direct', [peerUserId], null);
+    return fetchPersistentThread(conversation.id);
+  }
+
   const peerProfile = getLocalPublicProfileById(peerUserId);
   if (!peerProfile || !peerProfile.allowDirectMessages) {
     throw new Error('This member is not accepting direct messages.');
@@ -75,6 +91,9 @@ export async function createGroupConversation(userId: string, participantIds: st
   if (normalizedName.length < 2 || normalizedName.length > 60) {
     throw new Error('Group names must be between 2 and 60 characters.');
   }
+  if (isPersistentMessagingEnabled()) {
+    return createPersistentConversation('group', members, normalizedName);
+  }
   if (participantIds.some((participantId) => !getLocalPublicProfileById(participantId)?.allowDirectMessages)) {
     throw new Error('Every group member must have direct messages enabled.');
   }
@@ -96,6 +115,7 @@ export async function fetchUserConversations(userId: string): Promise<Conversati
   if (!userId) {
     throw new Error('Sign in to view your conversations.');
   }
+  if (isPersistentMessagingEnabled()) return fetchPersistentConversations(userId);
   await delay();
   return [...conversations.values()]
     .filter((conversation) => conversation.participantIds.includes(userId))
@@ -104,6 +124,7 @@ export async function fetchUserConversations(userId: string): Promise<Conversati
 }
 
 export async function fetchConversationThread(conversationId: string, userId: string): Promise<ConversationThread> {
+  if (isPersistentMessagingEnabled()) return fetchPersistentThread(conversationId);
   const conversation = requireParticipant(conversationId, userId);
   await delay();
   return {
@@ -117,6 +138,7 @@ export async function fetchConversationMessages(conversationId: string, userId: 
 }
 
 export async function sendConversationMessage(conversationId: string, senderId: string, body: string): Promise<Message> {
+  if (isPersistentMessagingEnabled()) return sendPersistentMessage(conversationId, body);
   const conversation = requireParticipant(conversationId, senderId);
   const peerUserId = conversation.kind === 'direct'
     ? conversation.participantIds.find((participantId) => participantId !== senderId)
