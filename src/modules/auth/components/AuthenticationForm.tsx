@@ -9,7 +9,7 @@ interface AuthenticationFormProps {
   initialMode?: AuthMode;
   initialEmail?: string;
   initialError?: string | null;
-  onLogin: (email: string, password: string) => void | Promise<void>;
+  onLogin: (email: string, password: string) => boolean | void | Promise<boolean | void>;
   onSignup: (input: SignUpInput, password: string) => boolean | Promise<boolean>;
   onResetPassword: (email: string) => void | Promise<void>;
   onVerifyEmailCode: (code: string) => boolean | Promise<boolean>;
@@ -87,9 +87,14 @@ export function AuthenticationForm({
           onSuccess?.();
         }
       } else {
-        await onLogin(email.trim(), password);
+        const requiresTwoFactor = await onLogin(email.trim(), password);
         setPassword('');
-        onSuccess?.();
+        if (requiresTwoFactor) {
+          setVerificationCode('');
+          setStep('two-factor-code');
+        } else {
+          onSuccess?.();
+        }
       }
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'We could not complete your request.');
