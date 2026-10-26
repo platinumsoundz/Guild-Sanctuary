@@ -129,3 +129,12 @@ npm run build
 ```
 
 Copy `.env.example` to `.env.local`. Public Supabase URL/key values are not secrets. Never commit `.env.local`, service-role keys, Stripe keys, or webhook secrets.
+
+
+### 2026-10-26 — Safe public projections for profile and event counts
+
+- Replaced the two flagged security-definer views with `security_invoker=true` views backed by narrow projection tables in the non-exposed `private` schema.
+- `private.public_profile_projection` stores only the existing public-profile view's fields, with bio/location/age/star-sign/belief/social-links filtered by each profile's privacy settings. A trigger keeps the projection synchronized with profile inserts, updates, visibility changes, and deletion.
+- `private.event_rsvp_count_projection` stores only event IDs and going counts for visible events. Triggers keep counts synchronized with RSVP and event changes; individual RSVP rows are not exposed through the count view.
+- Applied the migration to the connected Supabase project. Verification showed the view row counts match the projection tables and both views now have `security_invoker=true`.
+- The Supabase security advisor no longer flags either view. Remaining findings are the intentional `is_active_user()` helper used by profile RLS, the informational no-policy finding for the private game-session table (it is intentionally service-role-only), and leaked-password protection, which still needs an Auth dashboard setting change.
