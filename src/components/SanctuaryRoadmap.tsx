@@ -176,6 +176,16 @@ export function SanctuaryRoadmap() {
             </div>
             <h2>{system.title}</h2>
             <p>{system.description}</p>
+            {system.status !== 'Available' && (
+              <button
+                className={styles.placeholderAction}
+                type="button"
+                disabled
+                aria-label={`${system.title}: ${system.status === 'Security gated' ? 'locked until security checks pass' : system.status === 'Preview' ? 'preview only' : 'coming soon'}`}
+              >
+                {system.status === 'Security gated' ? 'Locked · checks required' : system.status === 'Preview' ? 'Preview only' : 'Coming soon'}
+              </button>
+            )}
           </article>
         ))}
       </section>
