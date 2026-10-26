@@ -43,9 +43,9 @@ jobs:
         run: npx opennextjs-cloudflare build
 
       - name: Deploy to Cloudflare Workers
-        if: github.event_name != 'pull_request' && vars.ENABLE_GITHUB_CLOUDFLARE_DEPLOY == 'true' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' && env.HAS_SUPABASE_CONFIG == 'true'
+        if: github.event_name != 'pull_request' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' && env.HAS_SUPABASE_CONFIG == 'true'
         run: npx opennextjs-cloudflare deploy
 
       - name: Explain skipped deployment
-        if: github.event_name != 'pull_request' && (vars.ENABLE_GITHUB_CLOUDFLARE_DEPLOY != 'true' || env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' || env.HAS_SUPABASE_CONFIG != 'true')
-        run: echo "::notice::Build passed. Production deployment is handled by the connected Cloudflare Workers Builds pipeline. To opt into the separate GitHub Actions deploy path, set the repository Actions variable ENABLE_GITHUB_CLOUDFLARE_DEPLOY=true and verify the Cloudflare token has Workers Scripts/Assets write permissions."
+        if: github.event_name != 'pull_request' && (env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' || env.HAS_SUPABASE_CONFIG != 'true')
+        run: echo "::notice::Build passed, but production deployment was skipped because Cloudflare credentials or Supabase configuration are missing. Configure the repository secrets before expecting a live rollout."
