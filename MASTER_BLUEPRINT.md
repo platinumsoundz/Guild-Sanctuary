@@ -23,7 +23,7 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `feeds` | Unified post feed, media metadata, likes, comments | In-memory or optional Supabase adapter |
 | `shorts` | Unified short video feed and engagement | In-memory or optional Supabase adapter |
 | `events` | Community events and RSVPs | In-memory |
-| `messages` | Direct one-to-one/group conversations and threads | Active UI uses in-memory demo service; optional Supabase repository is not wired into the UI |
+| `messages` | Direct one-to-one/group conversations and threads | Hybrid: in-memory for local/demo sessions; authenticated Supabase sessions route through the persistent repository; staging migration/RLS/realtime validation pending |
 | `profiles` / `settings` | Profile, discovery, privacy, local preferences | Browser-local demo store |
 | `moderation` | Report UI and moderator workflow contracts | Supabase-dependent when configured |
 | `support` | Optional community support | Stripe donation link returned only on explicitly enabled Vercel Production deployments; no app-side reconciliation |
@@ -168,3 +168,11 @@ Verification and deployment:
 - Role assignment is deliberately fail-closed. Only active admins/developers/owners can search the member list; rank checks prevent assigning or modifying equal/higher roles unless the caller is an owner, and users cannot change their own role. The first owner must be assigned once by an operator after verifying the correct Supabase Auth UUID; there is no public owner self-claim.
 - The admin feature is not operational in production until the migration is applied to the connected Supabase project and the first owner is bootstrapped. Local/demo authentication is not sufficient for privileged operations.
 - Games Hub now links to the owner's supplied Roblox experience and displays copyable Java and Bedrock Minecraft server addresses. The Minecraft hostname links are convenience links only; joining still happens through the Minecraft client, and no server port was supplied or invented.
+
+
+## Persistent messaging integration — implementation in review (2026-10-26)
+
+- Authenticated sessions whose Supabase user ID matches the app session now use the persistent repository for direct/group conversation creation, inbox listing, thread reads, and message sends.
+- Local/demo sessions remain on the in-memory service; the app does not silently mix local IDs with Supabase UUIDs.
+- The active thread hook subscribes to message INSERT events and deduplicates messages that arrive both from the send response and realtime.
+- Required verification before enabling broadly: confirm the conversation RPC and message policies are applied in staging; test two distinct accounts, direct-message privacy, group membership, unauthorized thread access, send/read after reload, realtime reconnect/error behavior, and guest/demo isolation. Confirm Supabase Realtime publication and RLS for messages. No migrations were applied by this code change.
