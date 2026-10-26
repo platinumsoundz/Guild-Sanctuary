@@ -205,6 +205,9 @@ begin
 end;
 $$;
 
+revoke all on function public.touch_conversation_after_message() from public;
+revoke all on function public.touch_conversation_after_message() from anon;
+
 drop trigger if exists messages_touch_conversation on public.messages;
 create trigger messages_touch_conversation
 after insert on public.messages
