@@ -15,11 +15,13 @@ import {
   Wallet,
   HeartHandshake,
   Gamepad2,
+  Map,
   X,
   type LucideIcon,
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
+import { SanctuaryNotifications } from '@/components/SanctuaryNotifications';
 import styles from './Navigation.module.css';
 
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
@@ -29,6 +31,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
   { id: 'games', label: 'Games', icon: Gamepad2 },
+  { id: 'roadmap', label: 'Systems & Roadmap', icon: Map },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
@@ -136,6 +139,7 @@ export function Navigation({
           </div>
         </div>
         <div className={styles.accountArea}>
+          <SanctuaryNotifications />
           {!isSessionReady ? (
             <span className={styles.accountPlaceholder} role="status">Restoring session</span>
           ) : (
