@@ -2,6 +2,13 @@
 
 import type { Conversation, Message, PublicProfile } from '@/types/database';
 import { getLocalPublicProfileById } from '@/modules/auth';
+import { getSupabaseBrowserClient } from '@/services/supabase';
+import {
+  createPersistentConversation,
+  fetchPersistentConversations,
+  fetchPersistentThread,
+  sendPersistentMessage,
+} from './supabaseRepository';
 
 export interface ConversationThread {
   conversation: Conversation;
@@ -22,6 +29,23 @@ function participantKey(userId: string, peerUserId: string): string {
   return [userId, peerUserId].sort().join(':');
 }
 
+function isSupabaseConfigured(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
+
+/**
+ * Use the durable repository only when the active Supabase session belongs to
+ * the user represented by the current app session. Local/demo sessions remain
+ * isolated in the in-memory repository and are never silently mixed with UUID
+ * conversations from Supabase.
+ */
+async function hasPersistentSession(userId: string): Promise<boolean> {
+  if (!isSupabaseConfigured() || !userId) return false;
+  const { data, error } = await getSupabaseBrowserClient().auth.getUser();
+  if (error) throw new Error(`Authentication could not be verified: ${error.message}`);
+  return data.user?.id === userId;
+}
+
 function requireParticipant(conversationId: string, userId: string): Conversation {
   const conversation = conversations.get(conversationId);
   if (!conversation || !conversation.participantIds.includes(userId)) {
@@ -34,6 +58,13 @@ export async function createDirectConversation(userId: string, peerUserId: strin
   if (!userId || !peerUserId || userId === peerUserId) {
     throw new Error('Choose another community member to start a conversation.');
   }
+
+  if (await hasPersistentSession(userId)) {
+    // The database RPC is the authority for membership and account privacy.
+    const conversation = await createPersistentConversation('direct', [peerUserId], null);
+    return fetchPersistentThread(conversation.id);
+  }
+
   const peerProfile = getLocalPublicProfileById(peerUserId);
   if (!peerProfile || !peerProfile.allowDirectMessages) {
     throw new Error('This member is not accepting direct messages.');
@@ -75,6 +106,12 @@ export async function createGroupConversation(userId: string, participantIds: st
   if (normalizedName.length < 2 || normalizedName.length > 60) {
     throw new Error('Group names must be between 2 and 60 characters.');
   }
+
+  if (await hasPersistentSession(userId)) {
+    // The RPC validates the requested members against the authenticated caller.
+    return createPersistentConversation('group', participantIds, normalizedName);
+  }
+
   if (participantIds.some((participantId) => !getLocalPublicProfileById(participantId)?.allowDirectMessages)) {
     throw new Error('Every group member must have direct messages enabled.');
   }
@@ -96,6 +133,9 @@ export async function fetchUserConversations(userId: string): Promise<Conversati
   if (!userId) {
     throw new Error('Sign in to view your conversations.');
   }
+  if (await hasPersistentSession(userId)) {
+    return fetchPersistentConversations(userId);
+  }
   await delay();
   return [...conversations.values()]
     .filter((conversation) => conversation.participantIds.includes(userId))
@@ -104,6 +144,9 @@ export async function fetchUserConversations(userId: string): Promise<Conversati
 }
 
 export async function fetchConversationThread(conversationId: string, userId: string): Promise<ConversationThread> {
+  if (await hasPersistentSession(userId)) {
+    return fetchPersistentThread(conversationId);
+  }
   const conversation = requireParticipant(conversationId, userId);
   await delay();
   return {
@@ -117,16 +160,22 @@ export async function fetchConversationMessages(conversationId: string, userId: 
 }
 
 export async function sendConversationMessage(conversationId: string, senderId: string, body: string): Promise<Message> {
+  const normalizedBody = body.trim();
+  if (normalizedBody.length < 1 || normalizedBody.length > 2000) {
+    throw new Error('Messages must contain 1 to 2,000 characters.');
+  }
+
+  if (await hasPersistentSession(senderId)) {
+    // The insert policy validates the authenticated sender's membership.
+    return sendPersistentMessage(conversationId, normalizedBody);
+  }
+
   const conversation = requireParticipant(conversationId, senderId);
   const peerUserId = conversation.kind === 'direct'
     ? conversation.participantIds.find((participantId) => participantId !== senderId)
     : undefined;
   if (peerUserId && !getLocalPublicProfileById(peerUserId)?.allowDirectMessages) {
     throw new Error('This member is not accepting direct messages.');
-  }
-  const normalizedBody = body.trim();
-  if (normalizedBody.length < 1 || normalizedBody.length > 2000) {
-    throw new Error('Messages must contain 1 to 2,000 characters.');
   }
 
   await delay();
@@ -146,6 +195,8 @@ export async function sendConversationMessage(conversationId: string, senderId: 
 export const sendDirectMessage = sendConversationMessage;
 
 export function removeUserConversationData(userId: string): void {
+  // This cleanup only affects local/demo data. Persistent account deletion and
+  // message retention are governed by database constraints and approved policy.
   for (const [key] of conversationKeys) {
     if (key.split(':').includes(userId)) conversationKeys.delete(key);
   }
