@@ -104,13 +104,21 @@ Full-schema checks also cover `account_deletion_requests`, `moderation_appeals`,
 
 ## Still blocked after SQL
 
-Applying SQL does not make the product launch-ready. These remain code-only or unimplemented:
+Applying SQL does not make the product launch-ready. These are implemented in
+code but have not been applied, deployed, or staging-tested:
 
 - refund/chargeback clawback and manual-review flagging
 - 18+ token purchase gate
-- 7-day account-deletion grace period and restore flow
-- full admin dashboard: reports, suspend/ban, wallet history, audit log, appeals/notes, role management
-- approved Terms/Privacy and durable signup acceptance
-- staging validation of RLS, Edge Functions, webhook idempotency, and test-mode checkout
+- 7-day account-deletion grace period, restore, and the secret-protected purge
+- admin dashboard: reports, suspend/ban, wallet history, audit log, appeals,
+  notes, role management, and Terms acceptance view
+- Terms acceptance recording behind `NEXT_PUBLIC_TERMS_REQUIRED`
+- staging validation of RLS, Edge Functions, webhook idempotency, and test-mode
+  checkout
 
-Keep `TOKEN_CHECKOUT_ENABLED=false` and do not enable live sales until those are complete and reviewed.
+Still unimplemented: approved final Terms/Privacy text, a certified CMP for
+advertising, and a scheduler that calls the purge route.
+
+Follow [PHASE1_STAGING_CHECKLIST.md](PHASE1_STAGING_CHECKLIST.md) for the
+case-by-case verification steps. Keep `TOKEN_CHECKOUT_ENABLED=false` and do not
+enable live sales until those checks are complete and reviewed.
