@@ -129,3 +129,15 @@ npm run build
 ```
 
 Copy `.env.example` to `.env.local`. Public Supabase URL/key values are not secrets. Never commit `.env.local`, service-role keys, Stripe keys, or webhook secrets.
+
+
+## Change log
+
+### 2026-10-26 — Persistent notification bar foundation
+
+- Added a responsive notification bar and panel mounted inside the app session provider.
+- Added the `notifications` table with recipient-owned row-level security, read-state-only update grants, and indexes for recent/unread activity.
+- Added database triggers to create notifications when a different user likes or comments on a visible post, Short, or event.
+- Guest mode remains browse-only and does not receive personal notification data.
+- The database migration is applied to the connected Supabase project and is tracked in `supabase/migrations/20261026103000_social_notifications.sql`.
+- Validation is pending. Notifications currently refresh on load/open rather than relying on Supabase Realtime, and this work has not been merged or deployed.
