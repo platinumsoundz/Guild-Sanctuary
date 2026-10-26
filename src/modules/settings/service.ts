@@ -93,8 +93,7 @@ export async function saveAccountPreferences(userId: string, preferences: Accoun
   if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') {
     throw new Error('Choose a supported layout arrangement.');
   }
-  if (isSupabaseCommunityStorageConfigured()) {
-    await requireCommunityStorageUser(userId);
+  if (isSupabaseCommunityStorageConfigured() && await hasMatchingSupabaseUser(userId)) {
     const { data, error } = await getSupabaseBrowserClient().from('account_settings')
       .upsert({ user_id: userId, preferences: { ...preferences } as Record<string, unknown>, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
       .select('preferences,updated_at').single();
