@@ -24,9 +24,9 @@ const destinationFor: Record<NotificationItem['target_type'], NavigationState> =
   event: 'events',
 };
 
-export function NotificationBar() {
+export function NotificationBar({ fullPage = false }: { fullPage?: boolean }) {
   const { currentUser, isGuest, setActiveNavigation } = useAppContext();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(fullPage);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -161,14 +161,14 @@ export function NotificationBar() {
 
 
   return (
-    <aside className={styles.bar} aria-label="Notifications">
+    <aside className={`${styles.bar} ${fullPage ? styles.fullPage : ''}`} aria-label="Notifications">
       <div className={styles.inner}>
-        <span className={styles.label}>COMMUNITY ACTIVITY</span>
+        {!fullPage && <span className={styles.label}>COMMUNITY ACTIVITY</span>}
         <div className={styles.actions}>
           {isConnected && unreadCount > 0 && (
             <span className={styles.unreadSummary}>{unreadCount} unread</span>
           )}
-          <button
+          {!fullPage && <button
             type="button"
             className={styles.bellButton}
             aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'}
@@ -182,7 +182,7 @@ export function NotificationBar() {
             <Bell size={17} aria-hidden="true" />
             <span>Notifications</span>
             {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 99 ? '99+' : unreadCount}</span>}
-          </button>
+          </button>}
         </div>
       </div>
 
