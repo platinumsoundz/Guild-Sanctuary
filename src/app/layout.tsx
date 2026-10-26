@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { AppContextProvider } from '@/context/AppContext'
 import { PwaInstallHelp } from '@/components/PwaInstallHelp'
+import { PwaServiceWorker } from '@/components/PwaServiceWorker'
 import { AdSenseScript } from '@/modules/ads/AdSenseScript'
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body className="bg-neutral-950 text-neutral-100 min-h-screen antialiased">
         <AdSenseScript />
         <PwaInstallHelp />
+        <PwaServiceWorker />
         <AppContextProvider>
           {children}
         </AppContextProvider>
