@@ -17,6 +17,7 @@ import { DirectMessageThread, MessagesInbox } from '@/modules/messages';
 import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
 import { WalletPanel } from '@/modules/economy';
+import { GamesHub } from '@/components/GamesHub';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import styles from './AppWorkspace.module.css';
 
@@ -110,6 +111,8 @@ export function AppWorkspace() {
         <main className={styles.supportPage}>
           <WalletPanel userId={currentUser.user.id} isGuest={isGuest} />
         </main>
+      ) : activeNavigation === 'games' ? (
+        <GamesHub />
       ) : activeNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
