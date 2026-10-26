@@ -2,7 +2,7 @@
 
 ## Game destinations
 
-- **3D Training Ground:** `https://the-5-sleeves-3d.pages.dev/` (Cloudflare Pages). Keep the GitHack deployment available as a fallback until the Pages version has passed browser and device checks.
+- **The 5 Sleeves 3D:** `https://the-5-sleeves-3d.pages.dev/` (Cloudflare Pages). Keep the GitHack deployment available as a fallback until the Pages version has passed browser and device checks.
 - **2D Online:** set `NEXT_PUBLIC_5_SLEEVES_2D_URL` to the canonical Render URL after verifying it in the Render dashboard or existing production configuration. It is intentionally unset by default. The launcher disables this game's launch controls while the URL is unset rather than guessing a host.
 
 Set the public environment variable in the deployment environment (Vercel/Cloudflare configuration as appropriate) and trigger a fresh build. It is a public URL, not a secret.
