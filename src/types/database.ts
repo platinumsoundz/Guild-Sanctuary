@@ -11,7 +11,6 @@ export type EngagementTargetType = 'post' | 'event' | 'short';
 export type AccountLayout = 'comfortable' | 'compact';
 
 export interface SocialLinks {
-  [key: string]: string | null;
   facebook: string | null;
   x: string | null;
   youtube: string | null;
