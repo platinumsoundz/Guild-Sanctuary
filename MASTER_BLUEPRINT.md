@@ -160,3 +160,11 @@ Copy `.env.example` to `.env.local`. Public Supabase URL/key values are not secr
 - The matching guard migration is `supabase/migrations/20261026104500_lock_token_spending_until_staging.sql`.
 - Verified the three mutation RPCs are no longer executable by public/anon/authenticated and that only authenticated SELECT table grants remain.
 - This closes a live API path while the UI and game-wallet bridge are being developed. Re-enable user mutation grants only in isolated staging after reversal, deletion, and idempotency tests.
+
+
+### 2026-10-26 — Reproducible token shop schema
+
+- Added `supabase/migrations/20261026105000_token_shop_schema_and_guard.sql` to create the token catalogue, spend ledger, and entitlements on fresh environments, seed the existing 12 catalogue items without overwriting existing rows, restore owner-scoped RLS policies, and define the existing spend/equip RPCs.
+- Applied the migration to the connected Supabase project. Existing catalogue entries were preserved by `ON CONFLICT DO NOTHING`.
+- The migration intentionally revokes execution of token spending and cosmetic mutation RPCs from public, anon, authenticated, and service_role until the staged wallet bridge and reversal/deletion checks are approved.
+- Validation of the live schema/grants is being checked; app CI will run on the updated pull request.
