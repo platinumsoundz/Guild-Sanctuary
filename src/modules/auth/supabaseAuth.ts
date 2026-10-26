@@ -1,6 +1,6 @@
 'use client';
 
-import type { AuthSession } from './sessionStore';
+import { CURRENT_TERMS_VERSION, type AuthSession } from './sessionStore';
 import type { Profile, ProfilePrivacy, SocialLinks } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 
@@ -87,6 +87,14 @@ async function buildSession(): Promise<AuthSession> {
   const user = userResult.user;
   if (!user?.email || !user.email_confirmed_at) throw new Error('Verify your email before continuing.');
   const profileRow = await getProfileRow(user.id);
+  if (user.user_metadata?.terms_version === CURRENT_TERMS_VERSION) {
+    const { error: termsError } = await client
+      .from('terms_acceptances')
+      .insert({ user_id: user.id, terms_version: CURRENT_TERMS_VERSION });
+    if (termsError && termsError.code !== '23505') {
+      throw new Error(`Your Terms acceptance could not be recorded: ${termsError.message}`);
+    }
+  }
   const { data: factors, error: factorError } = await client.auth.mfa.listFactors();
   if (factorError) throw new Error(`Your security settings could not be loaded: ${factorError.message}`);
   const twoFactorEnabled = factors.totp.some((factor) => factor.status === 'verified');
@@ -105,14 +113,14 @@ async function buildSession(): Promise<AuthSession> {
   };
 }
 
-export async function requestSupabaseEmailCode(email: string, signup?: { username: string; displayName: string }): Promise<void> {
+export async function requestSupabaseEmailCode(email: string, signup?: { username: string; displayName: string; termsVersion?: string }): Promise<void> {
   const client = getSupabaseBrowserClient();
   const { error } = await client.auth.signInWithOtp({
     email: email.trim().toLowerCase(),
     options: {
       shouldCreateUser: Boolean(signup),
       emailRedirectTo: `${window.location.origin}/auth/callback`,
-      ...(signup ? { data: { username: signup.username, displayName: signup.displayName } } : {}),
+      ...(signup ? { data: { username: signup.username, displayName: signup.displayName, terms_version: signup.termsVersion } } : {}),
     },
   });
   if (error) throw new Error(`A verification code could not be sent: ${error.message}`);
