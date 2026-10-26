@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import type { Profile, ProfilePrivacy, SocialLinks } from '@/types/database';
+import { isSupabaseAuthConfigured } from '@/modules/auth';
 import { useAccountSettings } from '../useAccountSettings';
 import styles from './SettingsHub.module.css';
 
@@ -246,8 +247,12 @@ export function SettingsHub({
 
           <section className={`${styles.panel} ${styles.dangerPanel}`} aria-labelledby="delete-title">
             <h2 id="delete-title">Delete account</h2>
-            <p className={styles.hint}>This permanently removes your local demo account and signs you out. This prototype cannot securely erase server data.</p>
-            <form className={styles.linksForm} onSubmit={handleDelete}>
+            {isSupabaseAuthConfigured() ? (
+              <p className={styles.hint} role="status">Server-account deletion is not available in this screen yet. No account data will be deleted here; use the verified support process until secure server-side deletion is released.</p>
+            ) : (
+              <>
+                <p className={styles.hint}>This permanently removes your local demo account and signs you out. This prototype cannot securely erase server data.</p>
+                <form className={styles.linksForm} onSubmit={handleDelete}>
               <label className={styles.field}>
                 <span>Confirm your account email</span>
                 <input type="email" autoComplete="email" value={deleteEmail} onChange={(event) => setDeleteEmail(event.currentTarget.value)} required />
@@ -265,7 +270,9 @@ export function SettingsHub({
               <button className={styles.deleteButton} type="submit" disabled={isDeleting || deletePhrase !== 'DELETE' || deleteEmail.trim().toLowerCase() !== email.toLowerCase() || (twoFactorEnabled && deleteCode.length !== 6)}>
                 Permanently delete account
               </button>
-            </form>
+                </form>
+              </>
+            )}
           </section>
         </>
       )}
