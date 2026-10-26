@@ -151,3 +151,12 @@ Copy `.env.example` to `.env.local`. Public Supabase URL/key values are not secr
 - Token spending remains disabled in the UI. The current connected project is not confirmed isolated staging, and the cross-game identity bridge, server-authoritative game spend API, reversal workflow, and staging tests are not complete.
 - Updated shared database types for the existing token shop tables and RPCs.
 - Validation is pending. The token shop schema/functions exist in the connected database but require a checked-in reproducible migration before fresh environments can use them.
+
+
+### 2026-10-26 — Close direct token-spend RPCs pending staging
+
+- Removed public, anonymous, and authenticated execution grants from `spend_tokens`, `equip_profile_cosmetic`, and `clear_profile_cosmetic` in the connected Supabase project.
+- Removed unnecessary anonymous table privileges from the token wallet, ledgers, catalogue, and entitlement tables; authenticated users retain read-only grants protected by RLS.
+- The matching guard migration is `supabase/migrations/20261026104500_lock_token_spending_until_staging.sql`.
+- Verified the three mutation RPCs are no longer executable by public/anon/authenticated and that only authenticated SELECT table grants remain.
+- This closes a live API path while the UI and game-wallet bridge are being developed. Re-enable user mutation grants only in isolated staging after reversal, deletion, and idempotency tests.
