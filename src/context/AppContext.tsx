@@ -19,6 +19,7 @@ import {
   verifyLocalTwoFactor,
   lockPrivateProfileVault,
   isSupabaseAuthConfigured,
+  CURRENT_TERMS_VERSION,
   requestSupabaseEmailCode,
   restoreSupabaseSession,
   verifySupabaseEmailCode,
@@ -136,6 +137,9 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   };
 
   const signup = async (input: SignUpInput) => {
+    if (input.termsVersion !== CURRENT_TERMS_VERSION) {
+      throw new Error('Accept the current Terms draft before creating an account.');
+    }
     if (isSupabaseAuthConfigured()) {
       await requestSupabaseEmailCode(input.email, input);
       setPendingEmail(input.email.trim().toLowerCase());
