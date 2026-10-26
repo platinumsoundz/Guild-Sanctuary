@@ -16,7 +16,6 @@ jobs:
   deploy:
     name: Build and deploy Sanctuary to Cloudflare
     runs-on: ubuntu-latest
-    environment: cloudflare-production
     timeout-minutes: 20
     steps:
       - name: Check out source
