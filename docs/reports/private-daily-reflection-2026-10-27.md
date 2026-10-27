@@ -1,7 +1,7 @@
 # Private Daily Reflection — implementation report
 
 Date: 2026-10-27  
-Status: **Implemented in this branch; pending CI and browser verification. Not deployed.**
+Status: **Implemented in this branch; dedicated contract workflow and full CI passed on code head `d99a73fec62e739813c663318fe1f2b274cae0fa`. Browser verification remains outstanding. Not deployed.**
 
 ## User outcome
 
@@ -22,10 +22,16 @@ The Sanctuary feed now has a calm, optional daily reflection card. A signed-in m
 
 This is deliberately local-only. Entries are not synced to an account and are not sent to Sanctuary servers. The UI explains that anyone with access to the same browser profile may be able to read the data. Members are told not to enter details they would not want another browser-profile user to see. This is not encrypted storage and must not be described as secure/private from other users of the same device.
 
-## Verification required
+## Verification evidence
 
-- Dedicated contract workflow passes on the exact PR head.
-- Full TypeScript check and production build pass.
+- Dedicated workflow run `40440070368` passed: npm install, all 14 contract checks, TypeScript typecheck, and production build.
+- Full CI run `40440070347` passed: PWA/auth/messaging checks, Deno checks, TypeScript typecheck, and production build.
+- The automated roadmap/build check run `40440070357` completed successfully and uploaded its report artifact.
+- A Vercel status also reported a build-rate-limit failure; the GitHub Actions checks above passed independently.
+
+## Verification still required
+
+- Browser QA on mobile and desktop: create, update, reload, account switching, guest read-only, storage failure, and clear-history flow.
 - Browser QA on mobile and desktop: create, update, reload, account switching, guest read-only, storage failure, and clear-history flow.
 - Confirm no local reflection survives in UI after switching to a different account key; the form waits for the new account key to load before displaying its draft.
 - Verify previous entries display correctly and never include the current day twice.
