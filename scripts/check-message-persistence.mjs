@@ -29,6 +29,11 @@ const checks = [
   ['messaging tables are not granted to anon and writes are limited to messages', /from public, anon, authenticated/.test(migration) && /grant select on table public\.conversations, public\.conversation_members, public\.direct_conversation_pairs, public\.messages to authenticated/.test(migration) && /grant insert on table public\.messages to authenticated/.test(migration)],
   ['migration refreshes schema cache and conditionally enables Realtime', /notify pgrst, 'reload schema'/.test(migration) && /supabase_realtime/.test(migration) && /alter publication supabase_realtime add table public\.messages/.test(migration)],
   ['latest migration treats saved Settings DM preference as authoritative', /s\.preferences->>'allowDirectMessages'/.test(dmPreferenceFix) && /p\.allow_direct_messages/.test(dmPreferenceFix) && !/privacy->>'allowDirectMessages'/.test(dmPreferenceFix)],
+  ['inbox clearly discloses E2EE is not active', /MessagePrivacyNotice/.test(read('../src/modules/messages/MessagesInbox.tsx')) && /End-to-end encryption is not active yet/.test(read('../src/modules/messages/MessagePrivacyNotice.tsx'))],
+  ['conversation view also displays the message privacy notice', /MessagePrivacyNotice/.test(read('../src/modules/messages/DirectMessageThread.tsx'))],
+  ['E2EE design forbids custom production crypto and requires reviewed protocol', /Do not invent a home-grown encryption protocol/.test(read('../docs/MESSAGING_PRIVACY_AND_E2EE.md')) && /ratcheting protocol/.test(read('../docs/MESSAGING_PRIVACY_AND_E2EE.md'))],
+  ['E2EE plan documents metadata and reporting tradeoffs', /Metadata remains visible/.test(read('../docs/MESSAGING_PRIVACY_AND_E2EE.md')) && /Reporting and safety must be compatible/.test(read('../docs/MESSAGING_PRIVACY_AND_E2EE.md'))],
+  ['messaging is not advertised as encrypted before the release gate', /Do not remove the privacy notice/.test(read('../docs/MESSAGING_PRIVACY_AND_E2EE.md'))],
 ];
 
 for (const [label, passed] of checks) {
