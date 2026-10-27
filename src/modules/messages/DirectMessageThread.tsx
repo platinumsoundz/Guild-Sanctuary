@@ -45,14 +45,14 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
       <aside className={styles.privacyNotice} aria-label="Message privacy notice">
         <div className={styles.privacyNoticeHeading}>
           <span className={styles.privacyStatusDot} aria-hidden="true" />
-          <strong>Standard server-stored messages · E2EE not active</strong>
+          <strong>End-to-end encryption is not active</strong>
         </div>
-        <p>Sanctuary protects conversations with account access controls, but the current message content is not end-to-end encrypted. The service may be able to access server-stored message text. Avoid sending passwords, payment details, or information you would not want exposed.</p>
+        <p>Sanctuary messaging is not end-to-end encrypted. Depending on the environment, messages may use a demo in-memory path or a server-backed path; neither should be assumed to provide end-to-end confidentiality. If the server-backed path is enabled, message text is readable by the service. Avoid sending passwords, payment details, or highly sensitive information.</p>
         <details className={styles.privacyDetails}>
           <summary>What this means and what we are building</summary>
           <ul>
-            <li><strong>Now:</strong> messages are delivered through the Sanctuary database and restricted to conversation members.</li>
-            <li><strong>Next:</strong> evaluate a maintained, independently reviewed end-to-end encryption protocol. Private keys must stay on your devices; the server should handle ciphertext, not readable message text.</li>
+            <li><strong>Current implementation:</strong> the inbox/thread still uses an in-memory service by default; a Supabase repository and schema exist but must not be treated as active until configuration, migrations, RLS and two-account integration tests are verified.</li>
+            <li><strong>Next:</strong> evaluate a maintained, independently reviewed end-to-end encryption protocol. Private keys must stay on your devices; a server-backed implementation should handle ciphertext, not readable message text.</li>
             <li><strong>Local storage:</strong> saving messages only in this browser is not automatically safer and may lose history or expose it on a shared device. It is not a substitute for end-to-end encryption.</li>
             <li><strong>Honest status:</strong> we will not label messaging end-to-end encrypted until key management, multi-device behavior, recovery, reporting, and security review pass.</li>
           </ul>
