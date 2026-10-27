@@ -68,8 +68,8 @@ export async function POST(request: Request) {
       client_reference_id: userId,
       metadata: { sanctuary_order_id: orderId, sanctuary_user_id: userId, sanctuary_bundle_id: bundleId },
       payment_intent_data: { metadata: { sanctuary_order_id: orderId, sanctuary_user_id: userId, sanctuary_bundle_id: bundleId } },
-      success_url: `${trustedOrigin}/token-shop?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${trustedOrigin}/token-shop?checkout=cancelled`,
+      success_url: `${trustedOrigin}/?wallet=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${trustedOrigin}/?wallet=cancelled`,
       allow_promotion_codes: false,
     });
     if (!session.url) return NextResponse.json({ error: 'Stripe did not return a checkout URL.' }, { status: 502, headers: { 'Cache-Control': 'no-store' } });
