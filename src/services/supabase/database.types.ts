@@ -31,6 +31,8 @@ export type ProfileRow = {
   visibility: 'public' | 'private';
   created_at: string;
   updated_at: string;
+  self_discovery_summary: Record<string, string> | null;
+  self_discovery_visible: boolean;
 }
 
 export type PrivateProfileVaultRow = {
@@ -122,6 +124,7 @@ export interface Database {
       token_entitlements: Table<{
         user_id: string; item_id: string; granted_at: string;
       }>;
+      self_discovery_responses: Table<{ user_id: string; answers: Record<string, unknown>; consent_version: string; updated_at: string }>;
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
         user_id: string;
@@ -249,6 +252,7 @@ export interface Database {
           belief: string | null;
           social_links: Record<string, string | null> | null;
           allow_direct_messages: boolean;
+          self_discovery_summary: Record<string, string> | null;
         };
         Relationships: [];
       };
