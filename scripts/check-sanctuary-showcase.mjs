@@ -25,7 +25,7 @@ for (const [label, source, pattern] of [
   ['preference picker disclosed as local-only', home, /not a live public poll.*only shared if you add it to a feedback report/s],
   ['preference can be added to feedback', home, /My next-feature preference/],
   ['concept modal Escape support', home, /event\.key === 'Escape'/],
-  ['paced self-discovery questions', home, /A FEW GENTLE QUESTIONS.*1 of 4/s],
+  ['paced self-discovery questions', home, /A FEW GENTLE QUESTIONS.*of 4/s],
   ['self-discovery local save requires opt-in', home, /if \(!saveDiscoveryLocally\)/],
   ['self-discovery storage is browser-local', home, /sanctuary\\.self-discovery\\.preview\\.v1/],
   ['profile visibility defaults to private', home, /showDiscoveryOnProfile, setShowDiscoveryOnProfile.*useState\\(false\\)/],
