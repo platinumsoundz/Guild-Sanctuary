@@ -36,7 +36,7 @@ function parseData(raw: string | null): PlannerData {
     const habits = Array.isArray(candidate.habits) ? candidate.habits.filter((habit): habit is PlannerHabit =>
       Boolean(habit && typeof habit === 'object' && typeof habit.id === 'string' &&
         typeof habit.title === 'string' && habit.title.trim().length > 0 && habit.title.length <= MAX_HABIT_LENGTH &&
-        Array.isArray(habit.checkedDates) && habit.checkedDates.every((date) => typeof date === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(date)) &&
+        Array.isArray(habit.checkedDates) && habit.checkedDates.every((date) => typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) &&
         typeof habit.createdAt === 'string'),
     ).map((habit) => ({ ...habit, checkedDates: [...new Set(habit.checkedDates)].slice(-366) })) : [];
     const notesByDate = Object.fromEntries(Object.entries(candidate.notesByDate)
