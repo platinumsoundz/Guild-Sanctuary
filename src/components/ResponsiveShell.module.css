@@ -68,7 +68,7 @@
 
 .installTitle {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 750;
   line-height: 1.25;
 }
@@ -76,8 +76,8 @@
 .installDescription {
   margin: 1px 0 0;
   color: var(--install-muted);
-  font-size: 10px;
-  line-height: 1.35;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
  .installActions {
@@ -91,18 +91,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 32px;
+  min-height: 44px;
   border-radius: 7px;
   cursor: pointer;
   transition: background-color 140ms ease, border-color 140ms ease;
 }
 
 .installButton {
-  padding: 0 10px;
+  padding: 0 12px;
   border: 1px solid var(--install-accent);
   background: var(--install-accent);
   color: var(--install-accent-contrast);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 750;
   white-space: nowrap;
 }
@@ -112,8 +112,8 @@
 }
 
 .hideInstallButton {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid transparent;
@@ -129,7 +129,7 @@
 
 .installButton:focus-visible,
 .hideInstallButton:focus-visible {
-  outline: 2px solid var(--install-accent);
+  outline: 3px solid var(--install-accent);
   outline-offset: 2px;
 }
 
@@ -145,19 +145,20 @@
 
   .installCopy { gap: 7px; }
   .installIcon { width: 26px; height: 26px; }
-  .installTitle { font-size: 11px; }
-  .installDescription { font-size: 9px; line-height: 1.3; }
+  .installTitle { font-size: 14px; }
+  .installDescription { font-size: 13px; line-height: 1.5; }
 
   .installActions { gap: 3px; }
-  .installButton { min-height: 30px; padding: 0 8px; }
-  .hideInstallButton { width: 30px; height: 30px; min-height: 30px; }
+  .installButton { min-height: 44px; padding: 0 10px; }
+  .hideInstallButton { width: 44px; height: 44px; min-height: 44px; }
 }
 
 @media (max-width: 360px) {
   .installBanner { padding: 6px; gap: 5px; }
   .installCopy { gap: 5px; }
   .installDescription { max-width: 22ch; }
-  .installButton { padding: 0 7px; }
+  .installButton { padding: 0 9px; }
+  .installActions { width: 100%; justify-content: space-between; }
 }
 
 @media (prefers-reduced-motion: reduce) {
