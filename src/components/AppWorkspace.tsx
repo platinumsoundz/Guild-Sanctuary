@@ -2,6 +2,7 @@
 
 import { ResponsiveShell } from '@/components/ResponsiveShell';
 import { Navigation } from '@/components/Navigation';
+import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import type { CSSProperties } from 'react';
@@ -217,6 +218,7 @@ export function AppWorkspace() {
           data-world="sanctuary"
           style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}
         >
+        <PwaInstallBanner />
         <Navigation
           activeNavigation={activeNavigation}
           currentUser={currentUser}
