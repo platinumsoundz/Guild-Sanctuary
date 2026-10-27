@@ -17,6 +17,7 @@ create table if not exists public.self_discovery_responses (
     check (jsonb_typeof(answers) = 'object'),
   consent_version text not null default 'self-discovery-v1'
     check (char_length(consent_version) between 1 and 40),
+  consented_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
