@@ -248,3 +248,9 @@
     padding: 15px;
   }
 }
+
+.formNote {
+  margin: 0;
+  color: var(--muted);
+  font: 12px/1.6 Arial, sans-serif;
+}

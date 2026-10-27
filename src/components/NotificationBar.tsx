@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Bell, CheckCheck, Heart, MessageCircle, X } from 'lucide-react';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { getSupabaseBrowserClient } from '@/services/supabase';
@@ -31,6 +31,8 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const bellButtonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
 
   const loadNotifications = useCallback(async () => {
     if (!currentUser || isGuest || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -118,6 +120,32 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
     };
   }, [currentUser, isGuest, loadNotifications]);
 
+  // A compact notification popover must never trap the user on the current page.
+  // Close on Escape or an outside pointer press, and return keyboard focus to its trigger.
+  useEffect(() => {
+    if (!isOpen || !compact) return;
+
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (panelRef.current?.contains(target) || bellButtonRef.current?.contains(target)) return;
+      setIsOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      setIsOpen(false);
+      bellButtonRef.current?.focus();
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsidePointer);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [compact, isOpen]);
+
   const unreadCount = items.filter((item) => !item.read_at).length;
 
   const markRead = async (item: NotificationItem) => {
@@ -171,6 +199,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
             <span className={styles.unreadSummary}>{unreadCount} unread</span>
           )}
           {!fullPage && <button
+            ref={bellButtonRef}
             type="button"
             className={styles.bellButton}
             aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'}
@@ -189,7 +218,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
       </div>
 
       {isOpen && (
-        <section id="sanctuary-notification-panel" className={styles.panel} aria-label="Recent notifications">
+        <section ref={panelRef} id="sanctuary-notification-panel" className={styles.panel} aria-label="Recent notifications" role="region">
           <header className={styles.panelHeader}>
             <div>
               <h2>Notifications</h2>

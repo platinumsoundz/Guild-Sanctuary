@@ -103,21 +103,22 @@ export function MeetupCalendarPlaceholder() {
             <span>Description</span>
             <textarea value={description} onChange={(event) => setDescription(event.currentTarget.value)} maxLength={2000} rows={3} />
           </label>
+          <p className={styles.formNote}>The date and time are entered in your device’s local timezone and converted for consistent storage. Venue coordinates are required in this version; address search is not available yet.</p>
           <div className={styles.formRow}>
             <label className={styles.field}>
-              <span>Event date</span>
+              <span>Event date (your local time)</span>
               <input type="date" value={startDate} onChange={(event) => setStartDate(event.currentTarget.value)} required />
             </label>
             <label className={styles.field}>
-              <span>Start time</span>
+              <span>Start time (your local time)</span>
               <input type="time" step="60" value={startTime} onChange={(event) => setStartTime(event.currentTarget.value)} required />
             </label>
             <label className={styles.field}>
-              <span>Latitude</span>
+              <span>Latitude (venue map pin)</span>
               <input type="number" min="-90" max="90" step="any" value={latitude} onChange={(event) => setLatitude(event.currentTarget.value)} required />
             </label>
             <label className={styles.field}>
-              <span>Longitude</span>
+              <span>Longitude (venue map pin)</span>
               <input type="number" min="-180" max="180" step="any" value={longitude} onChange={(event) => setLongitude(event.currentTarget.value)} required />
             </label>
           </div>
@@ -143,7 +144,7 @@ export function MeetupCalendarPlaceholder() {
             {events.map((event) => (
               <article className={styles.eventCard} key={event.id}>
                 <div className={styles.eventMain}>
-                  <time className={styles.eventDate} dateTime={event.startsAt}>{event.startsAt.replace('T', ' ').slice(0, 16)} UTC</time>
+                  <time className={styles.eventDate} dateTime={event.startsAt}>{formatEventDateTime(event.startsAt)}</time>
                   <h3>{event.title}</h3>
                   <p>{event.description || 'No description provided.'}</p>
                   <span className={styles.locationText}>Location: {event.locationCoords.latitude.toFixed(3)}, {event.locationCoords.longitude.toFixed(3)}</span>
@@ -187,4 +188,13 @@ function toLocalDateTime(isoDate: string): string {
   const date = new Date(isoDate);
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
   return date.toISOString().slice(0, 16);
+}
+
+function formatEventDateTime(isoDate: string): string {
+  const date = new Date(isoDate);
+  if (!Number.isFinite(date.getTime())) return 'Time to be confirmed';
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+  }).format(date);
 }

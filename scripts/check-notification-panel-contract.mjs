@@ -19,5 +19,9 @@ assert.match(notifications, /setActiveNavigation\('notifications'\)/, 'Full noti
 assert.match(notifications, /aria-label="Close notifications"/, 'The notification panel must have a close control');
 assert.match(notificationStyles, /\.compact \.panel\s*\{[^}]*position:\s*absolute/s, 'Compact panel must overlay rather than replace the current page');
 assert.match(notificationStyles, /\.compact \.panel\s*\{[^}]*right:\s*0/s, 'Compact panel must be anchored to the header control');
+assert.match(notifications, /useRef<HTMLButtonElement>\(null\)/, 'Notification trigger must be available for focus restoration');
+assert.match(notifications, /closeOnOutsidePointer[\s\S]*?document\.addEventListener\('pointerdown', closeOnOutsidePointer\)/, 'Compact panel must close when the user clicks outside it');
+assert.match(notifications, /closeOnEscape[\s\S]*?event\.key !== 'Escape'[\s\S]*?bellButtonRef\.current\?\.focus\(\)/, 'Escape must close the panel and restore focus to the trigger');
+assert.match(notifications, /ref=\{panelRef\}/, 'Outside-click handling must identify the notification panel');
 
 console.log('Header navigation and notification panel contract checks passed.');
