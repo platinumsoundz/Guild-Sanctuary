@@ -73,8 +73,9 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
     const requestId = ++searchRequest.current;
     const requestedUserId = currentUserId;
     const normalizedQuery = value.trim();
+    setResults([]);
+    setError(null);
     if (normalizedQuery.length < 2) {
-      setResults([]);
       setIsSearching(false);
       return;
     }
