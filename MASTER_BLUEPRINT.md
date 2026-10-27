@@ -29,10 +29,18 @@ The product roadmap and locked decisions live in [ROADMAP.md](ROADMAP.md). Key d
 | `events` | Community events and RSVPs | In-memory |
 | `messages` | Direct one-to-one/group conversations and threads | Active UI uses in-memory demo service; optional Supabase repository is not wired into the UI |
 | `profiles` / `settings` | Profile, discovery, privacy, local preferences | Browser-local demo store |
+| `personal-planner` / `practice` | Private tasks, habits, daily notes, daily reflection | Browser local storage scoped by account ID; not cloud-synced; shared browser profile remains a privacy consideration |
 | `moderation` | Report UI and moderator workflow contracts | Supabase-dependent when configured |
 | `support` | Optional community support | Stripe donation link returned only on explicitly enabled Vercel Production deployments; no app-side reconciliation |
 | `economy` | Persistent token wallet and bundle purchase foundation | Supabase wallet/ledger migration and Edge Functions staged; checkout disabled by default; no spending/transfers yet |
 | `ads` | Responsive web display slots plus optional native AdMob placements | AdSense IDs via public build-time environment; native AdMob module not wired into the active shell |
+
+## Current UI implementation checkpoint (2026-10-27)
+
+- Daily Reflection is being moved from the community feed into the Personal Planner so personal reflection sits alongside tasks, habits, and notes. Treat this as in-code until the open PR is merged and authenticated browser/device QA is recorded.
+- The current branch adds mobile bottom tabs for Today, Community, Discover, Messages, and You; Circles and Practice are not yet separate routes. Desktop navigation labels and touch targets are larger, and secondary destinations remain in the drawer.
+- Feed posts use local relative timestamps with exact local time on hover/focus. Comment authors resolve to display names where available rather than exposing raw IDs; post reporting is tucked into a labelled overflow disclosure.
+- CI now includes explicit navigation, feed-polish, planner, habit, daily-reflection, and theme-contrast contract checks on the open PR. Passing CI is not a substitute for browser QA or production verification.
 
 ## Sanctuary consolidation
 
