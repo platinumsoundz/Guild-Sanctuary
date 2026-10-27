@@ -1,0 +1,30 @@
+name: Install Banner Accessibility Contract
+
+on:
+  pull_request:
+    paths:
+      - 'src/components/ResponsiveShell.tsx'
+      - 'src/components/ResponsiveShell.module.css'
+      - 'scripts/check-install-banner-contract.mjs'
+      - '.github/workflows/install-banner-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/components/ResponsiveShell.tsx'
+      - 'src/components/ResponsiveShell.module.css'
+      - 'scripts/check-install-banner-contract.mjs'
+      - '.github/workflows/install-banner-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  install-banner-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-install-banner-contract.mjs
