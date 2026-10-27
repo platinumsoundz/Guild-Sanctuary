@@ -77,7 +77,10 @@ export function Navigation({
   onSetTwoFactorEnabled,
   onLogout,
 }: NavigationProps) {
-  const visibleNavigationItems = navigationItems;
+  const canAccessAdmin = Boolean(
+    currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role),
+  );
+  const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || canAccessAdmin);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -145,6 +148,16 @@ export function Navigation({
           {isSessionReady && (
             <button className={styles.notificationButton} type="button" aria-label="Open notifications" onClick={() => onNavigate('notifications')}>
               <Bell size={19} strokeWidth={1.8} aria-hidden="true" />
+            </button>
+          )}
+          {isSessionReady && currentUser && !isGuest && (
+            <button className={styles.mobileQuickButton} type="button" aria-label="Open Token Shop" title="Token Shop" onClick={() => onNavigate('shop')}>
+              <ShoppingBag size={18} strokeWidth={1.8} aria-hidden="true" />
+            </button>
+          )}
+          {isSessionReady && currentUser && !isGuest && canAccessAdmin && (
+            <button className={styles.mobileQuickButton} type="button" aria-label="Open Admin & Moderation" title="Admin & Moderation" onClick={() => onNavigate('admin')}>
+              <ShieldCheck size={18} strokeWidth={1.8} aria-hidden="true" />
             </button>
           )}
           {!isSessionReady ? (
