@@ -18,97 +18,159 @@
 }
 
 .installBanner {
+  --install-bg: #f4f8f2;
+  --install-border: #dce5dc;
+  --install-ink: #203528;
+  --install-muted: #526257;
+  --install-accent: #315a3d;
+  --install-accent-contrast: #ffffff;
+  --install-icon-bg: #e4eee2;
+  --install-icon-ink: #315a3d;
+
   display: flex;
-  width: min(100%, 1500px);
-  min-height: 64px;
+  flex-wrap: wrap;
+  width: min(100%, 1120px);
+  min-height: 68px;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px 18px;
   margin: 0 auto 12px;
-  padding: 10px 14px;
-  border: 1px solid #dce5dc;
-  border-radius: 10px;
-  background: #f4f8f2;
-  color: #203528;
+  padding: 12px 16px;
+  border: 1px solid var(--install-border);
+  border-radius: 12px;
+  background: var(--install-bg);
+  color: var(--install-ink);
 }
 
 .installCopy,
 .installActions {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 12px;
 }
 
-.installCopy { min-width: 0; }
+.installCopy {
+  min-width: 0;
+  flex: 1 1 280px;
+}
 
 .installIcon {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 9px;
-  background: #e4eee2;
-  color: #3f6049;
+  border-radius: 10px;
+  background: var(--install-icon-bg);
+  color: var(--install-icon-ink);
 }
 
 .installTitle {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
+  line-height: 1.35;
 }
 
 .installDescription {
-  margin: 3px 0 0;
-  color: #647268;
-  font-size: 11px;
-  line-height: 1.4;
+  margin: 4px 0 0;
+  color: var(--install-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.installActions {
+  flex: 0 0 auto;
+  gap: 6px;
 }
 
 .installButton {
-  min-height: 36px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 7px;
-  background: #315a3d;
-  color: #fff;
-  font-size: 12px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--install-accent);
+  color: var(--install-accent-contrast);
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
+  transition: background-color 160ms ease, outline-color 160ms ease;
+}
+
+.installButton:hover {
+  background: #24462f;
 }
 
 .hideInstallButton {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   place-items: center;
-  border: 0;
-  border-radius: 7px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   background: transparent;
-  color: #536558;
+  color: var(--install-muted);
   cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.hideInstallButton:hover {
+  border-color: var(--install-border);
+  background: var(--install-icon-bg);
+  color: var(--install-ink);
 }
 
 .installButton:focus-visible,
 .hideInstallButton:focus-visible {
-  outline: 2px solid #315a3d;
-  outline-offset: 2px;
+  outline: 3px solid var(--install-accent);
+  outline-offset: 3px;
 }
 
 @media (max-width: 640px) {
   .workspace { padding: 0 0 16px; }
+
   .installBanner {
     width: auto;
     margin: 8px 10px 10px;
-    padding: 10px;
-    gap: 8px;
+    padding: 12px;
+    gap: 10px;
   }
-  .installCopy { gap: 8px; }
-  .installIcon { width: 32px; height: 32px; }
-  .installTitle { font-size: 12px; }
-  .installDescription { font-size: 10px; }
-  .installActions { gap: 3px; }
-  .installButton { min-height: 34px; padding: 0 10px; }
+
+  .installCopy {
+    flex-basis: 220px;
+    gap: 10px;
+  }
+
+  .installIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .installTitle { font-size: 14px; }
+  .installDescription { font-size: 13px; }
+
+  .installActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .installButton {
+    min-height: 44px;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .installBanner { padding: 10px; }
+  .installCopy { flex-basis: 100%; }
+  .installActions { justify-content: space-between; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .installButton,
+  .hideInstallButton {
+    transition: none;
+  }
 }
