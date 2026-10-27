@@ -28,6 +28,7 @@ jobs:
       - run: npm ci
       - run: npm run check:pwa
       - run: npm run check:auth
+      - run: npm run check:account-settings
       - run: npm run check:messages
       - run: npm run check:theme
       - run: deno check supabase/functions/token-checkout/index.ts supabase/functions/stripe-token-webhook/index.ts
