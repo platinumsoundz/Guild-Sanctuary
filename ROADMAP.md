@@ -86,8 +86,8 @@ existing launch gate and must complete before any live payment.
 | Rename the app shell to The Sanctuary | Planned | `ResponsiveShell.tsx` only code touchpoint |
 | Fix shell contrast | Planned | Body is `#0a0a0a`, toolbar text `#4c5b50`/`#3f6049` outside the light surface; near-invisible |
 | Single app shell | Planned | Remove the duplicate toolbar/header/nav layers |
-| Theme token system | Planned | Semantic CSS variables; no hardcoded colours in modules |
-| Dark mode | Planned | `data-theme`, `prefers-color-scheme`, persisted per account + device |
+| Theme token system | In code | Semantic CSS variables and global focus/reduced-motion styles added; CI and visual review pending |
+| Dark mode | In code | Working theme application path and pre-render device storage bootstrap; CI and visual review pending |
 | Theme presets and future flavours | Planned | Start with Light, Dark, and a low-contrast "Dusk"; leave room for seasonal themes |
 | Typography scale | Planned | Raise body from 9–12px Arial to 15–16px; humanist sans UI + serif display option |
 | Component primitives | Planned | Button, Card, Dialog, Sheet, Tabs, Toast, EmptyState, Skeleton, Avatar, Badge |
