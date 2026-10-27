@@ -31,6 +31,7 @@ export interface AccountPreferences {
   emailNotifications: boolean;
   personalizedFeed: boolean;
   layout: AccountLayout;
+  theme: AccountTheme;
 }
 
 export interface AccountSettings {
