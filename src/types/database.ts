@@ -69,6 +69,8 @@ export interface LocationPreference {
 }
 
 export interface Profile {
+  selfDiscoverySummary?: Record<string, string> | null;
+  selfDiscoveryVisible?: boolean;
   id: string;
   userId: string;
   username: string;
@@ -89,6 +91,7 @@ export interface Profile {
 }
 
 export interface PublicProfile {
+  selfDiscoverySummary?: Record<string, string> | null;
   userId: string;
   profileId: string;
   username: string;
