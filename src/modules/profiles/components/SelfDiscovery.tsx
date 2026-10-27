@@ -63,6 +63,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
   const [visible, setVisible] = useState(false);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [storageReady, setStorageReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
@@ -84,6 +85,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
         if (responseResult.error) throw responseResult.error;
         if (profileResult.error) throw profileResult.error;
         if (cancelled) return;
+        setStorageReady(true);
         if (responseResult.data) {
           setAnswers(readAnswers(responseResult.data.answers));
           setConsent(true);
@@ -194,7 +196,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
         <div className={styles.privacyNotice}><ShieldCheck size={18} /><span><strong>Private by default.</strong> Your full answers are stored with your Sanctuary account and are never shown to other members. Only a separate summary you choose to publish can appear on your profile.</span></div>
       </div>
       {!configured && <p className={styles.stateNotice}>Sign in with a connected Sanctuary account to save answers to the website. Guest/demo mode does not save this information.</p>}
-      {loaded && configured && (
+      {loaded && configured && storageReady && (
         <div className={styles.questionCard}>
           <div className={styles.progressHead}><span>{step < 4 ? 'A FEW GENTLE QUESTIONS' : 'YOUR PROFILE SUMMARY'}</span><span>{step < 4 ? `Question ${step + 1} of 4` : 'Sharing controls'}</span></div>
           <div className={styles.progress}><span style={{ width: `${Math.min(step + 1, 4) / 4 * 100}%` }} /></div>
@@ -242,6 +244,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
           {error && <p className={styles.error} role="alert">{error}</p>}
         </div>
       )}
+      {loaded && configured && !storageReady && <p className={styles.error} role="alert">{error || 'Your account-backed self-discovery storage is not ready yet. No answers have been saved.'}</p>}
       {loaded && !configured && <p className={styles.stateNotice}>Your answers will only be saved after the account-backed version is available and you sign in. Nothing is being saved locally.</p>}
       <p className={styles.footerNote}><LockKeyhole size={14} /> Raw answers are owner-only in the database. Public comparison uses only fields the other member explicitly shares.</p>
     </section>
