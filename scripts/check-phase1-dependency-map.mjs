@@ -35,8 +35,9 @@ for (const path of canonicalPaths) {
   assert.ok(report.includes(path), 'Dependency map omits canonical path: ' + path);
 }
 
+// PHASE1_STAGING_CHECKLIST.md is now present on main; keep the remaining
+// PR #18-only paths explicitly classified until they are reconciled.
 const branchOnlyPaths = [
-  'PHASE1_STAGING_CHECKLIST.md',
   'scripts/check-sql-handoff.mjs',
   'vitest.config.ts',
   'supabase/migrations/20261026000000_token_purchase_age_gate.sql',
