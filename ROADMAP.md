@@ -430,3 +430,14 @@ Until these criteria pass, keep live checkout, ads, mandatory Terms gate, and pr
 ## 12. Multi-agent development rules
 
 The authoritative operating model is `docs/AI_AGENT_OPERATING_MODEL.md`; all agents must read it through `AGENTS.md` and their platform entry file. Product & Experience and Engineering & Reliability may run in parallel only when file ownership and dependencies are separated. The roadmap coordinator owns canonical roadmap, blueprint, handoff, and agent-rule updates. Each task uses its own branch and focused PR; security-sensitive changes require an independent review. Keep The 5 Sleeves Online/2D and The 5 Sleeves 3D aligned to this roadmap through explicit contracts and separate repository work.
+
+
+## Verified delivery checkpoint — 2026-10-27
+
+- **Merged to `main`:** PR #157, commit `6deb72e684f237020458d5bfdeca3dd6a5bdb739`. Includes moving Daily Reflection into Personal Planner, mobile primary navigation, desktop navigation polish, community-feed improvements, and added regression contracts.
+- **Checks:** CI / build-and-deploy workflow and contract checks passed on PR #157's recorded head. Cloudflare production deployment was skipped. Vercel reported the daily deployment quota limit; no new production deployment is claimed.
+- **Not release-verified:** authenticated browser/device QA, account-switch testing, mobile accessibility checks, and Phase 1 staging checklist remain outstanding. Planner/reflection data are browser-local, not cloud-synced.
+- **Open follow-up stack:** PRs #158–#170 remain separate, mostly stacked draft work for notification UX, reflection export/storage safety, account-switch isolation, messaging RPC contracts, and E2EE readiness documentation. Check exact current heads and dependencies before merging; do not claim messaging is end-to-end encrypted.
+- **Superseded/overlapping drafts:** PR #155 (move Daily Reflection to planner) and #156 (planner/theme contract coverage) overlap changes now included in #157; review and close as superseded once their unique diffs are confirmed absent.
+- **Owner-only provider work:** Supabase, Stripe, Lemon Squeezy, Cloudflare, and Vercel account configuration/migrations/secrets remain explicit owner handoff tasks. Do not change provider configuration or enable checkout as part of code cleanup.
+- **Next release gate:** integrate the remaining stack in dependency order, re-run CI against each final head, then complete authenticated two-account and device/browser QA. Phase 1 remains not end-to-end verified.
