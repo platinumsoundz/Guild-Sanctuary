@@ -34,6 +34,7 @@ import { deleteDemoAccount } from '@/services/accountDeletion';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { Database } from '@/services/supabase/database.types';
 import { normalizeSocialLinks } from '@/lib/socialLinks';
+import { fetchAccountSettings } from '@/modules/settings/service';
 
 export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin';
 
@@ -103,6 +104,25 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     void restore();
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    if (!isSessionReady || !currentUser || isGuest || typeof document === 'undefined') return;
+    let cancelled = false;
+    void fetchAccountSettings(currentUser.user.id).then(({ preferences }) => {
+      if (cancelled) return;
+      const theme = preferences.theme;
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.classList.toggle('dark', theme !== 'light');
+      try {
+        window.localStorage.setItem('sanctuary-theme', theme);
+      } catch {
+        // The account preference remains authoritative if device storage is unavailable.
+      }
+    }).catch(() => {
+      // Keep the pre-render device preference if account settings cannot be loaded.
+    });
+    return () => { cancelled = true; };
+  }, [currentUser?.user.id, isSessionReady, isGuest]);
 
   const activateSession = (session: AuthSession, persist = !isSupabaseAuthConfigured()) => {
     if (persist) persistActiveSession(session);
