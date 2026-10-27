@@ -35,6 +35,10 @@ I sent `NOTIFY pgrst, 'reload schema';` to request a PostgREST schema-cache refr
 
 **Still needed:** reload the deployed app and retry loading short-video reactions with a real signed-in test account. If the same error persists, collect the exact request/response and check the active deployed app commit, project URL, schema cache, and argument name. Do not loosen grants to fix a cache error.
 
+## Role-management RPC — additional race found at 07:40 UTC
+
+A read-only inspection of `public.set_member_role(uuid,text)` found that the live function reads the caller's role/status before locking the target profile. A concurrent change to the caller's role can race that stale authorization read. The function's live ACL grants `authenticated` and `service_role`, not `anon`/PUBLIC, and its SECURITY DEFINER search path is empty. Proposed draft PR #84 adds deterministic row locks for both actor and target, then re-reads the actor's role/status before making the decision. It is not applied; staging concurrency tests and independent review are required.
+
 ## Moderation migration collision — verified at 07:36 UTC
 
 Two open proposals, PR #81 and PR #82, replace the same live `public.apply_moderation_action(...)` function using different migration versions. The live migration ledger still ends at `20261027003633`; neither proposal appears in the ledger. PR #81 includes explicit null-rationale handling and message-target existence/state handling. PR #82 overlaps on account role-rank checks but does not include the message-target path. If both are applied, the later replacement can overwrite safeguards in the earlier function body. Keep them unmerged/unapplied until there is one canonical reviewed migration.
@@ -55,13 +59,14 @@ Observed at 2026-10-27 07:36 UTC:
 ## Safe next actions
 
 1. Consolidate PR #81 and PR #82 into one canonical moderation migration, record the content-owner hierarchy policy decision, and test on a disposable/staging database before any apply.
-2. Retry the short-video reaction RPC from the deployed app with a real signed-in test account; if the schema-cache error persists, capture the exact request/response and verify deployed app commit/project URL before changing grants.
-3. Run a source-backed review of the 12 SECURITY DEFINER functions, starting with moderation/admin functions and the two short-reaction RPCs. Check explicit role gates and ownership/visibility predicates; don't revoke all authenticated access indiscriminately.
-4. Add an index proposal for the 21 foreign-key findings, grouped by high-write/large-table impact, and validate with query plans in staging.
-5. Review duplicate permissive policies and document which policy is canonical before removing any.
-6. Ask the owner to approve enabling leaked-password protection, then verify signup, login, password reset, and compromised-password rejection in a test account.
-7. Reconcile migration drift in a disposable database and split Phase 1 into focused PRs with independent review.
-8. Execute the Phase 1 staging checklist only after the code and migration set are reviewable and staging access is available.
+2. Review draft PR #84 for the `set_member_role` post-lock authority recheck and test concurrent demotion-versus-role-change behavior.
+3. Retry the short-video reaction RPC from the deployed app with a real signed-in test account; if the schema-cache error persists, capture the exact request/response and verify deployed app commit/project URL before changing grants.
+4. Run a source-backed review of the 12 SECURITY DEFINER functions, starting with moderation/admin functions and the two short-reaction RPCs. Check explicit role gates and ownership/visibility predicates; don't revoke all authenticated access indiscriminately.
+5. Add an index proposal for the 21 foreign-key findings, grouped by high-write/large-table impact, and validate with query plans in staging.
+6. Review duplicate permissive policies and document which policy is canonical before removing any.
+7. Ask the owner to approve enabling leaked-password protection, then verify signup, login, password reset, and compromised-password rejection in a test account.
+8. Reconcile migration drift in a disposable database and split Phase 1 into focused PRs with independent review.
+9. Execute the Phase 1 staging checklist only after the code and migration set are reviewable and staging access is available.
 
 ## Boundaries
 
