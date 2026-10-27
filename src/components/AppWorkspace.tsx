@@ -19,6 +19,7 @@ import { SettingsHub } from '@/modules/settings';
 import { TokenShopPanel, WalletPanel } from '@/modules/economy';
 import { GamesHub } from '@/components/GamesHub';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
+import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
@@ -105,7 +106,9 @@ export function AppWorkspace() {
     setActiveNavigation(navigation);
   };
 
-  const authenticatedContent = activeNavigation === 'notifications' ? (
+  const authenticatedContent = activeNavigation === 'today' ? (
+    <SanctuaryHome onNavigate={openNavigation} />
+  ) : activeNavigation === 'notifications' ? (
     <main className={styles.supportPage}>
       <NotificationBar fullPage />
     </main>
