@@ -22,7 +22,7 @@ export interface SocialLinks {
   reddit: string | null;
 }
 
-export interface AccountPreferences {
+export type AccountTheme = 'light' | 'dark' | 'dusk';\n\nexport interface AccountPreferences {
   allowProfileDiscovery: boolean;
   allowDirectMessages: boolean;
   showOnlineStatus: boolean;
