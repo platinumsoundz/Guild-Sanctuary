@@ -165,7 +165,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
   return (
     <aside className={`${styles.bar} ${fullPage ? styles.fullPage : ''} ${compact ? styles.compact : ''}`} aria-label="Notifications">
       <div className={styles.inner}>
-        {!fullPage && <span className={styles.label}>COMMUNITY ACTIVITY</span>}
+        {!fullPage && !compact && <span className={styles.label}>COMMUNITY ACTIVITY</span>}
         <div className={styles.actions}>
           {isConnected && unreadCount > 0 && (
             <span className={styles.unreadSummary}>{unreadCount} unread</span>

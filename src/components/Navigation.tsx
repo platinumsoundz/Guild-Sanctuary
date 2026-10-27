@@ -19,7 +19,6 @@ import {
   HeartHandshake,
   Gamepad2,
   Map,
-  Sun,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -139,10 +138,6 @@ export function Navigation({
               <Menu size={21} strokeWidth={1.8} aria-hidden="true" />
             </button>
           )}
-          <div className={styles.brand} aria-label="The Sanctuary">
-            <span className={styles.brandMark} aria-hidden="true"><Sun size={21} strokeWidth={1.7} /></span>
-            <span className={styles.brandWords}><span className={styles.brandOverline}>THE</span><span className={styles.brandName}>SANCTUARY</span></span>
-          </div>
         </div>
         <div className={styles.accountArea}>
           {isSessionReady && <NotificationBar compact />}

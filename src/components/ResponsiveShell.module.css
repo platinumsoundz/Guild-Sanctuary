@@ -31,14 +31,14 @@
   display: flex;
   flex-wrap: wrap;
   width: min(100%, 1120px);
-  min-height: 68px;
+  min-height: 48px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px 18px;
-  margin: 0 auto 12px;
-  padding: 12px 16px;
+  gap: 8px 12px;
+  margin: 0 auto 8px;
+  padding: 7px 10px;
   border: 1px solid var(--install-border);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--install-bg);
   color: var(--install-ink);
 }
@@ -47,56 +47,64 @@
 .installActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .installCopy {
   min-width: 0;
-  flex: 1 1 280px;
+  flex: 1 1 220px;
 }
 
 .installIcon {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--install-icon-bg);
   color: var(--install-icon-ink);
 }
 
 .installTitle {
   margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.25;
 }
 
 .installDescription {
-  margin: 4px 0 0;
+  margin: 1px 0 0;
   color: var(--install-muted);
   font-size: 13px;
   line-height: 1.5;
 }
 
-.installActions {
+ .installActions {
   flex: 0 0 auto;
-  gap: 6px;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.installButton,
+.hideInstallButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease;
 }
 
 .installButton {
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--install-accent);
   background: var(--install-accent);
   color: var(--install-accent-contrast);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
   white-space: nowrap;
-  transition: background-color 160ms ease, outline-color 160ms ease;
 }
 
 .installButton:hover {
@@ -104,17 +112,13 @@
 }
 
 .hideInstallButton {
-  display: grid;
   width: 44px;
   height: 44px;
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid transparent;
-  border-radius: 8px;
   background: transparent;
   color: var(--install-muted);
-  cursor: pointer;
-  transition: background-color 160ms ease, border-color 160ms ease;
 }
 
 .hideInstallButton:hover {
@@ -126,7 +130,7 @@
 .installButton:focus-visible,
 .hideInstallButton:focus-visible {
   outline: 3px solid var(--install-accent);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 
 @media (max-width: 640px) {
@@ -134,39 +138,27 @@
 
   .installBanner {
     width: auto;
-    margin: 8px 10px 10px;
-    padding: 12px;
-    gap: 10px;
+    margin: 4px 8px 6px;
+    padding: 7px 8px;
+    gap: 6px;
   }
 
-  .installCopy {
-    flex-basis: 220px;
-    gap: 10px;
-  }
-
-  .installIcon {
-    width: 36px;
-    height: 36px;
-  }
-
+  .installCopy { gap: 7px; }
+  .installIcon { width: 26px; height: 26px; }
   .installTitle { font-size: 14px; }
-  .installDescription { font-size: 13px; }
+  .installDescription { font-size: 13px; line-height: 1.5; }
 
-  .installActions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .installButton {
-    min-height: 44px;
-    padding: 0 16px;
-  }
+  .installActions { gap: 3px; }
+  .installButton { min-height: 44px; padding: 0 10px; }
+  .hideInstallButton { width: 44px; height: 44px; min-height: 44px; }
 }
 
 @media (max-width: 360px) {
-  .installBanner { padding: 10px; }
-  .installCopy { flex-basis: 100%; }
-  .installActions { justify-content: space-between; }
+  .installBanner { padding: 6px; gap: 5px; }
+  .installCopy { gap: 5px; }
+  .installDescription { max-width: 22ch; }
+  .installButton { padding: 0 9px; }
+  .installActions { width: 100%; justify-content: space-between; }
 }
 
 @media (prefers-reduced-motion: reduce) {

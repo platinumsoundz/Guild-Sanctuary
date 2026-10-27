@@ -7,7 +7,9 @@ const notificationStyles = readFileSync(new URL('../src/components/NotificationB
 
 assert.match(navigation, /<NotificationBar compact\s*\/>/, 'The header must use the compact notification control');
 assert.match(navigation, /aria-label="Open main navigation"/, 'Main navigation control must remain available in the header');
-assert.match(navigation, /headerIdentity[\s\S]*?menuButton[\s\S]*?styles\.brand/, 'The navigation control must precede the Sanctuary brand');
+assert.match(navigation, /headerIdentity[\s\S]*?menuButton/, 'The navigation control must remain at the far left of the compact header');
+assert.doesNotMatch(navigation, /styles\.brand|brandMark|brandName/, 'The oversized Sanctuary brand block must not occupy the header');
+assert.match(notifications, /!fullPage && !compact && <span className=\{styles\.label\}>COMMUNITY ACTIVITY<\/span>/, 'The community-activity label must be omitted from the compact header');
 assert.doesNotMatch(navigation, /aria-label="Open Token Shop"/, 'Token Shop must not occupy a header quick-action button');
 assert.doesNotMatch(navigation, /aria-label="Open Admin & Moderation"/, 'Admin must not occupy a header quick-action button');
 
