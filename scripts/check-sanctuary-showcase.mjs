@@ -22,6 +22,8 @@ for (const [label, source, pattern] of [
   ['browser-only onboarding progress', home, /sanctuary\.beta\.onboarding\.v1.*localStorage\.setItem\(onboardingKey/s],
   ['onboarding reset control', home, /Reset progress/.test(home)],
   ['visible build radar', home, /The build radar.*Direction, not deadlines/s],
+  ['preference picker disclosed as local-only', home, /not a live public poll.*only shared if you add it to a feedback report/s],
+  ['preference can be added to feedback', home, /My next-feature preference/],
   ['concept modal Escape support', home, /event\.key === 'Escape'/],
   ['Today route in navigation state', context, /NavigationState = 'today'/],
   ['Today route in navigation menu', navigation, /id: 'today', label: 'Today'/],
