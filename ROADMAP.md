@@ -331,6 +331,10 @@ turning the profile into a horoscope gimmick or a medical chart.
 - **Local browser storage is not a substitute for E2EE.** It can expose messages to anyone using an unlocked/shared device, browser extensions, malware, or a compromised account. Optional local caching should be encrypted where feasible, cleared on sign-out/shared-device sessions, and never be the only copy without a recovery warning.
 - **Release gates:** threat model; protocol/library review; migration and key lifecycle; two-device tests; account recovery and device-loss tests; revoked-device tests; group-member removal tests; report/abuse flows; backup/log checks; security review before calling messaging end-to-end encrypted.
 
+### Implementation readiness document
+
+See [Messaging E2EE Implementation Plan](docs/MESSAGING_E2EE_PLAN.md) for the threat model, data-flow audit checklist, protocol selection criteria, phased delivery, and mandatory release gates. The current UI now exposes a plain-language privacy explanation directly inside every open message thread. This is transparency work only: no cryptographic behavior or production message storage has changed.
+
 ### Phased delivery
 
 1. Keep the current privacy disclosure visible and audit every message storage, logging, moderation and export path.
