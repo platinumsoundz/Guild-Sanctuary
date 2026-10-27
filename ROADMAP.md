@@ -103,9 +103,9 @@ existing launch gate and must complete before any live payment.
 | Theme token system | In code | Semantic CSS variables and global focus/reduced-motion styles added; CI and visual review pending |
 | Dark mode | In code | Working theme application path and pre-render device storage bootstrap; CI and visual review pending |
 | Theme presets and future flavours | In code, QA pending | Theme foundation includes Light, Dark, Dusk, and System options; verify the exact merged implementation and browser persistence before marking verified |
-| Typography scale | Planned | Raise body from 9–12px Arial to 15–16px; humanist sans UI + serif display option |
+| Typography scale | In code, partial | Planner form controls are 15px, supporting copy 14px, and desktop navigation labels 14px; a whole-app typography pass and visual review remain planned |
 | Component primitives | Planned | Button, Card, Dialog, Sheet, Tabs, Toast, EmptyState, Skeleton, Avatar, Badge |
-| Navigation restructure | Planned | Desktop rail / mobile bottom tabs: Today, Community, Circles, Practice, Messages, You |
+| Navigation restructure | In code, partial | Desktop labels and touch targets improved; mobile fixed bottom tabs currently expose Today, Community, Discover, Messages, You with safe-area/content spacing. Circles and Practice destinations plus desktop rail redesign remain planned; browser/device QA pending |
 | Feed polish | Planned | Relative/local timestamps; replace raw author UUIDs in comments; move Report into an overflow menu |
 | Event form fix | Planned | Replace raw latitude/longitude with place search, timezone, online/offline |
 
@@ -186,6 +186,7 @@ actually run. This workstream is a hard gate, not a suggestion.
 
 | Item | Status | Notes |
 | --- | --- | --- |
+| Daily Planner + reflection | In code, QA pending | Tasks, habits, notes and daily reflection are grouped in the private planner; planner and reflection data remain browser-local and are not synced. Authenticated browser QA pending |
 | Today home | Planned | Daily prompt, mood, one practice, one reflection, next circle |
 | Mood/energy check-in | Planned | 10-second entry, private history, gentle patterns |
 | Private journal | Planned | Prompts, tags, search, export, optional share-as-post |
