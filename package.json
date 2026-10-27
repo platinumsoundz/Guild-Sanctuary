@@ -13,7 +13,8 @@
     "check:pwa": "node scripts/check-pwa-assets.mjs",
     "check:auth": "node scripts/check-auth-flows.mjs",
     "check:messages": "node scripts/check-message-persistence.mjs",
-    "check:theme": "node scripts/check-theme-contract.mjs"
+    "check:theme": "node scripts/check-theme-contract.mjs",
+    "check:self-discovery": "node scripts/check-self-discovery-contract.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
