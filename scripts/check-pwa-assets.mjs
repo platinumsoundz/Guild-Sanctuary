@@ -29,7 +29,7 @@ assert.match(installBanner, /aria-label="Hide install option"/);
 assert.match(installBanner, /Add to Home Screen/);
 assert.match(installBanner, /Android/i);
 assert.match(installBanner, /browser menu/i);
-assert.match(workspace, /<PwaInstallBanner \/>[\\s\\S]*?<Navigation/);
+assert.match(workspace, /<PwaInstallBanner \/>[\s\S]*?<Navigation/);
 assert.match(installBannerStyles, /prefers-reduced-motion: reduce/);
 
 console.log('PWA static checks passed: manifest, safe navigation fallback, and production-only registration.');
