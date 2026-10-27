@@ -151,9 +151,9 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     <section className={styles.card} aria-labelledby="reflection-title">
       <div className={styles.heading}>
         <span className={styles.icon} aria-hidden="true"><Heart size={19} /></span>
-        <div>
+        <div className={styles.headingCopy}>
           <p className={styles.eyebrow}>A MOMENT FOR YOURSELF</p><h2 id="reflection-title">Daily reflection</h2>
-          <p className={styles.description}>No streaks, scores or pressure. Just a little space to notice how you are.</p>
+          <p className={styles.description}>No streaks or pressure. Just a little space to notice how you are.</p>
         </div>
       </div>
       {loadedKey !== key ? <p className={styles.notice} role="status">Loading your private diary from your account…</p> : (
@@ -162,7 +162,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
             <legend>How are you feeling today?</legend>
             <div className={styles.moodOptions}>
               {MOODS.map((option) => (
-                <label className={`${styles.moodOption} ${mood === option.value ? styles.moodSelected : ''}`} key={option.value}>
+                <label className={`${styles.moodOption} ${mood === option.value ? styles.moodSelected : ''}`} data-mood={option.value} title={option.description} key={option.value}>
                   <input type="radio" name="reflection-mood" value={option.value} checked={mood === option.value} onChange={() => setMood(option.value)} />
                   <span className={styles.moodLabel}>{option.label}</span><span className={styles.moodDescription}>{option.description}</span>
                 </label>
@@ -171,22 +171,22 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
           </fieldset>
           <label className={styles.field}>
             <span>One thing I want to give attention to</span>
-            <input type="text" value={intention} maxLength={180} onChange={(event) => setIntention(event.target.value)} placeholder="For example, rest, patience, or reconnecting" />
+            <input type="text" value={intention} maxLength={180} onChange={(event) => setIntention(event.target.value)} placeholder="Rest, patience, reconnecting…" />
             <span className={styles.counter}>{intention.length}/180</span>
           </label>
           <label className={styles.field}>
             <span>What would I like to acknowledge today?</span>
-            <textarea value={reflection} maxLength={1200} rows={4} onChange={(event) => setReflection(event.target.value)} placeholder="A thought, a small win, something difficult, or anything you want to notice…" />
+            <textarea value={reflection} maxLength={1200} rows={3} onChange={(event) => setReflection(event.target.value)} placeholder="A thought, a small win, something difficult, or anything you want to notice…" />
             <span className={styles.counter}>{reflection.length}/1200</span>
           </label>
           <div className={styles.actions}>
-            <button className={styles.saveButton} type="submit" disabled={busy || !databaseReady || loadError}><Save size={16} aria-hidden="true" />{busy ? 'Saving…' : savedToday ? 'Update today’s reflection' : 'Save reflection'}</button>
+            <button className={styles.saveButton} type="submit" disabled={busy || !databaseReady || loadError}><Save size={16} aria-hidden="true" />{busy ? 'Saving…' : savedToday ? 'Update reflection' : 'Save reflection'}</button>
             {entries.length > 0 && <button className={styles.clearButton} type="button" onClick={clearHistory} disabled={busy}><RotateCcw size={15} aria-hidden="true" />Clear history</button>}
           </div>
-          <p className={styles.privacy}><LockKeyhole size={14} aria-hidden="true" /> Your diary is saved to your account database, not browser storage. Entries are private to your account through database access policies and are not posted to the public feed.</p>
+          <p className={styles.privacy}><LockKeyhole size={14} aria-hidden="true" /> Private to your account; saved in the database, not browser storage or the public feed.</p>
           {status && <p className={styles.status} role="status" aria-live="polite">{status}</p>}
           {loadError && <button className={styles.clearButton} type="button" onClick={() => { setLoadedKey(null); setLoadError(false); setStatus(''); setRetryCount((count) => count + 1); }}>Retry loading diary</button>}
-          <p className={styles.disclaimer}>This is a personal reflection tool, not medical advice, diagnosis or treatment.</p>
+          <p className={styles.disclaimer}>A personal reflection tool, not medical advice, diagnosis or treatment.</p>
         </form>
       )}
       {loadedKey === key && entries.some((entry) => entry.date !== today) && (
@@ -197,7 +197,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
               <li className={styles.historyEntry} key={entry.id}>
                 <div className={styles.historyMeta}>
                   <time dateTime={entry.date}>{new Date(`${entry.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</time>
-                  <span>{MOODS.find((option) => option.value === entry.mood)?.label ?? 'Reflection'}</span>
+                  <span data-mood={entry.mood}>{MOODS.find((option) => option.value === entry.mood)?.label ?? 'Reflection'}</span>
                 </div>
                 {entry.intention && <p className={styles.historyIntention}>Intention: {entry.intention}</p>}
                 {entry.reflection && <p className={styles.historyText}>{entry.reflection}</p>}
