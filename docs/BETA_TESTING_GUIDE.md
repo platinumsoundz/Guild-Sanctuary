@@ -16,7 +16,7 @@ Thank you for helping shape The Sanctuary. The beta is a work in progress; some 
 
 The Today screen includes an optional six-step checklist. Use it to explore the community, discover people, open a concept preview, browse feature statuses, prepare feedback, and visit the product map. The completion count is stored in this browser only; it is not a public score or an account-wide record. You can reset it at any time. If browser storage is unavailable, progress may only last for the current session.
 
-The Build Radar section is a directional snapshot, not a promise of release dates. Always use each feature card's status label to distinguish an existing route from a preview or concept.
+The Build Radar section is a directional snapshot, not a promise of release dates. The concept preference picker is also local-only; it does not count or transmit votes. If you want to share your choice, add it to a feedback report and send the report yourself. Always use each feature card's status label to distinguish an existing route from a preview or concept.
 
 ## How to report a bug
 
