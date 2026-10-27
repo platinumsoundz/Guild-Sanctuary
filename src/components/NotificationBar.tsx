@@ -34,6 +34,8 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
   const bellButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const loadRequest = useRef(0);
+  const activeAccountId = useRef<string | null>(null);
+  activeAccountId.current = !isGuest && currentUser ? currentUser.user.id : null;
 
   const loadNotifications = useCallback(async () => {
     const requestId = ++loadRequest.current;
@@ -171,7 +173,9 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
   const unreadCount = items.filter((item) => !item.read_at).length;
 
   const markRead = async (item: NotificationItem) => {
-    if (!currentUser || item.read_at) return;
+    const accountId = activeAccountId.current;
+    if (!accountId || !currentUser || item.read_at) return;
+    const isSameSession = () => activeAccountId.current === accountId;
     try {
       const client = getSupabaseBrowserClient();
       const readAt = new Date().toISOString();
@@ -179,34 +183,41 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
         .from('notifications')
         .update({ read_at: readAt })
         .eq('id', item.id)
-        .eq('recipient_id', currentUser.user.id);
+        .eq('recipient_id', accountId);
       if (updateError) throw updateError;
+      if (!isSameSession()) return;
       setItems((previous) => previous.map((entry) => entry.id === item.id ? { ...entry, read_at: readAt } : entry));
     } catch {
-      setError('This notification could not be marked as read.');
+      if (isSameSession()) setError('This notification could not be marked as read.');
     }
   };
 
   const markAllRead = async () => {
-    if (!currentUser || unreadCount === 0) return;
+    const accountId = activeAccountId.current;
+    if (!accountId || !currentUser || unreadCount === 0) return;
+    const isSameSession = () => activeAccountId.current === accountId;
     try {
       const client = getSupabaseBrowserClient();
       const readAt = new Date().toISOString();
       const { error: updateError } = await client
         .from('notifications')
         .update({ read_at: readAt })
-        .eq('recipient_id', currentUser.user.id)
+        .eq('recipient_id', accountId)
         .is('read_at', null);
       if (updateError) throw updateError;
+      if (!isSameSession()) return;
       setItems((previous) => previous.map((item) => ({ ...item, read_at: item.read_at ?? readAt })));
       setError(null);
     } catch {
-      setError('Notifications could not be marked as read.');
+      if (isSameSession()) setError('Notifications could not be marked as read.');
     }
   };
 
   const openNotification = async (item: NotificationItem) => {
+    const accountId = activeAccountId.current;
+    if (!accountId) return;
     await markRead(item);
+    if (activeAccountId.current !== accountId) return;
     setIsOpen(false);
     setActiveNavigation(destinationFor[item.target_type]);
   };
