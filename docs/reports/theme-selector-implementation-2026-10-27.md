@@ -5,7 +5,7 @@ Branch: `build/roadmap-theme-foundation-2026-10-27`
 Status: **Code written; CI and visual verification pending. Not deployed.**
 
 ## Member outcome
-- Members can choose Light, Dark, or Dusk in Settings → Appearance.
+- Members can choose Use device setting, Light, Dark, or Dusk in Settings → Appearance.
 - The choice is persisted in existing account settings JSON and mirrored to browser local storage for a quick pre-render theme bootstrap.
 - Global semantic tokens now define surfaces, text, borders, accent/status colours, spacing, radii, shadows, and motion.
 - Global focus indicators and reduced-motion support are included.
@@ -21,7 +21,7 @@ Status: **Code written; CI and visual verification pending. Not deployed.**
 
 ## Compatibility and safety
 - No database migration was added; the preference lives in the existing JSON preferences column.
-- Existing settings without a theme normalise to Dark to preserve the current app appearance.
+- New settings default to the operating-system colour preference; legacy settings without a theme normalise to Dark to preserve existing appearance.
 - Browser storage errors do not prevent saving the account preference.
 - No authentication, roles, payments, ads, wallet, or production configuration changed.
 
