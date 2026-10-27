@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDownRight, ArrowRight, BookOpen, CalendarDays, Check, CircleHelp, CheckCircle2, Circle, RotateCcw,
   Compass, Heart, Layers3, MessageCircle, MessageSquare, Search, ShieldCheck,
-  Sparkles, Sun, Users, Video, WalletCards, X, type LucideIcon,
+  Sparkles, Sun, Users, Video, WalletCards, X, LockKeyhole, type LucideIcon,
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import styles from './SanctuaryHome.module.css';
