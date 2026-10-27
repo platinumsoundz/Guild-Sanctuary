@@ -24,7 +24,7 @@ const destinationFor: Record<NotificationItem['target_type'], NavigationState> =
   event: 'events',
 };
 
-export function NotificationBar({ fullPage = false }: { fullPage?: boolean }) {
+export function NotificationBar({ fullPage = false, compact = false }: { fullPage?: boolean; compact?: boolean }) {
   const { currentUser, isGuest, setActiveNavigation } = useAppContext();
   const [isOpen, setIsOpen] = useState(fullPage);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -163,7 +163,7 @@ export function NotificationBar({ fullPage = false }: { fullPage?: boolean }) {
 
 
   return (
-    <aside className={`${styles.bar} ${fullPage ? styles.fullPage : ''}`} aria-label="Notifications">
+    <aside className={`${styles.bar} ${fullPage ? styles.fullPage : ''} ${compact ? styles.compact : ''}`} aria-label="Notifications">
       <div className={styles.inner}>
         {!fullPage && <span className={styles.label}>COMMUNITY ACTIVITY</span>}
         <div className={styles.actions}>
@@ -244,6 +244,7 @@ export function NotificationBar({ fullPage = false }: { fullPage?: boolean }) {
               ))}
             </ul>
           )}
+          {compact && <footer className={styles.panelFooter}><button type="button" onClick={() => { setIsOpen(false); setActiveNavigation('notifications'); }}>Open full notifications <span aria-hidden="true">→</span></button></footer>}
         </section>
       )}
     </aside>
