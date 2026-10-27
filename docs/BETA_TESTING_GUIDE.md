@@ -12,6 +12,12 @@ Thank you for helping shape The Sanctuary. The beta is a work in progress; some 
 6. **Mobile use:** Try one-handed navigation, scrolling, text entry, and closing dialogs.
 7. **Accessibility:** Try keyboard navigation on desktop, zoom text, and check whether button labels are understandable.
 
+## Start with the Today tour
+
+The Today screen includes an optional six-step checklist. Use it to explore the community, discover people, open a concept preview, browse feature statuses, prepare feedback, and visit the product map. The completion count is stored in this browser only; it is not a public score or an account-wide record. You can reset it at any time. If browser storage is unavailable, progress may only last for the current session.
+
+The Build Radar section is a directional snapshot, not a promise of release dates. Always use each feature card's status label to distinguish an existing route from a preview or concept.
+
 ## How to report a bug
 
 Please include:
