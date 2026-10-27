@@ -45,6 +45,43 @@ function toSummary(answers: Answers, selected: string[]): Summary {
   }
   return summary;
 }
+type Reflection = { headline: string; pattern: string; action: string; prompt: string; lesson: string };
+function buildReflection(answers: Answers): Reflection | null {
+  const chosen = Object.values(answers).filter(Boolean).length;
+  if (!chosen) return null;
+  const connection = {
+    quiet: ['Quiet space may help you recharge.', 'Protect a small quiet window after demanding moments, and tell people when you need space.', 'What helps me notice that I need a pause?'],
+    people: ['Connection may help restore your energy.', 'Plan one intentional check-in with someone you trust, while leaving room to rest too.', 'Which kinds of connection leave me feeling supported rather than drained?'],
+    mix: ['Your need for company or quiet may change with the day.', 'Before committing, take a moment to check your energy and choose what fits today.', 'What signs tell me whether I need company or quiet right now?'],
+  } as Record<string, string[]>;
+  const decisions = {
+    analysis: ['You may feel steadier when you can examine the evidence.', 'Set a limit for how much information you need, then choose a next step instead of researching indefinitely.', 'What would count as enough information to make this decision?'],
+    values: ['You may give close attention to values and how choices affect people.', 'Name the value that matters most, then check the practical trade-offs before deciding.', 'How can I honour what matters while still being realistic?'],
+    both: ['You may try to balance facts with human impact.', 'Write down one important fact and one important personal impact before choosing.', 'What evidence matters, and who is affected by this choice?'],
+  } as Record<string, string[]>;
+  const motivation = {
+    growth: ['Learning and mastery seem important to you right now.', 'Choose one small skill to practise for 15 minutes and note one thing you learned.', 'What would progress look like if I focused on learning rather than perfection?'],
+    belonging: ['Connection and belonging seem important to you right now.', 'Try one low-pressure invitation or tell someone clearly what kind of support would help.', 'Where do I feel most able to be myself with other people?'],
+    stability: ['Trust and stability seem important to you right now.', 'Make a short plan with one next step and one fallback, while allowing that plans can change.', 'What would help me feel prepared without needing to control everything?'],
+    freedom: ['Autonomy and meaning seem important to you right now.', 'Choose one flexible goal and write down why it matters to you personally.', 'Which choice feels meaningful to me, rather than simply expected of me?'],
+  } as Record<string, string[]>;
+  const connectionInsight = connection[answers.connection];
+  const decisionInsight = decisions[answers.decisions];
+  const motivationInsight = motivation[answers.motivation];
+  const pattern = [connectionInsight?.[0], decisionInsight?.[0], motivationInsight?.[0]].filter(Boolean).join(' ');
+  const action = motivationInsight?.[1] ?? connectionInsight?.[1] ?? decisionInsight?.[1] ?? 'Notice one moment today when your response feels natural, and reflect on what influenced it.';
+  const prompt = motivationInsight?.[2] ?? connectionInsight?.[2] ?? decisionInsight?.[2] ?? 'What did I notice about myself today?';
+  const lesson = answers.motivation === 'growth'
+    ? 'Micro-lesson: make practice small enough to repeat. A short, repeatable session often teaches you more than waiting for the perfect block of time.'
+    : answers.motivation === 'belonging'
+      ? 'Micro-lesson: specific requests are easier to respond to than hints. Try naming one practical thing that would help you feel supported.'
+      : answers.motivation === 'stability'
+        ? 'Micro-lesson: preparation works best when it includes a fallback. A plan can give direction without needing to predict everything.'
+        : answers.motivation === 'freedom'
+          ? 'Micro-lesson: values can act like a compass. Choose a direction that matters, then leave the route flexible.'
+          : 'Micro-lesson: a short pause between feeling and action can help you choose a response that fits your priorities.';
+  return { headline: 'A reflection from your answers so far', pattern: pattern || 'You are still exploring. As you answer more questions, this reflection can become more specific.', action, prompt, lesson };
+}
 function readAnswers(value: unknown): Answers {
   if (!value || typeof value !== 'object') return { ...emptyAnswers };
   const raw = value as Record<string, unknown>;
@@ -105,6 +142,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
   }, [userId, isGuest, onSummaryChange]);
 
   const summary = useMemo(() => toSummary(answers, selectedFields), [answers, selectedFields]);
+  const reflection = useMemo(() => buildReflection(answers), [answers]);
   const updateAnswer = (key: keyof Answers, value: string) => {
     setAnswers((current) => ({ ...current, [key]: value }));
     setNotice('');
@@ -218,6 +256,17 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
             </fieldset>
           ) : (
             <div className={styles.shareArea}>
+              {reflection && (
+                <section className={styles.reflectionCard} aria-labelledby="self-discovery-reflection-title">
+                  <p className={styles.eyebrow}>PRIVATE · BASED ON YOUR ANSWERS</p>
+                  <h3 id="self-discovery-reflection-title">{reflection.headline}</h3>
+                  <p>{reflection.pattern}</p>
+                  <div><strong>One thing to try</strong><p>{reflection.action}</p></div>
+                  <div><strong>Micro-lesson</strong><p>{reflection.lesson}</p></div>
+                  <div><strong>Journal prompt</strong><p>{reflection.prompt}</p></div>
+                  <small>This is a practical reflection generated from your selected preferences, not a mental-health assessment or diagnosis. It stays private and is not included in your public profile summary.</small>
+                </section>
+              )}
               <h3>Choose what belongs on your profile</h3>
               <p>Every item starts private. Select only the details you are comfortable sharing. You can hide the whole summary at any time.</p>
               {Object.entries({ connection: 'How I recharge', decisions: 'How I approach decisions', motivation: 'What motivates me', zodiac: 'My zodiac sign' }).map(([key, label]) => (
