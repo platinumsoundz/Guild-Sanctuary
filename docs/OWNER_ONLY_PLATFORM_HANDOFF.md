@@ -56,6 +56,7 @@ Never infer that a database, table, policy, function, webhook, secret, or deploy
 - [ ] Distinguish code/CI success from preview/production deployment. Record rate limits/build errors exactly.
 - [ ] Never paste environment-variable values into logs/issues.
 - [ ] Deploy/promote/rollback only as an explicit owner action after the approved commit passes relevant checks.
+- [ ] **Check the GitHub-to-Vercel integration itself.** Existing PRs have received Vercel preview deployment comments automatically when PRs were opened/updated; this is a provider-side automation that can run without an agent signing into Vercel. Decide whether agent-created branch/PR previews are permitted. If Vercel activity must be entirely owner-initiated, disable/restrict automatic preview deployments in Vercel's Git settings or the relevant project/branch controls, then record the verified setting. Agents must not change this setting. Until verified, treat PR-triggered Vercel previews as a possible automatic side effect and do not claim the provider is completely owner-operated.
 
 ## Required handoff format
 For every owner-only action, agent notes must provide:
