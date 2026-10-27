@@ -24,12 +24,12 @@ This is deliberately local-only. Entries are not synced to an account and are no
 
 ## Verification evidence for current PR head
 
-Current PR head: `0e8d11d3463ad0942a6d7fd0611b7ddaf113df29`.
+Code verification revision: `d99a73fec62e739813c663318fe1f2b274cae0fa`. Subsequent commits `0e8d11d3463ad0942a6d7fd0611b7ddaf113df29` and `1ee02afe63ba5d2c586a4db9e9dab4f322c95dc9` only updated this report; the code is unchanged.
 
-- Dedicated Daily Reflection Contract run `40440235726`: passed, including install, all 14 contract checks, TypeScript typecheck, and production build.
-- Full repository CI run `40440235776`: passed, including PWA/auth/messaging checks, Deno checks, TypeScript typecheck, and production build.
-- Cloudflare workflow run `40440235741`: build passed; deployment step was **skipped**.
-- Automated roadmap/build check run `40440235755`: completed successfully and uploaded its report artifact.
+- Dedicated Daily Reflection Contract run `40467959220` passed on PR head `1ee02afe63ba5d2c586a4db9e9dab4f322c95dc9`, including install, all 14 contract checks, TypeScript typecheck, and production build.
+- Full repository CI run `40467959266` passed on PR head `1ee02afe63ba5d2c586a4db9e9dab4f322c95dc9`, including PWA/auth/messaging checks, Deno checks, TypeScript typecheck, and production build.
+- Cloudflare workflow run `40467959144`: build passed; deployment step was **skipped**.
+- Automated roadmap/build check run `40467959131`: completed successfully and uploaded its report artifact.
 - Vercel reported a deployment rate-limit failure (`api-deployments-free-per-day`). GitHub CI success does not mean a production deployment occurred.
 
 ## Verification still required
