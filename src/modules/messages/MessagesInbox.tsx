@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Conversation, PublicProfile } from '@/types/database';
 import { searchPublicProfiles } from '@/modules/profiles';
 import { createGroupConversation, fetchUserConversations } from './service';
@@ -20,29 +20,61 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   const [groupName, setGroupName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const inboxRequest = useRef(0);
+  const searchRequest = useRef(0);
 
   const refresh = async () => {
+    const requestId = ++inboxRequest.current;
+    setIsLoading(true);
     try {
-      setConversations(await fetchUserConversations(currentUserId));
-      setError(null);
+      const nextConversations = await fetchUserConversations(currentUserId);
+      if (requestId === inboxRequest.current) {
+        setConversations(nextConversations);
+        setError(null);
+      }
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'Conversations could not be loaded.');
+      if (requestId === inboxRequest.current) {
+        setError(loadError instanceof Error ? loadError.message : 'Conversations could not be loaded.');
+      }
     } finally {
-      setIsLoading(false);
+      if (requestId === inboxRequest.current) setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    // Invalidate requests started for the previous account. Their late responses
+    // must never populate the newly signed-in user's inbox.
+    inboxRequest.current += 1;
+    searchRequest.current += 1;
+    setConversations([]);
+    setResults([]);
+    setSelectedMembers([]);
+    setIsLoading(true);
+    setError(null);
     void refresh();
+    return () => {
+      inboxRequest.current += 1;
+      searchRequest.current += 1;
+    };
   }, [currentUserId]);
 
   const search = async (value: string) => {
     setQuery(value);
+    const requestId = ++searchRequest.current;
+    if (value.trim().length < 2) {
+      setResults([]);
+      return;
+    }
     try {
-      setResults(value.trim().length >= 2 ? await searchPublicProfiles(value) : []);
-      setError(null);
+      const nextResults = await searchPublicProfiles(value);
+      if (requestId === searchRequest.current) {
+        setResults(nextResults);
+        setError(null);
+      }
     } catch (searchError) {
-      setError(searchError instanceof Error ? searchError.message : 'People could not be searched.');
+      if (requestId === searchRequest.current) {
+        setError(searchError instanceof Error ? searchError.message : 'People could not be searched.');
+      }
     }
   };
 
