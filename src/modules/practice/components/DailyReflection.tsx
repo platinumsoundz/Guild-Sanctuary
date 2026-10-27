@@ -23,6 +23,13 @@ function fromRow(row: { id: string; reflection_date: string; mood: string | null
   if (!MOODS.some((option) => option.value === row.mood)) return null;
   return { id: row.id, date: row.reflection_date, mood: row.mood as Mood, intention: row.intention ?? '', reflection: row.content ?? '', updatedAt: row.updated_at };
 }
+async function verifyReflectionOwner(expectedUserId: string) {
+  const { data, error } = await getSupabaseBrowserClient().auth.getUser();
+  if (error || !data.user) throw new Error('Sign in again to access your reflection diary.');
+  if (data.user.id !== expectedUserId) throw new Error('Your active account changed. Sign out and sign in again before accessing this diary.');
+  return data.user.id;
+}
+
 export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
   const today = localDateKey();
   const key = useMemo(() => userId, [userId]);
@@ -53,10 +60,11 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     }
     const load = async () => {
       try {
+        const ownerId = await verifyReflectionOwner(userId);
         const client = getSupabaseBrowserClient();
         const { data, error } = await client.from('daily_reflections')
           .select('id, reflection_date, mood, intention, content, updated_at')
-          .eq('user_id', userId)
+          .eq('user_id', ownerId)
           .order('reflection_date', { ascending: false })
           .order('created_at', { ascending: false })
           .limit(90);
@@ -90,9 +98,10 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     setBusy(true);
     setStatus('');
     try {
+      const ownerId = await verifyReflectionOwner(userId);
       const client = getSupabaseBrowserClient();
       const { data, error } = await client.from('daily_reflections').upsert({
-        user_id: userId,
+        user_id: ownerId,
         reflection_date: today,
         title: intention.trim().slice(0, 160),
         intention: intention.trim().slice(0, 180),
@@ -116,8 +125,9 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     if (!window.confirm('Delete all Sanctuary reflections saved to your account? This cannot be undone.')) return;
     setBusy(true);
     try {
+      const ownerId = await verifyReflectionOwner(userId);
       const client = getSupabaseBrowserClient();
-      const { error } = await client.from('daily_reflections').delete().eq('user_id', userId);
+      const { error } = await client.from('daily_reflections').delete().eq('user_id', ownerId);
       if (error) throw error;
       setEntries([]); setMood(''); setIntention(''); setReflection('');
       setStatus('Your saved diary entries have been deleted from your account.');
