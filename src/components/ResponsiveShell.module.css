@@ -29,7 +29,7 @@
   --install-icon-ink: var(--accent);
 
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   width: min(100%, 1120px);
   min-height: 48px;
   align-items: center;
@@ -52,7 +52,7 @@
 
 .installCopy {
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 1 1 220px;
 }
 
 .installIcon {
@@ -80,9 +80,10 @@
   line-height: 1.35;
 }
 
-.installActions {
+ .installActions {
   flex: 0 0 auto;
   gap: 4px;
+  margin-left: auto;
 }
 
 .installButton,
