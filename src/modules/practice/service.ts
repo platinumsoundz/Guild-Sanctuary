@@ -69,7 +69,7 @@ export async function saveDailyReflection(
   entry: Pick<ReflectionEntry, 'date' | 'mood' | 'intention' | 'reflection'>,
 ): Promise<ReflectionEntry> {
   const ownerId = await requireReflectionOwner(userId);
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(entry.date)) throw new Error('Choose a valid reflection date.');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(entry.date)) throw new Error('Choose a valid reflection date.');
   if (!['low', 'heavy', 'steady', 'good', 'bright'].includes(entry.mood)) throw new Error('Choose a supported mood.');
   const intention = entry.intention.trim().slice(0, 180);
   const reflection = entry.reflection.trim().slice(0, 1200);
