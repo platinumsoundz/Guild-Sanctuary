@@ -27,6 +27,9 @@ assert.ok(!source.includes('localStorage'), 'persistence and consent must be own
 assert.ok(!source.includes('SECURITY DEFINER'), 'client reflection engine must not contain privileged database functions');
 assert.ok(source.includes('You selected quiet time'), 'reflection examples must remain tied to member answers');
 assert.ok(source.includes('not a fixed learning type'), 'learning preferences must not be presented as validated learning styles');
+for (const value of ['values:rest', 'values:connection', 'values:growth', 'values:creativity', 'values:stability']) {
+  assert.ok(source.includes(value), `missing values-based reflection rule: ${value}`);
+}
 for (const required of ['Begin reflection', 'Question progress', 'Skip', 'Create reflection', 'Close and clear this session', 'not saved to your account']) {
   assert.ok(component.includes(required), `missing questionnaire UX/privacy behavior: ${required}`);
 }
