@@ -127,6 +127,26 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
           <p className={styles.disclaimer}>This is a personal reflection tool, not medical advice, diagnosis or treatment.</p>
         </form>
       )}
+      {loadedKey === key && entries.some((entry) => entry.date !== today) && (
+        <details className={styles.history}>
+          <summary>Previous reflections ({entries.filter((entry) => entry.date !== today).length})</summary>
+          <ol className={styles.historyList}>
+            {entries.filter((entry) => entry.date !== today).slice(0, 7).map((entry) => (
+              <li className={styles.historyEntry} key={entry.date}>
+                <div className={styles.historyMeta}>
+                  <time dateTime={entry.date}>{new Date(`${entry.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</time>
+                  <span>{MOODS.find((option) => option.value === entry.mood)?.label ?? 'Reflection'}</span>
+                </div>
+                {entry.intention && <p className={styles.historyIntention}>Intention: {entry.intention}</p>}
+                {entry.reflection && <p className={styles.historyText}>{entry.reflection}</p>}
+              </li>
+            ))}
+          </ol>
+          {entries.filter((entry) => entry.date !== today).length > 7 && (
+            <p className={styles.historyNote}>Showing the latest 7 previous entries. The rest remain stored locally until cleared or aged out of the 90-entry limit.</p>
+          )}
+        </details>
+      )}
     </section>
   );
 }
