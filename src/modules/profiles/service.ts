@@ -34,6 +34,10 @@ type PublicProfileRow = {
 };
 
 function toPublicProfile(row: PublicProfileRow): PublicProfile {
+  const allowedSummaryKeys = new Set(['connection', 'decisions', 'motivation', 'zodiac']);
+  const safeSummary = row.self_discovery_summary && typeof row.self_discovery_summary === 'object'
+    ? Object.fromEntries(Object.entries(row.self_discovery_summary).filter(([key, value]) => allowedSummaryKeys.has(key) && typeof value === 'string').map(([key, value]) => [key, (value as string).slice(0, 160)])) as Record<string, string>
+    : null;
   return {
     userId: row.id,
     profileId: row.id,
@@ -50,7 +54,7 @@ function toPublicProfile(row: PublicProfileRow): PublicProfile {
     belief: row.belief,
     socialLinks: { ...emptySocialLinks, ...(row.social_links ?? {}) },
     allowDirectMessages: row.allow_direct_messages,
-    selfDiscoverySummary: row.self_discovery_summary,
+    selfDiscoverySummary: safeSummary && Object.keys(safeSummary).length > 0 ? safeSummary : null,
     role: 'member',
   };
 }
