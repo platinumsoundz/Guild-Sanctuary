@@ -7,6 +7,7 @@ const layout = read('../src/app/layout.tsx');
 const settings = read('../src/modules/settings/components/SettingsHub.tsx');
 const service = read('../src/modules/settings/service.ts');
 const types = read('../src/types/database.ts');
+const appContext = read('../src/context/AppContext.tsx');
 
 for (const theme of ['light', 'dark', 'dusk']) {
   assert.ok(css.includes(`:root[data-theme="${theme}"]`) || (theme === 'dark' && css.includes(':root {')), `missing ${theme} palette`);
@@ -16,6 +17,8 @@ assert.ok(layout.includes("localStorage.getItem('sanctuary-theme')"), 'theme boo
 assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'theme bootstrap must apply the saved theme before render');
 assert.ok(layout.includes("classList.toggle('dark', theme !== 'light')"), 'Tailwind dark variants must follow the selected theme');
 assert.ok(settings.includes("classList.toggle('dark', theme !== 'light')"), 'live theme changes must update Tailwind dark variants');
+assert.ok(appContext.includes('fetchAccountSettings(currentUser.user.id)'), 'signed-in accounts must load their saved theme on session restore');
+assert.ok(appContext.includes("document.documentElement.dataset.theme = theme"), 'account theme must be applied after session restore');
 assert.ok(layout.includes('__html: themeBootstrap'), 'theme bootstrap must be included in the document head');
 assert.ok(!layout.includes('className="dark"'), 'fixed dark class must not override the selected theme');
 assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection must persist through account settings');
