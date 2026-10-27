@@ -38,6 +38,7 @@ for (const [label, source, pattern] of [
   ['concept modal Escape support', home, /event\.key === 'Escape'/],
   ['Today links to account-backed Self-discovery Centre', home, /Open my Self-discovery Centre/],
   ['self-discovery produces a private actionable reflection', selfDiscovery, /buildReflection\(answers\).*PRIVATE.*BASED ON YOUR ANSWERS/s],
+  ['self-discovery gives separate practical tips per answered topic', selfDiscovery, /Your personal playbook.*reflection.insights.map/s],
   ['self-discovery includes communication and learning preferences', selfDiscovery, /key: 'communication'.*key: 'learning'/s],
   ['self-discovery provides tailored learning advice', selfDiscovery, /const learning = .*Experimenting may help new ideas click for you/s],
   ['self-discovery advice is not a diagnosis and stays private', selfDiscovery, /not a mental-health assessment or diagnosis.*not included in your public profile summary/s],
