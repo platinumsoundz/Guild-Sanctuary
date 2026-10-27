@@ -5,7 +5,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 const service = read('../src/modules/messages/service.ts');
 const repository = read('../src/modules/messages/supabaseRepository.ts');
 const hook = read('../src/modules/messages/useDirectMessages.ts');
-const migration = read('../supabase/migrations/20261027000100_restore_secure_persistent_messaging.sql');
+const migration = read('../supabase/migrations/20261027001557_restore_secure_persistent_messaging.sql');
 const dmPreferenceFix = read('../supabase/migrations/20261027001600_fix_direct_message_preference_source.sql');
 
 const checks = [
