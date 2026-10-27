@@ -97,3 +97,12 @@ The read-only ledger query returned these 29 entries, in version order:
 | `20261027003633` | `sync_dm_setting_with_profile_privacy` |
 
 The duplicate `game_wallet_sessions` and `restore_moderation_and_comment_controls` names are not automatically errors, but they must be explained by their distinct versions and SQL bodies before reconstructing migration history.
+
+
+### SECURITY DEFINER function catalog detail
+
+A follow-up read-only catalog query enumerated 23 public SECURITY DEFINER functions. Every function in that query had a function-level empty `search_path` setting (`SET search_path TO ''`). The reviewed functions had no anonymous EXECUTE grant; authenticated EXECUTE was granted only for the selected RPCs that require it.
+
+This is a positive hardening signal: the advisor warning must **not** be interpreted as proof that search_path is unset or that all authenticated execution should be revoked. Each exposed function still needs body-level authorization review, and every table/function reference must remain schema-qualified because the search path is empty.
+
+The live `public.apply_moderation_action(...)` definition was inspected directly. It checks active moderator status, rationale length, action/target compatibility, suspension expiry, target existence, report/target consistency, and records moderation/audit events. It did **not** compare the caller's role rank to the target member's role or reject account actions against the caller. This gap is tracked in proposed PR #81; the migration is not applied and requires staging negative-path tests plus independent security review.
