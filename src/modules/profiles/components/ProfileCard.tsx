@@ -32,7 +32,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
               <p className={styles.eyebrow}>SELF-DISCOVERY · SHARED BY CHOICE</p>
               {Object.entries(profile.selfDiscoverySummary).map(([key, value]) => (
                 <div className={styles.selfDiscoveryItem} key={key}>
-                  <span>{({ connection: 'How I recharge', decisions: 'Decision style', motivation: 'Motivation', zodiac: 'Zodiac lens' } as Record<string, string>)[key] ?? key}</span>
+                  <span>{({ connection: 'How I recharge', decisions: 'Decision style', motivation: 'Motivation', communication: 'Communication preference', learning: 'Learning preference', zodiac: 'Zodiac lens' } as Record<string, string>)[key] ?? key}</span>
                   <strong>{value}</strong>
                 </div>
               ))}
