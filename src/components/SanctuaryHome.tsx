@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowDownRight, ArrowRight, BookOpen, CalendarDays, Check, CircleHelp,
+  ArrowDownRight, ArrowRight, BookOpen, CalendarDays, Check, CircleHelp, CheckCircle2, Circle, RotateCcw,
   Compass, Heart, Layers3, MessageCircle, MessageSquare, Search, ShieldCheck,
   Sparkles, Sun, Users, Video, WalletCards, X, type LucideIcon,
 } from 'lucide-react';
@@ -32,6 +32,15 @@ const features: Feature[] = [
 ];
 
 const filters = ['Everything', 'Available', 'In preview', 'In design', 'Safety gated'] as const;
+const onboardingKey = 'sanctuary.beta.onboarding.v1';
+const onboardingTasks = [
+  { id: 'community', title: 'Explore the community', detail: 'See how people share and connect.', action: 'Visit community', target: 'feed' as NavigationState },
+  { id: 'discover', title: 'Find people and interests', detail: 'Explore profiles and discover what connects members.', action: 'Discover people', target: 'discover' as NavigationState },
+  { id: 'concept', title: 'Open a concept preview', detail: 'See one of the experiences being shaped for the future.', action: 'Preview an idea', target: 'concept' as const },
+  { id: 'direction', title: 'Explore the feature statuses', detail: 'Understand what is live, in preview, or still in design.', action: 'Browse features', target: 'features' as const },
+  { id: 'feedback', title: 'Share one piece of feedback', detail: 'Help make the next iteration more useful.', action: 'Give feedback', target: 'feedback' as const },
+  { id: 'roadmap', title: 'Look at the product map', detail: 'See the broader systems planned for the Sanctuary.', action: 'Open product map', target: 'roadmap' as NavigationState },
+] as const;
 
 export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: NavigationState) => void }) {
   const [filter, setFilter] = useState<(typeof filters)[number]>('Everything');
@@ -40,7 +49,50 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
   const [feedbackTitle, setFeedbackTitle] = useState('');
   const [feedbackDetails, setFeedbackDetails] = useState('');
   const [copyState, setCopyState] = useState('');
+  const [completedTasks, setCompletedTasks] = useState<string[]>([]);
+  const [onboardingLoaded, setOnboardingLoaded] = useState(false);
   const visibleFeatures = useMemo(() => filter === 'Everything' ? features : features.filter((feature) => feature.status === filter), [filter]);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(onboardingKey);
+      if (stored) {
+        const parsed: unknown = JSON.parse(stored);
+        if (Array.isArray(parsed)) setCompletedTasks(parsed.filter((item): item is string => typeof item === 'string' && onboardingTasks.some((task) => task.id === item)));
+      }
+    } catch {
+      // Onboarding remains usable for this session if storage is unavailable.
+    } finally {
+      setOnboardingLoaded(true);
+    }
+  }, []);
+
+  const toggleTask = (id: string) => {
+    setCompletedTasks((current) => {
+      const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
+      try { window.localStorage.setItem(onboardingKey, JSON.stringify(next)); } catch { /* Keep progress in memory for this session. */ }
+      return next;
+    });
+  };
+
+  const startTask = (task: (typeof onboardingTasks)[number]) => {
+    toggleTask(task.id);
+    if (task.target === 'concept') {
+      setActiveFeature(features.find((feature) => feature.title === 'Daily reflection') ?? null);
+    } else if (task.target === 'features') {
+      setFilter('Everything');
+      document.getElementById('feature-explorer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (task.target === 'feedback') {
+      document.getElementById('beta-feedback-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      onNavigate(task.target);
+    }
+  };
+
+  const resetOnboarding = () => {
+    setCompletedTasks([]);
+    try { window.localStorage.removeItem(onboardingKey); } catch { /* No persistent state to clear. */ }
+  };
 
   useEffect(() => {
     if (!activeFeature) return;
@@ -89,6 +141,28 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
           <p>Some areas are working features. Others are clickable concepts to make the direction tangible. Each card tells you which is which.</p>
           <div className={styles.statusLegend}><span><i className={styles.dotAvailable} /> Available</span><span><i className={styles.dotPreview} /> Preview</span><span><i className={styles.dotDesign} /> In design</span></div>
         </div>
+      </section>
+
+      <section className={styles.onboarding} aria-labelledby="onboarding-title">
+        <div className={styles.onboardingHeader}>
+          <div><p className={styles.eyebrow}>YOUR FIRST FEW MINUTES</p><h2 id="onboarding-title">Make the Sanctuary yours</h2><p>A short, optional tour for beta testers. Your progress is saved only in this browser.</p></div>
+          <div className={styles.progressBlock} aria-label={onboardingLoaded ? completedTasks.length + ' of ' + onboardingTasks.length + ' steps complete' : 'Loading your progress'}>
+            <div className={styles.progressText}><strong>{completedTasks.length}/{onboardingTasks.length}</strong><span>{completedTasks.length === onboardingTasks.length ? 'Tour complete' : 'steps explored'}</span></div>
+            <div className={styles.progressTrack} role="progressbar" aria-valuemin={0} aria-valuemax={onboardingTasks.length} aria-valuenow={completedTasks.length}><span style={{ width: ((completedTasks.length / onboardingTasks.length) * 100) + '%' }} /></div>
+          </div>
+        </div>
+        <div className={styles.onboardingList}>
+          {onboardingTasks.map((task, index) => {
+            const done = completedTasks.includes(task.id);
+            return <div className={done ? styles.onboardingTaskDone : styles.onboardingTask} key={task.id}>
+              <button type="button" className={styles.taskCheck} onClick={() => toggleTask(task.id)} aria-label={(done ? 'Mark incomplete: ' : 'Mark complete: ') + task.title} aria-pressed={done}>{done ? <CheckCircle2 size={20} /> : <Circle size={20} />}</button>
+              <span className={styles.taskNumber}>0{index + 1}</span>
+              <div className={styles.taskCopy}><strong>{task.title}</strong><span>{task.detail}</span></div>
+              <button className={styles.taskAction} type="button" onClick={() => startTask(task)}>{done ? 'Visit again' : task.action} <ArrowRight size={14} /></button>
+            </div>;
+          })}
+        </div>
+        <div className={styles.onboardingFooter}><span><CircleHelp size={14} /> Optional guide · not a public score</span><button type="button" onClick={resetOnboarding}><RotateCcw size={13} /> Reset progress</button></div>
       </section>
 
       <section className={styles.quickRow} aria-label="Quick actions">
