@@ -91,6 +91,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   const reviewTasks = useMemo(() => data.tasks.filter((task) => reviewDays.includes(task.date)), [data.tasks, reviewDays]);
   const reviewCompleted = reviewTasks.filter((task) => task.done).length;
   const reviewNoteDays = reviewDays.filter((date) => Boolean(data.notesByDate[date]?.trim())).length;
+  const reviewHabitCheckins = data.habits.reduce((count, habit) => count + habit.checkedDates.filter((date) => reviewDays.includes(date)).length, 0);
 
   const addTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -188,6 +189,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
           <div><strong>{reviewTasks.length}</strong><span>tasks planned</span></div>
           <div><strong>{reviewCompleted}</strong><span>tasks completed</span></div>
           <div><strong>{reviewNoteDays}</strong><span>days with notes</span></div>
+          <div><strong>{reviewHabitCheckins}</strong><span>habit check-ins</span></div>
         </div>
       </section>
       <section className={styles.panel} aria-labelledby="habits-heading">
