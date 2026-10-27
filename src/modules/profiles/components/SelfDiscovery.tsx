@@ -139,12 +139,12 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
         if (isGuest || !isSupabaseCommunityStorageConfigured()) throw new Error('Sign in with your Sanctuary account to manage saved answers.');
         await requireCommunityStorageUser(userId);
         const client = getSupabaseBrowserClient();
-        const [deleteResult, profileResult] = await Promise.all([
-          client.from('self_discovery_responses').delete().eq('user_id', userId),
-          client.from('profiles').update({ self_discovery_summary: null, self_discovery_visible: false, updated_at: new Date().toISOString() }).eq('id', userId),
-        ]);
+        const hideResult = await client.from('profiles').update({ self_discovery_visible: false, updated_at: new Date().toISOString() }).eq('id', userId);
+        if (hideResult.error) throw hideResult.error;
+        const deleteResult = await client.from('self_discovery_responses').delete().eq('user_id', userId);
         if (deleteResult.error) throw deleteResult.error;
-        if (profileResult.error) throw profileResult.error;
+        const clearSummaryResult = await client.from('profiles').update({ self_discovery_summary: null, updated_at: new Date().toISOString() }).eq('id', userId);
+        if (clearSummaryResult.error) throw clearSummaryResult.error;
         setAnswers({ ...emptyAnswers }); setStep(0); setVisible(false); setSelectedFields([]);
         onSummaryChange?.(null);
         setNotice('Consent withdrawn. Your saved answers and profile summary have been deleted.');
@@ -172,12 +172,12 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
       if (isGuest || !isSupabaseCommunityStorageConfigured()) throw new Error('Sign in with your Sanctuary account to manage saved answers.');
       await requireCommunityStorageUser(userId);
       const client = getSupabaseBrowserClient();
-      const [deleteResult, profileResult] = await Promise.all([
-        client.from('self_discovery_responses').delete().eq('user_id', userId),
-        client.from('profiles').update({ self_discovery_summary: null, self_discovery_visible: false, updated_at: new Date().toISOString() }).eq('id', userId),
-      ]);
+      const hideResult = await client.from('profiles').update({ self_discovery_visible: false, updated_at: new Date().toISOString() }).eq('id', userId);
+      if (hideResult.error) throw hideResult.error;
+      const deleteResult = await client.from('self_discovery_responses').delete().eq('user_id', userId);
       if (deleteResult.error) throw deleteResult.error;
-      if (profileResult.error) throw profileResult.error;
+      const clearSummaryResult = await client.from('profiles').update({ self_discovery_summary: null, updated_at: new Date().toISOString() }).eq('id', userId);
+      if (clearSummaryResult.error) throw clearSummaryResult.error;
       setAnswers({ ...emptyAnswers }); setStep(0); setConsent(false); setVisible(false); setSelectedFields([]);
       onSummaryChange?.(null);
       setNotice('Your saved self-discovery answers and public summary have been cleared.');
