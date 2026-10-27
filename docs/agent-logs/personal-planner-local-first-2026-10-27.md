@@ -9,3 +9,8 @@
 - Limits: this is not encrypted storage and does not replace server-side account deletion. Clearing browser storage or using another device can make the local copy unavailable. Users should export data they want to retain.
 - Verification: added `scripts/check-personal-planner-contract.mjs` and `npm run check:personal-planner`; latest commit status only shows Vercel blocked by the daily build-rate limit. No CI result for the latest planner SHA is available yet, and no local execution was performed.
 - Follow-up: evaluate whether a future encrypted/server-backed planner should replace local-only persistence after schema inventory, RLS design, and explicit privacy review.
+
+
+## Integration audit follow-up — 2026-10-27
+- PR #129 corrected the stale Phase 1 dependency-map contract on `main`; this branch is being revalidated against the updated base before integration.
+- Planner data remains browser-local and is not encrypted or synced across devices. No provider setup or database migration is part of this PR.
