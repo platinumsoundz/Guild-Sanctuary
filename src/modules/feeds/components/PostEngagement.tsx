@@ -26,6 +26,15 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
   const [commentEngagement, setCommentEngagement] = useState<Record<string, { liked: boolean; count: number }>>({});
 
   useEffect(() => {
+    setComments([]);
+    setCommentAuthors({});
+    setIsOpen(false);
+    setError(null);
+    setEditingCommentId(null);
+    setEditingBody('');
+  }, [postId, userId]);
+
+  useEffect(() => {
     let cancelled = false;
     getPostEngagement(postId, userId).then((value) => {
       if (!cancelled) setStats(value);
@@ -43,7 +52,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
         const items = await fetchPostComments(postId);
         setComments(items);
         const authorNames = Object.fromEntries(items.flatMap((comment) => {
-          if (comment.authorId === userId) return [[comment.authorId, 'You'] as const];
+          if (comment.authorId === userId) return [];
           try {
             const profile = getLocalPublicProfileById(comment.authorId);
             return profile ? [[comment.authorId, profile.displayName] as const] : [];
@@ -113,7 +122,6 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
     try {
       const comment = await addPostComment(postId, userId, draft);
       setComments((current) => [...current, comment]);
-      setCommentAuthors((current) => ({ ...current, [comment.authorId]: 'You' }));
       setCommentEngagement((current) => ({ ...current, [comment.id]: { liked: false, count: 0 } }));
       setStats((current) => ({ ...current, commentsCount: current.commentsCount + 1 }));
       setDraft('');
