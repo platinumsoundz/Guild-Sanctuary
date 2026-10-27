@@ -23,5 +23,9 @@ assert.match(notifications, /useRef<HTMLButtonElement>\(null\)/, 'Notification t
 assert.match(notifications, /closeOnOutsidePointer[\s\S]*?document\.addEventListener\('pointerdown', closeOnOutsidePointer\)/, 'Compact panel must close when the user clicks outside it');
 assert.match(notifications, /closeOnEscape[\s\S]*?event\.key !== 'Escape'[\s\S]*?bellButtonRef\.current\?\.focus\(\)/, 'Escape must close the panel and restore focus to the trigger');
 assert.match(notifications, /ref=\{panelRef\}/, 'Outside-click handling must identify the notification panel');
+assert.match(notifications, /const loadRequest = useRef\(0\)/, 'Notification loading must track the latest request');
+assert.match(notifications, /if \(!isCurrentRequest\(\)\) return/, 'Stale notification requests must not overwrite current account state');
+assert.match(notifications, /\[currentUser\?\.user\.id, isGuest\]/, 'Account or guest-mode changes must clear prior notification state');
+assert.match(notifications, /if \(isCurrentRequest\(\)\) setIsLoading\(false\)/, 'Stale requests must not clear the current request loading indicator');
 
 console.log('Header navigation and notification panel contract checks passed.');

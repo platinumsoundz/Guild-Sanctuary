@@ -33,13 +33,18 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
   const [error, setError] = useState<string | null>(null);
   const bellButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
+  const loadRequest = useRef(0);
 
   const loadNotifications = useCallback(async () => {
+    const requestId = ++loadRequest.current;
+    const isCurrentRequest = () => loadRequest.current === requestId;
     if (!currentUser || isGuest || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setItems([]);
-      setIsConnected(false);
-      setIsLoading(false);
-      setError(null);
+      if (isCurrentRequest()) {
+        setItems([]);
+        setIsConnected(false);
+        setIsLoading(false);
+        setError(null);
+      }
       return;
     }
 
@@ -48,6 +53,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
     try {
       const client = getSupabaseBrowserClient();
       const { data: authData, error: authError } = await client.auth.getUser();
+      if (!isCurrentRequest()) return;
       if (authError || authData.user?.id !== currentUser.user.id) {
         setItems([]);
         setIsConnected(false);
@@ -64,6 +70,8 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
 
       if (queryError) throw queryError;
 
+      if (!isCurrentRequest()) return;
+
       const actorIds = [...new Set((data ?? []).map((item) => item.actor_id))];
       const actorNames = new Map<string, { displayName: string; username: string }>();
       if (actorIds.length) {
@@ -72,6 +80,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
           .select('id,display_name,username')
           .in('id', actorIds);
         if (actorsError) throw actorsError;
+        if (!isCurrentRequest()) return;
         for (const actor of actors ?? []) {
           actorNames.set(actor.id, {
             displayName: actor.display_name || actor.username,
@@ -80,6 +89,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
         }
       }
 
+      if (!isCurrentRequest()) return;
       setItems((data ?? []).map((item) => {
         const actor = actorNames.get(item.actor_id);
         return {
@@ -91,12 +101,24 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
       setIsConnected(true);
       setError(null);
     } catch {
-      setError('Notifications could not be loaded right now.');
-      setIsConnected(false);
+      if (isCurrentRequest()) {
+        setError('Notifications could not be loaded right now.');
+        setIsConnected(false);
+      }
     } finally {
-      setIsLoading(false);
+      if (isCurrentRequest()) setIsLoading(false);
     }
   }, [currentUser, isGuest]);
+
+  // Never leave the previous account's private notifications visible while a
+  // new session is being resolved, and invalidate any requests still in flight.
+  useEffect(() => {
+    loadRequest.current += 1;
+    setItems([]);
+    setIsConnected(false);
+    setIsLoading(false);
+    setError(null);
+  }, [currentUser?.user.id, isGuest]);
 
   useEffect(() => {
     void loadNotifications();
