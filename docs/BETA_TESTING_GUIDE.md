@@ -9,6 +9,7 @@ Thank you for helping shape The Sanctuary. The beta is a work in progress; some 
 3. **People & discovery:** Is it clear how to find a profile?
 4. **Messages, events, and notifications:** Can you tell what is implemented and what remains a preview?
 5. **Feature concepts:** Do Circles, Practice Library, Daily Reflection, and Self-discovery make sense? What would you change?
+6. **Self-discovery and privacy:** On a signed-in test account, confirm that answers save to your Sanctuary account only after consent. Check that the profile summary is hidden by default, that only individually selected summary fields appear when enabled, and that turning visibility off hides the summary. Test comparison against another test account that deliberately shares a summary. Never use real sensitive information in beta testing.
 6. **Mobile use:** Try one-handed navigation, scrolling, text entry, and closing dialogs.
 7. **Accessibility:** Try keyboard navigation on desktop, zoom text, and check whether button labels are understandable.
 
