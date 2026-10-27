@@ -141,6 +141,19 @@ export interface Database {
         created_at: string;
         updated_at: string;
       }>;
+      daily_reflections: Table<{
+        id: string;
+        user_id: string;
+        reflection_date: string;
+        title: string;
+        intention: string;
+        content: string;
+        mood: string | null;
+        prompts: unknown[];
+        tags: unknown[];
+        created_at: string;
+        updated_at: string;
+      }>;
       posts: Table<{
         id: string;
         author_id: string;
