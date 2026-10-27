@@ -218,6 +218,36 @@ const outputs: Record<string, Omit<SelfDiscoveryReflection, 'questionnaireVersio
     microLesson: 'Learning approaches are tools, not fixed styles. Choose them based on the task, access needs, and what helps you check understanding.',
     journalPrompt: 'Which combination helped me understand this topic, and how do I know?',
   },
+  'values:rest': {
+    pattern: 'You would like to make more room for rest and breathing space this week.',
+    practicalAction: 'Choose one small commitment you can pause, shorten, or do more gently to make room to recover.',
+    microLesson: 'Rest is a legitimate need, not a reward you must earn. Start with what is realistic for your circumstances.',
+    journalPrompt: 'What would enough rest look like for me this week, in real life?',
+  },
+  'values:connection': {
+    pattern: 'You would like to make more room for meaningful connection this week.',
+    practicalAction: 'Reach out to one person with a simple message or suggest a small moment together, without pressure.',
+    microLesson: 'Connection can be small and ordinary. A short, genuine interaction can matter without needing to solve everything.',
+    journalPrompt: 'Which relationships help me feel seen, and how could I nurture one of them?',
+  },
+  'values:growth': {
+    pattern: 'You would like to make more room for learning or personal growth this week.',
+    practicalAction: 'Pick one question you are curious about and spend ten minutes exploring it without needing a perfect outcome.',
+    microLesson: 'Growth can mean noticing, practising, or changing your mind. It does not need to be a dramatic transformation.',
+    journalPrompt: 'What would I like to understand a little better, and why does it matter to me?',
+  },
+  'values:creativity': {
+    pattern: 'You would like to make more room for creativity and play this week.',
+    practicalAction: 'Give yourself a small, no-pressure creative window and let the result be unfinished if you want.',
+    microLesson: 'Play can be valuable for its own sake. It does not have to become a skill, side project, or performance.',
+    journalPrompt: 'What would I make or explore if nobody needed to see the result?',
+  },
+  'values:stability': {
+    pattern: 'You would like to make more room for stability and getting one thing done this week.',
+    practicalAction: 'Choose one achievable task, define what “done enough” means, and leave the rest for another time.',
+    microLesson: 'A manageable next step can restore a sense of direction. Plans should account for energy, support, and constraints.',
+    journalPrompt: 'What is one thing I can reasonably finish, and what can wait?',
+  },
 };
 
 const fallback = {
