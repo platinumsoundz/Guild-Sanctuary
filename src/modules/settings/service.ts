@@ -11,6 +11,7 @@ export const defaultAccountPreferences: AccountPreferences = {
   emailNotifications: true,
   personalizedFeed: true,
   layout: 'comfortable',
+  theme: 'dark',
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
