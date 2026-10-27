@@ -24,8 +24,14 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
 
   useEffect(() => {
     let cancelled = false;
+    // Invalidate the previous thread immediately: a failed open or a slow request
+    // must not leave the previous conversation available for sends or refreshes.
+    setConversationId(null);
     setIsLoading(true);
+    setIsSending(false);
     setMessages([]);
+    setError(null);
+
     const openThread = selectedConversationId
       ? fetchConversationThread(selectedConversationId, userId)
       : peerUserId
@@ -48,22 +54,26 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
   const refresh = useCallback(async () => {
     if (!conversationId || !userId) return;
     try {
-      setMessages((await fetchConversationThread(conversationId, userId)).messages);
+      const thread = await fetchConversationThread(conversationId, userId);
+      if (thread.conversation.id === conversationId) setMessages(thread.messages);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Messages could not be loaded.');
     }
   }, [conversationId, userId]);
 
   const send = async (body: string) => {
-    if (!conversationId || !userId) {
+    const sendingConversationId = conversationId;
+    if (!sendingConversationId || !userId) {
       setError('Sign in to send messages.');
       return false;
     }
     setIsSending(true);
     setError(null);
     try {
-      const message = await sendConversationMessage(conversationId, userId, body);
-      setMessages((currentMessages) => [...currentMessages, message]);
+      const message = await sendConversationMessage(sendingConversationId, userId, body);
+      setMessages((currentMessages) => currentMessages.some((existing) => existing.id === message.id)
+        ? currentMessages
+        : [...currentMessages, message]);
       return true;
     } catch (sendError) {
       setError(sendError instanceof Error ? sendError.message : 'Message could not be sent.');
