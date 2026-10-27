@@ -282,7 +282,7 @@ turning the profile into a horoscope gimmick or a medical chart.
 - Personality profile with strengths, stressors, and how the member likes to
   communicate; clearly labelled as self-reflection, not a diagnosis.
 - Suggested practices based on stated interests and mood patterns.
-- A private reflection card with a tentative pattern, a practical next step, a journal prompt, and a short lesson based on answers so far.
+- A private reflection card with a tentative pattern, a practical next step, a journal prompt, and a short lesson based on answers so far. The personal playbook also gives separate practical tips for each answered topic (recharge, decisions, motivation, communication, and learning) so the output is more useful than a single personality label.
 - Optional educational wellbeing guidance explaining the limits of personality prompts and encouraging qualified support for persistent or distressing symptoms; it must not diagnose or add a condition to the member profile.
 - Suggested circles and people based on values, interests, and mutual friends.
 - Private insight cards: "You tend to check in lower on Sundays", "You finish
