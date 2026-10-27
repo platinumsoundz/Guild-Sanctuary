@@ -5,7 +5,7 @@
 - **PR:** https://github.com/platinumsoundz/Guild-Sanctuary/pull/93
 - **Branch:** `docs/owner-only-platform-handoff`
 - **Base SHA at branch creation:** `5d5ad672d326f253c5a13171b620523dd7281a21`
-- **Latest change commit:** `512b6f017abdf2a15cd656f1ab5310af66aa7800`
+- **Latest change commit:** `8a9be54f83caefb462af160b578e5ef04a904a68`
 - **Design decision:** Ashley alone performs direct Supabase, Stripe, Lemon Squeezy, Cloudflare and Vercel operations. Agents can prepare repo-only plans, proposed schemas, unapplied SQL drafts, and local/static checks that do not connect to providers.
 - **Files changed:** `docs/OWNER_ONLY_PLATFORM_HANDOFF.md`; `docs/PROPOSED_SYSTEM_DATA_MODELS.md`; this log.
 - **Repository evidence reviewed:** `AGENTS.md`, `ROADMAP.md`, `MASTER_BLUEPRINT.md`, `supabase/migrations/20261026103000_social_notifications.sql`, `supabase/migrations/20261013000000_short_engagement_stats.sql`, `supabase/migrations/20261026233000_repair_short_engagement_rpc.sql`, `src/components/NotificationBar.tsx`, `src/modules/messages/supabaseRepository.ts`, `src/modules/moderation/service.ts`.
