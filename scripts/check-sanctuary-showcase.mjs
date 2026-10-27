@@ -42,6 +42,8 @@ for (const [label, source, pattern] of [
   ['self-discovery includes communication and learning preferences', selfDiscovery, /key: 'communication'.*key: 'learning'/s],
   ['self-discovery provides tailored learning advice', selfDiscovery, /const learning = .*Experimenting may help new ideas click for you/s],
   ['self-discovery advice is not a diagnosis and stays private', selfDiscovery, /not a mental-health assessment or diagnosis.*not included in your public profile summary/s],
+  ['self-discovery playbook can be exported by the member', selfDiscovery, /Export my private playbook.*exportPrivatePlaybook/s],
+  ['self-discovery consent withdrawal remains actionable', selfDiscovery, /disabled=\{busy\} onClick=\{\(\) => void saveSummary\(\)\}.*Withdraw consent & delete answers/s],
   ['self-discovery answers saved to the website after consent', selfDiscovery, /self_discovery_responses.*upsert/s],
   ['self-discovery uses explicit save consent', selfDiscovery, /I agree to save these answers to my Sanctuary account/],
   ['profile summary sharing starts hidden', selfDiscoveryMigration, /self_discovery_visible boolean not null default false/],
