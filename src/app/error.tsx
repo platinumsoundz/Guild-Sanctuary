@@ -10,40 +10,51 @@ export default function ErrorBoundary({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log the runtime error to the browser console for inspection
-    console.error('Runtime error caught by boundary:', error)
+    // Keep diagnostics in the developer console; never expose raw exception text to visitors.
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Sanctuary route error:', error)
+    } else {
+      console.error('Sanctuary route error', error.digest ? { digest: error.digest } : {})
+    }
   }, [error])
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center p-6">
-      <div className="max-w-lg w-full bg-neutral-900 border border-neutral-800 rounded-xl p-8 space-y-6 shadow-2xl">
-        <div>
-          <h2 className="text-xl font-bold text-red-400">Runtime Exception Caught</h2>
-          <p className="text-sm text-neutral-400 mt-1">
-            The application crashed during client-side rendering or hydration.
+    <main className="flex min-h-screen items-center justify-center bg-neutral-950 p-6 text-neutral-100">
+      <section
+        role="alert"
+        aria-labelledby="sanctuary-error-title"
+        className="w-full max-w-lg space-y-6 rounded-xl border border-neutral-800 bg-neutral-900 p-8 shadow-2xl"
+      >
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">The Sanctuary</p>
+          <h1 id="sanctuary-error-title" className="text-xl font-bold">This space needs a moment.</h1>
+          <p className="text-sm leading-6 text-neutral-300">
+            Something went wrong while opening this part of the Sanctuary. Your private information is not shown here.
+            You can try again or return to the start.
           </p>
+          {error.digest && (
+            <p className="text-xs text-neutral-500">
+              Reference: <code>{error.digest}</code>
+            </p>
+          )}
         </div>
 
-        <div className="bg-neutral-950 border border-neutral-800 rounded-lg p-4 font-mono text-xs text-red-300 overflow-x-auto">
-          {error.message || 'Unknown runtime error'}
-          {error.digest && <div className="text-neutral-500 mt-2">Digest: {error.digest}</div>}
-        </div>
-
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <button
+            type="button"
             onClick={() => reset()}
-            className="flex-1 bg-neutral-100 text-neutral-950 font-semibold py-2.5 rounded-lg hover:bg-neutral-200 transition"
+            className="flex-1 rounded-lg bg-emerald-300 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
           >
-            Try Again
+            Try again
           </button>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 bg-neutral-800 text-neutral-200 font-semibold py-2.5 rounded-lg hover:bg-neutral-700 transition"
+          <a
+            href="/"
+            className="flex-1 rounded-lg border border-neutral-700 px-4 py-3 text-center text-sm font-semibold text-neutral-100 transition hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
           >
-            Reload Page
-          </button>
+            Return to home
+          </a>
         </div>
-      </div>
+      </section>
     </main>
   )
 }
