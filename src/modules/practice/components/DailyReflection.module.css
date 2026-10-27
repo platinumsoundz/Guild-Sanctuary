@@ -34,6 +34,15 @@
 .privacy svg { flex: 0 0 auto; margin-top: 2px; }
 .status { margin: 0; color: var(--accent, #315a3d); font-size: 13px; line-height: 1.5; }
 .disclaimer, .notice { margin: 0; color: var(--muted, #68776c); font-size: 12px; line-height: 1.6; }
+.history { margin-top: 18px; border-top: 1px solid var(--line, #dce4dc); padding-top: 15px; }
+.history summary { width: fit-content; color: var(--accent, #52765c); font-size: 13px; font-weight: 700; cursor: pointer; }
+.history summary:focus-visible { outline: 2px solid var(--accent, #52765c); outline-offset: 3px; border-radius: 3px; }
+.historyList { display: grid; gap: 12px; margin: 14px 0 0; padding: 0; list-style: none; }
+.historyEntry { padding: 13px; border: 1px solid var(--line, #dce4dc); border-radius: 11px; background: var(--surface, #fbfcf9); }
+.historyMeta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; color: var(--muted, #68776c); font-size: 11px; }
+.historyMeta span { color: var(--accent, #52765c); font-weight: 700; }
+.historyIntention, .historyText { margin: 8px 0 0; color: var(--ink, #25372c); font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.historyNote { margin: 12px 0 0; color: var(--muted, #68776c); font-size: 11px; line-height: 1.5; }
 @media (max-width: 760px) { .moodOptions { grid-template-columns: repeat(2, minmax(0, 1fr)); } .moodOption:last-child { grid-column: 1 / -1; } }
 @media (max-width: 420px) { .card { padding: 16px; border-radius: 14px; } .moodOptions { grid-template-columns: 1fr; } .moodOption:last-child { grid-column: auto; } .actions > button { width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .moodOption { transition: none; } }
