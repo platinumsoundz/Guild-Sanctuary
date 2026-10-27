@@ -32,6 +32,8 @@ for (const [label, source, pattern] of [
   ['preference can be added to feedback', home, /My next-feature preference/],
   ['concept modal Escape support', home, /event\.key === 'Escape'/],
   ['Today links to account-backed Self-discovery Centre', home, /Open my Self-discovery Centre/],
+  ['self-discovery produces a private actionable reflection', selfDiscovery, /buildReflection\(answers\).*PRIVATE.*BASED ON YOUR ANSWERS/s],
+  ['self-discovery advice is not a diagnosis and stays private', selfDiscovery, /not a mental-health assessment or diagnosis.*not included in your public profile summary/s],
   ['self-discovery answers saved to the website after consent', selfDiscovery, /self_discovery_responses.*upsert/s],
   ['self-discovery uses explicit save consent', selfDiscovery, /I agree to save these answers to my Sanctuary account/],
   ['profile summary sharing starts hidden', selfDiscoveryMigration, /self_discovery_visible boolean not null default false/],
