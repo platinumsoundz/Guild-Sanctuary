@@ -49,7 +49,10 @@ begin
     from public.profiles p
     where p.id = requested_target_id;
 
-    if caller_role is null or target_role is null then
+    if caller_role is null or caller_role not in ('moderator', 'admin', 'developer', 'owner') then
+      raise exception 'Moderator authorization required' using errcode = '42501';
+    end if;
+    if target_role is null then
       raise exception 'The account action target is unavailable.' using errcode = 'P0002';
     end if;
     if requested_target_id = caller_id then
