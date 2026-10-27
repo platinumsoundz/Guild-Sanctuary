@@ -10,7 +10,7 @@ const types = read('../src/types/database.ts');
 const appContext = read('../src/context/AppContext.tsx');
 
 assert.ok(settings.includes('value="system"'), 'missing system preference option in Settings');
-for (const theme of ['light', 'dark', 'dusk']) {
+for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean']) {
   assert.ok(css.includes(`:root[data-theme="${theme}"]`) || (theme === 'dark' && css.includes(':root {')), `missing ${theme} palette`);
   assert.ok(settings.includes(`value="${theme}"`), `missing ${theme} option in Settings`);
 }
@@ -18,6 +18,9 @@ assert.ok(layout.includes("localStorage.getItem('sanctuary-theme')"), 'theme boo
 assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'theme bootstrap must apply the saved theme before render');
 assert.ok(layout.includes("classList.toggle('dark', theme !== 'light')"), 'Tailwind dark variants must follow the selected theme');
 assert.ok(settings.includes("classList.toggle('dark', theme !== 'light')"), 'live theme changes must update Tailwind dark variants');
+assert.ok(!read('../src/components/AppWorkspace.module.css').includes('--surface: #fbfcf9'), 'app workspace must not override global theme surface tokens');
+assert.ok(css.includes(':root[data-theme="stone"]') && css.includes(':root[data-theme="ocean"]'), 'future-ready grey and blue palettes must exist');
+assert.ok(settings.includes('Token-unlockable themes can be added to this catalogue later'), 'token theme purchases must remain explicitly future-facing, not falsely enabled');
 assert.ok(settings.includes("window.matchMedia('(prefers-color-scheme: light)')"), 'system preference must follow the operating-system colour scheme');
 assert.ok(appContext.includes('fetchAccountSettings(currentUser.user.id)'), 'signed-in accounts must load their saved theme on session restore');
 assert.ok(appContext.includes("document.documentElement.dataset.theme = theme"), 'account theme must be applied after session restore');
@@ -25,6 +28,8 @@ assert.ok(layout.includes('__html: themeBootstrap'), 'theme bootstrap must be in
 assert.ok(!layout.includes('className="dark"'), 'fixed dark class must not override the selected theme');
 assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection must persist through account settings');
 assert.ok(service.includes("theme: 'system'"), 'new accounts must default to the system colour preference');
+assert.ok(service.includes("record.theme === 'stone'") && service.includes("record.theme === 'ocean'"), 'settings service must normalize added themes');
+assert.ok(layout.includes("saved === 'stone' || saved === 'ocean'"), 'pre-render theme bootstrap must accept new palettes');r preference');
 assert.ok(service.includes("record.theme === 'system' || record.theme === 'light' || record.theme === 'dark' || record.theme === 'dusk'"), 'saved themes must be normalised');
 assert.ok(service.includes(": 'dark',"), 'legacy preference records must retain the dark theme');
 assert.ok(service.includes('Choose a supported Sanctuary theme.'), 'unsupported themes must be rejected');
