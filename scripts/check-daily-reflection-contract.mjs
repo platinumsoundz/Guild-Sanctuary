@@ -17,5 +17,9 @@ const checks = [
   ['form and status messaging are accessible', /aria-live="polite"/.test(component) && /fieldset/.test(component) && /legend/.test(component)],
   ['responsive layouts and reduced-motion preferences are respected', /@media \(max-width: 760px\)/.test(styles) && /prefers-reduced-motion: reduce/.test(styles)],
 ];
+checks.push(
+  ['unreadable reflection storage fails closed instead of masquerading as an empty history', /const sessionReady = loadedKey === key && readableKey === key/.test(component) && /Saved reflections are unavailable/.test(component) && /Your existing data has not been changed/.test(component)],
+  ['account changes clear old reflection state and gate writes until storage is readable', /setLoadedKey\(null\)/.test(component) && /setEntries\(\[\]\)/.test(component) && /if \(!sessionReady\)/.test(component)],
+);
 for (const [label, passed] of checks) { console.log((passed ? 'PASS ' : 'FAIL ') + label); assert.ok(passed, label); }
 console.log('Daily reflection contract checks passed: ' + checks.length + '. Static checks only; browser integration is still required.');

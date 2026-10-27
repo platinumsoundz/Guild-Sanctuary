@@ -19,18 +19,16 @@ function localDateKey(date = new Date()): string {
 }
 function storageKey(userId: string): string { return `sanctuary-daily-reflection:v1:${encodeURIComponent(userId)}`; }
 function readEntries(key: string): ReflectionEntry[] {
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return [];
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
+  const raw = window.localStorage.getItem(key);
+  if (!raw) return [];
+  const parsed: unknown = JSON.parse(raw);
+  if (!Array.isArray(parsed)) throw new Error('Stored reflection history is not a list.');
     return parsed.filter((item): item is ReflectionEntry =>
       Boolean(item) && typeof item === 'object' && typeof item.date === 'string'
       && MOODS.some((mood) => mood.value === item.mood)
       && typeof item.intention === 'string' && typeof item.reflection === 'string'
       && typeof item.updatedAt === 'string',
-    ).slice(0, 90);
-  } catch { return []; }
+  ).slice(0, 90);
 }
 export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
   const today = localDateKey();
@@ -41,15 +39,31 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
   const [reflection, setReflection] = useState('');
   const [status, setStatus] = useState('');
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const [readableKey, setReadableKey] = useState<string | null>(null);
+  const sessionReady = loadedKey === key && readableKey === key;
   useEffect(() => {
-    const loaded = readEntries(key);
-    setEntries(loaded);
-    const existing = loaded.find((entry) => entry.date === today);
-    setMood(existing?.mood ?? '');
-    setIntention(existing?.intention ?? '');
-    setReflection(existing?.reflection ?? '');
+    setLoadedKey(null);
+    setReadableKey(null);
+    setEntries([]);
+    setMood('');
+    setIntention('');
+    setReflection('');
     setStatus('');
-    setLoadedKey(key);
+    try {
+      const loaded = readEntries(key);
+      setEntries(loaded);
+      const existing = loaded.find((entry) => entry.date === today);
+      setMood(existing?.mood ?? '');
+      setIntention(existing?.intention ?? '');
+      setReflection(existing?.reflection ?? '');
+      setReadableKey(key);
+    } catch {
+      // Fail closed: never treat an unreadable store as empty and overwrite it.
+      setEntries([]);
+      setStatus('This browser could not open the saved reflections. Your existing data has not been changed. Check browser storage access and try again.');
+    } finally {
+      setLoadedKey(key);
+    }
   }, [key, today]);
   const savedToday = entries.some((entry) => entry.date === today);
   const recentEntries = entries
@@ -63,6 +77,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
   const reflectionDays = recentEntries.length;
   const saveReflection = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!sessionReady) { setStatus('Your saved reflections are not ready to edit. Reload this section before trying again.'); return; }
     if (isGuest) { setStatus('Sign in to keep a reflection on this device.'); return; }
     if (!mood) { setStatus('Choose the mood that feels closest to today.'); return; }
     const nextEntry: ReflectionEntry = {
@@ -78,6 +93,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     } catch { setStatus('This browser could not save the reflection. Check its storage settings and try again.'); }
   };
   const clearHistory = () => {
+    if (!sessionReady) { setStatus('Your saved reflections are not ready to clear. Reload this section before trying again.'); return; }
     if (!window.confirm('Delete all Sanctuary reflections saved in this browser for this account? This cannot be undone.')) return;
     try {
       window.localStorage.removeItem(key);
@@ -104,7 +120,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
           <p className={styles.description}>No streaks, scores or pressure. Just a little space to notice how you are.</p>
         </div>
       </div>
-      {loadedKey !== key ? <p className={styles.notice} role="status">Opening your reflection on this device…</p> : (
+      {loadedKey !== key ? <p className={styles.notice} role="status">Opening your reflection on this device…</p> : !sessionReady ? <p className={styles.notice} role="status">{status || 'Saved reflections are unavailable. Your existing data has not been changed.'}</p> : (
         <form className={styles.form} onSubmit={saveReflection}>
           <fieldset className={styles.moodFieldset}>
             <legend>How are you feeling today?</legend>
@@ -136,7 +152,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
           <p className={styles.disclaimer}>This is a personal reflection tool, not medical advice, diagnosis or treatment.</p>
         </form>
       )}
-      {loadedKey === key && recentEntries.length > 0 && (
+      {sessionReady && recentEntries.length > 0 && (
         <section className={styles.insights} aria-labelledby="reflection-insights-title">
           <div className={styles.insightsHeading}>
             <div>
