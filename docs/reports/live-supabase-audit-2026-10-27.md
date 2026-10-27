@@ -58,3 +58,42 @@ Observed at 2026-10-27 02:07 UTC:
 ## Boundaries
 
 No production migrations, table updates, role changes, RLS policy changes, Auth settings changes, payment configuration changes, or deployment actions were performed. The PostgREST schema-cache reload is the only live operational action.
+
+
+## Exact live migration ledger snapshot
+
+The read-only ledger query returned these 29 entries, in version order:
+
+| Version | Name |
+|---|---|
+| `20261009000000` | `social_core_and_moderation` |
+| `20261009000100` | `community_tips` |
+| `20261009000200` | `private_vault_and_media_storage` |
+| `20261009000300` | `persistent_social_content` |
+| `20261010000000` | `unify_sanctuary_scope` |
+| `20261026101330` | `tighten_security_definer_rpc_grants` |
+| `20261026101359` | `restrict_public_view_privileges` |
+| `20261026102223` | `social_notifications` |
+| `20261026103220` | `lock_token_spending_until_staging` |
+| `20261026103632` | `token_shop_schema_and_guard` |
+| `20261026103950` | `game_wallet_sessions` |
+| `20261026104059` | `game_wallet_sessions` |
+| `20261026104447` | `secure_public_view_projections` |
+| `20261026113205` | `terms_acceptance_records` |
+| `20261026113229` | `restrict_terms_acceptance_columns` |
+| `20261026115428` | `add_social_target_visibility_helper` |
+| `20261026115434` | `repair_social_engagement_insert_policies` |
+| `20261026211149` | `role_hierarchy_admin_tools` |
+| `20261026211214` | `revoke_anon_role_rpc_grants` |
+| `20261026211250` | `revoke_public_moderator_rpc_grant` |
+| `20261026232625` | `repair_short_engagement_rpc` |
+| `20261026232923` | `add_comment_report_target` |
+| `20261026233006` | `restore_moderation_and_comment_controls` |
+| `20261026233145` | `restore_moderation_and_comment_controls` |
+| `20261026235134` | `comment_likes` |
+| `20261027001557` | `restore_secure_persistent_messaging` |
+| `20261027002103` | `fix_direct_message_preference_source` |
+| `20261027003520` | `allow_comment_reactions` |
+| `20261027003633` | `sync_dm_setting_with_profile_privacy` |
+
+The duplicate `game_wallet_sessions` and `restore_moderation_and_comment_controls` names are not automatically errors, but they must be explained by their distinct versions and SQL bodies before reconstructing migration history.
