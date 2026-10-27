@@ -1,0 +1,41 @@
+name: Feature idea
+description: Suggest an improvement or a new Sanctuary experience
+title: "[Idea]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should this solve?
+      description: Focus on the person and their situation, not a specific technical solution.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What would a good outcome look like?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area is this about?
+      options:
+        - Today dashboard
+        - Community feed
+        - Profiles and discovery
+        - Messages
+        - Events
+        - Notifications
+        - Daily reflection and practices
+        - Circles and groups
+        - Games
+        - Accessibility
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Examples or extra notes
+      description: Do not include personal or sensitive information.
