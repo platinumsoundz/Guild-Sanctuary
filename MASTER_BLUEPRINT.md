@@ -201,3 +201,13 @@ Phase 1 remains **not end-to-end verified**. Do not mark the trust/safety gate c
 - The adapter's source contract includes authenticated sender identity, visible-message filtering, a 500-message history bound, membership lookup, and Realtime subscriptions. These are source-level properties, not a live two-account test.
 - **Release status: not end-to-end verified.** Before claiming messaging works across accounts, wire the active UI to the repository behind the existing explicit feature flag, verify migration/RLS/RPC state in an owner-approved staging project, then test direct/group creation, persistence after reload, sender/recipient delivery, reconnect, and unauthorized access.
 - Do not apply migrations or change provider configuration as part of this code-only status note. Keep E2EE deferred per product-owner direction.
+
+
+## Release and integration memory — 2026-10-27
+
+- PR #157 is merged to `main` as commit `6deb72e684f237020458d5bfdeca3dd6a5bdb739`. The planner/reflection placement, responsive primary navigation, feed polish, and regression-contract updates are in the main branch.
+- Automated CI and contract checks passed for that PR head. Cloudflare deployment was skipped; Vercel reported a deployment quota limit. Do not state that this merge is deployed to production.
+- Browser/device and authenticated account-switch QA remain outstanding. Daily reflection and planner data are local to the browser profile and are not cloud-synced.
+- PRs #158–#170 are still open follow-up work; inspect current branch ancestry/checks before integrating because they form a dependent stack. PRs #155 and #156 overlap #157 and should be reviewed for superseded work rather than blindly merged.
+- Messaging remains not end-to-end encrypted. Security contract checks are static and do not prove live RLS/RPC authorization or two-account behavior.
+- Supabase, Stripe, Lemon Squeezy, Cloudflare, and Vercel account configuration is owner-only. Phase 1 is still not end-to-end verified.
