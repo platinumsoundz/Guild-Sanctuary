@@ -39,7 +39,7 @@ checks.push(
   ['message UI explains server access and avoids sensitive content', /If the server-backed path is enabled, message text is readable by the service/.test(messageUi) && /Avoid sending passwords/.test(messageUi)],
   ['message UI explains local-only storage is not E2EE', /not a substitute for end-to-end encryption/.test(messageUi)],
   ['message privacy explainer has visible expandable details', /<details className=\{styles\.privacyDetails\}>/.test(messageUi) && /\.privacyDetails summary/.test(messageUiCss)],
-  ['E2EE plan forbids custom cryptographic protocol and false claims', /Do not implement cryptographic primitives/.test(encryptionPlan) && /Do not describe it as end-to-end encrypted/.test(encryptionPlan)],
+  ['E2EE plan forbids custom cryptographic protocol and false claims', /Do not implement cryptographic primitives/.test(encryptionPlan) && /Do not describe either path as end-to-end encrypted/.test(encryptionPlan)],
   ['E2EE release plan includes device-loss, revocation and group-membership gates', /device loss/i.test(encryptionPlan) && /revocation/i.test(encryptionPlan) && /group membership/i.test(encryptionPlan)]
 );
 for (const [label, passed] of checks) {
