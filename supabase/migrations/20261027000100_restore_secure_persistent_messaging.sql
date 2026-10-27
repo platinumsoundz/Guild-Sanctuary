@@ -210,6 +210,7 @@ begin
   return new;
 end;
 $$;
+revoke all on function public.touch_conversation_on_message() from public, anon, authenticated;
 drop trigger if exists messages_touch_conversation on public.messages;
 create trigger messages_touch_conversation after insert on public.messages
 for each row execute function public.touch_conversation_on_message();
