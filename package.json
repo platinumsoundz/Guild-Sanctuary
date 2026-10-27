@@ -14,7 +14,8 @@
     "check:auth": "node scripts/check-auth-flows.mjs",
     "check:messages": "node scripts/check-message-persistence.mjs",
     "check:theme": "node scripts/check-theme-contract.mjs",
-    "check:theme-contrast": "node scripts/check-theme-contrast.mjs"
+    "check:theme-contrast": "node scripts/check-theme-contrast.mjs",
+    "check:sanctuary-brand": "node scripts/check-sanctuary-brand.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
