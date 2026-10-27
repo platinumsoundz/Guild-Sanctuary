@@ -22,6 +22,7 @@ for (const path of contextPaths) {
 
 const canonicalPaths = [
   'docs/SUPABASE_MIGRATION_DRIFT_INVENTORY_2026-10-26.md',
+  'PHASE1_STAGING_CHECKLIST.md',
   'supabase/migrations/20261009000000_social_core_and_moderation.sql',
   'supabase/migrations/20261012000000_token_wallet_and_fulfillment.sql',
   'supabase/migrations/20261026120000_role_hierarchy_admin_tools.sql',
@@ -36,9 +37,7 @@ for (const path of canonicalPaths) {
 }
 
 const branchOnlyPaths = [
-  'PHASE1_STAGING_CHECKLIST.md',
   'scripts/check-sql-handoff.mjs',
-  'vitest.config.ts',
   'supabase/migrations/20261026000000_token_purchase_age_gate.sql',
   'supabase/migrations/20261026000100_token_refund_clawback.sql',
   'supabase/migrations/20261026000200_account_deletion_grace_period.sql',
