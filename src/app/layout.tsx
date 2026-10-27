@@ -24,10 +24,10 @@ const themeBootstrap = `
 (() => {
   try {
     const saved = window.localStorage.getItem('sanctuary-theme');
-    const preference = saved === 'system' || saved === 'light' || saved === 'dark' || saved === 'dusk' ? saved : 'system';
+    const preference = saved === 'system' || saved === 'light' || saved === 'dark' || saved === 'dusk' || saved === 'stone' || saved === 'ocean' ? saved : 'system';
     const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
     document.documentElement.dataset.theme = theme;
-    document.documentElement.classList.toggle('dark', theme !== 'light');
+    document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
   } catch {
     document.documentElement.dataset.theme = 'dark';
     document.documentElement.classList.add('dark');

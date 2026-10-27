@@ -38,7 +38,6 @@ for (const path of canonicalPaths) {
 
 const branchOnlyPaths = [
   'scripts/check-sql-handoff.mjs',
-  'vitest.config.ts',
   'supabase/migrations/20261026000000_token_purchase_age_gate.sql',
   'supabase/migrations/20261026000100_token_refund_clawback.sql',
   'supabase/migrations/20261026000200_account_deletion_grace_period.sql',

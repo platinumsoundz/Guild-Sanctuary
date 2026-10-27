@@ -77,7 +77,7 @@ export function SettingsHub({
     const applyTheme = () => {
       const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
       document.documentElement.dataset.theme = theme;
-      document.documentElement.classList.toggle('dark', theme !== 'light');
+      document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
     };
     applyTheme();
     try {
@@ -273,16 +273,18 @@ export function SettingsHub({
               <span>Colour theme</span>
               <select id="sanctuary-theme" value={settings.preferences.theme} onChange={(event) => {
                 const theme = event.currentTarget.value;
-                if (theme !== 'system' && theme !== 'light' && theme !== 'dark' && theme !== 'dusk') return;
+                if (theme !== 'system' && theme !== 'light' && theme !== 'dark' && theme !== 'dusk' && theme !== 'stone' && theme !== 'ocean') return;
                 void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));
               }}>
                 <option value="system">Use device setting</option>
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
                 <option value="dusk">Dusk · low-glare warm</option>
+                <option value="stone">Stone · grey</option>
+                <option value="ocean">Ocean · blue</option>
               </select>
             </label>
-            <p className={styles.hint}>Your theme is saved to your account and remembered on this device. It changes the app colours without changing your profile accent.</p>
+            <p className={styles.hint}>Your theme is applied across the application pages and shared navigation, and saved to your account. Profile accent colours remain separate. Token-unlockable themes can be added to this catalogue later; purchases are not enabled here.</p>
           </section>
 
           <section className={styles.panel} aria-labelledby="layout-title">

@@ -2,7 +2,8 @@
 
 /*
  * The Sanctuary theme contract. Feature modules should use semantic variables.
- * The theme is selected through <html data-theme="light|dark|dusk">.
+ * Theme tokens are the single source of truth for all application pages and shared chrome.
+ * Keep feature CSS on semantic variables; do not redefine these tokens in page wrappers.
  */
 :root {
   color-scheme: dark;
@@ -50,6 +51,40 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
+}
+
+:root[data-theme="stone"] {
+  color-scheme: light;
+  --bg: #e7e9ec;
+  --surface: #f3f4f6;
+  --surface-raised: #ffffff;
+  --ink: #252a31;
+  --muted: #626b76;
+  --line: #cbd0d7;
+  --accent: #596675;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgb(89 102 117 / 12%);
+  --danger: #a72e35;
+  --success: #276749;
+  --warning: #865b08;
+  --shadow-card: 0 8px 28px rgb(37 42 49 / 8%);
+}
+
+:root[data-theme="ocean"] {
+  color-scheme: dark;
+  --bg: #101d2b;
+  --surface: #17283a;
+  --surface-raised: #20364b;
+  --ink: #e8f2fb;
+  --muted: #a9bfd2;
+  --line: #34516a;
+  --accent: #69c6d4;
+  --accent-contrast: #10242c;
+  --accent-soft: rgb(105 198 212 / 14%);
+  --danger: #ff9c9c;
+  --success: #8cdbb3;
+  --warning: #f2cf83;
+  --shadow-card: 0 8px 28px rgb(0 0 0 / 22%);
 }
 
 :root[data-theme="dusk"] {

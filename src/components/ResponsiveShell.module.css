@@ -14,18 +14,19 @@
 .viewport {
   min-height: inherit;
   overflow: clip;
-  background: #fbfcf9;
+  background: var(--bg);
+  color: var(--ink);
 }
 
 .installBanner {
-  --install-bg: #f4f8f2;
-  --install-border: #dce5dc;
-  --install-ink: #203528;
-  --install-muted: #526257;
-  --install-accent: #315a3d;
-  --install-accent-contrast: #ffffff;
-  --install-icon-bg: #e4eee2;
-  --install-icon-ink: #315a3d;
+  --install-bg: var(--surface);
+  --install-border: var(--line);
+  --install-ink: var(--ink);
+  --install-muted: var(--muted);
+  --install-accent: var(--accent);
+  --install-accent-contrast: var(--accent-contrast);
+  --install-icon-bg: var(--accent-soft);
+  --install-icon-ink: var(--accent);
 
   display: flex;
   flex-wrap: wrap;
@@ -99,7 +100,7 @@
 }
 
 .installButton:hover {
-  background: #24462f;
+  filter: brightness(0.94);
 }
 
 .hideInstallButton {
