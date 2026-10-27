@@ -20,7 +20,19 @@ export const viewport: Viewport = {
   colorScheme: 'light dark',
 }
 
-const themeBootstrap = `\n(() => {\n  try {\n    const saved = window.localStorage.getItem('sanctuary-theme');\n    const theme = saved === 'light' || saved === 'dark' || saved === 'dusk' ? saved : 'dark';\n    document.documentElement.dataset.theme = theme;\n  } catch {\n    document.documentElement.dataset.theme = 'dark';\n  }\n})();\n`;\n\nexport default function RootLayout({
+const themeBootstrap = `
+(() => {
+  try {
+    const saved = window.localStorage.getItem('sanctuary-theme');
+    const theme = saved === 'light' || saved === 'dark' || saved === 'dusk' ? saved : 'dark';
+    document.documentElement.dataset.theme = theme;
+  } catch {
+    document.documentElement.dataset.theme = 'dark';
+  }
+})();
+`;
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
