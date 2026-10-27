@@ -1,11 +1,6 @@
 .worldSurface {
-  --surface: #fbfcf9;
-  --surface-raised: #fff;
-  --ink: #25372c;
-  --muted: #68776c;
-  --line: #dce4dc;
-  --accent: var(--profile-accent, #52765c);
-  --accent-soft: color-mix(in srgb, var(--profile-accent, #52765c) 14%, var(--surface-raised));
+  /* Inherit the active application theme; the profile accent stays separate. */
+  --accent: var(--theme-accent, var(--accent));
   min-height: inherit;
   width: 100%;
   min-width: 0;
