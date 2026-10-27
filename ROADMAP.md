@@ -364,3 +364,48 @@ not a separate permanent document.
   relationships, no anonymous posting, free wisdom with future guide
   monetisation, spiritual + mental wellbeing focus, self-discovery inputs, and
   dark mode with theming. Recorded comparison findings and UI fixes.
+
+
+## 10. Competitive research and product learning
+
+The owner asked for a comparison against real-world apps and platforms. Treat this as ongoing product research, not a mandate to copy competitors. Record findings and sources in a dated report under `docs/reports/`, then summarise accepted product implications here.
+
+### Comparison set
+
+- **Community and conversation:** Discord, Reddit, Facebook Groups, WhatsApp, Mighty Networks.
+- **Identity, discovery, and creator ecosystems:** Instagram, YouTube, Twitch, Patreon.
+- **Habits, reflection, and wellbeing:** Finch, Daylio, Headspace, Duolingo, Habitica.
+- **Play, belonging, and creation:** Roblox, Steam.
+- **Personal knowledge and organisation:** Notion.
+
+For each platform, compare concrete user journeys and publicly documented capabilities: onboarding, discovery, social graph, group/community structure, messaging, creation tools, accessibility, privacy controls, moderation/reporting/blocking, safety for vulnerable users, notification pressure, monetisation, portability/deletion, platform constraints, and known user complaints. Separate verified facts, source-backed criticism, and the team's hypotheses. Prefer official product/help/privacy documents and current high-quality reporting; use community feedback as qualitative evidence rather than universal truth.
+
+### Sanctuary differentiation guardrails
+
+- Borrow useful patterns only when they reinforce growth with people, free community wisdom, emotional honesty, optional/private self-discovery, calm technology, privacy, and explainable safety.
+- Do not introduce infinite-scroll pressure, streak punishment, public vanity leaderboards, selling reach, paid access to core peer support, manipulative notifications, or medical/diagnostic claims.
+- Every proposed competitor-inspired feature must include member benefit, likely harms, privacy/safety impact, accessibility, engineering cost, success measure, and a decision of adopt / adapt / defer / reject.
+- Keep the core community and safety experience useful without purchases. Tokens remain cosmetic-only.
+
+## 11. Phase 1 execution and exit criteria
+
+Phase 1 is the trust/safety launch gate in W1. It is **not complete** merely because code, a branch, or a checklist exists. Current status remains partially implemented and not end-to-end verified until evidence is attached.
+
+### Parallel work packages
+
+| Work package | Owner lane | Branch / anchor | Completion evidence |
+| --- | --- | --- | --- |
+| P1-A: visual foundation and accessible shell | Product & Experience | Existing PR #69, `build/roadmap-theme-foundation-2026-10-27` | CI for exact head, reviewed diff, browser/device checks; no claim of deploy until observed |
+| P1-B: trust and safety | Engineering & Reliability | Existing PR #18, `feature/phase1-trust-safety` (verify live head before work) | Unit/integration tests plus `PHASE1_STAGING_CHECKLIST.md` executed against disposable staging |
+| P1-C: operating model and agent handoff | Roadmap & Integration | `build/phase1-agent-coordination-2026-10-27` | Agent rules, ownership, acceptance criteria, and reports available to all supported coding agents |
+| P1-D: independent review | Separate reviewer agent | Branch/PR chosen after P1-B diff inventory | Review findings and resolutions recorded; security-sensitive changes not self-approved |
+
+### Phase 1 release gate
+
+Before any release is called Phase 1 complete, verify: age eligibility is enforced server-side; terms version/time acceptance is recorded while the gate stays off until approved legal text; deletion request, restore, and purge respect the seven-day grace and authorization checks; refund/dispute processing is idempotent and never creates an automatic negative wallet balance; admin/moderation actions enforce role boundaries and audit events; migration state matches the target staging database; CI and security acceptance tests pass on the exact revision; backup/restore and rollback are understood; and a human owner approves the release.
+
+Until these criteria pass, keep live checkout, ads, mandatory Terms gate, and production migrations disabled. If staging access or secrets are unavailable, mark the item **Blocked** and leave a precise safe next action. Do not represent a local build as end-to-end verification.
+
+## 12. Multi-agent development rules
+
+The authoritative operating model is `docs/AI_AGENT_OPERATING_MODEL.md`; all agents must read it through `AGENTS.md` and their platform entry file. Product & Experience and Engineering & Reliability may run in parallel only when file ownership and dependencies are separated. The roadmap coordinator owns canonical roadmap, blueprint, handoff, and agent-rule updates. Each task uses its own branch and focused PR; security-sensitive changes require an independent review. Keep The 5 Sleeves Online/2D and The 5 Sleeves 3D aligned to this roadmap through explicit contracts and separate repository work.
