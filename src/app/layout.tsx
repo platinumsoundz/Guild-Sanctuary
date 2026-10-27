@@ -17,10 +17,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#0b2b20',
-  colorScheme: 'dark',
+  colorScheme: 'light dark',
 }
 
-export default function RootLayout({
+const themeBootstrap = `\n(() => {\n  try {\n    const saved = window.localStorage.getItem('sanctuary-theme');\n    const theme = saved === 'light' || saved === 'dark' || saved === 'dusk' ? saved : 'dark';\n    document.documentElement.dataset.theme = theme;\n  } catch {\n    document.documentElement.dataset.theme = 'dark';\n  }\n})();\n`;\n\nexport default function RootLayout({
   children,
 }: {
   children: React.ReactNode
