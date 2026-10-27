@@ -41,6 +41,7 @@ assert.ok(source.includes('You selected quiet time'), 'reflection examples must 
 assert.ok(source.includes('.filter((output): output is (typeof fallback) => Boolean(output))'), 'reflection must collect all matching answer outputs');
 assert.ok(source.includes('matched.slice(0, 3).map((output) => output.pattern)'), 'reflection summary must use multiple answers, not only the first match');
 assert.ok(source.includes('matched.slice(0, 2).map((output) => output.journalPrompt)'), 'journal prompts should reflect more than one answer when available');
+assert.ok(source.includes('matched.slice(0, 2).map((output) => output.practicalAction)'), 'practical actions should reflect more than one answer when available');
 assert.ok(source.includes('Your other answers add context too'), 'multi-answer results must avoid reducing a member to a single trait');
 assert.ok(source.includes('not a fixed learning type'), 'learning preferences must not be presented as validated learning styles');
 for (const value of ['values:rest', 'values:connection', 'values:growth', 'values:creativity', 'values:stability']) {
