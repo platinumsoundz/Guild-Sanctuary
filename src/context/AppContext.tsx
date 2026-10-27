@@ -108,6 +108,8 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   useEffect(() => {
     if (!isSessionReady || !currentUser || isGuest || typeof document === 'undefined') return;
     let cancelled = false;
+    let media: MediaQueryList | null = null;
+    let onSystemThemeChange: (() => void) | null = null;
     void fetchAccountSettings(currentUser.user.id).then(({ preferences }) => {
       if (cancelled) return;
       const preference = preferences.theme;
@@ -123,13 +125,37 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
         // The account preference remains authoritative if device storage is unavailable.
       }
       if (preference === 'system') {
-        const media = window.matchMedia('(prefers-color-scheme: light)');
-        media.addEventListener('change', applyTheme);
+        media = window.matchMedia('(prefers-color-scheme: light)');
+        onSystemThemeChange = applyTheme;
+        media.addEventListener('change', onSystemThemeChange);
       }
     }).catch(() => {
       // Keep the pre-render device preference if account settings cannot be loaded.
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      if (media && onSystemThemeChange) media.removeEventListener('change', onSystemThemeChange);
+    };
+  }, [currentUser?.user.id, isSessionReady, isGuest]);
+
+  useEffect(() => {
+    if (!isSessionReady || (currentUser && !isGuest) || typeof window === 'undefined') return;
+    let preference = 'system';
+    try {
+      preference = window.localStorage.getItem('sanctuary-theme') ?? 'system';
+    } catch {
+      // System preference is the fallback when device storage is unavailable.
+    }
+    if (preference !== 'system') return;
+    const media = window.matchMedia('(prefers-color-scheme: light)');
+    const applySystemTheme = () => {
+      const theme = media.matches ? 'light' : 'dark';
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.classList.toggle('dark', theme !== 'light');
+    };
+    applySystemTheme();
+    media.addEventListener('change', applySystemTheme);
+    return () => media.removeEventListener('change', applySystemTheme);
   }, [currentUser?.user.id, isSessionReady, isGuest]);
 
   const activateSession = (session: AuthSession, persist = !isSupabaseAuthConfigured()) => {
