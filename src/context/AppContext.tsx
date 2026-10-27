@@ -110,13 +110,21 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     let cancelled = false;
     void fetchAccountSettings(currentUser.user.id).then(({ preferences }) => {
       if (cancelled) return;
-      const theme = preferences.theme;
-      document.documentElement.dataset.theme = theme;
-      document.documentElement.classList.toggle('dark', theme !== 'light');
+      const preference = preferences.theme;
+      const applyTheme = () => {
+        const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.classList.toggle('dark', theme !== 'light');
+      };
+      applyTheme();
       try {
-        window.localStorage.setItem('sanctuary-theme', theme);
+        window.localStorage.setItem('sanctuary-theme', preference);
       } catch {
         // The account preference remains authoritative if device storage is unavailable.
+      }
+      if (preference === 'system') {
+        const media = window.matchMedia('(prefers-color-scheme: light)');
+        media.addEventListener('change', applyTheme);
       }
     }).catch(() => {
       // Keep the pre-render device preference if account settings cannot be loaded.
