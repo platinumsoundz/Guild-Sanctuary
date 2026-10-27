@@ -19,15 +19,26 @@
 |---|---|---|---|
 | Identity/profile | Existing code/schema must be reconciled | profiles or current auth-user mapping | Owner verifies actual Auth/schema; do not duplicate profiles |
 | Friends/follows | Proposed until audited | friend_requests, friendships, follows | Mutual friendship and one-way follow are separate relationships |
-| Notifications | Planned; draft UI reported, persistence unverified | notifications, notification_preferences | Real server-side event producers, recipient-scoped RLS, read/unread state |
-| Direct messaging | UI/demo persistence reported; production persistence unverified | conversations, conversation_members, messages, message_receipts | Decide E2EE/key management before schema lock |
+| Notifications | **In code; applied state unverified** | `public.notifications` plus `notify_social_like()` / `notify_social_comment()` | Migration `20261026103000_social_notifications.sql` exists in main. Owner must verify migration history, grants/RLS, trigger health and UI journey. `notification_preferences` remains proposed, not evidenced in the current migration. |
+| Direct messaging | **Schema/migration in code; production persistence unverified** | `conversations`, `conversation_members`, `messages` (receipt/read-state fields must be reconciled) | `20261010000000_unify_sanctuary_scope.sql`, `20261026230000_repair_persistent_messaging_schema.sql`, and `20261027001557_restore_secure_persistent_messaging.sql` exist in main. Blueprint says active UI still uses in-memory demo service and optional repository is not wired into UI. Owner verifies deployed schema; agents can audit repo wiring only. Decide E2EE/key management before schema lock. |
 | Reflection/self-discovery | Proposed | reflection_entries, assessment_runs, assessment_answers, assessment_summaries, consent_records | Sensitive by design; privacy, export/delete, no diagnostic claims |
-| Shorts engagement | Migration/code exists; applied state unverified | existing shorts plus short_likes, short_comments or current equivalents, aggregate RPC/read path | Owner checks migration 20261013000000_short_engagement_stats.sql and missing RPC |
+| Shorts engagement | **In code; applied state unverified** | existing `social_likes` / `social_comments`; `get_short_engagement_stats(uuid)` and `toggle_short_like(uuid)` | Both `20261013000000_short_engagement_stats.sql` and repair migration `20261026233000_repair_short_engagement_rpc.sql` exist in main. Do not create duplicate tables. Owner checks actual migration ledger, signature/grants, schema cache and signed-in like/unlike/count/comment flows. |
 | Moderation/reports | Competing implementation PRs noted | content_reports, moderation_actions, moderation_appeals | Resolve PR #81/#82 overlap before schema/policy migration |
 | Cosmetic wallet/entitlements | Proposed; no live commerce assumption | wallet_ledger_entries, entitlements, payment_events | Owner chooses Stripe vs Lemon Squeezy per flow; verified webhooks and idempotency |
 | Audit/security | Proposed | security_audit_events, optional session records if justified | Restricted access; never store tokens/secrets/message bodies |
 | Game bridge/rewards | Proposed | game_accounts, game_link_challenges, game_reward_events | Server-side verification/replay protection; never expose game_wallet_sessions |
 | Community/content | Reconcile existing schema | current posts/shorts/comments/community tables | Inspect actual schema before adding equivalent tables |
+
+## Existing repository evidence to reconcile before designing new migrations
+
+This table records repository files only, **not** deployed/provider state.
+
+| System | Checked-in evidence | Current caution |
+|---|---|---|
+| Notifications | `supabase/migrations/20261026103000_social_notifications.sql`; `src/components/NotificationBar.tsx` | The migration defines `notifications`, RLS read/update policies, and like/comment triggers. It currently allows notification types `like`/`comment` and target types `post`/`short`/`event`. It does not establish preferences, push delivery, or owner-verified production state. |
+| Shorts | `supabase/migrations/20261013000000_short_engagement_stats.sql`; `supabase/migrations/20261026233000_repair_short_engagement_rpc.sql` | Both migrations define the engagement RPCs. Confirm migration ordering/history and actual remote function signature before applying anything; avoid duplicate table creation. |
+| Messaging | `supabase/migrations/20261026230000_repair_persistent_messaging_schema.sql`; `supabase/migrations/20261027001557_restore_secure_persistent_messaging.sql`; `src/modules/messages/supabaseRepository.ts` | Repository code exists, but `MASTER_BLUEPRINT.md` says the active UI still uses the in-memory demo service and the optional repository is not wired into the UI. Do not call this production-persistent until owner verifies backend and UI cutover. |
+| Moderation | `supabase/migrations/20261026120000_role_hierarchy_admin_tools.sql`; `supabase/migrations/20261026233200_restore_moderation_and_comment_controls.sql`; open PRs #81 and #84 | Existing migrations and overlapping open role-authorization PRs mean no new competing hierarchy migration until the owner/coordinator resolves the canonical design. |
 
 ## Proposed relationships and invariants
 
