@@ -2,7 +2,7 @@
 
 Date: 2026-10-27
 Branch: `build/roadmap-theme-foundation-2026-10-27`
-Status: **Code written; CI and visual verification pending. Not deployed.**
+Status: **Code written; exact-head CI and Cloudflare Worker build passed. Browser/device, staging persistence, and visual verification pending. Not deployed.**
 
 ## Member outcome
 - Members can choose Use device setting, Light, Dark, or Dusk in Settings → Appearance.
@@ -26,8 +26,8 @@ Status: **Code written; CI and visual verification pending. Not deployed.**
 - No authentication, roles, payments, ads, wallet, or production configuration changed.
 
 ## Verification
-- Source edits were written to the existing theme-foundation branch and are pending the repository's CI workflows.
-- No local shell or browser/device session was available through this connector, so typecheck/build and visual/accessibility behaviour are not yet claimed as verified.
+- Exact-head CI run `40438076544` passed; the automated roadmap check `40438076588` passed; Cloudflare Worker build `40438076555` passed with deployment skipped for the PR.
+- No connected browser/device session is available for visual verification. CI proves typecheck/build and static checks, not real browser theme persistence or visual/accessibility behaviour.
 - Production deployment is not claimed.
 
 ## Known limitations / next actions
