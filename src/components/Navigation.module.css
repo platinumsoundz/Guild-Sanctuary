@@ -42,6 +42,26 @@
   min-width: 0;
 }
 
+.mobileQuickButton {
+  display: none;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.mobileQuickButton:hover,
+.mobileQuickButton:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .accountButton {
   display: inline-flex;
   min-height: 38px;
@@ -296,6 +316,10 @@
   .desktopNavigation {
     display: none;
   }
+
+  .mobileQuickButton {
+    display: inline-flex;
+  }
 }
 
 @media (max-width: 420px) {
@@ -311,6 +335,11 @@
   .notificationButton {
     width: 36px;
     height: 36px;
+  }
+
+  .mobileQuickButton {
+    width: 34px;
+    height: 34px;
   }
 
   .accountButton {
