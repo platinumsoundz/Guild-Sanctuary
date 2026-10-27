@@ -12,7 +12,7 @@ const checks = [
   ['planner does not write prior-account state before loading the new account key', /loadedStorageKey !== storageKey/.test(component) && /setLoadedStorageKey\(storageKey\)/.test(component)],
   ['planner clearly discloses local-only storage and browser-profile access', /Stored on this device only/.test(component) && /Anyone with access to this browser profile/.test(component)],
   ['planner exports data only after an explicit user action', /const exportData = \(\) =>/.test(component) && /onClick=\{exportData\}/.test(component)],
-  ['deleting local planner data requires explicit confirmation', /window\.confirm\('Delete all planner tasks and daily notes/.test(component)],
+  ['deleting local planner data requires explicit confirmation', /window\\.confirm\\('Delete all planner tasks, habits, check-ins, and daily notes/.test(component)],
   ['daily notes and task titles have bounded lengths', /MAX_TASK_LENGTH = 120/.test(component) && /MAX_NOTE_LENGTH = 5000/.test(component)],
   ['planner avoids network calls and automatic AI processing', !/fetch\(|\.from\(['"]/.test(component) && !/openai|anthropic|ai prompt/i.test(component)],
   ['daily reflection is part of the planner rather than the community feed', /DailyReflection userId=\{userId\} isGuest=\{false\}/.test(component) && !/DailyReflection userId=\{currentUser\.user\.id\}/.test(workspace)],
