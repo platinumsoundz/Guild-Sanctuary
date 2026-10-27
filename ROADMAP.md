@@ -73,6 +73,7 @@ Status labels used below:
 | Dark mode | Wanted as soon as possible, with a theme system designed for future themes/flavours |
 | Commerce | Tokens stay cosmetic-only; no gifts, transfers, trading, marketplace, or cash-out |
 | Guest mode | Read-only; no posting, spending, or DMs |
+| Moderation hierarchy | Strict rank hierarchy applies to account and content actions; no self-targeting; actor must strictly outrank target/owner; missing role/owner data fails closed; all actions require rationale and audit trail |
 
 ## 4. Workstreams
 
@@ -120,7 +121,8 @@ Status: **Partially in code; not verified end-to-end.** Check the current main-b
 - Seven-day account deletion grace, restore, and purge
 - Terms acceptance version and timestamp, flag off until approved text
 - Admin/moderation dashboard: reports, members, appeals, refund reviews, audit
-- Guards against self-ban and non-admin action on admins
+- Strict account and content moderation hierarchy, self-target rejection, post-lock role rechecks, rationale validation, and audit logging (proposed in PR #81; not staging-verified)
+- Member role changes lock actor/target rows before authorization and enforce strict hierarchy even for owner-to-owner changes (proposed in draft PR #84; not staging-verified)
 
 Do not enable live checkout, ads, or the terms gate until the checklist has
 actually run. This workstream is a hard gate, not a suggestion.
@@ -364,6 +366,11 @@ not a separate permanent document.
   relationships, no anonymous posting, free wisdom with future guide
   monetisation, spiritual + mental wellbeing focus, self-discovery inputs, and
   dark mode with theming. Recorded comparison findings and UI fixes.
+- **2026-10-27** — Locked moderation policy: self-targeting is prohibited;
+  actors must strictly outrank account/content owners; unknown role or owner
+  data fails closed; owner role changes cannot target an equal-ranked owner.
+  PR #81 contains the moderation proposal and PR #84 the role-change race fix;
+  both remain unapplied pending staging/concurrency tests and independent review.
 
 
 ## 10. Competitive research and product learning
