@@ -5,7 +5,7 @@ const requiredFiles = [
   'src/components/SanctuaryHome.module.css',
   'src/modules/messages/DirectMessageThread.tsx',
   'src/modules/messages/README.md',
-  'docs/MESSAGING_PRIVACY_AND_E2EE_PLAN.md',
+  'docs/MESSAGING_E2EE_PLAN.md',
   'src/modules/profiles/components/SelfDiscovery.tsx',
   'src/modules/profiles/components/SelfDiscovery.module.css',
   'supabase/migrations/20261027050000_persist_private_self_discovery.sql',
@@ -24,7 +24,7 @@ const selfDiscovery = readFileSync('src/modules/profiles/components/SelfDiscover
 const selfDiscoveryMigration = readFileSync('supabase/migrations/20261027050000_persist_private_self_discovery.sql', 'utf8');
 const profileCard = readFileSync('src/modules/profiles/components/ProfileCard.tsx', 'utf8');
 const messageThread = readFileSync('src/modules/messages/DirectMessageThread.tsx', 'utf8');
-const messagingPlan = readFileSync('docs/MESSAGING_PRIVACY_AND_E2EE_PLAN.md', 'utf8');
+const messagingPlan = readFileSync('docs/MESSAGING_E2EE_PLAN.md', 'utf8');
 
 for (const [label, source, pattern] of [
   ['visible status labels', home, /Available.*In preview.*In design.*Safety gated/s],
@@ -50,9 +50,9 @@ for (const [label, source, pattern] of [
   ['zodiac prompt does not request date of birth', selfDiscovery, /not your date of birth/],
   ['message thread clearly discloses E2EE is not active', messageThread, /End-to-end encryption is not active/],
   ['message thread does not claim unverified server persistence', messageThread, /demo in-memory path or a server-backed path/],
-  ['messaging plan prohibits home-grown cryptography', messagingPlan, /No home-grown cryptography/],
+  ['messaging plan prohibits home-grown cryptography', messagingPlan, /Do not implement cryptographic primitives/],
   ['messaging plan requires explicit user-controlled reporting', messagingPlan, /user initiated and explicit/],
-  ['messaging plan blocks E2EE claims before review', messagingPlan, /No public.*E2EE.*until all required checks/],
+  ['messaging plan blocks E2EE claims before review', messagingPlan, /Do not describe it as E2EE until the release gates below pass/],
   ['Today route in navigation state', context, /NavigationState = 'today'/],
   ['Today route in navigation menu', navigation, /id: 'today', label: 'Today'/],
   ['Today route connected to workspace', workspace, /activeNavigation === 'today'.*SanctuaryHome/s],
