@@ -385,3 +385,10 @@ not a separate permanent document.
 - **Not yet merged or deployed** — This work remains in a reviewable branch/PR. A passing contract or build does not prove browser-level behavior. Verify desktop/mobile, unauthenticated access, guest flow, clipboard fallback, theme contrast, and preview deployment before merge.
 - **Collaboration rule** — Use issues to capture tasks, branches for changes, PRs for review, and verified deployments for release evidence. Never share credentials or apply production database changes as part of a UI-only task.
 
+
+
+## Messaging privacy and E2EE
+
+- **Current state:** Direct and group messages are not end-to-end encrypted; persistent message bodies are stored as plaintext in the existing database schema. The inbox and conversation screen now disclose this clearly.
+- **In code on security branch:** Added `docs/MESSAGING_PRIVACY_AND_E2EE.md` with the threat model requirements, staged rollout, metadata limits, device key custody, group protocol needs, report-sharing behavior, and release gates.
+- **Next implementation gate:** Choose a maintained, reviewed E2EE protocol/library before adding key tables or changing message payloads. Do not invent a custom crypto protocol or remove the notice until direct-message encryption is tested on staging and reviewed. No production schema or deployment changes were made.
