@@ -75,3 +75,32 @@ Official/public sources reviewed on 2026-10-27:
 - Finch Help Center, [Pause Mode](https://help.finchcare.com/hc/en-us/articles/37936144770701-Pause-Mode) — pauses streaks and hides most features to support rest while preserving progress.
 
 This first slice does **not** yet verify the full comparison set from issue #72 (Instagram, YouTube, Twitch, Patreon, Facebook Groups, WhatsApp, Mighty Networks, Daylio, Headspace, Duolingo, Habitica, Roblox, Steam, Notion, Meetup, Insight Timer, and 7 Cups). Those require separate source checks before making feature-level claims.
+
+
+## Additional platform findings — 2026-10-27
+
+This section extends the first research slice with official help-centre material for YouTube, Patreon, WhatsApp, Headspace, and Meetup. These are product-pattern observations, not recommendations to copy entire monetisation models.
+
+| Platform | Verified public capability / policy | Sanctuary implication | Decision |
+| --- | --- | --- | --- |
+| YouTube | Creators can pause or disable comments, hold comments for review at different moderation levels, hide users across a channel, and define visible community guidelines. YouTube notes that channel guidelines set expectations but do not themselves automatically enforce platform rules. | Separate the visible rules from actual enforcement. Give members a way to set boundaries, pause discussion when needed, and make moderation state explainable. A guideline banner alone is not safety. | **Adopt/adapt:** community expectations plus real report/block/moderation controls; later consider pause mode for a post/thread during review. |
+| Patreon | Community chats can be scoped to all members or selected paid tiers; creators can assign moderators who review reported messages in a moderation hub. | Role-based moderation queues are a useful pattern, but tier-gating is not suitable for Sanctuary's core peer-support spaces. | **Adapt:** named community stewards and a dedicated report queue; **reject** paid access to support spaces or paid influence over moderation. |
+| WhatsApp | Group privacy settings let members limit who can add them; people can leave or report a group and receive context when an unknown contact adds them. | Prevent unwanted group membership and make exits/reports straightforward. Joining should be a choice, not a forced social obligation. | **Adopt:** invite/accept flows, clear group context, leave/mute/report controls and controls over who can add a member. |
+| Headspace | The full meditation library is subscription-based after trial, while a smaller set of articles, audio and public content remains free. Headspace's own guidance also encourages people to respect their pace and avoid unrealistic expectations. | Sanctuary can offer paid creator content later, but the product should preserve free community wisdom, safety information and basic reflection tools. | **Adapt:** optional paid structured guides only after free community and self-reflection basics are useful; **reject** locking core peer support behind a subscription. |
+| Meetup | Members can report content or people, organizers manage local groups, and the help centre describes review/appeal options. Some member-to-member messaging access is subscription-gated, while organizer contact and group discussions remain available in other contexts. | Local organisers can support real-world community, but a small platform needs a central escalation path and predictable privacy boundaries. Paid messaging is not aligned with Sanctuary's free mutual support principle. | **Adopt/adapt:** clear organizer/steward responsibilities, report confirmation and review status; **reject** charging members just to contact one another for support. |
+
+### Source notes for this section
+
+- YouTube Help, [Learn about comment settings](https://support.google.com/youtube/answer/9483359?hl=en) — comment pause/off, review queues, hidden users, blocked words and link filtering.
+- YouTube Help, [Set your channel guidelines](https://support.google.com/youtube/answer/11895180?hl=en) — visible expectations are not automatic enforcement.
+- Patreon Help Center, [Building Community with Chats](https://support.patreon.com/hc/en-gb/articles/18855652505357-Building-Community-with-Chats) — moderators and reported-message review.
+- Patreon Help Center, [Chats FAQ](https://support.patreon.com/hc/en-us/articles/25280817460877-Chats-FAQ) — access can depend on membership tiers.
+- WhatsApp Help Center, [How to stay safe in groups](https://faq.whatsapp.com/424124173736394/?cms_platform=web) — group privacy, leaving and reporting groups.
+- Headspace Help Center, [What's included for free?](https://help.headspace.com/hc/en-us/articles/115008192928-What-s-included-for-free) — free public resources versus subscription library.
+- Headspace Help Center, [How Long Does Meditation Take to learn?](https://help.headspace.com/hc/en-us/articles/115008040007-How-Long-Does-Meditation-Take-to-learn) — guidance that progress varies and people should avoid unrealistic expectations.
+- Meetup Help Center, [Reporting spam, inappropriate content or activity](https://help.meetup.com/hc/en-us/articles/360001673551-Reporting-spam-inappropriate-content-or-activity) — reporting and review flow.
+- Meetup Help Center, [Contacting other members and organizers](https://help.meetup.com/hc/en-us/articles/360002880111-Contacting-other-members-and-organizers) — messaging access and organizer contact.
+
+### Research limitations
+
+Instagram, Facebook Groups, WhatsApp's complete privacy/data controls, Mighty Networks, Daylio, Duolingo, Habitica, Roblox, Steam, Notion, Insight Timer, and 7 Cups are not fully assessed in this update. Do not infer a complete competitor ranking from this partial sample. The next pass should focus on privacy/export/deletion, member safety controls, accessibility, notification design, and current user pain reports, with official sources first and community reports labelled qualitative.
