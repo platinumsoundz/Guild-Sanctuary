@@ -40,7 +40,7 @@ checks.push(
   ['message UI explains local-only storage is not E2EE', /not a substitute for end-to-end encryption/.test(messageUi)],
   ['message privacy explainer has visible expandable details', /<details className=\{styles\.privacyDetails\}>/.test(messageUi) && /\.privacyDetails summary/.test(messageUiCss)],
   ['E2EE plan forbids custom cryptographic protocol and false claims', /Do not implement cryptographic primitives/.test(encryptionPlan) && /Do not describe it as end-to-end encrypted/.test(encryptionPlan)],
-  ['E2EE release plan includes device-loss, revocation and group-membership gates', /device-loss/.test(encryptionPlan) && /revocation/.test(encryptionPlan) && /group membership/.test(encryptionPlan)]
+  ['E2EE release plan includes device-loss, revocation and group-membership gates', /device loss/.test(encryptionPlan) && /revocation/.test(encryptionPlan) && /group membership/.test(encryptionPlan)]
 );
 for (const [label, passed] of checks) {
   console.log(`${passed ? 'PASS' : 'FAIL'} ${label}`);
