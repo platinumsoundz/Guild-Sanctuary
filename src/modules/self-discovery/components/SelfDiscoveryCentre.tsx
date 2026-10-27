@@ -23,7 +23,21 @@ export function SelfDiscoveryCentre() {
     [answers, hasFinished],
   );
 
+  const clearFeedback = () => {
+    setCopyStatus('idle');
+    setExportStatus('idle');
+  };
+
+  const closeAndClear = () => {
+    clearFeedback();
+    setIsOpen(false);
+    setAnswers({});
+    setStep(0);
+    setHasFinished(false);
+  };
+
   const chooseAnswer = (value: string) => {
+    clearFeedback();
     setAnswers((current) => ({ ...current, [question.id]: value }));
   };
 
@@ -143,13 +157,13 @@ export function SelfDiscoveryCentre() {
         </div>
         <p className={styles.disclaimer}>{reflection.disclaimer}</p>
         <div className={styles.actions}>
-          <button className={styles.secondaryButton} type="button" onClick={() => { setHasFinished(false); setStep(0); }}>
+          <button className={styles.secondaryButton} type="button" onClick={() => { clearFeedback(); setHasFinished(false); setStep(0); }}>
             Review answers
           </button>
           <button className={styles.primaryButton} type="button" onClick={restart}>
             Start again
           </button>
-          <button className={styles.textButton} type="button" onClick={() => { setIsOpen(false); setAnswers({}); setStep(0); setHasFinished(false); }}>
+          <button className={styles.textButton} type="button" onClick={closeAndClear}>
             Close and clear this session
           </button>
         </div>
@@ -167,7 +181,7 @@ export function SelfDiscoveryCentre() {
         <button
           className={styles.textButton}
           type="button"
-          onClick={() => { setIsOpen(false); setAnswers({}); setStep(0); setHasFinished(false); }}
+          onClick={closeAndClear}
         >
           Leave
         </button>
