@@ -335,6 +335,13 @@ turning the profile into a horoscope gimmick or a medical chart.
 
 See [Messaging E2EE Implementation Plan](docs/MESSAGING_E2EE_PLAN.md) for the threat model, data-flow audit checklist, protocol selection criteria, phased delivery, and mandatory release gates. The current UI now exposes a plain-language privacy explanation directly inside every open message thread. This is transparency work only: no cryptographic behavior or production message storage has changed.
 
+### Messaging privacy and end-to-end encryption
+- **Current truth:** E2EE is not implemented. The active inbox/thread still uses the in-memory messaging service by default; the Supabase repository/schema are optional and must not be represented as active until configuration, RLS and two-account integration tests are verified.
+- **In code on this branch:** updated the message-thread privacy notice so it does not falsely claim server persistence and makes clear that no E2EE protection is active.
+- **Design added:** docs/MESSAGING_PRIVACY_AND_E2EE_PLAN.md defines staged delivery, key lifecycle, metadata disclosure, user-initiated reporting, test gates and no-go release conditions.
+- **Implementation rule:** do not invent cryptography. Evaluate a maintained, independently reviewed protocol and keep private keys on client devices. Browser-local storage alone is not a substitute for E2EE.
+- **Release gate:** no production activation or “end-to-end encrypted” claim until protocol review, device/key recovery, group key rotation, RLS/Realtime isolation, reporting, metadata, cross-device tests and security review pass.
+
 ### Phased delivery
 
 1. Keep the current privacy disclosure visible and audit every message storage, logging, moderation and export path.
