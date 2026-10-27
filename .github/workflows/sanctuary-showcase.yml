@@ -6,9 +6,9 @@ on:
       - 'src/components/SanctuaryHome.tsx'
       - 'src/components/SanctuaryHome.module.css'
       - 'src/components/AppWorkspace.tsx'
-      - 'docs/MESSAGING_PRIVACY_AND_E2EE_PLAN.md'
       - 'src/modules/messages/DirectMessageThread.tsx'
       - 'src/modules/messages/README.md'
+      - 'docs/MESSAGING_E2EE_PLAN.md'
       - 'src/modules/profiles/components/SelfDiscovery.tsx'
       - 'src/modules/profiles/components/SelfDiscovery.module.css'
       - 'src/modules/profiles/components/ProfileDashboard.tsx'
@@ -28,9 +28,9 @@ on:
     branches: [main]
     paths:
       - 'src/components/SanctuaryHome.tsx'
-      - 'docs/MESSAGING_PRIVACY_AND_E2EE_PLAN.md'
       - 'src/modules/messages/DirectMessageThread.tsx'
       - 'src/modules/messages/README.md'
+      - 'docs/MESSAGING_E2EE_PLAN.md'
       - 'src/modules/profiles/components/SelfDiscovery.tsx'
       - 'src/modules/profiles/components/ProfileDashboard.tsx'
       - 'src/modules/profiles/components/ProfileCard.tsx'
