@@ -6,6 +6,9 @@ on:
       - 'src/modules/practice/**'
       - 'src/components/AppWorkspace.tsx'
       - 'scripts/check-daily-reflection-contract.mjs'
+      - 'src/services/supabase/database.types.ts'
+      - 'supabase/migrations/*daily_reflections*.sql'
+      - 'package.json'
       - '.github/workflows/daily-reflection-contract.yml'
   push:
     branches: [main]
