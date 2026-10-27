@@ -172,3 +172,15 @@ Verification and deployment:
 - Role assignment is deliberately fail-closed. Only active admins/developers/owners can search the member list; rank checks prevent assigning or modifying equal/higher roles unless the caller is an owner, and users cannot change their own role. The first owner must be assigned once by an operator after verifying the correct Supabase Auth UUID; there is no public owner self-claim.
 - The admin feature is not operational in production until the migration is applied to the connected Supabase project and the first owner is bootstrapped. Local/demo authentication is not sufficient for privileged operations.
 - Games Hub now links to the owner's supplied Roblox experience and displays copyable Java and Bedrock Minecraft server addresses. The Minecraft hostname links are convenience links only; joining still happens through the Minecraft client, and no server port was supplied or invented.
+
+
+## Multi-agent delivery status — 2026-10-27
+
+The shared agent operating contract is in `docs/AI_AGENT_OPERATING_MODEL.md`; `AGENTS.md` is the mandatory entry point. Claude, Gemini, and GitHub Copilot instruction files point agents to the same rules. Product & Experience and Engineering & Reliability are separate workstreams with isolated branches and focused PRs.
+
+Current anchors:
+- Visual foundation: PR #69 / `build/roadmap-theme-foundation-2026-10-27`. Open, not merged; CI/build and browser/device verification must be checked on the exact current head.
+- Trust and safety: PR #18 / `feature/phase1-trust-safety`. Inspect current head, changed files, and checklist before continuing; do not assume it is verified.
+- Coordination rules: `build/phase1-agent-coordination-2026-10-27`. This branch adds cross-agent rules, workstream ownership, and Phase 1 exit criteria.
+
+Phase 1 remains **not end-to-end verified**. Do not mark the trust/safety gate complete until the staging checklist has actually been executed with evidence. Hosting and provider access/configuration remain independent blockers; no documentation change means production is deployed.
