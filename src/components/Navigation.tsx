@@ -18,6 +18,7 @@ import {
   HeartHandshake,
   Gamepad2,
   Map,
+  Sun,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -26,7 +27,8 @@ import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modul
 import styles from './Navigation.module.css';
 
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
-  { id: 'feed', label: 'Feed', icon: Newspaper },
+  { id: 'today', label: 'Today', icon: Sun },
+  { id: 'feed', label: 'Community', icon: Newspaper },
   { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
   { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
   { id: 'events', label: 'Events', icon: CalendarDays },
@@ -35,7 +37,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
   { id: 'games', label: 'Games', icon: Gamepad2 },
-  { id: 'roadmap', label: 'Systems & Roadmap', icon: Map },
+  { id: 'roadmap', label: 'Product direction', icon: Map },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
