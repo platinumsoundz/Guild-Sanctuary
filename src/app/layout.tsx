@@ -25,9 +25,9 @@ const themeBootstrap = `
   try {
     const saved = window.localStorage.getItem('sanctuary-theme');
     const theme = saved === 'light' || saved === 'dark' || saved === 'dusk' ? saved : 'dark';
-    document.documentElement.dataset.theme = theme;
+    document.documentElement.dataset.theme = theme;\n    document.documentElement.classList.toggle('dark', theme !== 'light');
   } catch {
-    document.documentElement.dataset.theme = 'dark';
+    document.documentElement.dataset.theme = 'dark';\n    document.documentElement.classList.add('dark');
   }
 })();
 `;
