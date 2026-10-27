@@ -16,6 +16,7 @@ const checks = [
   ['daily notes and task titles have bounded lengths', /MAX_TASK_LENGTH = 120/.test(component) && /MAX_NOTE_LENGTH = 5000/.test(component)],
   ['planner avoids network calls and automatic AI processing', !/fetch\(|\.from\(['"]/.test(component) && !/openai|anthropic|ai prompt/i.test(component)],
   ['planner navigation is wired to the authenticated workspace', /activeNavigation === 'planner'/.test(workspace) && /PersonalPlanner/.test(workspace) && /'planner'/.test(context) && /id: 'planner'/.test(navigation)],
+  ['seven-day review derives counts locally without scoring the member', /Your seven-day review/.test(component) && /reviewTasks = useMemo/.test(component) && /not a score or a judgement/.test(component)],
   ['export and deletion provide accessible status feedback', /role="status" aria-live="polite"/.test(component) && /setStatus\('All local planner data was cleared\.'\)/.test(component)],
 ];
 
