@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { DailyReflection } from '@/modules/practice';
+import { SelfDiscoveryCentre } from '@/modules/self-discovery/components/SelfDiscoveryCentre';
 import styles from './PersonalPlanner.module.css';
 
 type PlannerTask = { id: string; title: string; date: string; done: boolean; createdAt: string };
@@ -154,6 +155,9 @@ export function PersonalPlanner({ userId }: { userId: string }) {
       </div>
       <section className={styles.reflectionSection} aria-label="Daily reflection">
         <DailyReflection userId={userId} isGuest={false} />
+      </section>
+      <section className={styles.reflectionSection} aria-label="Self-discovery questionnaire">
+        <SelfDiscoveryCentre />
       </section>
       {storageWarning && <p className={styles.warning} role="alert">Browser storage is unavailable or full. Changes may not survive a refresh; export or copy important notes before leaving.</p>}
       <label className={styles.dateLabel}>Day
