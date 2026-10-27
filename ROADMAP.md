@@ -314,7 +314,32 @@ turning the profile into a horoscope gimmick or a medical chart.
 4. Private insight cards from check-ins.
 5. Gentle suggestions (practices, circles, people).
 
-## 6. Comparison findings adopted into this roadmap
+## 6. Messaging privacy and end-to-end encryption
+
+**Current state:** connected direct-message records use a server-side message body. The current messaging UI does not provide end-to-end encryption (E2EE). The conversation database and its access controls are not equivalent to E2EE; only authorised participants can read messages through the app, but server-side plaintext may be available to the service and permitted operational processes. The message composer must disclose this honestly until E2EE is implemented and independently reviewed.
+
+### Recommended direction
+
+- **Default target:** E2EE for one-to-one conversations first, then group conversations after the multi-device and membership-change design is reviewed.
+- **Cryptography:** use a maintained, independently reviewed protocol/library with established device identity, authenticated key agreement, forward secrecy and post-compromise recovery where supported. Do not invent a home-grown encryption protocol or write cryptographic primitives ourselves.
+- **Key custody:** private keys remain on the user's devices. A server stores public key bundles and opaque ciphertext only; it must not receive private keys or message plaintext. Recovery is explicit and explained, not a silent server-side backdoor.
+- **Multi-device:** each device has its own identity/key material. Adding/removing devices and changing group membership must rotate or refresh access appropriately, with visible device/session management.
+- **Metadata:** E2EE does not automatically hide who messaged whom, timing, IP/log data, account identities, or message size. Minimise retained metadata, define retention, and explain the limits honestly.
+- **Moderation/reporting:** users may explicitly report a message by choosing to submit the selected message and context for review. This must be a deliberate disclosure, not routine plaintext scanning hidden behind an E2EE claim. Provide block, mute, rate limits, abuse reporting, and safety workflows.
+- **Local browser storage is not a substitute for E2EE.** It can expose messages to anyone using an unlocked/shared device, browser extensions, malware, or a compromised account. Optional local caching should be encrypted where feasible, cleared on sign-out/shared-device sessions, and never be the only copy without a recovery warning.
+- **Release gates:** threat model; protocol/library review; migration and key lifecycle; two-device tests; account recovery and device-loss tests; revoked-device tests; group-member removal tests; report/abuse flows; backup/log checks; security review before calling messaging end-to-end encrypted.
+
+### Phased delivery
+
+1. Keep the current privacy disclosure visible and audit every message storage, logging, moderation and export path.
+2. Write a threat model and select a maintained E2EE protocol/library suitable for web and mobile/PWA clients.
+3. Prototype one-to-one E2EE in a separate feature branch with no production data migration.
+4. Test key establishment, identity verification, offline delivery, replay/tampering, multi-device enrolment, revocation, account recovery and user-reported messages.
+5. Release one-to-one E2EE only after security review; then design group E2EE and device/session settings.
+
+Do not claim that Sanctuary messaging is end-to-end encrypted until the protocol, key management, all message paths and security review are complete.
+
+## 7. Comparison findings adopted into this roadmap
 
 The 2026-10-27 platform comparison reviewed Meta, TikTok, X, Reddit, Discord,
 WhatsApp/Telegram, YouTube, MySpace, Patreon/Substack, Meetup, Insight Timer,
