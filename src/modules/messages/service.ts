@@ -89,7 +89,7 @@ export async function createDirectConversation(userId: string, peerUserId: strin
     throw new Error('This recipient is not available in local demo mode. Connect the live Sanctuary account to check their actual direct-message settings.');
   }
   if (!peerProfile.allowDirectMessages) {
-    throw new Error('This member is not accepting direct messages.');
+    throw new Error('This local demo profile has direct messages turned off. Demo mode cannot verify the recipient’s live Sanctuary setting; sign in to the connected account to check it.');
   }
 
   await delay();
@@ -139,7 +139,7 @@ export async function createGroupConversation(userId: string, participantIds: st
     throw new Error('One or more recipients are not available in local demo mode. Connect the live Sanctuary account to verify their settings.');
   }
   if (localMembers.some((profile) => !profile?.allowDirectMessages)) {
-    throw new Error('Every group member must have direct messages enabled.');
+    throw new Error('A local demo profile has direct messages turned off. Demo mode cannot verify live Sanctuary settings; sign in to the connected accounts to check them.');
   }
   await delay();
   const timestamp = new Date().toISOString();
