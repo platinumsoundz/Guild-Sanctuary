@@ -26,6 +26,7 @@ import {
 import type { NavigationState } from '@/context/AppContext';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
 import styles from './Navigation.module.css';
+import { NotificationBar } from '@/components/NotificationBar';
 
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
   { id: 'feed', label: 'Feed', icon: Newspaper },
@@ -133,41 +134,20 @@ export function Navigation({
     <>
       <header className={styles.header}>
         <div className={styles.headerIdentity}>
-          <div className={styles.brand} aria-label="The Sanctuary">
-            <span className={styles.brandMark} aria-hidden="true"><Sun size={21} strokeWidth={1.7} /></span>
-            <span className={styles.brandWords}>
-              <span className={styles.brandOverline}>THE</span>
-              <span className={styles.brandName}>SANCTUARY</span>
-            </span>
-          </div>
           {isSessionReady && (
-            <button
-              ref={menuButtonRef}
-              className={styles.menuButton}
-              type="button"
-              aria-label="Open main navigation"
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-navigation-drawer"
-              onClick={() => setIsMenuOpen(true)}
-            >
+            <button ref={menuButtonRef} className={styles.menuButton} type="button" aria-label="Open main navigation" aria-expanded={isMenuOpen} aria-controls="mobile-navigation-drawer" onClick={() => setIsMenuOpen(true)}>
               <Menu size={21} strokeWidth={1.8} aria-hidden="true" />
             </button>
           )}
+          <div className={styles.brand} aria-label="The Sanctuary">
+            <span className={styles.brandMark} aria-hidden="true"><Sun size={21} strokeWidth={1.7} /></span>
+            <span className={styles.brandWords}><span className={styles.brandOverline}>THE</span><span className={styles.brandName}>SANCTUARY</span></span>
+          </div>
         </div>
         <div className={styles.accountArea}>
           {isSessionReady && (
             <button className={styles.notificationButton} type="button" aria-label="Open notifications" onClick={() => onNavigate('notifications')}>
               <Bell size={19} strokeWidth={1.8} aria-hidden="true" />
-            </button>
-          )}
-          {isSessionReady && currentUser && !isGuest && (
-            <button className={styles.mobileQuickButton} type="button" aria-label="Open Token Shop" title="Token Shop" onClick={() => onNavigate('shop')}>
-              <ShoppingBag size={18} strokeWidth={1.8} aria-hidden="true" />
-            </button>
-          )}
-          {isSessionReady && currentUser && !isGuest && canAccessAdmin && (
-            <button className={styles.mobileQuickButton} type="button" aria-label="Open Admin & Moderation" title="Admin & Moderation" onClick={() => onNavigate('admin')}>
-              <ShieldCheck size={18} strokeWidth={1.8} aria-hidden="true" />
             </button>
           )}
           {!isSessionReady ? (
