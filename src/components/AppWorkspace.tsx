@@ -17,6 +17,7 @@ import { AdSlot } from '@/modules/ads';
 import { DirectMessageThread, MessagesInbox } from '@/modules/messages';
 import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
+import { PersonalPlanner } from '@/modules/personal-planner/PersonalPlanner';
 import { TokenShopPanel, WalletPanel } from '@/modules/economy';
 import { GamesHub } from '@/components/GamesHub';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
@@ -116,7 +117,9 @@ export function AppWorkspace() {
     </main>
   ) : isAuthenticated && currentUser ? (
     <>
-      {activeNavigation === 'wallet' ? (
+      {activeNavigation === 'planner' ? (
+        <PersonalPlanner userId={currentUser.user.id} />
+      ) : activeNavigation === 'wallet' ? (
         <main className={styles.supportPage}>
           <WalletPanel userId={currentUser.user.id} isGuest={isGuest} />
         </main>
