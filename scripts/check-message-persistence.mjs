@@ -35,8 +35,8 @@ const checks = [
 ];
 
 checks.push(
-  ['message UI clearly states E2EE is not active', /E2EE not active/.test(messageUi) && /not end-to-end encrypted/.test(messageUi)],
-  ['message UI explains server access and avoids sensitive content', /service may be able to access server-stored message text/.test(messageUi) && /Avoid sending passwords/.test(messageUi)],
+  ['message UI clearly states E2EE is not active', /End-to-end encryption is not active/.test(messageUi) && /not end-to-end encrypted/.test(messageUi)],
+  ['message UI explains server access and avoids sensitive content', /If the server-backed path is enabled, message text is readable by the service/.test(messageUi) && /Avoid sending passwords/.test(messageUi)],
   ['message UI explains local-only storage is not E2EE', /not a substitute for end-to-end encryption/.test(messageUi)],
   ['message privacy explainer has visible expandable details', /<details className=\{styles\.privacyDetails\}>/.test(messageUi) && /\.privacyDetails summary/.test(messageUiCss)],
   ['E2EE plan forbids custom cryptographic protocol and false claims', /Do not implement cryptographic primitives/.test(encryptionPlan) && /Do not describe it as end-to-end encrypted/.test(encryptionPlan)],
