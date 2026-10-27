@@ -12,7 +12,7 @@ assert.match(feed, /title=\{new Date\(post\.createdAt\)\.toLocaleString\(\)\}/, 
 assert.doesNotMatch(feed, /slice\(0, 16\)\} UTC/, 'feed no longer labels UTC text as local time');
 assert.match(comments, /getLocalPublicProfileById\(comment\.authorId\)/, 'comment author IDs resolve to profile display names where available');
 assert.match(comments, /Community member/, 'unknown comment authors use a safe readable fallback');
-assert.doesNotMatch(comments, /comment\.authorId\}<\\/strong>/, 'raw comment author IDs are not rendered');
+assert.ok(!comments.includes('comment.authorId}</strong>'), 'raw comment author IDs are not rendered');
 assert.match(feedStyles, /\.postMeta\s*\{[^}]*font-size:\s*12px/s, 'post metadata is readable at 12px or larger');
 assert.match(feedStyles, /\.postText\s*\{[^}]*font-size:\s*16px/s, 'post body text remains comfortably readable');
 console.log('Feed polish contract checks passed.');
