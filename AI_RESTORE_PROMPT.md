@@ -62,3 +62,26 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 - Distinguish code added from SQL applied, functions deployed, and payments tested. Report only validations actually run.
 - Keep changes beginner-maintainable: prefer small feature-owned components/services and focused migrations; avoid long all-in-one files and unrelated edits. Update the module README, `MASTER_BLUEPRINT.md`, and this handoff when behavior/status changes.
 - Ask the user when a product, refund, chargeback, deletion, or spending policy is underspecified.
+
+
+## Handoff update — 2026-10-27: Phase 1 and multi-agent work
+
+Read `AGENTS.md` and `docs/AI_AGENT_OPERATING_MODEL.md` first. They are the cross-agent rules. Also read `ROADMAP.md` and `MASTER_BLUEPRINT.md` before changing code.
+
+### Parallel workstreams
+
+- **Product & Experience:** continue the visual foundation from PR #69 on `build/roadmap-theme-foundation-2026-10-27`. It is open/unmerged; verify current head, CI, and visual behavior before claiming completion.
+- **Engineering & Reliability:** inspect PR #18 and `feature/phase1-trust-safety`; review age gate, terms acceptance, account deletion grace/restore/purge, refund/dispute handling, moderation roles/audit, and migration/test state. The checklist is `PHASE1_STAGING_CHECKLIST.md` on that branch; nothing in it is done until observed.
+- **Roadmap & Integration:** use `build/phase1-agent-coordination-2026-10-27` for the shared AI rules and operating model. Keep canonical roadmap/blueprint/handoff updates coordinated.
+
+### Immediate next actions
+
+1. Confirm the current head and changed files for PRs #69 and #18; inspect workflow results for the exact heads.
+2. Inventory all Phase 1 migrations and compare them with staging history read-only. Never blindly run `supabase db push` because it applies all pending migrations.
+3. Run available static checks/tests on each branch. Record actual command output; if this environment cannot run shell commands or lacks secrets, mark the step blocked.
+4. Only after a disposable/staging project and safe credentials are configured, execute `PHASE1_STAGING_CHECKLIST.md` using Stripe test mode. Keep live checkout, ads, mandatory Terms gate, and production migrations disabled.
+5. Obtain independent review for security-sensitive changes. Do not merge or deploy just to make a checklist look complete.
+
+### Honest status rule
+
+Code, CI, staging, and production are separate states. A PR being open, a branch existing, a build passing, or a deployment being queued is not proof of production behavior. Report exact branch/commit and evidence; do not invent tests or claim a live update without checking the deployed revision.
