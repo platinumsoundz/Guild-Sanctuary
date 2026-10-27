@@ -8,6 +8,7 @@ const hook = read('../src/modules/messages/useDirectMessages.ts');
 const inbox = read('../src/modules/messages/MessagesInbox.tsx');
 const thread = read('../src/modules/messages/DirectMessageThread.tsx');
 const privacyNotice = read('../src/modules/messages/MessagePrivacyNotice.tsx');
+const encryptionPlan = read('../docs/design/END_TO_END_ENCRYPTION_READINESS.md');
 
 const migration = read('../supabase/migrations/20261027001557_restore_secure_persistent_messaging.sql');
 const dmPreferenceFix = read('../supabase/migrations/20261027002103_fix_direct_message_preference_source.sql');
@@ -16,6 +17,12 @@ const databaseTypes = read('../src/services/supabase/database.types.ts');
 const checks = [
   ['inbox and thread clearly disclose that end-to-end encryption is not active', /MessagePrivacyNotice/.test(inbox) && /MessagePrivacyNotice/.test(thread)],
   ['privacy notice does not claim encryption is already active', /End-to-end encryption is not active yet/.test(privacyNotice) && /not currently end-to-end encrypted/.test(privacyNotice)],
+  ['encryption plan states this is design only and requires independent review', /design requirements only/.test(encryptionPlan) && /independent security review required/.test(encryptionPlan)],
+  ['encryption plan forbids custom cryptography and requires a maintained reviewed library', /Do not implement primitives, key exchange, ratchets, group membership cryptography, or serialization from scratch/.test(encryptionPlan) && /maintained, independently reviewed implementations/.test(encryptionPlan)],
+  ['encryption plan covers device lifecycle, recovery, and group membership', /Device model/.test(encryptionPlan) && /Recovery/.test(encryptionPlan) && /Group membership/.test(encryptionPlan)],
+  ['encryption plan requires generic notification previews and consented reporting', /must not contain plaintext by default/.test(encryptionPlan) && /preview and confirmation/.test(encryptionPlan)],
+  ['encryption plan keeps legacy messages accurately labelled and forbids plaintext downgrade', /pre-E2EE messages as unencrypted/.test(encryptionPlan) && /Do not transparently downgrade an encrypted conversation to plaintext/.test(encryptionPlan)],
+
   ['member search clears old results before a new query resolves', /const normalizedQuery = value\.trim\(\);\s*setResults\(\[\]\);\s*setError\(null\);/.test(inbox)],
   ['inbox loads ignore responses from stale requests or accounts', /inboxRequest = useRef\(0\)/.test(inbox) && /activeUserId\.current !== requestedUserId/.test(inbox)],
   ['member search ignores stale results and removes the current user', /searchRequest = useRef\(0\)/.test(inbox) && /nextResults\.filter\(\(profile\) => profile\.userId !== requestedUserId\)/.test(inbox)],
