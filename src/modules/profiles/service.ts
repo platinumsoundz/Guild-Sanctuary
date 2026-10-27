@@ -34,7 +34,7 @@ type PublicProfileRow = {
 };
 
 function toPublicProfile(row: PublicProfileRow): PublicProfile {
-  const allowedSummaryKeys = new Set(['connection', 'decisions', 'motivation', 'zodiac']);
+  const allowedSummaryKeys = new Set(['connection', 'decisions', 'motivation', 'communication', 'learning', 'zodiac']);
   const safeSummary = row.self_discovery_summary && typeof row.self_discovery_summary === 'object'
     ? Object.fromEntries(Object.entries(row.self_discovery_summary).filter(([key, value]) => allowedSummaryKeys.has(key) && typeof value === 'string').map(([key, value]) => [key, (value as string).slice(0, 160)])) as Record<string, string>
     : null;
