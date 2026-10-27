@@ -8,6 +8,18 @@ const profile = readFileSync(new URL('../src/modules/profiles/components/Profile
 for (const id of ['recharge', 'decisions', 'motivation', 'communication', 'learning', 'values']) {
   assert.ok(source.includes(`id: '${id}'`), `missing questionnaire domain: ${id}`);
 }
+const questionnaireSource = source.split('export const SELF_DISCOVERY_QUESTIONS = [')[1]?.split('] as const;')[0] ?? '';
+const outputsSource = source.split('const outputs:')[1]?.split('const fallback =')[0] ?? '';
+const outputKeys = new Set([...outputsSource.matchAll(/^\s*'([^']+:[^']+)': \{/gm)].map((match) => match[1]));
+const questionBlocks = [...questionnaireSource.matchAll(/\{\s*id: '([^']+)',\s*prompt: '[\s\S]*?options: \[([\s\S]*?)\],\s*\},/g)];
+assert.equal(questionBlocks.length, 6, 'every questionnaire domain must be parsed for answer coverage');
+for (const [, questionId, optionSource] of questionBlocks) {
+  const values = [...optionSource.matchAll(/value: '([^']+)'/g)].map((match) => match[1]);
+  assert.ok(values.length >= 4, `question ${questionId} should keep its answer choices`);
+  for (const value of values.filter((value) => value !== 'unsure')) {
+    assert.ok(outputKeys.has(`${questionId}:${value}`), `missing answer-grounded reflection for ${questionId}:${value}`);
+  }
+}
 for (const required of [
   'validateSelfDiscoveryAnswers',
   'createSelfDiscoveryReflection',
@@ -40,4 +52,4 @@ for (const required of ['Begin reflection', 'Question progress', 'Skip', 'Create
 assert.ok(component.includes('aria-labelledby'), 'questionnaire sections must have accessible labels');
 assert.ok(profile.includes('<SelfDiscoveryCentre />'), 'self-discovery centre must be available from the member profile');
 
-console.log('Self-discovery contract checks passed: domains, input validation, explainable outputs, non-clinical language, and no hidden persistence/network calls.');
+console.log('Self-discovery contract checks passed: domains, answer coverage, input validation, multi-answer outputs, non-clinical language, and no hidden persistence/network calls.');
