@@ -111,3 +111,7 @@ A task is complete only at the level claimed:
 - **Blocked:** required access/configuration/approval was unavailable.
 
 Use the narrowest accurate status. Never equate merged with deployed, or deployed with safe.
+
+## Scheduled automation limits
+
+The available task scheduler supports daily, weekly, and monthly recurring tasks; hourly recurring builds and exact recurring minute-level start times are unavailable. Use separate daily flexible tasks for independent repositories, with approximate morning/afternoon/evening targets rather than promises of exact start times. Every scheduled run still follows the branch, task-scope, testing, and reporting rules above. A scheduled run request is not proof that a build ran, passed, or deployed; check its result and the exact commit.
