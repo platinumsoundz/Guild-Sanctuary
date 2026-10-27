@@ -441,3 +441,31 @@ The authoritative operating model is `docs/AI_AGENT_OPERATING_MODEL.md`; all age
 - **Superseded/overlapping drafts:** PR #155 (move Daily Reflection to planner) and #156 (planner/theme contract coverage) overlap changes now included in #157; review and close as superseded once their unique diffs are confirmed absent.
 - **Owner-only provider work:** Supabase, Stripe, Lemon Squeezy, Cloudflare, and Vercel account configuration/migrations/secrets remain explicit owner handoff tasks. Do not change provider configuration or enable checkout as part of code cleanup.
 - **Next release gate:** integrate the remaining stack in dependency order, re-run CI against each final head, then complete authenticated two-account and device/browser QA. Phase 1 remains not end-to-end verified.
+
+## Integration and release checkpoint — 2026-10-27 (latest)
+
+### Merged to `main`
+The following PRs are merged and present in the current mainline: #157–#170. The integration sequence covered responsive navigation/feed polish; notification accessibility and event-time clarity; private self-discovery export and session-state cleanup; an explicit end-to-end encryption readiness plan; notification action/session guards; static messaging RPC security contracts; message-thread and inbox account isolation; event and planner account isolation; fail-closed local reflection storage; and account-settings isolation. PR #155 and #156 were closed as superseded because their unique file changes were included in #157.
+
+### Verification and deployment
+- Current main commit: `d101c2dcf504fae4b8aa54855e293acd77b69700`.
+- Mainline CI passed: run [40587495814](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40587495814).
+- Automated roadmap/build check passed: run [40587495899](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40587495899).
+- The repository's Cloudflare deployment workflow completed successfully: run [40587495817](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40587495817). This records workflow success, not a substitute for authenticated browser/device verification.
+- Vercel had previously reported its daily deployment quota limit on preview checks. Do not treat that as a failure of the mainline CI or as proof of Vercel production deployment.
+
+### Remaining release gates
+- Authenticated browser/device QA is still outstanding: test account switching and isolation for settings, planner, reflections, events, inbox, message threads, and notification actions; verify mobile navigation, keyboard/focus behavior, event timezone display, and reflection storage-denial recovery.
+- Messaging remains **not end-to-end encrypted**. The merged readiness document is a plan/gate, not cryptographic implementation. Static messaging contract checks do not prove live Supabase RLS/RPC authorization; two-account staging tests are required.
+- Planner, daily reflection, and self-discovery answers/results remain browser-local/session-only as documented; do not describe them as account-synced or cloud-backed.
+- Phase 1 is not end-to-end verified until the staging checklist, safety authorization tests, backup/restore and rollback review, and human release approval are complete.
+
+### Open draft work to triage
+- #145 — database-backed Daily Reflection recovery: review carefully against the now-merged local-only reflection implementation before integrating; it may change storage/privacy assumptions.
+- #122 and #124 — guarded token-shop spending and its static contract check: dependent stack; require full CI and live authorization/ledger tests before enabling spending.
+- #84 and #81 — member-role authorization and moderation hierarchy: security-sensitive; require independent review and staging authorization tests.
+- #85 — beta showcase collaboration; validate feature scope and safety before promotion.
+- #5 — game wallet bridge; check compatibility with the token wallet/ledger and keep any spending/transfer claims disabled until verified.
+
+### Owner-only provider handoff
+Supabase schema/migrations/RLS and owner bootstrap; Stripe and Lemon Squeezy payment setup; Cloudflare/Vercel account settings, secrets, domains and provider configuration remain owner tasks. The successful Cloudflare workflow was the repository's existing automated release path; no provider account settings or secrets were edited in this cleanup.
