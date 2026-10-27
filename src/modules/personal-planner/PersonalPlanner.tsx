@@ -211,7 +211,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
                   <input type="checkbox" checked={habit.checkedDates.includes(selectedDate)} onChange={(event) => toggleHabit(habit.id, event.currentTarget.checked)} />
                   <span>{habit.title}</span>
                 </label>
-                <button type="button" className={styles.removeButton} aria-label={\`Delete habit: \${habit.title}\`} onClick={() => setData((current) => ({ ...current, habits: current.habits.filter((item) => item.id !== habit.id) }))}>Delete</button>
+                <button type="button" className={styles.removeButton} aria-label={`Delete habit: ${habit.title}`} onClick={() => setData((current) => ({ ...current, habits: current.habits.filter((item) => item.id !== habit.id) }))}>Delete</button>
               </li>
             ))}
           </ul>
