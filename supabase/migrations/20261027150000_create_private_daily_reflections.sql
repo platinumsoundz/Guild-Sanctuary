@@ -7,18 +7,23 @@ create table if not exists public.daily_reflections (
   user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   reflection_date date not null default current_date,
   title text not null default '',
-  content text not null,
+  intention text not null default '',
+  content text not null default '',
   mood text,
   prompts jsonb not null default '[]'::jsonb,
   tags jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint daily_reflections_content_nonempty check (length(trim(content)) > 0),
+  constraint daily_reflections_intention_length check (char_length(intention) <= 180),
+  constraint daily_reflections_content_length check (char_length(content) <= 1200),
   constraint daily_reflections_title_length check (char_length(title) <= 160),
   constraint daily_reflections_mood_length check (mood is null or char_length(mood) <= 48),
   constraint daily_reflections_prompts_array check (jsonb_typeof(prompts) = 'array'),
   constraint daily_reflections_tags_array check (jsonb_typeof(tags) = 'array')
 );
+
+create unique index if not exists daily_reflections_user_day_unique_idx
+  on public.daily_reflections (user_id, reflection_date);
 
 create index if not exists daily_reflections_user_date_idx
   on public.daily_reflections (user_id, reflection_date desc, created_at desc);
