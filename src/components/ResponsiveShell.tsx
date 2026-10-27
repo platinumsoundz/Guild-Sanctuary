@@ -42,6 +42,7 @@ export function ResponsiveShell({ children }: ResponsiveShellProps) {
 
     const handleInstallAvailable = (event: Event) => {
       event.preventDefault();
+      setInstallHelp(false);
       setInstallEvent(event as InstallPromptEvent);
     };
     const handleInstalled = () => {
@@ -76,12 +77,17 @@ export function ResponsiveShell({ children }: ResponsiveShellProps) {
       setInstallHelp(true);
       return;
     }
-    await installEvent.prompt();
-    const choice = await installEvent.userChoice;
-    setInstallEvent(null);
-    if (choice.outcome === 'accepted') {
-      hideInstallBanner();
-    } else {
+    try {
+      await installEvent.prompt();
+      const choice = await installEvent.userChoice;
+      setInstallEvent(null);
+      if (choice.outcome === 'accepted') {
+        hideInstallBanner();
+      } else {
+        setInstallHelp(true);
+      }
+    } catch {
+      setInstallEvent(null);
       setInstallHelp(true);
     }
   };
