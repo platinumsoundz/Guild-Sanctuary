@@ -6,12 +6,16 @@ const service = read('../src/modules/messages/service.ts');
 const repository = read('../src/modules/messages/supabaseRepository.ts');
 const hook = read('../src/modules/messages/useDirectMessages.ts');
 const inbox = read('../src/modules/messages/MessagesInbox.tsx');
+const thread = read('../src/modules/messages/DirectMessageThread.tsx');
+const privacyNotice = read('../src/modules/messages/MessagePrivacyNotice.tsx');
 
 const migration = read('../supabase/migrations/20261027001557_restore_secure_persistent_messaging.sql');
 const dmPreferenceFix = read('../supabase/migrations/20261027002103_fix_direct_message_preference_source.sql');
 const databaseTypes = read('../src/services/supabase/database.types.ts');
 
 const checks = [
+  ['inbox and thread clearly disclose that end-to-end encryption is not active', /MessagePrivacyNotice/.test(inbox) && /MessagePrivacyNotice/.test(thread)],
+  ['privacy notice does not claim encryption is already active', /End-to-end encryption is not active yet/.test(privacyNotice) && /not currently end-to-end encrypted/.test(privacyNotice)],
   ['member search clears old results before a new query resolves', /const normalizedQuery = value\.trim\(\);\s*setResults\(\[\]\);\s*setError\(null\);/.test(inbox)],
   ['inbox loads ignore responses from stale requests or accounts', /inboxRequest = useRef\(0\)/.test(inbox) && /activeUserId\.current !== requestedUserId/.test(inbox)],
   ['member search ignores stale results and removes the current user', /searchRequest = useRef\(0\)/.test(inbox) && /nextResults\.filter\(\(profile\) => profile\.userId !== requestedUserId\)/.test(inbox)],
