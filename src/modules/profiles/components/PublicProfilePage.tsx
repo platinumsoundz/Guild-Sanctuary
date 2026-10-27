@@ -5,15 +5,17 @@ import type { Post, PublicProfile } from '@/types/database';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import { fetchPublicProfileById } from '../service';
 import { ProfileCard } from './ProfileCard';
+import { SelfDiscoveryComparison } from './SelfDiscovery';
 import styles from './PublicProfilePage.module.css';
 
 interface PublicProfilePageProps {
   profile: PublicProfile;
   onBack: () => void;
   onMessage: (profile: PublicProfile) => void;
+  currentUserId: string;
 }
 
-export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }: PublicProfilePageProps) {
+export function PublicProfilePage({ profile: initialProfile, onBack, onMessage, currentUserId }: PublicProfilePageProps) {
   const [profile, setProfile] = useState(initialProfile);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,6 +88,7 @@ export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }
       </section>
 
       <ProfileCard profile={profile} />
+      <SelfDiscoveryComparison currentUserId={currentUserId} profile={profile} />
     </main>
   );
 }
