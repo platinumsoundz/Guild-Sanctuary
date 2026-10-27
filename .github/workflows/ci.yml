@@ -40,6 +40,7 @@ jobs:
       - run: npm run check:theme
       - run: npm run check:theme-contrast
       - run: npm run check:notifications
+      - run: npm run check:token-spend
       - run: deno check supabase/functions/token-checkout/index.ts supabase/functions/stripe-token-webhook/index.ts
       - run: npm run typecheck
       - run: npm run build
