@@ -13,6 +13,7 @@ Status: **Code written; CI and visual verification pending. Not deployed.**
 ## Scope
 - `src/app/globals.css`
 - `src/app/layout.tsx`
+- `src/context/AppContext.tsx`
 - `src/types/database.ts`
 - `src/modules/settings/service.ts`
 - `src/modules/settings/components/SettingsHub.tsx`
