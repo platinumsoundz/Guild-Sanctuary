@@ -9,6 +9,7 @@ const service = read('../src/modules/settings/service.ts');
 const types = read('../src/types/database.ts');
 const appContext = read('../src/context/AppContext.tsx');
 
+assert.ok(settings.includes('value="system"'), 'missing system preference option in Settings');
 for (const theme of ['light', 'dark', 'dusk']) {
   assert.ok(css.includes(`:root[data-theme="${theme}"]`) || (theme === 'dark' && css.includes(':root {')), `missing ${theme} palette`);
   assert.ok(settings.includes(`value="${theme}"`), `missing ${theme} option in Settings`);
@@ -24,7 +25,7 @@ assert.ok(layout.includes('__html: themeBootstrap'), 'theme bootstrap must be in
 assert.ok(!layout.includes('className="dark"'), 'fixed dark class must not override the selected theme');
 assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection must persist through account settings');
 assert.ok(service.includes("theme: 'system'"), 'new accounts must default to the system colour preference');
-assert.ok(service.includes("record.theme === 'light' || record.theme === 'dusk'"), 'saved themes must be normalised');
+assert.ok(service.includes("record.theme === 'system' || record.theme === 'light' || record.theme === 'dark' || record.theme === 'dusk'"), 'saved themes must be normalised');
 assert.ok(service.includes('Choose a supported Sanctuary theme.'), 'unsupported themes must be rejected');
 assert.ok(types.includes("export type AccountTheme = 'system' | 'light' | 'dark' | 'dusk'"), 'theme must be typed');
 assert.ok(types.includes('theme: AccountTheme;'), 'account preferences must contain a typed theme');
