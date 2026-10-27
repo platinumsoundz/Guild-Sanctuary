@@ -39,6 +39,10 @@ export async function POST(request: Request) {
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
+  if (session.mode === 'payment' && session.payment_status !== 'paid') {
+    // Completed but unpaid sessions are not fulfillment events; acknowledge without granting tokens.
+    return response(200, { received: 'true' });
+  }
   if (session.mode !== 'payment' || session.payment_status !== 'paid' || !session.id ||
       session.currency !== 'gbp' || session.amount_total === null ||
       !session.metadata?.sanctuary_order_id || !session.metadata?.sanctuary_user_id ||
