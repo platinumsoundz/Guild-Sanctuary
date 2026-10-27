@@ -70,3 +70,18 @@ These are candidates to evaluate, not an implementation decision or a security e
 - **Do not use the archived `libsignal-protocol-javascript` package.** It is no longer maintained; a similarly named package or old tutorial is not evidence of a safe current dependency. Reference: https://github.com/signalapp/libsignal-protocol-javascript
 
 **Current decision:** no crypto package has been added and no encrypted mode has been advertised. Next step is an architecture spike comparing Matrix integration cost against a genuinely browser-compatible, maintained protocol implementation. The choice must include threat model, licensing, multi-device support, identity verification, group protocol, recovery, and security review—not just an API that can encrypt a string.
+### Additional browser-first candidate found
+
+- **OpenE2EE Signal Protocol SDK:** The project advertises a pure-TypeScript browser/React Native/Node implementation with local device state, session ratcheting, and multi-device/group support. Its public docs explicitly say it has **not been independently audited**. Its maturity, protocol deviations, maintenance, package provenance, licensing, and security review need independent assessment before it is trusted with real private messages. It may reduce the need for a separate Matrix homeserver, but that operational convenience is not evidence that it is safer. References: https://github.com/open-e2ee/signal-protocol-js and https://docs.open-e2ee.dev/
+
+### Decision criteria
+
+| Criterion | Matrix JS SDK | OpenE2EE browser SDK |
+|---|---|---|
+| Browser crypto path | Rust crypto WASM documented by Matrix SDK | Pure TypeScript advertised by project |
+| Extra service | Requires Matrix homeserver and account/device mapping | Can use custom delivery transport, according to project docs |
+| Assurance signal | Established ecosystem and official SDK documentation; still needs Sanctuary-specific review | Newer/smaller project; project documentation says no independent audit |
+| Licensing / integration | Review project license and homeserver deployment requirements | Verify selected package version's exact license and protocol deviations before use |
+| Current status | Candidate only | Candidate only |
+
+**Recommendation:** Do not select by convenience or claims alone. Evaluate Matrix first for ecosystem maturity, and evaluate OpenE2EE as a browser-first alternative only after an explicit assurance/licensing review. No package has been installed and neither candidate is approved for production use.
