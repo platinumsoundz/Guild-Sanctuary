@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Conversation, PublicProfile } from '@/types/database';
 import { searchPublicProfiles } from '@/modules/profiles';
 import { createGroupConversation, fetchUserConversations } from './service';
@@ -19,30 +19,78 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   const [selectedMembers, setSelectedMembers] = useState<PublicProfile[]>([]);
   const [groupName, setGroupName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inboxRequest = useRef(0);
+  const searchRequest = useRef(0);
+  const groupRequest = useRef(0);
+  const activeUserId = useRef(currentUserId);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
+    const requestId = ++inboxRequest.current;
+    const requestedUserId = currentUserId;
     try {
-      setConversations(await fetchUserConversations(currentUserId));
+      const nextConversations = await fetchUserConversations(requestedUserId);
+      if (requestId !== inboxRequest.current || activeUserId.current !== requestedUserId) return;
+      setConversations(nextConversations);
       setError(null);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'Conversations could not be loaded.');
+      if (requestId === inboxRequest.current && activeUserId.current === requestedUserId) {
+        setError(loadError instanceof Error ? loadError.message : 'Conversations could not be loaded.');
+      }
     } finally {
-      setIsLoading(false);
+      if (requestId === inboxRequest.current && activeUserId.current === requestedUserId) {
+        setIsLoading(false);
+      }
     }
-  };
+  }, [currentUserId]);
 
   useEffect(() => {
+    activeUserId.current = currentUserId;
+    inboxRequest.current += 1;
+    searchRequest.current += 1;
+    groupRequest.current += 1;
+    setConversations([]);
+    setQuery('');
+    setResults([]);
+    setSelectedMembers([]);
+    setGroupName('');
+    setIsLoading(true);
+    setIsSearching(false);
+    setIsCreatingGroup(false);
+    setError(null);
     void refresh();
-  }, [currentUserId]);
+    return () => {
+      inboxRequest.current += 1;
+      searchRequest.current += 1;
+      groupRequest.current += 1;
+    };
+  }, [currentUserId, refresh]);
 
   const search = async (value: string) => {
     setQuery(value);
+    const requestId = ++searchRequest.current;
+    const requestedUserId = currentUserId;
+    const normalizedQuery = value.trim();
+    if (normalizedQuery.length < 2) {
+      setResults([]);
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
     try {
-      setResults(value.trim().length >= 2 ? await searchPublicProfiles(value) : []);
-      setError(null);
+      const nextResults = await searchPublicProfiles(normalizedQuery);
+      if (requestId === searchRequest.current && activeUserId.current === requestedUserId) {
+        setResults(nextResults.filter((profile) => profile.userId !== requestedUserId));
+        setError(null);
+      }
     } catch (searchError) {
-      setError(searchError instanceof Error ? searchError.message : 'People could not be searched.');
+      if (requestId === searchRequest.current && activeUserId.current === requestedUserId) {
+        setError(searchError instanceof Error ? searchError.message : 'People could not be searched.');
+      }
+    } finally {
+      if (requestId === searchRequest.current && activeUserId.current === requestedUserId) setIsSearching(false);
     }
   };
 
@@ -54,16 +102,30 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
 
   const handleCreateGroup = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isCreatingGroup || selectedMembers.length < 2) return;
+    const requestId = ++groupRequest.current;
+    const requestedUserId = currentUserId;
+    const requestedMembers = selectedMembers.map((member) => member.userId);
+    const requestedName = groupName;
+    setIsCreatingGroup(true);
+    setError(null);
     try {
-      const conversation = await createGroupConversation(currentUserId, selectedMembers.map((member) => member.userId), groupName);
+      const conversation = await createGroupConversation(requestedUserId, requestedMembers, requestedName);
+      if (requestId !== groupRequest.current || activeUserId.current !== requestedUserId) return;
       setGroupName('');
       setSelectedMembers([]);
       setQuery('');
       setResults([]);
       await refresh();
-      onOpenConversation(conversation);
+      if (requestId === groupRequest.current && activeUserId.current === requestedUserId) {
+        onOpenConversation(conversation);
+      }
     } catch (createError) {
-      setError(createError instanceof Error ? createError.message : 'The group conversation could not be created.');
+      if (requestId === groupRequest.current && activeUserId.current === requestedUserId) {
+        setError(createError instanceof Error ? createError.message : 'The group conversation could not be created.');
+      }
+    } finally {
+      if (requestId === groupRequest.current && activeUserId.current === requestedUserId) setIsCreatingGroup(false);
     }
   };
 
@@ -88,9 +150,10 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
             <span>Find members by name or username</span>
             <input value={query} onChange={(event) => void search(event.currentTarget.value)} minLength={2} placeholder="Search community…" />
           </label>
+          {isSearching && <p className={styles.description} role="status">Searching…</p>}
           {results.length > 0 && (
             <ul className={styles.searchResults}>
-              {results.filter((profile) => profile.userId !== currentUserId).map((profile) => (
+              {results.map((profile) => (
                 <li key={profile.userId}>
                   <label>
                     <input type="checkbox" checked={selectedMembers.some((member) => member.userId === profile.userId)} onChange={() => toggleMember(profile)} />
@@ -101,7 +164,9 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
             </ul>
           )}
           <p className={styles.selected}>{selectedMembers.length} member{selectedMembers.length === 1 ? '' : 's'} selected (choose at least two)</p>
-          <button className={styles.actionButton} type="submit" disabled={selectedMembers.length < 2}>Create group</button>
+          <button className={styles.actionButton} type="submit" disabled={selectedMembers.length < 2 || isCreatingGroup}>
+            {isCreatingGroup ? 'Creating group…' : 'Create group'}
+          </button>
         </form>
       </section>
       <section className={styles.conversations} aria-labelledby="conversations-title">
