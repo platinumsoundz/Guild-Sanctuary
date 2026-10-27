@@ -7,9 +7,9 @@ import { isSupabaseCommunityStorageConfigured, requireCommunityStorageUser } fro
 import type { PublicProfile } from '@/types/database';
 import styles from './SelfDiscovery.module.css';
 
-type Answers = { connection: string; decisions: string; motivation: string; zodiac: string };
+type Answers = { connection: string; decisions: string; motivation: string; communication: string; learning: string; zodiac: string };
 type Summary = Record<string, string>;
-const emptyAnswers: Answers = { connection: '', decisions: '', motivation: '', zodiac: '' };
+const emptyAnswers: Answers = { connection: '', decisions: '', motivation: '', communication: '', learning: '', zodiac: '' };
 const fields: { key: keyof Answers; title: string; prompt: string; helper: string; options: { value: string; label: string; detail: string }[] }[] = [
   { key: 'connection', title: 'What usually helps you recharge?', prompt: 'Choose what feels most like you lately. There is no right answer.', helper: 'You can change this whenever it feels different.', options: [
     { value: 'quiet', label: 'Quiet time on my own', detail: 'I reset with space to think or do my own thing.' },
@@ -27,6 +27,18 @@ const fields: { key: keyof Answers; title: string; prompt: string; helper: strin
     { value: 'stability', label: 'Security and stability', detail: 'I value trust, preparation, and knowing where I stand.' },
     { value: 'freedom', label: 'Freedom and meaning', detail: 'I want room to be myself and follow what feels meaningful.' },
   ] },
+  { key: 'communication', title: 'What helps you communicate when something matters?', prompt: 'Think about what tends to help you feel understood. You can choose a different answer in another situation.', helper: 'This is a preference to explore, not a fixed communication type.', options: [
+    { value: 'direct', label: 'Clear and direct words', detail: 'I appreciate knowing the point and what is being asked.' },
+    { value: 'gentle', label: 'A gentle, considerate approach', detail: 'Tone and reassurance help me stay open to the conversation.' },
+    { value: 'time', label: 'Time to think before replying', detail: 'I often express myself better after I have had a moment.' },
+    { value: 'talk', label: 'Talking it through together', detail: 'I understand my thoughts as I discuss them with someone.' },
+  ] },
+  { key: 'learning', title: 'How do you most enjoy learning something new?', prompt: 'Choose what often helps you get started. People can learn in several ways.', helper: 'These are learning preferences, not fixed learning styles or limits.', options: [
+    { value: 'hands-on', label: 'Trying it out hands-on', detail: 'Experimenting and practising helps it click.' },
+    { value: 'reading', label: 'Reading or watching an explanation', detail: 'I like to understand the steps before I try.' },
+    { value: 'discussion', label: 'Discussing it with someone', detail: 'Questions and conversation help me connect ideas.' },
+    { value: 'examples', label: 'Seeing examples and patterns', detail: 'I learn by comparing examples and noticing how things work.' },
+  ] },
   { key: 'zodiac', title: 'Would you like to include a zodiac sign?', prompt: 'Completely optional. We ask for the sign itself, not your date of birth.', helper: 'Astrology is offered as a cultural/reflective lens, not a scientific prediction.', options: [
     ...['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'].map((sign) => ({ value: sign, label: sign, detail: '' })),
   ] },
@@ -35,6 +47,8 @@ const labels: Record<string, Record<string, string>> = {
   connection: { quiet: 'Quiet time on my own', people: 'Time with people', mix: 'A bit of both' },
   decisions: { analysis: 'Evidence and analysis', values: 'Values and people', both: 'A balance of both' },
   motivation: { growth: 'Learning and mastery', belonging: 'Connection and belonging', stability: 'Security and stability', freedom: 'Freedom and meaning' },
+  communication: { direct: 'Clear and direct words', gentle: 'A gentle, considerate approach', time: 'Time to think before replying', talk: 'Talking it through together' },
+  learning: { 'hands-on': 'Trying it out hands-on', reading: 'Reading or watching an explanation', discussion: 'Discussing it with someone', examples: 'Seeing examples and patterns' },
 };
 function toSummary(answers: Answers, selected: string[]): Summary {
   const summary: Summary = {};
@@ -89,6 +103,8 @@ function readAnswers(value: unknown): Answers {
     connection: typeof raw.connection === 'string' ? raw.connection : '',
     decisions: typeof raw.decisions === 'string' ? raw.decisions : '',
     motivation: typeof raw.motivation === 'string' ? raw.motivation : '',
+    communication: typeof raw.communication === 'string' ? raw.communication : '',
+    learning: typeof raw.learning === 'string' ? raw.learning : '',
     zodiac: typeof raw.zodiac === 'string' ? raw.zodiac : '',
   };
 }
@@ -166,7 +182,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
     try {
       await persistAnswers();
       setNotice('Your answers are saved to your Sanctuary account.');
-      setStep((current) => Math.min(4, current + 1));
+      setStep((current) => Math.min(fields.length, current + 1));
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Your answers could not be saved.');
     } finally { setBusy(false); }
@@ -251,9 +267,9 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
       {!configured && <p className={styles.stateNotice}>Sign in with a connected Sanctuary account to save answers to the website. Guest/demo mode does not save this information.</p>}
       {loaded && configured && storageReady && (
         <div className={styles.questionCard}>
-          <div className={styles.progressHead}><span>{step < 4 ? 'A FEW GENTLE QUESTIONS' : 'YOUR PROFILE SUMMARY'}</span><span>{step < 4 ? `Question ${step + 1} of 4` : 'Sharing controls'}</span></div>
-          <div className={styles.progress}><span style={{ width: `${Math.min(step + 1, 4) / 4 * 100}%` }} /></div>
-          {step < 4 ? (
+          <div className={styles.progressHead}><span>{step < fields.length ? 'A FEW GENTLE QUESTIONS' : 'YOUR PROFILE SUMMARY'}</span><span>{step < fields.length ? `Question ${step + 1} of ${fields.length}` : 'Sharing controls'}</span></div>
+          <div className={styles.progress}><span style={{ width: `${Math.min(step + 1, fields.length) / fields.length * 100}%` }} /></div>
+          {step < fields.length ? (
             <fieldset className={styles.question}>
               <legend>{fields[step].title}</legend><p>{fields[step].prompt}</p>
               {fields[step].key === 'zodiac' ? (
@@ -284,7 +300,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
               )}
               <h3>Choose what belongs on your profile</h3>
               <p>Every item starts private. Select only the details you are comfortable sharing. You can hide the whole summary at any time.</p>
-              {Object.entries({ connection: 'How I recharge', decisions: 'How I approach decisions', motivation: 'What motivates me', zodiac: 'My zodiac sign' }).map(([key, label]) => (
+              {Object.entries({ connection: 'How I recharge', decisions: 'How I approach decisions', motivation: 'What motivates me', communication: 'How I communicate', learning: 'How I learn', communication: 'How I communicate', learning: 'How I learn', zodiac: 'My zodiac sign' }).map(([key, label]) => (
                 <label key={key} className={styles.shareOption}>
                   <input type="checkbox" checked={selectedFields.includes(key)} onChange={(event) => setSelectedFields((current) => event.target.checked ? [...current, key] : current.filter((item) => item !== key))} />
                   <span><strong>{label}</strong><small>{summary[key] || 'Not answered yet'}</small></span>
@@ -294,16 +310,16 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
                 <input type="checkbox" checked={visible} onChange={(event) => setVisible(event.target.checked)} />
                 <span><strong>Show selected summary on my public profile</strong><small>Off by default. This publishes only the selected summary fields, never the raw answers.</small></span>
               </label>
-              {visible && Object.keys(summary).length > 0 && <div className={styles.publicPreview}><span>PUBLIC PROFILE PREVIEW</span>{Object.entries(summary).map(([key, value]) => <div key={key}><span>{({ connection: 'Recharge', decisions: 'Decision style', motivation: 'Motivation', zodiac: 'Zodiac' } as Record<string,string>)[key] ?? key}</span><strong>{value}</strong></div>)}</div>}
+              {visible && Object.keys(summary).length > 0 && <div className={styles.publicPreview}><span>PUBLIC PROFILE PREVIEW</span>{Object.entries(summary).map(([key, value]) => <div key={key}><span>{({ connection: 'Recharge', decisions: 'Decision style', motivation: 'Motivation', communication: 'Communication', learning: 'Learning', zodiac: 'Zodiac' } as Record<string,string>)[key] ?? key}</span><strong>{value}</strong></div>)}</div>}
               <p className={styles.helper}>Your answers and sharing preferences are saved to the Sanctuary website, not your browser's local storage.</p>
             </div>
           )}
           <label className={styles.consent}><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span><strong>I agree to save these answers to my Sanctuary account.</strong><small>Optional. You can stop, change your mind, hide your summary, or delete your saved answers at any time.</small></span></label>
           <div className={styles.controls}>
             <button type="button" className={styles.secondary} disabled={step === 0 || busy} onClick={() => setStep((current) => Math.max(0, current - 1))}>Back</button>
-            {step < 4 ? <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void advance()}>{busy ? 'Saving…' : 'Save & continue'}</button> : <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void saveSummary()}>{busy ? 'Saving…' : consent ? 'Save privacy & profile choices' : 'Withdraw consent & delete answers'}</button>}
+            {step < fields.length ? <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void advance()}>{busy ? 'Saving…' : 'Save & continue'}</button> : <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void saveSummary()}>{busy ? 'Saving…' : consent ? 'Save privacy & profile choices' : 'Withdraw consent & delete answers'}</button>}
           </div>
-          {step === 4 && <button type="button" className={styles.clearButton} disabled={busy} onClick={() => void clearAnswers()}><Trash2 size={14} /> Delete my saved answers and hide summary</button>}
+          {step === fields.length && <button type="button" className={styles.clearButton} disabled={busy} onClick={() => void clearAnswers()}><Trash2 size={14} /> Delete my saved answers and hide summary</button>}
           {notice && <p className={styles.success} role="status">{notice}</p>}
           {error && <p className={styles.error} role="alert">{error}</p>}
         </div>
@@ -337,7 +353,7 @@ export function SelfDiscoveryComparison({ currentUserId, profile }: { currentUse
   }, [currentUserId, profile.selfDiscoverySummary]);
 
   if (!profile.selfDiscoverySummary) return null;
-  const myValues = answers ? toSummary(answers, ['connection','decisions','motivation','zodiac']) : {};
+  const myValues = answers ? toSummary(answers, ['connection','decisions','motivation','communication','learning','zodiac']) : {};
   const rows = Object.entries(profile.selfDiscoverySummary).filter(([key]) => key in myValues);
   return (
     <section className={styles.comparison} aria-labelledby="discovery-compare-title">
@@ -347,7 +363,7 @@ export function SelfDiscoveryComparison({ currentUserId, profile }: { currentUse
       {loading ? <p className={styles.helper}>Checking your saved answers…</p> : error ? <p className={styles.error} role="alert">{error}</p> : !answers ? <p className={styles.helper}>Save your own answers in your profile's Self-discovery Centre to compare.</p> : rows.length === 0 ? <p className={styles.helper}>There are no matching questions to compare yet. Answer a question they chose to share.</p> : (
         <div className={styles.comparisonRows}>{rows.map(([key, theirValue]) => {
           const same = myValues[key] === theirValue;
-          return <div key={key} className={styles.comparisonRow}><span>{({connection:'How I recharge',decisions:'Decision style',motivation:'Motivation',zodiac:'Zodiac sign'} as Record<string,string>)[key] ?? key}</span><strong>{same ? 'You answered the same' : 'You answered differently'}</strong><small>You: {myValues[key]} · {profile.displayName}: {theirValue}</small></div>;
+          return <div key={key} className={styles.comparisonRow}><span>{({connection:'How I recharge',decisions:'Decision style',motivation:'Motivation',communication:'Communication preference',learning:'Learning preference',zodiac:'Zodiac sign'} as Record<string,string>)[key] ?? key}</span><strong>{same ? 'You answered the same' : 'You answered differently'}</strong><small>You: {myValues[key]} · {profile.displayName}: {theirValue}</small></div>;
         })}</div>
       )}
     </section>
