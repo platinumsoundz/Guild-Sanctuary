@@ -375,6 +375,7 @@ not a separate permanent document.
 - **In code on feature branch** — Added a small automated contract check for Today routing, visible status labels, and feedback disclosure.
 - **In code on feature branch** — Added an optional six-step beta onboarding mission board with browser-local progress, completion controls, a reset option, and shortcuts into real routes or concept previews. Progress is not public and is not tied to account identity.
 - **In code on feature branch** — Added a visual Now / Next / Later build radar, including a clear guardrail that wallet purchases and high-impact actions remain gated behind release checks. It is directional, not a delivery promise.
+- **In code on feature branch** — Added a local concept preference picker that lets beta testers choose which idea interests them and carries that choice into a copyable feedback report. No vote is transmitted or aggregated.
 - **Not yet merged or deployed** — This work remains in a reviewable branch/PR. A passing contract or build does not prove browser-level behavior. Verify desktop/mobile, unauthenticated access, guest flow, clipboard fallback, theme contrast, and preview deployment before merge.
 - **Collaboration rule** — Use issues to capture tasks, branches for changes, PRs for review, and verified deployments for release evidence. Never share credentials or apply production database changes as part of a UI-only task.
 
