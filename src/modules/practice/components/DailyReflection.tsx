@@ -40,7 +40,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
   const [intention, setIntention] = useState('');
   const [reflection, setReflection] = useState('');
   const [status, setStatus] = useState('');
-  const [isReady, setIsReady] = useState(false);
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
   useEffect(() => {
     const loaded = readEntries(key);
     setEntries(loaded);
@@ -49,7 +49,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     setIntention(existing?.intention ?? '');
     setReflection(existing?.reflection ?? '');
     setStatus('');
-    setIsReady(true);
+    setLoadedKey(key);
   }, [key, today]);
   const savedToday = entries.some((entry) => entry.date === today);
   const saveReflection = (event: FormEvent<HTMLFormElement>) => {
@@ -95,7 +95,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
           <p className={styles.description}>No streaks, scores or pressure. Just a little space to notice how you are.</p>
         </div>
       </div>
-      {!isReady ? <p className={styles.notice} role="status">Opening your reflection on this device…</p> : (
+      {loadedKey !== key ? <p className={styles.notice} role="status">Opening your reflection on this device…</p> : (
         <form className={styles.form} onSubmit={saveReflection}>
           <fieldset className={styles.moodFieldset}>
             <legend>How are you feeling today?</legend>
