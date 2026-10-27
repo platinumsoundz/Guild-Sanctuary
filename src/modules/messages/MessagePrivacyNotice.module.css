@@ -1,0 +1,33 @@
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.notice > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--accent);
+}
+.notice strong {
+  display: block;
+  margin-bottom: 5px;
+  font: 700 11px/1.4 Arial, sans-serif;
+}
+.notice p {
+  margin: 0;
+  color: var(--muted);
+  font: 11px/1.55 Arial, sans-serif;
+}
+.notice span {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font: italic 10px/1.5 Arial, sans-serif;
+}
