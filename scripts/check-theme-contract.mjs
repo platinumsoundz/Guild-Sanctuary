@@ -9,6 +9,7 @@ const service = read('../src/modules/settings/service.ts');
 const types = read('../src/types/database.ts');
 const appContext = read('../src/context/AppContext.tsx');
 const workspaceCss = read('../src/components/AppWorkspace.module.css');
+const shellCss = read('../src/components/ResponsiveShell.module.css');
 
 assert.ok(settings.includes('value="system"'), 'missing system preference option in Settings');
 for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean']) {
@@ -31,6 +32,12 @@ assert.ok(service.includes("record.theme === 'stone'") && service.includes("reco
 assert.ok(types.includes("'system' | 'light' | 'dark' | 'dusk' | 'stone' | 'ocean'"), 'account theme type must include all palettes');
 assert.ok(!workspaceCss.includes('--surface: #fbfcf9') && !workspaceCss.includes('--ink: #25372c'), 'app workspace must not override global semantic palette tokens');
 assert.ok(!workspaceCss.includes('--accent: var(--theme-accent, var(--accent))'), 'workspace must not self-reference the accent token');
+assert.ok(/\.viewport\s*\{[^}]*background:\s*var\(--bg\)/s.test(shellCss), 'responsive shell viewport must use the active theme background');
+assert.ok(/\.viewport\s*\{[^}]*color:\s*var\(--ink\)/s.test(shellCss), 'responsive shell viewport must use the active theme text colour');
+for (const token of ['--surface', '--line', '--ink', '--muted', '--accent', '--accent-contrast', '--accent-soft']) {
+  assert.ok(shellCss.includes(`var(${token})`), `install banner must use semantic theme token ${token}`);
+}
+assert.ok(!shellCss.includes('background: #fbfcf9'), 'responsive shell must not hard-code a light viewport background');
 assert.ok(settings.includes('Token-unlockable themes can be added to this catalogue later'), 'token themes must remain future-facing, not falsely enabled');
 assert.ok(settings.includes('value="stone"') && settings.includes('value="ocean"'), 'grey and blue themes must be selectable');
 console.log('Theme contract checks passed. Static checks only; visual browser verification is still required.');
