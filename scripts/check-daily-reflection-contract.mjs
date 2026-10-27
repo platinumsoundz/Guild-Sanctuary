@@ -10,6 +10,7 @@ const checks = [
   ['uses account database client, not browser localStorage', /getSupabaseBrowserClient/.test(component) && !/localStorage/.test(component)],
   ['loads only the authenticated user’s rows', /from\('daily_reflections'\)[\s\S]*?\.eq\('user_id', userId\)/.test(component)],
   ['orders history newest first and bounds the query', /order\('reflection_date', \{ ascending: false \}\)/.test(component) && /\.limit\(90\)/.test(component)],
+  ['diary history renders all loaded entries rather than hiding older entries behind a seven-item slice', /Previous reflections/.test(component) && /\.filter\(\(entry\) => entry\.date !== today\)\.map\(\(entry\) =>/.test(component) && !/slice\(0, 7\)/.test(component)],
   ['saves with a per-user per-day upsert key', /\.upsert\([\s\S]*?user_id: userId[\s\S]*?reflection_date: today[\s\S]*?onConflict: 'user_id,reflection_date'/.test(component)],
   ['never silently falls back to local-only storage', /Nothing has been saved locally/.test(component) && !/localStorage/.test(component)],
   ['guest mode remains read-only', /if \(isGuest\)[\s\S]*?Sign in to save private diary entries/.test(component)],
