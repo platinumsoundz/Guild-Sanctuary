@@ -55,6 +55,9 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   const [data, setData] = useState<PlannerData>(EMPTY_DATA);
   const [ready, setReady] = useState(false);
   const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
+  const [storageWritableKey, setStorageWritableKey] = useState<string | null>(null);
+  const sessionReady = ready && loadedStorageKey === storageKey;
+  const visibleData = sessionReady ? data : EMPTY_DATA;
   const [selectedDate, setSelectedDate] = useState(localDateKey);
   const [newTask, setNewTask] = useState('');
   const [newHabit, setNewHabit] = useState('');
@@ -62,9 +65,19 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   const [storageWarning, setStorageWarning] = useState(false);
 
   useEffect(() => {
+    setReady(false);
+    setStatus('');
+    setNewTask('');
+    setNewHabit('');
     try {
-      setData(parseData(window.localStorage.getItem(storageKey)));
+      const loadedData = parseData(window.localStorage.getItem(storageKey));
+      setData(loadedData);
+      setStorageWritableKey(storageKey);
+      setStorageWarning(false);
     } catch {
+      // Never persist another account's in-memory data when this storage read fails.
+      setData(EMPTY_DATA);
+      setStorageWritableKey(null);
       setStorageWarning(true);
     } finally {
       setLoadedStorageKey(storageKey);
@@ -73,27 +86,27 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   }, [storageKey]);
 
   useEffect(() => {
-    if (!ready || loadedStorageKey !== storageKey) return;
+    if (!ready || loadedStorageKey !== storageKey || storageWritableKey !== storageKey) return;
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(data));
       setStorageWarning(false);
     } catch {
       setStorageWarning(true);
     }
-  }, [data, loadedStorageKey, ready, storageKey]);
+  }, [data, loadedStorageKey, ready, storageKey, storageWritableKey]);
 
-  const tasks = useMemo(() => data.tasks.filter((task) => task.date === selectedDate), [data.tasks, selectedDate]);
+  const tasks = useMemo(() => visibleData.tasks.filter((task) => task.date === selectedDate), [visibleData.tasks, selectedDate]);
   const completedCount = tasks.filter((task) => task.done).length;
-  const habitsCheckedToday = data.habits.filter((habit) => habit.checkedDates.includes(selectedDate)).length;
+  const habitsCheckedToday = visibleData.habits.filter((habit) => habit.checkedDates.includes(selectedDate)).length;
   const reviewDays = useMemo(() => Array.from({ length: 7 }, (_, index) => {
     const date = new Date(`${selectedDate}T12:00:00`);
     date.setDate(date.getDate() - (6 - index));
     return localDateKey(date);
   }), [selectedDate]);
-  const reviewTasks = useMemo(() => data.tasks.filter((task) => reviewDays.includes(task.date)), [data.tasks, reviewDays]);
+  const reviewTasks = useMemo(() => visibleData.tasks.filter((task) => reviewDays.includes(task.date)), [visibleData.tasks, reviewDays]);
   const reviewCompleted = reviewTasks.filter((task) => task.done).length;
-  const reviewNoteDays = reviewDays.filter((date) => Boolean(data.notesByDate[date]?.trim())).length;
-  const reviewHabitCheckins = data.habits.reduce((count, habit) => count + habit.checkedDates.filter((date) => reviewDays.includes(date)).length, 0);
+  const reviewNoteDays = reviewDays.filter((date) => Boolean(visibleData.notesByDate[date]?.trim())).length;
+  const reviewHabitCheckins = visibleData.habits.reduce((count, habit) => count + habit.checkedDates.filter((date) => reviewDays.includes(date)).length, 0);
 
   const addTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -108,7 +121,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   const addHabit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const title = newHabit.trim();
-    if (!title || title.length > MAX_HABIT_LENGTH || data.habits.length >= 20) return;
+    if (!title || title.length > MAX_HABIT_LENGTH || visibleData.habits.length >= 20) return;
     const habit: PlannerHabit = { id: crypto.randomUUID(), title, checkedDates: [], createdAt: new Date().toISOString() };
     setData((current) => ({ ...current, habits: [...current.habits, habit] }));
     setNewHabit('');
@@ -128,7 +141,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   };
 
   const exportData = () => {
-    const payload = { exportedAt: new Date().toISOString(), format: 'sanctuary-private-planner-v1', ...data };
+    const payload = { exportedAt: new Date().toISOString(), format: 'sanctuary-private-planner-v1', ...visibleData };
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
     const anchor = document.createElement('a');
     anchor.href = url;
@@ -157,7 +170,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
         <DailyReflection userId={userId} isGuest={false} />
       </section>
       <section className={styles.reflectionSection} aria-label="Self-discovery questionnaire">
-        <SelfDiscoveryCentre />
+        <SelfDiscoveryCentre key={userId} />
       </section>
       {storageWarning && <p className={styles.warning} role="alert">Browser storage is unavailable or full. Changes may not survive a refresh; export or copy important notes before leaving.</p>}
       <label className={styles.dateLabel}>Day
@@ -171,17 +184,17 @@ export function PersonalPlanner({ userId }: { userId: string }) {
         <form className={styles.addForm} onSubmit={addTask}>
           <label className={styles.visuallyHidden} htmlFor="planner-new-task">New task</label>
           <input id="planner-new-task" value={newTask} onChange={(event) => setNewTask(event.currentTarget.value)} maxLength={MAX_TASK_LENGTH} placeholder="What would help today?" />
-          <button type="submit" disabled={!ready || !newTask.trim()}>Add task</button>
+          <button type="submit" disabled={!sessionReady || !newTask.trim()}>Add task</button>
         </form>
         {tasks.length === 0 ? <p className={styles.empty}>Nothing planned yet. Add one small step if that would help.</p> : (
           <ul className={styles.taskList}>
             {tasks.map((task) => (
               <li key={task.id}>
                 <label>
-                  <input type="checkbox" checked={task.done} onChange={(event) => { const done = event.currentTarget.checked; setData((current) => ({ ...current, tasks: current.tasks.map((item) => item.id === task.id ? { ...item, done } : item) })); }} />
+                  <input type="checkbox" disabled={!sessionReady} checked={task.done} onChange={(event) => { const done = event.currentTarget.checked; setData((current) => ({ ...current, tasks: current.tasks.map((item) => item.id === task.id ? { ...item, done } : item) })); }} />
                   <span className={task.done ? styles.completed : undefined}>{task.title}</span>
                 </label>
-                <button type="button" className={styles.removeButton} aria-label={`Delete task: ${task.title}`} onClick={() => setData((current) => ({ ...current, tasks: current.tasks.filter((item) => item.id !== task.id) }))}>Delete</button>
+                <button type="button" className={styles.removeButton} disabled={!sessionReady} aria-label={`Delete task: ${task.title}`} onClick={() => setData((current) => ({ ...current, tasks: current.tasks.filter((item) => item.id !== task.id) }))}>Delete</button>
               </li>
             ))}
           </ul>
@@ -203,23 +216,23 @@ export function PersonalPlanner({ userId }: { userId: string }) {
       <section className={styles.panel} aria-labelledby="habits-heading">
         <div className={styles.sectionHeading}>
           <h2 id="habits-heading">Gentle habits</h2>
-          <span>{habitsCheckedToday} of {data.habits.length} checked today</span>
+          <span>{habitsCheckedToday} of {visibleData.habits.length} checked today</span>
         </div>
         <p className={styles.reviewCopy}>Choose routines that support you. Missed days are just days; there are no streaks or penalties.</p>
         <form className={styles.addForm} onSubmit={addHabit}>
           <label className={styles.visuallyHidden} htmlFor="planner-new-habit">New habit</label>
           <input id="planner-new-habit" value={newHabit} onChange={(event) => setNewHabit(event.currentTarget.value)} maxLength={MAX_HABIT_LENGTH} placeholder="e.g. Take a short walk" />
-          <button type="submit" disabled={!ready || !newHabit.trim() || data.habits.length >= 20}>Add habit</button>
+          <button type="submit" disabled={!sessionReady || !newHabit.trim() || visibleData.habits.length >= 20}>Add habit</button>
         </form>
-        {data.habits.length === 0 ? <p className={styles.empty}>Add a routine you would like to make room for.</p> : (
+        {visibleData.habits.length === 0 ? <p className={styles.empty}>Add a routine you would like to make room for.</p> : (
           <ul className={styles.taskList}>
-            {data.habits.map((habit) => (
+            {visibleData.habits.map((habit) => (
               <li key={habit.id}>
                 <label>
-                  <input type="checkbox" checked={habit.checkedDates.includes(selectedDate)} onChange={(event) => toggleHabit(habit.id, event.currentTarget.checked)} />
+                  <input type="checkbox" disabled={!sessionReady} checked={habit.checkedDates.includes(selectedDate)} onChange={(event) => toggleHabit(habit.id, event.currentTarget.checked)} />
                   <span>{habit.title}</span>
                 </label>
-                <button type="button" className={styles.removeButton} aria-label={`Delete habit: ${habit.title}`} onClick={() => setData((current) => ({ ...current, habits: current.habits.filter((item) => item.id !== habit.id) }))}>Delete</button>
+                <button type="button" className={styles.removeButton} disabled={!sessionReady} aria-label={`Delete habit: ${habit.title}`} onClick={() => setData((current) => ({ ...current, habits: current.habits.filter((item) => item.id !== habit.id) }))}>Delete</button>
               </li>
             ))}
           </ul>
@@ -231,11 +244,11 @@ export function PersonalPlanner({ userId }: { userId: string }) {
           <span>Optional · private</span>
         </div>
         <label className={styles.noteLabel} htmlFor="planner-daily-note">What would you like to remember about this day?</label>
-        <textarea id="planner-daily-note" rows={6} maxLength={MAX_NOTE_LENGTH} value={data.notesByDate[selectedDate] ?? ''} onChange={(event) => updateNote(event.currentTarget.value)} placeholder="A win, a challenge, a feeling, or anything worth noting…" />
-        <p className={styles.characterCount}>{(data.notesByDate[selectedDate] ?? '').length} / {MAX_NOTE_LENGTH}</p>
+        <textarea id="planner-daily-note" disabled={!sessionReady} rows={6} maxLength={MAX_NOTE_LENGTH} value={visibleData.notesByDate[selectedDate] ?? ''} onChange={(event) => updateNote(event.currentTarget.value)} placeholder="A win, a challenge, a feeling, or anything worth noting…" />
+        <p className={styles.characterCount}>{(visibleData.notesByDate[selectedDate] ?? '').length} / {MAX_NOTE_LENGTH}</p>
       </section>
       <div className={styles.actions}>
-        <button type="button" onClick={exportData} disabled={!ready}>Export my planner</button>
+        <button type="button" onClick={exportData} disabled={!sessionReady}>Export my planner</button>
         <button type="button" className={styles.dangerButton} onClick={clearData} disabled={!ready}>Delete all local planner data</button>
       </div>
       <p className={styles.status} role="status" aria-live="polite">{status}</p>
