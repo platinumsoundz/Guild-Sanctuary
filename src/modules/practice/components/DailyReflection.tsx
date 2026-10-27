@@ -52,6 +52,15 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     setLoadedKey(key);
   }, [key, today]);
   const savedToday = entries.some((entry) => entry.date === today);
+  const recentEntries = entries
+    .filter((entry) => entry.date <= today)
+    .slice(0, 7);
+  const moodCounts = MOODS.map((option) => ({
+    ...option,
+    count: recentEntries.filter((entry) => entry.mood === option.value).length,
+  })).filter((option) => option.count > 0);
+  const mostFrequentMood = [...moodCounts].sort((a, b) => b.count - a.count)[0];
+  const reflectionDays = recentEntries.length;
   const saveReflection = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isGuest) { setStatus('Sign in to keep a reflection on this device.'); return; }
@@ -126,6 +135,46 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
           {status && <p className={styles.status} role="status" aria-live="polite">{status}</p>}
           <p className={styles.disclaimer}>This is a personal reflection tool, not medical advice, diagnosis or treatment.</p>
         </form>
+      )}
+      {loadedKey === key && recentEntries.length > 0 && (
+        <section className={styles.insights} aria-labelledby="reflection-insights-title">
+          <div className={styles.insightsHeading}>
+            <div>
+              <p className={styles.eyebrow}>A GENTLE LOOK BACK</p>
+              <h3 id="reflection-insights-title">Your recent check-ins</h3>
+            </div>
+            <span className={styles.insightsCount}>{reflectionDays} {reflectionDays === 1 ? 'day' : 'days'} noted</span>
+          </div>
+          <p className={styles.insightsDescription}>
+            {reflectionDays === 1
+              ? 'You have made space for one check-in. There is no target to reach—come back whenever it feels useful.'
+              : `You have made space for ${reflectionDays} check-ins in your latest entries. This is a snapshot, not a score or a measure of progress.`}
+          </p>
+          <div className={styles.moodSummary} aria-label="Mood selections in your latest check-ins">
+            {moodCounts.map((item) => (
+              <div className={styles.moodSummaryItem} key={item.value}>
+                <div className={styles.moodSummaryLabel}>
+                  <span>{item.label}</span><span>{item.count} {item.count === 1 ? 'check-in' : 'check-ins'}</span>
+                </div>
+                <div className={styles.moodTrack} aria-hidden="true">
+                  <span className={styles.moodBar} style={{ width: `${(item.count / reflectionDays) * 100}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          {mostFrequentMood && (
+            <p className={styles.reflectionPrompt}>
+              <strong>A prompt to consider:</strong> {mostFrequentMood.value === 'low' || mostFrequentMood.value === 'heavy'
+                ? 'What kind of support or small kindness might make today feel a little more manageable?'
+                : mostFrequentMood.value === 'steady'
+                  ? 'What has helped you feel grounded lately, and how could you make room for a little more of it?'
+                  : mostFrequentMood.value === 'good'
+                    ? 'What is one thing you would like to remember about what has been going well?'
+                    : 'What has been giving you energy or hope, and is there a gentle way to nurture it?'}
+            </p>
+          )}
+          <p className={styles.insightsPrivacy}>Calculated from reflections stored in this browser only. These patterns do not diagnose or explain your mental health.</p>
+        </section>
       )}
       {loadedKey === key && entries.some((entry) => entry.date !== today) && (
         <details className={styles.history}>

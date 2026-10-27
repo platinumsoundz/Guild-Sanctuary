@@ -46,3 +46,19 @@
 @media (max-width: 760px) { .moodOptions { grid-template-columns: repeat(2, minmax(0, 1fr)); } .moodOption:last-child { grid-column: 1 / -1; } }
 @media (max-width: 420px) { .card { padding: 16px; border-radius: 14px; } .moodOptions { grid-template-columns: 1fr; } .moodOption:last-child { grid-column: auto; } .actions > button { width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .moodOption { transition: none; } }
+
+.insights { margin-top: 24px; padding: 18px; border: 1px solid var(--line, #dce4dc); border-radius: 14px; background: var(--surface, #fbfcf9); }
+.insightsHeading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.insightsHeading h3 { margin: 0; color: var(--ink, #25372c); font-size: 17px; font-weight: 700; letter-spacing: -.015em; }
+.insightsCount { padding: 6px 9px; border: 1px solid var(--line, #dce4dc); border-radius: 999px; color: var(--muted, #68776c); font-size: 11px; font-weight: 650; }
+.insightsDescription { margin: 9px 0 16px; color: var(--muted, #68776c); font-size: 12px; line-height: 1.6; }
+.moodSummary { display: grid; gap: 12px; }
+.moodSummaryItem { display: grid; gap: 6px; }
+.moodSummaryLabel { display: flex; justify-content: space-between; gap: 12px; color: var(--ink, #25372c); font-size: 12px; }
+.moodSummaryLabel span:last-child { color: var(--muted, #68776c); font-size: 11px; }
+.moodTrack { height: 7px; overflow: hidden; border-radius: 999px; background: var(--line, #dce4dc); }
+.moodBar { display: block; height: 100%; border-radius: inherit; background: var(--accent, #52765c); transition: width 180ms ease; }
+.reflectionPrompt { margin: 17px 0 0; padding: 12px 14px; border-left: 3px solid var(--accent, #52765c); border-radius: 0 9px 9px 0; background: var(--accent-soft, #edf3eb); color: var(--ink, #25372c); font-size: 12px; line-height: 1.65; }
+.reflectionPrompt strong { font-weight: 750; }
+.insightsPrivacy { margin: 12px 0 0; color: var(--muted, #68776c); font-size: 10px; line-height: 1.5; }
+@media (prefers-reduced-motion: reduce) { .moodBar { transition: none; } }
