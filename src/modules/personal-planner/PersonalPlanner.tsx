@@ -141,7 +141,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
             {tasks.map((task) => (
               <li key={task.id}>
                 <label>
-                  <input type="checkbox" checked={task.done} onChange={(event) => setData((current) => ({ ...current, tasks: current.tasks.map((item) => item.id === task.id ? { ...item, done: event.currentTarget.checked } : item) }))} />
+                  <input type="checkbox" checked={task.done} onChange={(event) => { const done = event.currentTarget.checked; setData((current) => ({ ...current, tasks: current.tasks.map((item) => item.id === task.id ? { ...item, done } : item) })); }} />
                   <span className={task.done ? styles.completed : undefined}>{task.title}</span>
                 </label>
                 <button type="button" className={styles.removeButton} aria-label={`Delete task: ${task.title}`} onClick={() => setData((current) => ({ ...current, tasks: current.tasks.filter((item) => item.id !== task.id) }))}>Delete</button>
