@@ -1,6 +1,6 @@
 # Live Supabase verification and Phase 1 blockers
 
-Checked: 2026-10-27 07:36 UTC  
+Checked: 2026-10-27 07:50 UTC  
 Project: Guild-Sanctuary production project  
 Method: read-only project, migration-ledger, schema/catalog, privilege, and advisor queries; one non-destructive PostgREST schema-cache reload notification. No table data, schema, roles, secrets, or project configuration were changed.
 
@@ -41,9 +41,9 @@ A read-only inspection of `public.set_member_role(uuid,text)` found that the liv
 
 ## Moderation migration collision — verified at 07:36 UTC
 
-Two open proposals, PR #81 and PR #82, replace the same live `public.apply_moderation_action(...)` function using different migration versions. The live migration ledger still ends at `20261027003633`; neither proposal appears in the ledger. PR #81 includes explicit null-rationale handling and message-target existence/state handling. PR #82 overlaps on account role-rank checks but does not include the message-target path. If both are applied, the later replacement can overwrite safeguards in the earlier function body. Keep them unmerged/unapplied until there is one canonical reviewed migration.
+PR #81 is now the canonical moderation proposal; overlapping draft PR #82 has been closed without merging to prevent competing replacements of the same function. The live migration ledger still ends at `20261027003633`; the canonical proposal is not applied. PR #81 preserves comment-aware handling, adds explicit message-target existence/state handling, validates null inputs, and now enforces the approved strict hierarchy for both account and content actions.
 
-The live schema confirms `public.messages.state` exists and `moderation_action_type` currently contains `ban, hide, remove, restore, suspend, warn`. The policy question of whether content actions must respect the content owner's role remains open; do not silently invent a policy in SQL. No database changes were made during this review.
+Policy approved by the product owner: a moderator cannot act on their own account/content and must strictly outrank the account or content owner. Equal/higher-ranked targets are denied; missing owner/role information fails closed. The canonical proposal resolves owners for posts, shorts, events, comments, and messages, locks actor/owner profiles in deterministic order, and rechecks the acting role after locks. Static contract and full CI passed on code revision `93391a2d70df6df3d66a39f45ebe860e10f9c632`; Cloudflare build is still in progress. This is not database integration proof. No production database changes were made.
 
 ## Security advisor snapshot
 
@@ -58,7 +58,7 @@ Observed at 2026-10-27 07:36 UTC:
 
 ## Safe next actions
 
-1. Consolidate PR #81 and PR #82 into one canonical moderation migration, record the content-owner hierarchy policy decision, and test on a disposable/staging database before any apply.
+1. Complete review of canonical PR #81, then run the account/content-owner role matrix and concurrency tests against an isolated staging database before any apply.
 2. Review draft PR #84 for the `set_member_role` post-lock authority recheck and test concurrent demotion-versus-role-change behavior.
 3. Retry the short-video reaction RPC from the deployed app with a real signed-in test account; if the schema-cache error persists, capture the exact request/response and verify deployed app commit/project URL before changing grants.
 4. Run a source-backed review of the 12 SECURITY DEFINER functions, starting with moderation/admin functions and the two short-reaction RPCs. Check explicit role gates and ownership/visibility predicates; don't revoke all authenticated access indiscriminately.
