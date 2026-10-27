@@ -4,9 +4,11 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import styles from './PersonalPlanner.module.css';
 
 type PlannerTask = { id: string; title: string; date: string; done: boolean; createdAt: string };
-type PlannerData = { version: 1; tasks: PlannerTask[]; notesByDate: Record<string, string> };
+type PlannerHabit = { id: string; title: string; checkedDates: string[]; createdAt: string };
+type PlannerData = { version: 1; tasks: PlannerTask[]; notesByDate: Record<string, string>; habits: PlannerHabit[] };
 
-const EMPTY_DATA: PlannerData = { version: 1, tasks: [], notesByDate: {} };
+const EMPTY_DATA: PlannerData = { version: 1, tasks: [], notesByDate: {}, habits: [] };
+const MAX_HABIT_LENGTH = 80;
 const MAX_TASK_LENGTH = 120;
 const MAX_NOTE_LENGTH = 5000;
 
@@ -31,10 +33,16 @@ function parseData(raw: string | null): PlannerData {
         /^\d{4}-\d{2}-\d{2}$/.test(task.date) && typeof task.done === 'boolean' &&
         typeof task.createdAt === 'string'),
     );
+    const habits = Array.isArray(candidate.habits) ? candidate.habits.filter((habit): habit is PlannerHabit =>
+      Boolean(habit && typeof habit === 'object' && typeof habit.id === 'string' &&
+        typeof habit.title === 'string' && habit.title.trim().length > 0 && habit.title.length <= MAX_HABIT_LENGTH &&
+        Array.isArray(habit.checkedDates) && habit.checkedDates.every((date) => typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) &&
+        typeof habit.createdAt === 'string'),
+    ).map((habit) => ({ ...habit, checkedDates: [...new Set(habit.checkedDates)].slice(-366) })) : [];
     const notesByDate = Object.fromEntries(Object.entries(candidate.notesByDate)
       .filter(([date, note]) => /^\d{4}-\d{2}-\d{2}$/.test(date) && typeof note === 'string')
       .map(([date, note]) => [date, note.slice(0, MAX_NOTE_LENGTH)]));
-    return { version: 1, tasks, notesByDate };
+    return { version: 1, tasks, notesByDate, habits };
   } catch {
     return EMPTY_DATA;
   }
@@ -47,6 +55,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(localDateKey);
   const [newTask, setNewTask] = useState('');
+  const [newHabit, setNewHabit] = useState('');
   const [status, setStatus] = useState('');
   const [storageWarning, setStorageWarning] = useState(false);
 
@@ -73,6 +82,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
 
   const tasks = useMemo(() => data.tasks.filter((task) => task.date === selectedDate), [data.tasks, selectedDate]);
   const completedCount = tasks.filter((task) => task.done).length;
+  const habitsCheckedToday = data.habits.filter((habit) => habit.checkedDates.includes(selectedDate)).length;
   const reviewDays = useMemo(() => Array.from({ length: 7 }, (_, index) => {
     const date = new Date(`${selectedDate}T12:00:00`);
     date.setDate(date.getDate() - (6 - index));
@@ -81,6 +91,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   const reviewTasks = useMemo(() => data.tasks.filter((task) => reviewDays.includes(task.date)), [data.tasks, reviewDays]);
   const reviewCompleted = reviewTasks.filter((task) => task.done).length;
   const reviewNoteDays = reviewDays.filter((date) => Boolean(data.notesByDate[date]?.trim())).length;
+  const reviewHabitCheckins = data.habits.reduce((count, habit) => count + habit.checkedDates.filter((date) => reviewDays.includes(date)).length, 0);
 
   const addTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -90,6 +101,24 @@ export function PersonalPlanner({ userId }: { userId: string }) {
     setData((current) => ({ ...current, tasks: [...current.tasks, task] }));
     setNewTask('');
     setStatus('Task added to this day.');
+  };
+
+  const addHabit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const title = newHabit.trim();
+    if (!title || title.length > MAX_HABIT_LENGTH || data.habits.length >= 20) return;
+    const habit: PlannerHabit = { id: crypto.randomUUID(), title, checkedDates: [], createdAt: new Date().toISOString() };
+    setData((current) => ({ ...current, habits: [...current.habits, habit] }));
+    setNewHabit('');
+    setStatus('Habit added. Check it on any day that feels right.');
+  };
+
+  const toggleHabit = (habitId: string, checked: boolean) => {
+    setData((current) => ({ ...current, habits: current.habits.map((habit) => {
+      if (habit.id !== habitId) return habit;
+      const dates = checked ? [...habit.checkedDates.filter((date) => date !== selectedDate), selectedDate] : habit.checkedDates.filter((date) => date !== selectedDate);
+      return { ...habit, checkedDates: dates };
+    }) }));
   };
 
   const updateNote = (note: string) => {
@@ -108,7 +137,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   };
 
   const clearData = () => {
-    if (!window.confirm('Delete all planner tasks and daily notes saved in this browser for this account? This cannot be undone.')) return;
+    if (!window.confirm('Delete all planner tasks, habits, check-ins, and daily notes saved in this browser for this account? This cannot be undone.')) return;
     setData(EMPTY_DATA);
     setStatus('All local planner data was cleared.');
   };
@@ -160,7 +189,33 @@ export function PersonalPlanner({ userId }: { userId: string }) {
           <div><strong>{reviewTasks.length}</strong><span>tasks planned</span></div>
           <div><strong>{reviewCompleted}</strong><span>tasks completed</span></div>
           <div><strong>{reviewNoteDays}</strong><span>days with notes</span></div>
+          <div><strong>{reviewHabitCheckins}</strong><span>habit check-ins</span></div>
         </div>
+      </section>
+      <section className={styles.panel} aria-labelledby="habits-heading">
+        <div className={styles.sectionHeading}>
+          <h2 id="habits-heading">Gentle habits</h2>
+          <span>{habitsCheckedToday} of {data.habits.length} checked today</span>
+        </div>
+        <p className={styles.reviewCopy}>Choose routines that support you. Missed days are just days; there are no streaks or penalties.</p>
+        <form className={styles.addForm} onSubmit={addHabit}>
+          <label className={styles.visuallyHidden} htmlFor="planner-new-habit">New habit</label>
+          <input id="planner-new-habit" value={newHabit} onChange={(event) => setNewHabit(event.currentTarget.value)} maxLength={MAX_HABIT_LENGTH} placeholder="e.g. Take a short walk" />
+          <button type="submit" disabled={!ready || !newHabit.trim() || data.habits.length >= 20}>Add habit</button>
+        </form>
+        {data.habits.length === 0 ? <p className={styles.empty}>Add a routine you would like to make room for.</p> : (
+          <ul className={styles.taskList}>
+            {data.habits.map((habit) => (
+              <li key={habit.id}>
+                <label>
+                  <input type="checkbox" checked={habit.checkedDates.includes(selectedDate)} onChange={(event) => toggleHabit(habit.id, event.currentTarget.checked)} />
+                  <span>{habit.title}</span>
+                </label>
+                <button type="button" className={styles.removeButton} aria-label={`Delete habit: ${habit.title}`} onClick={() => setData((current) => ({ ...current, habits: current.habits.filter((item) => item.id !== habit.id) }))}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
       <section className={styles.panel} aria-labelledby="notes-heading">
         <div className={styles.sectionHeading}>
