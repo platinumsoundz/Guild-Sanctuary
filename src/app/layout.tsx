@@ -24,7 +24,8 @@ const themeBootstrap = `
 (() => {
   try {
     const saved = window.localStorage.getItem('sanctuary-theme');
-    const theme = saved === 'light' || saved === 'dark' || saved === 'dusk' ? saved : 'dark';
+    const preference = saved === 'system' || saved === 'light' || saved === 'dark' || saved === 'dusk' ? saved : 'system';
+    const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
     document.documentElement.dataset.theme = theme;
     document.documentElement.classList.toggle('dark', theme !== 'light');
   } catch {
