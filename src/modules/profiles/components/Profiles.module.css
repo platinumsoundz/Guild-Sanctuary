@@ -102,6 +102,28 @@
   font-size: 11px;
 }
 
+.selfDiscoverySummary {
+  display: grid;
+  gap: 8px;
+  margin-top: 13px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+}
+.selfDiscoveryItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font: 10px/1.5 Arial, sans-serif;
+}
+.selfDiscoveryItem strong {
+  color: var(--ink);
+  font-size: 11px;
+  text-align: right;
+}
 .role {
   justify-self: end;
   color: var(--muted);
