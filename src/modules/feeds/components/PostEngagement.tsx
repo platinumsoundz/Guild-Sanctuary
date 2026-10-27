@@ -43,10 +43,10 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
         const items = await fetchPostComments(postId);
         setComments(items);
         const authorNames = Object.fromEntries(items.flatMap((comment) => {
-          if (comment.authorId === userId) return [[comment.authorId, 'You']];
+          if (comment.authorId === userId) return [[comment.authorId, 'You'] as const];
           try {
             const profile = getLocalPublicProfileById(comment.authorId);
-            return profile ? [[comment.authorId, profile.displayName]] : [];
+            return profile ? [[comment.authorId, profile.displayName] as const] : [];
           } catch {
             return [];
           }
