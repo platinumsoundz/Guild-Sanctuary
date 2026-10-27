@@ -247,7 +247,24 @@ export function SettingsHub({
             </form>
           </section>
 
-          <section className={styles.panel} aria-labelledby="theme-title">\n            <h2 id="theme-title">Appearance</h2>\n            <label className={styles.toggleRow} htmlFor="sanctuary-theme">\n              <span>Colour theme</span>\n              <select id="sanctuary-theme" value={settings.preferences.theme} onChange={(event) => {\n                const theme = event.currentTarget.value;\n                if (theme !== 'light' && theme !== 'dark' && theme !== 'dusk') return;\n                void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));\n              }}>\n                <option value="light">Light</option>\n                <option value="dark">Dark</option>\n                <option value="dusk">Dusk · low-glare warm</option>\n              </select>\n            </label>\n            <p className={styles.hint}>Your theme is saved to your account and remembered on this device. It changes the app colours without changing your profile accent.</p>\n          </section>\n\n          <section className={styles.panel} aria-labelledby="layout-title">
+          <section className={styles.panel} aria-labelledby="theme-title">
+            <h2 id="theme-title">Appearance</h2>
+            <label className={styles.toggleRow} htmlFor="sanctuary-theme">
+              <span>Colour theme</span>
+              <select id="sanctuary-theme" value={settings.preferences.theme} onChange={(event) => {
+                const theme = event.currentTarget.value;
+                if (theme !== 'light' && theme !== 'dark' && theme !== 'dusk') return;
+                void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));
+              }}>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="dusk">Dusk · low-glare warm</option>
+              </select>
+            </label>
+            <p className={styles.hint}>Your theme is saved to your account and remembered on this device. It changes the app colours without changing your profile accent.</p>
+          </section>
+
+          <section className={styles.panel} aria-labelledby="layout-title">
             <h2 id="layout-title">Layout arrangement</h2>
             <div className={styles.layoutChoices}>
               <label><input type="radio" name="layout" value="comfortable" checked={settings.preferences.layout === 'comfortable'} onChange={() => void updatePreferences({ layout: 'comfortable' }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Comfortable</label>
