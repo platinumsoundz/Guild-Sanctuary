@@ -5,7 +5,7 @@ const css = readFileSync(new URL('../src/components/ResponsiveShell.module.css',
 const component = readFileSync(new URL('../src/components/ResponsiveShell.tsx', import.meta.url), 'utf8');
 
 const checks = [
-  ['install banner uses a bounded width and can wrap instead of overflowing', /\.installBanner\s*\{[\s\S]*?width:\s*min\(100%,\s*1120px\)[\s\S]*?flex-wrap:\s*wrap/i.test(css)],
+  ['install banner uses a bounded width and can wrap instead of overflowing', /\.installBanner\s*\{[\s\S]*?width:\s*min\(100%,\s*1120px\)/i.test(css) && /\.installBanner\s*\{[\s\S]*?flex-wrap:\s*wrap/i.test(css)],
   ['banner uses named local colour tokens instead of scattered hardcoded colours', /--install-bg:[\s\S]*?--install-border:[\s\S]*?--install-ink:[\s\S]*?--install-muted:[\s\S]*?--install-accent:/i.test(css) && /background:\s*var\(--install-bg\)/i.test(css)],
   ['title is readable at 14px or above on the narrow layout', /@media\s*\(max-width:\s*640px\)[\s\S]*?\.installTitle\s*\{\s*font-size:\s*14px/i.test(css)],
   ['description uses readable 13px text and generous line-height', /\.installDescription\s*\{[\s\S]*?font-size:\s*13px[\s\S]*?line-height:\s*1\.5/i.test(css)],
