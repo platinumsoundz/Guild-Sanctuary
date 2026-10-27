@@ -314,7 +314,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
               )}
               <h3>Choose what belongs on your profile</h3>
               <p>Every item starts private. Select only the details you are comfortable sharing. You can hide the whole summary at any time.</p>
-              {Object.entries({ connection: 'How I recharge', decisions: 'How I approach decisions', motivation: 'What motivates me', communication: 'How I communicate', learning: 'How I learn', communication: 'How I communicate', learning: 'How I learn', zodiac: 'My zodiac sign' }).map(([key, label]) => (
+              {Object.entries({ connection: 'How I recharge', decisions: 'How I approach decisions', motivation: 'What motivates me', communication: 'How I communicate', learning: 'How I learn', zodiac: 'My zodiac sign' }).map(([key, label]) => (
                 <label key={key} className={styles.shareOption}>
                   <input type="checkbox" checked={selectedFields.includes(key)} onChange={(event) => setSelectedFields((current) => event.target.checked ? [...current, key] : current.filter((item) => item !== key))} />
                   <span><strong>{label}</strong><small>{summary[key] || 'Not answered yet'}</small></span>
