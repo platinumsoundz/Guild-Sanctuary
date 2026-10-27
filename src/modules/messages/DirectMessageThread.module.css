@@ -198,6 +198,41 @@
   }
 }
 
+.privacyNoticeHeading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.privacyStatusDot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: #b87825;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #b87825 15%, transparent);
+}
+.privacyDetails {
+  margin-top: 9px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+.privacyDetails summary {
+  color: var(--accent);
+  cursor: pointer;
+  font: 700 10px/1.5 Arial, sans-serif;
+  text-underline-offset: 3px;
+}
+.privacyDetails ul {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font: 10px/1.55 Arial, sans-serif;
+}
+.privacyDetails li strong {
+  color: var(--ink);
+}
 .privacyNotice {
   display: grid;
   gap: 5px;
