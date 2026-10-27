@@ -12,7 +12,8 @@
     "android:apk": "CAPACITOR_RELEASE_BUILD=true cap sync android && cd android && ./gradlew assembleRelease",
     "check:pwa": "node scripts/check-pwa-assets.mjs",
     "check:auth": "node scripts/check-auth-flows.mjs",
-    "check:messages": "node scripts/check-message-persistence.mjs"
+    "check:messages": "node scripts/check-message-persistence.mjs",
+    "check:theme": "node scripts/check-theme-contract.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
