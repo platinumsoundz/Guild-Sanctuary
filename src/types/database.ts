@@ -22,7 +22,7 @@ export interface SocialLinks {
   reddit: string | null;
 }
 
-export type AccountTheme = 'light' | 'dark' | 'dusk';
+export type AccountTheme = 'system' | 'light' | 'dark' | 'dusk';
 
 export interface AccountPreferences {
   allowProfileDiscovery: boolean;
