@@ -46,6 +46,7 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
   const [filter, setFilter] = useState<(typeof filters)[number]>('Everything');
   const [activeFeature, setActiveFeature] = useState<Feature | null>(null);
   const [feedbackType, setFeedbackType] = useState('Idea or improvement');
+  const [nextFeatureChoice, setNextFeatureChoice] = useState('Daily Reflection');
   const [feedbackTitle, setFeedbackTitle] = useState('');
   const [feedbackDetails, setFeedbackDetails] = useState('');
   const [copyState, setCopyState] = useState('');
@@ -195,6 +196,30 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
             );
           })}
         </div>
+      </section>
+
+      <section className={styles.communityVote} aria-labelledby="community-vote-title">
+        <div className={styles.voteCopy}>
+          <p className={styles.eyebrow}>HELP SET THE DIRECTION</p>
+          <h2 id="community-vote-title">What would you like to explore next?</h2>
+          <p>Choose the concept you are most interested in. This is a local preference picker, not a live public poll—your choice is only shared if you add it to a feedback report and send that report yourself.</p>
+        </div>
+        <fieldset className={styles.voteChoices}>
+          <legend>Pick one idea</legend>
+          {['Daily Reflection', 'Practice Library', 'Circles', 'Self-discovery'].map((choice) => (
+            <label className={nextFeatureChoice === choice ? styles.voteChoiceSelected : styles.voteChoice} key={choice}>
+              <input type="radio" name="next-feature-choice" value={choice} checked={nextFeatureChoice === choice} onChange={() => setNextFeatureChoice(choice)} />
+              <span>{choice}</span>
+              <span className={styles.voteRadio} aria-hidden="true" />
+            </label>
+          ))}
+          <button className={styles.primaryButton} type="button" onClick={() => {
+            setFeedbackType('Idea or improvement');
+            setFeedbackTitle('My next-feature preference: ' + nextFeatureChoice);
+            setFeedbackDetails('The concept I would most like to explore next is ' + nextFeatureChoice + '.\n\nWhy this matters to me: ');
+            document.getElementById('beta-feedback-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}>Add my choice to feedback <ArrowRight size={15} /></button>
+        </fieldset>
       </section>
 
       <section className={styles.buildRadar} aria-labelledby="build-radar-title">
