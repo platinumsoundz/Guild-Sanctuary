@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { Post, Profile } from '@/types/database';
 import { normalizeSocialLinks, socialLinkFields } from '@/lib/socialLinks';
 import { ProfileCard } from './ProfileCard';
@@ -24,6 +24,8 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [selfDiscoverySummary, setSelfDiscoverySummary] = useState<Record<string, string> | null>(null);
+  const handleSelfDiscoverySummaryChange = useCallback((summary: Record<string, string> | null) => setSelfDiscoverySummary(summary), []);
 
   useEffect(() => setDraft(profile), [profile]);
 
@@ -139,8 +141,8 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
         )}
       </section>
 
-      <ProfileCard profile={draft} />
-      <SelfDiscoveryPanel userId={profile.id} isGuest={isGuest} />
+      <ProfileCard profile={{ ...draft, selfDiscoverySummary }} />
+      <SelfDiscoveryPanel userId={profile.id} isGuest={isGuest} onSummaryChange={handleSelfDiscoverySummaryChange} />
 
       {isEditing && (
         <form className={`${styles.editor} grid w-full min-w-0`} onSubmit={(event) => void handleSave(event)}>
