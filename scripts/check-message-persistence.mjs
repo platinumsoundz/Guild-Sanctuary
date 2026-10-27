@@ -5,6 +5,9 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 const service = read('../src/modules/messages/service.ts');
 const repository = read('../src/modules/messages/supabaseRepository.ts');
 const hook = read('../src/modules/messages/useDirectMessages.ts');
+const messageUi = read('../src/modules/messages/DirectMessageThread.tsx');
+const messageUiCss = read('../src/modules/messages/DirectMessageThread.module.css');
+const encryptionPlan = read('../docs/MESSAGING_E2EE_PLAN.md');
 const migration = read('../supabase/migrations/20261027001557_restore_secure_persistent_messaging.sql');
 const dmPreferenceFix = read('../supabase/migrations/20261027002103_fix_direct_message_preference_source.sql');
 
@@ -31,6 +34,14 @@ const checks = [
   ['latest migration treats saved Settings DM preference as authoritative', /s\.preferences->>'allowDirectMessages'/.test(dmPreferenceFix) && /p\.allow_direct_messages/.test(dmPreferenceFix) && !/privacy->>'allowDirectMessages'/.test(dmPreferenceFix)],
 ];
 
+checks.push(
+  ['message UI clearly states E2EE is not active', /E2EE not active/.test(messageUi) && /not end-to-end encrypted/.test(messageUi)],
+  ['message UI explains server access and avoids sensitive content', /service may be able to access server-stored message text/.test(messageUi) && /Avoid sending passwords/.test(messageUi)],
+  ['message UI explains local-only storage is not E2EE', /not a substitute for end-to-end encryption/.test(messageUi)],
+  ['message privacy explainer has visible expandable details', /<details className=\{styles\.privacyDetails\}>/.test(messageUi) && /\.privacyDetails summary/.test(messageUiCss)],
+  ['E2EE plan forbids custom cryptographic protocol and false claims', /Do not implement cryptographic primitives/.test(encryptionPlan) && /must not be described as E2EE/.test(encryptionPlan)],
+  ['E2EE release plan includes device-loss, revocation and group-membership gates', /device-loss/.test(encryptionPlan) && /revocation/.test(encryptionPlan) && /group membership/.test(encryptionPlan)]
+);
 for (const [label, passed] of checks) {
   console.log(`${passed ? 'PASS' : 'FAIL'} ${label}`);
   assert.ok(passed, label);
