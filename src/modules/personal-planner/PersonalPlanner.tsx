@@ -73,6 +73,14 @@ export function PersonalPlanner({ userId }: { userId: string }) {
 
   const tasks = useMemo(() => data.tasks.filter((task) => task.date === selectedDate), [data.tasks, selectedDate]);
   const completedCount = tasks.filter((task) => task.done).length;
+  const reviewDays = useMemo(() => Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(`${selectedDate}T12:00:00`);
+    date.setDate(date.getDate() - (6 - index));
+    return localDateKey(date);
+  }), [selectedDate]);
+  const reviewTasks = useMemo(() => data.tasks.filter((task) => reviewDays.includes(task.date)), [data.tasks, reviewDays]);
+  const reviewCompleted = reviewTasks.filter((task) => task.done).length;
+  const reviewNoteDays = reviewDays.filter((date) => Boolean(data.notesByDate[date]?.trim())).length;
 
   const addTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -141,6 +149,18 @@ export function PersonalPlanner({ userId }: { userId: string }) {
             ))}
           </ul>
         )}
+      </section>
+      <section className={styles.panel} aria-labelledby="review-heading">
+        <div className={styles.sectionHeading}>
+          <h2 id="review-heading">Your seven-day review</h2>
+          <span>Ending {selectedDate}</span>
+        </div>
+        <p className={styles.reviewCopy}>A simple view of what you chose to record—not a score or a judgement.</p>
+        <div className={styles.reviewStats}>
+          <div><strong>{reviewTasks.length}</strong><span>tasks planned</span></div>
+          <div><strong>{reviewCompleted}</strong><span>tasks completed</span></div>
+          <div><strong>{reviewNoteDays}</strong><span>days with notes</span></div>
+        </div>
       </section>
       <section className={styles.panel} aria-labelledby="notes-heading">
         <div className={styles.sectionHeading}>
