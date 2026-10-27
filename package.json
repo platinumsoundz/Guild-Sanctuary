@@ -13,6 +13,7 @@
     "check:pwa": "node scripts/check-pwa-assets.mjs",
     "check:auth": "node scripts/check-auth-flows.mjs",
     "check:messages": "node scripts/check-message-persistence.mjs",
+    "check:self-discovery": "node scripts/check-self-discovery-contract.mjs",
     "check:personal-planner": "node scripts/check-personal-planner-contract.mjs",
     "check:theme": "node scripts/check-theme-contract.mjs",
     "check:theme-contrast": "node scripts/check-theme-contrast.mjs"
