@@ -20,7 +20,7 @@ for (const [label, source, pattern] of [
   ['explicit concept disclaimer', home, /CONCEPT PREVIEW.*NOT A LIVE FEATURE/s],
   ['feedback privacy disclosure', home, /does not submit to a server/i],
   ['browser-only onboarding progress', home, /sanctuary\.beta\.onboarding\.v1.*localStorage\.setItem\(onboardingKey/s],
-  ['onboarding reset control', home, /Reset progress/.test(home)],
+  ['onboarding reset control', home, /Reset progress/],
   ['visible build radar', home, /The build radar.*Direction, not deadlines/s],
   ['preference picker disclosed as local-only', home, /not a live public poll.*only shared if you add it to a feedback report/s],
   ['preference can be added to feedback', home, /My next-feature preference/],
