@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   CalendarDays,
+  CalendarCheck,
   Bell,
   Clapperboard,
   Menu,
@@ -27,6 +28,7 @@ import styles from './Navigation.module.css';
 
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
   { id: 'feed', label: 'Feed', icon: Newspaper },
+  { id: 'planner', label: 'Daily Planner', icon: CalendarCheck },
   { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
   { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
   { id: 'events', label: 'Events', icon: CalendarDays },
