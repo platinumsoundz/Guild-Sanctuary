@@ -20,7 +20,8 @@
     "check:theme": "node scripts/check-theme-contract.mjs",
     "check:theme-contrast": "node scripts/check-theme-contrast.mjs",
     "check:notifications": "node scripts/check-notification-panel-contract.mjs",
-    "check:daily-reflection": "node scripts/check-daily-reflection-contract.mjs"
+    "check:daily-reflection": "node scripts/check-daily-reflection-contract.mjs",
+    "check:navigation": "node scripts/check-navigation-contract.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
