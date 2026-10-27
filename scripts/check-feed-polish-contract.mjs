@@ -10,6 +10,8 @@ assert.match(feed, /date\.toLocaleString\(\)/, 'future timestamps fall back to l
 assert.match(feed, /date\.toLocaleDateString\(undefined/, 'older posts use the member locale');
 assert.match(feed, /title=\{new Date\(post\.createdAt\)\.toLocaleString\(\)\}/, 'relative timestamps expose the exact local time on hover/focus');
 assert.doesNotMatch(feed, /slice\(0, 16\)\} UTC/, 'feed no longer labels UTC text as local time');
+assert.match(feed, /<details className=\{styles\.postOverflow\}>/, 'post reporting is placed in a compact overflow menu');
+assert.match(feed, /<summary aria-label="More post actions">More<\/summary>/, 'post overflow menu has an accessible label');
 assert.match(comments, /getLocalPublicProfileById\(comment\.authorId\)/, 'comment author IDs resolve to profile display names where available');
 assert.match(comments, /Community member/, 'unknown comment authors use a safe readable fallback');
 assert.match(comments, /setComments\(\[\]\)[\s\S]*?\}, \[postId, userId\]\)/, 'comment state clears when the post or account changes');
