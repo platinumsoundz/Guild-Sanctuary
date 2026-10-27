@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { DailyReflection } from '@/modules/practice';
 import styles from './PersonalPlanner.module.css';
 
 type PlannerTask = { id: string; title: string; date: string; done: boolean; createdAt: string };
@@ -151,6 +152,9 @@ export function PersonalPlanner({ userId }: { userId: string }) {
         <strong>Stored on this device only</strong>
         <span>This first version saves to this browser's local storage, scoped to your account ID. It is not synced across devices. Anyone with access to this browser profile may be able to access it. Export anything you want to keep before clearing browser data.</span>
       </div>
+      <section aria-label="Daily reflection">
+        <DailyReflection userId={userId} isGuest={false} />
+      </section>
       {storageWarning && <p className={styles.warning} role="alert">Browser storage is unavailable or full. Changes may not survive a refresh; export or copy important notes before leaving.</p>}
       <label className={styles.dateLabel}>Day
         <input type="date" value={selectedDate} onChange={(event) => setSelectedDate(event.currentTarget.value)} />
