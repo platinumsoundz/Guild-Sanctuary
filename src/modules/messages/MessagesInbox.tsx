@@ -5,6 +5,7 @@ import type { Conversation, PublicProfile } from '@/types/database';
 import { searchPublicProfiles } from '@/modules/profiles';
 import { createGroupConversation, fetchUserConversations } from './service';
 import styles from './MessagesInbox.module.css';
+import { MessagePrivacyNotice } from './MessagePrivacyNotice';
 
 interface MessagesInboxProps {
   currentUserId: string;
@@ -72,6 +73,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
       <p className={styles.eyebrow}>PRIVATE MESSAGES</p>
       <h1>Messages</h1>
       <p className={styles.description}>Choose a one-to-one conversation or start a group chat.</p>
+      <MessagePrivacyNotice />
       <section className={styles.groups} aria-labelledby="direct-title">
         <h2 id="direct-title">Start a one-to-one conversation</h2>
         <p className={styles.description}>Find a public profile and choose Message to start a private chat.</p>
