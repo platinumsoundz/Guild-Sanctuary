@@ -5,10 +5,16 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 const service = read('../src/modules/messages/service.ts');
 const repository = read('../src/modules/messages/supabaseRepository.ts');
 const hook = read('../src/modules/messages/useDirectMessages.ts');
+const inbox = read('../src/modules/messages/MessagesInbox.tsx');
+
 const migration = read('../supabase/migrations/20261027001557_restore_secure_persistent_messaging.sql');
 const dmPreferenceFix = read('../supabase/migrations/20261027002103_fix_direct_message_preference_source.sql');
 
 const checks = [
+  ['inbox loads ignore responses from stale requests or accounts', /inboxRequest = useRef\(0\)/.test(inbox) && /activeUserId\.current !== requestedUserId/.test(inbox)],
+  ['member search ignores stale results and removes the current user', /searchRequest = useRef\(0\)/.test(inbox) && /nextResults\.filter\(\(profile\) => profile\.userId !== requestedUserId\)/.test(inbox)],
+  ['account changes clear inbox and member selection state', /setConversations\(\[\]\)/.test(inbox) && /setSelectedMembers\(\[\]\)/.test(inbox) && /setResults\(\[\]\)/.test(inbox)],
+  ['group creation prevents duplicate submits and stale account navigation', /isCreatingGroup \|\| selectedMembers\.length < 2/.test(inbox) && /groupRequest\.current/.test(inbox) && /onOpenConversation\(conversation\)/.test(inbox)],
   ['persistent mode is opt-in and verifies the authenticated user ID', /isPersistentMessagingEnabled/.test(service) && /NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES === 'true'/.test(service) && /data\.user\.id !== userId/.test(service)],
   ['identity mismatches fail closed instead of falling back to demo storage', /active Sanctuary session does not match the signed-in account/.test(service)],
   ['demo mode never claims it checked a recipient live DM setting', /local demo profile has direct messages turned off/.test(service) && !/This member is not accepting direct messages/.test(service)],
