@@ -79,12 +79,26 @@ function buildReflection(answers: Answers): Reflection | null {
     stability: ['Trust and stability seem important to you right now.', 'Make a short plan with one next step and one fallback, while allowing that plans can change.', 'What would help me feel prepared without needing to control everything?'],
     freedom: ['Autonomy and meaning seem important to you right now.', 'Choose one flexible goal and write down why it matters to you personally.', 'Which choice feels meaningful to me, rather than simply expected of me?'],
   } as Record<string, string[]>;
+  const communication = {
+    direct: ['Clear, direct language may help you feel understood.', 'When a conversation matters, say what you need in one clear sentence and invite the other person to share their view.', 'How can I be clear while staying curious about the other person?'],
+    gentle: ['A considerate tone may help you stay engaged in difficult conversations.', 'Try naming both the issue and your intention to work through it respectfully.', 'What helps me feel safe enough to be honest?'],
+    time: ['A little thinking time may help you express yourself.', 'It is okay to say, “I want to think about that and come back to you.”', 'What would help me respond thoughtfully without feeling rushed?'],
+    talk: ['Talking things through may help you organise your thoughts.', 'Ask someone you trust to listen while you work through an idea, and tell them whether you want advice or just a sounding board.', 'When does talking help me find clarity?'],
+  } as Record<string, string[]>;
+  const learning = {
+    'hands-on': ['Experimenting may help new ideas click for you.', 'Try a short hands-on practice session and note what changed between your first and second attempt.', 'What did I learn by trying rather than only reading?'],
+    reading: ['A clear explanation may help you get oriented.', 'Start with a short guide, then test your understanding with one small example.', 'Which explanation helped me understand the idea most clearly?'],
+    discussion: ['Questions and conversation may help you connect ideas.', 'Explain the idea in your own words to someone or ask three questions that would clarify it.', 'What became clearer when I talked it through?'],
+    examples: ['Comparing examples may help you spot patterns.', 'Look at two examples, identify what they share, and note one meaningful difference.', 'Which pattern did I notice, and where might it not apply?'],
+  } as Record<string, string[]>;
   const connectionInsight = connection[answers.connection];
   const decisionInsight = decisions[answers.decisions];
   const motivationInsight = motivation[answers.motivation];
-  const pattern = [connectionInsight?.[0], decisionInsight?.[0], motivationInsight?.[0]].filter(Boolean).join(' ');
-  const action = motivationInsight?.[1] ?? connectionInsight?.[1] ?? decisionInsight?.[1] ?? 'Notice one moment today when your response feels natural, and reflect on what influenced it.';
-  const prompt = motivationInsight?.[2] ?? connectionInsight?.[2] ?? decisionInsight?.[2] ?? 'What did I notice about myself today?';
+  const communicationInsight = communication[answers.communication];
+  const learningInsight = learning[answers.learning];
+  const pattern = [connectionInsight?.[0], decisionInsight?.[0], motivationInsight?.[0], communicationInsight?.[0], learningInsight?.[0]].filter(Boolean).join(' ');
+  const action = motivationInsight?.[1] ?? learningInsight?.[1] ?? communicationInsight?.[1] ?? connectionInsight?.[1] ?? decisionInsight?.[1] ?? 'Notice one moment today when your response feels natural, and reflect on what influenced it.';
+  const prompt = motivationInsight?.[2] ?? learningInsight?.[2] ?? communicationInsight?.[2] ?? connectionInsight?.[2] ?? decisionInsight?.[2] ?? 'What did I notice about myself today?';
   const lesson = answers.motivation === 'growth'
     ? 'Micro-lesson: make practice small enough to repeat. A short, repeatable session often teaches you more than waiting for the perfect block of time.'
     : answers.motivation === 'belonging'
