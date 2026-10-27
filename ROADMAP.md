@@ -24,10 +24,19 @@ Status labels used below:
   GitHub repository name (`Guild-Sanctuary`) and the Android application ID
   (`com.guildsanctuary.app`) stay for now: changing the app ID breaks installed
   builds and store identity, and the repository name is not user-facing.
-- Current rename touchpoints:
-  - `src/components/ResponsiveShell.tsx` — renders `GUILD / SANCTUARY` and a
-    `G` brand mark. Change to `THE SANCTUARY` (or just `SANCTUARY`) with a sun
-    mark to match `Navigation.tsx`.
+- Current shell inspection (2026-10-27):
+  - `src/components/ResponsiveShell.tsx` currently renders the install banner
+    above the app stage; it does **not** contain a `GUILD / SANCTUARY` title or
+    `G` brand mark in the checked-in main revision. The install banner has an
+    Install action and a dismiss button that persists the choice in local
+    storage.
+  - `src/app/layout.tsx` on main still forces a dark body class and dark
+    colour-scheme. PR #69 removes those forced classes and adds the theme
+    bootstrap, but it is not merged/deployed.
+  - The oversized black `Guild / Sanctuary / Community Activity` area reported
+    by the owner was not found in the checked-in shell/feed source inspected on
+    2026-10-27. Before editing another component blindly, verify the live
+    deployment commit and capture which route/component renders that area.
   - `package.json` — `"name": "guild-sanctuary"` is internal only; rename when
     convenient, not urgent.
   - Documentation headings still say "Guild Sanctuary" in places.
