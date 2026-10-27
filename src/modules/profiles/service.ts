@@ -30,6 +30,7 @@ type PublicProfileRow = {
   belief: string | null;
   social_links: Record<string, string | null> | null;
   allow_direct_messages: boolean;
+  self_discovery_summary: Record<string, string> | null;
 };
 
 function toPublicProfile(row: PublicProfileRow): PublicProfile {
@@ -49,6 +50,7 @@ function toPublicProfile(row: PublicProfileRow): PublicProfile {
     belief: row.belief,
     socialLinks: { ...emptySocialLinks, ...(row.social_links ?? {}) },
     allowDirectMessages: row.allow_direct_messages,
+    selfDiscoverySummary: row.self_discovery_summary,
     role: 'member',
   };
 }
