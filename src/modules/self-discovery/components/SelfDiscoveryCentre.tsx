@@ -13,6 +13,7 @@ export function SelfDiscoveryCentre() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<SelfDiscoveryAnswers>({});
   const [hasFinished, setHasFinished] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
   const question = SELF_DISCOVERY_QUESTIONS[step];
   const answer = answers[question.id];
   const answeredCount = Object.keys(answers).length;
@@ -25,7 +26,18 @@ export function SelfDiscoveryCentre() {
     setAnswers((current) => ({ ...current, [question.id]: value }));
   };
 
+  const copyJournalPrompt = async () => {
+    if (!reflection) return;
+    try {
+      await navigator.clipboard.writeText(reflection.journalPrompt);
+      setCopyStatus('copied');
+    } catch {
+      setCopyStatus('failed');
+    }
+  };
+
   const restart = () => {
+    setCopyStatus('idle');
     setStep(0);
     setAnswers({});
     setHasFinished(false);
@@ -80,6 +92,11 @@ export function SelfDiscoveryCentre() {
         <div className={styles.resultBlock}>
           <h3>A question for your journal</h3>
           <p>{reflection.journalPrompt}</p>
+          <button className={styles.secondaryButton} type="button" onClick={() => void copyJournalPrompt()}>
+            Copy journal prompt
+          </button>
+          {copyStatus === 'copied' && <p role="status" className={styles.progressCopy}>Journal prompt copied. You choose where to save it.</p>}
+          {copyStatus === 'failed' && <p role="status" className={styles.progressCopy}>Could not copy automatically. You can select and copy the prompt above.</p>}
         </div>
         <p className={styles.disclaimer}>{reflection.disclaimer}</p>
         <div className={styles.actions}>
