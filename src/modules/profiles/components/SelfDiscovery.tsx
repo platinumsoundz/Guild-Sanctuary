@@ -233,10 +233,10 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
         <h2 id="self-discovery-title">Get to know yourself, at your own pace.</h2>
         <p>Explore your preferences, motivations, and optional zodiac traditions one question at a time. These prompts are for reflection—not a diagnosis, formal MBTI result, or prediction.</p>
         <div className={styles.privacyNotice}><ShieldCheck size={18} /><span><strong>Private by default.</strong> Your full answers are stored with your Sanctuary account and are never shown to other members. Only a separate summary you choose to publish can appear on your profile.</span></div>
-        <section className={styles.wellbeing} aria-labelledby="wellbeing-guide-title">
-          <div className={styles.wellbeingHeading}><HeartHandshake size={18} /><div><h3 id="wellbeing-guide-title">Want to understand your wellbeing, too?</h3><p>Optional, educational guidance — not a diagnosis or a mental-health test.</p></div></div>
+        <section className={styles.panel} aria-labelledby="wellbeing-guide-title">
+          <div className={styles.intro}><HeartHandshake size={18} /><div><h3 id="wellbeing-guide-title">Want to understand your wellbeing, too?</h3><p>Optional, educational guidance — not a diagnosis or a mental-health test.</p></div></div>
           <button type="button" className={styles.secondary} aria-expanded={showWellbeingGuide} onClick={() => setShowWellbeingGuide((value) => !value)}>{showWellbeingGuide ? 'Hide wellbeing guidance' : 'Explore wellbeing guidance'}</button>
-          {showWellbeingGuide && <div className={styles.wellbeingContent}>
+          {showWellbeingGuide && <div className={styles.reflectionCard}>
             <p>Personality preferences cannot tell you whether you have a mental-health condition. Focus, mood, anxiety, sleep and social energy can be affected by many things, and one questionnaire cannot identify the cause.</p>
             <ul>
               <li><strong>Notice patterns:</strong> write down what you experience, when it happens, and what seems to help.</li>
