@@ -1,6 +1,9 @@
 # The Sanctuary — Roadmap
 
 Last updated: 2026-10-27
+
+Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
+
 Owner: product owner (Ashley)
 Status: planning document. Nothing here is built unless it says so.
 
@@ -30,9 +33,10 @@ Status labels used below:
     `G` brand mark in the checked-in main revision. The install banner has an
     Install action and a dismiss button that persists the choice in local
     storage.
-  - `src/app/layout.tsx` on main still forces a dark body class and dark
-    colour-scheme. PR #69 removes those forced classes and adds the theme
-    bootstrap, but it is not merged/deployed.
+  - The theme foundation from PR #69 is merged to `main` according to the
+    current coordination issue. Treat theme tokens and theme selection as
+    **in code**, but keep browser/device QA and production deployment as
+    **unverified** until exact-SHA and live-host evidence is recorded.
   - The oversized black `Guild / Sanctuary / Community Activity` area reported
     by the owner was not found in the checked-in shell/feed source inspected on
     2026-10-27. Before editing another component blindly, verify the live
@@ -98,7 +102,7 @@ existing launch gate and must complete before any live payment.
 | Single app shell | Planned | Remove the duplicate toolbar/header/nav layers |
 | Theme token system | In code | Semantic CSS variables and global focus/reduced-motion styles added; CI and visual review pending |
 | Dark mode | In code | Working theme application path and pre-render device storage bootstrap; CI and visual review pending |
-| Theme presets and future flavours | Planned | Start with Light, Dark, and a low-contrast "Dusk"; leave room for seasonal themes |
+| Theme presets and future flavours | In code, QA pending | Theme foundation includes Light, Dark, Dusk, and System options; verify the exact merged implementation and browser persistence before marking verified |
 | Typography scale | Planned | Raise body from 9–12px Arial to 15–16px; humanist sans UI + serif display option |
 | Component primitives | Planned | Button, Card, Dialog, Sheet, Tabs, Toast, EmptyState, Skeleton, Avatar, Badge |
 | Navigation restructure | Planned | Desktop rail / mobile bottom tabs: Today, Community, Circles, Practice, Messages, You |
@@ -140,7 +144,7 @@ actually run. This workstream is a hard gate, not a suggestion.
 
 | Item | Status | Notes |
 | --- | --- | --- |
-| Notifications data model and in-app bell | Planned | `notifications`, unread count, mark-all-read |
+| Notifications data model and in-app bell | In code, live event delivery unverified | Notification table/UI and read-state handling exist in the repository; live migration state and event delivery need owner/staging verification |
 | Notification preferences | Planned | Per type and channel; quiet hours; digest |
 | Email notifications | Planned | Daily/weekly digest; make the existing inert setting real |
 | Web push + Android push | Planned | Requires a service worker; Capacitor push later |
