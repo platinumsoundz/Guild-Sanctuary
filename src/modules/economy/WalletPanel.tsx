@@ -55,6 +55,8 @@ export function WalletPanel({ userId, isGuest }: WalletPanelProps) {
         </div>
       </header>
 
+      {process.env.NEXT_PUBLIC_SANCTUARY_STRIPE_TEST_CHECKOUT_ENABLED === 'true' && <p className={styles.notice} role="status">Test mode only: payments are simulated and no real money is charged.</p>}
+      {checkoutEnabled && <p className={styles.notice} role="status">TEST MODE ONLY — payments are simulated; no real money will be charged.</p>}
       {notice && <p className={styles.notice} role="status">{notice}</p>}
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isGuest && <p className={styles.notice}>Guest Mode is read-only. Sign in with your account to view a wallet or buy tokens.</p>}
