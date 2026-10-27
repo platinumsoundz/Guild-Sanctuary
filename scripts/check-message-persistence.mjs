@@ -56,6 +56,17 @@ checks.push(
   ['repository uses the typed RPC name rather than the lower-level migration function name', /rpc\('create_sanctuary_conversation'/.test(repository) && !/rpc\('create_conversation'/.test(repository)],
 );
 
+checks.push(
+  ['conversation RPC rejects unauthenticated or inactive callers', /caller_id is null or not public\.is_active_user\(\)/.test(migration)],
+  ['conversation RPC requires caller membership and bounds group size', /if not caller_id = any\(coalesce\(requested_member_ids/.test(migration) && /member_count < 3 or member_count > 50/.test(migration)],
+  ['direct conversation pairs are normalized and unique per world', /check \(first_user_id < second_user_id\)/.test(migration) && /unique \(first_user_id, second_user_id, world_type\)/.test(migration)],
+  ['security-definer conversation RPCs pin search_path and revoke public/anon execution', /language plpgsql security definer set search_path = ''/.test(migration) && /language sql security definer set search_path = ''/.test(migration) && /revoke all on function public\.create_conversation[\s\S]*?from public, anon/.test(migration) && /revoke all on function public\.create_sanctuary_conversation[\s\S]*?from public, anon/.test(migration)],
+  ['message trigger function is not directly executable by app roles', /revoke all on function public\.touch_conversation_on_message\(\) from public, anon, authenticated/.test(migration)],
+  ['authenticated clients cannot directly mutate conversation membership or history', /revoke all on table public\.conversations, public\.conversation_members, public\.direct_conversation_pairs, public\.messages from public, anon, authenticated/.test(migration) && !/grant (update|delete|insert) on table public\.conversations/.test(migration) && !/grant (update|delete|insert) on table public\.conversation_members/.test(migration) && !/grant (update|delete|insert) on table public\.direct_conversation_pairs/.test(migration)],
+  ['conversation reads and message reads fail closed for non-members', /using \(public\.is_active_conversation_member\(id\)\)/.test(migration) && /using \(public\.is_active_conversation_member\(conversation_id\) and state = 'visible'\)/.test(migration)],
+  ['conversation creation validates recipient status and direct-message preferences', /p\.status = 'active'/.test(migration) && /p\.allow_direct_messages/.test(migration) && /s\.preferences->>'allowDirectMessages'/.test(dmPreferenceFix)],
+);
+
 for (const [label, passed] of checks) {
   console.log(`${passed ? 'PASS' : 'FAIL'} ${label}`);
   assert.ok(passed, label);
