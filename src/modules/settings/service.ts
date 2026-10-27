@@ -47,7 +47,8 @@ function normalizePreferences(value: unknown): AccountPreferences {
     showOnlineStatus: typeof record.showOnlineStatus === 'boolean' ? record.showOnlineStatus : false,
     emailNotifications: typeof record.emailNotifications === 'boolean' ? record.emailNotifications : true,
     personalizedFeed: typeof record.personalizedFeed === 'boolean' ? record.personalizedFeed : true,
-    layout: record.layout === 'compact' ? 'compact' : 'comfortable',\n    theme: record.theme === 'light' || record.theme === 'dusk' ? record.theme : 'dark',
+    layout: record.layout === 'compact' ? 'compact' : 'comfortable',
+    theme: record.theme === 'light' || record.theme === 'dusk' ? record.theme : 'dark',
   };
 }
 
