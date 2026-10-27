@@ -272,7 +272,7 @@ turning the profile into a horoscope gimmick or a medical chart.
 | Height / weight | Member | **Private only** | Self-tracking framing; no BMI labels |
 | Likes / dislikes | Member | Public by choice | Tags and free text; used for circles and people suggestions |
 | Values | Member | Public by choice | e.g. honesty, family, nature, service |
-| Personality questionnaire | Member | Private by default | 16-type style, shareable summary |
+| Personality and motivation prompts | Member | Private by default | 16-type-style and Enneagram-inspired prompts delivered gradually; optional summary only with separate opt-in |
 | Energy rhythm | Derived from check-ins | Private | "Morning / evening" patterns, no judgement |
 | Practice interests | Member | Public by choice | Meditation, breathwork, journaling, philosophy |
 
@@ -282,6 +282,8 @@ turning the profile into a horoscope gimmick or a medical chart.
 - Personality profile with strengths, stressors, and how the member likes to
   communicate; clearly labelled as self-reflection, not a diagnosis.
 - Suggested practices based on stated interests and mood patterns.
+- A private reflection card with a tentative pattern, a practical next step, a journal prompt, and a short lesson based on answers so far. The personal playbook also gives separate practical tips for each answered topic (recharge, decisions, motivation, communication, and learning) so the output is more useful than a single personality label.
+- Optional educational wellbeing guidance explaining the limits of personality prompts and encouraging qualified support for persistent or distressing symptoms; it must not diagnose or add a condition to the member profile.
 - Suggested circles and people based on values, interests, and mutual friends.
 - Private insight cards: "You tend to check in lower on Sundays", "You finish
   more practices in the morning" — with an easy way to turn insights off.
@@ -303,6 +305,8 @@ turning the profile into a horoscope gimmick or a medical chart.
   notice", never "you are" or "this will happen".
 - **No public scores.** No attractiveness, mental-health, or compatibility
   score visible to others.
+- **Separate consent for collection and visibility.** Ask one small, optional question at a time; explain why it helps; allow skip, pause, review, edit, and delete. Saving answers and showing a summary on a profile are separate choices. Profile visibility is off by default, and no individual answer is public unless the member explicitly chooses to share it.
+- **More than one lens, never one verdict.** Offer the 16-type-style questionnaire, Enneagram-inspired motivations, and zodiac reflection as distinct optional lenses. Explain that they differ in evidence and purpose; do not merge them into a supposedly objective identity score.
 
 ### Suggested implementation order
 
@@ -312,7 +316,43 @@ turning the profile into a horoscope gimmick or a medical chart.
 4. Private insight cards from check-ins.
 5. Gentle suggestions (practices, circles, people).
 
-## 6. Comparison findings adopted into this roadmap
+## 6. Messaging privacy and end-to-end encryption
+
+**Current state:** connected direct-message records use a server-side message body. The current messaging UI does not provide end-to-end encryption (E2EE). The conversation database and its access controls are not equivalent to E2EE; only authorised participants can read messages through the app, but server-side plaintext may be available to the service and permitted operational processes. The message composer must disclose this honestly until E2EE is implemented and independently reviewed.
+
+### Recommended direction
+
+- **Default target:** E2EE for one-to-one conversations first, then group conversations after the multi-device and membership-change design is reviewed.
+- **Cryptography:** use a maintained, independently reviewed protocol/library with established device identity, authenticated key agreement, forward secrecy and post-compromise recovery where supported. Do not invent a home-grown encryption protocol or write cryptographic primitives ourselves.
+- **Key custody:** private keys remain on the user's devices. A server stores public key bundles and opaque ciphertext only; it must not receive private keys or message plaintext. Recovery is explicit and explained, not a silent server-side backdoor.
+- **Multi-device:** each device has its own identity/key material. Adding/removing devices and changing group membership must rotate or refresh access appropriately, with visible device/session management.
+- **Metadata:** E2EE does not automatically hide who messaged whom, timing, IP/log data, account identities, or message size. Minimise retained metadata, define retention, and explain the limits honestly.
+- **Moderation/reporting:** users may explicitly report a message by choosing to submit the selected message and context for review. This must be a deliberate disclosure, not routine plaintext scanning hidden behind an E2EE claim. Provide block, mute, rate limits, abuse reporting, and safety workflows.
+- **Local browser storage is not a substitute for E2EE.** It can expose messages to anyone using an unlocked/shared device, browser extensions, malware, or a compromised account. Optional local caching should be encrypted where feasible, cleared on sign-out/shared-device sessions, and never be the only copy without a recovery warning.
+- **Release gates:** threat model; protocol/library review; migration and key lifecycle; two-device tests; account recovery and device-loss tests; revoked-device tests; group-member removal tests; report/abuse flows; backup/log checks; security review before calling messaging end-to-end encrypted.
+
+### Implementation readiness document
+
+See [Messaging E2EE Implementation Plan](docs/MESSAGING_E2EE_PLAN.md) for the threat model, data-flow audit checklist, protocol selection criteria, phased delivery, and mandatory release gates. The current UI now exposes a plain-language privacy explanation directly inside every open message thread. This is transparency work only: no cryptographic behavior or production message storage has changed.
+
+### Messaging privacy and end-to-end encryption
+- **Current truth:** E2EE is not implemented. The active inbox/thread still uses the in-memory messaging service by default; the Supabase repository/schema are optional and must not be represented as active until configuration, RLS and two-account integration tests are verified.
+- **In code on this branch:** updated the message-thread privacy notice so it does not falsely claim server persistence and makes clear that no E2EE protection is active.
+- **Design added:** docs/MESSAGING_E2EE_PLAN.md defines staged delivery, key lifecycle, metadata disclosure, user-initiated reporting, test gates and no-go release conditions.
+- **Implementation rule:** do not invent cryptography. Evaluate a maintained, independently reviewed protocol and keep private keys on client devices. Browser-local storage alone is not a substitute for E2EE.
+- **Release gate:** no production activation or “end-to-end encrypted” claim until protocol review, device/key recovery, group key rotation, RLS/Realtime isolation, reporting, metadata, cross-device tests and security review pass.
+
+### Phased delivery
+
+1. Keep the current privacy disclosure visible and audit every message storage, logging, moderation and export path.
+2. Write a threat model and select a maintained E2EE protocol/library suitable for web and mobile/PWA clients.
+3. Prototype one-to-one E2EE in a separate feature branch with no production data migration.
+4. Test key establishment, identity verification, offline delivery, replay/tampering, multi-device enrolment, revocation, account recovery and user-reported messages.
+5. Release one-to-one E2EE only after security review; then design group E2EE and device/session settings.
+
+Do not claim that Sanctuary messaging is end-to-end encrypted until the protocol, key management, all message paths and security review are complete.
+
+## 7. Comparison findings adopted into this roadmap
 
 The 2026-10-27 platform comparison reviewed Meta, TikTok, X, Reddit, Discord,
 WhatsApp/Telegram, YouTube, MySpace, Patreon/Substack, Meetup, Insight Timer,
@@ -330,7 +370,7 @@ Calm, and 7 Cups. The findings that shaped this roadmap:
 The full gap analysis lives in the session report and is summarised here; it is
 not a separate permanent document.
 
-## 7. Deliberately out of scope
+## 8. Deliberately out of scope
 
 - Anonymous or throwaway posting (revisit only with a safety design).
 - Live video streaming (audio rooms first).
@@ -342,7 +382,7 @@ not a separate permanent document.
 - Official MBTI branding.
 - A recommendation algorithm that optimises time-on-app.
 
-## 8. Open questions for the product owner
+## 9. Open questions for the product owner
 
 1. Should new members follow the whole community by default, or start empty?
 2. Can strangers send friend requests, or only follow first?
@@ -358,9 +398,30 @@ not a separate permanent document.
 11. What is the first public URL shape: `/@name`, `/u/name`, or `/members/name`?
 12. When do teen defaults become a launch requirement?
 
-## 9. Change log
+## 10. Change log
 
 - **2026-10-27** — Roadmap created. Locked naming, friend + follow
   relationships, no anonymous posting, free wisdom with future guide
   monetisation, spiritual + mental wellbeing focus, self-discovery inputs, and
   dark mode with theming. Recorded comparison findings and UI fixes.
+
+
+## 11. Visible beta showcase and collaboration (2026-10-27)
+
+- **In code on feature branch** — Today is the new product-first landing screen, accessible before sign-in. It features live route shortcuts and a filtered feature explorer.
+- **In code on feature branch** — Concept cards for Daily Reflection, Practice Library, Circles, and Self-discovery show illustrative mini-previews and explicitly state that they are concepts, not live features.
+- **In code on feature branch** — A beta feedback form prepares a copyable report locally. It does not submit feedback to a server.
+- **In code on feature branch** — Added a beta testing guide, collaboration guide, pull-request checklist, and structured GitHub issue templates.
+- **In code on feature branch** — Added a small automated contract check for Today routing, visible status labels, and feedback disclosure.
+- **In code on feature branch** — Added an optional six-step beta onboarding mission board with browser-local progress, completion controls, a reset option, and shortcuts into real routes or concept previews. Progress is not public and is not tied to account identity.
+- **In code on feature branch** — Added a visual Now / Next / Later build radar, including a clear guardrail that wallet purchases and high-impact actions remain gated behind release checks. It is directional, not a delivery promise.
+- **In code on feature branch** — Added a local concept preference picker that lets beta testers choose which idea interests them and carries that choice into a copyable feedback report. No vote is transmitted or aggregated.
+- **In code on feature branch** — Replaced the local-only questionnaire with an account-backed Self-discovery Centre on the member profile. Members can answer one prompt at a time across recharge, decision-making, motivation, communication preferences, learning preferences, and an optional zodiac-sign lens; receive a private reflection with an actionable tip, micro-lesson, and journal prompt; explicitly consent to saving answers to the website; choose summary fields; and separately enable/disable public profile visibility.
+- **Database migration in the PR, not applied to production** — `self_discovery_responses` stores raw answers behind owner-only RLS. `profiles.self_discovery_summary` stores only the curated fields selected for sharing; `self_discovery_visible` defaults false. The public profile projection returns only the curated summary when the member explicitly enables it.
+- **In code on feature branch** — Public profile cards can display a consented self-discovery summary. A comparison panel compares a signed-in member's own saved answers against only the other member's published summary; it labels exact answer matches/differences, not compatibility or identity scores.
+- **In code on feature branch** — Added a private, rule-based reflection output from the user's current answers: a plain-language pattern, a personal playbook with separate practical tips for answered topics, one practical action, a micro-lesson, and a journal prompt. Members can export the playbook as a user-initiated JSON file. It is explicitly non-diagnostic and excluded from public profile summaries; it is not an AI mental-health assessment or a full personality framework score.
+- **Privacy fix in code** — Consent withdrawal remains available even after the member unchecks the save-consent box. The withdrawal flow hides the public summary before deleting stored answers.
+- **Release boundary** — The migration has not been applied to production, so account-backed UI saving will remain unavailable until the migration is reviewed and applied in a safe release process. No answers are saved in browser local storage.
+- **Not yet merged or deployed** — This work remains in a reviewable branch/PR. A passing contract or build does not prove browser-level behavior. Verify desktop/mobile, unauthenticated access, guest flow, clipboard fallback, theme contrast, and preview deployment before merge.
+- **Collaboration rule** — Use issues to capture tasks, branches for changes, PRs for review, and verified deployments for release evidence. Never share credentials or apply production database changes as part of a UI-only task.
+

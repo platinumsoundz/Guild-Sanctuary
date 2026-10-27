@@ -1,0 +1,46 @@
+name: Bug report
+description: Report something that does not work as expected
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: "Please do not include passwords, private messages, verification codes, payment details, or other sensitive information."
+  - type: input
+    id: location
+    attributes:
+      label: Screen or feature
+      description: Where did the problem happen?
+      placeholder: Today, Messages, Events...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What did you click or enter?
+      placeholder: "1. Open...\n2. Select...\n3. Notice..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: Android 16, Chrome...
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Optional screenshot or extra notes
+      description: Remove private information before attaching anything.

@@ -32,3 +32,9 @@ Vercel Web Analytics is integrated through `@vercel/analytics/next`; enable it f
 - `src/modules/` contains isolated feature modules. Each module owns its implementation and documents its scope in a local README.
 - Modules should depend on shared types rather than importing implementation details from sibling modules.
 - Keep the root app shell independent from feature implementations so a module can evolve without coupling unrelated features.
+
+## Beta and collaboration
+
+- [Beta testing guide](docs/BETA_TESTING_GUIDE.md)
+- [Collaboration guide](docs/COLLABORATION_GUIDE.md)
+- [Contributor guide](CONTRIBUTING.md)

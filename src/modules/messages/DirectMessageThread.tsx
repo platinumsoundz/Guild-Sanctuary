@@ -42,6 +42,22 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
           </div>
         </div>
       </header>
+      <aside className={styles.privacyNotice} aria-label="Message privacy notice">
+        <div className={styles.privacyNoticeHeading}>
+          <span className={styles.privacyStatusDot} aria-hidden="true" />
+          <strong>End-to-end encryption is not active</strong>
+        </div>
+        <p>Sanctuary messaging is not end-to-end encrypted. Depending on the environment, messages may use a demo in-memory path or a server-backed path; neither should be assumed to provide end-to-end confidentiality. If the server-backed path is enabled, message text is readable by the service. Avoid sending passwords, payment details, or highly sensitive information.</p>
+        <details className={styles.privacyDetails}>
+          <summary>What this means and what we are building</summary>
+          <ul>
+            <li><strong>Current implementation:</strong> the inbox/thread still uses an in-memory service by default; a Supabase repository and schema exist but must not be treated as active until configuration, migrations, RLS and two-account integration tests are verified.</li>
+            <li><strong>Next:</strong> evaluate a maintained, independently reviewed end-to-end encryption protocol. Private keys must stay on your devices; a server-backed implementation should handle ciphertext, not readable message text.</li>
+            <li><strong>Local storage:</strong> saving messages only in this browser is not automatically safer and may lose history or expose it on a shared device. It is not a substitute for end-to-end encryption.</li>
+            <li><strong>Honest status:</strong> we will not label messaging end-to-end encrypted until key management, multi-device behavior, recovery, reporting, and security review pass.</li>
+          </ul>
+        </details>
+      </aside>
       <section className={styles.messageList} aria-label={`Conversation: ${title}`} aria-live="polite">
         {isLoading ? <p className={styles.emptyMessage}>Opening conversation...</p> : messages.length === 0 ? (
           <p className={styles.emptyMessage}>This is the beginning of your conversation.</p>

@@ -1,0 +1,57 @@
+name: Sanctuary showcase contract
+
+on:
+  pull_request:
+    paths:
+      - 'src/components/SanctuaryHome.tsx'
+      - 'src/components/SanctuaryHome.module.css'
+      - 'src/components/AppWorkspace.tsx'
+      - 'src/modules/messages/DirectMessageThread.tsx'
+      - 'src/modules/messages/README.md'
+      - 'docs/MESSAGING_E2EE_PLAN.md'
+      - 'src/modules/profiles/components/SelfDiscovery.tsx'
+      - 'src/modules/profiles/components/SelfDiscovery.module.css'
+      - 'src/modules/profiles/components/ProfileDashboard.tsx'
+      - 'src/modules/profiles/components/ProfileCard.tsx'
+      - 'src/modules/profiles/components/PublicProfilePage.tsx'
+      - 'src/modules/profiles/service.ts'
+      - 'src/types/database.ts'
+      - 'src/services/supabase/database.types.ts'
+      - 'supabase/migrations/20261027050000_persist_private_self_discovery.sql'
+      - 'src/components/Navigation.tsx'
+      - 'src/context/AppContext.tsx'
+      - 'docs/COLLABORATION_GUIDE.md'
+      - 'docs/BETA_TESTING_GUIDE.md'
+      - 'scripts/check-sanctuary-showcase.mjs'
+      - '.github/workflows/sanctuary-showcase.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/components/SanctuaryHome.tsx'
+      - 'src/modules/messages/DirectMessageThread.tsx'
+      - 'src/modules/messages/README.md'
+      - 'docs/MESSAGING_E2EE_PLAN.md'
+      - 'src/modules/profiles/components/SelfDiscovery.tsx'
+      - 'src/modules/profiles/components/ProfileDashboard.tsx'
+      - 'src/modules/profiles/components/ProfileCard.tsx'
+      - 'src/modules/profiles/components/PublicProfilePage.tsx'
+      - 'src/modules/profiles/service.ts'
+      - 'src/services/supabase/database.types.ts'
+      - 'supabase/migrations/20261027050000_persist_private_self_discovery.sql'
+      - 'src/components/AppWorkspace.tsx'
+      - 'src/components/Navigation.tsx'
+      - 'src/context/AppContext.tsx'
+      - 'scripts/check-sanctuary-showcase.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  showcase-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-sanctuary-showcase.mjs

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { Post, Profile } from '@/types/database';
 import { normalizeSocialLinks, socialLinkFields } from '@/lib/socialLinks';
 import { ProfileCard } from './ProfileCard';
+import { SelfDiscoveryPanel } from './SelfDiscovery';
 import styles from './ProfileDashboard.module.css';
 
 interface ProfileDashboardProps {
@@ -12,16 +13,19 @@ interface ProfileDashboardProps {
   isPostsLoading: boolean;
   onSave: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => void | Promise<void>;
   onThemeChange: (themeColor: string) => void;
+  isGuest?: boolean;
 }
 
 const starSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
 
-export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThemeChange }: ProfileDashboardProps) {
+export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThemeChange, isGuest = false }: ProfileDashboardProps) {
   const [draft, setDraft] = useState(profile);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [selfDiscoverySummary, setSelfDiscoverySummary] = useState<Record<string, string> | null>(null);
+  const handleSelfDiscoverySummaryChange = useCallback((summary: Record<string, string> | null) => setSelfDiscoverySummary(summary), []);
 
   useEffect(() => setDraft(profile), [profile]);
 
@@ -137,7 +141,8 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
         )}
       </section>
 
-      <ProfileCard profile={draft} />
+      <ProfileCard profile={{ ...draft, selfDiscoverySummary }} />
+      <SelfDiscoveryPanel userId={profile.id} isGuest={isGuest} onSummaryChange={handleSelfDiscoverySummaryChange} />
 
       {isEditing && (
         <form className={`${styles.editor} grid w-full min-w-0`} onSubmit={(event) => void handleSave(event)}>
