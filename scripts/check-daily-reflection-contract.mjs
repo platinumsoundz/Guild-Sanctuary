@@ -1,21 +1,31 @@
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
+
 const component = readFileSync(new URL('../src/modules/practice/components/DailyReflection.tsx', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../src/modules/practice/components/DailyReflection.module.css', import.meta.url), 'utf8');
+const types = readFileSync(new URL('../src/services/supabase/database.types.ts', import.meta.url), 'utf8');
+const migration = readFileSync(new URL('../supabase/migrations/20261027150000_create_private_daily_reflections.sql', import.meta.url), 'utf8');
+
 const checks = [
-  ['reflection data is namespaced per user and versioned', /sanctuary-daily-reflection:v1:\$\{encodeURIComponent\(userId\)\}/.test(component)],
-  ['guest mode cannot write reflections', /if \(isGuest\)[\s\S]*?Sign in to keep a reflection/.test(component)],
-  ['account switch does not render the previous account reflection while loading', /loadedKey !== key/.test(component) && /setLoadedKey\(key\)/.test(component)],
-  ['mood is required before save', /if \(!mood\)[\s\S]*?Choose the mood/.test(component)],
-  ['free-text fields have bounded lengths', /maxLength=\{180\}/.test(component) && /maxLength=\{1200\}/.test(component)],
-  ['only a bounded history is retained', /\.slice\(0, 90\)/.test(component)],
-  ['recent previous entries can be revisited without leaving the feed', /Previous reflections/.test(component) && /\.slice\(0, 7\)/.test(component) && /<details/.test(component)],
-  ['history deletion requires explicit confirmation', /window\.confirm\('Delete all Sanctuary reflections/.test(component)],
-  ['storage errors are handled instead of crashing', /catch[\s\S]*?browser could not save the reflection/.test(component)],
-  ['privacy note explains local-only storage and shared-browser risk', /not synced to your account or sent to Sanctuary servers/.test(component) && /may be able to read it/.test(component)],
-  ['feature is framed as reflection, not medical care', /not medical advice, diagnosis or treatment/.test(component)],
-  ['form and status messaging are accessible', /aria-live="polite"/.test(component) && /fieldset/.test(component) && /legend/.test(component)],
-  ['responsive layouts and reduced-motion preferences are respected', /@media \(max-width: 760px\)/.test(styles) && /prefers-reduced-motion: reduce/.test(styles)],
+  ['uses account database client, not browser localStorage', /getSupabaseBrowserClient/.test(component) && !/localStorage/.test(component)],
+  ['loads only the authenticated user’s rows', /from\('daily_reflections'\)[\s\S]*?\.eq\('user_id', userId\)/.test(component)],
+  ['orders history newest first and bounds the query', /order\('reflection_date', \{ ascending: false \}\)/.test(component) && /\.limit\(90\)/.test(component)],
+  ['saves with a per-user per-day upsert key', /\.upsert\([\s\S]*?user_id: userId[\s\S]*?reflection_date: today[\s\S]*?onConflict: 'user_id,reflection_date'/.test(component)],
+  ['never silently falls back to local-only storage', /Nothing has been saved locally/.test(component) && !/localStorage/.test(component)],
+  ['guest mode remains read-only', /if \(isGuest\)[\s\S]*?Sign in to save private diary entries/.test(component)],
+  ['requires mood and non-empty reflection or intention', /if \(!mood\)/.test(component) && /!intention\.trim\(\) && !reflection\.trim\(\)/.test(component)],
+  ['bounds free-text input to schema limits', /maxLength=\{180\}/.test(component) && /maxLength=\{1200\}/.test(component)],
+  ['does not expose private entries in public feed', /not posted to the public feed/.test(component)],
+  ['provides an explicit confirmed delete-all operation scoped to user', /window\.confirm\('Delete all Sanctuary reflections/.test(component) && /\.delete\(\)\.eq\('user_id', userId\)/.test(component)],
+  ['handles database load/save/delete failures accessibly', /could not be loaded from your account/.test(component) && /could not be saved to the database/.test(component) && /could not be deleted/.test(component) && /aria-live="polite"/.test(component)],
+  ['keeps non-clinical disclaimer and accessible mood fieldset', /not medical advice, diagnosis or treatment/.test(component) && /fieldset/.test(component) && /legend/.test(component)],
+  ['database types include daily_reflections', /daily_reflections: Table</.test(types)],
+  ['migration enables RLS and owner-scoped CRUD policies', /enable row level security/.test(migration) && /for select to authenticated[\s\S]*?auth\.uid\(\) = user_id/.test(migration) && /for insert to authenticated[\s\S]*?auth\.uid\(\) = user_id/.test(migration) && /for update to authenticated[\s\S]*?with check \(auth\.uid\(\) = user_id\)/.test(migration) && /for delete to authenticated[\s\S]*?auth\.uid\(\) = user_id/.test(migration)],
+  ['migration denies anonymous grants and enforces one entry per user per day', /revoke all on public\.daily_reflections from anon/.test(migration) && /unique index if not exists daily_reflections_user_day_unique_idx/.test(migration)],
+  ['responsive and reduced-motion styles remain', /@media \(max-width: 760px\)/.test(styles) && /prefers-reduced-motion: reduce/.test(styles)],
 ];
-for (const [label, passed] of checks) { console.log((passed ? 'PASS ' : 'FAIL ') + label); assert.ok(passed, label); }
-console.log('Daily reflection contract checks passed: ' + checks.length + '. Static checks only; browser integration is still required.');
+for (const [label, passed] of checks) {
+  console.log((passed ? 'PASS ' : 'FAIL ') + label);
+  assert.ok(passed, label);
+}
+console.log('Database-backed Daily Reflection contract checks passed: ' + checks.length + '. Static checks only; authenticated browser/database integration still requires owner-applied migration and live QA.');
