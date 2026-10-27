@@ -124,7 +124,7 @@ export interface Database {
       token_entitlements: Table<{
         user_id: string; item_id: string; granted_at: string;
       }>;
-      self_discovery_responses: Table<{ user_id: string; answers: Record<string, unknown>; consent_version: string; updated_at: string }>;
+      self_discovery_responses: Table<{ user_id: string; answers: Record<string, unknown>; consent_version: string; consented_at: string; updated_at: string }>;
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
         user_id: string;
