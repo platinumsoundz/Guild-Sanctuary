@@ -51,6 +51,12 @@ for (const required of ['Begin reflection', 'Question progress', 'Skip', 'Create
   assert.ok(component.includes(required), `missing questionnaire UX/privacy behavior: ${required}`);
 }
 assert.ok(component.includes('aria-labelledby'), 'questionnaire sections must have accessible labels');
+assert.ok(component.includes("const clearFeedback = () =>"), 'feedback should have a shared reset path');
+assert.ok(component.includes("clearFeedback();\n    setAnswers((current) => ({ ...current, [question.id]: value }));"), 'changing an answer should clear stale copy/export feedback');
+assert.ok(component.includes("const closeAndClear = () =>"), 'closing should clear the current questionnaire session');
+assert.ok(component.includes("clearFeedback();\n    setIsOpen(false);\n    setAnswers({});\n    setStep(0);\n    setHasFinished(false);"), 'closing should clear answers and feedback together');
+assert.ok((component.match(/onClick={closeAndClear}/g) ?? []).length === 2, 'both Leave and Close and clear should use the same cleanup path');
+assert.ok(component.includes("onClick={() => { clearFeedback(); setHasFinished(false); setStep(0); }}"), 'reviewing answers should clear stale result feedback');
 assert.ok(component.includes('const downloadReflection = () =>'), 'reflection export must be explicitly user initiated');
 assert.ok(component.includes('URL.createObjectURL(blob)'), 'reflection export must create a local text file without a server request');
 assert.ok(component.includes('reflection.disclaimer'), 'exported reflection must retain its non-clinical disclaimer');
