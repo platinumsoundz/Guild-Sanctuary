@@ -26,6 +26,7 @@ assert.ok(!layout.includes('className="dark"'), 'fixed dark class must not overr
 assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection must persist through account settings');
 assert.ok(service.includes("theme: 'system'"), 'new accounts must default to the system colour preference');
 assert.ok(service.includes("record.theme === 'system' || record.theme === 'light' || record.theme === 'dark' || record.theme === 'dusk'"), 'saved themes must be normalised');
+assert.ok(service.includes(": 'dark',"), 'legacy preference records must retain the dark theme');
 assert.ok(service.includes('Choose a supported Sanctuary theme.'), 'unsupported themes must be rejected');
 assert.ok(types.includes("export type AccountTheme = 'system' | 'light' | 'dark' | 'dusk'"), 'theme must be typed');
 assert.ok(types.includes('theme: AccountTheme;'), 'account preferences must contain a typed theme');
