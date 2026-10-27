@@ -42,6 +42,10 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
           </div>
         </div>
       </header>
+      <aside className={styles.privacyNotice} aria-label="Message privacy notice">
+        <strong>Message privacy: not end-to-end encrypted yet</strong>
+        <p>Messages in connected Sanctuary conversations may be stored in the website database and can be processed for delivery and moderation. Do not send passwords, financial details, or highly sensitive information here. End-to-end encryption is planned but is not active in this version.</p>
+      </aside>
       <section className={styles.messageList} aria-label={`Conversation: ${title}`} aria-live="polite">
         {isLoading ? <p className={styles.emptyMessage}>Opening conversation...</p> : messages.length === 0 ? (
           <p className={styles.emptyMessage}>This is the beginning of your conversation.</p>
