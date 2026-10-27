@@ -27,6 +27,17 @@ export function ProfileCard({ profile }: ProfileCardProps) {
             {profile.starSign && <span>{profile.starSign}</span>}
             {profile.belief && <span>{profile.belief}</span>}
           </div>
+          {profile.selfDiscoverySummary && Object.keys(profile.selfDiscoverySummary).length > 0 && (
+            <section className={styles.selfDiscoverySummary} aria-label="Shared self-discovery summary">
+              <p className={styles.eyebrow}>SELF-DISCOVERY · SHARED BY CHOICE</p>
+              {Object.entries(profile.selfDiscoverySummary).map(([key, value]) => (
+                <div className={styles.selfDiscoveryItem} key={key}>
+                  <span>{({ connection: 'How I recharge', decisions: 'Decision style', motivation: 'Motivation', zodiac: 'Zodiac lens' } as Record<string, string>)[key] ?? key}</span>
+                  <strong>{value}</strong>
+                </div>
+              ))}
+            </section>
+          )}
           {(!('privacy' in profile) || profile.privacy.socialLinks) && <ProfileSocialLinks links={profile.socialLinks} />}
         </div>
       </div>
