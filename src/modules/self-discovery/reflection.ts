@@ -292,7 +292,9 @@ export function createSelfDiscoveryReflection(input: unknown): SelfDiscoveryRefl
   const pattern = patterns.length > 0
     ? patterns.join(' ')
     : fallback.pattern;
-  const practicalAction = primary.practicalAction;
+  const practicalAction = matched.length > 1
+    ? matched.slice(0, 2).map((output) => output.practicalAction).join(' ')
+    : primary.practicalAction;
   const microLesson = matched.length > 1
     ? `${primary.microLesson} Your other answers add context too; treat this as a collection of possibilities, not a single description of you.`
     : primary.microLesson;
