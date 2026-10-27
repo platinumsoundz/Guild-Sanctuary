@@ -30,7 +30,8 @@ function token(block, name) {
 
 const themes = ['default', 'light', 'dark', 'stone', 'ocean', 'dusk'];
 for (const theme of themes) {
-  const block = readThemeBlock(theme);
+  // Dark intentionally inherits the root/default palette, so validate the same token set.
+  const block = readThemeBlock(theme === 'dark' ? 'default' : theme);
   const bg = token(block, 'bg');
   const surface = token(block, 'surface');
   const ink = token(block, 'ink');
