@@ -9,6 +9,7 @@ const checks = [
   ['RPC remains SECURITY DEFINER with an empty search_path', /language plpgsql\s+security definer\s+set search_path\s*=\s*''/i.test(functionSql)],
   ['signed-in moderator authorization remains enforced', /caller_id is null or not public\.is_moderator\(\)/i.test(functionSql)],
   ['account actions lock caller and target in stable UUID order', /where p\.id in \(caller_id,\s*requested_target_id\)\s+order by p\.id\s+for update/i.test(functionSql)],
+  ['moderator role is rechecked after locks are acquired', /caller_role is null or caller_role not in \('moderator', 'admin', 'developer', 'owner'\)/i.test(functionSql)],
   ['self-target account actions are rejected', /if requested_target_id = caller_id then\s+raise exception 'You cannot moderate your own account\.'/i.test(functionSql)],
   ['all Sanctuary roles have explicit ordered ranks', /caller_rank := case caller_role[\s\S]*?when 'owner' then 6[\s\S]*?when 'developer' then 5[\s\S]*?when 'admin' then 4[\s\S]*?when 'moderator' then 3[\s\S]*?when 'vip' then 2[\s\S]*?when 'user' then 1/i.test(functionSql) && /target_rank := case target_role[\s\S]*?when 'owner' then 6[\s\S]*?when 'developer' then 5[\s\S]*?when 'admin' then 4[\s\S]*?when 'moderator' then 3[\s\S]*?when 'vip' then 2[\s\S]*?when 'user' then 1/i.test(functionSql)],
   ['equal or higher roles are rejected before the action is recorded', functionSql.indexOf('caller_rank <= target_rank') >= 0 && functionSql.indexOf('caller_rank <= target_rank') < functionSql.indexOf('insert into public.moderation_actions')],
