@@ -13,7 +13,7 @@ for (const theme of ['light', 'dark', 'dusk']) {
   assert.ok(settings.includes(`value="${theme}"`), `missing ${theme} option in Settings`);
 }
 assert.ok(layout.includes("localStorage.getItem('sanctuary-theme')"), 'theme bootstrap must read the device fallback');
-assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'theme bootstrap must apply the saved theme before render');
+assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'theme bootstrap must apply the saved theme before render');\nassert.ok(layout.includes("classList.toggle('dark', theme !== 'light')"), 'Tailwind dark variants must follow the selected theme');\nassert.ok(settings.includes("classList.toggle('dark', theme !== 'light')"), 'live theme changes must update Tailwind dark variants');
 assert.ok(layout.includes('__html: themeBootstrap'), 'theme bootstrap must be included in the document head');
 assert.ok(!layout.includes('className="dark"'), 'fixed dark class must not override the selected theme');
 assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection must persist through account settings');
