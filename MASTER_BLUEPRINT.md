@@ -1,10 +1,24 @@
 # The Sanctuary — Master Blueprint
 
-Last updated: 2026-10-24
+Last updated: 2026-10-27
 
 ## Product decision
 
-The Sanctuary is one community system for reflection, growth, care, and connection. The former Guild Hall is retired. There is no world selector, no world-specific navigation, and no application-facing `WorldType` contract.
+The product is **The Sanctuary** — not "Guild Sanctuary" or "The Guild Sanctuary". It is one community system for reflection, growth, care, and connection, with spirituality and everyday mental wellbeing side by side. The former Guild Hall is retired. There is no world selector, no world-specific navigation, and no application-facing `WorldType` contract. `ROADMAP.md` is the product roadmap; this file records what exists in the repository now.
+
+The mission in one sentence: **personal growth inside a social environment, so nobody has to do it alone.**
+
+Locked product decisions (2026-10-27):
+
+- **Relationships:** friend (mutual, request/accept) and follow (one-way). One-way relationships are allowed.
+- **Anonymous posting:** not included. Guest mode remains read-only.
+- **Wisdom:** members share life lessons and practice for free through posts and circles. Practices and guides are in scope; guide account monetisation is a future option, not a launch feature.
+- **Self-knowledge:** optional self-discovery profile (birthday → star sign, likes/dislikes, values, a 16-type personality questionnaire, and optional private body metrics). It returns reflection and suggestions, never predictions or diagnoses.
+- **Theming:** dark mode is an immediate priority; the colour system must support future theme presets without per-module rewrites.
+- **Commerce:** tokens stay cosmetic-only. Gifts, VIP, post promotion, transfers, trading, marketplace, and cash-out remain deferred or rejected.
+- **Tone:** positivity and emotional honesty, not performance. No public follower leaderboards, streak punishment, or ranking.
+
+See `ROADMAP.md` for the workstreams (identity/theming, connection, self-discovery, circles/practices/guides, wellbeing, platform, future monetisation), the comparison findings, and the open questions.
 
 ## Architecture
 
@@ -33,9 +47,29 @@ The Sanctuary is one community system for reflection, growth, care, and connecti
 | `locations` | Experimental radius filtering | Not mounted; no durable location store |
 | `ads` | Consent-gated web display slots plus native AdMob entry point | AdSense requires an explicit flag plus a production-marked deployment (`VERCEL_ENV=production` or `NEXT_PUBLIC_DEPLOYMENT_ENV=production`); IDs come from public build-time environment; native module excluded from web bundle |
 
+### Planned modules (not built)
+
+These are roadmap direction only. Do not scaffold them or claim they exist.
+
+| Module | Scope | Status |
+| --- | --- | --- |
+| `relationships` | Follow (one-way) and friend (mutual request/accept), privacy controls, block/mute | Planned |
+| `notifications` | In-app bell, unread counts, per-type preferences, email digest, web/Android push | Planned |
+| `search` | Global search across people, posts, events, tags, and practices | Planned |
+| `saved` | Private Keep/bookmark collections | Planned |
+| `growth` | Today home, mood/energy check-in, private journal, gentle insights, milestones | Planned |
+| `self-discovery` | Birthday → star sign, likes/dislikes/values, 16-type questionnaire, private results | Planned |
+| `practices` | Curated guided practices, timer/player, completion history | Planned |
+| `circles` | Small topic groups with named stewards and member caps | Planned |
+| `guides` | Credibility label, tradition, disclosures; future paid offerings | Planned |
+| `live` | Audio-first rooms for sits, talks, and Q&A | Planned |
+| `theming` | Semantic design tokens, dark mode, theme presets | Planned (W0) |
+
 ## Navigation pages
 
 The single Sanctuary navigation exposes Feed, Events, Discover, Messages, Shorts, Games, Profile, Wallet, Token Shop, Support, Settings, and Moderation. Moderation is filtered to active moderators/admins. Games is an in-app launcher for The 5 Sleeves games, which stay hosted separately. The Token Shop mirrors the server-owned cosmetic catalogue and routes purchases to Wallet so the 18+ gate and idempotent spend path stay in one place. Guest mode can browse the Games and Token Shop preview but cannot buy or spend. The navigation bar and mobile drawer also link to the public `/guidelines`, `/terms`, and `/privacy` pages; the desktop item row scrolls horizontally and keeps the active page in view. `locations` remains intentionally unmounted.
+
+This twelve-item horizontal navigation is current behaviour, not the target. `ROADMAP.md` (W0) plans a desktop rail and mobile bottom tabs with six primary destinations — Today, Community, Circles, Practice, Messages, You — and moves Discover into search, Wallet/Shop into You, Support into About, and Moderation into an admin-only area. The app shell currently renders "GUILD / SANCTUARY" in `ResponsiveShell.tsx`; that copy must become The Sanctuary.
 
 ## Phase 1 launch gates — code status
 

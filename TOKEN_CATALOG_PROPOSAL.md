@@ -2,6 +2,8 @@
 
 **Status:** the 12-item profile-cosmetics catalog is implemented in code and staged in `20261024000002_profile_cosmetics.sql`, but the migration has not been applied to Supabase. Checkout remains disabled by default. The remaining sinks are proposals only. Do not enable live sales or expand redemption until refund/chargeback handling, the 18+ purchase gate, the 7-day deletion grace period, and the admin dashboard are implemented and tested.
 
+> **Direction update (2026-10-27):** wisdom sharing, life lessons, and practices are free at launch. Guide account monetisation (subscriptions, paid practices, sessions) is a separate future workstream recorded in `ROADMAP.md` (W7), not a token sink. Do not implement gifting, VIP, or post promotion from this proposal without explicit owner approval; tokens remain cosmetic-only.
+
 ## Scope
 
 Named token sinks:

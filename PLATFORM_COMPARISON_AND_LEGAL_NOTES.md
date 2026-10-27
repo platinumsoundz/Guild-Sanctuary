@@ -248,3 +248,59 @@ Accessed 2026-10-24. Policies change; re-check before publication.
 8. Which moderation actions require a second reviewer?
 9. Should teen accounts have direct messages disabled by default?
 10. When will a custom domain be available for AdSense and email deliverability?
+
+## 10. Sanctuary response — decisions locked 2026-10-27
+
+The product owner reviewed this comparison and the follow-up systems/UI audit.
+`ROADMAP.md` now holds the resulting workstreams. This section records which
+platform lessons were adopted, adapted, or rejected so the research stays tied
+to a decision.
+
+### Adopted
+
+- **Notifications** at platform scale: in-app bell, per-type preferences, email
+  digest, then web/Android push.
+- **A relationship graph**, expressed as **friend** (mutual request/accept) and
+  **follow** (one-way). One-way relationships are allowed.
+- **Global search**, **saved/Keep collections**, **sharing**, and **public
+  profile/post/event URLs** with previews.
+- **Block, mute, restrict, and message requests** as the baseline safety kit.
+- **Small circles** (Discord/Reddit pattern) sized for trust, with named
+  stewards and a member cap.
+- **Live audio rooms** before live video: meditation sits, talks, Q&A.
+- **Guide credibility** (Insight Timer pattern): tradition, disclosures, no
+  medical claims.
+- **Mood, journaling, and private insight** (Calm/7 Cups pattern) without
+  turning the product into a clinic.
+- **Offline/PWA, data export, and push** as platform maturity.
+
+### Adapted
+
+- "Followers" becomes friend + follow; counts are context, never a ranking.
+- Streaks become a gentle return prompt, not loss aversion.
+- Creator monetisation is deferred: members share wisdom and life lessons free,
+  and guides may sell optional offerings later.
+- The feed becomes Community / Friends / Following tabs, chronological first —
+  not an engagement-optimised algorithm.
+- Emergency signposting moves from the guidelines page into the journal,
+  circles, and support surfaces.
+
+### Rejected for now
+
+- **Anonymous posting.** Guest mode is read-only and is enough while moderation
+  and identity handling mature.
+- **Live video.** Audio-first until the safety and hosting cost are understood.
+- **Public vanity rankings, follower leaderboards, gifting, and creator
+  rankings.**
+- **Ads in journal, circles, or crisis surfaces.**
+- **Over-customised profiles** (MySpace lesson): keep the restrained accent and
+  cosmetic system.
+- **Official MBTI branding** or clinical personality claims.
+
+### Not copied
+
+- Infinite-scroll pressure, autoplay-everything, engagement bait, and public
+  like-count competition.
+- The assumption that scale justifies opaque enforcement.
+
+The detailed gap analysis, UI findings, and phased plan are in `ROADMAP.md`.

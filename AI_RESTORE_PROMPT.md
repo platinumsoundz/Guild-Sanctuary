@@ -1,19 +1,20 @@
-# Guild Sanctuary — AI Handoff / Restore Notes
+# The Sanctuary — AI Handoff / Restore Notes
 
-Read `MASTER_BLUEPRINT.md` and `README.md` first; they are the product and technical roadmap. Preserve the existing modular Next.js App Router + TypeScript project structure and read project/Next.js guidance before changing code.
+Read `MASTER_BLUEPRINT.md`, `ROADMAP.md`, and `README.md` first; they are the product, roadmap, and technical context. Preserve the existing modular Next.js App Router + TypeScript project structure and read project/Next.js guidance before changing code.
 
 ## Session checkpoint
 
 - Branch: `feature/phase1-trust-safety` (created from `audit/fixes-2026-10-23`). The other agent is working separately on password sign-in, database/domain work, and Cloudflare/Vercel/Supabase configuration; do not merge or rebase that work into this branch without reviewing both diffs.
+- The branch is pushed: `origin/feature/phase1-trust-safety` is at `2e85add`. No pull request has been opened and nothing has been merged into `main`. Open the PR at https://github.com/platinumsoundz/Guild-Sanctuary/pull/new/feature/phase1-trust-safety.
 - Current work adds the Phase 1 launch gates (18+ token purchase gate, refund/chargeback clawback, seven-day account deletion grace period, terms acceptance record, admin/moderation dashboard) and the Games and Token Shop navigation pages. It also includes the durable SQL handoff (`SUPABASE_SQL_HANDOFF.md`, `supabase/handoff/`), the public community-guidelines page (`/guidelines`), the marked draft Terms page (`/terms`), the platform/legal comparison (`PLATFORM_COMPARISON_AND_LEGAL_NOTES.md`), Wallet catalog filters/unequip plus `catalog.test.ts`, the AdSense switch-on layout (`ADSENSE_SETUP.md`, feed side rail / mobile bottom, Settings opt-in, no ad-view token rewards), keyset feed pagination with “Load more,” and optimistic direct messages with realtime gap recovery.
-- Checks actually run for this work: `npm run lint`, `npm run typecheck`, `npm run check:sql-handoff`, `npm test -- --run` (27/27), and `npm run build` passed.
-- Still not done: new migrations applied to Supabase, Edge Functions/webhook deployed, `ACCOUNT_PURGE_SECRET` configured with a scheduler, staging validation, AdSense custom domain/site approval/live slot IDs/UK/EEA certified CMP, approved final legal text, chat emoji packs, message read receipts/unread counts, and the open-source systems comparison/roadmap document.
-- Next three actions: (1) apply the Phase 1 migrations in a staging project (18+ age gate, refund clawback, deletion grace, admin dashboard, admin Terms view, plus the `terms_acceptances` pair) and run `verify_all.sql`; (2) deploy `token-checkout` and `stripe-token-webhook` with test-mode secrets and verify age-gate, refund, and dispute paths; (3) test the seven-day deletion schedule, restore, and purge route with `ACCOUNT_PURGE_SECRET` before enabling anything live. `PHASE1_STAGING_CHECKLIST.md` holds the exact cases and expected results; nothing in it has been run.
-- Push is still blocked until the GitHub PAT has `workflow` scope.
+- `ROADMAP.md` was added on 2026-10-27. It records the agreed product direction: rename to The Sanctuary only, friend + follow relationships, no anonymous posting, free wisdom sharing with future guide monetisation, spiritual + mental wellbeing, the self-discovery profile, and dark mode with a theme system. Nothing in W0–W7 is built yet except W1.
+- Checks actually run for the Phase 1 work: `npm run lint`, `npm run typecheck`, `npm run check:sql-handoff` (20 migrations, no Markdown fences), `npm test -- --run` (27/27), and `npm run build` passed.
+- Still not done: new migrations applied to Supabase, Edge Functions/webhook deployed, `ACCOUNT_PURGE_SECRET` configured with a scheduler, staging validation, AdSense custom domain/site approval/live slot IDs/UK/EEA certified CMP, approved final legal text, chat emoji packs, message read receipts/unread counts, and every W0/W2–W7 roadmap item.
+- Next three actions: (1) apply the Phase 1 migrations in a staging project (18+ age gate, refund clawback, deletion grace, admin dashboard, admin Terms view, plus the `terms_acceptances` pair) and run `verify_all.sql`; (2) deploy `token-checkout` and `stripe-token-webhook` with test-mode secrets and verify age-gate, refund, and dispute paths; (3) test the seven-day deletion schedule, restore, and purge route with `ACCOUNT_PURGE_SECRET` before enabling anything live. `PHASE1_STAGING_CHECKLIST.md` holds the exact cases and expected results; nothing in it has been run. Product work starts with W0: rename the shell and build the theme/dark-mode foundation.
 
 ## Project context
 
-**The Sanctuary** (`Guild-Sanctuary`) is a single-community Next.js 16 App Router + TypeScript application with an optional Capacitor Android shell. The former dual-world Guild Hall concept is retired. Do not reintroduce world selectors, `WorldType` navigation, or per-world stores.
+**The Sanctuary** (GitHub repository `Guild-Sanctuary`) is a single-community Next.js 16 App Router + TypeScript application with an optional Capacitor Android shell. The former dual-world Guild Hall concept is retired. Do not reintroduce world selectors, `WorldType` navigation, or per-world stores. The product name is only The Sanctuary; "Guild" is legacy repository/app-ID wording and must not appear in new user-facing copy.
 
 Current stack:
 
@@ -36,7 +37,16 @@ Current capabilities:
 
 ## Current product decisions
 
-- The product is **The Sanctuary**. Guild Hall / dual-world switching is retired.
+- The product is **The Sanctuary**. Guild Hall / dual-world switching is retired. "Guild Sanctuary" is not a product name; retire it from UI and docs (keep the repository name and Android app ID for now).
+- **Roadmap decisions locked 2026-10-27** (details in `ROADMAP.md`):
+  - Relationships are **friend** (mutual request/accept) and **follow** (one-way). One-way relationships are allowed. Counts are context, never a ranking.
+  - **No anonymous posting.** Guest mode is read-only and sufficient for now.
+  - **Practices and guides are in scope.** Members share wisdom, life lessons, and practice for free. Guide account monetisation is a future option; do not paywall peer support or crisis content.
+  - The focus is **personal growth inside a social environment**, with spirituality and everyday mental wellbeing side by side. Positivity and emotional honesty, not performance.
+  - **Self-discovery profile:** optional birthday → derived star sign, likes/dislikes, values, a 16-type personality questionnaire, and optional private body metrics. Results are reflection and suggestions, never predictions or diagnoses. Do not call it official MBTI. Body metrics must not produce BMI/"ideal weight" labels and must be private.
+  - **Dark mode now, theming later:** semantic design tokens, `data-theme`, `prefers-color-scheme`, persisted per account and device, with data-driven theme presets. Profile accent stays separate from the app theme.
+  - Commerce stays cosmetic-only: no gifts, VIP, post promotion, transfers, trading, marketplace, or cash-out.
+- The app shell still renders "GUILD / SANCTUARY" in `src/components/ResponsiveShell.tsx`; fixing that is the first W0 task, along with the shell contrast issue (dark toolbar text outside the light surface).
 - Guest browsing remains read-only.
 - Current wallet scope is: persistent balance/history, fixed token bundles, a 100-token signup grant, and permanent profile cosmetics. The implemented catalog has 12 items: three animated frames at 300 tokens, two effects at 200–250, four emoji badges at 150, and three curated GIF banners at 300. Purchases auto-equip; `equip_profile_cosmetic` switches owned items. The owner must approve every curated GIF and emoji badge before launch. Chat emoji packs are the next expression feature. The remaining catalog in `TOKEN_CATALOG_PROPOSAL.md` is illustrative and unapproved; gifts, VIP, post promotion, transfers, trading, marketplace, and cash-out remain deferred.
 - The profile page is display-first: profile card plus the user’s posts/media, with settings inside an “Edit profile” dialog. Discover lists public profiles on load and searches username/display name; it only finds other accounts when Supabase is configured and the profiles are public with discovery enabled.
@@ -74,6 +84,8 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 
 ## Handoff: next agent actions (small, modular tasks)
 
+Product work follows `ROADMAP.md`. Finish the validation items below before starting a new feature, so the Phase 1 gates are not left half-applied. The first planned product change is **W0**: rename the shell to The Sanctuary, fix the toolbar/surface contrast, and introduce semantic theme tokens with dark mode. Do not start W2+ features before W0 lands, and do not build W2–W7 items in one batch.
+
 1. **Validate current code first.** Read this handoff, `MASTER_BLUEPRINT.md`, and applicable project/Next docs. Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and the Deno Edge Function check if shell/dependencies are available. Fix only observed failures; keep each change focused in its feature module. Report exact commands/results.
 2. **Apply staging migrations safely.** For the Dashboard path, use `SUPABASE_SQL_HANDOFF.md` and `supabase/handoff/`. `economy_migrations.sql` combines the six economy migrations (wallet, spending, signup bonus, cosmetics, 18+ age gate, refund clawback); `all_migrations.sql` is for a fresh project only; `verify_economy.sql` and `verify_all.sql` are read-only checks. The earlier paste failures were Markdown fences, not SQL. From the repository, use the intended staging project only:
    ```sh
@@ -93,7 +105,9 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 
 ## Required collaboration rules
 
-- Treat `MASTER_BLUEPRINT.md`, `PLATFORM_COMPARISON_AND_LEGAL_NOTES.md`, and this handoff as source-of-truth project context; update them when roadmap/status changes. Use `SUPABASE_SQL_HANDOFF.md` for the paste-ready SQL path.
+- Treat `MASTER_BLUEPRINT.md`, `ROADMAP.md`, `PLATFORM_COMPARISON_AND_LEGAL_NOTES.md`, and this handoff as source-of-truth project context; update them when roadmap/status changes. Use `SUPABASE_SQL_HANDOFF.md` for the paste-ready SQL path.
+- The product name is **The Sanctuary** only. Do not add "Guild" to new UI copy or docs. Keep the repository name and Android app ID unchanged for now.
+- Respect the locked decisions in `ROADMAP.md`: friend + follow, no anonymous posting, free wisdom with deferred guide monetisation, spiritual + mental wellbeing, self-discovery without diagnosis, dark mode with theme presets, cosmetic-only tokens.
 - Keep Supabase RLS enabled. No client-side wallet writes, client-supplied prices, user IDs, or fulfillment claims. Never expose Stripe or Supabase secret keys.
 - Keep guest mode read-only. Never treat local demo balances or mock authentication as real accounts.
 - Distinguish code added from SQL applied, functions deployed, and payments tested. Report only validations actually run.

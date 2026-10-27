@@ -1,13 +1,13 @@
-# Guild Sanctuary — Database Recovery Memory
+# The Sanctuary — Database Recovery Memory
 
-Last updated: 2026-10-26
+Last updated: 2026-10-27
 Purpose: Persistent handoff for Supabase recovery and database integration.
 Status: IN PROGRESS — do not treat the database as a fresh installation.
 
 ## 1. Project identity
 
 - Repository: platinumsoundz/Guild-Sanctuary
-- Working branch: audit/fixes-2026-10-23
+- Working branch: `feature/phase1-trust-safety` (pushed to `origin` at `2e85add`). The earlier `audit/fixes-2026-10-23` notes below still describe the live-database audit accurately.
 - Linked Supabase project ref: xgpzvmhldyoyrwwebcic
 - Supabase CLI observed: v2.121.0
 - Local Docker/Podman unavailable in the terminal environment previously checked.
@@ -180,14 +180,23 @@ Previously observed `supabase migration list --linked`:
   20261024000001
   20261024000002
 
+The Phase 1 migrations are newer than that list and are also unapplied:
+`20261026000000`, `20261026000100`, `20261026000200`, `20261026000400`,
+`20261026000500`, `20261026113205`, `20261026113229`, and `20261027000000`.
+Do not assume the migration list above is complete; run
+`supabase migration list --linked` before any push.
+
 Some SQL effects may have been applied manually already. Inspect each pending
 migration and compare its intended changes with live objects before deciding
 whether to apply it or reconcile migration history. Never blindly push all.
 
 ## 7. Verification already completed
 
-- `npm run check:sql-handoff` passed: 12 migrations, no Markdown fences.
+- `npm run check:sql-handoff` passed on 2026-10-26: 20 migrations, no Markdown
+  fences, and every marked `-- Source:` section matches its migration.
 - `npm run typecheck` passed.
+- `npm run lint`, `npm test -- --run` (27/27), and `npm run build` passed on
+  the Phase 1 head commit (`2e85add`).
 - Git status was clean at the last recorded check.
 - A prior repair attempt exited with code 1; do not blindly repeat it.
 - `supabase db query --linked --file` may display only the final SELECT result
@@ -299,3 +308,45 @@ The user is tired and wants to resume later. Avoid repeating completed checks, l
 - "Mark reviewing" no longer requires resolution notes; closing an appeal still does.
 - Purchase reviews cannot be re-resolved after a decision, and moderation panel buttons are explicitly `type="button"`.
 - `MASTER_BLUEPRINT.md` records the known gaps: ban evasion through deletion, no in-app appeal for a suspended/banned account, a won dispute is not re-credited, and a theoretical concurrent duplicate refund.
+
+## SESSION CHECKPOINT — 2026-10-27 (product direction and roadmap)
+
+### Branch and push state
+- The earlier note that "nothing has been pushed" is superseded: `feature/phase1-trust-safety` is pushed to `origin` at `2e85add`.
+- No pull request is open and nothing has been merged into `main`.
+- Working tree was clean at the start of this checkpoint.
+
+### New memory documents
+- `ROADMAP.md` created. It is now the single product roadmap and holds the
+  comparison findings, workstreams W0–W7, the relationship model, notification
+  types, self-discovery design and guardrails, theming plan, out-of-scope list,
+  and open questions.
+- `MASTER_BLUEPRINT.md` updated with the new identity, locked decisions, planned
+  modules, and a pointer to the roadmap.
+- `AI_RESTORE_PROMPT.md` updated with the corrected branch/push state and the
+  same decisions.
+- `PLATFORM_COMPARISON_AND_LEGAL_NOTES.md` gained a decision-response section.
+- No feature code, migration, or SQL was changed in this checkpoint.
+
+### Locked product decisions
+- Name is **The Sanctuary** only. Retire "Guild" from UI and docs; keep the
+  repository name and Android app ID for now.
+- Relationships: **friend** (mutual) and **follow** (one-way). One-way is allowed.
+- **No anonymous posting**; guest mode stays read-only.
+- **Practices and guides** are in scope; wisdom sharing stays free; guide
+  monetisation is a future option.
+- Focus is **personal growth in a social environment**, combining spiritual and
+  mental wellbeing, positivity, and emotional honesty.
+- **Self-discovery profile**: birthday → star sign, likes/dislikes, values,
+  16-type personality questionnaire, optional private body metrics. Reflection
+  and suggestions only; no predictions, diagnoses, BMI labels, or official MBTI
+  branding.
+- **Dark mode as soon as possible**, with a token-based theme system ready for
+  future presets. Profile accent stays separate from the app theme.
+- Commerce stays cosmetic-only.
+
+### Next single action
+W0: rename the shell in `src/components/ResponsiveShell.tsx`, fix the dark
+toolbar/light surface contrast, then introduce semantic theme tokens and dark
+mode. Do not begin W2+ features until W0 lands. Separately, the Phase 1 staging
+runbook is still the gate before live payments.

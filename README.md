@@ -2,7 +2,7 @@
 
 A cross-platform community app focused on reflection, growth, and connection. The web app is a Next.js 16 App Router project; the Android shell uses Capacitor.
 
-Read [MASTER_BLUEPRINT.md](MASTER_BLUEPRINT.md) before making project changes. It records architecture rules, module ownership, verified progress, and the roadmap; keep it current as the codebase changes.
+Read [MASTER_BLUEPRINT.md](MASTER_BLUEPRINT.md) before making project changes. It records architecture rules, module ownership, and verified progress. [ROADMAP.md](ROADMAP.md) records the product direction, workstreams, and agreed decisions; keep both current as the codebase changes.
 
 ## Development
 

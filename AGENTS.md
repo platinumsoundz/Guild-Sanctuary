@@ -8,10 +8,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-## Guild Sanctuary handoff rules
+## The Sanctuary handoff rules
 
-- Read `MASTER_BLUEPRINT.md` and `AI_RESTORE_PROMPT.md` before planning changes. Keep the roadmap and handoff file aligned when status changes.
-- Current economy scope is wallet balance/history, fixed token bundles, a 100-token signup grant, and one permanent profile-frame sink (300 tokens). Spending is server-owned and idempotent via `spend_tokens`; the client sends only a catalog item ID. Checkout code is staged but not deployed or validated; `TOKEN_CHECKOUT_ENABLED` defaults to false. Do not enable live purchases until staging checks and refund/chargeback handling are complete.
+- Read `MASTER_BLUEPRINT.md`, `ROADMAP.md`, and `AI_RESTORE_PROMPT.md` before planning changes. Keep the roadmap and handoff file aligned when status changes.
+- The product name is **The Sanctuary** only. Do not add "Guild" to new UI copy or docs; the repository name and Android app ID stay unchanged for now. The shell still renders "GUILD / SANCTUARY" in `src/components/ResponsiveShell.tsx` until W0 lands.
+- Locked product decisions live in `ROADMAP.md`: friend + follow relationships, no anonymous posting, free wisdom sharing with deferred guide monetisation, spiritual + mental wellbeing, a self-discovery profile that never diagnoses, dark mode with theme presets, and cosmetic-only tokens.
+- Current economy scope is wallet balance/history, fixed token bundles, a 100-token signup grant, and a 12-item permanent profile-cosmetics catalog. Spending is server-owned and idempotent via `spend_tokens`; the client sends only a catalog item ID. Checkout code is staged but not deployed or validated; `TOKEN_CHECKOUT_ENABLED` defaults to false. Do not enable live purchases until staging checks and refund/chargeback handling are complete.
 - Refund/chargeback policy is not specified. Ask the product owner about full/partial refunds, disputes, manual support, and reversals if tokens have been spent; do not guess.
 - Do not use the shareable Stripe Payment Link for wallet purchases. Keep prices and fulfillment decisions server-side, and never expose Supabase/Stripe secrets.
 - Preview/local safety: Support returns its external donation URL only on Vercel Production with `STRIPE_DONATION_LINK_ENABLED=true`; AdSense requires its explicit flag plus a production-marked deployment (`VERCEL_ENV=production` or `NEXT_PUBLIC_DEPLOYMENT_ENV=production`); token checkout rejects Origins that do not exactly match server-side `APP_BASE_URL`. Keep preview environments free of live payment config.
