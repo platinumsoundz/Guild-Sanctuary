@@ -1,7 +1,7 @@
 # Phase 1 staging acceptance checklist
 
 **Status: NOT RUN. This is a release runbook, not evidence that the implementation exists on main or works.**  
-Checked: 2026-10-27. The current trust-and-safety implementation is still in open PR #18, which is not mergeable. The live production migration ledger does not contain its proposed Phase 1 migration versions.
+Checked: 2026-10-27. The broad trust-and-safety implementation in PR #18 is not the release target by itself. Focused proposals include PR #81 (moderation hierarchy and message handling) and draft PR #84 (member-role authorization locking). Both are code/CI-verified but not staging-verified. The live production migration ledger does not contain these proposed migration versions.
 
 ## Hard release gate
 
@@ -96,6 +96,11 @@ Record these values in the PR or a dated report:
 ## G. Moderation and admin
 
 - [ ] Ordinary member cannot invoke admin RPCs or change another member's role.
+- [ ] Account actions reject self-targeting and require the actor to strictly outrank the target; equal/higher-ranked targets are denied.
+- [ ] Content actions reject self-targeting and require the actor to strictly outrank the content owner for posts, shorts, events, comments, and messages; equal/higher-ranked owners are protected.
+- [ ] Unknown/missing actor role, target role, or content owner fails closed; inactive actors cannot moderate, but content owned by an inactive account remains reviewable.
+- [ ] Role-change RPC locks actor and target profiles in stable order, rechecks actor role/status after locking, rejects self-role changes, and does not allow owner-to-owner changes or peer-level grants.
+- [ ] Concurrency test: demote a moderator/admin while a moderation or role-change RPC is waiting on the same profile row; stale authority must not survive the lock wait.
 - [ ] Moderator/admin actions enforce hierarchy; no self-ban or non-admin action on an admin.
 - [ ] All privileged actions write appropriate audit records.
 - [ ] Reports, reviews, appeals, and member status reflect the persisted database state.
