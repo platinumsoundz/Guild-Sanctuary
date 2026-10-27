@@ -134,7 +134,7 @@
 }
 
 @media (max-width: 640px) {
-  .workspace { padding: 0 0 16px; }
+  .workspace { padding: 0 0 calc(80px + env(safe-area-inset-bottom)); }
 
   .installBanner {
     width: auto;

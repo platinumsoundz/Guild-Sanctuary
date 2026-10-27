@@ -31,7 +31,13 @@ jobs:
       - run: npm run check:account-settings
       - run: npm run check:messages
       - run: npm run check:self-discovery
+      - run: npm run check:daily-reflection
+      - run: npm run check:navigation
+      - run: npm run check:feed-polish
+      - run: npm run check:personal-planner
+      - run: npm run check:personal-habits
       - run: npm run check:theme
+      - run: npm run check:theme-contrast
       - run: npm run check:notifications
       - run: deno check supabase/functions/token-checkout/index.ts supabase/functions/stripe-token-webhook/index.ts
       - run: npm run typecheck

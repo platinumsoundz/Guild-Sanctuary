@@ -9,6 +9,18 @@ import { ReportContentButton } from '@/modules/moderation';
 import { PostEngagement } from './PostEngagement';
 import styles from './FeedContent.module.css';
 
+function formatPostTime(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Date unavailable';
+  const elapsed = Date.now() - date.getTime();
+  if (elapsed < 0) return date.toLocaleString();
+  if (elapsed < 60_000) return 'Just now';
+  if (elapsed < 3_600_000) return `${Math.floor(elapsed / 60_000)}m ago`;
+  if (elapsed < 86_400_000) return `${Math.floor(elapsed / 3_600_000)}h ago`;
+  if (elapsed < 604_800_000) return `${Math.floor(elapsed / 86_400_000)}d ago`;
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 const PLACEHOLDER_HEADING = 'A little room to begin';
 const PLACEHOLDER_MESSAGE = 'Thoughts and reflections from your community will find a home here.';
 
@@ -208,7 +220,7 @@ export function FeedContent() {
                     <span>@{authors[post.authorId]?.username ?? (post.authorId === currentUser?.user.id ? currentUser.profile.username : 'community')}</span>
                     {post.storyTag && <span className={styles.storyTag}>{post.storyTag}</span>}
                   </div>
-                  <time dateTime={post.createdAt}>{post.createdAt.replace('T', ' ').slice(0, 16)} UTC</time>
+                  <time dateTime={post.createdAt} title={new Date(post.createdAt).toLocaleString()}>{formatPostTime(post.createdAt)}</time>
                 </div>
                 {editingPostId === post.id ? (
                   <div className={styles.editArea}>
@@ -230,7 +242,12 @@ export function FeedContent() {
                   </video>
                 )}
                 {currentUser && !isGuest && <PostEngagement postId={post.id} userId={currentUser.user.id} />}
-                {currentUser && !isGuest && <ReportContentButton targetType="post" targetId={post.id} />}
+                {currentUser && !isGuest && (
+                  <details className={styles.postOverflow}>
+                    <summary aria-label="More post actions">More</summary>
+                    <ReportContentButton targetType="post" targetId={post.id} />
+                  </details>
+                )}
                 {currentUser && !isGuest && post.authorId === currentUser.user.id && editingPostId !== post.id && (
                   <div className={styles.postActions}>
                     <button className={styles.textButton} type="button" onClick={() => {

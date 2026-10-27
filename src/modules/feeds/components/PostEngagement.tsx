@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Heart, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { ReportContentButton } from '@/modules/moderation';
+import { getLocalPublicProfileById } from '@/modules/auth';
 import type { SocialComment } from '@/types/database';
 import { addPostComment, deletePostComment, fetchPostComments, getPostEngagement, togglePostLike, updatePostComment } from '../service';
 import { getCommentEngagement, toggleCommentLike } from '../commentEngagement';
@@ -16,12 +17,22 @@ interface PostEngagementProps {
 export function PostEngagement({ postId, userId }: PostEngagementProps) {
   const [stats, setStats] = useState({ liked: false, likesCount: 0, commentsCount: 0 });
   const [comments, setComments] = useState<SocialComment[]>([]);
+  const [commentAuthors, setCommentAuthors] = useState<Record<string, string>>({});
   const [draft, setDraft] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingBody, setEditingBody] = useState('');
   const [commentEngagement, setCommentEngagement] = useState<Record<string, { liked: boolean; count: number }>>({});
+
+  useEffect(() => {
+    setComments([]);
+    setCommentAuthors({});
+    setIsOpen(false);
+    setError(null);
+    setEditingCommentId(null);
+    setEditingBody('');
+  }, [postId, userId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,6 +51,16 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
       try {
         const items = await fetchPostComments(postId);
         setComments(items);
+        const authorNames = Object.fromEntries(items.flatMap((comment) => {
+          if (comment.authorId === userId) return [];
+          try {
+            const profile = getLocalPublicProfileById(comment.authorId);
+            return profile ? [[comment.authorId, profile.displayName] as const] : [];
+          } catch {
+            return [];
+          }
+        }));
+        setCommentAuthors(authorNames);
         const engagement = await Promise.all(items.map(async (comment) => [
           comment.id,
           await getCommentEngagement(comment.id, userId),
@@ -124,7 +145,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
         <div className={styles.commentPanel}>
           {comments.length === 0 ? <p className={styles.empty}>No comments yet.</p> : comments.map((comment) => (
             <article className={styles.commentItem} key={comment.id}>
-              <p className={styles.comment}><strong>{comment.authorId === userId ? 'You' : comment.authorId}</strong></p>
+              <p className={styles.comment}><strong>{commentAuthors[comment.authorId] ?? (comment.authorId === userId ? 'You' : 'Community member')}</strong></p>
               {editingCommentId === comment.id ? (
                 <div className={styles.commentEdit}>
                   <textarea value={editingBody} maxLength={1000} onChange={(event) => setEditingBody(event.currentTarget.value)} aria-label="Edit your comment" />
