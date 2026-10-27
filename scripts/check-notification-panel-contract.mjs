@@ -29,3 +29,7 @@ assert.match(notifications, /\[currentUser\?\.user\.id, isGuest\]/, 'Account or 
 assert.match(notifications, /if \(isCurrentRequest\(\)\) setIsLoading\(false\)/, 'Stale requests must not clear the current request loading indicator');
 
 console.log('Header navigation and notification panel contract checks passed.');
+
+assert.match(notifications, /const activeAccountId = useRef<string \| null>\(null\)/, 'Notification mutations must track the active account synchronously');
+assert.match(notifications, /if \(!isSameSession\(\)\) return/, 'Late read mutations must not update a different account session');
+assert.match(notifications, /if \(activeAccountId\.current !== accountId\) return/, 'Opening a stale notification must not navigate after an account switch');
