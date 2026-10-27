@@ -71,6 +71,18 @@ export function SettingsHub({
     document.documentElement.dataset.layout = settings.preferences.layout;
   }, [settings.preferences.layout]);
 
+  useEffect(() => {
+    if (isLoading) return;
+    const theme = settings.preferences.theme;
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.toggle('dark', theme !== 'light');
+    try {
+      window.localStorage.setItem('sanctuary-theme', theme);
+    } catch {
+      // Account settings remain authoritative when browser storage is unavailable.
+    }
+  }, [isLoading, settings.preferences.theme]);
+
   const updatePreference = async (key: keyof typeof preferenceLabels, value: boolean) => {
     let directMessagePreferenceSaved = false;
     try {
