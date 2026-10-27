@@ -65,4 +65,4 @@ Feedback is triaged into:
 The team will prioritise issues by user impact, frequency, severity, and effort. Reporting an issue does not guarantee it will be shipped, but it gives the team concrete evidence for a decision.
 
  
-**Self-discovery output:** The current prototype provides a private, rule-based reflection with one practical action, a micro-lesson, and a journal prompt based on the answers selected so far. It is not a diagnosis or clinical assessment. Check that these suggestions are respectful, optional, and never appear in the public profile summary.
+**Self-discovery output:** The account-backed Centre provides a private, rule-based reflection with an action, micro-lesson and journal prompt. Its paced questions cover recharge, decisions, motivation, communication preferences, learning preferences and an optional zodiac lens. It is not a diagnosis or clinical assessment. Check that suggestions are respectful, optional, and never appear in the public profile summary.
