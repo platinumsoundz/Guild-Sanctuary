@@ -33,9 +33,9 @@ const checks = [
 ];
 
 checks.push(
-  ['persistent conversation RPC exists in generated database types', /create_sanctuary_conversation:\\s*\\{/.test(databaseTypes)],
-  ['persistent conversation RPC arguments stay aligned with repository calls', /requested_kind:\\s*kind/.test(repository) && /requested_member_ids:\\s*uniqueIds/.test(repository) && /requested_name:\\s*name/.test(repository) && /requested_kind:\\s*'direct' \\| 'group'/.test(databaseTypes) && /requested_member_ids:\\s*string\\[\\]/.test(databaseTypes) && /requested_name\\?:\\s*string \\| null/.test(databaseTypes)],
-  ['repository uses the typed RPC name rather than the lower-level migration function name', /rpc\\('create_sanctuary_conversation'/.test(repository) && !/rpc\\('create_conversation'/.test(repository)],
+  ['persistent conversation RPC exists in generated database types', /create_sanctuary_conversation:\s*\{/.test(databaseTypes)],
+  ['persistent conversation RPC arguments stay aligned with repository calls', /requested_kind:\s*kind/.test(repository) && /requested_member_ids:\s*uniqueIds/.test(repository) && /requested_name:\s*name/.test(repository) && /requested_kind:\s*'direct' \| 'group'/.test(databaseTypes) && /requested_member_ids:\s*string\[\]/.test(databaseTypes) && /requested_name\?:\s*string \| null/.test(databaseTypes)],
+  ['repository uses the typed RPC name rather than the lower-level migration function name', /rpc\('create_sanctuary_conversation'/.test(repository) && !/rpc\('create_conversation'/.test(repository)],
 );
 
 for (const [label, passed] of checks) {
