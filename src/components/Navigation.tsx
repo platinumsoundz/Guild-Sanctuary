@@ -145,11 +145,7 @@ export function Navigation({
           </div>
         </div>
         <div className={styles.accountArea}>
-          {isSessionReady && (
-            <button className={styles.notificationButton} type="button" aria-label="Open notifications" onClick={() => onNavigate('notifications')}>
-              <Bell size={19} strokeWidth={1.8} aria-hidden="true" />
-            </button>
-          )}
+          {isSessionReady && <NotificationBar compact />}
           {!isSessionReady ? (
             <span className={styles.accountPlaceholder} role="status">Restoring session</span>
           ) : (
