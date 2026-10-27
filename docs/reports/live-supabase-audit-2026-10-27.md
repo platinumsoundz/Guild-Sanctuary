@@ -1,0 +1,60 @@
+# Live Supabase verification and Phase 1 blockers
+
+Checked: 2026-10-27 02:07 UTC  
+Project: Guild-Sanctuary production project  
+Method: read-only project, migration-ledger, schema/catalog, and advisor queries; one non-destructive PostgREST schema-cache reload notification. No table data, schema, roles, secrets, or project configuration were changed.
+
+## Summary
+
+**Phase 1 trust-and-safety migrations are not present in the live migration ledger.** The code on PR #18 is not production-verified and should not be merged/applied as one broad change. The live project has newer unrelated migrations after the previous 2026-10-26 drift report, so that report needs a fresh comparison before any migration plan is prepared.
+
+## Migration ledger
+
+The live ledger currently contains 29 entries. The ledger includes the existing Terms migrations at versions `20261026113205` and `20261026113229`, and several later fixes for messaging, comment reactions, and short engagement. It does **not** include the proposed Phase 1 migration versions currently on PR #18:
+
+- `20261026000000_token_purchase_age_gate.sql`
+- `20261026000100_token_refund_clawback.sql`
+- `20261026000200_account_deletion_grace_period.sql`
+- `20261026000400_admin_dashboard.sql`
+- `20261026000500_moderation_action_guards.sql`
+- `20261027000000_admin_terms_acceptances.sql`
+
+The exact migration history remains drifted from checked-in files. Do not run `supabase db push` blindly and do not try to force version strings to match. Recover SQL bodies for live-only migration versions, compare semantic effects against Git, and test a reconciled plan in a disposable environment before any schema change.
+
+## Short-video reaction RPC — targeted cache recovery
+
+The original symptom was: `Could not find the function public.get_short_engagement_stats(requested_short_id) in the schema cache`.
+
+Live catalog inspection confirmed:
+- `public.get_short_engagement_stats(requested_short_id uuid)` exists and returns `TABLE(liked boolean, likes_count bigint, comments_count bigint)`.
+- `public.toggle_short_like(requested_short_id uuid)` exists with the same result shape.
+- Both are SECURITY DEFINER functions.
+- The `authenticated` role can execute both; `anon` cannot.
+
+I sent `NOTIFY pgrst, 'reload schema';` to request a PostgREST schema-cache refresh. This does not alter table data or migration history and does not create missing objects.
+
+**Still needed:** reload the deployed app and retry loading short-video reactions with a real signed-in test account. If the same error persists, collect the exact request/response and check the active deployed app commit, project URL, schema cache, and argument name. Do not loosen grants to fix a cache error.
+
+## Security advisor snapshot
+
+Observed at 2026-10-27 02:07 UTC:
+
+- **1 INFO:** `public.game_wallet_sessions` has RLS enabled but no policies. This may intentionally deny direct client access; inspect all access paths before adding a policy.
+- **12 WARN:** authenticated users can execute SECURITY DEFINER functions, including `apply_moderation_action`, `create_conversation`, `create_sanctuary_conversation`, `get_report_target_owner`, `get_short_engagement_stats`, `is_active_conversation_member`, `is_active_user`, `is_moderator`, `search_members_for_admin`, `set_member_role`, `submit_content_report`, and `toggle_short_like`. This finding is a review signal, not proof each function is vulnerable. Audit each body, grants, caller authorization, search_path, and RLS assumptions before changing grants.
+- **1 WARN:** leaked-password protection is disabled in Supabase Auth. Enablement requires an owner-approved Auth configuration change and a sign-in regression check; not changed during this audit.
+- **21 INFO:** foreign-key columns without covering indexes.
+- **5 INFO:** indexes reported unused by current statistics. Usage counters may reset, so don't drop indexes solely on this signal.
+- **4 WARN:** multiple permissive policies on social comment/like operations. Review overlap and preserve behavior while consolidating, if warranted.
+
+## Safe next actions
+
+1. Run a source-backed review of the 12 SECURITY DEFINER functions, starting with moderation/admin functions and the two short-reaction RPCs. Check explicit role gates and ownership/visibility predicates; don't revoke all authenticated access indiscriminately.
+2. Add an index proposal for the 21 foreign-key findings, grouped by high-write/large-table impact, and validate with query plans in staging.
+3. Review duplicate permissive policies and document which policy is canonical before removing any.
+4. Ask the owner to approve enabling leaked-password protection, then verify signup, login, password reset, and compromised-password rejection in a test account.
+5. Reconcile migration drift in a disposable database and split Phase 1 into focused PRs with independent review.
+6. Execute the Phase 1 staging checklist only after the code and migration set are reviewable and staging access is available.
+
+## Boundaries
+
+No production migrations, table updates, role changes, RLS policy changes, Auth settings changes, payment configuration changes, or deployment actions were performed. The PostgREST schema-cache reload is the only live operational action.
