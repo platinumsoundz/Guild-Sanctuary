@@ -47,10 +47,15 @@ assert.ok(source.includes('not a fixed learning type'), 'learning preferences mu
 for (const value of ['values:rest', 'values:connection', 'values:growth', 'values:creativity', 'values:stability']) {
   assert.ok(source.includes(value), `missing values-based reflection rule: ${value}`);
 }
-for (const required of ['Begin reflection', 'Question progress', 'Skip', 'Create reflection', 'Close and clear this session', 'Copy journal prompt', 'You choose where to save it', 'not saved to your account']) {
+for (const required of ['Begin reflection', 'Question progress', 'Skip', 'Create reflection', 'Close and clear this session', 'Copy journal prompt', 'Download reflection (.txt)', 'You choose where to save it', 'not saved to your account']) {
   assert.ok(component.includes(required), `missing questionnaire UX/privacy behavior: ${required}`);
 }
 assert.ok(component.includes('aria-labelledby'), 'questionnaire sections must have accessible labels');
+assert.ok(component.includes('const downloadReflection = () =>'), 'reflection export must be explicitly user initiated');
+assert.ok(component.includes('URL.createObjectURL(blob)'), 'reflection export must create a local text file without a server request');
+assert.ok(component.includes('reflection.disclaimer'), 'exported reflection must retain its non-clinical disclaimer');
+assert.ok(component.includes('setTimeout(() => URL.revokeObjectURL(url), 1000)'), 'temporary object URLs must be released after download');
+assert.ok(component.includes('sanctuary-reflection-'), 'exported file must have a recognizable filename');
 assert.ok(profile.includes('<SelfDiscoveryCentre />'), 'self-discovery centre must be available from the member profile');
 
 console.log('Self-discovery contract checks passed: domains, answer coverage, input validation, multi-answer outputs, non-clinical language, and no hidden persistence/network calls.');

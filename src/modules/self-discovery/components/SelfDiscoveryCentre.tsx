@@ -14,6 +14,7 @@ export function SelfDiscoveryCentre() {
   const [answers, setAnswers] = useState<SelfDiscoveryAnswers>({});
   const [hasFinished, setHasFinished] = useState(false);
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [exportStatus, setExportStatus] = useState<'idle' | 'ready' | 'failed'>('idle');
   const question = SELF_DISCOVERY_QUESTIONS[step];
   const answer = answers[question.id];
   const answeredCount = Object.keys(answers).length;
@@ -36,8 +37,45 @@ export function SelfDiscoveryCentre() {
     }
   };
 
+  const downloadReflection = () => {
+    if (!reflection) return;
+    try {
+      const content = [
+        'The Sanctuary — Personal Reflection',
+        `Created on: ${new Date().toLocaleDateString()}`,
+        `Answers included: ${reflection.answeredCount} of ${reflection.totalQuestions}`,
+        '',
+        'A pattern to consider',
+        reflection.pattern,
+        '',
+        'One small experiment',
+        reflection.practicalAction,
+        '',
+        'A little lesson',
+        reflection.microLesson,
+        '',
+        'A question for your journal',
+        reflection.journalPrompt,
+        '',
+        reflection.disclaimer,
+        '',
+        'This file was created on your device at your request. Store or share it only where you feel comfortable.',
+      ].join('\n');
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sanctuary-reflection-${new Date().toISOString().slice(0, 10)}.txt`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setExportStatus('ready');
+    } catch {
+      setExportStatus('failed');
+    }
+  };
   const restart = () => {
     setCopyStatus('idle');
+    setExportStatus('idle');
     setStep(0);
     setAnswers({});
     setHasFinished(false);
@@ -95,6 +133,11 @@ export function SelfDiscoveryCentre() {
           <button className={styles.secondaryButton} type="button" onClick={() => void copyJournalPrompt()}>
             Copy journal prompt
           </button>
+          <button className={styles.secondaryButton} type="button" onClick={downloadReflection}>
+            Download reflection (.txt)
+          </button>
+          {exportStatus === 'ready' && <p role="status" className={styles.progressCopy}>Your reflection file was prepared on this device. Choose where to keep it.</p>}
+          {exportStatus === 'failed' && <p role="status" className={styles.progressCopy}>The download could not be prepared. You can still copy the journal prompt.</p>}
           {copyStatus === 'copied' && <p role="status" className={styles.progressCopy}>Journal prompt copied. You choose where to save it.</p>}
           {copyStatus === 'failed' && <p role="status" className={styles.progressCopy}>Could not copy automatically. You can select and copy the prompt above.</p>}
         </div>
