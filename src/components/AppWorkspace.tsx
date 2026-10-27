@@ -9,6 +9,7 @@ import type { Conversation, PublicProfile } from '@/types/database';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { AuthenticationGateway } from '@/modules/auth';
 import { Feed } from '@/modules/feeds';
+import { DailyReflection } from '@/modules/practice';
 import { MeetupCalendarPlaceholder } from '@/modules/events';
 import { ProfileDashboard, ProfileDiscovery, PublicProfilePage } from '@/modules/profiles';
 import { SupportPanel } from '@/modules/support';
@@ -129,6 +130,7 @@ export function AppWorkspace() {
         <SanctuaryRoadmap />
       ) : activeNavigation === 'feed' ? (
         <>
+          <DailyReflection userId={currentUser.user.id} isGuest={isGuest} />
           <AdSlot placement="feed-inline" />
           <Feed />
           <AdSlot placement="feed-sidebar" />
