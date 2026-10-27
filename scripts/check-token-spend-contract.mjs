@@ -16,7 +16,7 @@ assert.match(shop, /requested_item_id:\s*item\.item_id/, 'RPC must receive the s
 assert.match(shop, /requested_idempotency_key:\s*crypto\.randomUUID\(\)/, 'Each purchase attempt must have an idempotency key');
 assert.match(shop, /client\.auth\.getUser\(\)/, 'Shop must verify the current Supabase user');
 assert.match(shop, /authData\.user\?\.id !== userId/, 'Shop must bind the UI account to the authenticated user');
-assert.match(shop, /disabled=\{!hasSupabaseAccount \|\| owned \|\| purchasingItemId !== null\}/, 'Guest/unconfigured/owned/parallel UI purchases must be disabled');
+assert.match(shop, /disabled=\{!SPENDING_ENABLED \|\| !hasSupabaseAccount \|\| owned \|\| purchasingItemId !== null\}/, 'Spending lock, guest/unconfigured/owned/parallel UI purchases must be disabled');
 assert.match(shop, /balance_tokens/, 'Shop must consume the database-confirmed balance');
 assert.match(shop, /setOwnedItems/, 'Shop must refresh owned-item state after a confirmed purchase');
 
