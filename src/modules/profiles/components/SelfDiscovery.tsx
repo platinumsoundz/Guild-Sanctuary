@@ -91,7 +91,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
         const summary = profileResult.data.self_discovery_summary as Summary | null;
         if (summary && typeof summary === 'object') setSelectedFields(Object.keys(summary));
         setVisible(profileResult.data.self_discovery_visible === true);
-        onSummaryChange?.(summary && typeof summary === 'object' ? summary : null);
+        onSummaryChange?.(profileResult.data.self_discovery_visible === true && summary && typeof summary === 'object' ? summary : null);
       } catch (loadError) {
         if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Your self-discovery answers could not be loaded.');
       } finally {
