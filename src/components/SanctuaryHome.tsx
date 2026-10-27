@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDownRight, ArrowRight, BookOpen, CalendarDays, Check, CircleHelp,
   Compass, Heart, Layers3, MessageCircle, MessageSquare, Search, ShieldCheck,
@@ -41,6 +41,15 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
   const [feedbackDetails, setFeedbackDetails] = useState('');
   const [copyState, setCopyState] = useState('');
   const visibleFeatures = useMemo(() => filter === 'Everything' ? features : features.filter((feature) => feature.status === filter), [filter]);
+
+  useEffect(() => {
+    if (!activeFeature) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setActiveFeature(null);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [activeFeature]);
 
   const feedbackReport = () => [
     'The Sanctuary beta feedback',
