@@ -183,7 +183,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
         <details className={styles.history}>
           <summary>Previous reflections ({entries.filter((entry) => entry.date !== today).length})</summary>
           <ol className={styles.historyList}>
-            {entries.filter((entry) => entry.date !== today).slice(0, 7).map((entry) => (
+            {entries.filter((entry) => entry.date !== today).map((entry) => (
               <li className={styles.historyEntry} key={entry.id}>
                 <div className={styles.historyMeta}>
                   <time dateTime={entry.date}>{new Date(`${entry.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</time>
@@ -194,9 +194,6 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
               </li>
             ))}
           </ol>
-          {entries.filter((entry) => entry.date !== today).length > 7 && (
-            <p className={styles.historyNote}>Showing the latest 7 previous entries. All loaded entries remain stored in your account.</p>
-          )}
         </details>
       )}
     </section>
