@@ -106,7 +106,7 @@ existing launch gate and must complete before any live payment.
 | Typography scale | In code, partial | Planner form controls are 15px, supporting copy 14px, and desktop navigation labels 14px; a whole-app typography pass and visual review remain planned |
 | Component primitives | Planned | Button, Card, Dialog, Sheet, Tabs, Toast, EmptyState, Skeleton, Avatar, Badge |
 | Navigation restructure | In code, partial | Desktop labels and touch targets improved; mobile fixed bottom tabs currently expose Today, Community, Discover, Messages, You with safe-area/content spacing. Circles and Practice destinations plus desktop rail redesign remain planned; browser/device QA pending |
-| Feed polish | In code, partial | Relative/local post timestamps with exact local time available, readable post metadata, and comment author IDs replaced by display names or a safe fallback. Moving Report into a post overflow menu remains planned; CI and browser QA pending |
+| Feed polish | In code, partial | Relative/local post timestamps with exact local time available, readable post metadata, comment author IDs replaced by display names or a safe fallback, and Report moved into a compact post overflow menu; CI and browser QA pending |
 | Event form fix | Planned | Replace raw latitude/longitude with place search, timezone, online/offline |
 
 **Dark mode and theming design**
