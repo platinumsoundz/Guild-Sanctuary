@@ -56,7 +56,7 @@ function readAnswers(value: unknown): Answers {
   };
 }
 
-export function SelfDiscoveryPanel({ userId, isGuest = false }: { userId: string; isGuest?: boolean }) {
+export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }: { userId: string; isGuest?: boolean; onSummaryChange?: (summary: Summary | null) => void }) {
   const [answers, setAnswers] = useState<Answers>({ ...emptyAnswers });
   const [step, setStep] = useState(0);
   const [consent, setConsent] = useState(false);
@@ -91,6 +91,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false }: { userId: string
         const summary = profileResult.data.self_discovery_summary as Summary | null;
         if (summary && typeof summary === 'object') setSelectedFields(Object.keys(summary));
         setVisible(profileResult.data.self_discovery_visible === true);
+        onSummaryChange?.(summary && typeof summary === 'object' ? summary : null);
       } catch (loadError) {
         if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Your self-discovery answers could not be loaded.');
       } finally {
@@ -99,7 +100,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false }: { userId: string
     };
     void load();
     return () => { cancelled = true; };
-  }, [userId, isGuest]);
+  }, [userId, isGuest, onSummaryChange]);
 
   const summary = useMemo(() => toSummary(answers, selectedFields), [answers, selectedFields]);
   const updateAnswer = (key: keyof Answers, value: string) => {
@@ -132,6 +133,21 @@ export function SelfDiscoveryPanel({ userId, isGuest = false }: { userId: string
   const saveSummary = async () => {
     setBusy(true); setError(''); setNotice('');
     try {
+      if (!consent) {
+        if (isGuest || !isSupabaseCommunityStorageConfigured()) throw new Error('Sign in with your Sanctuary account to manage saved answers.');
+        await requireCommunityStorageUser(userId);
+        const client = getSupabaseBrowserClient();
+        const [deleteResult, profileResult] = await Promise.all([
+          client.from('self_discovery_responses').delete().eq('user_id', userId),
+          client.from('profiles').update({ self_discovery_summary: null, self_discovery_visible: false, updated_at: new Date().toISOString() }).eq('id', userId),
+        ]);
+        if (deleteResult.error) throw deleteResult.error;
+        if (profileResult.error) throw profileResult.error;
+        setAnswers({ ...emptyAnswers }); setStep(0); setVisible(false); setSelectedFields([]);
+        onSummaryChange?.(null);
+        setNotice('Consent withdrawn. Your saved answers and profile summary have been deleted.');
+        return;
+      }
       await persistAnswers();
       if (visible && Object.keys(summary).length === 0) throw new Error('Choose at least one summary item before making it visible.');
       await requireCommunityStorageUser(userId);
@@ -141,6 +157,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false }: { userId: string
         updated_at: new Date().toISOString(),
       }).eq('id', userId);
       if (profileError) throw new Error(`Your profile summary could not be saved: ${profileError.message}`);
+      onSummaryChange?.(visible && Object.keys(summary).length > 0 ? summary : null);
       setNotice(visible ? 'Your selected summary is now available on your public profile.' : 'Your answers are saved privately. Your profile summary is hidden.');
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Your profile summary could not be saved.');
@@ -160,6 +177,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false }: { userId: string
       if (deleteResult.error) throw deleteResult.error;
       if (profileResult.error) throw profileResult.error;
       setAnswers({ ...emptyAnswers }); setStep(0); setConsent(false); setVisible(false); setSelectedFields([]);
+      onSummaryChange?.(null);
       setNotice('Your saved self-discovery answers and public summary have been cleared.');
     } catch (clearError) {
       setError(clearError instanceof Error ? clearError.message : 'Your saved answers could not be cleared.');
@@ -217,7 +235,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false }: { userId: string
           <label className={styles.consent}><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span><strong>I agree to save these answers to my Sanctuary account.</strong><small>Optional. You can stop, change your mind, hide your summary, or delete your saved answers at any time.</small></span></label>
           <div className={styles.controls}>
             <button type="button" className={styles.secondary} disabled={step === 0 || busy} onClick={() => setStep((current) => Math.max(0, current - 1))}>Back</button>
-            {step < 4 ? <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void advance()}>{busy ? 'Saving…' : 'Save & continue'}</button> : <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void saveSummary()}>{busy ? 'Saving…' : 'Save privacy & profile choices'}</button>}
+            {step < 4 ? <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void advance()}>{busy ? 'Saving…' : 'Save & continue'}</button> : <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void saveSummary()}>{busy ? 'Saving…' : consent ? 'Save privacy & profile choices' : 'Withdraw consent & delete answers'}</button>}
           </div>
           {step === 4 && <button type="button" className={styles.clearButton} disabled={busy} onClick={() => void clearAnswers()}><Trash2 size={14} /> Delete my saved answers and hide summary</button>}
           {notice && <p className={styles.success} role="status">{notice}</p>}
