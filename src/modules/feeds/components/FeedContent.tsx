@@ -242,7 +242,12 @@ export function FeedContent() {
                   </video>
                 )}
                 {currentUser && !isGuest && <PostEngagement postId={post.id} userId={currentUser.user.id} />}
-                {currentUser && !isGuest && <ReportContentButton targetType="post" targetId={post.id} />}
+                {currentUser && !isGuest && (
+                  <details className={styles.postOverflow}>
+                    <summary aria-label="More post actions">More</summary>
+                    <ReportContentButton targetType="post" targetId={post.id} />
+                  </details>
+                )}
                 {currentUser && !isGuest && post.authorId === currentUser.user.id && editingPostId !== post.id && (
                   <div className={styles.postActions}>
                     <button className={styles.textButton} type="button" onClick={() => {
