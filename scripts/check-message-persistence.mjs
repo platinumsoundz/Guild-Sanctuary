@@ -67,6 +67,11 @@ checks.push(
   ['conversation creation validates recipient status and direct-message preferences', /p\.status = 'active'/.test(migration) && /p\.allow_direct_messages/.test(migration) && /s\.preferences->>'allowDirectMessages'/.test(dmPreferenceFix)],
 );
 
+checks.push(
+  ['message thread state is synchronously hidden when the account or selected thread changes', /const threadKey = `\$\{userId\}:\$\{selectedConversationId \?\? `peer:\$\{peerUserId \?\? ''\}`\}`/.test(hook) && /const visibleMessages = messagesThreadKey === threadKey \? messages : \[\]/.test(hook)],
+  ['message sending is blocked while the rendered thread key is stale', /messagesThreadKey !== threadKey \|\| !sendingConversationId/.test(hook)],
+);
+
 for (const [label, passed] of checks) {
   console.log(`${passed ? 'PASS' : 'FAIL'} ${label}`);
   assert.ok(passed, label);
