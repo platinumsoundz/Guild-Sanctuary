@@ -1,8 +1,8 @@
 # Live Supabase verification and Phase 1 blockers
 
-Checked: 2026-10-27 02:07 UTC  
+Checked: 2026-10-27 07:36 UTC  
 Project: Guild-Sanctuary production project  
-Method: read-only project, migration-ledger, schema/catalog, and advisor queries; one non-destructive PostgREST schema-cache reload notification. No table data, schema, roles, secrets, or project configuration were changed.
+Method: read-only project, migration-ledger, schema/catalog, privilege, and advisor queries; one non-destructive PostgREST schema-cache reload notification. No table data, schema, roles, secrets, or project configuration were changed.
 
 ## Summary
 
@@ -35,11 +35,17 @@ I sent `NOTIFY pgrst, 'reload schema';` to request a PostgREST schema-cache refr
 
 **Still needed:** reload the deployed app and retry loading short-video reactions with a real signed-in test account. If the same error persists, collect the exact request/response and check the active deployed app commit, project URL, schema cache, and argument name. Do not loosen grants to fix a cache error.
 
+## Moderation migration collision — verified at 07:36 UTC
+
+Two open proposals, PR #81 and PR #82, replace the same live `public.apply_moderation_action(...)` function using different migration versions. The live migration ledger still ends at `20261027003633`; neither proposal appears in the ledger. PR #81 includes explicit null-rationale handling and message-target existence/state handling. PR #82 overlaps on account role-rank checks but does not include the message-target path. If both are applied, the later replacement can overwrite safeguards in the earlier function body. Keep them unmerged/unapplied until there is one canonical reviewed migration.
+
+The live schema confirms `public.messages.state` exists and `moderation_action_type` currently contains `ban, hide, remove, restore, suspend, warn`. The policy question of whether content actions must respect the content owner's role remains open; do not silently invent a policy in SQL. No database changes were made during this review.
+
 ## Security advisor snapshot
 
-Observed at 2026-10-27 02:07 UTC:
+Observed at 2026-10-27 07:36 UTC:
 
-- **1 INFO:** `public.game_wallet_sessions` has RLS enabled but no policies. This may intentionally deny direct client access; inspect all access paths before adding a policy.
+- **1 INFO:** `public.game_wallet_sessions` has RLS enabled but no policies. A direct privilege check also confirmed `anon` and `authenticated` have no table-level SELECT, INSERT, or UPDATE privileges. This currently blocks direct client access; keep that boundary unless a reviewed server-side access path requires otherwise.
 - **12 WARN:** authenticated users can execute SECURITY DEFINER functions, including `apply_moderation_action`, `create_conversation`, `create_sanctuary_conversation`, `get_report_target_owner`, `get_short_engagement_stats`, `is_active_conversation_member`, `is_active_user`, `is_moderator`, `search_members_for_admin`, `set_member_role`, `submit_content_report`, and `toggle_short_like`. This finding is a review signal, not proof each function is vulnerable. Audit each body, grants, caller authorization, search_path, and RLS assumptions before changing grants.
 - **1 WARN:** leaked-password protection is disabled in Supabase Auth. Enablement requires an owner-approved Auth configuration change and a sign-in regression check; not changed during this audit.
 - **21 INFO:** foreign-key columns without covering indexes.
@@ -48,12 +54,14 @@ Observed at 2026-10-27 02:07 UTC:
 
 ## Safe next actions
 
-1. Run a source-backed review of the 12 SECURITY DEFINER functions, starting with moderation/admin functions and the two short-reaction RPCs. Check explicit role gates and ownership/visibility predicates; don't revoke all authenticated access indiscriminately.
-2. Add an index proposal for the 21 foreign-key findings, grouped by high-write/large-table impact, and validate with query plans in staging.
-3. Review duplicate permissive policies and document which policy is canonical before removing any.
-4. Ask the owner to approve enabling leaked-password protection, then verify signup, login, password reset, and compromised-password rejection in a test account.
-5. Reconcile migration drift in a disposable database and split Phase 1 into focused PRs with independent review.
-6. Execute the Phase 1 staging checklist only after the code and migration set are reviewable and staging access is available.
+1. Consolidate PR #81 and PR #82 into one canonical moderation migration, record the content-owner hierarchy policy decision, and test on a disposable/staging database before any apply.
+2. Retry the short-video reaction RPC from the deployed app with a real signed-in test account; if the schema-cache error persists, capture the exact request/response and verify deployed app commit/project URL before changing grants.
+3. Run a source-backed review of the 12 SECURITY DEFINER functions, starting with moderation/admin functions and the two short-reaction RPCs. Check explicit role gates and ownership/visibility predicates; don't revoke all authenticated access indiscriminately.
+4. Add an index proposal for the 21 foreign-key findings, grouped by high-write/large-table impact, and validate with query plans in staging.
+5. Review duplicate permissive policies and document which policy is canonical before removing any.
+6. Ask the owner to approve enabling leaked-password protection, then verify signup, login, password reset, and compromised-password rejection in a test account.
+7. Reconcile migration drift in a disposable database and split Phase 1 into focused PRs with independent review.
+8. Execute the Phase 1 staging checklist only after the code and migration set are reviewable and staging access is available.
 
 ## Boundaries
 
@@ -105,4 +113,4 @@ A follow-up read-only catalog query enumerated 23 public SECURITY DEFINER functi
 
 This is a positive hardening signal: the advisor warning must **not** be interpreted as proof that search_path is unset or that all authenticated execution should be revoked. Each exposed function still needs body-level authorization review, and every table/function reference must remain schema-qualified because the search path is empty.
 
-The live `public.apply_moderation_action(...)` definition was inspected directly. It checks active moderator status, rationale length, action/target compatibility, suspension expiry, target existence, report/target consistency, and records moderation/audit events. It did **not** compare the caller's role rank to the target member's role or reject account actions against the caller. This gap is tracked in proposed PR #81; the migration is not applied and requires staging negative-path tests plus independent security review.
+The live `public.apply_moderation_action(...)` definition was inspected directly. It checks active moderator status, rationale length, account/content action compatibility, suspension expiry, target existence for user/post/short/event/comment, report/target consistency, and records moderation/audit events. It allows `message` as a target type but does **not** check that a message exists or update `messages.state`. It also does **not** compare caller and target role ranks or reject self-targeted account actions. These gaps are addressed in part by proposed PR #81; no proposed hierarchy migration is applied, and the fix still requires migration reconciliation, staging negative-path tests, and independent security review.
