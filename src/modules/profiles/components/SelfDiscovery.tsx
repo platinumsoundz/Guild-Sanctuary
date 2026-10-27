@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Compass, LockKeyhole, ShieldCheck, Trash2, HeartHandshake } from 'lucide-react';
+import { Compass, LockKeyhole, ShieldCheck, Trash2, HeartHandshake, Download } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { isSupabaseCommunityStorageConfigured, requireCommunityStorageUser } from '@/services/supabase/communityMedia';
 import type { PublicProfile } from '@/types/database';
@@ -261,6 +261,29 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
     } finally { setBusy(false); }
   };
 
+  const exportPrivatePlaybook = () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      title: 'My private Sanctuary self-discovery playbook',
+      note: 'Personal reflection only. These preferences are not a diagnosis or a fixed description of who you are.',
+      answers,
+      reflection,
+      profileSharing: {
+        visible,
+        selectedFields,
+        summary: toSummary(answers, selectedFields),
+      },
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'sanctuary-self-discovery-playbook.json';
+    anchor.click();
+    URL.revokeObjectURL(url);
+    setNotice('Your private playbook was exported to a file on this device. Keep it somewhere safe.');
+  };
+
   const configured = isSupabaseCommunityStorageConfigured() && !isGuest;
   return (
     <section className={styles.panel} aria-labelledby="self-discovery-title">
@@ -332,6 +355,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
                   <div><strong>Micro-lesson</strong><p>{reflection.lesson}</p></div>
                   <div><strong>Journal prompt</strong><p>{reflection.prompt}</p></div>
                   <small>This is a practical reflection generated from your selected preferences, not a mental-health assessment or diagnosis. It stays private and is not included in your public profile summary.</small>
+                  <button type="button" className={styles.secondary} onClick={exportPrivatePlaybook}><Download size={15} /> Export my private playbook</button>
                 </section>
               )}
               <h3>Choose what belongs on your profile</h3>
@@ -353,7 +377,7 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
           <label className={styles.consent}><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span><strong>I agree to save these answers to my Sanctuary account.</strong><small>Optional. You can stop, change your mind, hide your summary, or delete your saved answers at any time.</small></span></label>
           <div className={styles.controls}>
             <button type="button" className={styles.secondary} disabled={step === 0 || busy} onClick={() => setStep((current) => Math.max(0, current - 1))}>Back</button>
-            {step < fields.length ? <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void advance()}>{busy ? 'Saving…' : 'Save & continue'}</button> : <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void saveSummary()}>{busy ? 'Saving…' : consent ? 'Save privacy & profile choices' : 'Withdraw consent & delete answers'}</button>}
+            {step < fields.length ? <button type="button" className={styles.primary} disabled={!consent || busy} onClick={() => void advance()}>{busy ? 'Saving…' : 'Save & continue'}</button> : <button type="button" className={styles.primary} disabled={busy} onClick={() => void saveSummary()}>{busy ? 'Saving…' : consent ? 'Save privacy & profile choices' : 'Withdraw consent & delete answers'}</button>}
           </div>
           {step === fields.length && <button type="button" className={styles.clearButton} disabled={busy} onClick={() => void clearAnswers()}><Trash2 size={14} /> Delete my saved answers and hide summary</button>}
           {notice && <p className={styles.success} role="status">{notice}</p>}
