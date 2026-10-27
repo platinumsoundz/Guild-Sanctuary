@@ -35,3 +35,8 @@ Daily reflections must save to the database as a private diary/feed, not to brow
 2. Ashley reviews and applies the migration through the approved Supabase workflow.
 3. Test create/update/reload, account switching, owner isolation with two accounts, history rendering, and delete-history flow in a real browser.
 4. Only then mark end-to-end persistence as verified.
+
+
+## Integration audit follow-up — 2026-10-27
+- PR #129 corrected the stale Phase 1 dependency-map inventory on `main`; this branch is being revalidated against the updated base.
+- This documentation update does not apply the migration or change provider configuration. Ashley must still review and apply the migration before the database-backed reflection UI can work end to end.
