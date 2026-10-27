@@ -1,11 +1,118 @@
 @import "tailwindcss";
 
+/*
+ * The Sanctuary theme contract. Feature modules should use semantic variables.
+ * The theme is selected through <html data-theme="light|dark|dusk">.
+ */
 :root {
+  color-scheme: dark;
+  --bg: #101713;
+  --surface: #18221b;
+  --surface-raised: #202c23;
+  --ink: #edf4ed;
+  --muted: #b1beb4;
+  --line: #354438;
+  --accent: #a4c9a7;
+  --accent-contrast: #132016;
+  --accent-soft: rgb(164 201 167 / 12%);
+  --danger: #ff8a80;
+  --success: #8bd5a5;
+  --warning: #f0c36d;
+  --shadow-card: 0 8px 28px rgb(0 0 0 / 22%);
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --motion-fast: 140ms;
+  --motion-normal: 200ms;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f7f2;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --ink: #203528;
+  --muted: #647268;
+  --line: #dce5dc;
+  --accent: #315a3d;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgb(49 90 61 / 9%);
+  --danger: #b42318;
+  --success: #247347;
+  --warning: #8b5b00;
+  --shadow-card: 0 8px 28px rgb(32 53 40 / 7%);
+}
+
+:root[data-theme="dark"] {
   color-scheme: dark;
 }
 
+:root[data-theme="dusk"] {
+  color-scheme: dark;
+  --bg: #211e20;
+  --surface: #2c272a;
+  --surface-raised: #373034;
+  --ink: #f3e9e6;
+  --muted: #c3b2b3;
+  --line: #514348;
+  --accent: #e7b49c;
+  --accent-contrast: #2a2020;
+  --accent-soft: rgb(231 180 156 / 12%);
+  --danger: #ff9b91;
+  --success: #a4d4ad;
+  --warning: #f1cd88;
+  --shadow-card: 0 8px 28px rgb(0 0 0 / 18%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--bg);
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: #0a0a0a;
-  color: #ededed;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  transition: background-color var(--motion-normal) ease, color var(--motion-normal) ease;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
