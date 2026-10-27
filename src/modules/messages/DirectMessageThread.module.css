@@ -197,3 +197,22 @@
     max-width: 90%;
   }
 }
+
+.privacyNotice {
+  display: grid;
+  gap: 5px;
+  margin: 12px 0 0;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-muted);
+}
+.privacyNotice strong {
+  color: var(--ink);
+  font: 700 10px/1.5 Arial, sans-serif;
+}
+.privacyNotice p {
+  margin: 0;
+  color: var(--muted);
+  font: 10px/1.6 Arial, sans-serif;
+}
