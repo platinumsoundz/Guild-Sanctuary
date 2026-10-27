@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [manifest, worker, offlinePage, registration, installBanner, installBannerStyles, workspace] = await Promise.all([
+const [manifest, worker, offlinePage, registration, responsiveShell, responsiveShellStyles, workspace] = await Promise.all([
   readFile('src/app/manifest.ts', 'utf8'),
   readFile('public/sw.js', 'utf8'),
   readFile('public/offline.html', 'utf8'),
   readFile('src/components/PwaServiceWorker.tsx', 'utf8'),
-  readFile('src/components/PwaInstallBanner.tsx', 'utf8'),
-  readFile('src/components/PwaInstallBanner.module.css', 'utf8'),
+  readFile('src/components/ResponsiveShell.tsx', 'utf8'),
+  readFile('src/components/ResponsiveShell.module.css', 'utf8'),
   readFile('src/components/AppWorkspace.tsx', 'utf8'),
 ]);
 
@@ -22,14 +22,16 @@ assert.match(offlinePage, /You're offline/);
 assert.match(offlinePage, /haven't been stored for offline use/);
 assert.match(registration, /process\.env\.NODE_ENV\s*!==\s*['"]production['"]/);
 assert.match(registration, /register\(['"]\/sw\.js['"]/);
-assert.match(installBanner, /beforeinstallprompt/);
-assert.match(installBanner, /appinstalled/);
-assert.match(installBanner, /sanctuary:pwa-install-dismissed:v1/);
-assert.match(installBanner, /aria-label="Hide install option"/);
-assert.match(installBanner, /Add to Home Screen/);
-assert.match(installBanner, /Android/i);
-assert.match(installBanner, /browser menu/i);
-assert.match(workspace, /<PwaInstallBanner \/>[\s\S]*?<Navigation/);
-assert.match(installBannerStyles, /prefers-reduced-motion: reduce/);
+assert.match(responsiveShell, /beforeinstallprompt/);
+assert.match(responsiveShell, /appinstalled/);
+assert.match(responsiveShell, /sanctuary-install-banner-hidden/);
+assert.match(responsiveShell, /aria-label="Hide install option"/);
+assert.match(responsiveShell, /Add to Home Screen/);
+assert.match(responsiveShell, /Install The Sanctuary/);
+assert.match(responsiveShell, /installPlatform/);
+assert.match(responsiveShellStyles, /min-height:\s*48px/);
+assert.match(responsiveShellStyles, /@media \(max-width: 640px\)/);
+assert.match(workspace, /ResponsiveShell/);
+assert.doesNotMatch(workspace, /PwaInstallBanner/);
 
-console.log('PWA static checks passed: manifest, safe navigation fallback, and production-only registration.');
+console.log('PWA checks passed: safe offline behavior, one compact dismissible install banner, and platform-specific guidance.');
