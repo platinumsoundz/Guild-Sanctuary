@@ -34,6 +34,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const databaseReady = !isGuest && isSupabaseAuthConfigured();
 
   useEffect(() => {
@@ -77,7 +78,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     };
     void load();
     return () => { cancelled = true; };
-  }, [databaseReady, key, userId, today, isGuest]);
+  }, [databaseReady, key, userId, today, isGuest, retryCount]);
 
   const savedToday = entries.some((entry) => entry.date === today);
   const saveReflection = async (event: FormEvent<HTMLFormElement>) => {
@@ -174,7 +175,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
           </div>
           <p className={styles.privacy}><LockKeyhole size={14} aria-hidden="true" /> Your diary is saved to your account database, not browser storage. Entries are private to your account through database access policies and are not posted to the public feed.</p>
           {status && <p className={styles.status} role="status" aria-live="polite">{status}</p>}
-          {loadError && <button className={styles.clearButton} type="button" onClick={() => { setLoadedKey(null); setLoadError(false); setStatus(''); }}>Retry loading diary</button>}
+          {loadError && <button className={styles.clearButton} type="button" onClick={() => { setLoadedKey(null); setLoadError(false); setStatus(''); setRetryCount((count) => count + 1); }}>Retry loading diary</button>}
           <p className={styles.disclaimer}>This is a personal reflection tool, not medical advice, diagnosis or treatment.</p>
         </form>
       )}
