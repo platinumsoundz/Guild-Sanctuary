@@ -4,6 +4,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { Post, Profile } from '@/types/database';
 import { normalizeSocialLinks, socialLinkFields } from '@/lib/socialLinks';
 import { ProfileCard } from './ProfileCard';
+import { SelfDiscoveryCentre } from '@/modules/self-discovery/components/SelfDiscoveryCentre';
 import styles from './ProfileDashboard.module.css';
 
 interface ProfileDashboardProps {
@@ -138,6 +139,8 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
       </section>
 
       <ProfileCard profile={draft} />
+
+      <SelfDiscoveryCentre />
 
       {isEditing && (
         <form className={`${styles.editor} grid w-full min-w-0`} onSubmit={(event) => void handleSave(event)}>
