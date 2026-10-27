@@ -206,7 +206,7 @@ export async function sendConversationMessage(conversationId: string, senderId: 
       throw new Error('This recipient is not available in local demo mode. Connect the live Sanctuary account to check their actual direct-message settings.');
     }
     if (!peerProfile.allowDirectMessages) {
-      throw new Error('This member is not accepting direct messages.');
+      throw new Error('This local demo profile has direct messages turned off. Demo mode cannot verify the recipient’s live Sanctuary setting; sign in to the connected account to check it.');
     }
   }
 
