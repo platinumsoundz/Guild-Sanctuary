@@ -1,10 +1,14 @@
 # The Sanctuary — Master Blueprint
 
-Last updated: 2026-10-24
+Last updated: 2026-10-27
 
 ## Product decision
 
-The Sanctuary is one community system for reflection, growth, care, and connection. The former Guild Hall is retired. There is no world selector, no world-specific navigation, and no application-facing `WorldType` contract.
+The product is **The Sanctuary** — a community system for personal growth, reflection, care, spiritual and everyday mental wellbeing, and connection. The former Guild Hall is retired. User-facing UI and documentation should use **The Sanctuary**, while the existing GitHub repository name and Android application ID remain unchanged for compatibility.
+
+The mission: **personal growth inside a social environment, so nobody has to do it alone.**
+
+The product roadmap and locked decisions live in [ROADMAP.md](ROADMAP.md). Key decisions: relationships use mutual friends plus one-way follows; guest mode is read-only; anonymous posting is out of scope; wisdom sharing and community support stay free; tokens remain cosmetic-only; no public vanity leaderboards, selling reach, cash-out, or medical/diagnostic claims. Self-discovery is optional and private by default. Do not mark planned features as live without deployed and tested evidence.
 
 ## Architecture
 

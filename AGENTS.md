@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Guild Sanctuary handoff rules
 
-- Read `MASTER_BLUEPRINT.md` and `AI_RESTORE_PROMPT.md` before planning changes. Keep the roadmap and handoff file aligned when status changes.
+- Read `ROADMAP.md`, `MASTER_BLUEPRINT.md`, and `AI_RESTORE_PROMPT.md` before planning changes. Keep the roadmap and handoff file aligned when status changes.
 - Current economy scope is wallet balance/history plus fixed token bundles only. Checkout code is staged but not deployed or validated; `TOKEN_CHECKOUT_ENABLED` defaults to false. Do not enable live purchases until staging checks and refund/chargeback handling are complete.
 - Refund/chargeback policy is not specified. Ask the product owner about full/partial refunds, disputes, manual support, and reversals if tokens have been spent; do not guess.
 - Do not use the shareable Stripe Payment Link for wallet purchases. Keep prices and fulfillment decisions server-side, and never expose Supabase/Stripe secrets.

@@ -2,7 +2,7 @@
 
 Cross-platform community app focused on reflection, growth, and connection.
 
-Read [MASTER_BLUEPRINT.md](MASTER_BLUEPRINT.md) before making project changes. It records architecture rules, module ownership, verified progress, and the roadmap; keep it current as the codebase changes.
+Read [ROADMAP.md](ROADMAP.md) for product direction and agreed decisions, then [MASTER_BLUEPRINT.md](MASTER_BLUEPRINT.md) for architecture and current implementation state. Keep both aligned as the codebase changes.
 
 ## Development
 
