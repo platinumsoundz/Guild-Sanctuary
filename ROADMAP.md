@@ -359,7 +359,7 @@ Calm, and 7 Cups. The findings that shaped this roadmap:
 The full gap analysis lives in the session report and is summarised here; it is
 not a separate permanent document.
 
-## 7. Deliberately out of scope
+## 8. Deliberately out of scope
 
 - Anonymous or throwaway posting (revisit only with a safety design).
 - Live video streaming (audio rooms first).
@@ -371,7 +371,7 @@ not a separate permanent document.
 - Official MBTI branding.
 - A recommendation algorithm that optimises time-on-app.
 
-## 8. Open questions for the product owner
+## 9. Open questions for the product owner
 
 1. Should new members follow the whole community by default, or start empty?
 2. Can strangers send friend requests, or only follow first?
@@ -387,7 +387,7 @@ not a separate permanent document.
 11. What is the first public URL shape: `/@name`, `/u/name`, or `/members/name`?
 12. When do teen defaults become a launch requirement?
 
-## 9. Change log
+## 10. Change log
 
 - **2026-10-27** — Roadmap created. Locked naming, friend + follow
   relationships, no anonymous posting, free wisdom with future guide
@@ -395,7 +395,7 @@ not a separate permanent document.
   dark mode with theming. Recorded comparison findings and UI fixes.
 
 
-## 10. Visible beta showcase and collaboration (2026-10-27)
+## 11. Visible beta showcase and collaboration (2026-10-27)
 
 - **In code on feature branch** — Today is the new product-first landing screen, accessible before sign-in. It features live route shortcuts and a filtered feature explorer.
 - **In code on feature branch** — Concept cards for Daily Reflection, Practice Library, Circles, and Self-discovery show illustrative mini-previews and explicitly state that they are concepts, not live features.
