@@ -52,6 +52,11 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
   const [copyState, setCopyState] = useState('');
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [onboardingLoaded, setOnboardingLoaded] = useState(false);
+  const [discoveryStep, setDiscoveryStep] = useState(0);
+  const [discoveryAnswers, setDiscoveryAnswers] = useState({ connection: '', decisions: '', motivation: '', zodiac: '' });
+  const [saveDiscoveryLocally, setSaveDiscoveryLocally] = useState(false);
+  const [showDiscoveryOnProfile, setShowDiscoveryOnProfile] = useState(false);
+  const [discoveryHydrated, setDiscoveryHydrated] = useState(false);
   const visibleFeatures = useMemo(() => filter === 'Everything' ? features : features.filter((feature) => feature.status === filter), [filter]);
 
   useEffect(() => {
@@ -67,6 +72,48 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
       setOnboardingLoaded(true);
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('sanctuary.self-discovery.preview.v1');
+      if (stored) {
+        const parsed = JSON.parse(stored) as { answers?: typeof discoveryAnswers; showOnProfile?: boolean };
+        if (parsed.answers && typeof parsed.answers === 'object') {
+          setDiscoveryAnswers({
+            connection: typeof parsed.answers.connection === 'string' ? parsed.answers.connection : '',
+            decisions: typeof parsed.answers.decisions === 'string' ? parsed.answers.decisions : '',
+            motivation: typeof parsed.answers.motivation === 'string' ? parsed.answers.motivation : '',
+            zodiac: typeof parsed.answers.zodiac === 'string' ? parsed.answers.zodiac : '',
+          });
+          setSaveDiscoveryLocally(true);
+          setShowDiscoveryOnProfile(parsed.showOnProfile === true);
+        }
+      }
+    } catch { /* Optional browser-only storage must never block the prototype. */ }
+    finally { setDiscoveryHydrated(true); }
+  }, []);
+
+  useEffect(() => {
+    if (!discoveryHydrated) return;
+    if (!saveDiscoveryLocally) {
+      try { window.localStorage.removeItem('sanctuary.self-discovery.preview.v1'); } catch { /* Storage may be unavailable. */ }
+      return;
+    }
+    try {
+      window.localStorage.setItem('sanctuary.self-discovery.preview.v1', JSON.stringify({ answers: discoveryAnswers, showOnProfile: showDiscoveryOnProfile }));
+    } catch { /* Keep the answers in memory for this visit. */ }
+  }, [discoveryAnswers, discoveryHydrated, saveDiscoveryLocally, showDiscoveryOnProfile]);
+
+  const updateDiscoveryAnswer = (key: keyof typeof discoveryAnswers, value: string) => {
+    setDiscoveryAnswers((current) => ({ ...current, [key]: value }));
+  };
+  const resetDiscovery = () => {
+    setDiscoveryAnswers({ connection: '', decisions: '', motivation: '', zodiac: '' });
+    setDiscoveryStep(0);
+    setShowDiscoveryOnProfile(false);
+    setSaveDiscoveryLocally(false);
+    try { window.localStorage.removeItem('sanctuary.self-discovery.preview.v1'); } catch { /* Storage may be unavailable. */ }
+  };
 
   const toggleTask = (id: string) => {
     setCompletedTasks((current) => {
@@ -164,6 +211,61 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
           })}
         </div>
         <div className={styles.onboardingFooter}><span><CircleHelp size={14} /> Optional guide · not a public score</span><button type="button" onClick={resetOnboarding}><RotateCcw size={13} /> Reset progress</button></div>
+      </section>
+
+      <section className={styles.discoveryStudio} aria-labelledby="discovery-studio-title">
+        <div className={styles.discoveryIntro}>
+          <p className={styles.eyebrow}>PERSONAL GROWTH · OPTIONAL BY DESIGN</p>
+          <h2 id="discovery-studio-title">Get to know yourself, at your own pace.</h2>
+          <p>Explore gentle prompts inspired by personality frameworks, motivations, and zodiac traditions. You can skip anything. This is a reflection tool—not a diagnosis, scientific assessment, or prediction.</p>
+          <div className={styles.discoveryPrivacy}><ShieldCheck size={17} /><span><strong>Private by default.</strong> Nothing is published to your account or profile in this preview.</span></div>
+        </div>
+        <div className={styles.discoveryCard}>
+          <div className={styles.discoveryProgressHeader}><span className={styles.discoveryStepLabel}>{discoveryStep < 4 ? 'A FEW GENTLE QUESTIONS' : 'YOUR REFLECTION'}</span><span className={styles.discoveryStepCount}>{discoveryStep < 4 ? (discoveryStep + 1) + ' of 4' : 'Complete'}</span></div>
+          <div className={styles.discoveryProgress}><span style={{ width: (Math.min(discoveryStep + 1, 4) / 4 * 100) + '%' }} /></div>
+          {discoveryStep === 0 && <fieldset className={styles.discoveryQuestion}><legend>1. What usually helps you recharge?</legend><p>There is no better answer. Choose what feels most like you lately.</p>
+            {[
+              ['quiet', 'Quiet time on my own', 'I reset with space to think or do my own thing.'],
+              ['people', 'Time with people', 'Conversation and shared energy help me recharge.'],
+              ['mix', 'A bit of both', 'It depends on the day and who I am with.'],
+            ].map(([value, title, detail]) => <label key={value} className={discoveryAnswers.connection === value ? styles.discoveryOptionSelected : styles.discoveryOption}><input type="radio" name="discovery-connection" checked={discoveryAnswers.connection === value} onChange={() => updateDiscoveryAnswer('connection', value)} /><span><strong>{title}</strong><small>{detail}</small></span></label>)}
+          </fieldset>}
+          {discoveryStep === 1 && <fieldset className={styles.discoveryQuestion}><legend>2. When making a difficult choice, what do you lean on first?</legend><p>Most people use both; this is just a starting point for reflection.</p>
+            {[
+              ['analysis', 'Evidence and analysis', 'I want to understand the facts and how things fit together.'],
+              ['values', 'Values and people', 'I think about what matters and how choices affect people.'],
+              ['both', 'A balance of both', 'I try to make room for the facts and the human side.'],
+            ].map(([value, title, detail]) => <label key={value} className={discoveryAnswers.decisions === value ? styles.discoveryOptionSelected : styles.discoveryOption}><input type="radio" name="discovery-decisions" checked={discoveryAnswers.decisions === value} onChange={() => updateDiscoveryAnswer('decisions', value)} /><span><strong>{title}</strong><small>{detail}</small></span></label>)}
+          </fieldset>}
+          {discoveryStep === 2 && <fieldset className={styles.discoveryQuestion}><legend>3. Which motivation feels closest to you right now?</legend><p>Your answer can change through different seasons of life.</p>
+            {[
+              ['growth', 'Learning and mastery', 'I want to improve, understand, or create something.'],
+              ['belonging', 'Connection and belonging', 'I want to feel close to people and make a positive difference.'],
+              ['stability', 'Security and stability', 'I value trust, preparation, and knowing where I stand.'],
+              ['freedom', 'Freedom and meaning', 'I want room to be myself and follow what feels meaningful.'],
+            ].map(([value, title, detail]) => <label key={value} className={discoveryAnswers.motivation === value ? styles.discoveryOptionSelected : styles.discoveryOption}><input type="radio" name="discovery-motivation" checked={discoveryAnswers.motivation === value} onChange={() => updateDiscoveryAnswer('motivation', value)} /><span><strong>{title}</strong><small>{detail}</small></span></label>)}
+          </fieldset>}
+          {discoveryStep === 3 && <fieldset className={styles.discoveryQuestion}><legend>4. Is there a zodiac sign you would like to include?</legend><p>This is completely optional. We ask for the sign itself here, not your date of birth.</p>
+            <select className={styles.discoverySelect} value={discoveryAnswers.zodiac} onChange={(event) => updateDiscoveryAnswer('zodiac', event.target.value)}><option value="">Skip for now</option>{['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'].map((sign) => <option key={sign} value={sign}>{sign}</option>)}</select>
+            <p className={styles.discoveryHelper}>Future versions could explore a 16-type personality questionnaire, Enneagram-inspired motivations, and astrology separately—without making you complete everything at once.</p>
+          </fieldset>}
+          {discoveryStep === 4 && <div className={styles.discoveryResults}><span className={styles.discoveryResultIcon}><Compass size={22} /></span><h3>A few themes to reflect on</h3><p>These are gentle prompts based only on your choices—not a formal personality type.</p><div className={styles.discoveryResultRows}>
+            {discoveryAnswers.connection && <div><span>Recharge</span><strong>{({quiet:'Quiet time',people:'Time with people',mix:'A mix of both'} as Record<string,string>)[discoveryAnswers.connection] ?? 'Not answered'}</strong></div>}
+            {discoveryAnswers.decisions && <div><span>Decision style</span><strong>{({analysis:'Evidence and analysis',values:'Values and people',both:'A balance of both'} as Record<string,string>)[discoveryAnswers.decisions] ?? 'Not answered'}</strong></div>}
+            {discoveryAnswers.motivation && <div><span>Current motivation</span><strong>{({growth:'Learning and mastery',belonging:'Connection and belonging',stability:'Security and stability',freedom:'Freedom and meaning'} as Record<string,string>)[discoveryAnswers.motivation] ?? 'Not answered'}</strong></div>}
+            {discoveryAnswers.zodiac && <div><span>Optional zodiac lens</span><strong>{discoveryAnswers.zodiac}</strong></div>}
+          </div><p className={styles.discoveryHelper}>Take what feels useful and leave the rest. These prompts do not predict your future or determine who you are.</p></div>}
+          <div className={styles.discoveryControls}><button type="button" className={styles.discoverySecondaryButton} onClick={() => discoveryStep === 4 ? setDiscoveryStep(0) : setDiscoveryStep(Math.max(0, discoveryStep - 1))} disabled={discoveryStep === 0}><ArrowDownRight size={15} /> {discoveryStep === 4 ? 'Start again' : 'Back'}</button>
+            {discoveryStep < 4 ? <button type="button" className={styles.primaryButton} onClick={() => setDiscoveryStep(discoveryStep + 1)}>{discoveryStep === 3 ? 'See my reflection' : 'Next question'} <ArrowRight size={15} /></button> : <button type="button" className={styles.primaryButton} onClick={() => { setFeedbackTitle('Self-discovery concept feedback'); setFeedbackDetails('I explored the self-discovery preview. What felt useful or uncomfortable? '); document.getElementById('beta-feedback-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>Give feedback <ArrowRight size={15} /></button>}
+          </div>
+          <div className={styles.discoveryConsent}>
+            <label><input type="checkbox" checked={saveDiscoveryLocally} onChange={(event) => { setSaveDiscoveryLocally(event.target.checked); if (!event.target.checked) setShowDiscoveryOnProfile(false); }} /><span><strong>Remember my answers on this device</strong><small>Optional. Saves only in this browser, not to your Sanctuary account.</small></span></label>
+            <label className={styles.discoveryVisibility}><input type="checkbox" checked={showDiscoveryOnProfile} disabled={!saveDiscoveryLocally} onChange={(event) => setShowDiscoveryOnProfile(event.target.checked)} /><span><strong>Show my summary on my profile</strong><small>{showDiscoveryOnProfile ? 'Profile visibility preview is on; nothing is actually published.' : 'Off by default. Turn on only if you want to preview a shareable summary.'}</small></span></label>
+            {showDiscoveryOnProfile && <div className={styles.profilePreview}><span>PROFILE SUMMARY PREVIEW · NOT PUBLISHED</span><strong>{discoveryAnswers.connection ? (({quiet:'Recharges in quiet',people:'Recharges with people',mix:'Enjoys a mix of quiet and connection'} as Record<string,string>)[discoveryAnswers.connection] ?? 'Self-discovery') : 'Self-discovery in progress'}</strong><small>{discoveryAnswers.motivation ? (({growth:'Motivated by learning',belonging:'Motivated by connection',stability:'Values stability',freedom:'Values freedom and meaning'} as Record<string,string>)[discoveryAnswers.motivation] ?? '') : ''}{discoveryAnswers.zodiac ? ' · ' + discoveryAnswers.zodiac + ' lens' : ''}</small></div>}
+            <p className={styles.discoveryStorageNote}><LockKeyhole size={14} /> This is a front-end prototype. It does not send answers to a server or change a real profile. You can clear the local preview below.</p>
+            <button type="button" className={styles.discoveryReset} onClick={resetDiscovery}>Clear my answers and visibility choice</button>
+          </div>
+        </div>
       </section>
 
       <section className={styles.quickRow} aria-label="Quick actions">
