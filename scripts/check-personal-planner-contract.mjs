@@ -26,3 +26,17 @@ for (const [label, passed] of checks) {
   console.log(`PASS ${label}`);
 }
 console.log(`Personal planner contract: ${checks.length} checks passed.`);
+
+const plannerAccountIsolation = read('../src/modules/personal-planner/PersonalPlanner.tsx');
+const accountIsolationChecks = [
+  ['planner hides in-memory data until the current account storage key is loaded', /const sessionReady = ready && loadedStorageKey === storageKey/.test(plannerAccountIsolation) && /const visibleData = sessionReady \? data : EMPTY_DATA/.test(plannerAccountIsolation)],
+  ['planner refuses to write unless storage was successfully read for the same account', /storageWritableKey !== storageKey/.test(plannerAccountIsolation) && /setStorageWritableKey\(storageKey\)/.test(plannerAccountIsolation)],
+  ['planner does not persist stale state after a storage read failure', /Never persist another account.s in-memory data when this storage read fails/.test(plannerAccountIsolation) && /setStorageWritableKey\(null\)/.test(plannerAccountIsolation)],
+  ['private planner editing and export controls are gated during account transitions', /disabled=\{!sessionReady\}/.test(plannerAccountIsolation) && /disabled=\{!sessionReady \|\|/.test(plannerAccountIsolation)],
+];
+for (const [label, passed] of accountIsolationChecks) { assert.ok(passed, label); console.log(`PASS ${label}`); }
+console.log(`Planner account-isolation contract: ${accountIsolationChecks.length} checks passed.`);
+
+const plannerSessionReset = read('../src/modules/personal-planner/PersonalPlanner.tsx');
+assert.ok(/SelfDiscoveryCentre key=\{userId\}/.test(plannerSessionReset), 'session-only self-discovery answers must reset when the planner account changes');
+console.log('PASS session-only self-discovery state resets across account changes');
