@@ -17,6 +17,7 @@ export function PwaInstallBanner() {
   const [dismissed, setDismissed] = useState(true);
   const [installed, setInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isPrompting, setIsPrompting] = useState(false);
@@ -27,9 +28,13 @@ export function PwaInstallBanner() {
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent)
       || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
+    const android = /Android/i.test(navigator.userAgent);
+    const chromium = /Chrome|Chromium|Edg|OPR|SamsungBrowser/i.test(navigator.userAgent);
+
     setInstalled(standalone);
     setIsIOS(ios);
-    setCanShow(ios);
+    setIsAndroid(android);
+    setCanShow(ios || android || chromium);
     try {
       setDismissed(window.localStorage.getItem(DISMISS_KEY) === 'true');
     } catch {
@@ -95,7 +100,7 @@ export function PwaInstallBanner() {
         <p>Keep your community close with quicker access from your home screen.</p>
         {showInstructions && isIOS && (
           <p className={styles.instructions}>
-            In Safari, tap Share, then choose <strong>Add to Home Screen</strong>.
+            {isIOS ? <>In Safari, tap Share, then choose <strong>Add to Home Screen</strong>.</> : isAndroid ? 'Open your browser menu and choose Install app or Add to Home screen.' : 'Open the browser menu and choose Install The Sanctuary or Install page as app.'}
           </p>
         )}
       </div>
