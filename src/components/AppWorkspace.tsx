@@ -145,10 +145,12 @@ export function AppWorkspace() {
           isPostsLoading={isProfilePostsLoading}
           onSave={updateProfile}
           onThemeChange={setProfileThemePreview}
+          isGuest={isGuest}
         />
       ) : activeNavigation === 'discover' && viewedProfile ? (
         <PublicProfilePage
           profile={viewedProfile}
+          currentUserId={currentUser.user.id}
           onBack={() => setViewedProfile(null)}
           onMessage={openMessage}
         />
