@@ -1,18 +1,15 @@
 # App-wide theme system repair — 2026-10-27
 
-## Problem found
-The root theme tokens in `src/app/globals.css` were being applied to the document, but `src/components/AppWorkspace.module.css` redefined `--surface`, `--surface-raised`, `--ink`, `--muted`, and `--line` on the main application wrapper using fixed light values. Those wrapper-level values override the selected global theme for much of the application, so the selector could change the browser/document chrome without consistently recolouring the pages.
+## Root cause
+The global theme tokens in `src/app/globals.css` were applied to the document, but `src/components/AppWorkspace.module.css` overrode key tokens (`--surface`, `--surface-raised`, `--ink`, `--muted`, and `--line`) with fixed light values on the application wrapper. That meant most application pages inherited the wrapper's fixed palette instead of the selected global theme.
 
 ## Changes
-- Removed the fixed light palette overrides from the main workspace wrapper so pages inherit the active semantic theme tokens.
-- Added `stone` (grey) and `ocean` (blue) palettes alongside light, dark and dusk.
-- Added both palettes to the account preference type, normalization and early theme bootstrap.
-- Exposed both palettes in Settings.
-- Kept profile accent colour independent from the application theme.
-- Documented token-unlockable themes as a future catalogue extension only. No token spending, purchase, entitlement, or shop integration is claimed or enabled.
-- Expanded static theme contract checks for new palettes and protection against workspace token overrides.
+- Removed fixed palette overrides from the application workspace so pages inherit the root theme tokens.
+- Added selectable `stone` (grey) and `ocean` (blue) palettes alongside light, dark, and dusk.
+- Updated account preference types, normalization, settings UI, and early document bootstrap for the new palettes.
+- Kept profile accent colour separate from application theme selection.
+- Explicitly reserved a future theme catalogue for token-unlockable cosmetics; no token purchases or entitlement checks are enabled by this change.
+- Rebuilt the static theme contract test to cover all palettes and prevent the app workspace from overriding global semantic tokens.
 
-## Verification / limits
-- CI is triggered by this branch; do not treat it as passing until GitHub reports the result.
-- Static checks do not replace a visual browser pass across feed, profile, messages, shop, and settings in each palette.
-- No migrations, provider settings, payments, or deployments were changed.
+## Verification
+CI has been triggered on this branch; confirm GitHub's final result before considering it passing. Static checks do not replace visual browser verification across feed, profile, messages, shop, and settings in each theme. No provider settings, migrations, billing, or deployments were changed.
