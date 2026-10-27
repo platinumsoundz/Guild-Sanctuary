@@ -95,3 +95,15 @@ Code, CI, staging, and production are separate states. A PR being open, a branch
 - Next safe steps: inspect the exact PR heads and CI; trace the feature flag and service boundary; implement the UI/service wiring in a focused branch only after checking current open PR collisions; then provide a staging checklist for two-account tests. Owner performs provider/database operations.
 - Required acceptance: direct and group conversations create successfully; messages persist after reload; sender and recipient see each message once; history and membership remain scoped; realtime reconnect errors are visible; a non-member cannot read or send; demo mode stays clearly separate from authenticated persistent mode.
 - Do not claim live messaging, database migration application, or deployment until observed evidence exists. No E2EE changes are requested now.
+
+
+## Latest verified checkpoint (2026-10-27)
+
+- Repository: `platinumsoundz/Guild-Sanctuary`; default branch `main` at `6deb72e684f237020458d5bfdeca3dd6a5bdb739` after squash-merging PR #157.
+- PR #157 merged: planner/reflection placement, responsive navigation, feed polish, regression contracts. CI/build workflow passed; Cloudflare deployment step skipped. Vercel deployment attempt was rate-limited. Production deployment is **not verified**.
+- PR #170's CI and automated roadmap checks passed on head `fc4a98c4ee4b5bdcc052834e1cbb8c3f5fda6b76`; it remains open/draft. PRs #158–#170 remain dependent follow-up stack work; do not assume they are merged or live.
+- PRs #155 and #156 overlap work included in #157; confirm no unique changes before closing them as superseded.
+- Required manual gates still outstanding: authenticated two-account isolation checks, browser/device/mobile QA, staging RLS/RPC authorization tests, and the Phase 1 staging checklist.
+- Messaging is not end-to-end encrypted. Static tests are not proof of live authorization. Reflection/planner data remain browser-local and not synced.
+- User owns all Supabase, Stripe, Lemon Squeezy, Cloudflare, and Vercel account-level configuration and migrations. Do not alter these provider settings without a separate explicit owner task.
+- Continue by verifying and integrating the dependent PR stack safely, re-running checks on each final head, and maintaining consistent status across `ROADMAP.md`, `MASTER_BLUEPRINT.md`, and this recovery checkpoint.
