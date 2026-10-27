@@ -282,6 +282,8 @@ turning the profile into a horoscope gimmick or a medical chart.
 - Personality profile with strengths, stressors, and how the member likes to
   communicate; clearly labelled as self-reflection, not a diagnosis.
 - Suggested practices based on stated interests and mood patterns.
+- A private reflection card with a tentative pattern, a practical next step, a journal prompt, and a short lesson based on answers so far.
+- Optional educational wellbeing guidance explaining the limits of personality prompts and encouraging qualified support for persistent or distressing symptoms; it must not diagnose or add a condition to the member profile.
 - Suggested circles and people based on values, interests, and mutual friends.
 - Private insight cards: "You tend to check in lower on Sundays", "You finish
   more practices in the morning" — with an easy way to turn insights off.
