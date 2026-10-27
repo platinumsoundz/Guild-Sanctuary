@@ -73,14 +73,22 @@ export function SettingsHub({
 
   useEffect(() => {
     if (isLoading) return;
-    const theme = settings.preferences.theme;
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.classList.toggle('dark', theme !== 'light');
+    const preference = settings.preferences.theme;
+    const applyTheme = () => {
+      const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.classList.toggle('dark', theme !== 'light');
+    };
+    applyTheme();
     try {
-      window.localStorage.setItem('sanctuary-theme', theme);
+      window.localStorage.setItem('sanctuary-theme', preference);
     } catch {
       // Account settings remain authoritative when browser storage is unavailable.
     }
+    if (preference !== 'system') return;
+    const media = window.matchMedia('(prefers-color-scheme: light)');
+    media.addEventListener('change', applyTheme);
+    return () => media.removeEventListener('change', applyTheme);
   }, [isLoading, settings.preferences.theme]);
 
   const updatePreference = async (key: keyof typeof preferenceLabels, value: boolean) => {
@@ -265,9 +273,10 @@ export function SettingsHub({
               <span>Colour theme</span>
               <select id="sanctuary-theme" value={settings.preferences.theme} onChange={(event) => {
                 const theme = event.currentTarget.value;
-                if (theme !== 'light' && theme !== 'dark' && theme !== 'dusk') return;
+                if (theme !== 'system' && theme !== 'light' && theme !== 'dark' && theme !== 'dusk') return;
                 void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));
               }}>
+                <option value="system">Use device setting</option>
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
                 <option value="dusk">Dusk · low-glare warm</option>
