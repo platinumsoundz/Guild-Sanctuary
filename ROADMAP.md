@@ -364,3 +364,15 @@ not a separate permanent document.
   relationships, no anonymous posting, free wisdom with future guide
   monetisation, spiritual + mental wellbeing focus, self-discovery inputs, and
   dark mode with theming. Recorded comparison findings and UI fixes.
+
+
+## 10. Visible beta showcase and collaboration (2026-10-27)
+
+- **In code on feature branch** — Today is the new product-first landing screen, accessible before sign-in. It features live route shortcuts and a filtered feature explorer.
+- **In code on feature branch** — Concept cards for Daily Reflection, Practice Library, Circles, and Self-discovery show illustrative mini-previews and explicitly state that they are concepts, not live features.
+- **In code on feature branch** — A beta feedback form prepares a copyable report locally. It does not submit feedback to a server.
+- **In code on feature branch** — Added a beta testing guide, collaboration guide, pull-request checklist, and structured GitHub issue templates.
+- **In code on feature branch** — Added a small automated contract check for Today routing, visible status labels, and feedback disclosure.
+- **Not yet merged or deployed** — This work remains in a reviewable branch/PR. A passing contract or build does not prove browser-level behavior. Verify desktop/mobile, unauthenticated access, guest flow, clipboard fallback, theme contrast, and preview deployment before merge.
+- **Collaboration rule** — Use issues to capture tasks, branches for changes, PRs for review, and verified deployments for release evidence. Never share credentials or apply production database changes as part of a UI-only task.
+
