@@ -197,6 +197,34 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
         </div>
       </section>
 
+      <section className={styles.buildRadar} aria-labelledby="build-radar-title">
+        <div className={styles.sectionHeading}>
+          <div><p className={styles.eyebrow}>WHERE WE ARE HEADING</p><h2 id="build-radar-title">The build radar</h2><p>A visual snapshot of product priorities—not release promises. The labels on each feature card remain the source of truth for implementation status.</p></div>
+          <span className={styles.featureCount}>Direction, not deadlines</span>
+        </div>
+        <div className={styles.radarGrid}>
+          <article className={styles.radarCard}>
+            <div className={styles.radarLabel}><span className={styles.radarDotNow} /> NOW · EXPERIENCE</div>
+            <h3>Make the core feel complete</h3>
+            <p>Improve Today, navigation, theme consistency, empty states, and the feedback loop so testers can understand and use what exists.</p>
+            <button type="button" onClick={() => { setFilter('Available'); document.getElementById('feature-explorer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>Explore available areas <ArrowRight size={14} /></button>
+          </article>
+          <article className={styles.radarCard}>
+            <div className={styles.radarLabel}><span className={styles.radarDotNext} /> NEXT · PERSONAL GROWTH</div>
+            <h3>Turn concepts into experiences</h3>
+            <p>Shape Daily Reflection and the Practice Library into useful, private tools with clear states and no pressure to share.</p>
+            <button type="button" onClick={() => { setFilter('In design'); document.getElementById('feature-explorer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>Explore design concepts <ArrowRight size={14} /></button>
+          </article>
+          <article className={styles.radarCard}>
+            <div className={styles.radarLabel}><span className={styles.radarDotLater} /> LATER · BELONGING</div>
+            <h3>Build smaller communities</h3>
+            <p>Develop Circles, self-discovery, and richer events after the first experiences are tested and their needs are understood.</p>
+            <button type="button" onClick={() => { setActiveFeature(features.find((feature) => feature.title === 'Circles') ?? null); }}>Preview Circles <ArrowRight size={14} /></button>
+          </article>
+        </div>
+        <div className={styles.radarGuardrail}><ShieldCheck size={17} /><p><strong>Trust before transactions.</strong> Wallet purchases, high-impact moderation, and role changes stay behind explicit release checks. Showing a future idea does not enable it.</p></div>
+      </section>
+
       <section className={styles.feedbackSection} aria-labelledby="beta-feedback-title">
         <div className={styles.feedbackIntro}>
           <p className={styles.eyebrow}>HELP SHAPE THE BETA</p><h2 id="beta-feedback-title">Your feedback becomes the next task.</h2>
