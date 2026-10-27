@@ -47,7 +47,7 @@ assert.ok(source.includes('not a fixed learning type'), 'learning preferences mu
 for (const value of ['values:rest', 'values:connection', 'values:growth', 'values:creativity', 'values:stability']) {
   assert.ok(source.includes(value), `missing values-based reflection rule: ${value}`);
 }
-for (const required of ['Begin reflection', 'Question progress', 'Skip', 'Create reflection', 'Close and clear this session', 'not saved to your account']) {
+for (const required of ['Begin reflection', 'Question progress', 'Skip', 'Create reflection', 'Close and clear this session', 'Copy journal prompt', 'You choose where to save it', 'not saved to your account']) {
   assert.ok(component.includes(required), `missing questionnaire UX/privacy behavior: ${required}`);
 }
 assert.ok(component.includes('aria-labelledby'), 'questionnaire sections must have accessible labels');
