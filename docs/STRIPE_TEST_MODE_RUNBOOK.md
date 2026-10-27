@@ -27,11 +27,11 @@ Set these in the chosen Vercel **Preview** deployment first. Never paste secret 
 - `SANCTUARY_STRIPE_TEST_PRICE_TOKENS_1200=price_...`
 - `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SECRET_KEY` for the intended Sanctuary Supabase project. Keep the service secret server-only.
 
-Create test-mode Prices in the Stripe account **The sanctuary** only. Each must be active, one-time, GBP, and exactly £1.00 / £5.00 / £10.00 respectively. Never reuse live-mode Price IDs.
+Created in the Stripe account **The sanctuary** in test mode only. Each is active, one-time, GBP, and the expected amount. These IDs are configured as Preview-only Vercel variables for this feature branch; never reuse them in live mode:\n\n- 100 tokens (£1.00): `price_1UV9ymDMX3xKbajdDIBvvWwt`\n- 600 tokens (£5.00): `price_1UV9yqDMX3xKbajdwpZ61mvL`\n- 1,200 tokens (£10.00): `price_1UV9ysDMX3xKbajdFMp6PUk0`
 
 ## Configure test webhook
 
-After this code has been reviewed and deployed to Preview, create a Stripe test-mode webhook endpoint at:
+After this code is deployed to a current Preview URL (Vercel deployment is currently blocked by the account's daily deployment quota), create a Stripe test-mode webhook endpoint at:
 
 `https://<the-exact-preview-host>/api/webhooks/stripe`
 
