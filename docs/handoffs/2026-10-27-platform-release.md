@@ -27,8 +27,9 @@ Read-only database inspection confirmed:
 - The function source restricts results to signed-in active users and visible Shorts.
 - The live migration ledger contains the repair entries; the repository contains the reviewed repair SQL.
 - Sent `NOTIFY pgrst, 'reload schema'` to refresh the PostgREST schema cache.
+- A controlled transaction called the stats function as a simulated authenticated active user and returned engagement counts successfully; the transaction was rolled back.
 
-**Remaining verification:** retry the engagement action from a signed-in browser. The SQL catalogue and cache-reload notification are verified; a real authenticated REST call has not been run here.
+**Remaining verification:** retry the engagement action from a signed-in browser. The SQL function call and cache-reload notification are verified; a real authenticated PostgREST request has not been run here.
 
 ### Posts, comments and reports
 
@@ -38,9 +39,10 @@ Source inspection confirms:
 - Each post comment also has a report action.
 - Shorts have a report action, and Shorts comments have edit/delete/like/report controls for the applicable user.
 - The live database has `content_reports`, comment-report target support, the report submission RPC and moderation queue/action functions.
+- A controlled transaction successfully submitted test reports for one visible post, one reportable comment, and one visible Short. The transaction was rolled back and a follow-up query confirmed none of the smoke-test reports persisted.
 - Live RLS policies exist on reports, comments, likes, conversations, memberships and messages.
 
-**Remaining verification:** submit a test report and exercise comment actions in an authenticated browser, then confirm the report appears in the authorized moderation queue.
+**Remaining verification:** exercise comment actions in an authenticated browser and confirm a real user-submitted report appears in the authorized moderation queue. The SQL smoke test verifies RPC logic, not client-side RLS enforcement.
 
 ### Direct messages and privacy settings
 
@@ -51,7 +53,9 @@ Read-only checks confirm:
 - The owner profile's DM setting is saved as enabled in both places.
 - Conversation, membership and message tables exist in the live project with RLS policies.
 
-**Remaining verification:** test a direct conversation between two distinct signed-in accounts with the recipient's setting enabled, then test that a disabled recipient is denied and that non-members cannot read messages. Do not enable/disable settings on another person's behalf to test this.
+- A controlled transaction successfully created a direct conversation through `create_sanctuary_conversation` between two active profiles with DM settings enabled; the transaction was rolled back and a follow-up query confirmed the conversation did not persist.
+
+**Remaining verification:** test a direct conversation from two real signed-in browser sessions, then test that a disabled recipient is denied and that non-members cannot read messages. Do not enable/disable settings on another person's behalf to test this.
 
 ## Settings truth table
 
