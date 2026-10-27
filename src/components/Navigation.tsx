@@ -27,6 +27,14 @@ import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modul
 import styles from './Navigation.module.css';
 import { NotificationBar } from '@/components/NotificationBar';
 
+const mobilePrimaryItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
+  { id: 'planner', label: 'Today', icon: CalendarCheck },
+  { id: 'feed', label: 'Community', icon: Newspaper },
+  { id: 'discover', label: 'Discover', icon: Search },
+  { id: 'messages', label: 'Messages', icon: MessageSquare },
+  { id: 'profile', label: 'You', icon: UserRound },
+];
+
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
   { id: 'feed', label: 'Feed', icon: Newspaper },
   { id: 'planner', label: 'Daily Planner', icon: CalendarCheck },
@@ -245,6 +253,22 @@ export function Navigation({
             )}
           </AnimatePresence>
         </>
+      )}
+      {isSessionReady && (
+        <nav className={styles.mobileBottomNavigation} aria-label="Quick navigation">
+          {mobilePrimaryItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={styles.mobileBottomButton}
+              aria-current={activeNavigation === item.id ? 'page' : undefined}
+              onClick={() => onNavigate(item.id)}
+            >
+              <item.icon size={20} strokeWidth={1.8} aria-hidden="true" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
       )}
       {isAuthModalOpen && (
         <AuthenticationModal
