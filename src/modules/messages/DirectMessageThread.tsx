@@ -43,8 +43,20 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
         </div>
       </header>
       <aside className={styles.privacyNotice} aria-label="Message privacy notice">
-        <strong>Message privacy: not end-to-end encrypted yet</strong>
-        <p>Messages in connected Sanctuary conversations may be stored in the website database and can be processed for delivery and moderation. Do not send passwords, financial details, or highly sensitive information here. End-to-end encryption is planned but is not active in this version.</p>
+        <div className={styles.privacyNoticeHeading}>
+          <span className={styles.privacyStatusDot} aria-hidden="true" />
+          <strong>Standard server-stored messages · E2EE not active</strong>
+        </div>
+        <p>Sanctuary protects conversations with account access controls, but the current message content is not end-to-end encrypted. The service may be able to access server-stored message text. Avoid sending passwords, payment details, or information you would not want exposed.</p>
+        <details className={styles.privacyDetails}>
+          <summary>What this means and what we are building</summary>
+          <ul>
+            <li><strong>Now:</strong> messages are delivered through the Sanctuary database and restricted to conversation members.</li>
+            <li><strong>Next:</strong> evaluate a maintained, independently reviewed end-to-end encryption protocol. Private keys must stay on your devices; the server should handle ciphertext, not readable message text.</li>
+            <li><strong>Local storage:</strong> saving messages only in this browser is not automatically safer and may lose history or expose it on a shared device. It is not a substitute for end-to-end encryption.</li>
+            <li><strong>Honest status:</strong> we will not label messaging end-to-end encrypted until key management, multi-device behavior, recovery, reporting, and security review pass.</li>
+          </ul>
+        </details>
       </aside>
       <section className={styles.messageList} aria-label={`Conversation: ${title}`} aria-live="polite">
         {isLoading ? <p className={styles.emptyMessage}>Opening conversation...</p> : messages.length === 0 ? (
