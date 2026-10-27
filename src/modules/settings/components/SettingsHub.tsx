@@ -71,6 +71,26 @@ export function SettingsHub({
     document.documentElement.dataset.layout = settings.preferences.layout;
   }, [settings.preferences.layout]);
 
+  useEffect(() => {
+    if (isLoading) return;
+    const preference = settings.preferences.theme;
+    const applyTheme = () => {
+      const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.classList.toggle('dark', theme !== 'light');
+    };
+    applyTheme();
+    try {
+      window.localStorage.setItem('sanctuary-theme', preference);
+    } catch {
+      // Account settings remain authoritative when browser storage is unavailable.
+    }
+    if (preference !== 'system') return;
+    const media = window.matchMedia('(prefers-color-scheme: light)');
+    media.addEventListener('change', applyTheme);
+    return () => media.removeEventListener('change', applyTheme);
+  }, [isLoading, settings.preferences.theme]);
+
   const updatePreference = async (key: keyof typeof preferenceLabels, value: boolean) => {
     let directMessagePreferenceSaved = false;
     try {
@@ -245,6 +265,24 @@ export function SettingsHub({
               ))}
               <button className={styles.primaryButton} type="submit">Save social links</button>
             </form>
+          </section>
+
+          <section className={styles.panel} aria-labelledby="theme-title">
+            <h2 id="theme-title">Appearance</h2>
+            <label className={styles.toggleRow} htmlFor="sanctuary-theme">
+              <span>Colour theme</span>
+              <select id="sanctuary-theme" value={settings.preferences.theme} onChange={(event) => {
+                const theme = event.currentTarget.value;
+                if (theme !== 'system' && theme !== 'light' && theme !== 'dark' && theme !== 'dusk') return;
+                void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));
+              }}>
+                <option value="system">Use device setting</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="dusk">Dusk · low-glare warm</option>
+              </select>
+            </label>
+            <p className={styles.hint}>Your theme is saved to your account and remembered on this device. It changes the app colours without changing your profile accent.</p>
           </section>
 
           <section className={styles.panel} aria-labelledby="layout-title">

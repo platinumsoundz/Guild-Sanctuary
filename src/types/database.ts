@@ -22,6 +22,8 @@ export interface SocialLinks {
   reddit: string | null;
 }
 
+export type AccountTheme = 'system' | 'light' | 'dark' | 'dusk';
+
 export interface AccountPreferences {
   allowProfileDiscovery: boolean;
   allowDirectMessages: boolean;
@@ -29,6 +31,7 @@ export interface AccountPreferences {
   emailNotifications: boolean;
   personalizedFeed: boolean;
   layout: AccountLayout;
+  theme: AccountTheme;
 }
 
 export interface AccountSettings {

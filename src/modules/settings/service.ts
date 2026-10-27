@@ -11,6 +11,7 @@ export const defaultAccountPreferences: AccountPreferences = {
   emailNotifications: true,
   personalizedFeed: true,
   layout: 'comfortable',
+  theme: 'system',
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -48,6 +49,7 @@ function normalizePreferences(value: unknown): AccountPreferences {
     emailNotifications: typeof record.emailNotifications === 'boolean' ? record.emailNotifications : true,
     personalizedFeed: typeof record.personalizedFeed === 'boolean' ? record.personalizedFeed : true,
     layout: record.layout === 'compact' ? 'compact' : 'comfortable',
+    theme: record.theme === 'system' || record.theme === 'light' || record.theme === 'dark' || record.theme === 'dusk' ? record.theme : 'dark',
   };
 }
 
@@ -95,6 +97,9 @@ export async function saveAccountPreferences(userId: string, preferences: Accoun
   }
   if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') {
     throw new Error('Choose a supported layout arrangement.');
+  }
+  if (preferences.theme !== 'system' && preferences.theme !== 'light' && preferences.theme !== 'dark' && preferences.theme !== 'dusk') {
+    throw new Error('Choose a supported Sanctuary theme.');
   }
   if (isSupabaseCommunityStorageConfigured()) {
     if (!(await hasMatchingSupabaseUser(userId))) {

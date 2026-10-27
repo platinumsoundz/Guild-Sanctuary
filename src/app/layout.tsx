@@ -17,8 +17,23 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#0b2b20',
-  colorScheme: 'dark',
+  colorScheme: 'light dark',
 }
+
+const themeBootstrap = `
+(() => {
+  try {
+    const saved = window.localStorage.getItem('sanctuary-theme');
+    const preference = saved === 'system' || saved === 'light' || saved === 'dark' || saved === 'dusk' ? saved : 'system';
+    const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.toggle('dark', theme !== 'light');
+  } catch {
+    document.documentElement.dataset.theme = 'dark';
+    document.documentElement.classList.add('dark');
+  }
+})();
+`;
 
 export default function RootLayout({
   children,
@@ -26,8 +41,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-neutral-950 text-neutral-100 min-h-screen antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: themeBootstrap }} /></head>
+      <body className="min-h-screen antialiased">
         <AdSenseScript />
         <PwaServiceWorker />
         <AppContextProvider>
