@@ -1,0 +1,28 @@
+name: Phase 1 moderation guard contract
+
+on:
+  pull_request:
+    paths:
+      - supabase/migrations/20261027021800_guard_moderation_action_role_hierarchy.sql
+      - scripts/check-moderation-action-guards.mjs
+      - .github/workflows/phase1-moderation-guard.yml
+  push:
+    branches:
+      - main
+    paths:
+      - supabase/migrations/20261027021800_guard_moderation_action_role_hierarchy.sql
+      - scripts/check-moderation-action-guards.mjs
+      - .github/workflows/phase1-moderation-guard.yml
+
+permissions:
+  contents: read
+
+jobs:
+  moderation-guard-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-moderation-action-guards.mjs
