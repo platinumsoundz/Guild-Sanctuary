@@ -85,3 +85,13 @@ Read `AGENTS.md` and `docs/AI_AGENT_OPERATING_MODEL.md` first. They are the cros
 ### Honest status rule
 
 Code, CI, staging, and production are separate states. A PR being open, a branch existing, a build passing, or a deployment being queued is not proof of production behavior. Report exact branch/commit and evidence; do not invent tests or claim a live update without checking the deployed revision.
+
+
+## Handoff update — 2026-10-27: messaging reliability
+
+- Product-owner priority: ordinary messaging reliability comes first; E2EE work is deferred.
+- The active UI is still documented as using the in-memory demo service. The Supabase repository exists but is not confirmed wired into the active UI.
+- Draft PR #109 adds static messaging contract checks; draft PR #110 fixes stale conversation state during thread switches and deduplicates send-response/realtime overlap. Neither is proof of live cross-account messaging.
+- Next safe steps: inspect the exact PR heads and CI; trace the feature flag and service boundary; implement the UI/service wiring in a focused branch only after checking current open PR collisions; then provide a staging checklist for two-account tests. Owner performs provider/database operations.
+- Required acceptance: direct and group conversations create successfully; messages persist after reload; sender and recipient see each message once; history and membership remain scoped; realtime reconnect errors are visible; a non-member cannot read or send; demo mode stays clearly separate from authenticated persistent mode.
+- Do not claim live messaging, database migration application, or deployment until observed evidence exists. No E2EE changes are requested now.

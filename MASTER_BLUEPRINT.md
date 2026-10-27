@@ -184,3 +184,12 @@ Current anchors:
 - Coordination rules: `build/phase1-agent-coordination-2026-10-27`. This branch adds cross-agent rules, workstream ownership, and Phase 1 exit criteria.
 
 Phase 1 remains **not end-to-end verified**. Do not mark the trust/safety gate complete until the staging checklist has actually been executed with evidence. Hosting and provider access/configuration remain independent blockers; no documentation change means production is deployed.
+
+
+## Messaging reliability status — 2026-10-27
+
+- The active message UI still uses the in-memory demo service; `src/modules/messages/supabaseRepository.ts` contains a persistent Supabase adapter, but its presence is not proof that the active UI uses it.
+- Draft PR #109 adds static checks for the messaging RPC contract. Draft PR #110 addresses stale thread state while switching conversations and deduplicates send responses against realtime events.
+- The adapter's source contract includes authenticated sender identity, visible-message filtering, a 500-message history bound, membership lookup, and Realtime subscriptions. These are source-level properties, not a live two-account test.
+- **Release status: not end-to-end verified.** Before claiming messaging works across accounts, wire the active UI to the repository behind the existing explicit feature flag, verify migration/RLS/RPC state in an owner-approved staging project, then test direct/group creation, persistence after reload, sender/recipient delivery, reconnect, and unauthorized access.
+- Do not apply migrations or change provider configuration as part of this code-only status note. Keep E2EE deferred per product-owner direction.
