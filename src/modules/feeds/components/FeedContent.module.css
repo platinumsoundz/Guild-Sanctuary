@@ -407,7 +407,7 @@
   color: var(--ink);
 }
 
-.postOverflow > :global(.wrapper) {
+.postOverflow > div {
   margin-top: 8px;
 }
 
