@@ -1,6 +1,4 @@
 .worldSurface {
-  /* Inherit the active application theme; the profile accent stays separate. */
-  --accent: var(--theme-accent, var(--accent));
   min-height: inherit;
   width: 100%;
   min-width: 0;
