@@ -374,6 +374,43 @@
   background: #101310;
 }
 
+.postOverflow {
+  position: relative;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.postOverflow > summary {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  font: 13px Arial, sans-serif;
+  list-style: none;
+}
+
+.postOverflow > summary::-webkit-details-marker {
+  display: none;
+}
+
+.postOverflow > summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.postOverflow[open] > summary {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.postOverflow > :global(.wrapper) {
+  margin-top: 8px;
+}
+
 :global(html[data-layout='compact']) .post {
   padding-block: 12px;
 }
