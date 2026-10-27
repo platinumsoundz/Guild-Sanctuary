@@ -1,6 +1,6 @@
 # Sanctuary Messaging End-to-End Encryption Plan
 
-**Status:** Design and readiness plan only. E2EE is not implemented. The current connected messaging path stores readable message bodies in the server-side database. Do not describe it as end-to-end encrypted. It must not be described as E2EE until the release gates below pass.
+**Status:** Design and readiness plan only. E2EE is not implemented. The active messaging service can use a demo in-memory path or an opt-in Supabase/PostgreSQL path, depending on configuration. When the server-backed path is enabled, readable message bodies are stored in the database. Do not describe either path as end-to-end encrypted; it must not be marketed as E2EE until the release gates below pass.
 
 ## Product decision
 
@@ -28,10 +28,10 @@ The intended sequence is one-to-one E2EE first, followed by group encryption aft
 
 ## Current data flow and honest disclosure
 
-1. A signed-in client sends the message body through the existing authenticated messaging repository.
-2. The server stores the body in `public.messages.body`.
-3. RLS and conversation-membership checks limit which authenticated members can read it, but those controls are not E2EE.
-4. The current UI must keep the “E2EE not active” disclosure visible and should advise users not to send passwords, payment details, or highly sensitive information.
+1. In demo mode, the current messaging service keeps conversations in memory and does not provide durable history.
+2. If persistent messaging is enabled and configured, the client sends the message body through the authenticated repository and the server stores it in `public.messages.body`.
+3. RLS and conversation-membership checks limit which authenticated members can read server-backed messages, but those controls are not E2EE.
+4. The current UI must keep a clear “end-to-end encryption is not active” disclosure visible and should advise users not to send passwords, payment details, or highly sensitive information.
 
 This plan does not change the production database, message schema, or message delivery behavior.
 
