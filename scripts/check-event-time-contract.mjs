@@ -15,3 +15,12 @@ assert.ok(!component.includes("event.startsAt.replace('T', ' ').slice(0, 16)} UT
 assert.ok(styles.includes('.formNote'), 'timezone and venue guidance must be readable in the form');
 
 console.log('Event time and location disclosure contract checks passed.');
+
+
+const eventsHook = readFileSync(new URL('../src/modules/events/useEvents.ts', import.meta.url), 'utf8');
+assert.ok(eventsHook.includes('const sessionReady = eventsUserId === userId'), 'event state must be tagged to the current account');
+assert.ok(eventsHook.includes('const visibleEvents = sessionReady ? events : []'), 'prior-account events must be hidden synchronously during account changes');
+assert.ok(eventsHook.includes('requestId !== requestGeneration.current'), 'stale event loads must not overwrite the active account state');
+assert.ok(eventsHook.includes('if (generation !== requestGeneration.current) return;'), 'stale event mutations must not overwrite the active account state');
+assert.ok(eventsHook.includes('isLoading: !sessionReady || isLoading'), 'account transitions must show a loading state instead of stale event data');
+console.log('Event account-isolation contract checks passed.');
