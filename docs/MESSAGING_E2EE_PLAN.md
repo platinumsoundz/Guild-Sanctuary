@@ -78,7 +78,7 @@ A candidate is not selected merely because it supports AES or exposes a low-leve
 ### Phase D — Adversarial testing and review
 
 - Test two independent devices and multiple browser sessions.
-- Test key mismatch, wrong recipient, tampering, replay, offline delivery, duplicate events, stale device keys, device revocation, and recovery after device loss. Device-loss recovery must be tested explicitly before release.
+- Test key mismatch, wrong recipient, tampering, replay, offline delivery, duplicate events, stale device keys, device revocation, and recovery after device loss. The device-loss recovery path must be tested explicitly before release.
 - Test that removed group members cannot decrypt future group messages before group E2EE is released.
 - Verify database rows, logs, notifications, analytics, backups, error reports, and exports contain no plaintext for E2EE conversations.
 - Verify reporting is a deliberate user-triggered disclosure and the user can see what will be sent.
