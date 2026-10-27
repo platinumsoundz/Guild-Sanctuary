@@ -62,3 +62,8 @@ Feedback is triaged into:
 - **Release blocker:** a problem that makes a release unsafe or unreliable.
 
 The team will prioritise issues by user impact, frequency, severity, and effort. Reporting an issue does not guarantee it will be shipped, but it gives the team concrete evidence for a decision.
+
+
+## Message privacy beta check
+
+The inbox and conversation screen intentionally display a notice that end-to-end encryption is **not active yet**. Current persistent message bodies are stored in the service database. Do not test with real passwords, financial details, medical details, or other sensitive content. The E2EE design and release gates are documented in `docs/MESSAGING_PRIVACY_AND_E2EE.md`. Do not remove this disclosure until a reviewed protocol is implemented and verified in staging.
