@@ -106,3 +106,40 @@
   .footer p { flex-basis: calc(100% - 36px); } .footer button { margin-left: 29px; }
 }
 @media (prefers-reduced-motion: reduce) { .primaryButton, .secondaryButton, .featureCard { transition: none; } .primaryButton:hover, .secondaryButton:hover, .featureCard:hover { transform: none; } }
+
+
+.onboarding { margin: 22px 0 30px; padding: clamp(18px, 3vw, 28px); border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.onboardingHeader { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+.onboardingHeader h2 { margin: 0; font-size: clamp(22px, 2.8vw, 30px); font-weight: 620; letter-spacing: -.03em; }
+.onboardingHeader > div:first-child > p:last-child { margin: 8px 0 0; color: var(--muted); font: 12px/1.7 Arial, sans-serif; }
+.progressBlock { width: min(100%, 220px); flex: 0 0 auto; }
+.progressText { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.progressText strong { color: var(--accent); font-size: 21px; font-weight: 700; letter-spacing: -.04em; }
+.progressText span { color: var(--muted); font: 10px Arial, sans-serif; }
+.progressTrack { height: 6px; overflow: hidden; border-radius: 999px; background: var(--line); }
+.progressTrack span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width 180ms ease; }
+.onboardingList { border-top: 1px solid var(--line); }
+.onboardingTask, .onboardingTaskDone { display: grid; grid-template-columns: 28px 24px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.taskCheck { display: grid; width: 28px; height: 28px; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
+.taskCheck:hover, .taskCheck[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); }
+.taskNumber { color: var(--muted); font: 700 10px Arial, sans-serif; }
+.taskCopy { display: grid; min-width: 0; gap: 4px; }
+.taskCopy strong { color: var(--ink); font-size: 12px; font-weight: 650; }
+.taskCopy span { color: var(--muted); font: 11px/1.55 Arial, sans-serif; }
+.onboardingTaskDone .taskCopy strong { color: var(--muted); }
+.onboardingTaskDone .taskCopy strong::after { content: ' · done'; color: var(--accent); font: 700 9px Arial, sans-serif; }
+.taskAction { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 0 7px 10px; border: 0; background: transparent; color: var(--accent); font: 700 10px Arial, sans-serif; white-space: nowrap; cursor: pointer; }
+.taskAction:hover { text-decoration: underline; text-underline-offset: 4px; }
+.onboardingFooter { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-top: 14px; }
+.onboardingFooter span, .onboardingFooter button { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font: 10px Arial, sans-serif; }
+.onboardingFooter button { padding: 5px 0; border: 0; background: transparent; cursor: pointer; }
+.onboardingFooter button:hover { color: var(--accent); }
+.onboardingFooter span svg { color: var(--accent); }
+@media (max-width: 650px) {
+  .onboarding { padding: 16px; }
+  .onboardingHeader { align-items: flex-start; flex-direction: column; gap: 15px; }
+  .progressBlock { width: 100%; }
+  .onboardingTask, .onboardingTaskDone { grid-template-columns: 25px 20px minmax(0, 1fr); gap: 8px; }
+  .taskAction { grid-column: 3; justify-self: start; padding: 3px 0 0; }
+}
+@media (prefers-reduced-motion: reduce) { .progressTrack span { transition: none; } }
