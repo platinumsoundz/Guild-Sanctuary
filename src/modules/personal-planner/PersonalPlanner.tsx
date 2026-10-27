@@ -44,6 +44,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   const storageKey = `sanctuary-private-planner:v1:${userId}`;
   const [data, setData] = useState<PlannerData>(EMPTY_DATA);
   const [ready, setReady] = useState(false);
+  const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(localDateKey);
   const [newTask, setNewTask] = useState('');
   const [status, setStatus] = useState('');
@@ -55,19 +56,20 @@ export function PersonalPlanner({ userId }: { userId: string }) {
     } catch {
       setStorageWarning(true);
     } finally {
+      setLoadedStorageKey(storageKey);
       setReady(true);
     }
   }, [storageKey]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || loadedStorageKey !== storageKey) return;
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(data));
       setStorageWarning(false);
     } catch {
       setStorageWarning(true);
     }
-  }, [data, ready, storageKey]);
+  }, [data, loadedStorageKey, ready, storageKey]);
 
   const tasks = useMemo(() => data.tasks.filter((task) => task.date === selectedDate), [data.tasks, selectedDate]);
   const completedCount = tasks.filter((task) => task.done).length;
