@@ -70,7 +70,7 @@ The Settings screen also states that server-side account deletion is not availab
 - The live `token_spend_catalog` has 12 catalog rows; the UI reads the catalog, wallet balance and owned entitlements for a matching signed-in Supabase account.
 - **Purchases/spending remain disabled intentionally** (`SPENDING_ENABLED = false` and the database spending guard is locked). Showing the shop is not proof that purchases are ready.
 - Admin & Moderation is included in navigation but correctly hidden from guest/basic accounts. It is available only to active profiles whose role is `moderator`, `admin`, `developer` or `owner`.
-- The account matched to the supplied primary email already has an active `owner` profile. The alternate name did not resolve to a second profile in the exact-name lookup, so no second account was guessed and no role was changed. If Admin remains absent while signed into the owner account, refresh the session/sign out and back in, then verify the active auth user ID matches the owner profile ID.
+- The requested primary email resolves to an active `owner` profile in the connected project; no additional profile was safely matched to the alternate name. No role was changed. If Admin remains absent while signed into the owner account, refresh the session/sign out and back in, then verify the active auth user ID matches the owner profile ID.
 
 ## Database and security gates still open
 
