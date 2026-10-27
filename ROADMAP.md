@@ -272,7 +272,7 @@ turning the profile into a horoscope gimmick or a medical chart.
 | Height / weight | Member | **Private only** | Self-tracking framing; no BMI labels |
 | Likes / dislikes | Member | Public by choice | Tags and free text; used for circles and people suggestions |
 | Values | Member | Public by choice | e.g. honesty, family, nature, service |
-| Personality questionnaire | Member | Private by default | 16-type style, shareable summary |
+| Personality and motivation prompts | Member | Private by default | 16-type-style and Enneagram-inspired prompts delivered gradually; optional summary only with separate opt-in |
 | Energy rhythm | Derived from check-ins | Private | "Morning / evening" patterns, no judgement |
 | Practice interests | Member | Public by choice | Meditation, breathwork, journaling, philosophy |
 
@@ -303,6 +303,8 @@ turning the profile into a horoscope gimmick or a medical chart.
   notice", never "you are" or "this will happen".
 - **No public scores.** No attractiveness, mental-health, or compatibility
   score visible to others.
+- **Separate consent for collection and visibility.** Ask one small, optional question at a time; explain why it helps; allow skip, pause, review, edit, and delete. Saving answers and showing a summary on a profile are separate choices. Profile visibility is off by default, and no individual answer is public unless the member explicitly chooses to share it.
+- **More than one lens, never one verdict.** Offer the 16-type-style questionnaire, Enneagram-inspired motivations, and zodiac reflection as distinct optional lenses. Explain that they differ in evidence and purpose; do not merge them into a supposedly objective identity score.
 
 ### Suggested implementation order
 
