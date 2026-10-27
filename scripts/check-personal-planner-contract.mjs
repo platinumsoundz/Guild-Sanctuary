@@ -9,6 +9,7 @@ const context = read('../src/context/AppContext.tsx');
 
 const checks = [
   ['planner is scoped to the current account in browser storage', /sanctuary-private-planner:v1:\$\{userId\}/.test(component)],
+  ['planner does not write prior-account state before loading the new account key', /loadedStorageKey !== storageKey/.test(component) && /setLoadedStorageKey\(storageKey\)/.test(component)],
   ['planner clearly discloses local-only storage and browser-profile access', /Stored on this device only/.test(component) && /Anyone with access to this browser profile/.test(component)],
   ['planner exports data only after an explicit user action', /const exportData = \(\) =>/.test(component) && /onClick=\{exportData\}/.test(component)],
   ['deleting local planner data requires explicit confirmation', /window\.confirm\('Delete all planner tasks and daily notes/.test(component)],
