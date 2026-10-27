@@ -9,6 +9,7 @@ const checks = [
   ['mood is required before save', /if \(!mood\)[\s\S]*?Choose the mood/.test(component)],
   ['free-text fields have bounded lengths', /maxLength=\{180\}/.test(component) && /maxLength=\{1200\}/.test(component)],
   ['only a bounded history is retained', /\.slice\(0, 90\)/.test(component)],
+  ['recent previous entries can be revisited without leaving the feed', /Previous reflections/.test(component) && /\.slice\(0, 7\)/.test(component) && /<details/.test(component)],
   ['history deletion requires explicit confirmation', /window\.confirm\('Delete all Sanctuary reflections/.test(component)],
   ['storage errors are handled instead of crashing', /catch[\s\S]*?browser could not save the reflection/.test(component)],
   ['privacy note explains local-only storage and shared-browser risk', /not synced to your account or sent to Sanctuary servers/.test(component) && /may be able to read it/.test(component)],
