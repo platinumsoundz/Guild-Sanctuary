@@ -22,3 +22,13 @@
 .reflectionCard>div strong{color:var(--accent);font:700 10px Arial,sans-serif}
 .reflectionCard>div p{margin:0;color:var(--ink);font:11px/1.65 Arial,sans-serif}
 .reflectionCard>small{color:var(--muted);font:10px/1.6 Arial,sans-serif}
+
+.personalPlaybook{display:grid;gap:10px;padding-top:10px;border-top:1px solid var(--line)}
+.personalPlaybook h4{margin:0;color:var(--ink);font-size:13px;line-height:1.4}
+.personalPlaybook>p{margin:0;color:var(--muted);font:10px/1.6 Arial,sans-serif}
+.playbookGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.playbookItem{display:grid;align-content:start;gap:6px;padding:11px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.playbookItem h5{margin:0;color:var(--ink);font:700 11px/1.4 Arial,sans-serif}
+.playbookItem p{margin:0;color:var(--muted);font:10px/1.6 Arial,sans-serif}
+.playbookItem strong{margin-top:3px;color:var(--accent);font:700 10px Arial,sans-serif}
+@media(max-width:560px){.playbookGrid{grid-template-columns:minmax(0,1fr)}}
