@@ -15,6 +15,7 @@ interface MessagesInboxProps {
 
 export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversation }: MessagesInboxProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [sessionUserId, setSessionUserId] = useState(currentUserId);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PublicProfile[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<PublicProfile[]>([]);
@@ -27,6 +28,9 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   const searchRequest = useRef(0);
   const groupRequest = useRef(0);
   const activeUserId = useRef(currentUserId);
+  const sessionReady = sessionUserId === currentUserId;
+  const visibleConversations = sessionReady ? conversations : [];
+  const visibleSelectedMembers = sessionReady ? selectedMembers : [];
 
   const refresh = useCallback(async () => {
     const requestId = ++inboxRequest.current;
@@ -49,6 +53,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
 
   useEffect(() => {
     activeUserId.current = currentUserId;
+    setSessionUserId(currentUserId);
     inboxRequest.current += 1;
     searchRequest.current += 1;
     groupRequest.current += 1;
@@ -104,7 +109,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
 
   const handleCreateGroup = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isCreatingGroup || selectedMembers.length < 2) return;
+    if (!sessionReady || isCreatingGroup || selectedMembers.length < 2) return;
     const requestId = ++groupRequest.current;
     const requestedUserId = currentUserId;
     const requestedMembers = selectedMembers.map((member) => member.userId);
@@ -147,14 +152,14 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
         <form onSubmit={(event) => void handleCreateGroup(event)}>
           <label>
             <span>Group name</span>
-            <input value={groupName} onChange={(event) => setGroupName(event.currentTarget.value)} minLength={2} maxLength={60} required />
+            <input value={sessionReady ? groupName : ''} onChange={(event) => setGroupName(event.currentTarget.value)} minLength={2} maxLength={60} required disabled={!sessionReady} />
           </label>
           <label>
             <span>Find members by name or username</span>
-            <input value={query} onChange={(event) => void search(event.currentTarget.value)} minLength={2} placeholder="Search community…" />
+            <input value={sessionReady ? query : ''} onChange={(event) => void search(event.currentTarget.value)} minLength={2} placeholder="Search community…" disabled={!sessionReady} />
           </label>
-          {isSearching && <p className={styles.description} role="status">Searching…</p>}
-          {results.length > 0 && (
+          {sessionReady && isSearching && <p className={styles.description} role="status">Searching…</p>}
+          {sessionReady && results.length > 0 && (
             <ul className={styles.searchResults}>
               {results.map((profile) => (
                 <li key={profile.userId}>
@@ -166,18 +171,18 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
               ))}
             </ul>
           )}
-          <p className={styles.selected}>{selectedMembers.length} member{selectedMembers.length === 1 ? '' : 's'} selected (choose at least two)</p>
-          <button className={styles.actionButton} type="submit" disabled={selectedMembers.length < 2 || isCreatingGroup}>
+          <p className={styles.selected}>{visibleSelectedMembers.length} member{visibleSelectedMembers.length === 1 ? '' : 's'} selected (choose at least two)</p>
+          <button className={styles.actionButton} type="submit" disabled={!sessionReady || selectedMembers.length < 2 || isCreatingGroup}>
             {isCreatingGroup ? 'Creating group…' : 'Create group'}
           </button>
         </form>
       </section>
       <section className={styles.conversations} aria-labelledby="conversations-title">
         <h2 id="conversations-title">Your conversations</h2>
-        {error && <p className={styles.error} role="alert">{error}</p>}
-        {isLoading ? <p className={styles.description}>Loading conversations…</p> : conversations.length === 0 ? (
+        {sessionReady && error && <p className={styles.error} role="alert">{error}</p>}
+        {!sessionReady || isLoading ? <p className={styles.description}>Loading conversations…</p> : visibleConversations.length === 0 ? (
           <p className={styles.description}>No conversations yet.</p>
-        ) : conversations.map((conversation) => (
+        ) : visibleConversations.map((conversation) => (
           <button className={styles.conversation} key={conversation.id} type="button" onClick={() => onOpenConversation(conversation)}>
             <strong>{conversation.name ?? 'Direct message'}</strong>
             <span>{conversation.kind === 'group' ? `${conversation.participantIds.length} members` : 'Private conversation'}</span>

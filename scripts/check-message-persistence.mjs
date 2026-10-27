@@ -70,6 +70,8 @@ checks.push(
 checks.push(
   ['message thread state is synchronously hidden when the account or selected thread changes', /const threadKey = `\$\{userId\}:\$\{selectedConversationId \?\? `peer:\$\{peerUserId \?\? ''\}`\}`/.test(hook) && /const visibleMessages = messagesThreadKey === threadKey \? messages : \[\]/.test(hook)],
   ['message sending is blocked while the rendered thread key is stale', /messagesThreadKey !== threadKey \|\| !sendingConversationId/.test(hook)],
+  ['inbox hides prior-account conversations synchronously until the new session reset runs', /const sessionReady = sessionUserId === currentUserId/.test(inbox) && /const visibleConversations = sessionReady \? conversations : \[\]/.test(inbox) && /!sessionReady \|\| isLoading/.test(inbox)],
+  ['inbox hides prior-account member selections and search results during account transitions', /const visibleSelectedMembers = sessionReady \? selectedMembers : \[\]/.test(inbox) && /sessionReady && results\.length > 0/.test(inbox) && /if \(!sessionReady \|\| isCreatingGroup/.test(inbox)],
 );
 
 for (const [label, passed] of checks) {
