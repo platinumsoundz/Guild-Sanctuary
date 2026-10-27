@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 
 const css = readFileSync(new URL('../src/components/ResponsiveShell.module.css', import.meta.url), 'utf8');
 const component = readFileSync(new URL('../src/components/ResponsiveShell.tsx', import.meta.url), 'utf8');
+const legacyHelp = readFileSync(new URL('../src/components/PwaInstallHelp.tsx', import.meta.url), 'utf8');
 
 const checks = [
   ['install banner uses a bounded width and can wrap instead of overflowing', /\.installBanner\s*\{[\s\S]*?width:\s*min\(100%,\s*1120px\)/i.test(css) && /\.installBanner\s*\{[\s\S]*?flex-wrap:\s*wrap/i.test(css)],
@@ -15,6 +16,7 @@ const checks = [
   ['reduced-motion preference disables control transitions', /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?transition:\s*none/i.test(css)],
   ['banner retains an accessible label and explicit hide control', /aria-label="Install Sanctuary app"/i.test(component) && /aria-label="Hide install option"/i.test(component)],
   ['install prompt remains browser-aware and does not claim offline support', /beforeinstallprompt/i.test(component) && /Install app|Add to Home Screen/i.test(component) && !/offline support/i.test(component)],
+  ['legacy install-help component is inert so only the top-of-page banner renders', /return null/i.test(legacyHelp) && /centralized in ResponsiveShell/i.test(legacyHelp)],
 ];
 
 for (const [label, passed] of checks) {
