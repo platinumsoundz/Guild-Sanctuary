@@ -59,7 +59,7 @@ function toSummary(answers: Answers, selected: string[]): Summary {
   }
   return summary;
 }
-type Reflection = { headline: string; pattern: string; action: string; prompt: string; lesson: string };
+type Reflection = { headline: string; pattern: string; action: string; prompt: string; lesson: string; insights: { title: string; pattern: string; tip: string }[] };
 function buildReflection(answers: Answers): Reflection | null {
   const chosen = Object.values(answers).filter(Boolean).length;
   if (!chosen) return null;
@@ -96,6 +96,12 @@ function buildReflection(answers: Answers): Reflection | null {
   const motivationInsight = motivation[answers.motivation];
   const communicationInsight = communication[answers.communication];
   const learningInsight = learning[answers.learning];
+  const insights: Reflection['insights'] = [];
+  if (connectionInsight) insights.push({ title: 'Recharge and energy', pattern: connectionInsight[0], tip: connectionInsight[1] });
+  if (decisionInsight) insights.push({ title: 'Decision-making', pattern: decisionInsight[0], tip: decisionInsight[1] });
+  if (motivationInsight) insights.push({ title: 'Motivation', pattern: motivationInsight[0], tip: motivationInsight[1] });
+  if (communicationInsight) insights.push({ title: 'Communication', pattern: communicationInsight[0], tip: communicationInsight[1] });
+  if (learningInsight) insights.push({ title: 'Learning and practice', pattern: learningInsight[0], tip: learningInsight[1] });
   const pattern = [connectionInsight?.[0], decisionInsight?.[0], motivationInsight?.[0], communicationInsight?.[0], learningInsight?.[0]].filter(Boolean).join(' ');
   const action = motivationInsight?.[1] ?? learningInsight?.[1] ?? communicationInsight?.[1] ?? connectionInsight?.[1] ?? decisionInsight?.[1] ?? 'Notice one moment today when your response feels natural, and reflect on what influenced it.';
   const prompt = motivationInsight?.[2] ?? learningInsight?.[2] ?? communicationInsight?.[2] ?? connectionInsight?.[2] ?? decisionInsight?.[2] ?? 'What did I notice about myself today?';
@@ -108,7 +114,7 @@ function buildReflection(answers: Answers): Reflection | null {
         : answers.motivation === 'freedom'
           ? 'Micro-lesson: values can act like a compass. Choose a direction that matters, then leave the route flexible.'
           : 'Micro-lesson: a short pause between feeling and action can help you choose a response that fits your priorities.';
-  return { headline: 'A reflection from your answers so far', pattern: pattern || 'You are still exploring. As you answer more questions, this reflection can become more specific.', action, prompt, lesson };
+  return { headline: 'A reflection from your answers so far', pattern: pattern || 'You are still exploring. As you answer more questions, this reflection can become more specific.', action, prompt, lesson, insights };
 }
 function readAnswers(value: unknown): Answers {
   if (!value || typeof value !== 'object') return { ...emptyAnswers };
@@ -306,6 +312,22 @@ export function SelfDiscoveryPanel({ userId, isGuest = false, onSummaryChange }:
                   <p className={styles.eyebrow}>PRIVATE · BASED ON YOUR ANSWERS</p>
                   <h3 id="self-discovery-reflection-title">{reflection.headline}</h3>
                   <p>{reflection.pattern}</p>
+                  {reflection.insights.length > 0 && (
+                    <section className={styles.personalPlaybook} aria-label="Practical tips based on your answers">
+                      <h4>Your personal playbook</h4>
+                      <p>These are flexible ideas to try—not fixed rules about how your brain works. Keep what helps and ignore what does not.</p>
+                      <div className={styles.playbookGrid}>
+                        {reflection.insights.map((insight) => (
+                          <article className={styles.playbookItem} key={insight.title}>
+                            <h5>{insight.title}</h5>
+                            <p>{insight.pattern}</p>
+                            <strong>Try this</strong>
+                            <p>{insight.tip}</p>
+                          </article>
+                        ))}
+                      </div>
+                    </section>
+                  )}
                   <div><strong>One thing to try</strong><p>{reflection.action}</p></div>
                   <div><strong>Micro-lesson</strong><p>{reflection.lesson}</p></div>
                   <div><strong>Journal prompt</strong><p>{reflection.prompt}</p></div>
