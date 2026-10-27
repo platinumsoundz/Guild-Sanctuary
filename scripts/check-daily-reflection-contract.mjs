@@ -5,6 +5,7 @@ const styles = readFileSync(new URL('../src/modules/practice/components/DailyRef
 const checks = [
   ['reflection data is namespaced per user and versioned', /sanctuary-daily-reflection:v1:\$\{encodeURIComponent\(userId\)\}/.test(component)],
   ['guest mode cannot write reflections', /if \(isGuest\)[\s\S]*?Sign in to keep a reflection/.test(component)],
+  ['account switch does not render the previous account reflection while loading', /loadedKey !== key/.test(component) && /setLoadedKey\(key\)/.test(component)],
   ['mood is required before save', /if \(!mood\)[\s\S]*?Choose the mood/.test(component)],
   ['free-text fields have bounded lengths', /maxLength=\{180\}/.test(component) && /maxLength=\{1200\}/.test(component)],
   ['only a bounded history is retained', /\.slice\(0, 90\)/.test(component)],
