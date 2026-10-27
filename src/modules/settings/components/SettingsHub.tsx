@@ -72,18 +72,28 @@ export function SettingsHub({
   }, [settings.preferences.layout]);
 
   const updatePreference = async (key: keyof typeof preferenceLabels, value: boolean) => {
+    let directMessagePreferenceSaved = false;
     try {
-      // These two controls affect real profile access rules. Save the authoritative
-      // profile field first so a failed profile update cannot leave a false green toggle.
-      if (key === 'allowProfileDiscovery') {
-        await onUpdateProfile({ visibility: value ? 'public' : 'private' });
-      } else if (key === 'allowDirectMessages') {
+      if (key === 'allowDirectMessages') {
+        // account_settings is the authoritative privacy preference checked by the
+        // conversation RPC. Its database trigger synchronizes the profile fields.
+        await updatePreferences({ allowDirectMessages: value });
+        directMessagePreferenceSaved = true;
+        // Refresh the in-memory profile too, so other screens update immediately.
         await onUpdateProfile({ privacy: { ...privacy, allowDirectMessages: value } });
+      } else {
+        if (key === 'allowProfileDiscovery') {
+          await onUpdateProfile({ visibility: value ? 'public' : 'private' });
+        }
+        await updatePreferences({ [key]: value });
       }
-      await updatePreferences({ [key]: value });
       setError(null);
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
+      if (key === 'allowDirectMessages' && directMessagePreferenceSaved) {
+        setError('Your direct-message preference was saved. The profile view could not refresh; reload the page if it still looks stale.');
+      } else {
+        setError(saveError instanceof Error ? saveError.message : 'The setting could not be saved.');
+      }
     }
   };
 
@@ -173,7 +183,7 @@ export function SettingsHub({
               {(Object.entries(preferenceLabels) as [keyof typeof preferenceLabels, string][]).map(([key, label]) => (
                 <label className={styles.toggleRow} key={key}>
                   <span>{label}</span>
-                  <input type="checkbox" checked={key === 'allowProfileDiscovery' ? visibility === 'public' : key === 'allowDirectMessages' ? privacy.allowDirectMessages : settings.preferences[key]} disabled={placeholderPreferenceKeys.has(key)} aria-label={placeholderPreferenceKeys.has(key) ? `${label}, coming soon` : label} onChange={(event) => void updatePreference(key, event.currentTarget.checked)} />
+                  <input type="checkbox" checked={key === 'allowProfileDiscovery' ? visibility === 'public' : key === 'allowDirectMessages' ? settings.preferences.allowDirectMessages : settings.preferences[key]} disabled={placeholderPreferenceKeys.has(key)} aria-label={placeholderPreferenceKeys.has(key) ? `${label}, coming soon` : label} onChange={(event) => void updatePreference(key, event.currentTarget.checked)} />
                 </label>
               ))}
             </div>
