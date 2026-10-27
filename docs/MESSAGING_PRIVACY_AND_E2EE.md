@@ -60,3 +60,13 @@ Browser-local-only messages reduce server retention but do not provide cross-dev
 ## Release gate
 
 Do not remove the privacy notice or call messaging E2EE until the selected protocol is implemented, the plaintext server path is disabled for encrypted conversations, tests pass, staging verification is complete, and the security design has been reviewed. This work does not alter the production database or deployment.
+
+## Protocol options researched for the next decision
+
+These are candidates to evaluate, not an implementation decision or a security endorsement:
+
+- **Matrix JavaScript SDK + Rust crypto WASM:** Official SDK documentation says it runs in browsers and Node.js and uses Rust crypto bindings for E2EE. Its crypto store uses browser IndexedDB by default. This is the clearest browser-capable candidate found, but adopting it means operating or integrating a Matrix homeserver, mapping Sanctuary identities to Matrix devices, handling cross-signing/recovery, and preventing multiple clients from opening the same crypto store concurrently. Evaluate the additional service and account lifecycle before choosing it. References: https://github.com/matrix-org/matrix-js-sdk and https://matrix-org.github.io/matrix-js-sdk/
+- **Signal `@signalapp/libsignal-client`:** Signal publishes a TypeScript API over Rust and implements the Signal Protocol, but its current npm package is AGPL-3.0-only and its published platform support is based on native Node add-ons; the upstream project says use outside Signal is unsupported. It is not a drop-in browser-only dependency for the current Next.js web client. Resolve platform compatibility and license implications before considering it. References: https://github.com/signalapp/libsignal and https://www.npmjs.com/package/@signalapp/libsignal-client
+- **Do not use the archived `libsignal-protocol-javascript` package.** It is no longer maintained; a similarly named package or old tutorial is not evidence of a safe current dependency. Reference: https://github.com/signalapp/libsignal-protocol-javascript
+
+**Current decision:** no crypto package has been added and no encrypted mode has been advertised. Next step is an architecture spike comparing Matrix integration cost against a genuinely browser-compatible, maintained protocol implementation. The choice must include threat model, licensing, multi-device support, identity verification, group protocol, recovery, and security review—not just an API that can encrypt a string.
