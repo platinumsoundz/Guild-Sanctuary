@@ -3,6 +3,9 @@ import { readFileSync, existsSync } from 'node:fs';
 const requiredFiles = [
   'src/components/SanctuaryHome.tsx',
   'src/components/SanctuaryHome.module.css',
+  'src/modules/profiles/components/SelfDiscovery.tsx',
+  'src/modules/profiles/components/SelfDiscovery.module.css',
+  'supabase/migrations/20261027050000_persist_private_self_discovery.sql',
   'docs/COLLABORATION_GUIDE.md',
   'docs/BETA_TESTING_GUIDE.md',
   '.github/PULL_REQUEST_TEMPLATE.md',
@@ -14,6 +17,9 @@ const home = readFileSync('src/components/SanctuaryHome.tsx', 'utf8');
 const context = readFileSync('src/context/AppContext.tsx', 'utf8');
 const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
 const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
+const selfDiscovery = readFileSync('src/modules/profiles/components/SelfDiscovery.tsx', 'utf8');
+const selfDiscoveryMigration = readFileSync('supabase/migrations/20261027050000_persist_private_self_discovery.sql', 'utf8');
+const profileCard = readFileSync('src/modules/profiles/components/ProfileCard.tsx', 'utf8');
 
 for (const [label, source, pattern] of [
   ['visible status labels', home, /Available.*In preview.*In design.*Safety gated/s],
