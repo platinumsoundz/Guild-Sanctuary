@@ -11,6 +11,7 @@ const migration = read('../supabase/migrations/20261027001557_restore_secure_per
 const dmPreferenceFix = read('../supabase/migrations/20261027002103_fix_direct_message_preference_source.sql');
 
 const checks = [
+  ['member search clears old results before a new query resolves', /const normalizedQuery = value\.trim\(\);\s*setResults\(\[\]\);\s*setError\(null\);/.test(inbox)],
   ['inbox loads ignore responses from stale requests or accounts', /inboxRequest = useRef\(0\)/.test(inbox) && /activeUserId\.current !== requestedUserId/.test(inbox)],
   ['member search ignores stale results and removes the current user', /searchRequest = useRef\(0\)/.test(inbox) && /nextResults\.filter\(\(profile\) => profile\.userId !== requestedUserId\)/.test(inbox)],
   ['account changes clear inbox and member selection state', /setConversations\(\[\]\)/.test(inbox) && /setSelectedMembers\(\[\]\)/.test(inbox) && /setResults\(\[\]\)/.test(inbox)],
