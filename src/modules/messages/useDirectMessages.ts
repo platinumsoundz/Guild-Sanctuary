@@ -21,6 +21,11 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Hide the previous thread during the render where account or selection changes,
+  // before effects have a chance to clear the underlying state.
+  const threadKey = `${userId}:${selectedConversationId ?? `peer:${peerUserId ?? ''}`}`;
+  const [messagesThreadKey, setMessagesThreadKey] = useState(threadKey);
+  const visibleMessages = messagesThreadKey === threadKey ? messages : [];
   const threadRequest = useRef(0);
   const activeConversationId = useRef<string | null>(null);
 
@@ -28,6 +33,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     const requestId = ++threadRequest.current;
     let cancelled = false;
     activeConversationId.current = null;
+    setMessagesThreadKey(threadKey);
     setConversationId(null);
     setIsLoading(true);
     setIsSending(false);
@@ -42,6 +48,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     openThread.then((thread) => {
       if (!cancelled && requestId === threadRequest.current) {
         activeConversationId.current = thread.conversation.id;
+        setMessagesThreadKey(threadKey);
         setConversationId(thread.conversation.id);
         setMessages(thread.messages);
         setError(null);
@@ -57,7 +64,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
       cancelled = true;
       if (threadRequest.current === requestId) threadRequest.current += 1;
     };
-  }, [peerUserId, selectedConversationId, userId]);
+  }, [peerUserId, selectedConversationId, threadKey, userId]);
 
   const refresh = useCallback(async () => {
     const requestedConversationId = conversationId;
@@ -86,7 +93,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
   const send = async (body: string) => {
     const sendingConversationId = conversationId;
     const sendingThread = threadRequest.current;
-    if (!sendingConversationId || !userId || activeConversationId.current !== sendingConversationId) {
+    if (messagesThreadKey !== threadKey || !sendingConversationId || !userId || activeConversationId.current !== sendingConversationId) {
       setError('Open a conversation and sign in before sending messages.');
       return false;
     }
@@ -151,5 +158,5 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     };
   }, [conversationId, userId]);
 
-  return { messages, isLoading, isSending, error, send };
+  return { messages: visibleMessages, isLoading, isSending, error, send };
 }
