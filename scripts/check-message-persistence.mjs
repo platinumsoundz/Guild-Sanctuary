@@ -9,6 +9,7 @@ const inbox = read('../src/modules/messages/MessagesInbox.tsx');
 
 const migration = read('../supabase/migrations/20261027001557_restore_secure_persistent_messaging.sql');
 const dmPreferenceFix = read('../supabase/migrations/20261027002103_fix_direct_message_preference_source.sql');
+const databaseTypes = read('../src/services/supabase/database.types.ts');
 
 const checks = [
   ['member search clears old results before a new query resolves', /const normalizedQuery = value\.trim\(\);\s*setResults\(\[\]\);\s*setError\(null\);/.test(inbox)],
@@ -37,6 +38,12 @@ const checks = [
   ['migration refreshes schema cache and conditionally enables Realtime', /notify pgrst, 'reload schema'/.test(migration) && /supabase_realtime/.test(migration) && /alter publication supabase_realtime add table public\.messages/.test(migration)],
   ['latest migration treats saved Settings DM preference as authoritative', /s\.preferences->>'allowDirectMessages'/.test(dmPreferenceFix) && /p\.allow_direct_messages/.test(dmPreferenceFix) && !/privacy->>'allowDirectMessages'/.test(dmPreferenceFix)],
 ];
+
+checks.push(
+  ['persistent conversation RPC exists in generated database types', /create_sanctuary_conversation:\s*\{/.test(databaseTypes)],
+  ['persistent conversation RPC arguments stay aligned with repository calls', /requested_kind:\s*kind/.test(repository) && /requested_member_ids:\s*uniqueIds/.test(repository) && /requested_name:\s*name/.test(repository) && /requested_kind:\s*'direct' \| 'group'/.test(databaseTypes) && /requested_member_ids:\s*string\[\]/.test(databaseTypes) && /requested_name\?:\s*string \| null/.test(databaseTypes)],
+  ['repository uses the typed RPC name rather than the lower-level migration function name', /rpc\('create_sanctuary_conversation'/.test(repository) && !/rpc\('create_conversation'/.test(repository)],
+);
 
 for (const [label, passed] of checks) {
   console.log(`${passed ? 'PASS' : 'FAIL'} ${label}`);
