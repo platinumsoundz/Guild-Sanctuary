@@ -284,16 +284,30 @@ export function validateSelfDiscoveryAnswers(input: unknown): SelfDiscoveryAnswe
 export function createSelfDiscoveryReflection(input: unknown): SelfDiscoveryReflection {
   const answers = validateSelfDiscoveryAnswers(input);
   const answeredCount = Object.keys(answers).length;
-  const chosen = SELF_DISCOVERY_QUESTIONS
+  const matched = SELF_DISCOVERY_QUESTIONS
     .map((question) => outputs[`${question.id}:${answers[question.id]}`])
-    .find((output) => Boolean(output));
+    .filter((output): output is (typeof fallback) => Boolean(output));
+  const primary = matched[0] ?? fallback;
+  const patterns = matched.slice(0, 3).map((output) => output.pattern);
+  const pattern = patterns.length > 0
+    ? patterns.join(' ')
+    : fallback.pattern;
+  const practicalAction = primary.practicalAction;
+  const microLesson = matched.length > 1
+    ? `${primary.microLesson} Your other answers add context too; treat this as a collection of possibilities, not a single description of you.`
+    : primary.microLesson;
+  const journalPrompt = matched.length > 1
+    ? matched.slice(0, 2).map((output) => output.journalPrompt).join(' ')
+    : primary.journalPrompt;
 
-  const reflection = chosen ?? fallback;
   return {
     questionnaireVersion: SELF_DISCOVERY_QUESTIONNAIRE_VERSION,
     answeredCount,
     totalQuestions: SELF_DISCOVERY_QUESTIONS.length,
-    ...reflection,
+    pattern,
+    practicalAction,
+    microLesson,
+    journalPrompt,
     disclaimer: 'This is a private, non-clinical reflection based only on the answers you chose to share here. It may not fit your experience. It is not a diagnosis or professional advice; you can edit or delete your answers.',
   };
 }
