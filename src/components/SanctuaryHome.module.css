@@ -143,3 +143,20 @@
   .taskAction { grid-column: 3; justify-self: start; padding: 3px 0 0; }
 }
 @media (prefers-reduced-motion: reduce) { .progressTrack span { transition: none; } }
+
+
+.buildRadar { margin: 40px 0 24px; padding: clamp(20px, 3.2vw, 32px); border: 1px solid var(--line); border-radius: 15px; background: radial-gradient(circle at 100% 0%, var(--accent-soft), transparent 45%), var(--surface-raised); }
+.radarGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+.radarCard { display: flex; min-width: 0; flex-direction: column; padding: 18px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }
+.radarLabel { display: flex; align-items: center; gap: 7px; color: var(--muted); font: 700 9px Arial, sans-serif; letter-spacing: .75px; }
+.radarLabel span { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; }
+.radarDotNow { background: var(--accent); } .radarDotNext { background: #b9a05c; } .radarDotLater { background: var(--muted); }
+.radarCard h3 { margin: 18px 0 7px; color: var(--ink); font-size: 16px; font-weight: 650; letter-spacing: -.015em; }
+.radarCard p { margin: 0 0 18px; color: var(--muted); font: 12px/1.75 Arial, sans-serif; }
+.radarCard button { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: auto; padding: 7px 0 2px; border: 0; border-bottom: 1px solid transparent; background: transparent; color: var(--accent); font: 700 10px Arial, sans-serif; cursor: pointer; }
+.radarCard button:hover { border-bottom-color: var(--accent); }
+.radarGuardrail { display: flex; align-items: flex-start; gap: 10px; margin-top: 13px; padding: 13px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--accent); }
+.radarGuardrail svg { flex: 0 0 auto; margin-top: 2px; }
+.radarGuardrail p { margin: 0; color: var(--muted); font: 11px/1.7 Arial, sans-serif; }
+.radarGuardrail strong { color: var(--ink); }
+@media (max-width: 900px) { .radarGrid { grid-template-columns: 1fr; } .radarCard { min-height: 190px; } }
