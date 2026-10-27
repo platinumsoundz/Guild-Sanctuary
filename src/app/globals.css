@@ -1,11 +1,73 @@
 @import "tailwindcss";
 
+/*
+ * The Sanctuary design tokens.
+ * Keep feature modules on semantic tokens rather than inventing local colours.
+ * The light palette is the default; data-theme="dark" is ready for the theme
+ * controller to activate once account/device preference wiring is in place.
+ */
 :root {
+  color-scheme: light;
+  --bg: #f7f8f5;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --ink: #203528;
+  --muted: #647268;
+  --line: #dce5dc;
+  --accent: #315a3d;
+  --accent-contrast: #ffffff;
+  --danger: #b42318;
+  --success: #247347;
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --shadow-card: 0 8px 28px rgb(32 53 40 / 7%);
+  --motion-fast: 140ms;
+  --motion-normal: 200ms;
+}
+
+:root[data-theme="dark"] {
   color-scheme: dark;
+  --bg: #111713;
+  --surface: #19221b;
+  --surface-raised: #222e25;
+  --ink: #edf4ed;
+  --muted: #b0beb2;
+  --line: #354438;
+  --accent: #a4c9a7;
+  --accent-contrast: #132016;
+  --danger: #ff8a80;
+  --success: #8bd5a5;
+  --shadow-card: 0 8px 28px rgb(0 0 0 / 22%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
 }
 
 body {
+  margin: 0;
   background-color: #0a0a0a;
   color: #ededed;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
