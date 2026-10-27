@@ -84,6 +84,8 @@ export function Navigation({
     currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role),
   );
   const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || canAccessAdmin);
+  // Keep utility destinations in the drawer so the top navigation stays focused.
+  const desktopNavigationItems = visibleNavigationItems.filter((item) => item.id !== 'shop' && item.id !== 'admin');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -167,7 +169,7 @@ export function Navigation({
         <>
           <nav className={styles.desktopNavigation} aria-label="Main navigation">
             <div className={styles.desktopNavigationItems}>
-              {visibleNavigationItems.map((item) => (
+              {desktopNavigationItems.map((item) => (
                 <button
                   key={item.id}
                   className={styles.desktopNavigationButton}
@@ -220,7 +222,7 @@ export function Navigation({
                   </div>
                   <nav aria-label="Main navigation">
                     <div className={styles.drawerNavigationItems}>
-                      {navigationItems.map((item) => (
+                      {visibleNavigationItems.map((item) => (
                         <button
                           key={item.id}
                           className={styles.drawerNavigationButton}
