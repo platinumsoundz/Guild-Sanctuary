@@ -98,7 +98,7 @@ export async function saveAccountPreferences(userId: string, preferences: Accoun
   if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') {
     throw new Error('Choose a supported layout arrangement.');
   }
-  if (preferences.theme !== 'system' && preferences.theme !== 'light' && preferences.theme !== 'dark' && preferences.theme !== 'dusk') {
+  if (!['system', 'light', 'dark', 'dusk', 'stone', 'ocean'].includes(preferences.theme)) {
     throw new Error('Choose a supported Sanctuary theme.');
   }
   if (isSupabaseCommunityStorageConfigured()) {
