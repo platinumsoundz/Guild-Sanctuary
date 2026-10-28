@@ -271,3 +271,75 @@
   .quickRow button { transition: none; }
   .quickRow button:hover { transform: none; }
 }
+
+
+/* Cosmic reference pass: elevate the home hero without competing with content. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--line));
+  background:
+    radial-gradient(ellipse at 82% 8%, rgb(117 91 228 / 20%), transparent 45%),
+    radial-gradient(ellipse at 0% 100%, rgb(45 173 200 / 10%), transparent 42%),
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-raised) 94%, #151336), var(--surface));
+  box-shadow: 0 20px 60px rgb(0 0 0 / 22%), inset 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+.hero h1 {
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.heroActions > a,
+.heroActions > button {
+  min-height: 46px;
+  border-radius: 14px;
+  font-weight: 650;
+}
+
+.heroNote {
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--line));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 76%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.quickRow button {
+  border-color: color-mix(in srgb, var(--accent) 18%, var(--line));
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--surface-raised) 82%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+}
+
+.quickRow button:hover,
+.quickRow button:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--line));
+  background: var(--accent-soft);
+}
+
+@media (max-width: 620px) {
+  .hero {
+    border-radius: 22px;
+    background:
+      radial-gradient(ellipse at 90% 0%, rgb(117 91 228 / 18%), transparent 54%),
+      linear-gradient(155deg, color-mix(in srgb, var(--surface-raised) 96%, #151336), var(--surface));
+    box-shadow: 0 14px 38px rgb(0 0 0 / 20%), inset 0 1px 0 rgb(255 255 255 / 5%);
+  }
+
+  .heroActions > a,
+  .heroActions > button {
+    min-height: 48px;
+  }
+
+  .quickRow button {
+    min-height: 76px;
+    border-radius: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quickRow button {
+    transition: none;
+  }
+}
