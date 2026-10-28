@@ -43,7 +43,13 @@ jobs:
       - run: npm run check:notifications
       - run: npm run check:token-spend
       - run: npm run check:cosmic-arcade
+      - run: npm run check:guild-browser-arcade
+      - run: npm run check:guild-companion-hub
+      - run: npm run check:guild-cloud-lab
+      - run: npm run check:guild-cloud-lab-control
+      - run: npm run check:conversation-calls
       - run: npm run check:sanctuary-home
-      - run: deno check supabase/functions/token-checkout/index.ts supabase/functions/stripe-token-webhook/index.ts
+      - run: npm run check:roadmaps
+      - run: deno check supabase/functions/token-checkout/index.ts supabase/functions/stripe-token-webhook/index.ts supabase/functions/call-ice-config/index.ts supabase/functions/guild-cloud-lab-control/index.ts
       - run: npm run typecheck
       - run: npm run build

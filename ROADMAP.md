@@ -1,8 +1,30 @@
 # The Sanctuary — Roadmap
 
+## Public roadmap split and release truth — 2026-10-28
+
+- The in-app **Sanctuary Roadmap** is member-facing: plain-language summaries, status labels, and native expandable **More info** details. It covers only Sanctuary features and beta-readiness work.
+- The separate **Guild Roadmap** covers the cosmic gaming world, browser arcade, game library, media lounge, optional platform integrations and the future Cloud Lab. The 5 Sleeves games are external projects and are intentionally excluded from the public Sanctuary and Guild roadmaps.
+- This repository `ROADMAP.md` remains the detailed engineering roadmap for contributors. It is not the same as the simplified public page.
+- Current development work is staged on `feat/guild-browser-arcade-first-2026-10-28` and draft PR [#205](https://github.com/platinumsoundz/Guild-Sanctuary/pull/205), currently based on `feat/cosmic-mobile-ui-2026-10-28`. A comparison against `main` reports a diverged history (266 commits ahead, 1 behind); this is a stacked feature branch, so do not retarget or rebase it blindly. Reconcile the branch history deliberately before final integration. Do not merge or deploy until fresh CI, migration review, security checks and browser/device QA are complete.
+- The public pages distinguish source implementation from live verification. A feature labelled Preview or In development must not be described as production-ready without recorded test evidence.
+
+## Server-authoritative storage direction — 2026-10-28
+
+- Recommended architecture: server-backed canonical account data and cross-device sync, with bounded local caching for offline resilience. Keep large personal music/photos on-device by default unless a member explicitly opts into a quota-backed private cloud backup.
+- Added `docs/sanctuary-storage-strategy.md` with data placement, sync rules, quotas, retention/deletion requirements and a staged migration plan.
+- The migration is repository code only: it has not been applied. Guild Companion now has an explicit **Sign in & sync** action that uses the existing Supabase session, merges device-local entries into the authenticated user's server library, and refreshes from the server; it reports unavailable migration/auth/quota failures without deleting the device-local copy.
+- Guild Companion now says the game library is device-local today, describes server sync as planned rather than available, and warns if this browser cannot persist the local library. Cloud Lab copy now recommends an encrypted server-side home volume and explicitly avoids provisioning paid compute without an approved provider and spend ceiling.
+- This is an architecture/UI hardening step only. Server-backed Guild library sync, cloud media backup, Linux compute and persistent workspace volumes are not implemented or provisioned by this change.
+
 Last updated: 2026-10-28
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
+
+## Guild and calling hardening — 2026-10-28
+
+- Incoming WebRTC signalling payloads now pass a strict allowlist and shape/size validation before SDP or ICE data reaches the peer connection. This reduces malformed or oversized broadcast payloads; it does not replace Realtime authorization or real-browser security testing.
+- The local Guild game library now caps manually added entries at 500, matching the import cap and preventing unbounded localStorage growth from the UI.
+- Focused source contracts cover the call-signal validation and manual library cap. These are static checks; a two-account browser call and real media/network QA remain outstanding.
 
 ## Integration batch checkpoint — 2026-10-28
 
@@ -669,3 +691,82 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Implemented on feature branch:** Tighten shared page typography and responsive spacing, preserve content above fixed bottom navigation, and respect reduced-motion preferences.
 - **Validation outstanding:** Run the theme and theme-contrast contract scripts, TypeScript check, production build, and visual QA at narrow phone widths and desktop widths. Verify light/ocean/dusk/stone themes, keyboard navigation, screen-reader names, and iOS/Android safe areas before merge/release.
 - This pass is CSS-focused and intentionally avoids changing auth, persistence, database schemas, or service integrations.
+
+
+## Guild implementation checkpoint — 2026-10-28
+
+A first browser-first Guild implementation has started on `feat/guild-browser-arcade-first-2026-10-28`, based on the cosmic mobile UI work so both can be reviewed together. This is a prototype checkpoint, not a release-ready feature.
+
+- Added a hidden Guild entry surface revealed by a connected gamepad or the keyboard accessibility override `Ctrl+Shift+G`; no ordinary navigation item or public Guild route was added.
+- Added an original, browser-native **Orbital Drift** arcade trial with keyboard/WASD, gamepad, and touch-button controls, a timed win/loss loop, and a device-local best score.
+
+- Added a controller-first **Big Picture mode** to both the hidden Guild and the existing Cosmic Arcade: fullscreen/immersive layouts, visible controller status, D-pad navigation between arcade games, A/select activation, B/back behavior, Start/keyboard toggle, and stronger focus styling.
+- Cosmic Arcade gamepad support is a shared shell-level improvement; game-specific gameplay still needs hands-on QA per title (especially Solitaire, Crossword, and the Classic collection), and controller mappings vary across browsers and hardware.
+- Expanded the Arcade with a second original, playable **Comet Dodge** survival trial. It includes a falling-comet loop, collision/loss state, 20-second survival goal, keyboard and touch controls, controller directions, pause/resume, and restart. Neither game's score is a verified achievement or cloud reward.
+- The entry requires the existing authenticated Sanctuary identity. No new account, provider linking, cloud rewards, Guild database tables, or cross-world sharing is introduced.
+- Added focused static contract checks for both trials. They must be run alongside typecheck/build and browser testing; source-contract checks alone do not verify actual controller behaviour.
+- **Progress in the next build pass:** added an explicit pause/resume state and visible HUD control, with keyboard `P` and controller start-button support. Controller input is ignored while the page is backgrounded. Guest sessions are now explicitly excluded from Guild entry, and the contract check covers that guard.
+- **Not yet complete:** physical controller mapping QA across browsers, mobile-device tests, gamepad reconnect handling, Supabase/RLS design, trusted progression, catalogue expansion, and licensed/open-source game selection.
+- **Security note:** the hidden entry is a discoverability choice only. This prototype stores its best score in local storage and does not treat it as a verified achievement or reward.
+
+Current Guild implementation is now a **first UI/gameplay prototype**, not 0% code. Release verification remains 0% until browser/device, auth, and security tests produce evidence.
+
+
+## Guild companion hub and retro gaming groundwork (2026-10-28)
+
+- **Implemented in the Guild UI; device QA pending:** a local-first unified game library where members can save game titles, platform labels, and optional HTTP(S) links. The list is stored in the current browser's local storage. This is a personal catalogue, not an installed-game scanner.
+- **Implemented in the Guild UI; device QA pending:** a local music lounge that plays user-selected audio files through the browser, and a photo gallery with previous/next controls and an optional five-second slideshow. Selected media uses temporary browser object URLs and is not uploaded to Sanctuary by this component.
+- **Gaming ecosystem directory:** official links for RetroArch, RetroAchievements, Steam, Xbox, GOG and itch.io, with plain-language status explaining that account linking, achievement sync, automatic game discovery and native launching are not connected yet.
+- **RetroArch plan:** support a user's own compatible RetroArch installation and legally obtained game files; do not host or distribute ROMs. Investigate documented RetroAchievements support and authorised Steam/Xbox APIs before implementing OAuth, achievement import or verified progression. Do not treat self-entered achievements as verified.
+- **Required companion architecture:** optional signed Windows companion for user-approved game discovery and launching; Android companion integration must respect package visibility and system launch rules. Native launch protocols must be tested against exact platforms and never accepted from arbitrary user input in the web app.
+- **Cloud Linux environment remains separate work:** requires isolated per-user compute, persistent storage, quotas, authentication, abuse controls, observability and explicit cost limits. Do not simulate this as a privileged browser terminal.
+- **Privacy boundary:** current local media selection is session-only; game titles are browser-local. No cloud media upload, automatic file scan, external account linking, cloud persistence or platform reward verification is enabled.
+- **Contract check:** `npm run check:guild-companion-hub` verifies key source-level feature and safety guardrails. It is not a substitute for typecheck, browser QA, security review or device testing.
+
+
+## Sanctuary voice and video calls (2026-10-28)
+
+- Added one-to-one voice/video call controls directly inside the existing Sanctuary message thread, not as a Guild-only feature. Guild can reuse this shared messaging surface when it opens a Sanctuary conversation.
+- Added browser permission prompts, outgoing invitations, incoming accept/decline, WebRTC offer/answer/ICE exchange over a private Supabase Realtime channel, distinct audio/video playback surfaces, mute, camera toggle, hang-up handling, 45-second outgoing no-answer timeout, 30-second incoming invite expiry, and a 10-second recovery window for brief network interruptions.
+- Hardened the local Guild companion: wait for the saved library to load before persisting, validate saved links before rendering, prevent duplicate titles per platform, open external links with `noopener noreferrer`, and cap media selection at 30 files with 100 MB audio / 25 MB image per-file limits.
+- Added local game-library JSON export/import with a 1 MB import limit, schema/version validation, HTTP(S)-only link validation, 500-entry cap and duplicate merging. Backups contain only game titles, platform labels and web links; no media files or account data are included.
+- Added a Supabase Realtime RLS migration that limits call broadcast access to authenticated users who are active members of the conversation in the channel topic.
+- Added `npm run check:conversation-calls` to CI for source-contract checks.
+- Applied the `sanctuary_call_signaling` migration to the connected Supabase project on 2026-10-28. Read-back confirmed both SELECT and INSERT policies exist and restrict broadcast topics to active conversation members and active accounts.
+- **Not release-ready yet:** the Supabase dashboard's global Realtime **Allow public access** setting still needs manual verification/disablement so private-channel policies cannot be bypassed by public channels. Typecheck/build and two-device browser tests must pass. This branch has not run a Cloudflare build or deployment.
+- Added an authenticated `call-ice-config` Supabase Edge Function. It verifies active conversation membership, can mint one-hour TURN REST credentials from server-only `TURN_SERVER_URLS` and `TURN_SHARED_SECRET` settings, and returns a STUN-only fallback when TURN is not configured. Configure `APP_BASE_URL` and an approved TURN provider's REST shared secret/URLs before claiming reliable cross-network calling. The function must be deployed before its TURN path is available. Group calls, call history, notifications when the thread is closed, and recording are not implemented. Calls are not recorded by this feature.
+- WebRTC media is encrypted in transit, but this does not make the text-message database end-to-end encrypted. Do not describe the existing message service as end-to-end encrypted.
+
+## Guild account sync and Cloud Lab control-plane groundwork (2026-10-28)
+
+- Added an authenticated Guild library sync path backed by the staged `guild_library_entries` migration. The migration remains unapplied and sync has not been validated against the live Supabase project.
+- Hardened cache isolation with a browser-local account binding; syncing is refused if the cache was last bound to another Sanctuary account. Sync waits for library hydration, queues removals for the next successful sync, batches deletes, and locks edits while syncing.
+- Added a staged Cloud Lab schema with a safe owner-readable lifecycle/quota table and a separate service-role-only infrastructure mapping table for provider instance IDs and persistent volume references.
+- First-release Cloud Lab schema allows one persistent workspace per account and constrains disk, CPU, memory and runtime quotas. It does not provision compute or expose a terminal.
+- Added `npm run check:guild-cloud-lab` to assert control-plane access boundaries and quota constraints.
+- **Still required:** apply and review both new migrations through the normal database workflow; test RLS using two separate accounts; implement an authenticated, idempotent server-side lifecycle orchestrator and secure terminal gateway; choose an isolation/provider model and explicit spend cap; test real sync and browser behavior. Do not provision paid resources or mark Cloud Lab as available before those gates pass.
+
+## Guild Cloud Lab control endpoint — 2026-10-28
+
+- Added an authenticated, same-origin Supabase Edge Function scaffold for reading a member's own Cloud Lab status.
+- The endpoint checks the active account, uses the verified session user as owner, returns non-cacheable status data, and fails closed for start/stop/reset/delete until provider orchestration and spend controls exist.
+- Added `npm run check:guild-cloud-lab-control` source-contract coverage and documented the current boundary.
+- This is not a working Linux terminal and has not been deployed. The Cloud Lab schema migration remains unapplied; runtime/provider credentials, encrypted persistent volumes, lifecycle queue, spend budget, and live authorization tests remain prerequisites.
+
+## Guild calling hardening and Cloud Lab pause (2026-10-28)
+
+- Cloud Lab is visibly labelled **In development** and pinned for later. The UI now explains that the app/database can provide account/control-plane groundwork, but a real persistent Linux guest requires isolated compute and durable storage. No provider is selected and no compute is provisioned.
+- Hardened the call receiver to reject malformed Realtime broadcast payloads before processing, and capped pending ICE candidates to 256 to avoid unbounded queue growth.
+- Expanded calling source-contract coverage and documented the remaining real-device release checks.
+- Audio/video source implementation includes one-to-one WebRTC calls, private signalling, browser permission prompts, mute/camera toggles, timeouts and reconnect feedback. It is **not yet verified as production-ready**: no authenticated two-device end-to-end test has been run, and TURN relay configuration is absent, so some networks may fail to connect.
+- Next Guild improvements should prioritize playable browser games, a more useful local-first library, keyboard/controller navigation, accessibility, and clear native-game integration boundaries rather than spending time on Cloud Lab provisioning.
+
+
+
+## Full-beta readiness gate — 2026-10-28
+
+- Added [docs/full-beta-release-gate.md](docs/full-beta-release-gate.md) as the staged release checklist across CI/build, auth, RLS/migrations, messaging, calling, moderation, payments, privacy, accessibility, PWA/mobile and operations.
+- The checklist is a gate, not a readiness claim. P0 items require evidence from a successful source build and authorized staging tests. Static contract checks alone do not satisfy browser/device or security verification.
+- Current blockers remain: draft PR #205 needs fresh complete CI; Guild library and Cloud Lab migrations are staged but not applied; call-ICE/TURN configuration is not deployed; calls need two-account/two-device network tests; the active inbox/thread service is still in-memory demo state; several older roadmap PRs need safe reconciliation rather than blind merges.
+- Cloud Lab remains In development and pinned for later. Native game scanning/launch, verified platform achievement sync, cloud media backup and group calls remain future infrastructure work.
+- This branch has not been merged or deployed. No production migration or paid compute was initiated.

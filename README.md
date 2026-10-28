@@ -15,7 +15,7 @@
 
 ## What is in the app
 
-Implementation and verification status varies by feature; use [ROADMAP.md](ROADMAP.md) for the current source of truth.
+Implementation and verification status varies by feature. The in-app **Sanctuary Roadmap** is the simplified member-facing plan; the separate **Guild Roadmap** covers cosmic gaming features. Contributors should use [ROADMAP.md](ROADMAP.md) and [docs/full-beta-release-gate.md](docs/full-beta-release-gate.md) for engineering detail and release evidence.
 
 - **Community:** feed posts, comments, likes, author display names, reporting, and short-form video surfaces.
 - **Today / personal growth:** personal planner, habits, notes, and daily reflection.
@@ -63,6 +63,7 @@ npm run check:messages      # message persistence contract
 npm run check:theme         # theme contract
 npm run check:navigation    # navigation contract
 npm run check:cosmic-arcade # arcade regression contract
+npm run check:roadmaps      # Sanctuary/Guild roadmap scope and accessibility
 ```
 
 The repository contains additional focused `check:*` scripts; inspect `package.json` for the full list. Contract scripts are static regression checks, not a replacement for browser, accessibility, security, or end-to-end tests.
