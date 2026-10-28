@@ -651,3 +651,12 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Improved profile editor field stacking and save-action sizing on narrow screens, with visible focus treatment for form controls.
 - **Scope:** presentation-only CSS; no admin/moderation, backend integration, data contract, or deployment changes.
 - **Verification status:** changes are committed to the front-end feature branch. Browser/device visual QA and automated checks have not been run in this session.
+
+
+## Cross-surface mobile and accessibility pass (2026-10-28)
+
+- Added keyboard-focus treatments and touch-friendly controls to compact notifications, the shared workspace, community feed composer/posts, profile discovery, public profiles, and self-discovery.
+- Tightened narrow-screen feed attachment layouts and public-profile action wrapping; constrained notification popover width on small viewports.
+- Reinforced responsive shell safe-area padding and media sizing.
+- **Scope:** CSS/presentation only; no API contracts, backend, moderation logic, database, or provider configuration changed.
+- **Verification:** source edits are committed to the feature branch. Automated checks and browser/device visual QA have not been run here.
