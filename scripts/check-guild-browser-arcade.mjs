@@ -7,7 +7,10 @@ const css = readFileSync('src/components/GuildWorld.module.css', 'utf8');
 const controller = readFileSync('src/lib/controllerInput.ts', 'utf8');
 
 assert.match(workspace, /<GuildWorld userId=\{currentUser\?\.user\.id \?\? null\} isAuthenticated=\{isAuthenticated && !isGuest\} \/>/, 'hidden Guild shell is mounted and guest sessions are excluded');
-assert.doesNotMatch(workspace, /activeNavigation === 'guild'|label:\s*'The Guild'/, 'Guild is not exposed in ordinary navigation');
+assert.match(workspace, /activeNavigation === 'guild'/, 'Guild Arcade is reachable from its dedicated route');
+const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
+assert.match(navigation, /id: 'guild', label: 'Guild Arcade'/, 'Guild Arcade is exposed in ordinary navigation');
+assert.match(navigation, /items: \['guild', 'guild-roadmap'\]/, 'Guild Arcade and Guild roadmap are grouped together');
 assert.match(guild, /getConnectedGamepad/, 'Guild uses the shared controller abstraction');
 assert.match(controller, /readGamepadDirections/, 'controller abstraction maps physical input to logical directions');
 assert.match(controller, /button.value > 0.65/, 'controller abstraction supports analog button thresholds');
