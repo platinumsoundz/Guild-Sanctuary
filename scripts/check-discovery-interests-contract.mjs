@@ -68,7 +68,7 @@ for (const required of [
   "'connection_accepted'",
   'requester_id = (select auth.uid())',
   'recipients respond to connection requests',
-  'revoke all on table public.profile_follows, public.profile_connections, public.profile_blocks from anon, authenticated',
+  'revoke all on table public.profile_follows, public.profile_connections, public.profile_blocks, public.profile_discovery_hidden, public.profile_discovery_saved, public.profile_discovery_intentions from anon, authenticated',
 ]) assert.ok(relationshipMigration.includes(required), `missing relationship security contract: ${required}`);
 
 for (const required of [
