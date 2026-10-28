@@ -389,8 +389,8 @@ export function GuildCompanionHub() {
       {mediaMessage && <p className={styles.status} role="status">{mediaMessage}</p>}
 
       <section className={styles.panel} aria-labelledby="guild-cloud-lab-title">
-        <div className={styles.panelHeading}><span className={styles.icon}><Terminal size={19} /></span><div><h3 id="guild-cloud-lab-title">Cloud Lab · persistent Linux</h3><p>Infrastructure design is underway; this is deliberately not a simulated terminal.</p></div></div>
-        <div className={styles.notice}><strong>Not provisioned yet.</strong> Recommended design: server-hosted isolated Linux with an encrypted persistent home volume, per-user quotas, authenticated terminal gateway and controlled network egress. Stopping the workspace should preserve files; reset/delete should require confirmation. No shell commands can run from this panel today, and no paid compute should start until a provider and spend ceiling are approved.</div>
+        <div className={styles.panelHeading}><span className={styles.icon}><Terminal size={19} /></span><div><h3 id="guild-cloud-lab-title">Cloud Lab · persistent Linux <span className={styles.statusPill}>In development</span></h3><p>Paused here until a safe runtime can be provided; this is deliberately not a simulated terminal.</p></div></div>
+        <div className={styles.notice}><strong>Pinned for later development.</strong> The Sanctuary website and Supabase can handle the account, permissions and control-plane groundwork, but a real persistent Linux terminal also needs an isolated compute runtime and durable storage. Those are not included in the current app/database alone. No provider has been selected and no paid service is being started. For now, Cloud Lab stays labelled in development while Guild improvements continue.</div>
         <div className={styles.libraryTools}>
           <button type="button" className={styles.secondary} onClick={() => void checkCloudLabStatus()} disabled={cloudLabBusy}>
             <ShieldCheck size={14} /> {cloudLabBusy ? 'Checking status…' : 'Check workspace status'}
