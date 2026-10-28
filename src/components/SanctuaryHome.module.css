@@ -331,3 +331,67 @@
 @media (max-width: 1050px) { .worldGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .worldCardCommunity, .worldCardArcade, .worldCardCreator, .worldCardShop { min-height: 210px; } }
 @media (max-width: 560px) { .worldDestinations { margin: 22px 0 30px; padding: 15px; border-radius: 16px; } .worldHeading { align-items: flex-start; } .worldSigil { width: 42px; height: 42px; font-size: 25px; } .worldGrid { grid-template-columns: minmax(0, 1fr); gap: 10px; } .worldCardCommunity, .worldCardArcade, .worldCardCreator, .worldCardShop { min-height: 0; padding: 16px; } .worldIcon { margin-bottom: 12px; } .worldAction { padding-top: 13px; } }
 @media (prefers-reduced-motion: reduce) { .worldCardCommunity, .worldCardArcade, .worldCardCreator, .worldCardShop { transition: none; } .worldCardCommunity:hover, .worldCardArcade:hover, .worldCardCreator:hover, .worldCardShop:hover { transform: none; } }
+
+/* Final polish for the home hero and discovery cards, matching the winged portal artwork. */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-color: rgb(160 142 255 / 30%);
+  background:
+    radial-gradient(ellipse at 78% 12%, rgb(139 119 255 / 18%), transparent 36%),
+    radial-gradient(ellipse at 5% 100%, rgb(74 192 233 / 10%), transparent 42%),
+    linear-gradient(135deg, rgb(18 22 59 / 98%), rgb(8 13 36 / 98%));
+  box-shadow: 0 24px 70px rgb(2 3 22 / 22%), inset 0 1px rgb(255 255 255 / 4%);
+}
+.hero::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(184 164 255 / 75%), rgb(133 231 255 / 52%), transparent);
+  content: '';
+  pointer-events: none;
+}
+.hero h1 { color: #f7f4ff; text-wrap: balance; }
+.hero h1 em { color: #c3aaff; text-shadow: 0 0 28px rgb(166 139 255 / 20%); }
+.intro { color: #c4cbed; }
+.heroNote {
+  border-color: rgb(163 148 255 / 26%);
+  background: linear-gradient(150deg, rgb(30 34 82 / 86%), rgb(13 18 47 / 90%));
+  box-shadow: inset 0 1px rgb(255 255 255 / 4%);
+}
+.orbit { border-color: rgb(165 147 255 / 50%); color: #a6ecff; box-shadow: 0 0 28px rgb(126 115 255 / 13%); }
+.orbit::before, .orbit::after { border-color: rgb(162 153 255 / 36%); }
+.orbit span { background: #a3edff; box-shadow: 0 0 9px rgb(143 234 255 / 65%); }
+.quickRow button {
+  border-color: rgb(160 142 255 / 22%);
+  background: linear-gradient(145deg, rgb(25 29 72 / 88%), rgb(11 16 42 / 94%));
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+.quickRow button:hover { border-color: rgb(153 224 255 / 60%); background: linear-gradient(145deg, rgb(42 43 100 / 92%), rgb(13 25 53 / 96%)); box-shadow: 0 8px 22px rgb(3 4 25 / 24%); transform: translateY(-2px); }
+.sectionHeading h2, .feedbackIntro h2 { color: #f3f0ff; }
+.sectionHeading > div > p:last-child { color: #c0c7e8; }
+.featureCount, .filter, .filterActive { border-color: rgb(160 142 255 / 25%); background-color: rgb(17 21 54 / 88%); color: #c2c9e9; }
+.filterActive { border-color: rgb(156 234 255 / 62%); background: linear-gradient(100deg, rgb(143 113 255 / 24%), rgb(78 180 255 / 10%)); color: #fbf9ff; }
+.featureCard {
+  border-color: rgb(160 142 255 / 21%);
+  border-radius: 14px;
+  background: linear-gradient(155deg, rgb(23 27 67 / 92%), rgb(10 15 39 / 96%));
+  box-shadow: inset 0 1px rgb(255 255 255 / 2%);
+}
+.featureCard:hover { border-color: rgb(155 225 255 / 56%); box-shadow: 0 14px 32px rgb(2 4 26 / 24%); }
+.featureCard h3 { color: #f1eeff; }
+.featureCard p { color: #c0c7e8; }
+.primaryButton { border-color: #b7a1ff; background: linear-gradient(105deg, #9b80f5, #7467dd); color: #fff; box-shadow: 0 8px 22px rgb(113 93 224 / 22%); }
+.secondaryButton { border-color: rgb(160 142 255 / 34%); background: rgb(22 27 65 / 88%); color: #eeeaff; }
+.primaryButton:focus-visible, .secondaryButton:focus-visible, .quickRow button:focus-visible, .filter:focus-visible, .filterActive:focus-visible { outline: 2px solid #9cecff; outline-offset: 3px; }
+@media (max-width: 700px) {
+  .hero { border-radius: 15px; }
+  .quickRow button { padding: 12px; }
+  .featureCard { min-height: 210px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quickRow button, .primaryButton, .secondaryButton, .featureCard { transition: none; }
+  .quickRow button:hover, .primaryButton:hover, .secondaryButton:hover { transform: none; }
+}
