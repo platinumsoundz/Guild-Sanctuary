@@ -142,3 +142,15 @@
     flex-wrap: wrap;
   }
 }
+
+/* Public profile: keep actions and media usable at small viewport widths. */
+.actions :where(button, a) { min-height: 42px; touch-action: manipulation; }
+.actions :where(button, a):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.post img,
+.post video { max-width: 100%; }
+@media (max-width: 420px) {
+  .actions > button, .actions > a { flex: 1 1 100%; }
+}
