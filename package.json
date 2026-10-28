@@ -28,6 +28,7 @@
     "check:token-spend": "node scripts/check-token-spend-contract.mjs",
     "check:cosmic-arcade": "node scripts/check-cosmic-arcade-contract.mjs",
     "check:sanctuary-home": "node scripts/check-sanctuary-home-contract.mjs",
+    "check:comment-actions": "node scripts/check-community-comment-actions.mjs",
     "check:roadmaps": "node scripts/check-roadmaps.mjs",
     "check:short-engagement-rpc": "node scripts/check-short-engagement-rpc.mjs",
     "check:shorts-full-size": "node scripts/check-shorts-full-size.mjs"
