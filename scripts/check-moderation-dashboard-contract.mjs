@@ -27,4 +27,12 @@ assert.ok(dashboard.includes('onClick={() => void refresh()}'), 'moderators must
 assert.ok(dashboard.includes('window.confirm'), 'destructive moderation actions must require an explicit confirmation');
 assert.ok(dashboard.includes('setNotice('), 'successful action submission must provide visible status feedback');
 
+assert.ok(admin.includes('Admin access overview'), 'admin dashboard must explain role-scoped capabilities');
+assert.ok(admin.includes('filteredMembers.map'), 'member search results must support role/status filtering');
+assert.ok(admin.includes('availableStatuses'), 'member status filters must use observed status values');
+assert.ok(admin.includes('window.confirm'), 'role changes must require explicit confirmation');
+assert.ok(admin.includes('This increases the member’s privilege level'), 'privilege increases must show a clear warning');
+assert.ok(admin.includes('setMembers([])'), 'failed member searches must not leave stale member results actionable');
+assert.ok(admin.includes('roleChangePreview'), 'role editor must show current and requested roles before submission');
+
 console.log('Moderation dashboard contract checks passed.');
