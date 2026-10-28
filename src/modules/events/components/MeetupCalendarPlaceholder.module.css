@@ -27,6 +27,15 @@
   font-weight: 400;
 }
 
+.intro {
+  max-width: 600px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .worldTag,
 .sectionHeading > span {
   color: var(--muted);
@@ -40,7 +49,7 @@
   margin-top: 28px;
   padding: 19px;
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: 8px;
   background: var(--surface-raised);
 }
 
@@ -80,7 +89,7 @@
   min-height: 38px;
   padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 5px;
   background: var(--surface);
   color: var(--ink);
   font: inherit;
@@ -114,14 +123,19 @@
 .primaryButton,
 .secondaryButton,
 .selectedButton {
-  min-height: 34px;
-  padding: 6px 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 7px 12px;
   border: 1px solid var(--accent);
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
   font-family: Arial, sans-serif;
   font-weight: 700;
-  font-size: 10px;
+  font-size: 11px;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
 }
 
 .primaryButton,
@@ -135,37 +149,316 @@
   color: var(--accent);
 }
 
+.primaryButton:hover,
+.selectedButton:hover {
+  filter: brightness(0.94);
+}
+
+.secondaryButton:hover {
+  background: var(--surface-raised);
+}
+
 .textButton {
-  padding: 3px 0;
+  padding: 4px 0;
   border: 0;
   background: transparent;
   color: var(--accent);
   cursor: pointer;
   font-family: Arial, sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .eventsSection {
-  margin-top: 32px;
+  margin-top: 36px;
 }
 
 .sectionHeading {
-  padding-bottom: 12px;
+  align-items: end;
+  padding-bottom: 14px;
+}
+
+.eventFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.pastEventsToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font: 11px/1.4 Arial, sans-serif;
+  cursor: pointer;
+}
+
+.pastEventsToggle input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+}
+
+.pastEventsToggle input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.mapExplorer {
+  overflow: hidden;
+  margin: 0 0 24px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+
+.mapHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+}
+
+.mapHeading h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.mapHeading > div > p:last-child {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font: 12px/1.5 Arial, sans-serif;
+}
+
+.mapExternalLink,
+.coordinatePreview a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  color: var(--accent);
+  font: 700 11px/1.4 Arial, sans-serif;
+  text-underline-offset: 3px;
+}
+
+.mapFrameWrap {
+  padding: 0 12px;
+}
+
+.mapFrame {
+  display: block;
+  width: 100%;
+  height: clamp(240px, 35vw, 390px);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.mapAttribution {
+  margin: 7px 4px 0;
+  color: var(--muted);
+  font: 10px/1.5 Arial, sans-serif;
+}
+
+.mapUnavailable {
+  margin: 0 12px 12px;
+  padding: 22px 16px;
+  border: 1px dashed var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--muted);
+  font: 12px/1.6 Arial, sans-serif;
+}
+
+.nearbyPanel {
+  padding: 14px 12px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.nearbyHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.nearbyHeading h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nearbyControls > span,
+.nearbyEvent small,
+.nearbyEmpty {
+  color: var(--muted);
+  font: 10px/1.5 Arial, sans-serif;
+}
+
+.nearbyControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.nearbyRadiusLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font: 10px/1.4 Arial, sans-serif;
+}
+
+.nearbyRadiusLabel select {
+  min-height: 30px;
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 11px Arial, sans-serif;
+}
+
+.nearbyRadiusLabel select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.nearbyList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 8px;
+  padding-bottom: 10px;
+}
+
+.nearbyEvent,
+.nearbyEventActive {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.nearbyEventActive {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.nearbyEvent > span,
+.nearbyEventActive > span {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.nearbyEvent strong,
+.nearbyEventActive strong {
+  overflow: hidden;
+  color: var(--ink);
+  font: 700 11px/1.35 Arial, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nearbyEmpty {
+  margin: 0 0 10px;
+}
+
+.pinList {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  padding: 14px 12px 16px;
+  scrollbar-width: thin;
+}
+
+.mapPin,
+.activePin {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 170px;
+  max-width: 240px;
+  min-height: 60px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.activePin {
+  border-color: var(--accent);
+  background: var(--surface-raised);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.pinNumber {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 24px;
+  color: var(--accent);
+  font: 700 10px/1 Arial, sans-serif;
+}
+
+.pinText {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.pinText strong {
+  overflow: hidden;
+  color: var(--ink);
+  font: 700 11px/1.35 Arial, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pinText small {
+  color: var(--muted);
+  font: 10px/1.3 Arial, sans-serif;
 }
 
 .eventList {
   border-top: 1px solid var(--line);
 }
 
-.eventCard {
+.eventCard,
+.eventCardActive {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 18px 2px;
+  padding: 19px 12px;
   border-bottom: 1px solid var(--line);
+  border-radius: 5px;
+}
+
+.eventCardActive {
+  background: var(--surface-raised);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .eventMain {
@@ -178,9 +471,9 @@
   display: block;
   color: var(--muted);
   font-family: Arial, sans-serif;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.2px;
 }
 
 .eventMain h3 {
@@ -190,28 +483,45 @@
   font-weight: 400;
 }
 
+.organizerName {
+  margin: 5px 0 2px;
+  color: var(--accent);
+  font: 700 11px/1.45 Arial, sans-serif;
+  overflow-wrap: anywhere;
+}
+
 .eventMain > p {
   margin: 6px 0;
   color: var(--muted);
   font-family: Arial, sans-serif;
-  font-size: 11px;
-  line-height: 1.55;
+  font-size: 12px;
+  line-height: 1.6;
   overflow-wrap: anywhere;
 }
 
 .locationText,
 .attendeeCount {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   margin: 4px 12px 0 0;
   font-weight: 400;
 }
 
 .emptyState {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 0;
   padding: 22px 2px;
   color: var(--muted);
   font-family: Arial, sans-serif;
   font-size: 13px;
+  line-height: 1.6;
+}
+
+.emptyState p {
+  margin: 0;
 }
 
 .error {
@@ -219,11 +529,67 @@
   color: #b33b32;
   font-family: Arial, sans-serif;
   font-size: 11px;
+  line-height: 1.5;
+}
+
+.formNote {
+  margin: 0;
+  color: var(--muted);
+  font: 12px/1.6 Arial, sans-serif;
+}
+
+.coordinatePreview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--muted);
+  font: 11px/1.5 Arial, sans-serif;
+}
+
+.coordinatePreview > svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .calendar {
+    padding: 32px 20px;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .eventCard,
+  .eventCardActive {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 13px;
+    padding: 17px 10px;
+  }
+
+  .eventActions {
+    width: 100%;
+  }
+
+  .mapHeading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mapFrame {
+    height: 280px;
+  }
 }
 
 @media (max-width: 500px) {
   .calendar {
-    padding: 32px 20px;
+    padding: 28px 16px;
   }
 
   .calendar h1 {
@@ -235,22 +601,57 @@
   }
 
   .formRow {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .eventCard {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
+    grid-template-columns: 1fr;
   }
 
   .createPanel {
     padding: 15px;
   }
+
+  .sectionHeading {
+    align-items: flex-start;
+  }
+
+  .mapHeading {
+    padding: 16px;
+  }
+
+  .mapFrameWrap {
+    padding: 0 8px;
+  }
+
+  .mapFrame {
+    height: 245px;
+  }
+
+  .pinList {
+    padding: 12px 8px 14px;
+  }
+
+  .mapPin,
+  .activePin {
+    min-width: 150px;
+  }
 }
 
-.formNote {
-  margin: 0;
-  color: var(--muted);
-  font: 12px/1.6 Arial, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton,
+  .secondaryButton,
+  .selectedButton {
+    transition: none;
+  }
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.selectedButton:focus-visible,
+.textButton:focus-visible,
+.mapPin:focus-visible,
+.activePin:focus-visible,
+.nearbyEvent:focus-visible,
+.nearbyEventActive:focus-visible,
+.mapExternalLink:focus-visible,
+.coordinatePreview a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }

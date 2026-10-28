@@ -173,8 +173,9 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
   return event;
 }
 
-export async function updateEvent(eventId: string, creatorId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt'>): Promise<Event> {
+export async function updateEvent(eventId: string, creatorId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt' | 'locationCoords'>): Promise<Event> {
   validateEvent(input.title, input.description, input.startsAt);
+  validateCoordinates(input.locationCoords);
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(creatorId);
     const { data, error } = await getSupabaseBrowserClient()
@@ -182,6 +183,8 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
       .update({
         title: input.title.trim(),
         description: input.description.trim(),
+        latitude: input.locationCoords.latitude,
+        longitude: input.locationCoords.longitude,
         starts_at: new Date(input.startsAt).toISOString(),
       })
       .eq('id', eventId)
@@ -200,6 +203,7 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
 
   event.title = input.title.trim();
   event.description = input.description.trim();
+  event.locationCoords = input.locationCoords;
   event.startsAt = new Date(input.startsAt).toISOString();
   return event;
 }
