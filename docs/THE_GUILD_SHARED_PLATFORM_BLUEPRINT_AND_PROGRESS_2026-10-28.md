@@ -18,7 +18,9 @@ The Guild is a hidden, controller-first gaming world within The Sanctuary. It is
 - **Progression:** mixed rewards from personal quests, verified platform achievements and moderated community activities.
 - **Identity:** reuse the authenticated Sanctuary identity and account. Provide optional gaming preferences/profile fields without creating a second account or automatically exposing linked platform data.
 - **Cross-world sharing:** explicit user action only. Sharing publishes a distinct item to a chosen audience; it does not grant broad read access to the source record.
-- **First integration:** Steam, starting with a feasibility check and a narrow, documented subset of supported data.
+- **Gaming platform ambition:** Windows PC and Android, plus browser-playable games. The first playable deliverable is a controller-friendly browser Arcade; Steam account/data integration and external launchers come later as separate capabilities.
+- **First platform data integration:** Steam, starting with a feasibility check and a narrow, documented subset of supported data.
+- **External gaming environments:** Winlator, DroidDeck, GameHub or streaming clients are future feasibility targets, not assumed capabilities. Verify exact app identity, supported launch mechanisms and platform restrictions before promising integration.
 - **Controller input:** consistent mapped defaults through a shared input abstraction. Remapping can follow later.
 - **Orientation:** landscape-first where suitable, with a deliberately designed portrait experience. Do not rely on forced rotation.
 - **Visibility:** completely hidden from ordinary navigation and public entry points for now. Controller detection/accessibility override reveals the entry path. A future URL is possible, but not part of the initial scope.
@@ -58,40 +60,47 @@ A shared input abstraction translates supported gamepads into logical actions (n
 
 First audit provider access and data coverage. Verify account linking and identity; then evaluate supported profile, owned-game and achievement data against API permissions, privacy settings, access requirements and rate limits. Store credentials safely on the server where required. Imported data needs source and timestamp metadata, safe retries, deduplication, unlinking and deletion behaviour. Do not promise detection/control of arbitrary installed or running games. Manual tracking remains usable when provider data is unavailable.
 
-## 3. Guild delivery roadmap
+## 3. Guild delivery roadmap — browser games first
 
-### Phase 0 — Repository and capability audit
-Map existing routes, shared components, themes, authentication, admin/moderation, feeds, messages, planner, Supabase schema/RLS, migration drift and current test coverage. Classify each capability as shared, configurable or Guild-specific. Identify unresolved beta blockers from `ROADMAP.md` and `MASTER_BLUEPRINT.md`.
+The target is an all-in-one gaming hub for Windows PC and Android, with browser-playable games as the first real gaming deliverable. Keep the launch mechanism abstract so native launchers and streaming can be added later without rebuilding the Guild. A website cannot generally inspect or control arbitrary installed games, so each external environment requires a verified, supported handoff mechanism.
 
-**Exit:** reviewed reuse map, data ownership proposal, risk register and acceptance tests.
+### Phase 0 — Repository and gaming feasibility audit
+Map existing routes, shared components, themes, authentication, admin/moderation, feeds, messages, planner, Supabase schema/RLS, migration drift and test coverage. Classify capabilities as shared, configurable or Guild-specific. Separately inventory browser-game options/licences and define the supported desktop/mobile browser and controller matrix. Identify unresolved Sanctuary beta blockers.
 
-### Phase 1 — Shared-world shell and controller
-Define world context/routing and hidden-entry rules; add controller detection, mapped defaults, accessibility override, disconnect grace behaviour and adaptive layouts. Do not expose Guild navigation publicly.
+**Exit:** reviewed reuse map, data ownership proposal, risk register, game selection criteria and acceptance tests.
 
-**Exit:** stable entry/exit/navigation on the supported device/browser matrix without regressions to Sanctuary.
+### Phase 1 — Hidden world shell and shared controller layer
+Define world context/routing and hidden-entry rules; add controller detection, mapped logical actions, keyboard/touch coexistence, accessibility override, disconnect grace behaviour and adaptive layouts. Keep Guild out of ordinary public navigation.
 
-### Phase 2 — Secure Guild data domain
-Implement Guild-owned data and permission boundaries, world-aware shared services, RLS policies, explicit cross-world publishing and audit rules. Add negative tests for cross-world reads, messaging participation, unauthorised membership, account deletion and client-forged rewards.
+**Exit:** reliable entry, focus movement, selection, back/menu actions and reconnect handling on the supported device/browser matrix without Sanctuary regressions.
 
-**Exit:** access-boundary and privacy tests pass before exposing community data.
+### Phase 2 — Guild Arcade: playable browser games
+Build the Arcade catalogue and a small curated set of controller-friendly games that run directly in supported browsers. Prefer original, open-source or explicitly licensed games. Define fullscreen where allowed, pause/exit, touch/keyboard fallback, saved game state where supported, and a game adapter contract. Distinguish local game progress from server-verified achievements; never trust client-submitted rewards without validation.
 
-### Phase 3 — Guild Hall and Codex
-Build the hub, game catalogue, personal goals, manual session tracking, quests, achievements, XP/ranks and progress history by extending shared planner and UI foundations.
+**Exit:** users can enter the hidden Guild with a controller, select and play at least one complete browser game on target desktop and Android browsers, and return to the Guild cleanly.
 
-**Exit:** complete progression loop works without external platform integration.
+### Phase 3 — Secure Guild data and shared-service configuration
+Establish Guild-owned community and gaming records, world-aware shared services, RLS, explicit cross-world publishing and audit rules. Include negative tests for cross-world reads, message participation, unauthorised membership, account deletion and forged rewards. Keep the Arcade usable if optional backend or integration services fail.
 
-### Phase 4 — Steam
-Deliver the first supported linking/import flow after the API feasibility study. Add sync status, retries, rate-limit handling, deduplication, unlinking and clear labels for verified vs self-reported activity.
+**Exit:** access-boundary tests pass and game progress/rewards have a defined trusted source.
 
-**Exit:** supported end-to-end data flow is reliable; manual tracking still works during outages or privacy restrictions.
+### Phase 4 — Guild Hall, Codex and progression
+Build the hub, game catalogue metadata, personal goals, manual session tracking, quests, achievements, XP/ranks and progress history by extending the Sanctuary's shared planner and UI foundations. Support mixed rewards while clearly distinguishing self-reported, server-verified browser-game and imported platform evidence.
 
-### Phase 5 — Guild community and admin
-Extend shared feeds, messaging, game communities, parties and group challenges. Reuse the existing admin/moderation dashboard with world filters and explicit distinction between account-wide and world-specific enforcement.
+**Exit:** a useful end-to-end gaming and progression loop works without Steam or an external launcher.
+
+### Phase 5 — External launch feasibility and Steam data
+First verify Steam's supported API/data scope and implement account linking/import as a separate adapter. In parallel, investigate exact Winlator, DroidDeck and GameHub products and supported Android handoff mechanisms. Test app links/intents only where documented and permitted. Treat launching a game, importing game data and streaming gameplay as distinct capabilities.
+
+**Exit:** Steam data integration is reliable for the documented supported subset, and any external launch flow has been proven on actual compatible devices before being advertised.
+
+### Phase 6 — Guild community and shared administration
+Extend shared feeds, messaging, game communities, parties and group challenges. Reuse the existing admin/moderation dashboard with world filters and distinguish account-wide from world-specific enforcement. Implement explicit cross-world sharing as a deliberate publish action with audience preview and defined revocation behaviour.
 
 **Exit:** reporting, blocking, moderation, publishing, sharing and deletion rules work end to end.
 
-### Phase 6 — Hardening and future URL readiness
-Run controller, accessibility, browser/device, performance, integration-failure and security tests. Confirm Guild failures cannot take down Sanctuary features. Document any future domain/origin/cookie/auth changes without launching a separate URL now.
+### Phase 7 — Hardening and future URL readiness
+Run controller, accessibility, browser/device, performance, integration-failure and security tests. Confirm Guild failures cannot take down Sanctuary features. Document future domain/origin/cookie/auth requirements without launching a separate URL now.
 
 **Exit:** evidence-backed release criteria pass; exact tested commit and environment are recorded.
 
@@ -141,13 +150,15 @@ Public release should not be declared until:
 The Guild should not be allowed to silently delay the existing Sanctuary beta. Build its reusable foundation alongside release-hardening only where changes are low-risk and independently testable; keep the hidden world disabled until its access and privacy gates pass.
 
 Indicative estimate after a current-code audit:
-- **Guild architecture/controller shell:** 1–3 weeks.
-- **Secure Guild data boundary and shared-service configuration:** 2–4 weeks.
+- **Hidden shell and controller layer:** 1–3 weeks.
+- **Curated browser Arcade prototype and first playable games:** 2–4 weeks, depending on game scope, licences and device testing.
+- **Secure Guild data boundary:** 2–4 weeks.
 - **Guild Hall/Codex and mixed progression:** 2–4 weeks.
-- **Steam feasibility plus first integration:** 2–5+ weeks, highly dependent on provider access and the exact data scope.
+- **Steam data feasibility/integration:** 2–5+ weeks, depending on provider access and data scope.
+- **External Android launch adapters:** unknown until exact apps and supported launch mechanisms are verified; allow a separate feasibility spike.
 - **Community/admin integration and hardening:** 2–4 weeks.
 
-Several phases can overlap. A credible internal Guild alpha may take roughly **6–10 weeks** after work starts; a controlled Guild beta with community, progression and one reliable Steam data flow may take **10–18+ weeks**. These are rough estimates, not commitments. A public Guild launch should be separately approved and should not be inferred from the Sanctuary public release.
+Several phases can overlap. A small internal alpha with the shell and a playable browser game may be possible in roughly **3–6 weeks** after work starts, subject to audit findings. A broader controlled Guild beta with multiple browser games, community, progression and one reliable Steam data flow is more plausibly **10–18+ weeks**. These are estimates, not commitments. These are rough estimates, not commitments. A public Guild launch should be separately approved and should not be inferred from the Sanctuary public release.
 
 ## 5. Priorities across frontend, backend and Guild
 
@@ -170,7 +181,8 @@ Several phases can overlap. A credible internal Guild alpha may take roughly **6
 3. Build controller/world configuration without duplicating existing feature modules.
 4. Establish RLS/data boundaries before Guild feeds/messages.
 5. Build the Codex/progression loop before depending on Steam.
-6. Do not expose Guild navigation or launch a separate URL until explicitly approved.
+6. Deliver browser-playable games first; treat external game launching and streaming as separate, evidence-gated capabilities.
+7. Do not expose Guild navigation or launch a separate URL until explicitly approved.
 
 ## 6. Reporting rule
 
@@ -183,4 +195,4 @@ At each meaningful checkpoint, report separate percentages for:
 
 Each percentage update should state what changed, which tests/evidence support it, what remains blocked and the revised calendar range. A passing build alone must not increase the verified percentage for browser/device, database or production behaviour.
 
-**Current status:** the Guild concept and roadmap are recorded on this branch; no Guild feature code, migrations, secrets or deployment changes are included in this planning work.
+**Current status:** the Guild concept and revised browser-games-first roadmap are recorded on this branch; no Guild feature code, migrations, secrets or deployment changes are included in this planning work.
