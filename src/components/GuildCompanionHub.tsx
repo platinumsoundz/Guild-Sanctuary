@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Download, ExternalLink, Gamepad2, Image as ImageIcon, Library, Music2, Plus, ShieldCheck, Terminal, Trash2, Upload } from 'lucide-react';
 import styles from './GuildCompanionHub.module.css';
+import { createClient } from '@/lib/supabase/client';
 
 type LocalGame = { id: string; title: string; platform: string; launchUrl: string };
 type MediaFile = { id: string; file: File; url: string };
@@ -34,6 +35,8 @@ export function GuildCompanionHub() {
   const [games, setGames] = useState<LocalGame[]>([]);
   const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [storageWarning, setStorageWarning] = useState(false);
+  const [syncBusy, setSyncBusy] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('Server sync is not connected yet.');
   const [title, setTitle] = useState('');
   const [platform, setPlatform] = useState('Browser');
   const [launchUrl, setLaunchUrl] = useState('');
@@ -152,6 +155,71 @@ export function GuildCompanionHub() {
     }
   };
 
+  const syncLibrary = async () => {
+    if (syncBusy) return;
+    setSyncBusy(true);
+    setSyncMessage('Checking your Sanctuary account…');
+    try {
+      const supabase = createClient();
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) {
+        setSyncMessage('Sign in to Sanctuary before syncing. Your existing device-local library has not been changed.');
+        return;
+      }
+
+      const { data: remoteRows, error: readError } = await supabase
+        .from('guild_library_entries')
+        .select('id, title, platform, launch_url, updated_at')
+        .order('updated_at', { ascending: false });
+      if (readError) {
+        setSyncMessage(readError.code === '42P01' || readError.code === 'PGRST205'
+          ? 'Server library is not available yet. The database migration must be applied before syncing; your local library is unchanged.'
+          : `Could not read your server library (${readError.message}). Your local library is unchanged.`);
+        return;
+      }
+
+      const remote = (remoteRows || []) as Array<{ id: string; title: string; platform: string; launch_url: string; updated_at: string }>;
+      const remoteKeys = new Set(remote.map((item) => `${item.platform.toLowerCase()}::${item.title.trim().toLowerCase()}`));
+      let added = 0;
+      for (const item of games) {
+        const key = `${item.platform.toLowerCase()}::${item.title.trim().toLowerCase()}`;
+        if (remoteKeys.has(key)) continue;
+        const { error: insertError } = await supabase.from('guild_library_entries').insert({
+          user_id: authData.user.id,
+          title: item.title.trim(),
+          platform: item.platform,
+          launch_url: safeWebUrl(item.launchUrl),
+        });
+        if (insertError) {
+          if (insertError.code === '23505') continue;
+          setSyncMessage(`Sync stopped while saving your library (${insertError.message}). Your server copy may contain some entries; try syncing again to finish.`);
+          return;
+        }
+        remoteKeys.add(key);
+        added += 1;
+      }
+
+      const { data: finalRows, error: finalError } = await supabase
+        .from('guild_library_entries')
+        .select('id, title, platform, launch_url, updated_at')
+        .order('updated_at', { ascending: false });
+      if (finalError) {
+        setSyncMessage(`Your entries may have been saved, but the final server refresh failed (${finalError.message}). Try syncing again.`);
+        return;
+      }
+      const synced = ((finalRows || []) as Array<{ id: string; title: string; platform: string; launch_url: string }>)
+        .map((item) => ({ id: item.id, title: item.title, platform: item.platform, launchUrl: safeWebUrl(item.launch_url) }));
+      setGames(synced);
+      setStorageWarning(false);
+      setSyncMessage(`Synced ${synced.length} game entries to your Sanctuary account. Added ${added} new entr${added === 1 ? 'y' : 'ies'} from this device.`);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Unknown connection error';
+      setSyncMessage(`Server sync could not start: ${detail}. Your local library remains available.`);
+    } finally {
+      setSyncBusy(false);
+    }
+  };
+
   const addGame = () => {
     const cleanTitle = title.trim();
     if (!cleanTitle) return;
@@ -192,6 +260,7 @@ export function GuildCompanionHub() {
       <section className={styles.panel} aria-labelledby="guild-library-title">
         <div className={styles.panelHeading}><span className={styles.icon}><Library size={19} /></span><div><h3 id="guild-library-title">Unified game library</h3><p>Saved on this device today. Cross-device sync is planned, not connected. No installed-game scan has been performed.</p></div></div>
         <div className={styles.libraryTools}>
+          <button type="button" className={styles.primary} onClick={() => void syncLibrary()} disabled={syncBusy}><ShieldCheck size={14} /> {syncBusy ? 'Syncing…' : 'Sign in & sync'}</button>
           <button type="button" className={styles.secondary} onClick={exportLibrary}><Download size={14} /> Export backup</button>
           <input ref={libraryImportInput} className={styles.hiddenInput} type="file" accept="application/json,.json" onChange={(event) => void importLibrary(event.target.files?.[0])} />
           <button type="button" className={styles.secondary} onClick={() => libraryImportInput.current?.click()}><Upload size={14} /> Import backup</button>
@@ -202,6 +271,7 @@ export function GuildCompanionHub() {
           <label className={styles.urlField}>Optional web game / store link<input value={launchUrl} onChange={(event) => setLaunchUrl(event.target.value)} placeholder="https://…" inputMode="url" /></label>
           <button type="submit" className={styles.primary}><Plus size={15} /> Add to library</button>
         </form>
+        <p className={styles.status} role="status" aria-live="polite">{syncMessage}</p>
         {games.length ? <ul className={styles.gameList}>{games.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={safeWebUrl(game.launchUrl)} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => setGames((current) => current.filter((item) => item.id !== game.id))}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
         <div className={styles.notice}><strong>Next integration:</strong> an optional signed Sanctuary Companion can request permission to scan supported game locations and launch compatible installed titles. A website alone cannot enumerate your device or execute arbitrary local apps.</div>
       </section>
