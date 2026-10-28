@@ -638,9 +638,9 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 ## Community comment reliability — 2026-10-28
 
-- **Implemented on `fix/community-comment-action-reliability-2026-10-28`; validation pending:** comment loading now has a visible pending state and prevents repeat loads; successful empty results are distinguished from failed/uncompleted loads; posting trims empty text and blocks duplicate submits while pending.
-- Existing edit/delete/like/report actions are preserved. A focused static contract is wired into CI.
-- Remaining gates: exact-head contract, TypeScript/build, and desktop/mobile authenticated interaction tests. This is a client reliability improvement, not a replacement for database authorization/RLS.
+- **Merged to `main` in PR #217**, commit `f968b4f0feba6ac1ac3b73c13ddea09180c3c85a`: comment loading now has a visible pending state and prevents repeat loads; successful empty results are distinguished from failed/uncompleted loads; posting trims empty text and blocks duplicate submits while pending.
+- Existing edit/delete/like/report actions are preserved. The focused static contract is wired into CI.
+- Exact-head CI, typecheck, production build and Cloudflare Worker build passed before merge. Remaining gates: desktop/mobile authenticated interaction tests and backend authorization/RLS verification. This is a client reliability improvement, not a replacement for database authorization/RLS.
 - No database migration, production deployment, account, payment, or provider settings changed.
 
 
