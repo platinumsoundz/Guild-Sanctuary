@@ -63,7 +63,7 @@ function pairKey(a: string, b: string): string {
 
 export async function fetchRelationshipStates(userId: string, targetIds: string[]): Promise<Map<string, RelationshipState>> {
   const uniqueIds = [...new Set(targetIds.filter((id) => id && id !== userId))];
-  const result = new Map<string, RelationshipState>(uniqueIds.map((id) => [id, {
+  const result = new Map<string, RelationshipState>(uniqueIds.map((id): [string, RelationshipState] => [id, {
     following: false, connection: 'none', connectionId: null, blocked: false,
   }]));
   if (!uniqueIds.length) return result;
