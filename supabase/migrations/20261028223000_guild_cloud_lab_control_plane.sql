@@ -25,6 +25,10 @@ comment on column public.guild_workspace_status.state is
 create index if not exists guild_workspace_status_owner_updated_idx
   on public.guild_workspace_status (user_id, updated_at desc);
 
+-- First release allows one persistent workspace per account to bound spend and support load.
+create unique index if not exists guild_workspace_status_one_per_owner_uidx
+  on public.guild_workspace_status (user_id);
+
 alter table public.guild_workspace_status enable row level security;
 
 drop policy if exists "Members can read their Cloud Lab status" on public.guild_workspace_status;
