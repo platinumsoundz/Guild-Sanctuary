@@ -26,7 +26,6 @@ export function CosmicSanctuaryArt(props: SVGProps<SVGSVGElement>) {
       <circle cx="380" cy="215" r="100" fill="none" stroke="#b6f5ff" strokeOpacity=".45" strokeWidth="2"/>
       <circle cx="380" cy="215" r="118" fill="none" stroke="#d8b5ff" strokeOpacity=".35" strokeDasharray="3 12" strokeWidth="2"/>
       <ellipse cx="380" cy="224" rx="130" ry="160" fill="none" stroke="#b4eaff" strokeOpacity=".25" strokeWidth="8" filter="url(#cosmic-glow)"/>
-      <g transform="translate(380 155)"><use href="#cosmic-wing" transform="translate(0 0) scale(-1 1)"/><use href="#cosmic-wing"/></g>
       <g transform="translate(380 150)"><use href="#cosmic-wing-feathers"/><use href="#cosmic-wing-feathers" transform="scale(-1 1)"/></g>
       <path d="M380 112 C354 150 353 198 380 240 C407 198 406 150 380 112Z" fill="#fff" opacity=".72" filter="url(#cosmic-glow)"/>
       <path d="M380 112 C354 150 353 198 380 240 C407 198 406 150 380 112Z" fill="#f4fdff" opacity=".85"/>
