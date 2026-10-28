@@ -4,6 +4,13 @@ Last updated: 2026-10-28
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
+## Support and creator-project navigation (2026-10-28)
+
+- **In code, QA pending:** The Support page presents voluntary contribution options first, then embeds the existing games/creator-project hub beneath them.
+- The Support page heading is “Support the creator”; the navigation label remains “Support the community”.
+- The dedicated **Cosmic Arcade** navigation entry remains available. The embedded Games hub includes the Cosmic Arcade and creator game links without nesting a second `main` landmark.
+- Contribution checkout, provider settings, and external game host configuration remain gated by owner-only setup and verification.
+
 ## Cosmic Arcade update (2026-10-28)
 
 - **In code, QA pending:** Restored a dedicated Games navigation entry labelled “Cosmic Arcade”; existing creator/community game links remain in the Games hub.
