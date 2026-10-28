@@ -10,11 +10,11 @@ for select
 to authenticated
 using (
   realtime.messages.extension = 'broadcast'
-  and split_part(realtime.topic(), ':', 1) = 'sanctuary-call'
+  and split_part((select realtime.topic()), ':', 1) = 'sanctuary-call'
   and exists (
     select 1
     from public.conversation_members cm
-    where cm.conversation_id::text = split_part(realtime.topic(), ':', 2)
+    where cm.conversation_id::text = split_part((select realtime.topic()), ':', 2)
       and cm.user_id = (select auth.uid())
       and cm.left_at is null
       and public.is_active_user()
