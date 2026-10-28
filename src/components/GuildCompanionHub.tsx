@@ -15,6 +15,8 @@ const platforms = ['Browser', 'Steam', 'Xbox', 'RetroArch', 'Other'];
 const MAX_MEDIA_FILES = 30;
 const MAX_AUDIO_BYTES = 100 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
+const MAX_AUDIO_TOTAL_BYTES = 250 * 1024 * 1024;
+const MAX_IMAGE_TOTAL_BYTES = 100 * 1024 * 1024;
 
 function safeWebUrl(value: string): string {
   if (!value.trim()) return '';
@@ -96,8 +98,16 @@ export function GuildCompanionHub() {
     if (!files) return;
     const remaining = Math.max(0, MAX_MEDIA_FILES - (type === 'audio' ? audioFilesRef.current.length : photosRef.current.length));
     const maxBytes = type === 'audio' ? MAX_AUDIO_BYTES : MAX_IMAGE_BYTES;
+    const maxTotalBytes = type === 'audio' ? MAX_AUDIO_TOTAL_BYTES : MAX_IMAGE_TOTAL_BYTES;
+    const existing = type === 'audio' ? audioFilesRef.current : photosRef.current;
+    let totalBytes = existing.reduce((total, item) => total + item.file.size, 0);
     const eligible = Array.from(files).filter((file) => (type === 'audio' ? file.type.startsWith('audio/') : file.type.startsWith('image/')) && file.size > 0 && file.size <= maxBytes);
-    const selected = eligible.slice(0, remaining);
+    const selected: File[] = [];
+    for (const file of eligible) {
+      if (selected.length >= remaining || totalBytes + file.size > maxTotalBytes) continue;
+      selected.push(file);
+      totalBytes += file.size;
+    }
     const additions = selected.map((file) => ({ id: crypto.randomUUID(), file, url: URL.createObjectURL(file) }));
     if (type === 'audio') setAudioFiles((current) => [...current, ...additions]);
     else {
@@ -106,7 +116,7 @@ export function GuildCompanionHub() {
       setSlideshow(false);
     }
     const skipped = files.length - selected.length;
-    setMediaMessage(selected.length ? `${selected.length} ${type === 'audio' ? 'audio file(s)' : 'photo(s)'} selected. ${skipped ? `${skipped} skipped (unsupported type, size limit, or 30-file limit). ` : ''}Files stay in this browser session; they are not uploaded.` : `No files added. Choose supported ${type === 'audio' ? 'audio up to 100 MB' : 'images up to 25 MB'}; the limit is 30 files per lounge.`);
+    setMediaMessage(selected.length ? `${selected.length} ${type === 'audio' ? 'audio file(s)' : 'photo(s)'} selected. ${skipped ? `${skipped} skipped (unsupported type, size limit, or 30-file limit). ` : ''}Files stay in this browser session; they are not uploaded.` : `No files added. Choose supported ${type === 'audio' ? 'audio up to 100 MB each (250 MB total)' : 'images up to 25 MB each (100 MB total)'}; the limit is 30 files per lounge.`);
   };
 
   const exportLibrary = () => {
