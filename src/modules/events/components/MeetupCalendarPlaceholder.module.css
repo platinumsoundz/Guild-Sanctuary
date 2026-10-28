@@ -248,6 +248,81 @@
   font: 12px/1.6 Arial, sans-serif;
 }
 
+.nearbyPanel {
+  padding: 14px 12px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.nearbyHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.nearbyHeading h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nearbyHeading > span,
+.nearbyEvent small,
+.nearbyEmpty {
+  color: var(--muted);
+  font: 10px/1.5 Arial, sans-serif;
+}
+
+.nearbyList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 8px;
+  padding-bottom: 10px;
+}
+
+.nearbyEvent,
+.nearbyEventActive {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.nearbyEventActive {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.nearbyEvent > span,
+.nearbyEventActive > span {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.nearbyEvent strong,
+.nearbyEventActive strong {
+  overflow: hidden;
+  color: var(--ink);
+  font: 700 11px/1.35 Arial, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nearbyEmpty {
+  margin: 0 0 10px;
+}
+
 .pinList {
   display: flex;
   gap: 9px;
@@ -514,6 +589,8 @@
 .textButton:focus-visible,
 .mapPin:focus-visible,
 .activePin:focus-visible,
+.nearbyEvent:focus-visible,
+.nearbyEventActive:focus-visible,
 .mapExternalLink:focus-visible,
 .coordinatePreview a:focus-visible {
   outline: 2px solid var(--accent);
