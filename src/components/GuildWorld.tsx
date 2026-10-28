@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Gamepad2, LockKeyhole, Orbit, Play, RotateCcw, Trophy, X } from 'lucide-react';
+import { Expand, Gamepad2, LockKeyhole, Minimize2, Orbit, Play, RotateCcw, Trophy, X } from 'lucide-react';
 import styles from './GuildWorld.module.css';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections } from '@/lib/controllerInput';
 import { GuildCometDodge } from './GuildCometDodge';
@@ -30,6 +30,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   const [controllerConnected, setControllerConnected] = useState(false);
   const [entryOpen, setEntryOpen] = useState(false);
   const [worldOpen, setWorldOpen] = useState(false);
+  const [bigPicture, setBigPicture] = useState(false);
   const [gameState, setGameState] = useState<GameState>('ready');
   const [score, setScore] = useState(0);
   const [seconds, setSeconds] = useState(START_SECONDS);
@@ -69,6 +70,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
 
   const closeWorld = useCallback(() => {
     setWorldOpen(false);
+    setBigPicture(false);
     setEntryOpen(false);
     setGameState('ready');
     setNotice('');
@@ -165,7 +167,8 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
           }
         }
         if (worldOpen) {
-          if (pressed(1) || pressed(9)) closeWorld();
+          if (pressed(1)) closeWorld();
+          if (pressed(9)) setBigPicture((value) => !value);
           if (time - gamepadActionAt.current > 140) {
             const { left, right, up, down } = readGamepadDirections(pad, pressed);
             if (left || right || up || down) {
@@ -205,7 +208,8 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
         return;
       }
       if (!worldOpen) return;
-      if (event.key === 'Escape') closeWorld();
+      if (event.key === 'Escape') { if (bigPicture) setBigPicture(false); else closeWorld(); }
+      if (event.key === 'F6') { event.preventDefault(); setBigPicture((value) => !value); }
       if (event.key.toLowerCase() === 'p' && (gameState === 'playing' || gameState === 'paused')) { event.preventDefault(); togglePause(); }
       if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') { event.preventDefault(); if (gameState === 'playing') moveShip(-4, 0); }
       if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') { event.preventDefault(); if (gameState === 'playing') moveShip(4, 0); }
@@ -215,7 +219,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [closeWorld, gameState, moveShip, startGame, togglePause, worldOpen]);
+  }, [bigPicture, closeWorld, gameState, moveShip, startGame, togglePause, worldOpen]);
 
   const enterGuild = () => {
     if (!isAuthenticated || !userId) {
@@ -242,11 +246,11 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
         </aside>
       )}
       {worldOpen && (
-        <div className={styles.backdrop} role="dialog" aria-modal="true" aria-labelledby="guild-title">
-          <section ref={dialogRef} className={styles.world}>
+        <div className={`${styles.backdrop} ${bigPicture ? styles.backdropBigPicture : ""}`} role="dialog" aria-modal="true" aria-labelledby="guild-title">
+          <section ref={dialogRef} className={`${styles.world} ${bigPicture ? styles.worldBigPicture : ""}`}>
             <header className={styles.topbar}>
               <div className={styles.brand}><span className={styles.brandMark}><Orbit size={20} /></span><span><small>THE SANCTUARY · HIDDEN WORLD</small><strong id="guild-title">The Guild</strong></span></div>
-              <div className={styles.topActions}><span className={styles.connected}><Gamepad2 size={14} /> {controllerConnected ? 'Controller connected' : 'Keyboard / touch'}</span><button ref={closeButtonRef} type="button" className={styles.closeButton} onClick={closeWorld}><X size={18} /> Exit Guild</button></div>
+              <div className={styles.topActions}><span className={styles.connected}><Gamepad2 size={14} /> {controllerConnected ? 'Controller connected' : 'Keyboard / touch'}</span><button type="button" className={styles.bigPictureButton} onClick={() => setBigPicture((value) => !value)}>{bigPicture ? <Minimize2 size={16} /> : <Expand size={16} />}{bigPicture ? 'Windowed' : 'Big Picture'}</button><button ref={closeButtonRef} type="button" className={styles.closeButton} onClick={closeWorld}><X size={18} /> Exit Guild</button></div>
             </header>
             <div className={styles.content}>
               <div className={styles.hero}>
