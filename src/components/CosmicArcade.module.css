@@ -90,3 +90,5 @@
   .solitaireColumn .solitaireCard { margin-bottom:-48%; }
   .solitaireEmpty { min-height:24px; }
 }
+
+.solitaireCard:focus-visible,.solitaireEmpty:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
