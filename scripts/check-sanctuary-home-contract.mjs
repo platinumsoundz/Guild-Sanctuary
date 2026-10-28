@@ -7,6 +7,8 @@ const context = readFileSync('src/context/AppContext.tsx', 'utf8');
 const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
 const css = readFileSync('src/components/SanctuaryHome.module.css', 'utf8');
 const art = readFileSync('src/components/CosmicSanctuaryArt.tsx', 'utf8');
+const navigationCss = readFileSync('src/components/Navigation.module.css', 'utf8');
+const notificationCss = readFileSync('src/components/NotificationBar.module.css', 'utf8');
 
 assert.match(workspace, /activeNavigation === 'today'[\s\S]*?<SanctuaryHome onNavigate=\{openNavigation\} \/>/, 'Today route renders the Sanctuary home');
 assert.match(context, /NavigationState = 'today'/, 'Today is a supported navigation state');
