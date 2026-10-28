@@ -10,7 +10,7 @@ type GuildWorldProps = {
   isAuthenticated: boolean;
 };
 
-type GameState = 'ready' | 'playing' | 'won' | 'lost';
+type GameState = 'ready' | 'playing' | 'paused' | 'won' | 'lost';
 
 const BEST_KEY = 'sanctuary-guild-orbital-drift-best-v1';
 const TARGET = 12;
@@ -51,6 +51,11 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   useEffect(() => { orbRef.current = orb; }, [orb]);
   useEffect(() => { scoreRef.current = score; }, [score]);
   useEffect(() => { stateRef.current = gameState; }, [gameState]);
+
+  const togglePause = useCallback(() => {
+    setGameState((state) => state === 'playing' ? 'paused' : state === 'paused' ? 'playing' : state);
+    setNotice((message) => message === 'Trial paused.' ? 'Back in orbit.' : 'Trial paused.');
+  }, []);
 
   const startGame = useCallback(() => {
     setScore(0);
@@ -164,8 +169,10 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
               }
               gamepadActionAt.current = time;
             }
+            if (pressed(8)) togglePause();
             if (pressed(0)) {
-              if (gameState !== 'playing') startGame();
+              if (gameState === 'paused') setGameState('playing');
+              else if (gameState !== 'playing') startGame();
               else moveShip(0, -4);
             }
           }
@@ -178,7 +185,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
     };
     frame = window.requestAnimationFrame(poll);
     return () => { active = false; window.cancelAnimationFrame(frame); };
-  }, [closeWorld, entryOpen, gameState, isPageVisible, moveShip, startGame, worldOpen]);
+  }, [closeWorld, entryOpen, gameState, isPageVisible, moveShip, startGame, togglePause, worldOpen]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -189,15 +196,16 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
       }
       if (!worldOpen) return;
       if (event.key === 'Escape') closeWorld();
+      if (event.key.toLowerCase() === 'p' && (gameState === 'playing' || gameState === 'paused')) { event.preventDefault(); togglePause(); }
       if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') { event.preventDefault(); if (gameState === 'playing') moveShip(-4, 0); }
       if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') { event.preventDefault(); if (gameState === 'playing') moveShip(4, 0); }
       if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') { event.preventDefault(); if (gameState === 'playing') moveShip(0, -4); }
       if (event.key === 'ArrowDown' || event.key.toLowerCase() === 's') { event.preventDefault(); if (gameState === 'playing') moveShip(0, 4); }
-      if (event.key === 'Enter' || event.key === ' ') { if (gameState !== 'playing') startGame(); }
+      if (event.key === 'Enter' || event.key === ' ') { if (gameState === 'paused') setGameState('playing'); else if (gameState !== 'playing') startGame(); }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [closeWorld, gameState, moveShip, startGame, worldOpen]);
+  }, [closeWorld, gameState, moveShip, startGame, togglePause, worldOpen]);
 
   const enterGuild = () => {
     if (!isAuthenticated || !userId) {
@@ -244,12 +252,12 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
                 <aside className={styles.progressCard}><div className={styles.progressIcon}><Trophy size={19} /></div><p className={styles.eyebrow}>YOUR LOCAL RECORD</p><strong>{best.toString().padStart(2, '0')} <small>fragments</small></strong><p>Your best run is saved on this device only. No cloud rewards or cross-world sharing are enabled in this prototype.</p><div className={styles.progressLine}><span style={{ width: `${Math.min(100, (best / TARGET) * 100)}%` }} /></div><small>Target: {TARGET} fragments</small></aside>
               </div>
               <section className={styles.gamePanel} aria-label="Orbital Drift game">
-                <div className={styles.gameStatus}><span><i className={gameState === 'won' ? styles.statusWin : gameState === 'lost' ? styles.statusLost : ''} /> {gameState === 'playing' ? 'IN FLIGHT' : gameState === 'won' ? 'TRIAL COMPLETE' : gameState === 'lost' ? 'TRIAL ENDED' : 'READY WHEN YOU ARE'}</span><span>TIME {String(seconds).padStart(2, '0')}s · FRAGMENTS {String(score).padStart(2, '0')}/{TARGET}</span></div>
+                <div className={styles.gameStatus}><span><i className={gameState === 'won' ? styles.statusWin : gameState === 'lost' ? styles.statusLost : ''} /> {gameState === 'playing' ? 'IN FLIGHT' : gameState === 'paused' ? 'PAUSED' : gameState === 'won' ? 'TRIAL COMPLETE' : gameState === 'lost' ? 'TRIAL ENDED' : 'READY WHEN YOU ARE'}</span><span>TIME {String(seconds).padStart(2, '0')}s · FRAGMENTS {String(score).padStart(2, '0')}/{TARGET}</span>{(gameState === 'playing' || gameState === 'paused') && <button type="button" className={styles.pauseButton} onClick={togglePause}>{gameState === 'paused' ? 'Resume' : 'Pause'}</button>}</div>
                 <div className={styles.playfield} tabIndex={0} aria-label="Game field. Use arrow keys or WASD to move, or use a controller." onClick={(event) => event.currentTarget.focus()}>
                   <div className={styles.fieldStars} />
                   <div className={styles.fragment} style={{ left: `${orb.x}%`, top: `${orb.y}%` }} aria-label="Star fragment">✦</div>
                   <div className={styles.playerShip} style={{ left: `${ship.x}%`, top: `${ship.y}%` }} aria-label="Your ship">✧</div>
-                  {gameState !== 'playing' && <div className={styles.gameOverlay}><strong>{gameState === 'won' ? 'Orbit stabilised' : gameState === 'lost' ? 'Try another orbit' : 'Your trial awaits'}</strong><span>{gameState === 'won' ? 'You collected every fragment.' : gameState === 'lost' ? `You collected ${score} of ${TARGET}. The stars are patient.` : 'Collect 12 fragments before time runs out.'}</span><button type="button" onClick={startGame}><RotateCcw size={14} /> {gameState === 'ready' ? 'Begin trial' : 'Try again'}</button></div>}
+                  {gameState !== 'playing' && <div className={styles.gameOverlay}><strong>{gameState === 'paused' ? 'Hold your orbit' : gameState === 'won' ? 'Orbit stabilised' : gameState === 'lost' ? 'Try another orbit' : 'Your trial awaits'}</strong><span>{gameState === 'paused' ? 'Your timer is paused. Resume when you are ready.' : gameState === 'won' ? 'You collected every fragment.' : gameState === 'lost' ? `You collected ${score} of ${TARGET}. The stars are patient.` : 'Collect 12 fragments before time runs out.'}</span>{gameState === 'paused' ? <button type="button" onClick={() => setGameState('playing')}><Play size={14} fill="currentColor" /> Resume trial</button> : <button type="button" onClick={startGame}><RotateCcw size={14} /> {gameState === 'ready' ? 'Begin trial' : 'Try again'}</button>}</div>}
                 </div>
                 <div className={styles.gameControls}><span><kbd>← ↑ ↓ →</kbd> or <kbd>W A S D</kbd> move</span><span><kbd>A / ✕</kbd> on controller · <kbd>Esc / B</kbd> exit</span><div className={styles.touchControls}><button type="button" aria-label="Move up" onClick={() => moveShip(0, -5)}>↑</button><div><button type="button" aria-label="Move left" onClick={() => moveShip(-5, 0)}>←</button><button type="button" aria-label="Move down" onClick={() => moveShip(0, 5)}>↓</button><button type="button" aria-label="Move right" onClick={() => moveShip(5, 0)}>→</button></div></div></div>
                 {notice && <p className={styles.notice} role="status">{notice}</p>}
