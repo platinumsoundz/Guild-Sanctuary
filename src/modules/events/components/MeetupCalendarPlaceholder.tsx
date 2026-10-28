@@ -23,6 +23,9 @@ export function MeetupCalendarPlaceholder() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const selectedMapEvent = events.find((event) => event.id === selectedMapEventId) ?? events[0] ?? null;
+  const selectedMapLinks = selectedMapEvent
+    ? getMapLinks(String(selectedMapEvent.locationCoords.latitude), String(selectedMapEvent.locationCoords.longitude))
+    : null;
   const coordinatePreview = getMapLinks(latitude, longitude);
 
   const clearForm = () => {
@@ -169,24 +172,28 @@ export function MeetupCalendarPlaceholder() {
                   <h3 id="map-explorer-title">{selectedMapEvent ? selectedMapEvent.title : 'Choose an event pin'}</h3>
                   <p>Select an event below to focus the map on its location and inspect the event details.</p>
                 </div>
-                {selectedMapEvent && (
-                  <a className={styles.mapExternalLink} href={getMapLinks(String(selectedMapEvent.locationCoords.latitude), String(selectedMapEvent.locationCoords.longitude))?.open} target="_blank" rel="noreferrer">
+                {selectedMapLinks && (
+                  <a className={styles.mapExternalLink} href={selectedMapLinks.open} target="_blank" rel="noreferrer">
                     Open full map <ExternalLink size={14} aria-hidden="true" />
                   </a>
                 )}
               </div>
-              {selectedMapEvent && (
+              {selectedMapEvent && selectedMapLinks ? (
                 <div className={styles.mapFrameWrap} aria-label="Map showing the selected event location">
                   <iframe
                     className={styles.mapFrame}
                     title={`OpenStreetMap location for ${selectedMapEvent.title}`}
-                    src={getMapLinks(String(selectedMapEvent.locationCoords.latitude), String(selectedMapEvent.locationCoords.longitude))?.embed}
+                    src={selectedMapLinks.embed}
                     loading="lazy"
                     referrerPolicy="no-referrer"
                   />
                   <p className={styles.mapAttribution}>Map data © OpenStreetMap contributors. Map opens on OpenStreetMap in a new tab.</p>
                 </div>
-              )}
+              ) : selectedMapEvent ? (
+                <div className={styles.mapUnavailable} role="status">
+                  This event has missing or invalid coordinates, so its map cannot be shown. The event details are still available below.
+                </div>
+              ) : null}
               <div className={styles.pinList} role="group" aria-label="Choose an event map pin">
                 {events.map((event, index) => (
                   <button
@@ -210,7 +217,12 @@ export function MeetupCalendarPlaceholder() {
                     <time className={styles.eventDate} dateTime={event.startsAt}>{formatEventDateTime(event.startsAt)}</time>
                     <h3>{event.title}</h3>
                     <p>{event.description || 'No description provided.'}</p>
-                    <span className={styles.locationText}><MapPin size={13} aria-hidden="true" /> Map pin available · {event.locationCoords.latitude.toFixed(3)}, {event.locationCoords.longitude.toFixed(3)}</span>
+                    <span className={styles.locationText}>
+                      <MapPin size={13} aria-hidden="true" />
+                      {getMapLinks(String(event.locationCoords.latitude), String(event.locationCoords.longitude))
+                        ? `Map pin available · ${event.locationCoords.latitude.toFixed(3)}, ${event.locationCoords.longitude.toFixed(3)}`
+                        : 'Location unavailable · coordinates are missing or invalid'}
+                    </span>
                     <span className={styles.attendeeCount}>{event.rsvpCount} going</span>
                     {userId && <EventEngagement eventId={event.id} userId={userId} />}
                     {userId && <ReportContentButton targetType="event" targetId={event.id} />}
