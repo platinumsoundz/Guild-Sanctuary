@@ -44,6 +44,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
   const [signallingReady, setSignallingReady] = useState(false);
   const localVideo = useRef<HTMLVideoElement>(null);
   const remoteVideo = useRef<HTMLVideoElement>(null);
+  const remoteAudio = useRef<HTMLAudioElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const peerRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof getSupabaseBrowserClient>['channel']> | null>(null);
@@ -57,6 +58,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     streamRef.current = null;
     if (localVideo.current) localVideo.current.srcObject = null;
     if (remoteVideo.current) remoteVideo.current.srcObject = null;
+    if (remoteAudio.current) remoteAudio.current.srcObject = null;
     setRemoteReady(false);
     setMuted(false);
     setCameraOff(false);
@@ -199,7 +201,9 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     const pc = peerRef.current;
     if (!pc) return;
     pc.ontrack = (event) => {
-      if (remoteVideo.current) remoteVideo.current.srcObject = event.streams[0] ?? null;
+      const remoteStream = event.streams[0] ?? null;
+      if (callKind === 'video' && remoteVideo.current) remoteVideo.current.srcObject = remoteStream;
+      if (callKind === 'audio' && remoteAudio.current) remoteAudio.current.srcObject = remoteStream;
       setRemoteReady(true);
       setCallState('connected');
     };
@@ -216,7 +220,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
         setError('The call connection was interrupted. You can hang up and try again.');
       }
     };
-  }, [sendSignal, callState]);
+  }, [sendSignal, callState, callKind]);
 
   useEffect(() => {
     if (callState !== 'idle' && localVideo.current && streamRef.current) {
@@ -327,10 +331,12 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
       {callState !== 'idle' && (
         <div className={styles.callArea}>
           <div className={styles.callStatus} role="status">{callState === 'calling' ? 'Calling…' : callState === 'connecting' ? 'Connecting securely…' : 'Call connected'}{remoteReady ? ' · Remote media received' : ''}</div>
-          <div className={styles.videos}>
-            <video ref={remoteVideo} autoPlay playsInline className={styles.remoteVideo} aria-label="Other participant video" />
-            <video ref={localVideo} autoPlay muted playsInline className={styles.localVideo} aria-label="Your camera preview" />
-          </div>
+          {callKind === 'video' ? (
+            <div className={styles.videos}>
+              <video ref={remoteVideo} autoPlay playsInline className={styles.remoteVideo} aria-label="Other participant video" />
+              <video ref={localVideo} autoPlay muted playsInline className={styles.localVideo} aria-label="Your camera preview" />
+            </div>
+          ) : <audio ref={remoteAudio} autoPlay aria-label="Other participant audio" />}
           <div className={styles.actions}>
             <button type="button" onClick={toggleMute}>{muted ? <MicOff size={15} /> : <Mic size={15} />}{muted ? 'Unmute' : 'Mute'}</button>
             {callKind === 'video' && <button type="button" onClick={toggleCamera}>{cameraOff ? <VideoOff size={15} /> : <Video size={15} />}{cameraOff ? 'Camera on' : 'Camera off'}</button>}
