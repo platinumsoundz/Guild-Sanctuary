@@ -9,6 +9,8 @@ const roadmap = readFileSync('ROADMAP.md', 'utf8');
 for (const required of [
   "export type CommunityPostMode = 'open' | 'life-lesson' | 'conversation'",
   'export function buildCommunityPost',
+  'allowMediaOnly = false',
+  'if (!content && !allowMediaOnly)',
   "storyTag = 'Life lesson'",
   "storyTag = 'Question'",
   'Each guided answer must be 1,200 characters or fewer.',
