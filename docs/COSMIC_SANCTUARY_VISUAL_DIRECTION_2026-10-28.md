@@ -48,3 +48,12 @@ The cosmic Sanctuary theme is now the product's default visual direction, not me
 3. Feature-by-feature refinement for Feed, Events, profiles, creator support, shop, Sanctuary Intelligence, and Cosmic Arcade.
 4. Mobile and accessibility review: contrast, focus, reduced motion, safe areas, overflow, and touch targets.
 5. Run full CI/typecheck/build and visual QA before merging or deployment. No deployment is implied by this theme change.
+
+
+## Shared interaction and destination styling — continued work
+
+The default cosmic theme is intended to be the baseline for the whole product. Global styles now provide the atmospheric page backdrop, consistent focus indicators, selection colour, form-control accents, disabled-state clarity, and reduced-motion handling. These are semantic-token based so future themes can override the palette without removing the interaction affordances.
+
+The shared navigation shell and notification panel use semantic cosmic glass surfaces and accent gradients. Cosmic Arcade has a dedicated treatment for its hero, game tabs, play areas, active states, and phone layout; it remains a separate Sanctuary destination and does not absorb creator links.
+
+Before release, run the repository's full CI, typecheck and production build on the final PR head. The CSS-only additions have regression assertions, but they are not a substitute for real browser visual QA, contrast review, or checking all feature-specific modules.
