@@ -18,6 +18,8 @@ assert.ok(component.includes('timeZoneName: \'short\''), 'event cards must displ
 assert.ok(component.includes('formatEventDateTime(event.startsAt)'), 'event cards must use the timezone-aware formatter');
 assert.ok(!component.includes("event.startsAt.replace('T', ' ').slice(0, 16)} UTC"), 'event cards must not label raw ISO timestamps as UTC without conversion');
 assert.ok(component.includes('latitude < -90') && component.includes('longitude > 180'), 'invalid map coordinates must not be embedded');
+assert.ok(component.includes('Math.max(-180, longitude - delta)') && component.includes('Math.min(180, longitude + delta)'), 'map bounds must stay valid near the date line');
+assert.ok(component.includes('Math.max(-90, latitude - delta)') && component.includes('Math.min(90, latitude + delta)'), 'map bounds must stay valid near the poles');
 assert.ok(component.includes('const selectedMapLinks = selectedMapEvent'), 'selected event map links must be validated once before rendering');
 assert.ok(component.includes('src={selectedMapLinks.embed}'), 'map iframe must only receive a validated URL');
 assert.ok(component.includes('This event has missing or invalid coordinates'), 'invalid event coordinates must produce a readable map fallback');
