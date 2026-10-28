@@ -234,9 +234,28 @@
   cursor: pointer;
 }
 
+.drawerNavigationGroups {
+  display: grid;
+  gap: 17px;
+}
+
+.drawerNavigationGroup {
+  display: grid;
+  gap: 6px;
+}
+
+.drawerGroupLabel {
+  margin: 0;
+  padding: 0 12px;
+  color: var(--muted);
+  font: 700 10px/1.4 Arial, sans-serif;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
 .drawerNavigationItems {
   display: grid;
-  gap: 5px;
+  gap: 4px;
 }
 
 .drawerNavigationButton {
@@ -247,7 +266,7 @@
   gap: 14px;
   padding: 0 13px;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: 9px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
