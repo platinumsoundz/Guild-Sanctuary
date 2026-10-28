@@ -77,7 +77,7 @@ export function MeetupCalendarPlaceholder() {
     try {
       const startsAt = toIsoDateTime(startDate, startTime);
       if (editingEvent) {
-        await editEvent(editingEvent.id, { title, description, startsAt });
+        await editEvent(editingEvent.id, { title, description, startsAt, locationCoords: { latitude: Number(latitude), longitude: Number(longitude) } });
       } else {
         await addEvent({
           creatorId: userId,
