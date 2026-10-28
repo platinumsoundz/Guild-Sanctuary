@@ -30,7 +30,7 @@ export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }
     Promise.all([
       fetchPublicProfileById(initialProfile.userId),
       fetchPostsByAuthor(initialProfile.userId),
-      fetchPublicDiscoveryInterests([initialProfile.userId]),
+      fetchPublicDiscoveryInterests([initialProfile.userId]).catch(() => new Map<string, string[]>()),
     ]).then(([latestProfile, authorPosts, interestMap]) => {
       if (cancelled) return;
       if (!latestProfile) {
