@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { Event } from '@/types/database';
 import type { PublicProfile, Post } from '@/types/database';
 import { CalendarDays, Compass, Globe2, MapPin, MessageCircle, Search, Sparkles, Users } from 'lucide-react';
 import { fetchFeed } from '@/modules/feeds';
