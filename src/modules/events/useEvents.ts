@@ -8,7 +8,7 @@ interface UseEventsResult {
   isLoading: boolean;
   error: string | null;
   addEvent: (input: CreateEventInput) => Promise<void>;
-  editEvent: (eventId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt'>) => Promise<void>;
+  editEvent: (eventId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt' | 'locationCoords'>) => Promise<void>;
   removeEvent: (eventId: string) => Promise<void>;
   rsvp: (eventId: string, status: 'going' | 'interested' | 'cancelled') => Promise<void>;
 }
@@ -55,7 +55,7 @@ export function useEvents(userId: string): UseEventsResult {
     if (generation !== requestGeneration.current) return;
     setEvents((current) => [...current, { ...event, rsvpCount: 0, viewerStatus: null }].sort((a, b) => a.startsAt.localeCompare(b.startsAt)));
   };
-  const editEvent = async (eventId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt'>) => {
+  const editEvent = async (eventId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt' | 'locationCoords'>) => {
     if (!sessionReady) throw new Error('Wait for your account events to finish loading.');
     const generation = requestGeneration.current;
     const event = await updateEvent(eventId, userId, input);
