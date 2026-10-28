@@ -42,6 +42,7 @@ jobs:
       - run: npm run check:theme-contrast
       - run: npm run check:notifications
       - run: npm run check:token-spend
+      - run: npm run check:stripe-token-fulfillment
       - run: npm run check:cosmic-arcade
       - run: npm run check:sanctuary-home
       - run: deno check supabase/functions/token-checkout/index.ts supabase/functions/stripe-token-webhook/index.ts
