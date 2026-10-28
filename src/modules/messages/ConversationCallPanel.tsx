@@ -53,6 +53,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
   const [callKind, setCallKind] = useState<CallKind>('audio');
   const [callId, setCallId] = useState<string | null>(null);
   const [incoming, setIncoming] = useState<Signal | null>(null);
+  const incomingRef = useRef<Signal | null>(null);
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +95,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
   const resetCall = useCallback(() => {
     activeCallRef.current = null;
     setCallId(null);
+    incomingRef.current = null;
     setIncoming(null);
     setCallState('idle');
     queuedCandidates.current = [];
@@ -122,7 +124,12 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
         const signal = payload as Signal;
         if (!signal || signal.from === currentUserId || typeof signal.callId !== 'string') return;
         if (signal.type === 'invite') {
-          if (activeCallRef.current === null) setIncoming(signal);
+          if (activeCallRef.current === null && incomingRef.current === null) {
+            incomingRef.current = signal;
+            setIncoming(signal);
+          } else {
+            void sendSignal({ type: 'reject', callId: signal.callId }).catch(() => {});
+          }
           return;
         }
         if (signal.callId !== activeCallRef.current) return;
@@ -211,6 +218,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     const timer = window.setTimeout(() => {
       if (activeCallRef.current !== null) return;
       void sendSignal({ type: 'reject', callId: invitedCallId }).catch(() => {});
+      if (incomingRef.current?.callId === invitedCallId) incomingRef.current = null;
       setIncoming((current) => current?.callId === invitedCallId ? null : current);
     }, 30_000);
     return () => window.clearTimeout(timer);
@@ -294,6 +302,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     if (!incoming || !channelRef.current) return;
     setError(null);
     const signal = incoming;
+    incomingRef.current = null;
     activeCallRef.current = signal.callId;
     setCallId(signal.callId);
     setCallKind(signal.kind ?? 'audio');
@@ -313,6 +322,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     if (incoming) {
       try { await sendSignal({ type: 'reject', callId: incoming.callId }); } catch {}
     }
+    incomingRef.current = null;
     setIncoming(null);
   };
 
