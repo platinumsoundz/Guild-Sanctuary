@@ -56,4 +56,15 @@ The owner must handle Supabase schema/migrations/RLS/owner bootstrap, Stripe and
 - Supabase schema/migrations/RLS/owner bootstrap, Stripe and Lemon Squeezy payment setup, and Cloudflare/Vercel account configuration, secrets, domains and provider settings remain owner-only handoff tasks. No provider account settings were changed in this cleanup.
 - Messaging is not end-to-end encrypted. The readiness document is a plan only. Planner/reflection/self-discovery data must not be described as cloud-synced until the approved database work is applied and tested.
 - Phase 1 remains **not end-to-end verified** until the staging checklist, authenticated two-account tests, browser/device QA, backup/restore and rollback review, independent security review, and owner release approval are recorded.
-- **Dependency audit blocker:** CI's `npm ci` reported one critical-severity vulnerability in the dependency tree. The exact advisory/package still needs identification and triage; do not run a blanket `npm audit fix` or claim release readiness until the impact and safe remediation are reviewed.
+- **Dependency audit blocker resolved:** PR #171 updated Next.js to patched 16.4.3 and aligned the lockfile; its exact-head `npm ci` reported 0 vulnerabilities. Post-merge checks are pending.
+
+
+## Critical dependency security fix — 2026-10-28
+
+- Merged PR #171: https://github.com/platinumsoundz/Guild-Sanctuary/pull/171.
+- Merge commit: `bb0fc5240a2bf571e86384197a37256a8faf85fb`.
+- Updated Next.js from 16.4.0 to patched 16.4.3 and aligned `@next/env` and all eight platform-specific `@next/swc-*` lock entries with SHA-512 integrity pins. Existing `sharp` is 0.35.5.
+- Added `npm run check:framework-security` to CI to prevent the locked Next.js version falling below 16.4.1 or the @next/env/SWC versions drifting from it, and to require sharp >= 0.35.5.
+- On the exact PR head `7815b278c0f9938b5b3fa0dcf27e1071ea45fa22`, `npm ci` succeeded, the framework-security contract passed, full CI/typecheck/build passed, dependency-map contract passed, roadmap/build check passed, and the repository Cloudflare workflow passed. The same install log reported **0 vulnerabilities**.
+- Post-merge CI, dependency-map, roadmap/build and Cloudflare workflows are running against merge commit `bb0fc5240a2bf571e86384197a37256a8faf85fb`; do not mark post-merge checks complete until those runs finish.
+- This dependency patch does not replace browser/device QA, staging authorization tests, independent security review or the Phase 1 release gates. Token spending remains disabled; messaging is not end-to-end encrypted; owner-only provider setup remains unchanged.
