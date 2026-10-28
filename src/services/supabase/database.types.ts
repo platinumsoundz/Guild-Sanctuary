@@ -116,6 +116,13 @@ export interface Database {
         saved_profile_id: string;
         created_at: string;
       }>;
+      profile_discovery_intentions: Table<{
+        user_id: string;
+        intention: 'find_community' | 'explore_ideas' | 'grow_together' | 'collaborate' | 'find_circle' | 'broaden_perspective';
+        is_public: boolean;
+        created_at: string;
+        updated_at: string;
+      }>;
       profile_interests: Table<{
         user_id: string;
         interest: string;
