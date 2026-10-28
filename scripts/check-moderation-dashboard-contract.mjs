@@ -34,5 +34,7 @@ assert.ok(admin.includes('window.confirm'), 'role changes must require explicit 
 assert.ok(admin.includes('This increases the member’s privilege level'), 'privilege increases must show a clear warning');
 assert.ok(admin.includes('setMembers([])'), 'failed member searches must not leave stale member results actionable');
 assert.ok(admin.includes('roleChangePreview'), 'role editor must show current and requested roles before submission');
+assert.ok(admin.includes("role={messageIsError ? 'alert' : 'status'}"), 'member-management failures must be announced as alerts');
+assert.ok(admin.includes('messageError'), 'member-management errors must have distinct visual styling');
 
 console.log('Moderation dashboard contract checks passed.');
