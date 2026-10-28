@@ -101,6 +101,7 @@ export function SelfDiscoveryCentre() {
       <section className={styles.card} aria-labelledby="self-discovery-heading">
         <div className={styles.introIcon} aria-hidden="true">✦</div>
         <p className={styles.eyebrow}>A MOMENT FOR YOU</p>
+        <span className="ai-tag">Guided self-reflection</span>
         <h2 id="self-discovery-heading">Self-discovery, at your pace</h2>
         <p className={styles.introCopy}>
           Explore what helps you recharge, make decisions, connect, and learn.
@@ -125,6 +126,7 @@ export function SelfDiscoveryCentre() {
     return (
       <section className={styles.card} aria-labelledby="reflection-result-heading">
         <p className={styles.eyebrow}>YOUR PRIVATE REFLECTION</p>
+        <span className="cosmic-badge">Personal insight · Not a diagnosis</span>
         <h2 id="reflection-result-heading">A few things to explore</h2>
         <p className={styles.progressCopy}>
           Based on {reflection.answeredCount} of {reflection.totalQuestions} answers. Take what fits and leave what does not.
