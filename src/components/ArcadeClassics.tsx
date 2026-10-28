@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 import styles from './ArcadeClassics.module.css';
 
-type GameId = '2048' | 'mines' | 'lights' | 'memory' | 'hangman' | 'wordle' | 'tictactoe' | 'connect4' | 'rpsls' | 'hanoi' | 'flood' | 'life' | 'whack' | 'trivia' | 'fifteen' | 'simon' | 'pong' | 'breakout' | 'tetris';
+type GameId = '2048' | 'mines' | 'lights' | 'memory' | 'hangman' | 'wordle' | 'tictactoe' | 'connect4' | 'rpsls' | 'hanoi' | 'flood' | 'life' | 'whack' | 'trivia' | 'fifteen' | 'simon' | 'pong' | 'breakout' | 'tetris' | 'sudoku' | 'maze' | 'typing' | 'asteroids' | 'invaders';
 const options: { id: GameId; title: string; group: string }[] = [
   { id: '2048', title: '2048', group: 'Puzzle' }, { id: 'mines', title: 'Minesweeper', group: 'Puzzle' },
   { id: 'lights', title: 'Lights Out', group: 'Puzzle' }, { id: 'memory', title: 'Memory Match', group: 'Puzzle' },
@@ -15,6 +15,7 @@ const options: { id: GameId; title: string; group: string }[] = [
   { id: 'whack', title: 'Whack-a-Star', group: 'Arcade' }, { id: 'trivia', title: 'Cosmic Trivia', group: 'Words' },
   { id: 'fifteen', title: '15 Puzzle', group: 'Puzzle' }, { id: 'simon', title: 'Simon Memory', group: 'Memory' },
   { id: 'pong', title: 'Cosmic Pong', group: 'Arcade' }, { id: 'breakout', title: 'Brick Breaker', group: 'Arcade' }, { id: 'tetris', title: 'Starfall Blocks', group: 'Puzzle' },
+  { id: 'sudoku', title: 'Sudoku', group: 'Logic' }, { id: 'maze', title: 'Maze Runner', group: 'Arcade' }, { id: 'typing', title: 'Typing Sprint', group: 'Words' }, { id: 'asteroids', title: 'Asteroid Dodge', group: 'Arcade' }, { id: 'invaders', title: 'Space Invaders', group: 'Arcade' },
 ];
 const wordBank = ['NEBULA', 'GALAXY', 'PLANET', 'COSMIC', 'ORBIT'];
 const trivia = [
@@ -81,6 +82,12 @@ export function ArcadeClassics() {
   const [blocks,setBlocks]=useState<number[][]>(Array.from({length:10},()=>Array(6).fill(0)));
   const [activeShape,setActiveShape]=useState<number[][]>([[1,1,1],[0,1,0]]);
   const [blockX,setBlockX]=useState(1);
+  const [sudoku,setSudoku]=useState<number[]>(Array.from({length:81},(_,i)=>[0,1,4,9,12,13,20,21,22,25,27,31,35,36,39,41,44,45,49,51,53,55,57,62,63,66,67,68,69,72,76,79,80].includes(i)?((i*7)%9)+1:0));
+  const [mazePos,setMazePos]=useState(0);
+  const [typingInput,setTypingInput]=useState('');
+  const [asteroidPos,setAsteroidPos]=useState(2);
+  const [invaderScore,setInvaderScore]=useState(0);
+  const [invaders,setInvaders]=useState<number[]>(Array.from({length:15},(_,i)=>i));
   const wonTic=useMemo(()=>['012','345','678','036','147','258','048','246'].some(line=>[...line].every(i=>board[Number(i)]==='X')), [board]);
   const wonConnect=useMemo(()=>connect.some((row,r)=>row.some((v,c)=>!!v&&[[0,1],[1,0],[1,1],[1,-1]].some(([dr,dc])=>[0,1,2,3].every(k=>{const rr=r+dr*k,cc=c+dc*k;return rr>=0&&rr<6&&cc>=0&&cc<7&&connect[rr][cc]===v;})))),[connect]);
   const reset = () => {
