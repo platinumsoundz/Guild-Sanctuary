@@ -54,3 +54,10 @@
 - Responsive CSS allows the radius controls to wrap on narrow screens.
 - Verification blocker: the runtime cannot resolve `github.com` for a local clone. No local contract execution, typecheck, build, browser/device review, or GitHub Actions run has been completed on the current head. Vercel previously reported a build-rate-limit failure. The next verification step is a draft PR CI/preview during this owner-requested release pass; production deployment remains separately gated.
 - Remaining known product limitation: event records store coordinates but no venue name/address, so the UI cannot reliably show human-readable place names without a separately reviewed schema/migration and location-source decision.
+
+
+## Final source review follow-up — 2026-10-28 UTC
+- Added an opt-in “Include past events” filter so the page's “Upcoming events” view no longer mixes expired gatherings into the default discovery results. Map pins, nearby-event discovery, selected event, count, and cards now use the same filtered set; the empty state explains how to reveal past events.
+- Added keyboard-focus styling and regression assertions for the filter.
+- Previously verified at head 7d2d995da71a3237ca2e5a9a983c07624ebe2057: GitHub CI passed install, security/contracts, event contract, typecheck and production build; Cloudflare worker build passed while deployment was correctly skipped for this PR; automated roadmap check passed. This new filter change requires those checks to rerun on the new head before release.
+- Vercel preview remains blocked by its reported build-rate limit, so browser/device and screen-reader QA still require a usable preview. Keep this PR draft; no production deployment, schema/RLS/provider changes, or production writes.

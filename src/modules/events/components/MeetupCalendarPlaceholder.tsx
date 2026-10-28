@@ -23,6 +23,7 @@ export function MeetupCalendarPlaceholder() {
   const [editingEvent, setEditingEvent] = useState<EventView | null>(null);
   const [selectedMapEventId, setSelectedMapEventId] = useState<string | null>(null);
   const [nearbyRadiusKm, setNearbyRadiusKm] = useState(10);
+  const [includePastEvents, setIncludePastEvents] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [creatorProfiles, setCreatorProfiles] = useState<Record<string, PublicProfile>>({});
 
@@ -42,13 +43,14 @@ export function MeetupCalendarPlaceholder() {
     return () => { cancelled = true; };
   }, [events]);
 
-  const selectedMapEvent = events.find((event) => event.id === selectedMapEventId) ?? events[0] ?? null;
+  const visibleEvents = events.filter((event) => includePastEvents || new Date(event.startsAt).getTime() >= Date.now());
+  const selectedMapEvent = visibleEvents.find((event) => event.id === selectedMapEventId) ?? visibleEvents[0] ?? null;
   const selectedMapLinks = selectedMapEvent
     ? getMapLinks(String(selectedMapEvent.locationCoords.latitude), String(selectedMapEvent.locationCoords.longitude))
     : null;
   const coordinatePreview = getMapLinks(latitude, longitude);
   const nearbyEvents = selectedMapLinks && selectedMapEvent
-    ? events
+    ? visibleEvents
         .map((event) => ({ event, distanceKm: getDistanceKm(
           selectedMapEvent.locationCoords.latitude,
           selectedMapEvent.locationCoords.longitude,
@@ -188,7 +190,13 @@ export function MeetupCalendarPlaceholder() {
             <p className={styles.eyebrow}>EXPLORE THE AREA</p>
             <h2 id="upcoming-events-title">Upcoming events</h2>
           </div>
-          <span>{events.length} {events.length === 1 ? 'event' : 'events'}</span>
+          <div className={styles.eventFilters}>
+            <span>{visibleEvents.length} {visibleEvents.length === 1 ? 'event' : 'events'}</span>
+            <label className={styles.pastEventsToggle}>
+              <input type="checkbox" checked={includePastEvents} onChange={(event) => setIncludePastEvents(event.currentTarget.checked)} />
+              <span>Include past events</span>
+            </label>
+          </div>
         </div>
 
         {isLoading ? <p className={styles.emptyState}>Loading events and map pins…</p> : error ? (
@@ -197,6 +205,11 @@ export function MeetupCalendarPlaceholder() {
           <div className={styles.emptyState}>
             <MapPinned size={25} aria-hidden="true" />
             <p>No events to map yet. When your community creates an event, its location pin will appear here.</p>
+          </div>
+        ) : visibleEvents.length === 0 ? (
+          <div className={styles.emptyState}>
+            <MapPinned size={25} aria-hidden="true" />
+            <p>No upcoming events right now. Turn on “Include past events” to browse previous gatherings.</p>
           </div>
         ) : (
           <>
@@ -267,7 +280,7 @@ export function MeetupCalendarPlaceholder() {
                 </section>
               )}
               <div className={styles.pinList} role="group" aria-label="Choose an event map pin">
-                {events.map((event, index) => (
+                {visibleEvents.map((event, index) => (
                   <button
                     className={selectedMapEvent?.id === event.id ? styles.activePin : styles.mapPin}
                     key={event.id}
@@ -282,8 +295,8 @@ export function MeetupCalendarPlaceholder() {
               </div>
             </section>
 
-            <div className={styles.eventList} aria-label="Upcoming event details">
-              {events.map((event) => (
+            <div className={styles.eventList} aria-label="Event details">
+              {visibleEvents.map((event) => (
                 <article className={selectedMapEvent?.id === event.id ? styles.eventCardActive : styles.eventCard} key={event.id}>
                   <div className={styles.eventMain}>
                     <time className={styles.eventDate} dateTime={event.startsAt}>{formatEventDateTime(event.startsAt)}</time>

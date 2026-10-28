@@ -179,6 +179,34 @@
   padding-bottom: 14px;
 }
 
+.eventFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.pastEventsToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font: 11px/1.4 Arial, sans-serif;
+  cursor: pointer;
+}
+
+.pastEventsToggle input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+}
+
+.pastEventsToggle input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .mapExplorer {
   overflow: hidden;
   margin: 0 0 24px;

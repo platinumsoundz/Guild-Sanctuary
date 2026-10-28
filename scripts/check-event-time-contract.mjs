@@ -55,3 +55,12 @@ assert.ok(component.includes("locationCoords: { latitude: Number(latitude), long
 assert.ok(eventService.includes("validateCoordinates(input.locationCoords);"), 'event updates must validate coordinate bounds');
 assert.ok(eventService.includes("latitude: input.locationCoords.latitude") && eventService.includes("longitude: input.locationCoords.longitude"), 'event updates must persist both coordinate values');
 console.log('Event location editing contract checks passed.');
+
+assert.ok(component.includes('const [includePastEvents, setIncludePastEvents] = useState(false)'), 'past-event browsing must be opt-in by default');
+assert.ok(component.includes('const visibleEvents = events.filter((event) => includePastEvents || new Date(event.startsAt).getTime() >= Date.now())'), 'the default event view must not label past events as upcoming');
+assert.ok(component.includes('Include past events') && component.includes('checked={includePastEvents}'), 'people must be able to include past events with an accessible toggle');
+assert.ok(component.includes('No upcoming events right now'), 'the upcoming-only view must explain its empty state and how to find past events');
+assert.ok(component.includes('visibleEvents.map((event, index)'), 'map pin selection must follow the active upcoming/past filter');
+assert.ok(component.includes('visibleEvents.map((event) => ('), 'event cards must follow the active upcoming/past filter');
+assert.ok(css.includes('.pastEventsToggle input:focus-visible'), 'past-event filter must have visible keyboard focus');
+console.log('Upcoming/past event filter contract checks passed.');
