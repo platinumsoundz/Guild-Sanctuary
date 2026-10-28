@@ -642,3 +642,14 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Existing edit/delete/like/report actions are preserved. A focused static contract is wired into CI.
 - Remaining gates: exact-head contract, TypeScript/build, and desktop/mobile authenticated interaction tests. This is a client reliability improvement, not a replacement for database authorization/RLS.
 - No database migration, production deployment, account, payment, or provider settings changed.
+
+
+## Integration update — 2026-10-29
+
+- **Merged to `main`:** [PR #217 — community comment reliability](https://github.com/platinumsoundz/Guild-Sanctuary/pull/217), merge commit `f968b4f0feba6ac1ac3b73c13ddea09180c3c85a`. The change adds visible comment-loading state, distinguishes empty results from failed/uncompleted loads, trims empty posts and blocks duplicate submissions while pending.
+- **Verification scope:** exact-head CI, typecheck, production build and Cloudflare Worker build passed before merge. This confirms build/contract quality, not authenticated end-to-end browser behavior or a production deployment. The Cloudflare deployment workflow is deliberately manual.
+- **Beta candidate:** PR #210 is updated with the compact-header change and a matching navigation contract. The latest head needs a fresh, visible workflow result; earlier checks are not evidence for the new head. The PR currently reports a mergeability conflict against `main`, so resolve that before considering merge.
+- **Next dependency chain:** keep guest-read-only PR #213, Guild Arcade #214 and creator-games #215 in order. Their static contracts and builds pass on recorded heads, but route-level UI gating still needs service/RLS checks and authenticated/guest browser journeys before merge.
+- **Daily Reflection #216:** schema/RLS/index review supports the existing account-scoped design; two-account browser isolation and save/read/delete failure paths remain open.
+- **Moderation #191/#199:** do not merge until the missing queue RPC is reconciled against the live migration ledger and action authorization receives independent review and staging tests.
+- **No production deployment, live database writes, migration application, provider-secret changes, or payment changes were performed in this batch.
