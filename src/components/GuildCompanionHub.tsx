@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ExternalLink, Gamepad2, Image as ImageIcon, Library, Music2, Plus, ShieldCheck, Terminal, Trash2 } from 'lucide-react';
+import { Download, ExternalLink, Gamepad2, Image as ImageIcon, Library, Music2, Plus, ShieldCheck, Terminal, Trash2, Upload } from 'lucide-react';
 import styles from './GuildCompanionHub.module.css';
 
 type LocalGame = { id: string; title: string; platform: string; launchUrl: string };
@@ -43,6 +43,7 @@ export function GuildCompanionHub() {
   const [mediaMessage, setMediaMessage] = useState('');
   const audioInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
+  const libraryImportInput = useRef<HTMLInputElement>(null);
   const audioFilesRef = useRef<MediaFile[]>([]);
   const photosRef = useRef<MediaFile[]>([]);
 
@@ -95,6 +96,58 @@ export function GuildCompanionHub() {
     setMediaMessage(selected.length ? `${selected.length} ${type === 'audio' ? 'audio file(s)' : 'photo(s)'} selected. ${skipped ? `${skipped} skipped (unsupported type, size limit, or 30-file limit). ` : ''}Files stay in this browser session; they are not uploaded.` : `No files added. Choose supported ${type === 'audio' ? 'audio up to 100 MB' : 'images up to 25 MB'}; the limit is 30 files per lounge.`);
   };
 
+  const exportLibrary = () => {
+    try {
+      const blob = new Blob([JSON.stringify({ format: 'sanctuary-guild-library', version: 1, exportedAt: new Date().toISOString(), games }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'sanctuary-guild-library.json';
+      link.click();
+      URL.revokeObjectURL(url);
+      setMediaMessage('Library backup exported to your device. It contains game titles, platform labels and web links only.');
+    } catch {
+      setMediaMessage('Could not export the library in this browser.');
+    }
+  };
+
+  const importLibrary = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 1024 * 1024) {
+      setMediaMessage('Library backup is too large. Choose a JSON file smaller than 1 MB.');
+      return;
+    }
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      if (!parsed || typeof parsed !== 'object' || !('format' in parsed) || parsed.format !== 'sanctuary-guild-library' || !('version' in parsed) || parsed.version !== 1 || !('games' in parsed) || !Array.isArray(parsed.games)) {
+        throw new Error('format');
+      }
+      const allowedPlatforms = ['Browser', 'Steam', 'Xbox', 'RetroArch', 'Other'];
+      const valid = parsed.games.filter((item): item is LocalGame =>
+        Boolean(item) && typeof item === 'object' &&
+        typeof item.id === 'string' && typeof item.title === 'string' && item.title.trim().length > 0 && item.title.length <= 80 &&
+        typeof item.platform === 'string' && allowedPlatforms.includes(item.platform) &&
+        typeof item.launchUrl === 'string' && (!item.launchUrl || Boolean(safeWebUrl(item.launchUrl)))
+      ).slice(0, 500).map((item) => ({ ...item, id: crypto.randomUUID(), title: item.title.trim(), launchUrl: safeWebUrl(item.launchUrl) }));
+      if (valid.length === 0 && parsed.games.length > 0) {
+        setMediaMessage('No valid game entries were found in that backup.');
+        return;
+      }
+      setGames((current) => {
+        const merged = [...current];
+        for (const item of valid) {
+          if (!merged.some((existing) => existing.title.toLowerCase() === item.title.toLowerCase() && existing.platform === item.platform)) merged.push(item);
+        }
+        return merged.slice(0, 500);
+      });
+      setMediaMessage(`Imported ${valid.length} validated entries. Existing titles on the same platform were kept without duplicates.`);
+    } catch {
+      setMediaMessage('That file is not a supported Sanctuary Guild library backup.');
+    } finally {
+      if (libraryImportInput.current) libraryImportInput.current.value = '';
+    }
+  };
+
   const addGame = () => {
     const cleanTitle = title.trim();
     if (!cleanTitle) return;
@@ -130,6 +183,11 @@ export function GuildCompanionHub() {
 
       <section className={styles.panel} aria-labelledby="guild-library-title">
         <div className={styles.panelHeading}><span className={styles.icon}><Library size={19} /></span><div><h3 id="guild-library-title">Unified game library</h3><p>Saved on this device. No installed-game scan has been performed.</p></div></div>
+        <div className={styles.libraryTools}>
+          <button type="button" className={styles.secondary} onClick={exportLibrary}><Download size={14} /> Export backup</button>
+          <input ref={libraryImportInput} className={styles.hiddenInput} type="file" accept="application/json,.json" onChange={(event) => void importLibrary(event.target.files?.[0])} />
+          <button type="button" className={styles.secondary} onClick={() => libraryImportInput.current?.click()}><Upload size={14} /> Import backup</button>
+        </div>
         <form className={styles.gameForm} onSubmit={(event) => { event.preventDefault(); addGame(); }}>
           <label>Game name<input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Celestial Racer" maxLength={80} required /></label>
           <label>Platform<select value={platform} onChange={(event) => setPlatform(event.target.value)}>{platforms.map((item) => <option key={item}>{item}</option>)}</select></label>
