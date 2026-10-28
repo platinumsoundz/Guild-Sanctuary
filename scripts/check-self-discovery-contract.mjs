@@ -84,5 +84,11 @@ assert.ok(component.includes('createPersonalizedLearningPlan'), 'questionnaire r
 assert.ok(component.includes('A learning path to try'), 'questionnaire result must render the learning plan');
 assert.ok(component.includes('SANCTUARY INTELLIGENCE'), 'learning plan must be clearly identified');
 
+assert.ok(component.includes("learningPlan.basis.map((item) => <li key={item}>{item}</li>)"), 'learning path must show which selected preferences informed the suggestion');
+assert.ok(component.includes("'Sanctuary Intelligence — Learning Path'"), 'download must include the learning path when one exists');
+assert.ok(component.includes("...learningPlan.basis.map((item) => '- ' + item)"), 'download must include the learning plan explanation basis');
+assert.ok(component.includes('learningPlan.disclaimer'), 'downloaded learning path must preserve its non-clinical disclaimer');
+
+
 
 console.log('Self-discovery contract checks passed: domains, answer coverage, input validation, multi-answer outputs, non-clinical language, and no hidden persistence/network calls.');
