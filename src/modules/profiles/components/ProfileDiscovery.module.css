@@ -500,3 +500,19 @@
     flex-wrap: wrap;
   }
 }
+
+.intentionTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.intentionTags span {
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font: 10px/1.35 Arial, sans-serif;
+}
