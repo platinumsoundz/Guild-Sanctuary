@@ -705,9 +705,10 @@ Current Guild implementation is now a **first UI/gameplay prototype**, not 0% co
 ## Sanctuary voice and video calls (2026-10-28)
 
 - Added one-to-one voice/video call controls directly inside the existing Sanctuary message thread, not as a Guild-only feature. Guild can reuse this shared messaging surface when it opens a Sanctuary conversation.
-- Added browser permission prompts, outgoing invitations, incoming accept/decline, WebRTC offer/answer/ICE exchange over a private Supabase Realtime channel, local/remote video surfaces, mute, camera toggle and hang-up handling.
+- Added browser permission prompts, outgoing invitations, incoming accept/decline, WebRTC offer/answer/ICE exchange over a private Supabase Realtime channel, local/remote video surfaces, mute, camera toggle, hang-up handling, 45-second outgoing no-answer timeout and 30-second incoming invite expiry.
 - Added a Supabase Realtime RLS migration that limits call broadcast access to authenticated users who are active members of the conversation in the channel topic.
 - Added `npm run check:conversation-calls` to CI for source-contract checks.
-- **Not release-ready yet:** the migration must be applied to the connected Supabase project; private Realtime channel authorization must be verified against the project's existing policies; typecheck/build and two-device browser tests must pass. This branch has not run a Cloudflare build or deployment.
+- Applied the `sanctuary_call_signaling` migration to the connected Supabase project on 2026-10-28. Read-back confirmed both SELECT and INSERT policies exist and restrict broadcast topics to active conversation members and active accounts.
+- **Not release-ready yet:** the Supabase dashboard's global Realtime **Allow public access** setting still needs manual verification/disablement so private-channel policies cannot be bypassed by public channels. Typecheck/build and two-device browser tests must pass. This branch has not run a Cloudflare build or deployment.
 - The initial ICE configuration uses a public STUN server only. Some restrictive networks require a TURN relay; configure an approved TURN provider with short-lived credentials before claiming reliable cross-network calling. Group calls, call history, notifications when the thread is closed, and recording are not implemented. Calls are not recorded by this feature.
 - WebRTC media is encrypted in transit, but this does not make the text-message database end-to-end encrypted. Do not describe the existing message service as end-to-end encrypted.
