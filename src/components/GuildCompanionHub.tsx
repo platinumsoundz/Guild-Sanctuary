@@ -33,6 +33,7 @@ const services = [
 export function GuildCompanionHub() {
   const [games, setGames] = useState<LocalGame[]>([]);
   const [libraryLoaded, setLibraryLoaded] = useState(false);
+  const [storageWarning, setStorageWarning] = useState(false);
   const [title, setTitle] = useState('');
   const [platform, setPlatform] = useState('Browser');
   const [launchUrl, setLaunchUrl] = useState('');
@@ -57,13 +58,16 @@ export function GuildCompanionHub() {
           typeof item.platform === 'string' && typeof item.launchUrl === 'string' &&
           ['Browser', 'Steam', 'Xbox', 'RetroArch', 'Other'].includes(item.platform)).map((item: LocalGame) => ({ ...item, launchUrl: safeWebUrl(item.launchUrl) })));
       }
-    } catch { /* A local library is optional and can be rebuilt. */ }
+    } catch { setStorageWarning(true); }
     finally { setLibraryLoaded(true); }
   }, []);
 
   useEffect(() => {
     if (!libraryLoaded) return;
-    try { window.localStorage.setItem(LIBRARY_KEY, JSON.stringify(games)); } catch { /* Private browsing may disable storage. */ }
+    try {
+      window.localStorage.setItem(LIBRARY_KEY, JSON.stringify(games));
+      setStorageWarning(false);
+    } catch { setStorageWarning(true); }
   }, [games, libraryLoaded]);
 
   useEffect(() => { audioFilesRef.current = audioFiles; }, [audioFiles]);
@@ -181,12 +185,12 @@ export function GuildCompanionHub() {
   return (
     <section className={styles.hub} aria-label="Guild companion features">
       <div className={styles.heading}>
-        <div><p className={styles.eyebrow}>YOUR PERSONAL ORBIT</p><h2>Library & lounges</h2><p>Build your local library, enjoy your own media, and prepare your connected gaming worlds.</p></div>
-        <span className={styles.privacy}><ShieldCheck size={15} /> Local-first</span>
+        <div><p className={styles.eyebrow}>YOUR PERSONAL ORBIT</p><h2>Library & lounges</h2><p>Designed for server-backed account sync, with private media kept on your device by default. The library below is device-local until secure sync is implemented.</p></div>
+        <span className={styles.privacy}><ShieldCheck size={15} /> Device-local today</span>
       </div>
 
       <section className={styles.panel} aria-labelledby="guild-library-title">
-        <div className={styles.panelHeading}><span className={styles.icon}><Library size={19} /></span><div><h3 id="guild-library-title">Unified game library</h3><p>Saved on this device. No installed-game scan has been performed.</p></div></div>
+        <div className={styles.panelHeading}><span className={styles.icon}><Library size={19} /></span><div><h3 id="guild-library-title">Unified game library</h3><p>Saved on this device today. Cross-device sync is planned, not connected. No installed-game scan has been performed.</p></div></div>
         <div className={styles.libraryTools}>
           <button type="button" className={styles.secondary} onClick={exportLibrary}><Download size={14} /> Export backup</button>
           <input ref={libraryImportInput} className={styles.hiddenInput} type="file" accept="application/json,.json" onChange={(event) => void importLibrary(event.target.files?.[0])} />
@@ -222,11 +226,12 @@ export function GuildCompanionHub() {
           </div> : <div className={styles.empty}>No photos selected. Your images are previewed locally and are not uploaded to Sanctuary.</div>}
         </section>
       </div>
+      {storageWarning && <p className={styles.status} role="status">This browser could not read or save the local library. Export or restore a backup if available; no cloud copy exists yet.</p>}
       {mediaMessage && <p className={styles.status} role="status">{mediaMessage}</p>}
 
       <section className={styles.panel} aria-labelledby="guild-cloud-lab-title">
         <div className={styles.panelHeading}><span className={styles.icon}><Terminal size={19} /></span><div><h3 id="guild-cloud-lab-title">Cloud Lab · persistent Linux</h3><p>Infrastructure design is underway; this is deliberately not a simulated terminal.</p></div></div>
-        <div className={styles.notice}><strong>Not provisioned yet.</strong> A real Linux workspace needs an isolated container or VM, persistent per-user storage, authentication, CPU/memory/disk quotas, network egress controls, package-install policy, lifecycle management and audit logs. No shell commands can run from this panel today.</div>
+        <div className={styles.notice}><strong>Not provisioned yet.</strong> Recommended design: server-hosted isolated Linux with an encrypted persistent home volume, per-user quotas, authenticated terminal gateway and controlled network egress. Stopping the workspace should preserve files; reset/delete should require confirmation. No shell commands can run from this panel today, and no paid compute should start until a provider and spend ceiling are approved.</div>
         <div className={styles.serviceChips}><span>Per-user isolation</span><span>Persistent home directory</span><span>Resource quotas</span><span>Secure terminal gateway</span><span>Stop / reset controls</span><span>Cost and abuse limits</span></div>
       </section>
 
@@ -235,7 +240,7 @@ export function GuildCompanionHub() {
         <div className={styles.services}>{services.map((service) => <article className={styles.service} key={service.name}><div className={styles.serviceTop}><strong>{service.name}</strong><span>{service.kind}</span></div><p>{service.description}</p><a href={service.url} target="_blank" rel="noopener noreferrer">Open official site <ExternalLink size={13} /></a></article>)}</div>
         <div className={styles.notice}><strong>RetroArch & RetroAchievements:</strong> use a compatible RetroArch installation and your own legally obtained game files. The Guild will not provide ROM downloads. Future integration can import supported achievement data with your consent; achievement verification must come from the platform, not a self-reported score.</div>
       </section>
-      <p className={styles.footnote}>Privacy: selected media stays in this browser session and is not uploaded. Your game list is stored in this browser only. Cross-device sync, cloud storage, account linking, automatic scanning and native launch are not enabled yet.</p>
+      <p className={styles.footnote}>Storage plan: server-backed account data and sync, local caching for resilience, and device-local media by default. Selected media stays in this browser session and is not uploaded. Your game list is stored in this browser only today; if this browser blocks storage, the warning above explains that no cloud copy exists yet. Cross-device sync, cloud media backup, account linking, automatic scanning and native launch are not enabled yet.</p>
     </section>
   );
 }
