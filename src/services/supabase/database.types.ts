@@ -207,7 +207,7 @@ export interface Database {
       }>;
       social_comments: Table<{
         id: string;
-        target_type: 'post' | 'short' | 'event';
+        target_type: 'post' | 'short' | 'event' | 'user';
         target_id: string;
         author_id: string;
         body: string;
@@ -218,7 +218,7 @@ export interface Database {
         id: string;
         recipient_id: string;
         actor_id: string;
-        notification_type: 'like' | 'comment';
+        notification_type: 'like' | 'comment' | 'follow' | 'connection_request' | 'connection_accepted';
         target_type: 'post' | 'short' | 'event';
         target_id: string;
         created_at: string;
