@@ -1,0 +1,28 @@
+name: Moderation role hierarchy contract
+
+on:
+  pull_request:
+    paths:
+      - supabase/migrations/20261027010000_enforce_moderation_role_hierarchy.sql
+      - scripts/check-moderation-guard-contract.mjs
+      - .github/workflows/moderation-guard-contract.yml
+  push:
+    branches:
+      - main
+    paths:
+      - supabase/migrations/20261027010000_enforce_moderation_role_hierarchy.sql
+      - scripts/check-moderation-guard-contract.mjs
+      - .github/workflows/moderation-guard-contract.yml
+
+permissions:
+  contents: read
+
+jobs:
+  moderation-guard-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-moderation-guard-contract.mjs
