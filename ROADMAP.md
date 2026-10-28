@@ -641,3 +641,13 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 
 - **Follow-up polish (2026-10-28):** Learning-path results show the exact selected preferences used to shape the suggestion, and the user-requested local text export includes the learning path, its rationale and its non-clinical disclaimer when a learning preference was answered. Answers remain session-only; export remains an explicit local user action.
+
+
+## Responsive front-end refinement (2026-10-28)
+
+- Improved small-screen home hero and quick-action layouts, including narrow-device typography, full-width primary actions and touch-friendly spacing.
+- Added consistent keyboard focus visibility and reduced-motion handling to home interactions.
+- Refined feed spacing for compact viewports and devices with bottom safe-area insets.
+- Improved profile editor field stacking and save-action sizing on narrow screens, with visible focus treatment for form controls.
+- **Scope:** presentation-only CSS; no admin/moderation, backend integration, data contract, or deployment changes.
+- **Verification status:** changes are committed to the front-end feature branch. Browser/device visual QA and automated checks have not been run in this session.
