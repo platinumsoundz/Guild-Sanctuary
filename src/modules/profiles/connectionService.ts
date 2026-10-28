@@ -73,7 +73,8 @@ export async function fetchRelationshipStates(userId: string, targetIds: string[
     for (const id of uniqueIds) {
       const state = result.get(id)!;
       state.following = store.follows.some((row) => row.followerId === userId && row.followeeId === id);
-      state.blocked = store.blocks.some((row) => row.blockerId === userId && row.blockedId === id);
+      state.blocked = store.blocks.some((row) => (row.blockerId === userId && row.blockedId === id)
+        || (row.blockerId === id && row.blockedId === userId));
       state.hidden = store.hiddenProfiles.some((row) => row.userId === userId && row.profileId === id);
       state.saved = store.savedProfiles.some((row) => row.userId === userId && row.profileId === id);
       const connection = store.connections.find((row) =>
