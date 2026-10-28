@@ -127,6 +127,7 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
   return (
     <main className={styles.page}>
       <section className={styles.hero} aria-labelledby="sanctuary-home-title">
+        <div className={styles.heroArtwork} aria-hidden="true" />
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}><Sun size={14} aria-hidden="true" /> THE SANCTUARY · BETA</p>
           <h1 id="sanctuary-home-title">A calmer place to <em>grow together.</em></h1>
