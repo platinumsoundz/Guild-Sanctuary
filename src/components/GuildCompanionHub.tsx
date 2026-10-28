@@ -10,6 +10,7 @@ type MediaFile = { id: string; file: File; url: string };
 
 const LIBRARY_KEY = 'sanctuary-guild-local-library-v1';
 const DELETED_IDS_KEY = 'sanctuary-guild-library-deleted-v1';
+const OWNER_KEY = 'sanctuary-guild-library-owner-v1';
 const platforms = ['Browser', 'Steam', 'Xbox', 'RetroArch', 'Other'];
 const MAX_MEDIA_FILES = 30;
 const MAX_AUDIO_BYTES = 100 * 1024 * 1024;
@@ -168,6 +169,18 @@ export function GuildCompanionHub() {
         return;
       }
 
+      try {
+        const previousOwner = window.localStorage.getItem(OWNER_KEY);
+        if (previousOwner && previousOwner !== authData.user.id) {
+          setSyncMessage('This browser cache belongs to a different Sanctuary account. Export its library before switching accounts; syncing was stopped to prevent mixing private libraries.');
+          return;
+        }
+      } catch {
+        setStorageWarning(true);
+        setSyncMessage('Could not verify which account owns this browser cache. Sync was stopped to protect account privacy.');
+        return;
+      }
+
       const { data: remoteRows, error: readError } = await supabase
         .from('guild_library_entries')
         .select('id, title, platform, launch_url, updated_at')
@@ -231,6 +244,7 @@ export function GuildCompanionHub() {
         .map((item) => ({ id: item.id, title: item.title, platform: item.platform, launchUrl: safeWebUrl(item.launch_url) }));
       setGames(synced);
       try {
+        window.localStorage.setItem(OWNER_KEY, authData.user.id);
         window.localStorage.removeItem(DELETED_IDS_KEY);
         setStorageWarning(false);
       } catch {
