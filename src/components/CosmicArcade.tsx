@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { CosmicSnake } from './CosmicSnake';
 import { BookOpen, CreditCard, Gem, LockKeyhole, MoonStar, Puzzle, RotateCcw, Sparkles, Star } from 'lucide-react';
 import styles from './CosmicArcade.module.css';
 
@@ -11,7 +12,7 @@ const games: { id: ArcadeGame; title: string; subtitle: string; icon: typeof Sta
   { id: 'crossword', title: 'Celestial Crossword', subtitle: 'Reflect on stars, planets and spiritual traditions.', icon: BookOpen, status: 'Coming soon' },
   { id: 'solitaire', title: 'Lunar Solitaire', subtitle: 'A calm, moonlit take on a classic card game.', icon: MoonStar, status: 'Coming soon' },
   { id: 'mahjong', title: 'Zodiac Mahjong', subtitle: 'Match celestial tiles and zodiac symbols.', icon: Gem, status: 'Coming soon' },
-  { id: 'snake', title: 'Cosmic Snake', subtitle: 'Collect stardust and see how long you survive.', icon: Sparkles, status: 'Coming soon' },
+  { id: 'snake', title: 'Cosmic Snake', subtitle: 'Collect stardust and see how long you survive.', icon: Sparkles, status: 'Playable preview' },
 ];
 
 const wordGrid = [
@@ -79,7 +80,7 @@ export function CosmicArcade() {
         })}
       </div>
 
-      {selectedGame === 'wordsearch' ? (
+      {selectedGame === 'snake' ? <CosmicSnake /> : selectedGame === 'wordsearch' ? (
         <div className={styles.playArea}>
           <div className={styles.playHeader}>
             <div><p className={styles.eyebrow}>MINDFUL PUZZLE</p><h2>Starseed Word Search</h2><p>Tap letters to find words running left-to-right. Words you find will be marked below.</p></div>
