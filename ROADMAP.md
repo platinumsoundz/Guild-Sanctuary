@@ -101,7 +101,7 @@ existing launch gate and must complete before any live payment.
 | Fix shell contrast | Planned | Body is `#0a0a0a`, toolbar text `#4c5b50`/`#3f6049` outside the light surface; near-invisible |
 | Single app shell | Planned | Remove the duplicate toolbar/header/nav layers |
 | Theme token system | In code | Semantic CSS variables and global focus/reduced-motion styles added; CI and visual review pending |
-| Cosmic visual polish | In code, QA pending | Subtle theme-aware star field and aurora gradients; reusable AI tags, cosmetic badges, gradient outlines, and chat bubble styling added. Static contract coverage added; run CI and verify visually across themes/devices before marking verified |
+| Cosmic visual polish | In code, QA pending | Subtle theme-aware star field and aurora gradients; reusable AI tags, cosmetic badges, gradient outlines, and chat bubble styling added. Integrated designed labels into the private self-discovery entry/result states and profile header. Static contract coverage added; run CI and verify visually across themes/devices before marking verified |
 | Dark mode | In code | Working theme application path and pre-render device storage bootstrap; CI and visual review pending |
 | Theme presets and future flavours | In code, QA pending | Theme foundation includes Light, Dark, Dusk, and System options; verify the exact merged implementation and browser persistence before marking verified |
 | Typography scale | In code, partial | Planner form controls are 15px, supporting copy 14px, and desktop navigation labels 14px; a whole-app typography pass and visual review remain planned |
