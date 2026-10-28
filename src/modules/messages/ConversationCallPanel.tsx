@@ -330,10 +330,13 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
         <div><strong>Voice &amp; video</strong><span>Private one-to-one calls in Sanctuary</span></div>
       </div>
       {callState === 'idle' && !incoming && (
+        <>
+        <p className={styles.note} role="status">{signallingReady ? 'Secure call signalling is ready.' : 'Connecting to secure call signalling…'}</p>
         <div className={styles.actions}>
           <button type="button" onClick={() => void startCall('audio')} disabled={!conversationId || !signallingReady}><Phone size={15} aria-hidden="true" /> Voice call</button>
           <button type="button" onClick={() => void startCall('video')} disabled={!conversationId || !signallingReady}><Video size={15} aria-hidden="true" /> Video call</button>
         </div>
+        </>
       )}
       {incoming && callState === 'idle' && (
         <div className={styles.incoming} role="alert">
