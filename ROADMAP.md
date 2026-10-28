@@ -634,3 +634,10 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 
 - **Follow-up polish (2026-10-28):** Learning-path results show the exact selected preferences used to shape the suggestion, and the user-requested local text export includes the learning path, its rationale and its non-clinical disclaimer when a learning preference was answered. Answers remain session-only; export remains an explicit local user action.
+
+
+## Private Daily Reflection client restoration — 2026-10-28
+
+- **In code on `feat/private-daily-reflection-client-restore-2026-10-28`; validation pending:** restore the account-backed reflection client and compact mood controls; legacy browser data can only be imported after an explicit confirmation.
+- Read-only inspection of the active Guild-Sanctuary database confirmed the `daily_reflections` table, owner-only RLS policies for all CRUD operations, and a unique `(user_id, reflection_date)` index. This batch does not add or apply migrations.
+- Remaining gates: exact-head contract/typecheck/build, authenticated browser testing, and cross-account isolation. No production deployment or auth/payment/provider changes.
