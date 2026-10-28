@@ -1,9 +1,7 @@
-name: Scheduled Free Health Check
+name: On-demand Free Health Check
 
+# Temporarily manual-only through the October 2026 quota reset.
 on:
-  schedule:
-    # GitHub schedules can be delayed during high load; this is a target cadence, not an exact timer.
-    - cron: "17 */2 * * *"
   workflow_dispatch:
 
 permissions:
@@ -17,7 +15,7 @@ jobs:
   validate:
     name: Deno, TypeScript and production build
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     env:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
