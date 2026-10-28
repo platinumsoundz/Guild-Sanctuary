@@ -5,7 +5,7 @@
 - The in-app **Sanctuary Roadmap** is member-facing: plain-language summaries, status labels, and native expandable **More info** details. It covers only Sanctuary features and beta-readiness work.
 - The separate **Guild Roadmap** covers the cosmic gaming world, browser arcade, game library, media lounge, optional platform integrations and the future Cloud Lab. The 5 Sleeves games are external projects and are intentionally excluded from the public Sanctuary and Guild roadmaps.
 - This repository `ROADMAP.md` remains the detailed engineering roadmap for contributors. It is not the same as the simplified public page.
-- Current development work is staged on `feat/guild-browser-arcade-first-2026-10-28` and draft PR [#205](https://github.com/platinumsoundz/Guild-Sanctuary/pull/205). Do not merge or deploy until fresh CI, migration review, security checks and browser/device QA are complete.
+- Current development work is staged on `feat/guild-browser-arcade-first-2026-10-28` and draft PR [#205](https://github.com/platinumsoundz/Guild-Sanctuary/pull/205), currently based on `feat/cosmic-mobile-ui-2026-10-28`. A comparison against `main` reports a diverged history (266 commits ahead, 1 behind); this is a stacked feature branch, so do not retarget or rebase it blindly. Reconcile the branch history deliberately before final integration. Do not merge or deploy until fresh CI, migration review, security checks and browser/device QA are complete.
 - The public pages distinguish source implementation from live verification. A feature labelled Preview or In development must not be described as production-ready without recorded test evidence.
 
 ## Server-authoritative storage direction — 2026-10-28
