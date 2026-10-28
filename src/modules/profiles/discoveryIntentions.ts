@@ -94,7 +94,7 @@ export async function saveMemberDiscoveryIntentions(
 
 export async function fetchPublicDiscoveryIntentions(userIds: string[]): Promise<Map<string, DiscoveryIntentionId[]>> {
   const ids = [...new Set(userIds.filter(Boolean))];
-  const result = new Map<string, DiscoveryIntentionId[]>(ids.map((id) => [id, []]));
+  const result = new Map<string, DiscoveryIntentionId[]>(ids.map((id): [string, DiscoveryIntentionId[]] => [id, []]));
   if (!ids.length) return result;
   if (!isSupabaseCommunityStorageConfigured()) {
     for (const id of ids) {
