@@ -24,11 +24,13 @@ assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the 
 assert.match(arcade, /Starseed Word Search/, 'word search preview remains available');
 assert.ok(arcade.includes("selectedGame === 'classics' ? <ArcadeClassics />"), 'arcade classics are connected to the main selector');
 assert.match(arcade, /16 playable games/, 'the classic games collection is advertised');
-for (const game of ['2048', 'Minesweeper', 'Lights Out', 'Memory Match', 'Word Guess', 'Hangman', 'Tic-Tac-Toe', 'Connect Four', 'Tower of Hanoi', 'Flood Fill', 'Game of Life', 'Whack-a-Star', 'Cosmic Trivia', '15 Puzzle', 'Simon Memory']) assert.ok(classics.includes(game), `classic collection includes ${game}`);
+for (const game of ['2048', 'Minesweeper', 'Lights Out', 'Memory Match', 'Word Guess', 'Hangman', 'Tic-Tac-Toe', 'Connect Four', 'Tower of Hanoi', 'Flood Fill', 'Game of Life', 'Whack-a-Star', 'Cosmic Trivia', '15 Puzzle', 'Simon Memory', 'Cosmic Pong', 'Brick Breaker', 'Starfall Blocks']) assert.ok(classics.includes(game), `classic collection includes ${game}`);
 assert.match(classics, /function slide2048/, '2048 merges tiles');
 assert.match(classics, /mineCells/, 'Minesweeper uses a hidden minefield');
 assert.ok(classics.includes('setLife(a=>a.map'), 'Game of Life advances cellular rules');
 assert.match(classics, /aria-label/, 'classic games include accessible control labels');
+assert.match(classics, /Optional game extras/, 'games expose a planned token-spending integration point');
+assert.match(classics, /Token spending is not enabled yet/, 'token spending remains locked until server-side wallet validation exists');
 assert.ok(classicsCss.includes('@media(max-width:600px)'), 'classic games have mobile styles');
 assert.match(arcade, /selectedGame === 'crossword' \? <CelestialCrossword \/>/, 'crossword is connected to the game selector');
 assert.match(arcade, /id: 'crossword',[^\n]*status: 'Playable preview'/, 'crossword is advertised as playable');
