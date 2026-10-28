@@ -8,7 +8,7 @@ const migration = readFileSync('supabase/migrations/20261028214500_guild_library
 
 for (const text of [
   'Account library sync is available', 'Local cache + account sync', 'DELETED_IDS_KEY', 'OWNER_KEY', 'previousOwner !== authData.user.id', 'prevent mixing private libraries', 'removeGame', 'queued removals were applied', 'disabled={syncBusy}', 'Your visible library was left unchanged',
-  'Sign in & sync', 'syncLibrary', 'supabase.auth.getUser()', 'pendingDeletes', "from('guild_library_entries').delete().in('id', pendingDeletes)",
+  'Sign in & sync', 'syncLibrary', 'if (syncBusy || !libraryLoaded) return;', 'Loading library…', 'supabase.auth.getUser()', 'pendingDeletes', "from('guild_library_entries').delete().in('id', pendingDeletes)",
   "from('guild_library_entries')", 'Your local library is unchanged',
   'Syncing…', 'storageWarning', 'could not read or save the device-local cache', 'Sign in and sync to keep a server copy',
   'persistent home volume', 'Unified game library', 'Music lounge',
