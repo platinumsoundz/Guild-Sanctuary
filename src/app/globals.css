@@ -246,3 +246,66 @@ body::before {
     background-attachment: scroll;
   }
 }
+
+
+/* Shared cosmic interaction layer: all pages inherit the same tactile visual language. */
+html {
+  background: var(--bg);
+  scrollbar-color: color-mix(in srgb, var(--cosmic-violet) 54%, var(--surface)) var(--bg);
+  scrollbar-width: thin;
+}
+body {
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 8% 0%, rgb(129 103 245 / 13%), transparent 34rem),
+    radial-gradient(ellipse at 96% 18%, rgb(67 190 233 / 9%), transparent 30rem),
+    radial-gradient(ellipse at 52% 100%, rgb(115 68 192 / 8%), transparent 42rem),
+    linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 90%, var(--cosmic-violet)) 55%, var(--bg));
+  background-attachment: fixed;
+}
+::selection {
+  background: color-mix(in srgb, var(--cosmic-violet) 48%, transparent);
+  color: var(--ink);
+}
+:where(button, input, textarea, select, a, summary, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--cosmic-cyan);
+  outline-offset: 3px;
+}
+:where(button, input, textarea, select) {
+  accent-color: var(--cosmic-violet);
+}
+:where(input:not([type="checkbox"]):not([type="radio"]), textarea, select) {
+  border-color: var(--line);
+  background-color: color-mix(in srgb, var(--surface) 90%, var(--bg));
+  color: var(--ink);
+}
+:where(input:not([type="checkbox"]):not([type="radio"]), textarea, select)::placeholder {
+  color: color-mix(in srgb, var(--muted) 80%, transparent);
+}
+:where(button, input, textarea, select):disabled {
+  cursor: not-allowed;
+  opacity: .62;
+}
+:where(button, a, [role="button"]) {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(button, a, input, textarea, select) {
+  transition-duration: var(--motion-fast);
+}
+@media (hover: hover) and (pointer: fine) {
+  :where(button:not(:disabled), [role="button"]:not([aria-disabled="true"])) {
+    transition-property: border-color, background-color, box-shadow, color, transform;
+  }
+}
+@media (max-width: 700px) {
+  body { background-attachment: scroll; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
