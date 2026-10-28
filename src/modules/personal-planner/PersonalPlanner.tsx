@@ -114,7 +114,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
           const hasLegacyData = loadedData.tasks.length > 0 || loadedData.habits.length > 0 || Object.values(loadedData.notesByDate).some((note) => note.trim().length > 0);
           if (hasLegacyData) {
             const { error: migrateError } = await client.from('personal_planner_data')
-              .upsert({ user_id: userId, planner_data: loadedData }, { onConflict: 'user_id' });
+              .upsert({ user_id: userId, planner_data: { ...loadedData } }, { onConflict: 'user_id' });
             if (migrateError) throw new Error(`Your existing planner could not be transferred to the database: ${migrateError.message}`);
             // Only remove the old copy after the database confirms the transfer.
             window.localStorage.removeItem(storageKey);
@@ -155,7 +155,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
           throw new Error('Your active account changed. Sign in again before saving planner changes.');
         }
         const { error } = await client.from('personal_planner_data')
-          .upsert({ user_id: userId, planner_data: snapshot }, { onConflict: 'user_id' });
+          .upsert({ user_id: userId, planner_data: { ...snapshot } }, { onConflict: 'user_id' });
         if (error) throw new Error(error.message);
       }).then(() => {
         if (generation === saveGeneration.current) {
