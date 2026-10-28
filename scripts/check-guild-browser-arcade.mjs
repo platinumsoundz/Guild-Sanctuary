@@ -15,6 +15,9 @@ assert.match(controller, /horizontal < -0.45/, 'controller abstraction supports 
 assert.match(guild, /ctrlKey && event\.shiftKey/, 'keyboard accessibility override exists');
 assert.match(guild, /Orbital Drift/, 'first original browser game is present');
 assert.match(guild, /GuildCometDodge/, 'second playable arcade trial is wired into the Guild');
+assert.match(guild, /worldBigPicture/, 'Guild supports fullscreen Big Picture mode');
+assert.match(guild, /pressed\(9\).*setBigPicture/, 'controller Start button toggles Big Picture mode');
+assert.match(guild, /F6/, 'Guild Big Picture mode has a keyboard accessibility shortcut');
 const comet = readFileSync('src/components/GuildCometDodge.tsx', 'utf8');
 const cometCss = readFileSync('src/components/GuildCometDodge.module.css', 'utf8');
 assert.match(comet, /Comet Dodge/, 'second original browser game is present');
