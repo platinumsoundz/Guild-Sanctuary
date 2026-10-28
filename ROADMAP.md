@@ -4,6 +4,12 @@ Last updated: 2026-10-28
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
+## Guild and calling hardening — 2026-10-28
+
+- Incoming WebRTC signalling payloads now pass a strict allowlist and shape/size validation before SDP or ICE data reaches the peer connection. This reduces malformed or oversized broadcast payloads; it does not replace Realtime authorization or real-browser security testing.
+- The local Guild game library now caps manually added entries at 500, matching the import cap and preventing unbounded localStorage growth from the UI.
+- Focused source contracts cover the call-signal validation and manual library cap. These are static checks; a two-account browser call and real media/network QA remain outstanding.
+
 ## Integration batch checkpoint — 2026-10-28
 
 The following focused PRs have been merged into `main` as a single integration batch:
