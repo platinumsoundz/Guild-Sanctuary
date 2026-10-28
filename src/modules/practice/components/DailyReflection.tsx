@@ -111,11 +111,17 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
               .upsert(rows, { onConflict: 'user_id,reflection_date' });
             if (migrateError) throw new Error(`Your existing reflections could not be transferred to the database: ${migrateError.message}`);
             loaded = [...loaded, ...missingEntries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 90);
-            window.localStorage.removeItem(key);
-            setStatus('Your existing reflections have been transferred to your account database.');
+            try {
+              window.localStorage.removeItem(key);
+              setStatus('Your existing reflections have been transferred to your account database.');
+            } catch {
+              setStatus('Your existing reflections have been transferred to your account database, but the old browser copy could not be removed.');
+            }
           } else if (loaded.length > 0) {
             // Database rows take precedence for dates already present; the full legacy date set is now covered.
-            window.localStorage.removeItem(key);
+            try { window.localStorage.removeItem(key); } catch {
+              setStatus('Your account database is ready, but the old browser copy could not be removed.');
+            }
           }
         }
         if (!legacyReadable && loaded.length === 0) {
