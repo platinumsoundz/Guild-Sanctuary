@@ -255,7 +255,6 @@ async function updatePrivateProfileList(
   if (!userId || !targetId || userId === targetId) throw new Error('Choose another member.');
   const localField = kind === 'hidden' ? 'hiddenProfiles' : 'savedProfiles';
   const idField = kind === 'hidden' ? 'hidden_profile_id' : 'saved_profile_id';
-  const table = kind === 'hidden' ? 'profile_discovery_hidden' : 'profile_discovery_saved';
   if (!isSupabaseCommunityStorageConfigured()) {
     const store = readLocalStore();
     const existing = store[localField].some((row) => row.userId === userId && row.profileId === targetId);
