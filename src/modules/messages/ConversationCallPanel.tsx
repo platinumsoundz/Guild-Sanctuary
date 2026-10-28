@@ -18,6 +18,20 @@ interface Props {
 
 const ICE_SERVERS: RTCIceServer[] = [{ urls: 'stun:stun.l.google.com:19302' }];
 
+async function resolveIceServers(conversationId: string | null): Promise<RTCIceServer[]> {
+  if (!conversationId) return ICE_SERVERS;
+  try {
+    const client = getSupabaseBrowserClient();
+    const { data, error } = await client.functions.invoke('call-ice-config', { body: { conversationId } });
+    if (!error && Array.isArray(data?.iceServers) && data.iceServers.length > 0) {
+      return data.iceServers as RTCIceServer[];
+    }
+  } catch {
+    // The call remains usable with STUN when optional TURN infrastructure is not configured.
+  }
+  return ICE_SERVERS;
+}
+
 export function ConversationCallPanel({ conversationId, currentUserId, peerName, isGroup }: Props) {
   const [callState, setCallState] = useState<CallState>('idle');
   const [callKind, setCallKind] = useState<CallKind>('audio');
@@ -208,10 +222,11 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
 
   const preparePeer = async (kind: CallKind) => {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('This browser does not support microphone or camera access. Use a secure HTTPS connection and a supported browser.');
+    const iceServers = await resolveIceServers(conversationId);
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: kind === 'video' });
     streamRef.current = stream;
     if (localVideo.current) localVideo.current.srcObject = stream;
-    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    const pc = new RTCPeerConnection({ iceServers });
     peerRef.current = pc;
     stream.getTracks().forEach((track) => pc.addTrack(track, stream));
     return pc;
