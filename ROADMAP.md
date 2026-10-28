@@ -679,3 +679,14 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Added `npm run check:guest-access` and wired it into CI.
 - **Still to verify:** full CI/typecheck/build on the exact branch, browser checks for each allowed and restricted route, and any deeper service-level mutation protections. This UI gate complements but does not replace server-side authentication/authorization.
 - No database migration, provider configuration, production deployment, or payment changes are included.
+
+
+## Guild browser arcade recovery — 2026-10-28
+
+- **Implemented on feature branch `feat/guild-arcade-preview-integration-v2-2026-10-28`:** selectively recovered the original Guild browser world, Orbital Drift, Comet Dodge, controller input helpers and companion hub from the divergent Guild feature branch.
+- Added a first-class `Guild Arcade` navigation item and route, grouped beside the Guild Roadmap. Cosmic Arcade remains a separate Sanctuary mini-game area.
+- Preserved keyboard/touch controls, gamepad support where browser APIs allow it, reduced-motion styles, focus management and local-only best-run storage from the recovered source.
+- Guild Arcade is account-gated at the workspace route; guest sessions remain limited to public read-only routes. The local library/media features must not be described as cloud-synced or uploaded by default.
+- Added `npm run check:guild-browser-arcade` to CI to cover route wiring, game/controller contracts and explicit account gate.
+- **Verification pending:** exact-head CI, typecheck, build and screenshot workflows; browser/gamepad testing on desktop and mobile; test the companion hub with and without Supabase configuration. This batch does not include calling, Cloud Lab, migration application or external platform OAuth.
+- No production deployment, provider configuration, secrets, billing or database writes are included. The branch is based on the guest-safety batch; merge that dependency before integrating this batch, or rebase/reconcile if the dependency changes.
