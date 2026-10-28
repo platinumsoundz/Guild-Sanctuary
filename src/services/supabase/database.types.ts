@@ -128,6 +128,11 @@ export interface Database {
         preferences: Record<string, unknown>;
         updated_at: string;
       }>;
+      personal_planner_data: Table<
+        { user_id: string; planner_data: Record<string, unknown>; updated_at: string },
+        { user_id: string; planner_data: Record<string, unknown>; updated_at?: string },
+        { planner_data?: Record<string, unknown>; updated_at?: string }
+      >;
       posts: Table<{
         id: string;
         author_id: string;
