@@ -6,7 +6,7 @@ const guild = readFileSync('src/components/GuildWorld.tsx', 'utf8');
 const css = readFileSync('src/components/GuildWorld.module.css', 'utf8');
 const controller = readFileSync('src/lib/controllerInput.ts', 'utf8');
 
-assert.match(workspace, /<GuildWorld userId=\{currentUser\?\.user\.id \?\? null\} isAuthenticated=\{isAuthenticated\} \/>/, 'hidden Guild shell is mounted without a navigation item');
+assert.match(workspace, /<GuildWorld userId=\{currentUser\?\.user\.id \?\? null\} isAuthenticated=\{isAuthenticated && !isGuest\} \/>/, 'hidden Guild shell is mounted and guest sessions are excluded');
 assert.doesNotMatch(workspace, /activeNavigation === 'guild'|label:\s*'The Guild'/, 'Guild is not exposed in ordinary navigation');
 assert.match(guild, /getConnectedGamepad/, 'Guild uses the shared controller abstraction');
 assert.match(controller, /readGamepadDirections/, 'controller abstraction maps physical input to logical directions');
