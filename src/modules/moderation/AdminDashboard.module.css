@@ -179,3 +179,10 @@
     width: 100%;
   }
 }
+
+
+.messageError {
+  color: #ffb4b4;
+  border-left: 3px solid #d97777;
+  padding-left: 10px;
+}
