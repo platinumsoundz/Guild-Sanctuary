@@ -20,7 +20,7 @@ const checks = [
 ];
 checks.push(
   ['unavailable database storage fails closed rather than silently falling back to local storage', /Database storage is not configured/.test(component) && /The reflections database could not be reached/.test(component)],
-  ['database errors are reported without discarding existing local data', /existing browser reflection copy could not be read/.test(component) && /Your existing data has not been changed/.test(component)],
+  ['database errors are reported without discarding existing local data', /previous browser reflection copy could not be read/.test(component) && /It has not been changed/.test(component)],
 );
 for (const [label, passed] of checks) { console.log((passed ? 'PASS ' : 'FAIL ') + label); assert.ok(passed, label); }
 console.log('Daily reflection contract checks passed: ' + checks.length + '. Static checks only; browser integration is still required.');
