@@ -24,7 +24,18 @@ alter table public.profile_interests enable row level security;
 drop policy if exists "members read own or public interests" on public.profile_interests;
 create policy "members read own or public interests"
   on public.profile_interests for select to authenticated
-  using (user_id = (select auth.uid()) or (is_public and public.is_active_user()));
+  using (
+    user_id = (select auth.uid())
+    or (
+      is_public
+      and public.is_active_user()
+      and exists (
+        select 1
+        from private.public_profile_projection projection
+        where projection.id = profile_interests.user_id
+      )
+    )
+  );
 
 drop policy if exists "members add own interests" on public.profile_interests;
 create policy "members add own interests"
