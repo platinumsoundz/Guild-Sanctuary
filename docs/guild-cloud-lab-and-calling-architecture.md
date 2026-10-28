@@ -70,3 +70,12 @@ Status: design and implementation checklist only. No terminal runtime, compute p
 ## Storage strategy alignment
 
 The default is server-authoritative account data with bounded local caching, not unconditional server upload of every local file. See `docs/sanctuary-storage-strategy.md` for data placement and sync rules. A future Linux workspace must use an encrypted persistent server volume; localStorage is not a substitute for a Linux home directory. The Guild library schema is staged in `supabase/migrations/20261028214500_guild_library_entries.sql`, but that migration has not been applied or live-tested; Guild Companion now includes an explicit authenticated sync path that requires it to be applied. User-selected music and photos remain on-device unless a separate, explicitly opted-in cloud backup is implemented with quotas and deletion guarantees.
+
+### Cloud Lab control endpoint scaffold
+
+- Added `supabase/functions/guild-cloud-lab-control` as an authenticated, same-origin control-plane entry point. It resolves the member from verified session claims, checks the active account, and only selects the caller's own workspace status.
+- The `status` action is read-only. It returns no-store responses and reports missing schema/runtime as unavailable instead of fabricating a running terminal.
+- `start`, `stop`, `reset`, and `delete` intentionally fail closed with `RUNTIME_NOT_CONFIGURED` until a real provider adapter, idempotent job queue, spend guard, and persistent-volume lifecycle exist. The endpoint does not provision compute or mutate lifecycle state.
+- The function requires JWT verification in `supabase/config.toml`. It is repository code only and has not been deployed or tested against a live project. Configure the canonical HTTPS `APP_BASE_URL` before any staging test.
+- Static source-contract coverage is available via `npm run check:guild-cloud-lab-control`; this is not a substitute for authenticated cross-account tests.
+
