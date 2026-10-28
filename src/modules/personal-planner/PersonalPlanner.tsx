@@ -68,7 +68,6 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   const [newTask, setNewTask] = useState('');
   const [newHabit, setNewHabit] = useState('');
   const [status, setStatus] = useState('');
-  const [storageWarning, setStorageWarning] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
