@@ -45,7 +45,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
-  { id: 'games', label: 'Games', icon: Gamepad2 },
+  { id: 'games', label: 'Cosmic Arcade', icon: Gamepad2 },
   { id: 'roadmap', label: 'Systems & Roadmap', icon: Map },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
