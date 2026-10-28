@@ -75,6 +75,18 @@ export function SelfDiscoveryCentre() {
         '',
         'A question for your journal',
         reflection.journalPrompt,
+        ...(learningPlan ? [
+          '',
+          'Sanctuary Intelligence — Learning Path',
+          learningPlan.title,
+          learningPlan.approach,
+          'Start here: ' + learningPlan.firstStep,
+          'Try this: ' + learningPlan.practice,
+          'Reflect: ' + learningPlan.reflectionPrompt,
+          'Why this suggestion:',
+          ...learningPlan.basis.map((item) => '- ' + item),
+          learningPlan.disclaimer,
+        ] : []),
         '',
         reflection.disclaimer,
         '',
@@ -157,6 +169,10 @@ export function SelfDiscoveryCentre() {
             <p><strong>Start here:</strong> {learningPlan.firstStep}</p>
             <p><strong>Try this:</strong> {learningPlan.practice}</p>
             <p><strong>Reflect:</strong> {learningPlan.reflectionPrompt}</p>
+            <p><strong>Why this suggestion:</strong></p>
+            <ul className={styles.promiseList}>
+              {learningPlan.basis.map((item) => <li key={item}>{item}</li>)}
+            </ul>
             <p className={styles.disclaimer}>{learningPlan.disclaimer}</p>
           </div>
         )}
