@@ -6,16 +6,24 @@ const styles = readFileSync(new URL('../src/modules/events/components/MeetupCale
 
 assert.ok(component.includes('Event date (your local time)'), 'event date input must disclose local-time interpretation');
 assert.ok(component.includes('Start time (your local time)'), 'event time input must disclose local-time interpretation');
-assert.ok(component.includes('device’s local timezone'), 'event form must explain local input timezone');
-assert.ok(component.includes('address search is not available yet'), 'event form must not imply address geocoding exists');
-assert.ok(component.includes('Latitude (venue map pin)') && component.includes('Longitude (venue map pin)'), 'required coordinates must be explained as map-pin coordinates');
-assert.ok(component.includes('timeZoneName: \'short\''), 'event cards must display a local timezone abbreviation');
+assert.ok(component.includes('Dates use your device’s local timezone'), 'event form must explain local input timezone');
+assert.ok(component.includes('preview the pin on a real map'), 'event form must explain how to verify a location pin');
+assert.ok(component.includes('<iframe') && component.includes('OpenStreetMap'), 'event discovery must render a real map');
+assert.ok(component.includes('aria-label="Choose an event map pin"'), 'event map pins must have an accessible selector');
+assert.ok(component.includes('aria-pressed={selectedMapEvent?.id === event.id}'), 'map pin selection state must be exposed to assistive technology');
+assert.ok(component.includes('Show on map'), 'event cards must let users focus the map on a specific event');
+assert.ok(component.includes('Open full map'), 'users must be able to open the selected map location');
+assert.ok(component.includes('Map data © OpenStreetMap contributors'), 'map attribution must be visible');
+assert.ok(component.includes('timeZoneName: \'short\''), 'event cards must display a timezone abbreviation');
 assert.ok(component.includes('formatEventDateTime(event.startsAt)'), 'event cards must use the timezone-aware formatter');
 assert.ok(!component.includes("event.startsAt.replace('T', ' ').slice(0, 16)} UTC"), 'event cards must not label raw ISO timestamps as UTC without conversion');
-assert.ok(styles.includes('.formNote'), 'timezone and venue guidance must be readable in the form');
+assert.ok(component.includes('latitude < -90') && component.includes('longitude > 180'), 'invalid map coordinates must not be embedded');
+assert.ok(styles.includes('.mapExplorer') && styles.includes('.mapFrame'), 'map explorer must have dedicated layout styles');
+assert.ok(styles.includes('@media (max-width: 760px)'), 'map and event controls must adapt to smaller screens');
+assert.ok(styles.includes(':focus-visible'), 'interactive map controls must have visible keyboard focus');
+assert.ok(styles.includes('prefers-reduced-motion: reduce'), 'motion must respect reduced-motion preferences');
 
-console.log('Event time and location disclosure contract checks passed.');
-
+console.log('Event map discovery, location disclosure, and accessibility contract checks passed.');
 
 const eventsHook = readFileSync(new URL('../src/modules/events/useEvents.ts', import.meta.url), 'utf8');
 assert.ok(eventsHook.includes('const sessionReady = eventsUserId === userId'), 'event state must be tagged to the current account');
