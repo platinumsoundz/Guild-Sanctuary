@@ -66,6 +66,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     if (!conversationId || !currentUserId || isGroup) return;
     let cancelled = false;
     const client = getSupabaseBrowserClient();
+    void client.realtime.setAuth();
     const channel = client.channel(`sanctuary-call:${conversationId}`, { config: { private: true } });
     channelRef.current = channel;
     channel.on('broadcast', { event: 'signal' }, ({ payload }) => {
