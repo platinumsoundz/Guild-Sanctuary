@@ -24,6 +24,18 @@ function localKey(userId: string): string {
   return `sanctuary-discovery-interests:${userId}`;
 }
 
+const LOCAL_PUBLIC_INDEX = 'sanctuary-public-discovery-interest-users';
+
+function readLocalPublicIndex(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const value: unknown = JSON.parse(window.localStorage.getItem(LOCAL_PUBLIC_INDEX) ?? '[]');
+    return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
 function readLocal(userId: string): MemberDiscoveryInterest[] {
   if (typeof window === 'undefined') return [];
   try {
@@ -72,6 +84,10 @@ export async function saveMemberDiscoveryInterests(userId: string, values: strin
     if (typeof window === 'undefined') throw new Error('Interests can only be saved in a browser session.');
     try {
       window.localStorage.setItem(localKey(userId), JSON.stringify(interests));
+      const publicIds = new Set(readLocalPublicIndex());
+      if (interests.some((item) => item.isPublic)) publicIds.add(userId);
+      else publicIds.delete(userId);
+      window.localStorage.setItem(LOCAL_PUBLIC_INDEX, JSON.stringify([...publicIds]));
       return interests;
     } catch {
       throw new Error('Your discovery interests could not be saved in this browser.');
@@ -116,7 +132,10 @@ export async function fetchPublicDiscoveryInterests(userIds: string[]): Promise<
 
 export async function findUserIdsByPublicInterest(query: string): Promise<string[]> {
   const interest = normalizeInterest(query);
-  if (!interest || !isSupabaseCommunityStorageConfigured()) return [];
+  if (!interest) return [];
+  if (!isSupabaseCommunityStorageConfigured()) {
+    return readLocalPublicIndex().filter((userId) => readLocal(userId).some((item) => item.isPublic && item.interest.includes(interest)));
+  }
   await requireCommunityStorageUser();
   const { data, error } = await getSupabaseBrowserClient().from('profile_interests')
     .select('user_id').eq('is_public', true).ilike('interest', `%${escapeLikePattern(interest)}%`).limit(30);
