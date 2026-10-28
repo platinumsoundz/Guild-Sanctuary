@@ -18,6 +18,7 @@ import {
   ShoppingBag,
   HeartHandshake,
   Gamepad2,
+  Sun,
   Map,
   X,
   type LucideIcon,
@@ -28,7 +29,7 @@ import styles from './Navigation.module.css';
 import { NotificationBar } from '@/components/NotificationBar';
 
 const mobilePrimaryItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
-  { id: 'planner', label: 'Today', icon: CalendarCheck },
+  { id: 'today', label: 'Today', icon: Sun },
   { id: 'feed', label: 'Community', icon: Newspaper },
   { id: 'discover', label: 'Discover', icon: Search },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
@@ -36,7 +37,8 @@ const mobilePrimaryItems: { id: NavigationState; label: string; icon: LucideIcon
 ];
 
 const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
-  { id: 'feed', label: 'Feed', icon: Newspaper },
+  { id: 'today', label: 'Today', icon: Sun },
+  { id: 'feed', label: 'Community', icon: Newspaper },
   { id: 'planner', label: 'Daily Planner', icon: CalendarCheck },
   { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
   { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
