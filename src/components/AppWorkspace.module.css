@@ -99,3 +99,95 @@
   .supportPage { padding: 18px 12px; }
   .sectionPage h1 { overflow-wrap: anywhere; }
 }
+
+
+/* Shared cosmic design language across feature modules. */
+.worldSurface {
+  background-color: color-mix(in srgb, var(--surface) 91%, transparent);
+  background-image:
+    radial-gradient(ellipse at 5% 0%, rgb(126 103 235 / 9%), transparent 34rem),
+    radial-gradient(ellipse at 96% 52%, rgb(58 190 207 / 5%), transparent 32rem);
+}
+
+.sectionPage,
+.profilePage,
+.supportPage {
+  position: relative;
+  isolation: isolate;
+}
+
+.sectionEyebrow {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: var(--accent-soft);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sectionPage h1 {
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.sectionDescription {
+  max-width: 58ch;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+@media (max-width: 700px) {
+  .worldSurface {
+    background-image:
+      radial-gradient(ellipse at 0% 0%, rgb(126 103 235 / 10%), transparent 23rem),
+      radial-gradient(ellipse at 100% 42%, rgb(58 190 207 / 5%), transparent 20rem);
+  }
+
+  .worldContent {
+    min-height: 0;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .sectionPage,
+  .profilePage {
+    min-height: 0;
+    gap: 16px;
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+
+  .sectionPage h1 {
+    max-width: 100%;
+    font-size: clamp(30px, 8vw, 42px);
+  }
+
+  .sectionDescription {
+    margin-top: 0;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .supportPage {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .sectionPage,
+  .profilePage {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .worldSurface {
+    transition: none;
+  }
+}

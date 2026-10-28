@@ -271,3 +271,175 @@
   .quickRow button { transition: none; }
   .quickRow button:hover { transform: none; }
 }
+
+
+/* Cosmic reference pass: elevate the home hero without competing with content. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--line));
+  background:
+    radial-gradient(ellipse at 82% 8%, rgb(117 91 228 / 20%), transparent 45%),
+    radial-gradient(ellipse at 0% 100%, rgb(45 173 200 / 10%), transparent 42%),
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-raised) 94%, #151336), var(--surface));
+  box-shadow: 0 20px 60px rgb(0 0 0 / 22%), inset 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+.hero h1 {
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.heroActions > a,
+.heroActions > button {
+  min-height: 46px;
+  border-radius: 14px;
+  font-weight: 650;
+}
+
+.heroNote {
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--line));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 76%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.quickRow button {
+  border-color: color-mix(in srgb, var(--accent) 18%, var(--line));
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--surface-raised) 82%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+}
+
+.quickRow button:hover,
+.quickRow button:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--line));
+  background: var(--accent-soft);
+}
+
+@media (max-width: 620px) {
+  .hero {
+    border-radius: 22px;
+    background:
+      radial-gradient(ellipse at 90% 0%, rgb(117 91 228 / 18%), transparent 54%),
+      linear-gradient(155deg, color-mix(in srgb, var(--surface-raised) 96%, #151336), var(--surface));
+    box-shadow: 0 14px 38px rgb(0 0 0 / 20%), inset 0 1px 0 rgb(255 255 255 / 5%);
+  }
+
+  .heroActions > a,
+  .heroActions > button {
+    min-height: 48px;
+  }
+
+  .quickRow button {
+    min-height: 76px;
+    border-radius: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quickRow button {
+    transition: none;
+  }
+}
+
+/* Sanctuary visual overhaul — bespoke celestial artwork, editorial typography and luminous detail. */
+.hero{min-height:clamp(420px,42vw,560px);position:relative;isolation:isolate;display:flex;align-items:center;overflow:hidden;padding:clamp(28px,5vw,66px);border:1px solid rgb(173 147 255 / 38%);border-radius:24px;background:#07091d;box-shadow:0 26px 90px rgb(4 3 25 / 42%),inset 0 1px 0 rgb(255 255 255 / 12%)}
+.hero::before{position:absolute;z-index:-1;inset:0;content:"";background:linear-gradient(90deg,rgb(5 7 25 / 98%) 0%,rgb(6 7 30 / 91%) 28%,rgb(7 7 33 / 53%) 53%,rgb(7 7 30 / 9%) 100%),linear-gradient(0deg,rgb(5 7 24 / 42%),transparent 48%)}
+.hero::after{position:absolute;z-index:-1;inset:0;content:"";opacity:.58;pointer-events:none;background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 45%,transparent 70%),radial-gradient(1px 1px at 27% 72%,#c7c4ff 45%,transparent 70%),radial-gradient(2px 2px at 48% 18%,#fff 45%,transparent 70%),radial-gradient(1px 1px at 68% 82%,#e4c9ff 45%,transparent 70%),radial-gradient(1.5px 1.5px at 87% 28%,#fff 45%,transparent 70%);background-size:290px 230px,230px 290px,350px 270px,310px 220px,260px 310px}
+.heroArtwork{position:absolute;z-index:-2;inset:0 0 0 24%;background:url('/images/sanctuary-celestial-hero.svg') center right/cover no-repeat;transform:scale(1.015);filter:saturate(1.12)}
+.heroCopy{position:relative;z-index:1;width:min(100%,720px);max-width:720px;padding:clamp(0px,1vw,10px) 0}
+.eyebrow{color:#d9c6ff;font-size:10px;letter-spacing:.24em;text-shadow:0 0 22px rgb(173 123 255 / 55%)}
+.hero h1{max-width:680px;font-family:Georgia,'Times New Roman',serif;font-size:clamp(42px,6vw,76px);font-weight:400;line-height:.99;letter-spacing:-.045em;text-wrap:balance;text-shadow:0 4px 32px rgb(0 0 0 / 44%)}
+.hero h1 em{display:block;margin-top:.12em;color:#d6b8ff;font-style:normal;text-shadow:0 0 34px rgb(152 86 255 / 38%)}
+.intro{max-width:490px;margin-top:22px;color:#e0def9;font-size:14px;line-height:1.9;text-shadow:0 2px 14px rgb(0 0 0 / 75%)}
+.heroActions{gap:12px;margin-top:28px}
+.heroActions>.primaryButton{border-color:transparent;background:linear-gradient(105deg,#345dff 0%,#8449ff 55%,#d75cff 100%);color:#fff;box-shadow:0 0 30px rgb(105 76 255 / 34%),inset 0 1px 0 rgb(255 255 255 / 28%)}
+.heroActions>.secondaryButton{border-color:rgb(218 199 255 / 56%);background:rgb(7 9 32 / 55%);color:#f5efff;backdrop-filter:blur(14px)}
+.heroNote{display:none}
+.onboarding,.discoveryStudio,.communityVote,.buildRadar,.feedbackSection{position:relative;overflow:hidden;border-color:rgb(153 124 255 / 24%);border-radius:18px;background:radial-gradient(ellipse at 100% 0%,rgb(117 73 255 / 13%),transparent 43%),linear-gradient(135deg,color-mix(in srgb,var(--surface-raised) 94%,#16113d),var(--surface));box-shadow:inset 0 1px 0 rgb(255 255 255 / 4%),0 14px 42px rgb(0 0 0 / 12%)}
+.quickRow button{position:relative;overflow:hidden;min-height:84px;border-color:rgb(151 122 255 / 34%);border-radius:15px;background:radial-gradient(circle at 12% 0%,rgb(128 74 255 / 18%),transparent 58%),linear-gradient(145deg,rgb(17 17 53 / 96%),rgb(7 10 31 / 96%));box-shadow:inset 0 1px 0 rgb(255 255 255 / 7%),0 8px 26px rgb(0 0 0 / 14%)}
+.quickRow button::after{position:absolute;right:13px;top:11px;width:3px;height:3px;border-radius:50%;content:"";background:#e8dcff;box-shadow:-29px 13px 0 #8e80ff,-8px 45px 0 #d7b8ff,-49px 52px 0 #6f9fff;opacity:.8}
+.quickRow button>svg:first-child{width:38px;height:38px;padding:9px;border:1px solid rgb(188 152 255 / 50%);border-radius:50%;background:rgb(120 80 255 / 15%);filter:drop-shadow(0 0 10px rgb(149 95 255 / 38%))}
+.quickRow button:hover,.quickRow button:focus-visible{border-color:#bda0ff;background:linear-gradient(145deg,rgb(38 25 91 / 98%),rgb(10 14 44 / 98%))}
+.featureCard{position:relative;overflow:hidden;min-height:260px;padding:0 18px 18px;border-color:rgb(150 123 255 / 27%);border-radius:15px;background:radial-gradient(ellipse at 88% 0%,rgb(119 79 255 / 15%),transparent 52%),linear-gradient(180deg,color-mix(in srgb,var(--surface-raised) 96%,#100b36),var(--surface));box-shadow:inset 0 1px 0 rgb(255 255 255 / 4%)}
+.featureCard::before{display:block;height:88px;margin:0 -18px 16px;content:"";border-bottom:1px solid rgb(170 137 255 / 18%);background-color:#0b0d2c;background-image:radial-gradient(circle at 20% 32%,rgb(255 255 255 / 92%) 0 1px,transparent 1.7px),radial-gradient(circle at 71% 24%,rgb(183 151 255 / 90%) 0 1.5px,transparent 2px),radial-gradient(ellipse at 70% 115%,rgb(92 56 220 / 80%),transparent 55%),radial-gradient(ellipse at 30% 130%,rgb(27 94 210 / 62%),transparent 56%),linear-gradient(130deg,#070a23,#171044 52%,#080d2c);background-size:63px 51px,89px 71px,auto,auto,auto}
+.featureCard:nth-child(3n + 2)::before{background-image:radial-gradient(circle at 20% 32%,#fff 0 1px,transparent 1.7px),radial-gradient(circle at 71% 24%,#c7b0ff 0 1.5px,transparent 2px),radial-gradient(ellipse at 50% 130%,rgb(204 77 255 / 75%),transparent 52%),radial-gradient(ellipse at 15% 0%,rgb(37 103 255 / 50%),transparent 52%),linear-gradient(130deg,#080a25,#24104c 52%,#080d2c)}
+.featureCard:nth-child(3n)::before{background-image:radial-gradient(circle at 20% 32%,#fff 0 1px,transparent 1.7px),radial-gradient(circle at 71% 24%,#9fe8ff 0 1.5px,transparent 2px),radial-gradient(ellipse at 75% 120%,rgb(32 190 225 / 65%),transparent 50%),radial-gradient(ellipse at 20% 100%,rgb(118 65 255 / 72%),transparent 52%),linear-gradient(130deg,#070a23,#0e1b4a 52%,#080d2c)}
+.cardTop{margin-top:-2px}
+.featureIcon{width:42px;height:42px;border-color:rgb(179 148 255 / 40%);border-radius:50%;background:rgb(95 62 200 / 16%);box-shadow:0 0 22px rgb(125 85 255 / 15%)}
+.featureCard h3,.onboardingHeader h2,.discoveryIntro h2,.voteCopy h2,.sectionHeading h2,.feedbackIntro h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:-.025em}
+.featureCard h3{font-size:20px}
+.cardDescription{font-size:12px;line-height:1.8}
+.footer{border-color:rgb(153 124 255 / 25%)}
+@media(min-width:901px){.heroCopy{max-width:660px}.heroNote{display:none}}
+@media(max-width:900px){.hero{min-height:510px;padding:clamp(26px,5vw,46px)}.heroArtwork{inset:0 0 0 10%;background-position:62% center;opacity:.88}.hero::before{background:linear-gradient(90deg,rgb(5 7 25 / 96%) 0%,rgb(6 7 30 / 84%) 42%,rgb(7 7 33 / 35%) 100%),linear-gradient(0deg,rgb(5 7 24 / 48%),transparent 55%)}.heroNote{display:none}}
+@media(max-width:560px){.page{padding:13px 12px calc(24px + env(safe-area-inset-bottom))}.hero{min-height:590px;align-items:flex-start;padding:34px 22px 28px;border-radius:22px}.heroArtwork{inset:18% -34% 0 -12%;background-position:59% center;background-size:auto 100%;opacity:.93}.hero::before{background:linear-gradient(180deg,rgb(5 7 25 / 98%) 0%,rgb(6 7 30 / 88%) 27%,rgb(6 7 30 / 42%) 53%,rgb(5 7 25 / 22%) 100%),linear-gradient(90deg,rgb(5 7 25 / 30%),transparent 70%),linear-gradient(0deg,rgb(5 7 25 / 65%),transparent 35%)}.hero h1{max-width:440px;font-size:clamp(42px,12vw,60px)}.intro{max-width:330px;font-size:13px;line-height:1.8}.heroActions{align-items:stretch;flex-direction:column;max-width:290px}.heroActions>a,.heroActions>button{width:100%;min-height:48px}.quickRow{gap:9px;margin:13px 0 30px}.quickRow button{min-height:88px;padding:12px 10px;gap:8px}.quickRow button>svg:first-child{width:34px;height:34px;padding:8px}.quickRow strong{font-size:11px;white-space:normal}.featureGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.featureCard{min-height:265px;padding:0 12px 14px}.featureCard::before{margin:0 -12px 13px;height:76px}.cardTop{align-items:flex-start;flex-direction:column;gap:8px}.featureIcon{width:37px;height:37px}.featureCard h3{font-size:17px}.statusAvailable,.statusPreview,.statusDesign,.statusGated{font-size:9px}}
+@media(max-width:360px){.hero{min-height:560px;padding:27px 17px 22px}.hero h1{font-size:41px}.featureGrid{grid-template-columns:1fr}.featureCard{min-height:230px}.featureCard::before{height:96px}}
+@media(prefers-reduced-motion:reduce){.heroArtwork{transform:none}}
+
+/* Soul pass: make the hero feel like an invitation into a living fantasy world. */
+.hero{min-height:clamp(540px,48vw,650px);padding:clamp(30px,5.5vw,76px) clamp(24px,5vw,68px);border-radius:22px;background:#060821;box-shadow:0 30px 100px rgb(2 2 20 / 58%),inset 0 1px 0 rgb(255 255 255 / 18%)}
+.heroArtwork{inset:0;background-position:center center;background-size:cover;opacity:1;filter:saturate(1.2) contrast(1.04)}
+.hero::before{background:linear-gradient(90deg,rgb(3 5 24 / 98%) 0%,rgb(4 5 27 / 91%) 23%,rgb(5 6 30 / 66%) 40%,rgb(5 6 30 / 12%) 73%,rgb(5 6 30 / 5%) 100%),linear-gradient(0deg,rgb(4 5 25 / 75%) 0%,transparent 27%,transparent 75%,rgb(5 5 25 / 20%) 100%)}
+.hero::after{opacity:.8;background-image:radial-gradient(2px 2px at 14% 17%,#fff 45%,transparent 70%),radial-gradient(1px 1px at 25% 62%,#c7c4ff 45%,transparent 70%),radial-gradient(2px 2px at 48% 18%,#fff 45%,transparent 70%),radial-gradient(1px 1px at 68% 82%,#e4c9ff 45%,transparent 70%),radial-gradient(1.5px 1.5px at 87% 28%,#fff 45%,transparent 70%);background-size:290px 230px,230px 290px,350px 270px,310px 220px,260px 310px}
+.heroCopy{max-width:600px;width:58%;padding:16px 0 34px}
+.eyebrow{display:flex;align-items:center;gap:11px;color:#f0d8ff;font-size:10px;letter-spacing:.27em;font-weight:650}
+.heroCopy>.eyebrow::before,.heroCopy>.eyebrow::after{content:"";height:1px;width:28px;background:linear-gradient(90deg,transparent,#d7b5ff);box-shadow:0 0 9px #9c6dff}
+.heroCopy>.eyebrow::after{background:linear-gradient(90deg,#d7b5ff,transparent)}
+.hero h1{margin-top:20px;max-width:640px;font-size:clamp(44px,5.1vw,70px);line-height:1.02;letter-spacing:-.035em;font-weight:400;color:#fff8ff;text-shadow:0 3px 22px rgb(6 2 26 / 95%),0 0 48px rgb(171 100 255 / 25%)}
+.hero h1 em{margin-top:.12em;color:#d8b4ff;text-shadow:0 0 28px rgb(162 101 255 / 65%),0 3px 24px #08051c}
+.intro{margin-top:23px;max-width:420px;font-size:14px;line-height:1.9;color:#f1eaff;text-shadow:0 2px 15px #03031c,0 1px 4px #03031c}
+.heroActions{display:flex;flex-direction:row;gap:13px;margin-top:30px}
+.heroActions>.primaryButton{min-height:49px;padding:0 24px;border-radius:999px;background:linear-gradient(105deg,#2464ff 0%,#7b3dff 58%,#d14bff 100%);box-shadow:0 0 0 1px rgb(255 255 255 / 22%) inset,0 0 26px rgb(114 61 255 / 52%),0 8px 24px rgb(0 0 0 / 30%);font-size:13px;letter-spacing:.01em}
+.heroActions>.secondaryButton{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:49px;padding:0 25px;border-radius:999px;border-color:rgb(224 197 255 / 75%);background:rgb(6 8 35 / 55%);box-shadow:0 0 20px rgb(128 80 255 / 10%),inset 0 1px 0 rgb(255 255 255 / 10%);font-size:13px;backdrop-filter:blur(12px)}
+.heroActions>.primaryButton:hover,.heroActions>.secondaryButton:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.quickRow{position:relative;z-index:2;margin-top:-52px;gap:14px}
+.quickRow button{min-height:96px;border-radius:15px;border-color:rgb(175 147 255 / 42%);background:linear-gradient(110deg,rgb(9 11 39 / 91%),rgb(14 11 52 / 79%));box-shadow:0 14px 36px rgb(1 2 20 / 35%),inset 0 1px 0 rgb(255 255 255 / 13%);backdrop-filter:blur(18px)}
+.quickRow button>svg:first-child{width:43px;height:43px;padding:10px;background:radial-gradient(circle,#6d4cff 0%,rgb(81 55 202 / 28%) 60%,transparent 72%);border-color:rgb(198 164 255 / 65%);box-shadow:0 0 24px rgb(115 79 255 / 42%),inset 0 0 12px rgb(209 179 255 / 18%)}
+.quickRow button strong{font-size:13px;letter-spacing:.01em}
+.quickRow button span{font-size:11px;color:#c9c2ee}
+.onboarding,.discoveryStudio,.communityVote,.buildRadar,.feedbackSection{border-radius:20px;background:radial-gradient(ellipse at 10% 0%,rgb(82 73 219 / 14%),transparent 44%),radial-gradient(ellipse at 100% 100%,rgb(141 57 229 / 10%),transparent 48%),linear-gradient(145deg,rgb(15 17 51 / 96%),rgb(7 9 29 / 97%));box-shadow:0 18px 54px rgb(0 0 0 / 18%),inset 0 1px 0 rgb(255 255 255 / 7%)}
+.featureCard{border-radius:17px;background:linear-gradient(180deg,rgb(15 16 48 / 97%),rgb(7 9 29 / 98%));box-shadow:0 14px 36px rgb(0 0 0 / 23%),inset 0 1px 0 rgb(255 255 255 / 7%)}
+.featureCard::before{height:112px;position:relative;background-size:74px 58px,97px 79px,auto,auto,auto}
+.featureCard::after{position:absolute;top:0;left:0;right:0;height:112px;content:"";pointer-events:none;background:linear-gradient(180deg,transparent 45%,rgb(7 9 29 / 92%) 100%);border-bottom:1px solid rgb(171 132 255 / 18%)}
+.featureIcon{box-shadow:0 0 25px rgb(125 85 255 / 25%),inset 0 0 12px rgb(209 179 255 / 8%)}
+@media(max-width:900px){.hero{min-height:570px}.heroCopy{width:70%;max-width:560px}.heroArtwork{background-position:57% center}.hero::before{background:linear-gradient(90deg,rgb(3 5 24 / 97%) 0%,rgb(4 5 27 / 85%) 36%,rgb(5 6 30 / 42%) 67%,rgb(5 6 30 / 10%) 100%),linear-gradient(0deg,rgb(4 5 25 / 70%),transparent 45%)}.quickRow{margin-top:-38px}}
+@media(max-width:560px){.hero{min-height:640px;padding:32px 22px 110px;border-radius:20px}.heroArtwork{inset:0;background-position:60% center;background-size:auto 100%;opacity:1}.heroCopy{width:100%;max-width:440px;padding-top:6px}.hero::before{background:linear-gradient(180deg,rgb(3 5 24 / 98%) 0%,rgb(4 5 27 / 88%) 29%,rgb(5 6 30 / 47%) 53%,rgb(5 6 30 / 10%) 75%),linear-gradient(90deg,rgb(3 5 24 / 32%),transparent 100%),linear-gradient(0deg,rgb(4 5 25 / 55%),transparent 32%)}.hero h1{font-size:clamp(42px,11vw,57px);line-height:1.02;margin-top:18px}.intro{max-width:330px;font-size:13px;line-height:1.8;margin-top:18px}.heroActions{flex-direction:column;align-items:flex-start;margin-top:24px;max-width:290px}.heroActions>.primaryButton,.heroActions>.secondaryButton{width:100%;min-height:48px}.quickRow{margin-top:-78px;gap:9px}.quickRow button{min-height:90px;padding:11px 9px;gap:7px}.quickRow button>svg:first-child{width:36px;height:36px;padding:8px}.quickRow button strong{font-size:11px}.quickRow button span{font-size:10px}.featureCard::before,.featureCard::after{height:94px}}
+
+
+/* Celestial craft pass: coded atmosphere, depth, and responsive interaction details. */
+.heroArtwork{overflow:hidden;transform-origin:58% 50%;animation:sanctuary-scene-arrive 900ms cubic-bezier(.2,.7,.2,1) both}
+.heroArtwork::before,.heroArtwork::after{position:absolute;inset:-12%;content:"";pointer-events:none}
+.heroArtwork::before{background:radial-gradient(ellipse at 70% 35%,rgb(206 157 255 / 18%),transparent 22%),radial-gradient(ellipse at 83% 62%,rgb(83 143 255 / 15%),transparent 27%),radial-gradient(ellipse at 55% 90%,rgb(44 205 255 / 11%),transparent 34%);mix-blend-mode:screen;animation:sanctuary-nebula-breathe 13s ease-in-out infinite alternate}
+.heroArtwork::after{inset:8% 3% auto auto;width:clamp(190px,28vw,390px);height:clamp(190px,28vw,390px);border:1px solid rgb(220 201 255 / 16%);border-radius:50%;box-shadow:0 0 0 18px rgb(181 154 255 / 3%),0 0 0 42px rgb(181 154 255 / 2%),inset 0 0 50px rgb(162 112 255 / 8%);transform:rotate(-24deg) scaleX(1.35);mask-image:linear-gradient(180deg,#000 0%,transparent 88%)}
+.heroCopy{animation:sanctuary-copy-arrive 720ms 100ms cubic-bezier(.2,.7,.2,1) both}
+.heroCopy>.eyebrow{width:fit-content;padding:8px 0}
+.hero h1 em{background:linear-gradient(105deg,#f2dfff 4%,#c3a4ff 44%,#9bdcff 88%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px rgb(153 105 255 / 22%))}
+.heroActions>.primaryButton{position:relative;overflow:hidden;isolation:isolate}
+.heroActions>.primaryButton::after{position:absolute;z-index:-1;inset:0;content:"";background:linear-gradient(110deg,transparent 20%,rgb(255 255 255 / 28%) 48%,transparent 72%);transform:translateX(-130%);transition:transform 650ms ease}
+.heroActions>.primaryButton:hover::after,.heroActions>.primaryButton:focus-visible::after{transform:translateX(130%)}
+.quickRow button{transition:transform 180ms ease,border-color 180ms ease,box-shadow 180ms ease,background 180ms ease}
+.quickRow button::before{position:absolute;inset:0;border-radius:inherit;content:"";pointer-events:none;background:linear-gradient(125deg,rgb(202 172 255 / 9%),transparent 38%,transparent 72%,rgb(108 172 255 / 6%));opacity:.8}
+.quickRow button:hover{transform:translateY(-3px);box-shadow:0 18px 38px rgb(1 2 20 / 40%),0 0 0 1px rgb(195 161 255 / 9%) inset}
+.featureCard{isolation:isolate;transition:transform 220ms ease,border-color 220ms ease,box-shadow 220ms ease}
+.featureCard::after{position:absolute;z-index:-1;top:12px;right:-22px;width:145px;height:68px;border:1px solid rgb(214 193 255 / 30%);border-radius:50%;content:"";pointer-events:none;transform:rotate(-24deg);box-shadow:0 0 0 8px rgb(173 133 255 / 3%),0 0 24px rgb(140 91 255 / 8%)}
+.featureCard:nth-child(3n + 2)::after{border-color:rgb(247 173 255 / 34%);transform:rotate(18deg) scale(.88)}
+.featureCard:nth-child(3n)::after{border-color:rgb(135 212 255 / 36%);transform:rotate(-10deg) scale(1.12)}
+.featureCard:hover{transform:translateY(-4px);border-color:rgb(191 159 255 / 62%);box-shadow:0 20px 44px rgb(2 3 23 / 32%),inset 0 1px 0 rgb(255 255 255 / 7%)}
+.onboardingTask,.onboardingTaskDone,.voteChoice,.voteChoiceSelected,.discoveryOption,.discoveryOptionSelected,.radarCard{transition:border-color 180ms ease,background-color 180ms ease,box-shadow 180ms ease}
+.onboardingTask:hover,.onboardingTaskDone:hover{border-bottom-color:rgb(179 147 255 / 48%)}
+.voteChoice:hover,.discoveryOption:hover{box-shadow:0 7px 22px rgb(104 73 210 / 10%)}
+.feedbackForm input,.feedbackForm select,.feedbackForm textarea,.discoverySelect{min-height:44px;border-radius:11px;transition:border-color 160ms ease,box-shadow 160ms ease}
+.feedbackForm textarea{min-height:112px}
+.feedbackForm input:focus-visible,.feedbackForm select:focus-visible,.feedbackForm textarea:focus-visible,.discoverySelect:focus-visible{border-color:#b99aff;outline:2px solid rgb(185 154 255 / 32%);outline-offset:1px;box-shadow:0 0 0 5px rgb(146 99 255 / 8%)}
+.filter,.filterActive{min-height:40px;transition:color 160ms ease,background 160ms ease,border-color 160ms ease,transform 160ms ease}
+.filter:hover{border-color:rgb(177 146 255 / 58%);color:var(--ink);transform:translateY(-1px)}
+.closeButton:focus-visible,.taskCheck:focus-visible,.taskAction:focus-visible,.cardAction:focus-visible,.radarCard button:focus-visible,.footer button:focus-visible,.onboardingFooter button:focus-visible{outline:2px solid #c3a5ff;outline-offset:3px}
+@keyframes sanctuary-scene-arrive{from{opacity:.68;transform:scale(1.045)}to{opacity:1;transform:scale(1)}}
+@keyframes sanctuary-copy-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sanctuary-nebula-breathe{from{opacity:.58;transform:translate3d(-1%,1%,0) scale(.98)}to{opacity:1;transform:translate3d(1%,-1%,0) scale(1.035)}}
+@media(max-width:760px){.heroCopy{width:min(100%,610px)}.heroArtwork::after{top:28%;right:0;width:210px;height:210px;opacity:.58}.quickRow{margin-top:-28px}}
+@media(max-width:560px){.heroCopy{width:100%;padding-bottom:18px}.heroArtwork{animation-duration:650ms}.heroArtwork::before{inset:0;background:radial-gradient(ellipse at 68% 54%,rgb(178 126 255 / 18%),transparent 38%),radial-gradient(ellipse at 45% 88%,rgb(56 190 255 / 12%),transparent 42%)}.heroArtwork::after{top:42%;right:-24px;width:170px;height:170px;opacity:.46}.quickRow{margin-top:-22px}.featureCard::after{top:8px;right:-32px;width:112px;height:58px}.filter,.filterActive{min-height:42px}}
+@media(prefers-reduced-motion:reduce){.heroArtwork,.heroCopy{animation:none}.heroArtwork::before{animation:none}.heroActions>.primaryButton::after{display:none}.quickRow button,.featureCard,.onboardingTask,.onboardingTaskDone,.voteChoice,.voteChoiceSelected,.discoveryOption,.discoveryOptionSelected,.radarCard{transition:none}.quickRow button:hover,.featureCard:hover{transform:none}}

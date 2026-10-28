@@ -660,3 +660,12 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Reinforced responsive shell safe-area padding and media sizing.
 - **Scope:** CSS/presentation only; no API contracts, backend, moderation logic, database, or provider configuration changed.
 - **Verification:** source edits are committed to the feature branch. Automated checks and browser/device visual QA have not been run here.
+
+
+## Cosmic mobile front-end polish — 2026-10-28
+
+- **Implemented on feature branch:** Establish a midnight-indigo / violet cosmic default for the dark theme, with restrained nebula lighting, semantic theme tokens, refined borders and card surfaces.
+- **Implemented on feature branch:** Improve mobile navigation glass styling, active-item affordance, sticky header treatment, touch target sizing, full-width shell spacing, and safe-area handling for devices with display cut-outs.
+- **Implemented on feature branch:** Tighten shared page typography and responsive spacing, preserve content above fixed bottom navigation, and respect reduced-motion preferences.
+- **Validation outstanding:** Run the theme and theme-contrast contract scripts, TypeScript check, production build, and visual QA at narrow phone widths and desktop widths. Verify light/ocean/dusk/stone themes, keyboard navigation, screen-reader names, and iOS/Android safe areas before merge/release.
+- This pass is CSS-focused and intentionally avoids changing auth, persistence, database schemas, or service integrations.
