@@ -66,3 +66,27 @@
 .snakeControls button:focus-visible,.letter:focus-visible,.tab:focus-visible,.activeTab:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .snakeControls button:active { background:color-mix(in srgb,var(--accent) 20%,var(--surface)); }
 @media (max-width:420px) { .snakeStats > div { padding:10px; }.snakeStats strong { font-size:18px; }.snakeBoard { gap:2px; }.snakeCell { border-radius:2px; } }
+
+
+.solitaireTop { display:grid; grid-template-columns:repeat(2,minmax(66px,90px)) minmax(0,1fr); gap:clamp(8px,2vw,18px); margin:22px 0; }
+.solitaireFoundations { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(5px,1.5vw,12px); }
+.solitairePile { display:flex; flex-direction:column; align-items:center; gap:7px; min-width:0; }
+.solitairePile > span { color:var(--muted); font-size:8px; font-weight:800; letter-spacing:.6px; text-align:center; }
+.solitaireCard { display:grid; place-items:center; width:100%; min-width:0; aspect-ratio:5 / 7; border:1px solid var(--line); border-radius:7px; font-size:clamp(12px,2vw,19px); font-weight:800; cursor:pointer; touch-action:manipulation; }
+.solitaireBack { color:#f5e8ff; background:repeating-linear-gradient(45deg,#302044,#302044 5px,#49335e 5px,#49335e 10px); box-shadow:inset 0 0 0 3px #302044; }
+.solitaireFace { color:#1e293b; background:#f8fafc; border-color:#cbd5e1; }
+.solitaireRed { color:#be123c; }
+.solitaireSelected { outline:3px solid var(--accent); outline-offset:1px; transform:translateY(-2px); }
+.solitaireTableau { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:clamp(4px,1.2vw,10px); align-items:start; }
+.solitaireColumn { display:flex; flex-direction:column; align-items:stretch; min-width:0; min-height:110px; padding:3px; border:1px dashed var(--line); border-radius:8px; background:color-mix(in srgb,var(--surface) 75%,transparent); }
+.solitaireColumn .solitaireCard { margin-bottom:-38%; border-radius:5px; font-size:clamp(8px,1.4vw,15px); }
+.solitaireColumn .solitaireCard:last-of-type { margin-bottom:4px; }
+.solitaireEmpty { min-height:34px; border:1px dashed var(--line); border-radius:5px; color:var(--muted); background:transparent; cursor:pointer; }
+@media (max-width:520px) {
+  .solitaireTop { grid-template-columns:repeat(2,minmax(54px,68px)) minmax(0,1fr); gap:6px; }
+  .solitaireFoundations { gap:4px; }
+  .solitairePile > span { font-size:7px; letter-spacing:0; }
+  .solitaireColumn { padding:2px; }
+  .solitaireColumn .solitaireCard { margin-bottom:-48%; }
+  .solitaireEmpty { min-height:24px; }
+}
