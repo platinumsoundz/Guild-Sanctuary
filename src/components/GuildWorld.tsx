@@ -289,10 +289,6 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
               <div className={styles.sectionHead}><div><p className={styles.eyebrow}>THE ARCADE · 02</p><h2>Comet Dodge</h2></div><span className={styles.localPill}>20-SECOND SURVIVAL</span></div>
               <GuildCometDodge />
               <GuildCompanionHub />
-              <section aria-label="Creator games and community worlds" className={styles.creatorGames}>
-                <div className={styles.sectionHead}><div><p className={styles.eyebrow}>CREATOR GAMES · COMMUNITY WORLDS</p><h2>More worlds to explore</h2></div></div>
-                <GamesHub />
-              </section>
               <footer className={styles.footer}><span>THE GUILD · ALPHA PROTOTYPE</span><span>Sanctuary identity · isolated game state · no verified rewards</span></footer>
             </div>
           </section>
