@@ -50,5 +50,7 @@ assert.match(globalCss, /prefers-reduced-motion: reduce/, 'global motion respect
 assert.match(arcadeCss, /Cosmic Arcade is a Sanctuary-built world/, 'Cosmic Arcade is visually integrated as its own destination');
 assert.match(arcadeCss, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/, 'Arcade tabs adapt to narrow screens');
 assert.match(arcadeCss, /var\(--cosmic-cyan\)/, 'Arcade focus and active states use cosmic accents');
+assert.doesNotMatch(arcadeCss, /var\(--text\)/, 'Arcade uses the shared semantic ink token instead of an undefined text token');
+assert.match(arcadeCss, /Consistent keyboard and touch affordances/, 'all Arcade modes share keyboard and touch refinements');
 
 console.log('Sanctuary home contract checks passed.');
