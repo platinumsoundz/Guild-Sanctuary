@@ -15,6 +15,7 @@ const checks = [
   ['moderation tools are gated by the account role', /canModerate = \['moderator', 'admin', 'developer', 'owner'\]/.test(admin)],
   ['moderation queue checks the authenticated active account', /auth\.getUser\(\)/.test(service) && /profile\.status !== 'active'/.test(service)],
   ['every moderation action requires a bounded rationale', /rationale\.length < 3 \|\| rationale\.length > 1000/.test(service)],
+  ['moderation buttons stay disabled until a rationale is supplied', /!rationales\[report\.id\]\?\.trim\(\)/.test(moderation)],
   ['moderation actions use the server-side authorization RPC', /rpc\('apply_moderation_action'/.test(service)],
   ['message hide/remove/restore actions update message visibility', /requested_target_type='message'[\s\S]*?update public\.messages set state/.test(messageMigration)],
   ['message moderation validates that the target still exists', /requested_target_type = 'message' and not exists\(select 1 from public\.messages/.test(messageMigration)],
