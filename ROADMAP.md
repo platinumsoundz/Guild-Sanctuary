@@ -694,7 +694,7 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 ## Creator games moved into the Guild — 2026-10-28
 
-- **In code on feature branch `feat/move-creator-games-into-guild-2026-10-28`; validation pending:** Move the creator-project and community-world hub (The 5 Sleeves 2D, The 5 Sleeves 3D, Roblox, and Platinum Survival Java/Bedrock) out of the Support the creator page and into the Guild experience.
+- **Implemented on `feat/move-creator-games-into-guild-2026-10-28`; CI and screenshot capture passed:** Move the creator-project and community-world hub (The 5 Sleeves 2D, The 5 Sleeves 3D, Roblox, and Platinum Survival Java/Bedrock) out of the Support the creator page and into the Guild experience.
 - The Support page now remains focused on voluntary contributions and checkout notices. The existing Cosmic Arcade mini-games remain a separate Sanctuary-built games area.
 - Add a static contract requiring the games hub to render in the Guild and not in Support. This does not change game hosting URLs, game saves, account linking, or token integration.
 - **Release status:** run Guild/guest contracts, typecheck and production build on the exact head; interactive browser/device QA remains required. No production deployment is claimed.
