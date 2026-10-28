@@ -20,6 +20,7 @@ import { PersonalPlanner } from '@/modules/personal-planner/PersonalPlanner';
 import { TokenShopPanel, WalletPanel } from '@/modules/economy';
 import { CosmicArcade } from '@/components/CosmicArcade';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
+import { GuildRoadmap } from '@/components/GuildRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
@@ -134,6 +135,8 @@ export function AppWorkspace() {
         <AdminDashboard role={currentUser.profile.role} />
       ) : activeNavigation === 'roadmap' ? (
         <SanctuaryRoadmap />
+      ) : activeNavigation === 'guild-roadmap' ? (
+        <GuildRoadmap />
       ) : activeNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
