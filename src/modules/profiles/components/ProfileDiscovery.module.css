@@ -415,3 +415,88 @@
   font-size: 10px;
   line-height: 1.5;
 }
+
+.relationshipButton,
+.blockButton,
+.requestsPanel button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, opacity 140ms ease;
+}
+
+.relationshipButton:hover:not(:disabled),
+.requestsPanel button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+.relationshipButton:disabled,
+.blockButton:disabled,
+.requestsPanel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.blockButton {
+  width: 32px;
+  padding: 0;
+  color: var(--danger, #b34d58);
+}
+
+.requestsPanel {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-raised);
+}
+
+.requestsPanel h2 {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.requestRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.requestRow > span > span {
+  color: var(--muted);
+}
+
+.requestRow > div {
+  display: flex;
+  gap: 7px;
+}
+
+@media (max-width: 640px) {
+  .requestRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profileActions {
+    flex-wrap: wrap;
+  }
+}
