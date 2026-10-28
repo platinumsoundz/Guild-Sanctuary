@@ -256,3 +256,16 @@
 .panelFooter button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); cursor: pointer; font: 700 12px Arial, sans-serif; }
 .panelFooter button:hover, .panelFooter button:focus-visible { border-color: var(--accent); }
 @media (max-width: 420px) { .compact .bellButton { width: 36px; height: 36px; } .compact .panel { right: -44px; } }
+/* Keep the compact notification popover usable on touch devices and with keyboard focus. */
+.compact .bellButton { min-width: 44px; min-height: 44px; }
+.compact .panel { max-width: min(390px, calc(100vw - 24px)); }
+.panelFooter button { min-height: 42px; }
+.compact :where(button, a):focus-visible,
+.fullPage :where(button, a):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (max-width: 420px) {
+  .compact .bellButton { width: 44px; height: 44px; }
+  .compact .panel { right: -36px; }
+}
