@@ -8,6 +8,8 @@ const discovery = readFileSync(new URL('../src/modules/profiles/components/Profi
 const workspace = readFileSync(new URL('../src/components/AppWorkspace.tsx', import.meta.url), 'utf8');
 const publicProfile = readFileSync(new URL('../src/modules/profiles/components/PublicProfilePage.tsx', import.meta.url), 'utf8');
 const relationshipMigration = readFileSync(new URL('../supabase/migrations/20261028170000_connection_relationships.sql', import.meta.url), 'utf8');
+const profileReportEnum = readFileSync(new URL('../supabase/migrations/20261028180000_add_profile_report_target.sql', import.meta.url), 'utf8');
+const profileReportRpc = readFileSync(new URL('../supabase/migrations/20261028180100_profile_report_rpc.sql', import.meta.url), 'utf8');
 const relationshipService = readFileSync(new URL('../src/modules/profiles/connectionService.ts', import.meta.url), 'utf8');
 const intentionsService = readFileSync(new URL('../src/modules/profiles/discoveryIntentions.ts', import.meta.url), 'utf8');
 const intentionsEditor = readFileSync(new URL('../src/modules/profiles/components/ProfileDiscoveryIntentionsEditor.tsx', import.meta.url), 'utf8');
@@ -89,6 +91,9 @@ assert.ok(discovery.includes('Connection requests'), 'discovery must expose inco
 assert.ok(discovery.includes('Block member'), 'discovery must provide a block control');
 assert.ok(discovery.includes('Blocked members'), 'members must be able to manage their block list');
 assert.ok(discovery.includes('ReportContentButton targetType="user"'), 'members must be able to report profiles');
+assert.ok(profileReportEnum.includes("add value if not exists 'user'"), 'profile reports must extend the existing report target enum');
+assert.ok(profileReportRpc.includes('You cannot report your own profile'), 'profile reporting must reject self-reports');
+assert.ok(profileReportRpc.includes("when 'user' then select exists"), 'profile reports must enter the existing moderation queue');
 assert.ok(intentionsService.includes('MAX_DISCOVERY_INTENTIONS = 3'), 'discovery intentions must be capped');
 assert.ok(intentionsService.includes('isPublic'), 'intention visibility must be explicit');
 assert.ok(intentionsEditor.includes('Keep these intentions private'), 'intentions must be private by default');
