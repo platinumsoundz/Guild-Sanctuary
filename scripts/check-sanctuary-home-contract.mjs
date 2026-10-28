@@ -12,6 +12,7 @@ const notificationCss = readFileSync('src/components/NotificationBar.module.css'
 const workspaceCss = readFileSync('src/components/AppWorkspace.module.css', 'utf8');
 const globalCss = readFileSync('src/app/globals.css', 'utf8');
 const arcadeCss = readFileSync('src/components/CosmicArcade.module.css', 'utf8');
+const cosmicThemeCss = readFileSync('src/components/CosmicTheme.module.css', 'utf8');
 
 assert.match(workspace, /activeNavigation === 'today'[\s\S]*?<SanctuaryHome onNavigate=\{openNavigation\} \/>/, 'Today route renders the Sanctuary home');
 assert.match(context, /NavigationState = 'today'/, 'Today is a supported navigation state');
@@ -44,6 +45,8 @@ assert.match(globalCss, /--bg: #090d25/, 'cosmic midnight is the default theme')
 assert.match(globalCss, /--cosmic-violet: #a995ff/, 'default theme exposes cosmic accent tokens');
 assert.match(globalCss, /data-theme="ocean"/, 'alternate ocean theme remains independently selectable');
 assert.match(globalCss, /data-theme="dusk"/, 'alternate dusk theme remains independently selectable');
+assert.match(cosmicThemeCss, /linear-gradient\(180deg, var\(--bg\)/, 'cosmic shell inherits the selected theme background');
+assert.doesNotMatch(cosmicThemeCss, /--bg:\s*#|--surface:\s*#|--ink:\s*#/, 'cosmic shell does not override semantic theme tokens');
 
 assert.match(globalCss, /Shared cosmic interaction layer/, 'global controls share the cosmic interaction layer');
 assert.match(globalCss, /prefers-reduced-motion: reduce/, 'global motion respects reduced-motion preferences');
