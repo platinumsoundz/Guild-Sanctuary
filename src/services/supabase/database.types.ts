@@ -106,6 +106,16 @@ export interface Database {
         blocked_id: string;
         created_at: string;
       }>;
+      profile_discovery_hidden: Table<{
+        user_id: string;
+        hidden_profile_id: string;
+        created_at: string;
+      }>;
+      profile_discovery_saved: Table<{
+        user_id: string;
+        saved_profile_id: string;
+        created_at: string;
+      }>;
       profile_interests: Table<{
         user_id: string;
         interest: string;
