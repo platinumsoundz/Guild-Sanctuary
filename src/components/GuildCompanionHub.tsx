@@ -44,6 +44,8 @@ export function GuildCompanionHub() {
   const [title, setTitle] = useState('');
   const [platform, setPlatform] = useState('Browser');
   const [launchUrl, setLaunchUrl] = useState('');
+  const [librarySearch, setLibrarySearch] = useState('');
+  const [libraryPlatformFilter, setLibraryPlatformFilter] = useState('All');
   const [audioFiles, setAudioFiles] = useState<MediaFile[]>([]);
   const [photos, setPhotos] = useState<MediaFile[]>([]);
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -263,6 +265,12 @@ export function GuildCompanionHub() {
     }
   };
 
+  const visibleGames = games.filter((game) => {
+    const matchesSearch = game.title.toLocaleLowerCase().includes(librarySearch.trim().toLocaleLowerCase());
+    const matchesPlatform = libraryPlatformFilter === 'All' || game.platform === libraryPlatformFilter;
+    return matchesSearch && matchesPlatform;
+  });
+
   const checkCloudLabStatus = async () => {
     if (cloudLabBusy) return;
     setCloudLabBusy(true);
@@ -361,7 +369,12 @@ export function GuildCompanionHub() {
           <button type="submit" className={styles.primary} disabled={!libraryLoaded || syncBusy}><Plus size={15} /> Add to library</button>
         </form>
         <p className={styles.status} role="status" aria-live="polite">{syncMessage}</p>
-        {games.length ? <ul className={styles.gameList}>{games.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={safeWebUrl(game.launchUrl)} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => removeGame(game)} disabled={!libraryLoaded || syncBusy}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
+        {games.length > 0 && <div className={styles.libraryFilters}>
+          <label>Search library<input type="search" value={librarySearch} onChange={(event) => setLibrarySearch(event.target.value)} placeholder="Find a game…" aria-label="Search game library" /></label>
+          <label>Platform<select value={libraryPlatformFilter} onChange={(event) => setLibraryPlatformFilter(event.target.value)} aria-label="Filter games by platform"><option>All</option>{platforms.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <span aria-live="polite">{visibleGames.length} of {games.length} games</span>
+        </div>}
+        {games.length ? visibleGames.length ? <ul className={styles.gameList}>{visibleGames.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={safeWebUrl(game.launchUrl)} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => removeGame(game)} disabled={!libraryLoaded || syncBusy}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>No games match these filters. Clear the search or choose another platform.</p> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
         <div className={styles.notice}><strong>Next integration:</strong> an optional signed Sanctuary Companion can request permission to scan supported game locations and launch compatible installed titles. A website alone cannot enumerate your device or execute arbitrary local apps.</div>
       </section>
 
