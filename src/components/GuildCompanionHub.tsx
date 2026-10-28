@@ -38,6 +38,8 @@ export function GuildCompanionHub() {
   const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [storageWarning, setStorageWarning] = useState(false);
   const [syncBusy, setSyncBusy] = useState(false);
+  const [cloudLabBusy, setCloudLabBusy] = useState(false);
+  const [cloudLabMessage, setCloudLabMessage] = useState('Runtime is not provisioned. You can check whether server-side workspace metadata is available.');
   const [syncMessage, setSyncMessage] = useState('Sign in and sync to merge this device library with your account library.');
   const [title, setTitle] = useState('');
   const [platform, setPlatform] = useState('Browser');
@@ -261,6 +263,39 @@ export function GuildCompanionHub() {
     }
   };
 
+  const checkCloudLabStatus = async () => {
+    if (cloudLabBusy) return;
+    setCloudLabBusy(true);
+    setCloudLabMessage('Checking your authenticated Cloud Lab status…');
+    try {
+      const supabase = createClient();
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) {
+        setCloudLabMessage('Sign in to Sanctuary to check workspace status. No workspace was started.');
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('guild-cloud-lab-control', { body: { action: 'status' } });
+      if (error) {
+        setCloudLabMessage('Cloud Lab status is unavailable. Confirm the Edge Function is deployed, APP_BASE_URL is configured, and the database migration is installed. No compute was started.');
+        return;
+      }
+      if (!data || data.configured !== false || data.runtimeAvailable !== false) {
+        setCloudLabMessage('The status response was not recognised. No workspace action was requested.');
+        return;
+      }
+      const workspace = data.workspace as { state?: string; disk_quota_mb?: number; cpu_limit_millicores?: number; memory_limit_mb?: number; runtime_limit_minutes?: number } | null;
+      if (workspace) {
+        setCloudLabMessage(`Workspace metadata: ${workspace.state ?? 'unknown'} · ${workspace.disk_quota_mb ?? '—'} MB disk · ${workspace.cpu_limit_millicores ?? '—'} millicores · ${workspace.memory_limit_mb ?? '—'} MB memory · ${workspace.runtime_limit_minutes ?? '—'} min runtime cap. A terminal runtime is not connected.`);
+      } else {
+        setCloudLabMessage(typeof data.message === 'string' ? data.message : 'No workspace metadata found. Cloud Lab does not start compute in this build.');
+      }
+    } catch {
+      setCloudLabMessage('Could not contact Cloud Lab. Check your connection and server configuration; no compute was started.');
+    } finally {
+      setCloudLabBusy(false);
+    }
+  };
+
   const removeGame = (game: LocalGame) => {
     try {
       const saved = window.localStorage.getItem(DELETED_IDS_KEY);
@@ -356,6 +391,12 @@ export function GuildCompanionHub() {
       <section className={styles.panel} aria-labelledby="guild-cloud-lab-title">
         <div className={styles.panelHeading}><span className={styles.icon}><Terminal size={19} /></span><div><h3 id="guild-cloud-lab-title">Cloud Lab · persistent Linux</h3><p>Infrastructure design is underway; this is deliberately not a simulated terminal.</p></div></div>
         <div className={styles.notice}><strong>Not provisioned yet.</strong> Recommended design: server-hosted isolated Linux with an encrypted persistent home volume, per-user quotas, authenticated terminal gateway and controlled network egress. Stopping the workspace should preserve files; reset/delete should require confirmation. No shell commands can run from this panel today, and no paid compute should start until a provider and spend ceiling are approved.</div>
+        <div className={styles.libraryTools}>
+          <button type="button" className={styles.secondary} onClick={() => void checkCloudLabStatus()} disabled={cloudLabBusy}>
+            <ShieldCheck size={14} /> {cloudLabBusy ? 'Checking status…' : 'Check workspace status'}
+          </button>
+        </div>
+        <p className={styles.status} role="status" aria-live="polite">{cloudLabMessage}</p>
         <div className={styles.serviceChips}><span>Per-user isolation</span><span>Persistent home directory</span><span>Resource quotas</span><span>Secure terminal gateway</span><span>Stop / reset controls</span><span>Cost and abuse limits</span></div>
       </section>
 
