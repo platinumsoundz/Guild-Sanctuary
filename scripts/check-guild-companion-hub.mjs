@@ -7,7 +7,7 @@ const guild = readFileSync('src/components/GuildWorld.tsx', 'utf8');
 const migration = readFileSync('supabase/migrations/20261028214500_guild_library_entries.sql', 'utf8');
 
 for (const text of [
-  'Account library sync is available', 'Local cache + account sync', 'DELETED_IDS_KEY', 'OWNER_KEY', 'previousOwner !== authData.user.id', 'prevent mixing private libraries', 'removeGame', 'queued removals were applied', 'disabled={!libraryLoaded || syncBusy}', 'Your visible library was left unchanged',
+  'Account library sync is wired in code but remains unverified', 'Local cache + account sync', 'DELETED_IDS_KEY', 'OWNER_KEY', 'previousOwner !== authData.user.id', 'prevent mixing private libraries', 'removeGame', 'queued removals were applied', 'disabled={!libraryLoaded || syncBusy}', 'Your visible library was left unchanged',
   'Sign in & sync', 'syncLibrary', 'if (syncBusy || !libraryLoaded) return;', 'Loading library…', 'supabase.auth.getUser()', 'pendingDeletes', "from('guild_library_entries').delete().in('id', pendingDeletes)",
   "from('guild_library_entries')", 'Your local library is unchanged',
   'Syncing…', 'storageWarning', 'could not read or save the device-local cache', 'Sign in and sync to keep a server copy',
@@ -15,7 +15,7 @@ for (const text of [
   'Memory gallery', 'Cloud Lab', 'persistent Linux', 'not a simulated terminal',
   'RetroArch', 'RetroAchievements', 'Steam', 'Xbox', 'GOG', 'itch.io',
   'localStorage', 'libraryLoaded', 'MAX_MEDIA_FILES', 'MAX_AUDIO_BYTES',
-  'MAX_IMAGE_BYTES', 'MAX_AUDIO_TOTAL_BYTES', 'MAX_IMAGE_TOTAL_BYTES', 'safeWebUrl', 'exportLibrary', 'importLibrary',
+  'MAX_IMAGE_BYTES', 'MAX_AUDIO_TOTAL_BYTES', 'MAX_IMAGE_TOTAL_BYTES', '250 MB total', '100 MB total', 'per-file/total-size limit', 'safeWebUrl', 'exportLibrary', 'importLibrary',
   'sanctuary-guild-library', 'games.length >= 500', '500-game limit',
   'noopener noreferrer', 'URL.createObjectURL', 'not uploaded', 'https:',
   'target="_blank"', 'rel="noopener noreferrer"',
