@@ -690,3 +690,11 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Added `npm run check:guild-browser-arcade` to CI to cover route wiring, game/controller contracts and explicit account gate.
 - **Verification pending:** exact-head CI, typecheck, build and screenshot workflows; browser/gamepad testing on desktop and mobile; test the companion hub with and without Supabase configuration. This batch does not include calling, Cloud Lab, migration application or external platform OAuth.
 - No production deployment, provider configuration, secrets, billing or database writes are included. The branch is based on the guest-safety batch; merge that dependency before integrating this batch, or rebase/reconcile if the dependency changes.
+
+
+## Creator games moved into the Guild — 2026-10-28
+
+- **In code on feature branch `feat/move-creator-games-into-guild-2026-10-28`; validation pending:** Move the creator-project and community-world hub (The 5 Sleeves 2D, The 5 Sleeves 3D, Roblox, and Platinum Survival Java/Bedrock) out of the Support the creator page and into the Guild experience.
+- The Support page now remains focused on voluntary contributions and checkout notices. The existing Cosmic Arcade mini-games remain a separate Sanctuary-built games area.
+- Add a static contract requiring the games hub to render in the Guild and not in Support. This does not change game hosting URLs, game saves, account linking, or token integration.
+- **Release status:** run Guild/guest contracts, typecheck and production build on the exact head; interactive browser/device QA remains required. No production deployment is claimed.
