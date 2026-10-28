@@ -62,10 +62,12 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     setCameraOff(false);
   }, []);
 
-  const sendSignal = useCallback((signal: Omit<Signal, 'from'>) => {
+  const sendSignal = useCallback(async (signal: Omit<Signal, 'from'>) => {
     const channel = channelRef.current;
     if (!channel) throw new Error('Call signalling is not connected.');
-    return channel.send({ type: 'broadcast', event: 'signal', payload: { ...signal, from: currentUserId } });
+    const status = await channel.send({ type: 'broadcast', event: 'signal', payload: { ...signal, from: currentUserId } });
+    if (status !== 'ok') throw new Error('The call signal could not be delivered. Check the connection and try again.');
+    return status;
   }, [currentUserId]);
 
   const resetCall = useCallback(() => {
