@@ -29,3 +29,10 @@
 - Added an accessible fallback message and changed event cards to disclose unavailable locations instead of presenting invalid values as usable pins.
 - Extended the event contract assertions for validated map URLs and fallback UI.
 - Source checks, typecheck, production build, browser/device QA, and deployment remain unrun; automatic preview/deployment is not being treated as verification.
+
+
+## Nearby-area discovery follow-up — 2026-10-28 UTC
+- Added a “Happening within 10 km” panel around the selected event, ranked by Haversine distance with readable metres/kilometres.
+- Nearby event cards are keyboard accessible and select/focus that event on the map; invalid/missing coordinates are excluded from proximity results.
+- Added responsive styling and contract assertions for distance ranking and the empty state.
+- Source contract execution, typecheck/build, and browser/device QA remain outstanding; this is source progress only, not a verified release.
