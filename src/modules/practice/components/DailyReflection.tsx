@@ -2,11 +2,21 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Heart, LockKeyhole, RotateCcw, Save } from 'lucide-react';
+import { getSupabaseBrowserClient } from '@/services/supabase';
+import { isSupabaseCommunityStorageConfigured } from '@/services/supabase/communityMedia';
 import styles from './DailyReflection.module.css';
 
 type Mood = 'low' | 'heavy' | 'steady' | 'good' | 'bright';
 interface ReflectionEntry { date: string; mood: Mood; intention: string; reflection: string; updatedAt: string; }
 interface DailyReflectionProps { userId: string; isGuest: boolean; }
+type DailyReflectionRow = { reflection_date: string; mood: string | null; intention: string; content: string; updated_at: string };
+function mapDatabaseEntries(rows: DailyReflectionRow[]): ReflectionEntry[] {
+  return rows.filter((row): row is DailyReflectionRow & { mood: Mood } =>
+    typeof row.reflection_date === 'string' && MOODS.some((option) => option.value === row.mood) &&
+    typeof row.intention === 'string' && typeof row.content === 'string' && typeof row.updated_at === 'string',
+  ).map((row) => ({ date: row.reflection_date, mood: row.mood, intention: row.intention, reflection: row.content, updatedAt: row.updated_at }))
+    .sort((a, b) => b.date.localeCompare(a.date)).slice(0, 90);
+}
 const MOODS: { value: Mood; label: string; description: string }[] = [
   { value: 'low', label: 'Low', description: 'A difficult day' },
   { value: 'heavy', label: 'Heavy', description: 'A lot on my mind' },
@@ -40,8 +50,10 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
   const [status, setStatus] = useState('');
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const [readableKey, setReadableKey] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const sessionReady = loadedKey === key && readableKey === key;
   useEffect(() => {
+    let cancelled = false;
     setLoadedKey(null);
     setReadableKey(null);
     setEntries([]);
@@ -49,22 +61,84 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     setIntention('');
     setReflection('');
     setStatus('');
-    try {
-      const loaded = readEntries(key);
-      setEntries(loaded);
-      const existing = loaded.find((entry) => entry.date === today);
-      setMood(existing?.mood ?? '');
-      setIntention(existing?.intention ?? '');
-      setReflection(existing?.reflection ?? '');
-      setReadableKey(key);
-    } catch {
-      // Fail closed: never treat an unreadable store as empty and overwrite it.
-      setEntries([]);
-      setStatus('This browser could not open the saved reflections. Your existing data has not been changed. Check browser storage access and try again.');
-    } finally {
-      setLoadedKey(key);
-    }
-  }, [key, today]);
+
+    const loadReflections = async () => {
+      try {
+        if (isGuest) {
+          if (!cancelled) { setReadableKey(key); setLoadedKey(key); }
+          return;
+        }
+        if (!isSupabaseCommunityStorageConfigured()) {
+          throw new Error('Database storage is not configured. Your reflections are locked rather than silently saved only in this browser.');
+        }
+        const client = getSupabaseBrowserClient();
+        const { data: authData, error: authError } = await client.auth.getUser();
+        if (authError) throw new Error(`Your sign-in could not be verified: ${authError.message}`);
+        if (!authData.user || authData.user.id !== userId) {
+          throw new Error('Sign in with the same Sanctuary account to load your private reflections.');
+        }
+
+        const { data: savedRows, error: loadError } = await client.from('daily_reflections')
+          .select('reflection_date,mood,intention,content,updated_at')
+          .eq('user_id', userId)
+          .order('reflection_date', { ascending: false })
+          .limit(90);
+        if (loadError) throw new Error(`Your reflections could not be loaded from the database: ${loadError.message}`);
+
+        let loaded = mapDatabaseEntries((savedRows ?? []) as DailyReflectionRow[]);
+        let legacyEntries: ReflectionEntry[] = [];
+        let legacyReadable = true;
+        try {
+          legacyEntries = readEntries(key);
+        } catch {
+          legacyReadable = false;
+        }
+        if (legacyEntries.length > 0) {
+          const savedDates = new Set(loaded.map((entry) => entry.date));
+          const missingEntries = legacyEntries.filter((entry) => !savedDates.has(entry.date));
+          if (missingEntries.length > 0) {
+            const rows = missingEntries.map((entry) => ({
+              user_id: userId,
+              reflection_date: entry.date,
+              title: '',
+              intention: entry.intention.slice(0, 180),
+              content: entry.reflection.slice(0, 1200),
+              mood: entry.mood,
+              prompts: [],
+              tags: [],
+            }));
+            const { error: migrateError } = await client.from('daily_reflections')
+              .upsert(rows, { onConflict: 'user_id,reflection_date' });
+            if (migrateError) throw new Error(`Your existing reflections could not be transferred to the database: ${migrateError.message}`);
+            loaded = [...loaded, ...missingEntries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 90);
+            window.localStorage.removeItem(key);
+            setStatus('Your existing reflections have been transferred to your account database.');
+          } else if (loaded.length > 0) {
+            // Database rows take precedence for dates already present; the full legacy date set is now covered.
+            window.localStorage.removeItem(key);
+          }
+        }
+        if (!legacyReadable && loaded.length === 0) {
+          setStatus('Your account database is ready, but the previous browser reflection copy could not be read. It has not been changed.');
+        }
+        if (cancelled) return;
+        setEntries(loaded);
+        const existing = loaded.find((entry) => entry.date === today);
+        setMood(existing?.mood ?? '');
+        setIntention(existing?.intention ?? '');
+        setReflection(existing?.reflection ?? '');
+        setReadableKey(key);
+      } catch (loadError) {
+        if (cancelled) return;
+        setEntries([]);
+        setStatus(loadError instanceof Error ? loadError.message : 'The reflections database could not be reached.');
+      } finally {
+        if (!cancelled) setLoadedKey(key);
+      }
+    };
+    void loadReflections();
+    return () => { cancelled = true; };
+  }, [isGuest, key, today, userId]);
   const savedToday = entries.some((entry) => entry.date === today);
   const recentEntries = entries
     .filter((entry) => entry.date <= today)
@@ -75,31 +149,68 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
   })).filter((option) => option.count > 0);
   const mostFrequentMood = [...moodCounts].sort((a, b) => b.count - a.count)[0];
   const reflectionDays = recentEntries.length;
-  const saveReflection = (event: FormEvent<HTMLFormElement>) => {
+  const saveReflection = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!sessionReady) { setStatus('Your saved reflections are not ready to edit. Reload this section before trying again.'); return; }
-    if (isGuest) { setStatus('Sign in to keep a reflection on this device.'); return; }
+    if (isGuest) { setStatus('Sign in to save a reflection to your account.'); return; }
     if (!mood) { setStatus('Choose the mood that feels closest to today.'); return; }
-    const nextEntry: ReflectionEntry = {
-      date: today, mood, intention: intention.trim().slice(0, 180),
-      reflection: reflection.trim().slice(0, 1200), updatedAt: new Date().toISOString(),
-    };
-    const nextEntries = [nextEntry, ...entries.filter((entry) => entry.date !== today)]
-      .sort((a, b) => b.date.localeCompare(a.date)).slice(0, 90);
+    setSaving(true);
+    setStatus('Saving your reflection to your account…');
     try {
-      window.localStorage.setItem(key, JSON.stringify(nextEntries));
+      const client = getSupabaseBrowserClient();
+      const { data: authData, error: authError } = await client.auth.getUser();
+      if (authError || !authData.user || authData.user.id !== userId) {
+        throw new Error('Your active account changed. Sign in again before saving reflections.');
+      }
+      const payload = {
+        user_id: userId,
+        reflection_date: today,
+        title: '',
+        intention: intention.trim().slice(0, 180),
+        content: reflection.trim().slice(0, 1200),
+        mood,
+        prompts: [],
+        tags: [],
+      };
+      const { data: saved, error } = await client.from('daily_reflections')
+        .upsert(payload, { onConflict: 'user_id,reflection_date' })
+        .select('updated_at')
+        .single();
+      if (error) throw new Error(error.message);
+      const nextEntry: ReflectionEntry = {
+        date: today, mood, intention: payload.intention,
+        reflection: payload.content, updatedAt: saved.updated_at,
+      };
+      const nextEntries = [nextEntry, ...entries.filter((entry) => entry.date !== today)]
+        .sort((a, b) => b.date.localeCompare(a.date)).slice(0, 90);
       setEntries(nextEntries);
-      setStatus('Your reflection is saved in this browser.');
-    } catch { setStatus('This browser could not save the reflection. Check its storage settings and try again.'); }
+      setStatus('Your reflection is saved to your Sanctuary account.');
+    } catch (saveError) {
+      setStatus(saveError instanceof Error ? `Your reflection was not saved: ${saveError.message}` : 'Your reflection was not saved. Try again.');
+    } finally {
+      setSaving(false);
+    }
   };
-  const clearHistory = () => {
+  const clearHistory = async () => {
     if (!sessionReady) { setStatus('Your saved reflections are not ready to clear. Reload this section before trying again.'); return; }
-    if (!window.confirm('Delete all Sanctuary reflections saved in this browser for this account? This cannot be undone.')) return;
+    if (!window.confirm('Delete all Sanctuary reflections saved to your account? This cannot be undone.')) return;
+    setSaving(true);
     try {
-      window.localStorage.removeItem(key);
+      const client = getSupabaseBrowserClient();
+      const { data: authData, error: authError } = await client.auth.getUser();
+      if (authError || !authData.user || authData.user.id !== userId) {
+        throw new Error('Your active account changed. Sign in again before clearing reflections.');
+      }
+      const { error } = await client.from('daily_reflections').delete().eq('user_id', userId);
+      if (error) throw new Error(error.message);
+      try { window.localStorage.removeItem(key); } catch { /* Database deletion is authoritative. */ }
       setEntries([]); setMood(''); setIntention(''); setReflection('');
-      setStatus('Your locally saved reflections have been deleted.');
-    } catch { setStatus('The browser could not delete the saved reflections.'); }
+      setStatus('Your account reflection history has been deleted.');
+    } catch (clearError) {
+      setStatus(clearError instanceof Error ? `Reflection history was not deleted: ${clearError.message}` : 'Reflection history could not be deleted.');
+    } finally {
+      setSaving(false);
+    }
   };
   if (isGuest) return (
     <section className={styles.card} aria-labelledby="reflection-title">
@@ -108,7 +219,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
         <div><p className={styles.eyebrow}>A MOMENT FOR YOURSELF</p><h2 id="reflection-title">Daily reflection</h2></div>
       </div>
       <p className={styles.description}>A gentle check-in for your mood, intention and thoughts. Guest browsing stays read-only.</p>
-      <p className={styles.notice}>Sign in to write and save a reflection on this device.</p>
+      <p className={styles.notice}>Sign in to save a reflection to your Sanctuary account.</p>
     </section>
   );
   return (
@@ -144,10 +255,10 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
             <span className={styles.counter}>{reflection.length}/1200</span>
           </label>
           <div className={styles.actions}>
-            <button className={styles.saveButton} type="submit"><Save size={16} aria-hidden="true" />{savedToday ? 'Update today’s reflection' : 'Save reflection'}</button>
-            {entries.length > 0 && <button className={styles.clearButton} type="button" onClick={clearHistory}><RotateCcw size={15} aria-hidden="true" />Clear history</button>}
+            <button className={styles.saveButton} type="submit" disabled={saving}><Save size={16} aria-hidden="true" />{saving ? 'Saving…' : savedToday ? 'Update today’s reflection' : 'Save reflection'}</button>
+            {entries.length > 0 && <button className={styles.clearButton} type="button" onClick={() => void clearHistory()} disabled={saving}><RotateCcw size={15} aria-hidden="true" />Clear history</button>}
           </div>
-          <p className={styles.privacy}><LockKeyhole size={14} aria-hidden="true" /> Saved only in this browser on this device. It is not synced to your account or sent to Sanctuary servers. Anyone with access to this browser profile may be able to read it, so avoid entering details you would not want them to see.</p>
+          <p className={styles.privacy}><LockKeyhole size={14} aria-hidden="true" /> Saved to your Sanctuary account database and protected by row-level security. Your reflections follow your account across devices; avoid sharing your sign-in with anyone you do not trust.</p>
           {status && <p className={styles.status} role="status" aria-live="polite">{status}</p>}
           <p className={styles.disclaimer}>This is a personal reflection tool, not medical advice, diagnosis or treatment.</p>
         </form>
