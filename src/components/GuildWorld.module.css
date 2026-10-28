@@ -4,3 +4,5 @@
 
 
 .publicGuild{width:min(100%,1440px);margin:0 auto;padding:clamp(16px,4vw,42px);color:var(--ink)}.publicGuild>h1{margin:0;font-size:clamp(30px,5vw,48px);letter-spacing:-.045em}.publicGuildIntro{max-width:720px;color:var(--muted);font-size:14px;line-height:1.7}.publicGuild :global(.hub){width:100%;padding:18px 0}.publicGuild :global(.hub > .header){display:none}.publicGuild :global(.hub .futureSection){margin-top:24px}@media(max-width:600px){.publicGuild{padding:14px}.publicGuild :global(.hub){padding:12px 0}}
+
+.enterPublicGuild{display:inline-flex;align-items:center;gap:8px;min-height:42px;margin:10px 0 6px;padding:10px 15px;border:1px solid var(--line);border-radius:10px;background:var(--accent);color:var(--surface-raised);font-weight:700;cursor:pointer}.enterPublicGuild:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
