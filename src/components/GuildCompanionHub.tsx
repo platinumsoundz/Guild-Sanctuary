@@ -360,7 +360,7 @@ export function GuildCompanionHub() {
   return (
     <section className={styles.hub} aria-label="Guild companion features">
       <div className={styles.heading}>
-        <div><p className={styles.eyebrow}>YOUR PERSONAL ORBIT</p><h2>Library & lounges</h2><p>Account library sync is available when signed in and the database migration is installed. Personal media stays on your device by default.</p></div>
+        <div><p className={styles.eyebrow}>YOUR PERSONAL ORBIT</p><h2>Library & lounges</h2><p>Account library sync is wired in code but remains unverified until its database migration is applied and tested. Personal media stays on your device by default.</p></div>
         <span className={styles.privacy}><ShieldCheck size={15} /> Local cache + account sync</span>
       </div>
 
