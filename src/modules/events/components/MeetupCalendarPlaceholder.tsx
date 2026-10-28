@@ -55,7 +55,9 @@ export function MeetupCalendarPlaceholder() {
           event.locationCoords.longitude,
         ) }))
         .filter(({ event, distanceKm }) =>
-          distanceKm <= 10 && Boolean(getMapLinks(String(event.locationCoords.latitude), String(event.locationCoords.longitude))),
+          event.id !== selectedMapEvent.id
+          && distanceKm <= 10
+          && Boolean(getMapLinks(String(event.locationCoords.latitude), String(event.locationCoords.longitude))),
         )
         .sort((a, b) => a.distanceKm - b.distanceKm)
     : [];
