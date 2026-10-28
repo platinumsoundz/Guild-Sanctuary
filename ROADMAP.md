@@ -669,3 +669,13 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Implemented on feature branch:** Tighten shared page typography and responsive spacing, preserve content above fixed bottom navigation, and respect reduced-motion preferences.
 - **Validation outstanding:** Run the theme and theme-contrast contract scripts, TypeScript check, production build, and visual QA at narrow phone widths and desktop widths. Verify light/ocean/dusk/stone themes, keyboard navigation, screen-reader names, and iOS/Android safe areas before merge/release.
 - This pass is CSS-focused and intentionally avoids changing auth, persistence, database schemas, or service integrations.
+
+
+## Release-candidate integration batch update — 2026-10-28
+
+- **Merged into the release-candidate branch only:** PR [#212 — keep Shorts videos full size](https://github.com/platinumsoundz/Guild-Sanctuary/pull/212), squash commit `49260ef65e06aaced2f0a487edfeb1c49505d345`.
+- The change gives each Shorts clip its own full-height grid row, preserves vertical scroll snapping, and adds a CI contract against the layout regression.
+- **Not merged to `main`; not deployed to production.** GitHub reported all exact-head PR checks passing before merge. Vercel preview remained rate-limited and Cloudflare skipped deployment on the PR event, so this is not live-device acceptance evidence.
+- Guest-safe preview PR #213 remains the next dependency. It is still draft because its route-level guard must be reviewed alongside service/RLS authorization and real sign-in journeys. Guild Arcade PR #214 and creator games PR #215 remain stacked behind it; do not retarget/merge them until the guest-access dependency is reviewed and integrated.
+- Daily Reflection PR #216 remains draft pending authenticated account-isolation and save/read/delete failure-path acceptance. Messaging/comment/Shorts backend runtime checks remain separate release gates.
+- No Supabase writes, migrations, production settings, secrets, payment settings or production deployment were changed in this batch.
