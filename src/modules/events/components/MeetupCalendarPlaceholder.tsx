@@ -333,7 +333,12 @@ function getMapLinks(latitudeValue: string, longitudeValue: string): { embed: st
     return null;
   }
   const delta = 0.012;
-  const bounds = [longitude - delta, latitude - delta, longitude + delta, latitude + delta].join('%2C');
+  // Keep the requested bounding box inside the valid geographic range, including at the poles and date line.
+  const minLongitude = Math.max(-180, longitude - delta);
+  const minLatitude = Math.max(-90, latitude - delta);
+  const maxLongitude = Math.min(180, longitude + delta);
+  const maxLatitude = Math.min(90, latitude + delta);
+  const bounds = [minLongitude, minLatitude, maxLongitude, maxLatitude].join('%2C');
   return {
     embed: `https://www.openstreetmap.org/export/embed.html?bbox=${bounds}&layer=mapnik&marker=${latitude}%2C${longitude}`,
     open: `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=16/${latitude}/${longitude}`,
