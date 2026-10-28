@@ -160,6 +160,8 @@ export function AppWorkspace() {
           currentUserId={currentUser.user.id}
           onMessage={openMessage}
           onView={(profile) => setViewedProfile(profile)}
+          onExploreFeed={() => setActiveNavigation('feed')}
+          onExploreEvents={() => setActiveNavigation('events')}
         />
       ) : activeNavigation === 'messages' && messagePeer ? (
         <DirectMessageThread peer={messagePeer} onBack={() => setMessagePeer(null)} />
