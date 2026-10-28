@@ -62,5 +62,5 @@ assert.ok(component.includes('Include past events') && component.includes('check
 assert.ok(component.includes('No upcoming events right now'), 'the upcoming-only view must explain its empty state and how to find past events');
 assert.ok(component.includes('visibleEvents.map((event, index)'), 'map pin selection must follow the active upcoming/past filter');
 assert.ok(component.includes('visibleEvents.map((event) => ('), 'event cards must follow the active upcoming/past filter');
-assert.ok(css.includes('.pastEventsToggle input:focus-visible'), 'past-event filter must have visible keyboard focus');
+assert.ok(styles.includes('.pastEventsToggle input:focus-visible'), 'past-event filter must have visible keyboard focus');
 console.log('Upcoming/past event filter contract checks passed.');

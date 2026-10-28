@@ -61,3 +61,6 @@
 - Added keyboard-focus styling and regression assertions for the filter.
 - Previously verified at head 7d2d995da71a3237ca2e5a9a983c07624ebe2057: GitHub CI passed install, security/contracts, event contract, typecheck and production build; Cloudflare worker build passed while deployment was correctly skipped for this PR; automated roadmap check passed. This new filter change requires those checks to rerun on the new head before release.
 - Vercel preview remains blocked by its reported build-rate limit, so browser/device and screen-reader QA still require a usable preview. Keep this PR draft; no production deployment, schema/RLS/provider changes, or production writes.
+
+
+- CI follow-up: the new past-event regression assertion initially referenced the CSS variable as `css` instead of the script's existing `styles` variable. GitHub CI caught the test-script typo; corrected in the follow-up commit. Rerun CI on that commit before release.
