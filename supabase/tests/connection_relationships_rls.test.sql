@@ -1,5 +1,5 @@
 begin;
-select plan(19);
+select plan(23);
 
 select ok(
   (select c.relrowsecurity from pg_catalog.pg_class c where c.oid = 'public.profile_follows'::regclass),
@@ -83,6 +83,19 @@ select ok(exists (
   where schemaname = 'public' and tablename = 'social_comments'
     and policyname = 'blocked profiles excluded from comments' and permissive = 'RESTRICTIVE'
 ), 'blocked members are excluded from public comments');
+
+select ok(
+  (select c.relrowsecurity from pg_catalog.pg_class c where c.oid = 'public.profile_discovery_hidden'::regclass),
+  'profile_discovery_hidden has row-level security enabled'
+);
+select ok(
+  (select c.relrowsecurity from pg_catalog.pg_class c where c.oid = 'public.profile_discovery_saved'::regclass),
+  'profile_discovery_saved has row-level security enabled'
+);
+select ok(not has_table_privilege('anon', 'public.profile_discovery_hidden', 'select'),
+  'anonymous role cannot read hidden profile preferences');
+select ok(not has_table_privilege('anon', 'public.profile_discovery_saved', 'select'),
+  'anonymous role cannot read saved profile preferences');
 
 select * from finish();
 rollback;
