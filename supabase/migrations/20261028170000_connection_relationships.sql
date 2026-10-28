@@ -181,6 +181,33 @@ create trigger guard_profile_connections
   before insert or update on public.profile_connections
   for each row execute function private.guard_profile_relationships();
 
+-- Authenticated public-profile discovery must hide either side of a block.
+create or replace function private.is_profile_blocked(requested_profile_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select exists (
+    select 1
+    from public.profile_blocks b
+    where ((select auth.uid()) = b.blocker_id and b.blocked_id = requested_profile_id)
+       or ((select auth.uid()) = b.blocked_id and b.blocker_id = requested_profile_id)
+  );
+$;
+
+revoke all on function private.is_profile_blocked(uuid) from public, anon;
+grant execute on function private.is_profile_blocked(uuid) to authenticated;
+
+drop policy if exists "public profile projection readable" on private.public_profile_projection;
+create policy "public profile projection readable"
+  on private.public_profile_projection for select to anon, authenticated
+  using (
+    (select auth.uid()) is null
+    or not (select private.is_profile_blocked(id))
+  );
+
 -- Blocking immediately removes follow edges and closes pending requests both ways.
 create or replace function private.apply_profile_block_cleanup()
 returns trigger
@@ -195,7 +222,7 @@ begin
 
   update public.profile_connections
   set status = 'declined', responded_at = now()
-  where status = 'pending'
+  where status in ('pending', 'accepted')
     and (
       (requester_id = new.blocker_id and addressee_id = new.blocked_id)
       or (requester_id = new.blocked_id and addressee_id = new.blocker_id)
