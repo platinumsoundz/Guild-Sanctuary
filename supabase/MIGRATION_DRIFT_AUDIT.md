@@ -54,6 +54,7 @@ The following live migrations were added to this branch with their matching vers
 - `20261028160903_consolidate_social_engagement_rls`
 - `20261028161009_tighten_table_privilege_grants`
 - `20261028161415_restore_column_level_write_grants`
+- `20261028162026_harden_remaining_table_privileges`
 
 ## Recommended reconciliation workflow
 
