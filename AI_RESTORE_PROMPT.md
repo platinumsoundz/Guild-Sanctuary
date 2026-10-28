@@ -230,3 +230,11 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 ### Owner-only provider handoff
 Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment setup; Cloudflare/Vercel account settings, secrets, domains and provider configuration remain owner tasks. No provider account settings or secrets were edited as part of this cleanup.
+
+
+### Front-end responsive polish checkpoint — 2026-10-28
+- Active front-end branch: `feat/sanctuary-frontend-polish-2026-10-28`; draft PR #190: https://github.com/platinumsoundz/Guild-Sanctuary/pull/190
+- Added responsive home hero/quick-action layouts, keyboard focus visibility, reduced-motion handling, safe-area-aware feed spacing, and narrow-screen profile form refinements.
+- Updated `src/components/SanctuaryHome.module.css`, `src/modules/feeds/components/Feed.module.css`, and `src/modules/profiles/components/ProfileDashboard.module.css`.
+- This is presentation-only work. Admin/moderation and backend integration remain assigned to the separate backend agent.
+- Browser/device QA and automated checks remain outstanding; do not describe this branch as tested, merged, or deployed.
