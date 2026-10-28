@@ -38,7 +38,7 @@ assert.match(css, /@media \(max-width: 560px\)/, 'cosmic hero has a dedicated mo
 assert.match(navigationCss, /luminous active states/, 'navigation has cosmic glass styling');
 assert.match(navigationCss, /mobileBottomNavigation/, 'mobile navigation has a dedicated responsive surface');
 assert.match(notificationCss, /Cosmic glass treatment/, 'notifications share the cosmic visual system');
-assert.match(workspaceCss, /Cosmic visual language for every routed workspace/, 'routed workspace shares the cosmic art direction');
+assert.match(workspaceCss, /Routed workspaces share the cosmic atmosphere/, 'routed workspace shares the cosmic art direction');
 assert.match(workspaceCss, /linear-gradient\(145deg, color-mix/, 'section surfaces use the cosmic semantic palette');
 assert.match(workspaceCss, /text-wrap: balance/, 'section headings use balanced typography');
 assert.match(globalCss, /--bg: #090d25/, 'cosmic midnight is the default theme');
