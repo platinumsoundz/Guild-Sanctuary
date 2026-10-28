@@ -79,3 +79,12 @@ The default is server-authoritative account data with bounded local caching, not
 - The function requires JWT verification in `supabase/config.toml`. It is repository code only and has not been deployed or tested against a live project. Configure the canonical HTTPS `APP_BASE_URL` before any staging test.
 - Static source-contract coverage is available via `npm run check:guild-cloud-lab-control`; this is not a substitute for authenticated cross-account tests.
 
+## Current calling implementation status
+
+- The conversation panel implements one-to-one audio/video calls with private Realtime signalling, WebRTC media, incoming accept/decline, mute/camera controls, hang-up, invite timeout, reconnect feedback, and bounded payload/ICE handling.
+- Incoming broadcast payloads are validated before any call state changes; the pre-description ICE candidate queue is capped. Signalling database policies and the ICE-config function enforce active conversation membership and active-account status.
+- Calls use browser-provided WebRTC encryption and are not recorded by Sanctuary. Group calling is not implemented; it should use an SFU rather than mesh connections as the product grows.
+- STUN fallback may work on many networks, but cannot guarantee connectivity through restrictive NATs/firewalls. Reliable broad coverage requires a configured TURN relay; the server-side credential function supports configuration, but no TURN service or secrets are provisioned here.
+- Source-contract checks do not establish that audio/video works between real devices. Before calling this production-ready, run authenticated two-device tests for audio and video, permission denial, incoming timeout, reject/hang-up, tab refresh, reconnect, restricted networks, and cross-account/left-member access. Check Supabase Realtime private-channel settings in the deployed project.
+- Cloud Lab is explicitly **in development / pinned for later**. The current app and Supabase schema alone do not provide a safe persistent Linux guest; no provider has been selected and no compute is running.
+
