@@ -8,12 +8,13 @@ Status reconciliation: this update corrects stale theme/notification labels from
 
 - **In code, QA pending:** Restored a dedicated Games navigation entry labelled “Cosmic Arcade”; existing creator/community game links remain in the Games hub.
 - **Playable prototypes:** Starseed Word Search supports two-tap straight-line selection (horizontal, vertical, and diagonal), exact found-cell highlighting, progress, reset, and completion feedback. Cosmic Snake has keyboard and mobile controls, score, personal-best tracking for the current visit, and restart.
-- **Playable preview:** Lunar Solitaire now has a shuffled 52-card deal, seven tableau columns, stock/waste recycling, alternating-colour descending tableau moves, Ace-to-King suit foundations, automatic reveal of newly exposed cards, restart, and responsive card styling. It is a client-side single-visit prototype; persistence and automated gameplay QA remain pending.
-- **Planned:** Celestial Crossword and Zodiac Mahjong remain concepts, not falsely presented as playable.
-- **Regression contract added:** `npm run check:cosmic-arcade` checks key gameplay, accessibility, and spending-lock guardrails; it is a static source contract, not browser QA.
+- **Playable preview:** Lunar Solitaire has a shuffled 52-card deal, seven tableau columns, stock/waste recycling, alternating-colour descending tableau moves, Ace-to-King suit foundations, automatic reveal of newly exposed cards, restart, and responsive card styling. It is a client-side single-visit prototype; persistence and automated gameplay QA remain pending.
+- **Playable preview:** Celestial Crossword now has across/down clues, shared letter cells, answer checking, clue focus, reset, and responsive layout. It is a small starter puzzle, not yet a larger puzzle pack.
+- **Planned:** Zodiac Mahjong remains a concept and is not labelled playable.
+- **Regression contract added:** `npm run check:cosmic-arcade` checks key gameplay, accessibility, and spending-lock guardrails; it is a static source contract, not browser QA. The repository CI typecheck/build run passed for the prior arcade revision; this crossword update needs its own CI result before being called verified.
 - **Token economy — design only / spending locked:** Theme previews and example consumables (hints, extra lives, and a 50-token Snake revive) are shown as future ideas. No arcade item is purchasable and this UI does not deduct tokens.
 - **Required before token spending:** Implement a server-authoritative game economy/RPC with authenticated ownership, wallet balance checks, idempotency keys, game-session validation, and immutable ledger entries. Define whether revives/boosts are consumables, expiry/refund rules, and exploit/rate limits. Require owner-approved Supabase migration and isolated staging tests before enabling spending.
-- **Validation pending:** Typecheck, production build, keyboard/screen-reader checks, mobile gameplay QA, and end-to-end wallet/RPC tests have not been run.
+- **Validation status:** CI typecheck and production build passed for the preceding arcade revision. The crossword update is awaiting its own CI run. Keyboard/screen-reader review, interactive mobile gameplay QA, persistence tests, and end-to-end wallet/RPC tests remain pending.
 
 Owner: product owner (Ashley)
 Status: planning document. Nothing here is built unless it says so.
