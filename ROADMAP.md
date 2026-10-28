@@ -728,3 +728,13 @@ Current Guild implementation is now a **first UI/gameplay prototype**, not 0% co
 - **Not release-ready yet:** the Supabase dashboard's global Realtime **Allow public access** setting still needs manual verification/disablement so private-channel policies cannot be bypassed by public channels. Typecheck/build and two-device browser tests must pass. This branch has not run a Cloudflare build or deployment.
 - Added an authenticated `call-ice-config` Supabase Edge Function. It verifies active conversation membership, can mint one-hour TURN REST credentials from server-only `TURN_SERVER_URLS` and `TURN_SHARED_SECRET` settings, and returns a STUN-only fallback when TURN is not configured. Configure `APP_BASE_URL` and an approved TURN provider's REST shared secret/URLs before claiming reliable cross-network calling. The function must be deployed before its TURN path is available. Group calls, call history, notifications when the thread is closed, and recording are not implemented. Calls are not recorded by this feature.
 - WebRTC media is encrypted in transit, but this does not make the text-message database end-to-end encrypted. Do not describe the existing message service as end-to-end encrypted.
+
+## Guild account sync and Cloud Lab control-plane groundwork (2026-10-28)
+
+- Added an authenticated Guild library sync path backed by the staged `guild_library_entries` migration. The migration remains unapplied and sync has not been validated against the live Supabase project.
+- Hardened cache isolation with a browser-local account binding; syncing is refused if the cache was last bound to another Sanctuary account. Sync waits for library hydration, queues removals for the next successful sync, batches deletes, and locks edits while syncing.
+- Added a staged Cloud Lab schema with a safe owner-readable lifecycle/quota table and a separate service-role-only infrastructure mapping table for provider instance IDs and persistent volume references.
+- First-release Cloud Lab schema allows one persistent workspace per account and constrains disk, CPU, memory and runtime quotas. It does not provision compute or expose a terminal.
+- Added `npm run check:guild-cloud-lab` to assert control-plane access boundaries and quota constraints.
+- **Still required:** apply and review both new migrations through the normal database workflow; test RLS using two separate accounts; implement an authenticated, idempotent server-side lifecycle orchestrator and secure terminal gateway; choose an isolation/provider model and explicit spend cap; test real sync and browser behavior. Do not provision paid resources or mark Cloud Lab as available before those gates pass.
+
