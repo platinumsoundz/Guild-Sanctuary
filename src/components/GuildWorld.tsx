@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Gamepad2, LockKeyhole, Orbit, Play, RotateCcw, Trophy, X } from 'lucide-react';
 import styles from './GuildWorld.module.css';
+import { getConnectedGamepad, readGamepadButtons, readGamepadDirections } from '@/lib/controllerInput';
 
 type GuildWorldProps = {
   userId: string | null;
@@ -143,22 +144,15 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
     let active = true;
     const poll = (time: number) => {
       if (!active) return;
-      const pads = navigator.getGamepads?.() ?? [];
-      const pad = Array.from(pads).find((item) => item?.connected) ?? null;
+      const pad = getConnectedGamepad();
       setControllerConnected(Boolean(pad));
       if (pad) {
-        const buttons = pad.buttons.map((button) => button.pressed || button.value > 0.65);
-        const pressed = (index: number) => Boolean(buttons[index] && !lastButtons.current[index]);
+        const { buttons, pressed } = readGamepadButtons(pad, lastButtons.current);
         if (!worldOpen && !entryOpen && pressed(0)) setEntryOpen(true);
         if (worldOpen) {
           if (pressed(1) || pressed(9)) closeWorld();
           if (time - gamepadActionAt.current > 140) {
-            const horizontal = pad.axes[0] ?? 0;
-            const vertical = pad.axes[1] ?? 0;
-            const left = pressed(14) || horizontal < -0.45;
-            const right = pressed(15) || horizontal > 0.45;
-            const up = pressed(12) || vertical < -0.45;
-            const down = pressed(13) || vertical > 0.45;
+            const { left, right, up, down } = readGamepadDirections(pad, pressed);
             if (left || right || up || down) {
               if (gameState === 'playing') moveShip((right ? 4 : left ? -4 : 0), (down ? 4 : up ? -4 : 0));
               else {
