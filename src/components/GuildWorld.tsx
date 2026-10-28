@@ -177,6 +177,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
       setNotice('Sign in to your Sanctuary account first. Your Guild will use that same identity.');
       return;
     }
+    setNotice('');
     setWorldOpen(true);
     setEntryOpen(false);
     setBest(readBest());
@@ -189,7 +190,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
           <div className={styles.entryIcon}><Gamepad2 size={19} aria-hidden="true" /></div>
           <div className={styles.entryCopy}>
             <strong>{controllerConnected ? 'Controller detected' : 'Accessibility entry'}</strong>
-            <span>The Guild is ready when you are.</span>
+            <span>{notice || "The Guild is ready when you are."}</span>
           </div>
           <button type="button" className={styles.enterButton} onClick={enterGuild}>Enter Guild <span aria-hidden="true">↗</span></button>
           {!controllerConnected && <button type="button" className={styles.dismiss} aria-label="Close Guild entry" onClick={() => setEntryOpen(false)}><X size={16} /></button>}
