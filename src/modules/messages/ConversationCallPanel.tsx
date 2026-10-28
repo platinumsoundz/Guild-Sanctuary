@@ -147,6 +147,28 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
   }, [conversationId, currentUserId, isGroup, resetCall, sendSignal]);
 
   useEffect(() => {
+    if (callState !== 'calling' || !callId) return;
+    const timer = window.setTimeout(() => {
+      if (activeCallRef.current !== callId) return;
+      void sendSignal({ type: 'hangup', callId });
+      resetCall();
+      setError('No answer. You can try calling again.');
+    }, 45_000);
+    return () => window.clearTimeout(timer);
+  }, [callId, callState, resetCall, sendSignal]);
+
+  useEffect(() => {
+    if (!incoming || callState !== 'idle') return;
+    const invitedCallId = incoming.callId;
+    const timer = window.setTimeout(() => {
+      if (activeCallRef.current !== null) return;
+      void sendSignal({ type: 'reject', callId: invitedCallId });
+      setIncoming((current) => current?.callId === invitedCallId ? null : current);
+    }, 30_000);
+    return () => window.clearTimeout(timer);
+  }, [incoming, callState, sendSignal]);
+
+  useEffect(() => {
     const pc = peerRef.current;
     if (!pc) return;
     pc.ontrack = (event) => {
