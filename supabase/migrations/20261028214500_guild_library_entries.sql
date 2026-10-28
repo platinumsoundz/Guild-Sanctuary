@@ -71,7 +71,7 @@ create or replace function public.enforce_guild_library_entry_limit()
 returns trigger
 language plpgsql
 set search_path = ''
-as $
+as $guild_limit$
 declare
   current_count bigint;
 begin
@@ -92,7 +92,7 @@ begin
   end if;
   return new;
 end;
-$;
+$guild_limit$;
 
 drop trigger if exists enforce_guild_library_entry_limit on public.guild_library_entries;
 create trigger enforce_guild_library_entry_limit
