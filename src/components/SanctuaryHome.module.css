@@ -301,3 +301,33 @@
   .heroIllustration { border-radius: 13px; }
   .hero .heroNote { padding: 13px; }
 }
+
+/* World destination cards — each route gets a distinct, calm celestial atmosphere. */
+.worldDestinations { margin: 30px 0 42px; padding: clamp(18px, 3vw, 30px); border: 1px solid rgb(151 126 255 / 24%); border-radius: 20px; background: linear-gradient(145deg, rgb(16 19 53 / 82%), rgb(10 15 39 / 88%)); box-shadow: 0 18px 48px rgb(3 4 23 / 18%); }
+.worldHeading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.worldHeading h2 { margin: 0; color: #f4f0ff; font-size: clamp(23px, 3vw, 34px); font-weight: 560; letter-spacing: -.035em; }
+.worldHeading p:not(.eyebrow) { margin: 8px 0 0; color: #bfc5e8; font: 12px/1.7 Arial, sans-serif; }
+.worldSigil { display: grid; width: 54px; height: 54px; flex: 0 0 auto; place-items: center; border: 1px solid rgb(166 151 255 / 35%); border-radius: 50%; color: #a5eaff; font-size: 32px; box-shadow: 0 0 26px rgb(130 117 255 / 12%); }
+.worldGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.worldCardCommunity, .worldCardArcade, .worldCardCreator, .worldCardShop { position: relative; display: flex; min-width: 0; min-height: 238px; flex-direction: column; align-items: flex-start; padding: 17px; overflow: hidden; border: 1px solid rgb(172 157 255 / 24%); border-radius: 15px; background: linear-gradient(155deg, rgb(80 73 165 / 23%), rgb(18 24 57 / 95%) 72%); color: #f8f5ff; text-align: left; cursor: pointer; transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+.worldCardCommunity::before, .worldCardArcade::before, .worldCardCreator::before, .worldCardShop::before { position: absolute; top: -52px; right: -42px; width: 145px; height: 145px; border-radius: 50%; background: radial-gradient(circle, rgb(152 143 255 / 24%), transparent 70%); content: ''; pointer-events: none; }
+.worldCardArcade { background: linear-gradient(155deg, rgb(35 77 143 / 28%), rgb(13 25 56 / 96%) 75%); }
+.worldCardArcade::before { background: radial-gradient(circle, rgb(85 210 255 / 25%), transparent 70%); }
+.worldCardCreator { background: linear-gradient(155deg, rgb(105 54 147 / 27%), rgb(29 18 57 / 96%) 75%); }
+.worldCardCreator::before { background: radial-gradient(circle, rgb(224 137 255 / 25%), transparent 70%); }
+.worldCardShop { background: linear-gradient(155deg, rgb(42 84 126 / 25%), rgb(14 27 52 / 96%) 75%); }
+.worldCardShop::before { background: radial-gradient(circle, rgb(133 245 255 / 20%), transparent 70%); }
+.worldCardCommunity:hover, .worldCardArcade:hover, .worldCardCreator:hover, .worldCardShop:hover { transform: translateY(-3px); border-color: rgb(169 224 255 / 65%); box-shadow: 0 14px 32px rgb(3 5 27 / 32%); }
+.worldIcon { display: grid; width: 43px; height: 43px; place-items: center; margin-bottom: 18px; border: 1px solid rgb(185 169 255 / 36%); border-radius: 13px; background: rgb(12 16 47 / 68%); color: #bfa8ff; }
+.worldCardArcade .worldIcon { color: #8feaff; }
+.worldCardCreator .worldIcon { color: #e2aaff; }
+.worldCardShop .worldIcon { color: #9fe9ff; }
+.worldKicker { color: #9eabd8; font: 700 8px/1.5 Arial, sans-serif; letter-spacing: 1.25px; }
+.worldCardCommunity strong, .worldCardArcade strong, .worldCardCreator strong, .worldCardShop strong { margin-top: 5px; font-size: 17px; font-weight: 650; letter-spacing: -.025em; }
+.worldDescription { margin-top: 8px; color: #c3c9e8; font: 11px/1.7 Arial, sans-serif; }
+.worldAction { display: inline-flex; align-items: center; gap: 7px; margin-top: auto; padding-top: 18px; color: #b8dfff; font: 700 10px Arial, sans-serif; }
+.worldCardCreator .worldAction { color: #e0bdff; }
+.worldCardCommunity:focus-visible, .worldCardArcade:focus-visible, .worldCardCreator:focus-visible, .worldCardShop:focus-visible { outline: 2px solid #9cecff; outline-offset: 3px; }
+@media (max-width: 1050px) { .worldGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .worldCardCommunity, .worldCardArcade, .worldCardCreator, .worldCardShop { min-height: 210px; } }
+@media (max-width: 560px) { .worldDestinations { margin: 22px 0 30px; padding: 15px; border-radius: 16px; } .worldHeading { align-items: flex-start; } .worldSigil { width: 42px; height: 42px; font-size: 25px; } .worldGrid { grid-template-columns: minmax(0, 1fr); gap: 10px; } .worldCardCommunity, .worldCardArcade, .worldCardCreator, .worldCardShop { min-height: 0; padding: 16px; } .worldIcon { margin-bottom: 12px; } .worldAction { padding-top: 13px; } }
+@media (prefers-reduced-motion: reduce) { .worldCardCommunity, .worldCardArcade, .worldCardCreator, .worldCardShop { transition: none; } .worldCardCommunity:hover, .worldCardArcade:hover, .worldCardCreator:hover, .worldCardShop:hover { transform: none; } }
