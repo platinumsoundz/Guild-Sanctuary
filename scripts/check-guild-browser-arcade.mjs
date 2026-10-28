@@ -5,6 +5,7 @@ const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
 const guild = readFileSync('src/components/GuildWorld.tsx', 'utf8');
 const css = readFileSync('src/components/GuildWorld.module.css', 'utf8');
 const controller = readFileSync('src/lib/controllerInput.ts', 'utf8');
+const support = readFileSync('src/modules/support/SupportPanel.tsx', 'utf8');
 
 assert.match(workspace, /<GuildWorld userId=\{currentUser\?\.user\.id \?\? null\} isAuthenticated=\{isAuthenticated && !isGuest\} \/>/, 'hidden Guild shell is mounted and guest sessions are excluded');
 assert.match(workspace, /activeNavigation === 'guild'/, 'Guild Arcade is reachable from its dedicated route');
