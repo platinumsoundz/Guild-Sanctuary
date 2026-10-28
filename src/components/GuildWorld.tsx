@@ -146,7 +146,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
       if (!active) return;
       const pad = getConnectedGamepad();
       setControllerConnected(Boolean(pad));
-      if (pad) {
+      if (pad && isPageVisible) {
         const { buttons, pressed } = readGamepadButtons(pad, lastButtons.current);
         if (!worldOpen && !entryOpen && pressed(0)) setEntryOpen(true);
         if (worldOpen) {
@@ -178,7 +178,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
     };
     frame = window.requestAnimationFrame(poll);
     return () => { active = false; window.cancelAnimationFrame(frame); };
-  }, [closeWorld, entryOpen, gameState, moveShip, startGame, worldOpen]);
+  }, [closeWorld, entryOpen, gameState, isPageVisible, moveShip, startGame, worldOpen]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
