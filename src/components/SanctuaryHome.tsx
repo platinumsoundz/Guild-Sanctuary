@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import styles from './SanctuaryHome.module.css';
+import { CosmicSanctuaryArt } from './CosmicSanctuaryArt';
 
 type FeatureStatus = 'Available' | 'In preview' | 'In design' | 'Safety gated';
 type Feature = {
@@ -128,19 +129,23 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
     <main className={styles.page}>
       <section className={styles.hero} aria-labelledby="sanctuary-home-title">
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}><Sun size={14} aria-hidden="true" /> THE SANCTUARY · BETA</p>
-          <h1 id="sanctuary-home-title">A calmer place to <em>grow together.</em></h1>
-          <p className={styles.intro}>Explore what is here today, try the current previews, and help shape what comes next. This is a living product showcase—not just a roadmap.</p>
+          <p className={styles.eyebrow}><Sparkles size={14} aria-hidden="true" /> A WORLD TO GROW INTO</p>
+          <h1 id="sanctuary-home-title">Find your place among the <em>stars.</em></h1>
+          <p className={styles.intro}>A welcoming space for real connection, self-discovery, and shared wonder. Explore what is here today and help shape the Sanctuary that comes next.</p>
           <div className={styles.heroActions}>
-            <button className={styles.primaryButton} type="button" onClick={() => onNavigate('feed')}>Explore the community <ArrowRight size={16} aria-hidden="true" /></button>
-            <a className={styles.secondaryButton} href="#feature-explorer">Explore upcoming features <ArrowDownRight size={16} aria-hidden="true" /></a>
+            <button className={styles.primaryButton} type="button" onClick={() => onNavigate('feed')}>Enter the community <ArrowRight size={16} aria-hidden="true" /></button>
+            <a className={styles.secondaryButton} href="#feature-explorer">Explore the Sanctuary <ArrowDownRight size={16} aria-hidden="true" /></a>
           </div>
+          <div className={styles.heroTrust}><span><span className={styles.trustStar}>✦</span> Human connection first</span><span><span className={styles.trustStar}>✦</span> Your pace, your space</span></div>
         </div>
-        <div className={styles.heroNote}>
-          <div className={styles.orbit} aria-hidden="true"><span /><span /><span /><Sun size={34} /></div>
-          <p className={styles.noteLabel}>A platform in progress</p>
-          <p>Some areas are working features. Others are clickable concepts to make the direction tangible. Each card tells you which is which.</p>
-          <div className={styles.statusLegend}><span><i className={styles.dotAvailable} /> Available</span><span><i className={styles.dotPreview} /> Preview</span><span><i className={styles.dotDesign} /> In design</span></div>
+        <div className={styles.heroArtwork}>
+          <CosmicSanctuaryArt className={styles.heroIllustration} />
+          <div className={styles.artCaption}><span className={styles.artPulse} /> YOUR SANCTUARY AWAITS <span>✧</span></div>
+          <div className={styles.heroNote}>
+            <p className={styles.noteLabel}>A living world, still unfolding</p>
+            <p>Explore working features and clearly labelled previews. Your voice helps shape what grows here next.</p>
+            <div className={styles.statusLegend}><span><i className={styles.dotAvailable} /> Available</span><span><i className={styles.dotPreview} /> Preview</span><span><i className={styles.dotDesign} /> In design</span></div>
+          </div>
         </div>
       </section>
 
