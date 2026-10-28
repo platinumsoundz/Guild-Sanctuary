@@ -60,7 +60,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     const timeout = setTimeout(() => {
       Promise.all([
         searchPublicProfiles(normalizedQuery),
-        findUserIdsByPublicInterest(normalizedQuery),
+        findUserIdsByPublicInterest(normalizedQuery).catch(() => []),
       ])
         .then(async ([nameResults, interestUserIds]) => {
           const interestProfiles = await Promise.all(interestUserIds.map((userId) => fetchPublicProfileById(userId)));
@@ -69,7 +69,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
             if (profile.userId !== currentUserId) unique.set(profile.userId, profile);
           }
           const merged = [...unique.values()].slice(0, 40);
-          const interests = await fetchPublicDiscoveryInterests(merged.map((profile) => profile.userId));
+          const interests = await fetchPublicDiscoveryInterests(merged.map((profile) => profile.userId)).catch(() => new Map<string, string[]>());
           if (!cancelled) {
             setProfiles(merged);
             setPublicInterests(interests);
