@@ -7,8 +7,9 @@ Status reconciliation: this update corrects stale theme/notification labels from
 ## Cosmic Arcade update (2026-10-28)
 
 - **In code, QA pending:** Restored a dedicated Games navigation entry labelled “Cosmic Arcade”; existing creator/community game links remain in the Games hub.
-- **Playable prototype:** Added a themed Starseed Word Search preview with letter selection, found-word progress, reset, and responsive layout.
-- **Planned:** Celestial Crossword, Lunar Solitaire, Zodiac Mahjong, and Cosmic Snake are visible as roadmap concepts, not falsely presented as playable.
+- **Playable prototypes:** Starseed Word Search supports two-tap straight-line selection (horizontal, vertical, and diagonal), exact found-cell highlighting, progress, reset, and completion feedback. Cosmic Snake has keyboard and mobile controls, score, personal-best tracking for the current visit, and restart.
+- **Planned:** Celestial Crossword, Lunar Solitaire, and Zodiac Mahjong remain concepts, not falsely presented as playable.
+- **Regression contract added:** `npm run check:cosmic-arcade` checks key gameplay, accessibility, and spending-lock guardrails; it is a static source contract, not browser QA.
 - **Token economy — design only / spending locked:** Theme previews and example consumables (hints, extra lives, and a 50-token Snake revive) are shown as future ideas. No arcade item is purchasable and this UI does not deduct tokens.
 - **Required before token spending:** Implement a server-authoritative game economy/RPC with authenticated ownership, wallet balance checks, idempotency keys, game-session validation, and immutable ledger entries. Define whether revives/boosts are consumables, expiry/refund rules, and exploit/rate limits. Require owner-approved Supabase migration and isolated staging tests before enabling spending.
 - **Validation pending:** Typecheck, production build, keyboard/screen-reader checks, mobile gameplay QA, and end-to-end wallet/RPC tests have not been run.
