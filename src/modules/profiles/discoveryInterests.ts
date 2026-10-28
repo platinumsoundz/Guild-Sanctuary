@@ -17,6 +17,10 @@ function normalizeInterest(value: string): string | null {
   return /^[a-z0-9][a-z0-9 _-]*$/.test(interest) ? interest : null;
 }
 
+function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, '\\function localKey(userId: string): string {');
+}
+
 function localKey(userId: string): string {
   return `sanctuary-discovery-interests:${userId}`;
 }
@@ -116,7 +120,7 @@ export async function findUserIdsByPublicInterest(query: string): Promise<string
   if (!interest || !isSupabaseCommunityStorageConfigured()) return [];
   await requireCommunityStorageUser();
   const { data, error } = await getSupabaseBrowserClient().from('profile_interests')
-    .select('user_id').eq('is_public', true).ilike('interest', `%${interest}%`).limit(30);
+    .select('user_id').eq('is_public', true).ilike('interest', `%${escapeLikePattern(interest)}%`).limit(30);
   if (error) throw new Error(`People could not be searched by interest: ${error.message}`);
   return [...new Set(data.map((item) => item.user_id))];
 }
