@@ -52,7 +52,6 @@
   background: var(--surface-raised);
 }
 
-
 .connectionToolkit {
   display: grid;
   gap: 10px;
