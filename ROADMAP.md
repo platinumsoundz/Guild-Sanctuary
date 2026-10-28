@@ -11,6 +11,14 @@ Status reconciliation: this update corrects stale theme/notification labels from
 - The dedicated **Cosmic Arcade** navigation entry remains available. The embedded Games hub includes the Cosmic Arcade and creator game links without nesting a second `main` landmark.
 - Contribution checkout, provider settings, and external game host configuration remain gated by owner-only setup and verification.
 
+## Sanctuary home showcase — clean integration slice (2026-10-28)
+
+- **In code on a clean branch, CI pending:** Ported the Today landing/showcase component and responsive styles from the conflicted beta showcase branch onto current `main`.
+- Added a dedicated Today route and made it the initial destination for fresh sessions, with Today accessible on mobile and desktop navigation.
+- Added a focused static contract for route wiring, navigation reachability, responsive CSS, reduced motion, and non-clinical copy.
+- This slice intentionally does **not** port the conflicted self-discovery persistence UI or migration. Private self-discovery remains a separate privacy/RLS review and owner-approved staging task.
+- Branch: `feat/sanctuary-home-clean-integration`. Run CI and review the exact head before merge; browser/device QA remains pending.
+
 ## Mainline PR reconciliation (2026-10-28)
 
 The following focused changes are now merged into `main`:
