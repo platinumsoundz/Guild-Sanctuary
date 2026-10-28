@@ -28,9 +28,10 @@ function isSignalPayload(value: unknown): value is Signal {
   if (!candidate.type || !SIGNAL_TYPES.has(candidate.type)) return false;
   if (candidate.kind !== undefined && candidate.kind !== 'audio' && candidate.kind !== 'video') return false;
   if ((candidate.type === 'offer' || candidate.type === 'answer') &&
-      (!candidate.description || (candidate.description.type !== 'offer' && candidate.description.type !== 'answer') ||
+      (!candidate.description || candidate.description.type !== candidate.type ||
        typeof candidate.description.sdp !== 'string' || candidate.description.sdp.length > 256_000)) return false;
-  if (candidate.type === 'ice' && (!candidate.candidate || typeof candidate.candidate !== 'object')) return false;
+  if (candidate.type === 'ice' && (!candidate.candidate || typeof candidate.candidate !== 'object' ||
+      (candidate.candidate.candidate !== undefined && (typeof candidate.candidate.candidate !== 'string' || candidate.candidate.candidate.length > 4_096)))) return false;
   return true;
 }
 
