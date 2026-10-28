@@ -142,3 +142,23 @@ export async function findUserIdsByPublicInterest(query: string): Promise<string
   if (error) throw new Error(`People could not be searched by interest: ${error.message}`);
   return [...new Set(data.map((item) => item.user_id))];
 }
+
+export async function findUserIdsBySharedPublicInterests(userId: string): Promise<string[]> {
+  if (!userId) return [];
+  const ownInterests = (await fetchMemberDiscoveryInterests(userId))
+    .filter((item) => item.isPublic)
+    .map((item) => item.interest);
+  if (!ownInterests.length) return [];
+
+  if (!isSupabaseCommunityStorageConfigured()) {
+    return readLocalPublicIndex().filter((candidateId) =>
+      candidateId !== userId && readLocal(candidateId).some((item) =>
+        item.isPublic && ownInterests.includes(item.interest)));
+  }
+
+  await requireCommunityStorageUser(userId);
+  const { data, error } = await getSupabaseBrowserClient().from('profile_interests')
+    .select('user_id').eq('is_public', true).in('interest', ownInterests).neq('user_id', userId).limit(100);
+  if (error) throw new Error(`People sharing your public interests could not be found: ${error.message}`);
+  return [...new Set(data.map((item) => item.user_id))];
+}
