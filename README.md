@@ -1,34 +1,112 @@
 # The Sanctuary
 
-Cross-platform community app focused on reflection, growth, and connection.
+**The Sanctuary** is a community app for personal growth, reflection, wellbeing, and connection. It brings community posts and short-form media together with private planning tools, messaging, events, self-discovery, and a growing set of games.
 
-Read [ROADMAP.md](ROADMAP.md) for product direction and agreed decisions, then [MASTER_BLUEPRINT.md](MASTER_BLUEPRINT.md) for architecture and current implementation state. Keep both aligned as the codebase changes.
+> **Project status:** Active development. Some screens and services are prototypes or use browser-local/in-memory demo data. A successful build does not mean a feature is production-ready. Authentication/RLS, persistence, privacy, payments, accessibility, and real-device behaviour must be verified before public launch.
 
-## Development
+## Product principles
 
-Requires Node.js 20.9 or newer.
+- Connection and personal growth come before commerce.
+- Community wisdom and support should remain accessible without payment.
+- Self-discovery is optional and private by default; personality tools are for reflection, not diagnosis.
+- Guest access is read-only.
+- Tokens are intended for cosmetic expression, not buying reach, attention, or status.
+- Privacy, clear moderation, and calm, accessible UI are core requirements.
+
+## What is in the app
+
+Implementation and verification status varies by feature; use [ROADMAP.md](ROADMAP.md) for the current source of truth.
+
+- **Community:** feed posts, comments, likes, author display names, reporting, and short-form video surfaces.
+- **Today / personal growth:** personal planner, habits, notes, and daily reflection.
+- **Discover and profiles:** profile and discovery surfaces, privacy settings, and local preferences.
+- **Messages:** direct and group conversation UI. The active inbox/thread still uses an in-memory demo service; end-to-end encryption is not implemented.
+- **Events:** community event and RSVP UI; persistence and end-to-end behaviour need verification.
+- **Cosmic Arcade:** Starseed Word Search, Cosmic Snake, Lunar Solitaire, and a small Celestial Crossword preview. These are prototypes; Zodiac Mahjong is planned. Arcade token purchases/rewards are not enabled.
+- **Games hub:** entry points for The 5 Sleeves 2D and The 5 Sleeves 3D. The 2D host URL must be configured and verified before launch; the 3D prototype currently links to its Pages host.
+- **Wallet and support:** wallet/Stripe checkout foundations and an optional donation path exist in code, but checkout is disabled by default and is not approved for live use.
+- **Themes and installation:** theme options and PWA manifest/assets are present; browser/device and offline behaviour still need validation.
+
+## Tech stack
+
+- Next.js App Router, React, and TypeScript
+- CSS Modules and Framer Motion
+- Supabase client/server integration and Edge Functions
+- Stripe checkout/webhook foundations; Lemon Squeezy package available for future integration
+- Vercel Analytics integration and optional AdSense/native AdMob foundations
+- Capacitor Android project
+
+The repository is still named `Guild-Sanctuary` for compatibility, but the product name and user-facing copy should be **The Sanctuary**.
+
+## Getting started
+
+Requirements: Node.js **20.9 or newer**.
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-Use `npm run build` to create a production build and `npm run start` to serve it.
-Run `npm run typecheck` to validate TypeScript independently of the production build.
+Open the local URL printed by Next.js. If you do not have the external service configuration, work on local/demo surfaces and expect connected features to be limited.
 
-## Deployment and environment
+Useful commands:
 
-Cloudflare Workers is the currently observed preview/deployment target; the last reported Worker build for commit `b08d405622bc32207050824e8af8c80719d867aa` was still in progress, so deployment is unconfirmed. The repository's donation and AdSense safety checks use Vercel-specific environment variables. Do not assume those guards fail closed on Cloudflare; keep live payment/ad configuration disabled until host-specific safeguards are reviewed and tested. Keep personal/production data and live credentials out of previews.
+```bash
+npm run dev                 # local development server
+npm run typecheck           # TypeScript check
+npm run build               # production build
+npm run start               # serve a built app
+npm run check:pwa           # PWA asset contract
+npm run check:auth          # auth-flow contract
+npm run check:messages      # message persistence contract
+npm run check:theme         # theme contract
+npm run check:navigation    # navigation contract
+npm run check:cosmic-arcade # arcade regression contract
+```
 
-Copy `.env.example` to `.env.local` for local work. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as public build/runtime configuration; keep Supabase secret keys, Stripe secrets, and webhook secrets server-side only. Set `APP_BASE_URL` to the exact canonical HTTPS origin used by the deployed environment. The donation link is served only when `VERCEL_ENV=production` and `STRIPE_DONATION_LINK_ENABLED=true`; configure `STRIPE_DONATION_URL` and the enable flag in Vercel Production only, with system environment variables enabled. Preview/local builds fail closed and hide it. Token checkout also checks the request origin against the Edge Function's `APP_BASE_URL`, so use a stable staging origin for test purchases; do not point previews at live functions. Set `NEXT_TELEMETRY_DISABLED=1` in Vercel's build environment as well as CI. Next.js inlines `NEXT_PUBLIC_*` values at build time, so configure them in Vercel before building each environment. Never commit `.env.local` or put private values in `NEXT_PUBLIC_*`.
+The repository contains additional focused `check:*` scripts; inspect `package.json` for the full list. Contract scripts are static regression checks, not a replacement for browser, accessibility, security, or end-to-end tests.
 
-The earlier GitHub `validate` run was reported passing for commit `b08d405622bc32207050824e8af8c80719d867aa`; that predates the latest Shorts, messaging-UX, and PWA edits. Those current edits have not been typechecked, built, or deployed. Re-check the current GitHub workflow (including the separate Deno check) and Cloudflare Worker status. CI does not apply migrations or certify production readiness; Supabase Auth/RLS, payment sandbox, restore, browser/device, and human release checks remain separate gates.
+## Project map
 
-Vercel Web Analytics is integrated through `@vercel/analytics/next`; enable it for the Vercel project in its dashboard. Web display ads use Google AdSense. The script and placements are disabled by default and remain off in previews/local development; enable `NEXT_PUBLIC_ADSENSE_ENABLED=true` and configure live IDs in Vercel Production only. The server also requires `VERCEL_ENV=production`, so enable Vercel system environment variables. Publisher and slot IDs are public and inlined at build time. AdSense auto ads may also be managed from the publisher account. Configure and verify an approved consent-management platform and the AdSense site review/ads.txt requirements in the AdSense account before serving production ads. It reports page-view traffic, not ad conversion or custom behavioral events. The persistent wallet and authenticated Stripe token checkout are being staged; use `TOKEN_CHECKOUT_ENABLED=true` only for isolated Stripe-test/Supabase staging after setup, and keep live checkout disabled until the full staging test and a refund/chargeback handling policy are in place. Token spending, transfers, marketplace, VIP, post promotion, and cosmetics are not implemented. The existing `/api/checkout`, `/api/webhooks/stripe`, and `/api/community-tips` paths remain disabled; token checkout uses separate Supabase Edge Functions. Authentication and other social/economy state are not production-ready. Messages supports direct and group demo flows, but the active inbox/thread still use in-memory services; the optional Supabase repository is not wired into the UI. End-to-end encrypted messaging is not implemented. PWA manifest/icons and browser-specific install guidance are in the repository, but they have not been browser/device tested; there is no service worker or offline cache. The signup Terms checkbox/version/timestamp record is not implemented, and the current Terms are a non-final draft. Do not describe the current build as a public production release.
+- `src/app/` — Next.js App Router pages and route handlers
+- `src/components/` — application shell, navigation, shared surfaces, and arcade/game UI
+- `src/context/AppContext.tsx` — navigation and current demo/Supabase session context
+- `src/modules/` — feature modules and their service boundaries
+- `src/types/` — shared TypeScript and database contracts
+- `supabase/migrations/` — SQL migrations (not automatically applied by CI)
+- `supabase/functions/` — Supabase Edge Functions
+- `scripts/` — focused source-contract checks
+- `ROADMAP.md` — product decisions, workstreams, and current implementation status
+- `MASTER_BLUEPRINT.md` — architecture and persistence notes
+- `AI_RESTORE_PROMPT.md` — continuity and handoff notes
 
-## Architecture
+Prefer module public entry points (`index.ts`) over importing another module's internals. Keep shared entity contracts in `src/types/`. Update the roadmap and blueprint when implementation or product decisions change.
 
-- `src/types/index.ts` contains shared primitives; `src/types/database.ts` defines database entity contracts.
-- `src/modules/` contains isolated feature modules. Each module owns its implementation and documents its scope in a local README.
-- Modules should depend on shared types rather than importing implementation details from sibling modules.
-- Keep the root app shell independent from feature implementations so a module can evolve without coupling unrelated features.
+## Environment and integrations
+
+Copy `.env.example` to `.env.local` and only populate values for services you are authorised to configure. Never commit local environment files or expose private keys through `NEXT_PUBLIC_*`.
+
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are public client configuration. **Never** put a Supabase service-role/secret key in a public variable.
+- Stripe secret keys, webhook secrets, and private price configuration must remain server-side. Token checkout is disabled by default; do not enable live checkout until authenticated staging, webhook, refund/chargeback, and host-specific origin checks have been verified.
+- Donation and AdSense safeguards currently include Vercel-specific environment checks. Cloudflare is also used as a hosting/preview target, so do not assume a Vercel-only guard protects a Cloudflare deployment. Keep live payment and advertising configuration off until safeguards for the actual host have been reviewed and tested.
+- `NEXT_PUBLIC_*` values are generally inlined at build time. Configure the correct values for each environment before building.
+- Keep previews isolated from production accounts, user data, and live payment configuration. Do not use production credentials for local development.
+
+Provider dashboards, production secrets, migrations, and deployment settings are owner-controlled tasks. The presence of a migration or Edge Function in Git does **not** mean it has been applied or deployed.
+
+## Before a public release
+
+1. Run the current CI checks against the exact commit intended for release.
+2. Apply and verify migrations in a controlled staging project; review Supabase Auth, RLS, and service-role access.
+3. Test signup/login, account deletion and recovery, messaging persistence, privacy boundaries, and moderation permissions with multiple accounts.
+4. Test Stripe only in isolated test mode, including webhook replay/idempotency and refund/chargeback handling. Keep live checkout disabled until the policies and legal text are approved.
+5. Verify the deployed host's security guards, canonical origin, analytics/ad consent, and environment variables.
+6. Test keyboard and screen-reader use, responsive layouts, mobile devices, PWA installation, and any claimed offline behaviour.
+7. Record evidence and the exact commit/deployment in [ROADMAP.md](ROADMAP.md). Do not mark a feature **Verified** based on source inspection or a green build alone.
+
+## Documentation
+
+- [Product roadmap and locked decisions](ROADMAP.md)
+- [Master architecture blueprint](MASTER_BLUEPRINT.md)
+- [AI restore and project handoff notes](AI_RESTORE_PROMPT.md)
