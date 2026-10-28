@@ -177,7 +177,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     if (callState !== 'calling' || !callId) return;
     const timer = window.setTimeout(() => {
       if (activeCallRef.current !== callId) return;
-      void sendSignal({ type: 'hangup', callId });
+      void sendSignal({ type: 'hangup', callId }).catch(() => {});
       resetCall();
       setError('No answer. You can try calling again.');
     }, 45_000);
@@ -189,7 +189,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     const invitedCallId = incoming.callId;
     const timer = window.setTimeout(() => {
       if (activeCallRef.current !== null) return;
-      void sendSignal({ type: 'reject', callId: invitedCallId });
+      void sendSignal({ type: 'reject', callId: invitedCallId }).catch(() => {});
       setIncoming((current) => current?.callId === invitedCallId ? null : current);
     }, 30_000);
     return () => window.clearTimeout(timer);
@@ -205,7 +205,9 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     };
     pc.onicecandidate = (event) => {
       if (event.candidate && activeCallRef.current) {
-        void sendSignal({ type: 'ice', callId: activeCallRef.current, candidate: event.candidate.toJSON() });
+        void sendSignal({ type: 'ice', callId: activeCallRef.current, candidate: event.candidate.toJSON() }).catch(() => {
+          setError('Network negotiation was interrupted. Hang up and try again.');
+        });
       }
     };
     pc.onconnectionstatechange = () => {
