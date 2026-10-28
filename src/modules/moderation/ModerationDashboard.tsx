@@ -23,7 +23,6 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
   const [busyReportId, setBusyReportId] = useState<string | null>(null);
 
   const canWarn = ['moderator', 'admin', 'developer', 'owner'].includes(role);
-  const canWarn
   const canSuspend = ['admin', 'developer', 'owner'].includes(role);
   const canBan = ['developer', 'owner'].includes(role);
 
