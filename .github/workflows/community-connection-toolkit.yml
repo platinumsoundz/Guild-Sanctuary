@@ -7,6 +7,7 @@ on:
       - 'src/modules/feeds/components/FeedContent.tsx'
       - 'src/modules/feeds/components/FeedContent.module.css'
       - 'scripts/check-community-connection-toolkit.mjs'
+      - 'scripts/test-community-connection.mjs'
       - 'docs/COMMUNITY_CONNECTION_TOOLKIT.md'
       - '.github/workflows/community-connection-toolkit.yml'
   push:
@@ -17,6 +18,7 @@ on:
       - 'src/modules/feeds/components/FeedContent.tsx'
       - 'src/modules/feeds/components/FeedContent.module.css'
       - 'scripts/check-community-connection-toolkit.mjs'
+      - 'scripts/test-community-connection.mjs'
       - 'docs/COMMUNITY_CONNECTION_TOOLKIT.md'
       - '.github/workflows/community-connection-toolkit.yml'
 
