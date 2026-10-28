@@ -276,7 +276,9 @@
 
 .profileActions {
   display: flex;
+  max-width: 340px;
   flex: 0 0 auto;
+  flex-wrap: wrap;
   align-items: center;
   gap: 7px;
 }
