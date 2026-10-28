@@ -5,6 +5,7 @@ import { RefreshCw, Search } from 'lucide-react';
 import type { ModerationAction } from '@/services/supabase';
 import { fetchModerationQueue, takeModerationAction, type ModerationQueueItem } from './service';
 import styles from './ModerationDashboard.module.css';
+import { getSafeModerationMediaUrl } from './media-url';
 
 interface ModerationDashboardProps {
   role?: string;
@@ -22,6 +23,7 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
   const [busyReportId, setBusyReportId] = useState<string | null>(null);
 
   const canWarn = ['moderator', 'admin', 'developer', 'owner'].includes(role);
+  const canWarn
   const canSuspend = ['admin', 'developer', 'owner'].includes(role);
   const canBan = ['developer', 'owner'].includes(role);
 
@@ -165,11 +167,20 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
                 </div>
                 {report.targetTitle && <h2>{report.targetTitle}</h2>}
                 <p className={styles.contentBody}>{report.targetContent?.trim() || 'The original content is unavailable (it may have been deleted). The report and audit record are retained for review.'}</p>
-                {report.targetMediaUrl && (
-                  <p className={styles.mediaLink}>
-                    <a href={report.targetMediaUrl} target="_blank" rel="noreferrer">Open attached media</a>
-                  </p>
-                )}
+                {(() => {
+                  const safeMediaUrl = getSafeModerationMediaUrl(report.targetMediaUrl);
+                  if (safeMediaUrl) {
+                    return (
+                      <p className={styles.mediaLink}>
+                        <a href={safeMediaUrl} target="_blank" rel="noopener noreferrer">Open attached media (opens in a new tab)</a>
+                      </p>
+                    );
+                  }
+                  if (report.targetMediaUrl) {
+                    return <p className={styles.contentMeta}>Media link hidden because its URL is invalid or uses an unsupported protocol.</p>;
+                  }
+                  return null;
+                })()}
                 {report.targetCreatedAt && <p className={styles.contentMeta}>Published {new Date(report.targetCreatedAt).toLocaleString()}</p>}
               </section>
               <p><b>Reason:</b> {report.reason}</p>
