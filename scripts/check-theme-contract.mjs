@@ -41,7 +41,7 @@ for (const token of ['--surface', '--line', '--ink', '--muted', '--accent', '--a
 assert.ok(!shellCss.includes('background: #fbfcf9'), 'responsive shell must not hard-code a light viewport background');
 assert.ok(settings.includes('Token-unlockable themes can be added to this catalogue later'), 'token themes must remain future-facing, not falsely enabled');
 assert.ok(settings.includes('value="stone"') && settings.includes('value="ocean"'), 'grey and blue themes must be selectable');
-assert.ok(/body::before\\s*\\{[^}]*pointer-events:\\s*none/s.test(css), 'cosmic star field must not block interaction');
+assert.ok(/body::before\s*\{[^}]*pointer-events:\s*none/s.test(css), 'cosmic star field must not block interaction');
 assert.ok(css.includes('background-attachment: fixed'), 'cosmic atmosphere should stay visually anchored while scrolling');
 assert.ok(css.includes('.ai-tag') && css.includes('.cosmic-badge') && css.includes('.cosmic-outline') && css.includes('.chat-bubble'), 'custom cosmic UI accents must be available');
 assert.ok(css.includes('prefers-reduced-motion: reduce'), 'cosmic effects must preserve reduced-motion support');
