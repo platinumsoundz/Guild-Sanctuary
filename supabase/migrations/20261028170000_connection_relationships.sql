@@ -320,4 +320,29 @@ create trigger guard_direct_message_blocks
   before insert on public.messages
   for each row execute function private.guard_direct_message_blocks();
 
+create or replace function private.guard_direct_conversation_blocks()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if exists (
+    select 1 from public.profile_blocks b
+    where (b.blocker_id = new.first_user_id and b.blocked_id = new.second_user_id)
+       or (b.blocker_id = new.second_user_id and b.blocked_id = new.first_user_id)
+  ) then
+    raise exception 'A direct conversation cannot be created because a member has blocked the other.';
+  end if;
+  return new;
+end;
+$;
+
+revoke all on function private.guard_direct_conversation_blocks() from public, anon, authenticated;
+
+drop trigger if exists guard_direct_conversation_blocks on public.direct_conversation_pairs;
+create trigger guard_direct_conversation_blocks
+  before insert on public.direct_conversation_pairs
+  for each row execute function private.guard_direct_conversation_blocks();
+
 commit;
