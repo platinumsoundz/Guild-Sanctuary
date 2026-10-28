@@ -29,10 +29,10 @@ function tooLong(value: string): boolean {
  * Turn an optional reflection template into a normal feed post.
  * No extra storage or network calls are involved; the existing feed owns publishing.
  */
-export function buildCommunityPost(draft: CommunityPostDraft, openDraft: string, openTag: string): CommunityPostResult {
+export function buildCommunityPost(draft: CommunityPostDraft, openDraft: string, openTag: string, allowMediaOnly = false): CommunityPostResult {
   if (draft.mode === 'open') {
     const content = clean(openDraft);
-    if (!content) return { content: '', storyTag: null, error: 'Add a few words before publishing.' };
+    if (!content && !allowMediaOnly) return { content: '', storyTag: null, error: 'Add a few words before publishing.' };
     if (content.length > MAX_POST_LENGTH) return { content: '', storyTag: null, error: 'Posts must be 2,800 characters or fewer.' };
     return { content, storyTag: openTag || null, error: null };
   }
