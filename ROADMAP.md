@@ -738,3 +738,10 @@ Current Guild implementation is now a **first UI/gameplay prototype**, not 0% co
 - Added `npm run check:guild-cloud-lab` to assert control-plane access boundaries and quota constraints.
 - **Still required:** apply and review both new migrations through the normal database workflow; test RLS using two separate accounts; implement an authenticated, idempotent server-side lifecycle orchestrator and secure terminal gateway; choose an isolation/provider model and explicit spend cap; test real sync and browser behavior. Do not provision paid resources or mark Cloud Lab as available before those gates pass.
 
+## Guild Cloud Lab control endpoint — 2026-10-28
+
+- Added an authenticated, same-origin Supabase Edge Function scaffold for reading a member's own Cloud Lab status.
+- The endpoint checks the active account, uses the verified session user as owner, returns non-cacheable status data, and fails closed for start/stop/reset/delete until provider orchestration and spend controls exist.
+- Added `npm run check:guild-cloud-lab-control` source-contract coverage and documented the current boundary.
+- This is not a working Linux terminal and has not been deployed. The Cloud Lab schema migration remains unapplied; runtime/provider credentials, encrypted persistent volumes, lifecycle queue, spend budget, and live authorization tests remain prerequisites.
+
