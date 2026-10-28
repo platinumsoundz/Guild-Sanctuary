@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 import styles from './ArcadeClassics.module.css';
 
@@ -48,6 +48,8 @@ function slide2048(grid: number[][], direction: string) {
 export function ArcadeClassics() {
   const [game,setGame]=useState<GameId>('2048');
   const [level,setLevel]=useState(1);
+  const [difficulty,setDifficulty]=useState<'chill'|'standard'|'expert'>('standard');
+  const completedRunRef=useRef('');
   const [playerName,setPlayerName]=useState('Player');
   const [leaderboard,setLeaderboard]=useState<{name:string;game:string;score:number;level:number}[]>([]);
   const [savedScore,setSavedScore]=useState(false);
@@ -94,6 +96,30 @@ export function ArcadeClassics() {
   const [asteroidPos,setAsteroidPos]=useState(2);
   const [invaderScore,setInvaderScore]=useState(0);
   const [invaders,setInvaders]=useState<number[]>(Array.from({length:15},(_,i)=>i));
+  const typingTarget = 'Starlight guides curious minds across the galaxy.';
+  const levelTarget = 512 * Math.min(4, Math.max(1, Math.ceil(level / 2)));
+  const levelComplete = useMemo(() => {
+    if (game === '2048') return grid2048.some(row => row.some(value => value >= levelTarget));
+    if (game === 'mines') return revealed.length === 54 && !revealed.some(i => mineCells.includes(i));
+    if (game === 'lights') return lights.every(value => !value);
+    if (game === 'memory') return matched.length === memory.length;
+    if (game === 'wordle') return guesses.includes(word);
+    if (game === 'hangman') return [...word].every(letter => hangLetters.includes(letter));
+    if (game === 'hanoi') return hanoi.some(peg => peg.length === 4);
+    if (game === 'flood') return flood.every(value => value === flood[0]) && floodMoves > 0;
+    if (game === 'tictactoe') return wonTic;
+    if (game === 'connect4') return wonConnect;
+    if (game === 'fifteen') return fifteen.every((value, index) => value === (index + 1) % 16);
+    if (game === 'maze') return mazePos === 24;
+    if (game === 'typing') return typingInput === typingTarget;
+    if (game === 'invaders') return invaders.length === 0;
+    if (game === 'breakout') return bricks.every(value => !value);
+    if (game === 'trivia') return question >= 3;
+    if (game === 'simon') return simon.length > 0 && simonInput.length === simon.length && simon.every((value, index) => value === simonInput[index]);
+    if (game === 'pong') return pong.score >= 5;
+    return false;
+  }, [game, grid2048, levelTarget, revealed, mineCells, lights, matched, memory, guesses, word, hangLetters, hanoi, flood, floodMoves, wonTic, wonConnect, fifteen, mazePos, typingInput, invaders, bricks, question, simon, simonInput, pong.score]);
+  const pointsForRun = Math.max(0, score * 100 + hits * 10 + matched.length * 25 + invaderScore * 10 + pong.score * 20 + bricks.filter(value => !value).length * 15 + revealed.filter(i => !mineCells.includes(i)).length * 5 + floodMoves * 2 + level * 25) * (difficulty === 'expert' ? 2 : difficulty === 'chill' ? 0.75 : 1);
   const wonTic=useMemo(()=>['012','345','678','036','147','258','048','246'].some(line=>[...line].every(i=>board[Number(i)]==='X')), [board]);
   const wonConnect=useMemo(()=>connect.some((row,r)=>row.some((v,c)=>!!v&&[[0,1],[1,0],[1,1],[1,-1]].some(([dr,dc])=>[0,1,2,3].every(k=>{const rr=r+dr*k,cc=c+dc*k;return rr>=0&&rr<6&&cc>=0&&cc<7&&connect[rr][cc]===v;})))),[connect]);
   const reset = () => {
@@ -102,15 +128,44 @@ export function ArcadeClassics() {
     setHanoi([[4,3,2,1],[],[]]);setHanoiFrom(null);setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);setLife(makeLife());setMole(Math.floor(Math.random()*16));setHits(0);setQuestion(0);setScore(0);setFifteen(makeFifteen());setSimon([]);setSimonInput([]);setMessage('');setPong({ballX:4,ballY:3,dx:1,dy:1,paddle:3,score:0,over:false});setBricks(Array.from({length:24},()=>true));setBrickBall({x:3,y:5,dx:1,dy:-1,paddle:3,lives:3});setBlocks(Array.from({length:10},()=>Array(6).fill(0)));setActiveShape([[1,1,1],[0,1,0]]);setBlockX(1);setSudoku(Array.from({length:81},(_,i)=>[0,1,4,9,12,13,20,21,22,25,27,31,35,36,39,41,44,45,49,51,53,55,57,62,63,66,67,68,69,72,76,79,80].includes(i)?((i*7)%9)+1:0));setMazePos(0);setTypingInput('');setAsteroidPos(2);setInvaderScore(0);setInvaders(Array.from({length:15},(_,i)=>i));
   };
   const tapLight = (i:number) => setLights(current=>current.map((v,j)=> directions.reduce((on,[dr,dc])=>{const r=Math.floor(i/5),c=i%5,rr=Math.floor(j/5),cc=j%5;return on || (j===i)||(rr===r+dr&&cc===c+dc);},false)?!v:v));
-  const advanceLevel = () => {setLevel(n=>n+1);setSavedScore(false);setMessage(`Level ${level+1} ready — a fresh challenge has been generated.`);if(game==='mines'){setMineCells(makeMines());setRevealed([]);setFlags([]);}if(game==='lights')setLights(makeLights());if(game==='memory'){setMemory(makeMemory());setFlipped([]);setMatched([]);}if(game==='2048')setGrid2048(make2048());if(game==='fifteen')setFifteen(makeFifteen());if(game==='flood'){setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);}if(game==='maze')setMazePos(0);};
-  const saveScore = () => {const entry={name:playerName.trim().slice(0,24)||'Player',game:options.find(o=>o.id===game)?.title||game,score:Math.max(0,score+hits*10+matched.length*25+invaderScore*10),level};setLeaderboard(old=>[...old,entry].sort((a,b)=>b.score-a.score||b.level-a.level).slice(0,20));setSavedScore(true);};
+  const advanceLevel = () => {completedRunRef.current='';setLevel(n=>n+1);setSavedScore(false);setMessage(`Level ${level+1} ready — a fresh challenge has been generated.`);if(game==='mines'){setMineCells(makeMines());setRevealed([]);setFlags([]);}if(game==='lights')setLights(makeLights());if(game==='memory'){setMemory(makeMemory());setFlipped([]);setMatched([]);}if(game==='2048')setGrid2048(make2048());if(game==='fifteen')setFifteen(makeFifteen());if(game==='flood'){setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);}if(game==='maze')setMazePos(0);};
+  const saveScore = () => {const entry={name:playerName.trim().slice(0,24)||'Player',game:options.find(o=>o.id===game)?.title||game,score:Math.round(pointsForRun),level};setLeaderboard(old=>[...old,entry].sort((a,b)=>b.score-a.score||b.level-a.level).slice(0,20));setSavedScore(true);};
+  useEffect(() => {
+    if (!levelComplete) return;
+    const runKey = `${game}:${level}`;
+    if (completedRunRef.current === runKey) return;
+    completedRunRef.current = runKey;
+    const entry = { name: playerName.trim().slice(0,24) || 'Player', game: options.find(o => o.id === game)?.title || game, score: Math.round(pointsForRun + 100 * (difficulty === 'expert' ? 2 : 1)), level };
+    setLeaderboard(old => [entry, ...old].sort((a,b) => b.score - a.score || b.level - a.level).slice(0,20));
+    setSavedScore(true);
+    setMessage(`Level ${level} complete! +${Math.round(100 * (difficulty === 'expert' ? 2 : 1))} clear bonus. Loading level ${level + 1}…`);
+    setLevel(value => value + 1);
+    if (game === '2048') setGrid2048(make2048());
+    if (game === 'mines') { setMineCells(makeMines()); setRevealed([]); setFlags([]); }
+    if (game === 'lights') setLights(makeLights());
+    if (game === 'memory') { setMemory(makeMemory()); setFlipped([]); setMatched([]); }
+    if (game === 'wordle' || game === 'hangman') { setWord(wordBank[Math.floor(Math.random()*wordBank.length)]); setGuess(''); setGuesses([]); setHangLetters([]); }
+    if (game === 'hanoi') { setHanoi([[4,3,2,1],[],[]]); setHanoiFrom(null); }
+    if (game === 'flood') { setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5))); setFloodMoves(0); }
+    if (game === 'tictactoe') setBoard(Array(9).fill(''));
+    if (game === 'connect4') { setConnect(makeConnect()); setTurn('🔴'); }
+    if (game === 'fifteen') setFifteen(makeFifteen());
+    if (game === 'maze') setMazePos(0);
+    if (game === 'typing') setTypingInput('');
+    if (game === 'invaders') { setInvaders(Array.from({length:15 + Math.min(15,level * 2)},(_,i)=>i)); setInvaderScore(0); }
+    if (game === 'breakout') { setBricks(Array.from({length:24 + Math.min(24,level * 2)},()=>true)); setBrickBall({x:3,y:5,dx:1,dy:-1,paddle:3,lives:3}); }
+    if (game === 'trivia') { setQuestion(0); setScore(0); }
+    if (game === 'simon') { setSimon([]); setSimonInput([]); }
+    if (game === 'pong') setPong({ballX:4,ballY:3,dx:1,dy:1,paddle:3,score:0,over:false});
+  }, [levelComplete, game, level, playerName, pointsForRun, difficulty]);
   const submitWord = () => {const value=guess.toUpperCase().replace(/[^A-Z]/g,'').slice(0,6);if(value.length!==word.length)return;setGuesses(v=>[...v,value]);setGuess('');if(value===word)setMessage('Correct! You found the hidden word.');else if(guesses.length>=5)setMessage(`The word was ${word}.`);};
   const moveFifteen = (i:number) => {const empty=fifteen.indexOf(0);if(Math.abs(Math.floor(i/4)-Math.floor(empty/4))+Math.abs(i%4-empty%4)!==1)return;setFifteen(a=>{const b=a.slice();[b[i],b[empty]]=[b[empty],b[i]];return b;});};
   return <section className={styles.wrap} aria-labelledby="classics-title">
-    <div className={styles.heading}><div><p className={styles.eyebrow}><Sparkles size={13}/> ARCADE CLASSICS</p><h2 id="classics-title">Pick your next little challenge</h2><p>24 browser mini-games with randomized replay for supported modes. Scores are stored on this device; shared online rankings need a trusted backend. Token-powered extras remain locked.</p></div><button className={styles.reset} onClick={reset} type="button"><RotateCcw size={14}/> Reset game</button></div>
+    <div className={styles.heading}><div><p className={styles.eyebrow}><Sparkles size={13}/> ARCADE CLASSICS</p><h2 id="classics-title">Pick your next little challenge</h2><p>24 browser mini-games with progressive difficulty, automatic level clears for supported objectives, and a local high-score table. Shared online rankings and token spending remain locked until trusted server validation is implemented.</p></div><button className={styles.reset} onClick={reset} type="button"><RotateCcw size={14}/> Reset game</button></div>
     <label className={styles.selectorLabel} htmlFor="classic-game-select">Choose a game</label>
     <select id="classic-game-select" className={styles.selector} value={game} onChange={e=>{setGame(e.target.value as GameId);setMessage('');}}>{options.map(o=><option key={o.id} value={o.id}>{o.group} — {o.title}</option>)}</select>
-    <div className={styles.levelBar}><strong>Level {level}</strong><span>Complete a challenge, then generate a fresh level.</span><button type="button" onClick={advanceLevel}>Next level ↗</button></div>
+    <div className={styles.levelBar}><strong>Level {level}</strong><span>{levelComplete ? 'Level cleared — generating the next challenge…' : 'Clear the objective to auto-advance and bank a score.'}</span><label htmlFor="arcade-difficulty">Difficulty</label><select id="arcade-difficulty" value={difficulty} onChange={e=>setDifficulty(e.target.value as 'chill'|'standard'|'expert')}><option value="chill">Chill · 0.75×</option><option value="standard">Standard · 1×</option><option value="expert">Expert · 2×</option></select><button type="button" onClick={advanceLevel}>Skip level ↗</button></div>
+    <p className={styles.runStats}>Run score <strong>{Math.round(pointsForRun).toLocaleString()}</strong> · Difficulty multiplier <strong>{difficulty === 'expert' ? '2×' : difficulty === 'chill' ? '0.75×' : '1×'}</strong> · {levelComplete ? 'Objective complete' : 'Objective in progress'}</p>
     <div className={styles.play}>
     {game==='2048' && <><h3>2048</h3><p>Slide tiles in a direction to combine matching numbers.</p><div className={styles.grid4}>{grid2048.flat().map((v,i)=><button key={i} className={styles.tile} type="button" onClick={()=>setGrid2048(g=>slide2048(g,['up','right','down','left'][i%4]))} aria-label={`Slide tiles ${['up','right','down','left'][i%4]}`}>{v||''}</button>)}</div><div className={styles.controls}>{['up','left','down','right'].map(d=><button key={d} type="button" onClick={()=>setGrid2048(g=>slide2048(g,d))}>{d}</button>)}</div></>}
     {game==='mines' && <><h3>Minesweeper</h3><p>Reveal cells, flag suspected mines, and avoid the hidden stars.</p><div className={styles.grid8}>{Array.from({length:64},(_,i)=><button key={i} type="button" className={styles.cell} aria-label={flags.includes(i)?'Flagged cell':revealed.includes(i)?(mineCells.includes(i)?'Mine':'Safe cell'):'Hidden cell'} onContextMenu={e=>{e.preventDefault();setFlags(a=>a.includes(i)?a.filter(n=>n!==i):[...a,i]);}} onClick={()=>{if(flags.includes(i))return;if(mineCells.includes(i)){setRevealed(Array.from({length:64},(_,n)=>n));setMessage('A star mine! Reset to try again.');}else{setRevealed(a=>[...a,i]);setMessage('Safe cell revealed. Right-click to flag a suspected mine.');}}}>{revealed.includes(i)?mineCells.includes(i)?'✹':mineCells.filter(m=>Math.abs(Math.floor(m/8)-Math.floor(i/8))<=1&&Math.abs(m%8-i%8)<=1).length||'·':flags.includes(i)?'⚑':''}</button>)}</div></>}
@@ -136,10 +191,10 @@ export function ArcadeClassics() {
     {game==='typing' && <><h3>Typing Sprint</h3><p>Type this phrase accurately:</p><blockquote>Starlight guides curious minds across the galaxy.</blockquote><textarea value={typingInput} onChange={e=>setTypingInput(e.target.value)} placeholder="Start typing here…" rows={3}/><p>Characters typed: {typingInput.length}</p><button type="button" onClick={()=>setTypingInput('')}>Restart</button>{typingInput==='Starlight guides curious minds across the galaxy.'&&<p role="status">Perfect run!</p>}</>}
     {game==='asteroids' && <><h3>Asteroid Dodge</h3><p>Steer your ship away from incoming space rocks.</p><div className={styles.spaceField}>{Array.from({length:35},(_,i)=><span key={i}>{i===28+asteroidPos?'▲':[2,8,12,17,22,30].includes(i)?'✦':''}</span>)}</div><div className={styles.controls}><button type="button" onClick={()=>setAsteroidPos(p=>Math.max(0,p-1))}>← Turn</button><button type="button" onClick={()=>setAsteroidPos(p=>(p+1)%7)}>Thrust →</button><button type="button" onClick={()=>setAsteroidPos(2)}>Restart</button></div></>}
     {game==='invaders' && <><h3>Space Invaders</h3><p>Fire at the invaders to clear the board.</p><div className={styles.invaderGrid}>{Array.from({length:25},(_,i)=><span key={i}>{invaders.includes(i)?'👾':i===22?'▲':''}</span>)}</div><div className={styles.controls}><button type="button" onClick={()=>setInvaders(a=>a.map(v=>Math.min(24,v+5)))}>Invaders descend</button><button type="button" onClick={()=>{setInvaders(a=>a.length?a.slice(0,-1):a);setInvaderScore(s=>s+1)}} disabled={!invaders.length}>Fire!</button><button type="button" onClick={()=>{setInvaders(Array.from({length:15},(_,i)=>i));setInvaderScore(0)}}>Restart</button></div><p>Score: {invaderScore}</p></>}
-    <section className={styles.scoreboard} aria-labelledby="arcade-scores-title"><h3 id="arcade-scores-title">Local high scores</h3><p>Scores are saved only in this browser for now, not shared across players or devices.</p><label htmlFor="arcade-player-name">Display name</label><input id="arcade-player-name" value={playerName} maxLength={24} onChange={e=>setPlayerName(e.target.value)} /><button type="button" onClick={saveScore} disabled={savedScore}>{savedScore?'Score saved':'Save this run'}</button>{leaderboard.length?<ol>{leaderboard.slice(0,10).map((entry,i)=><li key={`${entry.name}-${entry.game}-${entry.score}-${i}`}><span>{entry.name} · {entry.game} · Lv {entry.level}</span><strong>{entry.score}</strong></li>)}</ol>:<p>No scores yet. Finish a run and save your score to start the table.</p>}</section>
+    <section className={styles.scoreboard} aria-labelledby="arcade-scores-title"><h3 id="arcade-scores-title">Local high scores</h3><p>Scores are saved locally in this browser. Completed levels are added automatically; manual saves are available for unfinished runs. This is not a shared or anti-cheat online leaderboard.</p><label htmlFor="arcade-player-name">Display name</label><input id="arcade-player-name" value={playerName} maxLength={24} onChange={e=>setPlayerName(e.target.value)} /><button type="button" onClick={saveScore} disabled={savedScore}>{savedScore?'Score saved':'Save this run'}</button>{leaderboard.length?<ol>{leaderboard.slice(0,10).map((entry,i)=><li key={`${entry.name}-${entry.game}-${entry.score}-${i}`}><span>{entry.name} · {entry.game} · Lv {entry.level}</span><strong>{entry.score}</strong></li>)}</ol>:<p>No scores yet. Finish a run and save your score to start the table.</p>}</section>
     <section className={styles.tokenGate} aria-labelledby="token-gate-title"><div><p className={styles.eyebrow}>SANCTUARY TOKENS</p><h3 id="token-gate-title">Optional game extras</h3><p>Planned uses include cosmetic themes, optional hints and extra challenge modes. Token spending stays locked until secure server-side wallet checks, explicit confirmation and anti-replay protections are implemented.</p></div><button type="button" disabled aria-disabled="true" title="Token spending is not enabled yet"><Sparkles size={14}/> Token extras · coming soon</button><small>No tokens are charged and no wallet balance is changed in this preview.</small></section>
     {message&&<p className={styles.message} role="status">{message}</p>}
     </div>
-    <p className={styles.footnote}>These are lightweight browser prototypes. Progress stays in this visit only; online multiplayer and token spending remain disabled until server-authoritative wallet checks are ready.</p>
+    <p className={styles.footnote}>Arcade saves and rankings are browser-local. Token integration is prepared as a disabled gate only: actual token features require authenticated server-side balance checks, idempotent spend transactions, audit records, replay protection and server-validated results. No wallet is charged in this build.</p>
   </section>;
 }
