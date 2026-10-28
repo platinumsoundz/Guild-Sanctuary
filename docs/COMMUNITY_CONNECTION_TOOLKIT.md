@@ -3,7 +3,7 @@
 **Branch:** `feat/event-discovery-map-explorer-2026-10-28`  
 **Base:** `main`  
 **Owner:** Product & Experience  
-**Status:** implementation in progress; CI and browser/device QA not yet verified.
+**Status:** implementation complete; automated CI and browser/device QA verification pending on the current branch head.
 
 ## User outcome
 Members who want to share something meaningful can use a gentle structure for a life lesson or a conversation starter, making it easier for others to understand, respond, and connect.
@@ -36,6 +36,7 @@ Members who want to share something meaningful can use a gentle structure for a 
 
 ## Verification
 - `node scripts/check-community-connection-toolkit.mjs`
+- `node --experimental-strip-types scripts/test-community-connection.mjs` (runtime cases for all composer modes and validation)
 - `npm run typecheck`
 - `npm run build`
 - Manual QA: guest/read-only state, all three modes, validation errors, attachments, keyboard-only use, narrow mobile viewport, theme contrast, and publishing failure recovery.
