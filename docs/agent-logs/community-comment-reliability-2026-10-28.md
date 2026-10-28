@@ -11,6 +11,11 @@
 - No database migrations, production deployment, account, payment or provider settings changed.
 - Client controls do not replace backend authorization/RLS.
 
-## Validation
-- Exact-head contract, typecheck and production build must pass.
+## Validation status
+- Exact-head CI passed, including the new comment-action contract, TypeScript and production build.
+- Phase 1 dependency-map contract passed.
+- Cloudflare Worker build passed; deployment was skipped for the PR event.
+
+## Remaining validation
+- Real desktop/mobile testing must verify load errors, empty threads, posting, edit/delete, likes and reports while authenticated.
 - Real desktop/mobile testing must verify load errors, genuinely empty threads, posting, edit/delete, likes and reports while authenticated.
