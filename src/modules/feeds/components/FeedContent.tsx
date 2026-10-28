@@ -166,9 +166,9 @@ export function FeedContent() {
   return (
     <section className={styles.content} aria-live="polite" aria-labelledby="feed-heading">
       {currentUser && !isGuest && <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
-        <label className={styles.composerLabel} htmlFor={postMode === 'open' ? 'post-content' : postMode === 'life-lesson' ? 'lesson-learned' : 'community-question'}>Share with Sanctuary</label>
-        <div className={styles.connectionToolkit} aria-label="Choose a way to share">
-          <p className={styles.toolkitHeading}>A little structure can help people connect</p>
+        {postMode === 'open' ? <label className={styles.composerLabel} htmlFor="post-content">Share with Sanctuary</label> : <p className={styles.composerLabel}>Share with Sanctuary</p>}
+        <div className={styles.connectionToolkit} role="group" aria-labelledby="connection-toolkit-heading">
+          <p className={styles.toolkitHeading} id="connection-toolkit-heading">A little structure can help people connect</p>
           <div className={styles.templateChoices}>
             <button className={styles.templateChoice} type="button" aria-pressed={postMode === 'open'} onClick={() => setPostMode('open')}>Free-form</button>
             <button className={styles.templateChoice} type="button" aria-pressed={postMode === 'life-lesson'} onClick={() => setPostMode('life-lesson')}>Life lesson</button>
