@@ -67,7 +67,6 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     if (!conversationId || !currentUserId || isGroup) return;
     let cancelled = false;
     const client = getSupabaseBrowserClient();
-    void client.realtime.setAuth();
     const channel = client.channel(`sanctuary-call:${conversationId}`, { config: { private: true } });
     channelRef.current = channel;
     channel.on('broadcast', { event: 'signal' }, ({ payload }) => {
@@ -120,7 +119,9 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
         }
       })();
     });
-    channel.subscribe((status) => {
+    void client.realtime.setAuth().then(() => {
+      if (cancelled) return;
+      channel.subscribe((status) => {
       if (cancelled) return;
       if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
         setSignallingReady(false);
@@ -129,6 +130,9 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
         setSignallingReady(true);
         setError((current) => current?.startsWith('Secure call signalling') ? null : current);
       }
+      });
+    }).catch(() => {
+      if (!cancelled) setError('Could not authenticate the private call channel. Please sign in again.');
     });
     return () => {
       cancelled = true;
