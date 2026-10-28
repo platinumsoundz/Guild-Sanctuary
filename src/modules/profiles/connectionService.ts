@@ -266,10 +266,9 @@ async function updatePrivateProfileList(
   await requireCommunityStorageUser(userId);
   const client = getSupabaseBrowserClient();
   if (shouldInclude) {
-    const payload = kind === 'hidden'
-      ? { user_id: userId, hidden_profile_id: targetId }
-      : { user_id: userId, saved_profile_id: targetId };
-    const { error } = await client.from(table).insert(payload);
+    const { error } = kind === 'hidden'
+      ? await client.from('profile_discovery_hidden').insert({ user_id: userId, hidden_profile_id: targetId })
+      : await client.from('profile_discovery_saved').insert({ user_id: userId, saved_profile_id: targetId });
     if (error && error.code !== '23505') throw new Error(`Could not update your ${kind} profiles: ${error.message}`);
   } else {
     const { error } = kind === 'hidden'
@@ -295,9 +294,13 @@ export async function fetchPrivateDiscoveryProfileIds(userId: string, kind: 'hid
       .filter((row) => row.userId === userId).map((row) => row.profileId);
   }
   await requireCommunityStorageUser(userId);
-  const { data, error } = kind === 'hidden'
-    ? await getSupabaseBrowserClient().from('profile_discovery_hidden').select('hidden_profile_id').eq('user_id', userId)
-    : await getSupabaseBrowserClient().from('profile_discovery_saved').select('saved_profile_id').eq('user_id', userId);
-  if (error) throw new Error(`Could not load ${kind} profiles: ${error.message}`);
-  return data.map((row) => kind === 'hidden' ? ('hidden_profile_id' in row ? row.hidden_profile_id : '') : ('saved_profile_id' in row ? row.saved_profile_id : ''));
+  const client = getSupabaseBrowserClient();
+  if (kind === 'hidden') {
+    const { data, error } = await client.from('profile_discovery_hidden').select('hidden_profile_id').eq('user_id', userId);
+    if (error) throw new Error(`Could not load hidden profiles: ${error.message}`);
+    return data.map((row) => row.hidden_profile_id);
+  }
+  const { data, error } = await client.from('profile_discovery_saved').select('saved_profile_id').eq('user_id', userId);
+  if (error) throw new Error(`Could not load saved profiles: ${error.message}`);
+  return data.map((row) => row.saved_profile_id);
 }
