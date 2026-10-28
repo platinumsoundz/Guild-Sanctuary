@@ -243,5 +243,5 @@ Read the “Sanctuary Connection Discovery” section in ROADMAP.md and the lock
 - src/modules/profiles/components/ProfileInterestsEditor.tsx and src/modules/profiles/discoveryInterests.ts: member-controlled interests (up to 12), private by default, optional public discovery, local-demo fallback, and public-interest lookup.
 - src/modules/profiles/components/PublicProfilePage.tsx: displays member-approved public interests while keeping profile/feed loading resilient if the optional interest lookup fails.
 - supabase/migrations/20261028150000_member_discovery_interests.sql and src/services/supabase/database.types.ts: RLS-protected interest persistence and type definitions.
-- scripts/check-discovery-interests-contract.mjs and npm run check:discovery-interests: added static contract checks; they have not been executed in this environment.
+- scripts/check-discovery-interests-contract.mjs and npm run check:discovery-interests: added static contract checks and wired them into .github/workflows/ci.yml; they have not been executed in this environment.
 
