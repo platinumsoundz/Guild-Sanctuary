@@ -8,6 +8,7 @@ import { fetchEvents } from '@/modules/events';
 import type { EventView } from '@/modules/events';
 import { fetchPublicProfileById, searchPublicProfiles } from '../service';
 import { fetchMemberDiscoveryInterests, fetchPublicDiscoveryInterests, findUserIdsByPublicInterest, findUserIdsBySharedPublicInterests } from '../discoveryInterests';
+import { DISCOVERY_INTENTIONS, fetchMemberDiscoveryIntentions, fetchPublicDiscoveryIntentions, findUserIdsBySharedPublicIntentions, type DiscoveryIntentionId } from '../discoveryIntentions';
 import { blockProfile, fetchBlockedProfileIds, fetchIncomingConnectionRequests, fetchPrivateDiscoveryProfileIds, fetchRelationshipStates, followProfile, hideProfileFromDiscovery, requestConnection, respondToConnection, saveProfileForLater, unblockProfile, unhideProfileInDiscovery, unfollowProfile, unsaveProfile, type RelationshipState } from '../connectionService';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
@@ -35,9 +36,11 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
   const [query, setQuery] = useState('');
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
   const [publicInterests, setPublicInterests] = useState<Map<string, string[]>>(new Map());
+  const [publicIntentions, setPublicIntentions] = useState<Map<string, DiscoveryIntentionId[]>>(new Map());
   const [suggestedProfiles, setSuggestedProfiles] = useState<PublicProfile[]>([]);
   const [suggestedInterests, setSuggestedInterests] = useState<Map<string, string[]>>(new Map());
   const [sharedInterestMatches, setSharedInterestMatches] = useState<Map<string, string[]>>(new Map());
+  const [sharedIntentionMatches, setSharedIntentionMatches] = useState<Map<string, DiscoveryIntentionId[]>>(new Map());
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [relationshipStates, setRelationshipStates] = useState<Map<string, RelationshipState>>(new Map());
@@ -59,6 +62,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     if (activeTab !== 'people' || normalizedQuery.length < 2) {
       setProfiles([]);
       setPublicInterests(new Map());
+      setPublicIntentions(new Map());
       setError(null);
       setIsSearching(false);
       return;
@@ -79,10 +83,14 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
             if (profile.userId !== currentUserId) unique.set(profile.userId, profile);
           }
           const merged = [...unique.values()].slice(0, 40);
-          const interests = await fetchPublicDiscoveryInterests(merged.map((profile) => profile.userId)).catch(() => new Map<string, string[]>());
+          const [interests, intentions] = await Promise.all([
+            fetchPublicDiscoveryInterests(merged.map((profile) => profile.userId)).catch(() => new Map<string, string[]>()),
+            fetchPublicDiscoveryIntentions(merged.map((profile) => profile.userId)).catch(() => new Map<string, DiscoveryIntentionId[]>()),
+          ]);
           if (!cancelled) {
             setProfiles(merged);
             setPublicInterests(interests);
+            setPublicIntentions(intentions);
           }
         })
         .catch(() => {
@@ -104,17 +112,23 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     let cancelled = false;
     setIsLoadingSuggestions(true);
     setSuggestionError(null);
-    findUserIdsBySharedPublicInterests(currentUserId)
-      .then(async (userIds) => {
+    Promise.all([
+      findUserIdsBySharedPublicInterests(currentUserId),
+      findUserIdsBySharedPublicIntentions(currentUserId).catch(() => []),
+    ])
+      .then(async ([interestIds, intentionIds]) => {
+        const userIds = [...new Set([...interestIds, ...intentionIds])];
         const found = await Promise.all(userIds.map((userId) => fetchPublicProfileById(userId)));
         const unique = new Map<string, PublicProfile>();
         for (const profile of found) {
           if (profile && profile.userId !== currentUserId) unique.set(profile.userId, profile);
         }
         const profilesToShow = [...unique.values()].slice(0, 12);
-        const [interests, ownInterests] = await Promise.all([
+        const [interests, ownInterests, intentions, ownIntentions] = await Promise.all([
           fetchPublicDiscoveryInterests(profilesToShow.map((profile) => profile.userId)),
           fetchMemberDiscoveryInterests(currentUserId),
+          fetchPublicDiscoveryIntentions(profilesToShow.map((profile) => profile.userId)),
+          fetchMemberDiscoveryIntentions(currentUserId),
         ]);
         const ownPublic = new Set(ownInterests.filter((item) => item.isPublic).map((item) => item.interest));
         const shared = new Map<string, string[]>();
@@ -122,10 +136,18 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
           const overlap = (interests.get(profile.userId) ?? []).filter((interest) => ownPublic.has(interest));
           if (overlap.length) shared.set(profile.userId, overlap);
         }
+        const ownPublicIntentions = new Set(ownIntentions.filter((item) => item.isPublic).map((item) => item.intention));
+        const sharedIntentions = new Map<string, DiscoveryIntentionId[]>();
+        for (const profile of profilesToShow) {
+          const overlap = (intentions.get(profile.userId) ?? []).filter((intention) => ownPublicIntentions.has(intention));
+          if (overlap.length) sharedIntentions.set(profile.userId, overlap);
+        }
         if (!cancelled) {
           setSuggestedProfiles(profilesToShow);
           setSuggestedInterests(interests);
           setSharedInterestMatches(shared);
+          setPublicIntentions(intentions);
+          setSharedIntentionMatches(sharedIntentions);
         }
       })
       .catch(() => {
@@ -262,7 +284,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     { id: 'topics', label: 'Topics', icon: Compass, description: 'Explore public reflections and shared ideas.' },
   ];
 
-  const renderProfileResults = (items: PublicProfile[], interestMap: Map<string, string[]>, sharedMap?: Map<string, string[]>) => {
+  const renderProfileResults = (items: PublicProfile[], interestMap: Map<string, string[]>, sharedMap?: Map<string, string[]>, intentionMap: Map<string, DiscoveryIntentionId[]> = new Map(), sharedIntentionMap: Map<string, DiscoveryIntentionId[]> = new Map()) => {
     const visibleItems = items.filter((profile) => !relationshipStates.get(profile.userId)?.hidden);
     if (visibleItems.length === 0) return <p className={styles.stateMessage}>{items.length ? 'You have hidden these profiles from discovery.' : 'No public profiles are available to show yet.'}</p>;
     return (
@@ -282,6 +304,16 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
             )}
             {(sharedMap?.get(profile.userId) ?? []).length > 0 && (
               <p className={styles.matchReason}>You both list {(sharedMap?.get(profile.userId) ?? []).map((interest) => `#${interest}`).join(', ')}</p>
+            )}
+            {(intentionMap.get(profile.userId) ?? []).length > 0 && (
+              <div className={styles.intentionTags} aria-label="Public connection intentions">
+                {(intentionMap.get(profile.userId) ?? []).map((intention) => (
+                  <span key={intention}>{DISCOVERY_INTENTIONS.find((item) => item.id === intention)?.label ?? intention}</span>
+                ))}
+              </div>
+            )}
+            {(sharedIntentionMap.get(profile.userId) ?? []).length > 0 && (
+              <p className={styles.matchReason}>You share intentions: {(sharedIntentionMap.get(profile.userId) ?? []).map((intention) => DISCOVERY_INTENTIONS.find((item) => item.id === intention)?.label ?? intention).join(', ')}</p>
             )}
             <ProfileSocialLinks links={profile.socialLinks} />
             {(profile.location || profile.age || profile.starSign || profile.belief) && (
@@ -411,7 +443,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
           : suggestedProfiles.length > 0 ? (
             <>
               <p className={styles.stateMessage}>Suggested because you share public interests</p>
-              {renderProfileResults(suggestedProfiles, suggestedInterests, sharedInterestMatches)}
+              {renderProfileResults(suggestedProfiles, suggestedInterests, sharedInterestMatches, publicIntentions, sharedIntentionMatches)}
             </>
           ) : (
             <div className={styles.emptyState}><Users size={23} aria-hidden="true" /><p>Add public interests on your profile to discover people with similar interests, or search for a public name or username. You can explore topics and gatherings without contacting anyone.</p></div>
@@ -422,7 +454,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
           <p className={styles.error} role="alert">{error}</p>
         ) : profiles.length === 0 ? (
           <p className={styles.stateMessage}>No public profiles or interests match that search.</p>
-        ) : renderProfileResults(profiles, publicInterests))}
+        ) : renderProfileResults(profiles, publicInterests, undefined, publicIntentions))}
 
         {activeTab === 'topics' && (isLoadingExplore ? <p className={styles.stateMessage} role="status">Exploring public reflections…</p>
           : exploreError ? <p className={styles.error} role="alert">{exploreError}</p>
