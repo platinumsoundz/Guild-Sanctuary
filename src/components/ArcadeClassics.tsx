@@ -97,7 +97,7 @@ export function ArcadeClassics() {
   const [invaderScore,setInvaderScore]=useState(0);
   const [invaders,setInvaders]=useState<number[]>(Array.from({length:15},(_,i)=>i));
   const typingTarget = 'Starlight guides curious minds across the galaxy.';
-  const levelTarget = 512 * Math.min(4, Math.max(1, Math.ceil(level / 2)));
+  const levelTarget = 2048 * Math.min(4, Math.max(1, Math.ceil(level / 3)));
   const levelComplete = useMemo(() => {
     if (game === '2048') return grid2048.some(row => row.some(value => value >= levelTarget));
     if (game === 'mines') return revealed.length === 54 && !revealed.some(i => mineCells.includes(i));
@@ -163,7 +163,7 @@ export function ArcadeClassics() {
   return <section className={styles.wrap} aria-labelledby="classics-title">
     <div className={styles.heading}><div><p className={styles.eyebrow}><Sparkles size={13}/> ARCADE CLASSICS</p><h2 id="classics-title">Pick your next little challenge</h2><p>24 browser mini-games with progressive difficulty, automatic level clears for supported objectives, and a local high-score table. Shared online rankings and token spending remain locked until trusted server validation is implemented.</p></div><button className={styles.reset} onClick={reset} type="button"><RotateCcw size={14}/> Reset game</button></div>
     <label className={styles.selectorLabel} htmlFor="classic-game-select">Choose a game</label>
-    <select id="classic-game-select" className={styles.selector} value={game} onChange={e=>{setGame(e.target.value as GameId);setMessage('');}}>{options.map(o=><option key={o.id} value={o.id}>{o.group} — {o.title}</option>)}</select>
+    <select id="classic-game-select" className={styles.selector} value={game} onChange={e=>{completedRunRef.current='';setSavedScore(false);setGame(e.target.value as GameId);setMessage('');}}>{options.map(o=><option key={o.id} value={o.id}>{o.group} — {o.title}</option>)}</select>
     <div className={styles.levelBar}><strong>Level {level}</strong><span>{levelComplete ? 'Level cleared — generating the next challenge…' : 'Clear the objective to auto-advance and bank a score.'}</span><label htmlFor="arcade-difficulty">Difficulty</label><select id="arcade-difficulty" value={difficulty} onChange={e=>setDifficulty(e.target.value as 'chill'|'standard'|'expert')}><option value="chill">Chill · 0.75×</option><option value="standard">Standard · 1×</option><option value="expert">Expert · 2×</option></select><button type="button" onClick={advanceLevel}>Skip level ↗</button></div>
     <p className={styles.runStats}>Run score <strong>{Math.round(pointsForRun).toLocaleString()}</strong> · Difficulty multiplier <strong>{difficulty === 'expert' ? '2×' : difficulty === 'chill' ? '0.75×' : '1×'}</strong> · {levelComplete ? 'Objective complete' : 'Objective in progress'}</p>
     <div className={styles.play}>

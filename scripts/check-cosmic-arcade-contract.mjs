@@ -34,6 +34,13 @@ assert.match(classics, /Token spending is not enabled yet/, 'token spending rema
 assert.match(classics, /sanctuary-arcade-scores-v1/, 'scores are stored locally with an explicit versioned key');
 assert.match(classics, /Local high scores/, 'local scoreboard is visible');
 assert.match(classics, /advanceLevel/, 'level progression control is present');
+assert.match(classics, /levelComplete/, 'supported games detect objective completion');
+assert.match(classics, /completedRunRef/, 'completion rewards are guarded against duplicate scoring');
+assert.match(classics, /setLevel\(value => value \+ 1\)/, 'completed objectives automatically advance the level');
+assert.match(classics, /Difficulty/, 'players can choose a difficulty tier');
+assert.match(classics, /pointsForRun/, 'score is derived from gameplay events and level progress');
+assert.match(classics, /setLeaderboard\(old => \[entry, \.\.\.old\]/, 'completed runs are automatically banked in the local leaderboard');
+assert.match(classics, /server-authoritative wallet checks/, 'token features are explicitly gated on trusted server-side wallet validation');
 assert.match(classics, /Typing Sprint/, 'typing game is included');
 assert.match(classics, /Space Invaders/, 'space shooter is included');
 assert.ok(classicsCss.includes('@media(max-width:600px)'), 'classic games have mobile styles');
