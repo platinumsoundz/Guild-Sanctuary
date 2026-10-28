@@ -11,6 +11,7 @@ const navigationCss = readFileSync('src/components/Navigation.module.css', 'utf8
 const notificationCss = readFileSync('src/components/NotificationBar.module.css', 'utf8');
 const workspaceCss = readFileSync('src/components/AppWorkspace.module.css', 'utf8');
 const globalCss = readFileSync('src/app/globals.css', 'utf8');
+const arcadeCss = readFileSync('src/components/CosmicArcade.module.css', 'utf8');
 
 assert.match(workspace, /activeNavigation === 'today'[\s\S]*?<SanctuaryHome onNavigate=\{openNavigation\} \/>/, 'Today route renders the Sanctuary home');
 assert.match(context, /NavigationState = 'today'/, 'Today is a supported navigation state');
@@ -43,5 +44,11 @@ assert.match(globalCss, /--bg: #090d25/, 'cosmic midnight is the default theme')
 assert.match(globalCss, /--cosmic-violet: #a995ff/, 'default theme exposes cosmic accent tokens');
 assert.match(globalCss, /data-theme="ocean"/, 'alternate ocean theme remains independently selectable');
 assert.match(globalCss, /data-theme="dusk"/, 'alternate dusk theme remains independently selectable');
+
+assert.match(globalCss, /Shared cosmic interaction layer/, 'global controls share the cosmic interaction layer');
+assert.match(globalCss, /prefers-reduced-motion: reduce/, 'global motion respects reduced-motion preferences');
+assert.match(arcadeCss, /Cosmic Arcade is a Sanctuary-built world/, 'Cosmic Arcade is visually integrated as its own destination');
+assert.match(arcadeCss, /grid-template-columns: repeat\\(2, minmax\\(0, 1fr\\)\\)/, 'Arcade tabs adapt to narrow screens');
+assert.match(arcadeCss, /var\\(--cosmic-cyan\\)/, 'Arcade focus and active states use cosmic accents');
 
 console.log('Sanctuary home contract checks passed.');
