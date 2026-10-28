@@ -28,6 +28,15 @@ assert.match(notifications, /if \(!isCurrentRequest\(\)\) return/, 'Stale notifi
 assert.match(notifications, /\[currentUser\?\.user\.id, isGuest\]/, 'Account or guest-mode changes must clear prior notification state');
 assert.match(notifications, /if \(isCurrentRequest\(\)\) setIsLoading\(false\)/, 'Stale requests must not clear the current request loading indicator');
 
+
+const phonePanelStyles = notificationStyles.slice(notificationStyles.lastIndexOf('@media (max-width: 480px)'));
+assert.match(phonePanelStyles, /\.compact \.panel\s*\{[^}]*position:\s*fixed/s, 'On phones, the notification panel is positioned against the viewport to avoid clipping');
+assert.match(phonePanelStyles, /left:\s*12px/s, 'The phone notification panel keeps a left viewport gutter');
+assert.match(phonePanelStyles, /right:\s*12px/s, 'The phone notification panel keeps a right viewport gutter');
+assert.match(phonePanelStyles, /max-height:\s*calc\(100dvh/s, 'The phone notification panel fits within the dynamic viewport');
+assert.match(phonePanelStyles, /env\(safe-area-inset-top/s, 'The phone notification panel respects the device top safe area');
+assert.doesNotMatch(phonePanelStyles, /right:\s*-\d+px/, 'The phone notification panel must not be shifted off-screen');
+
 console.log('Header navigation and notification panel contract checks passed.');
 
 assert.match(notifications, /const activeAccountId = useRef<string \| null>\(null\)/, 'Notification mutations must track the active account synchronously');
