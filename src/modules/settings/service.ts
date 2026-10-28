@@ -106,7 +106,7 @@ export async function saveAccountPreferences(userId: string, preferences: Accoun
       throw new Error('Sign in with the connected Sanctuary account to save account settings.');
     }
     const { data, error } = await getSupabaseBrowserClient().from('account_settings')
-      .upsert({ user_id: userId, preferences: { ...preferences } as Record<string, unknown>, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      .upsert({ user_id: userId, preferences: { ...preferences } as Record<string, unknown> }, { onConflict: 'user_id' })
       .select('preferences,updated_at').single();
     if (error) throw new Error(`Account settings could not be saved to your account: ${error.message}`);
     return { userId, preferences: normalizePreferences(data.preferences), updatedAt: data.updated_at };
