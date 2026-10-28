@@ -189,8 +189,8 @@ export function GuildCompanionHub() {
         setSyncMessage('Could not read the pending deletion queue. Nothing was deleted from the server; check browser storage before syncing again.');
         return;
       }
-      for (const id of pendingDeletes) {
-        const { error: deleteError } = await supabase.from('guild_library_entries').delete().eq('id', id);
+      if (pendingDeletes.length) {
+        const { error: deleteError } = await supabase.from('guild_library_entries').delete().in('id', pendingDeletes);
         if (deleteError) {
           setSyncMessage(`Could not finish syncing a library removal (${deleteError.message}). Pending removals are kept for your next attempt.`);
           return;
