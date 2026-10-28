@@ -1,5 +1,5 @@
 begin;
-select plan(23);
+select plan(25);
 
 select ok(
   (select c.relrowsecurity from pg_catalog.pg_class c where c.oid = 'public.profile_follows'::regclass),
@@ -96,6 +96,13 @@ select ok(not has_table_privilege('anon', 'public.profile_discovery_hidden', 'se
   'anonymous role cannot read hidden profile preferences');
 select ok(not has_table_privilege('anon', 'public.profile_discovery_saved', 'select'),
   'anonymous role cannot read saved profile preferences');
+
+select ok(
+  (select c.relrowsecurity from pg_catalog.pg_class c where c.oid = 'public.profile_discovery_intentions'::regclass),
+  'profile_discovery_intentions has row-level security enabled'
+);
+select ok(not has_table_privilege('anon', 'public.profile_discovery_intentions', 'select'),
+  'anonymous role cannot read discovery intention preferences');
 
 select * from finish();
 rollback;
