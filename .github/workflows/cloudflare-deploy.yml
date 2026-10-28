@@ -1,7 +1,8 @@
 name: Sanctuary Cloudflare deployment
 
 on:
-  # Quota-saver: build/deploy only from main; PRs use the regular CI workflow.
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -44,7 +45,7 @@ jobs:
         run: npx opennextjs-cloudflare build
 
       - name: Deploy to Cloudflare Workers
-        # Production deploys stay explicit/manual until the integration batch is ready.
+        # Production deploys are explicit/manual only while the release batch is being assembled.
         if: github.event_name == 'workflow_dispatch' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' && env.HAS_SUPABASE_CONFIG == 'true'
         run: npx opennextjs-cloudflare deploy
 
