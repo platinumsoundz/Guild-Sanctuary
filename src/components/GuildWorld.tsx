@@ -236,11 +236,14 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
 
   return (
     <>
-      {!isAuthenticated && (
+      {!worldOpen && (
         <main className={styles.publicGuild} aria-labelledby="public-guild-title">
           <p className={styles.eyebrow}>THE GUILD · COMMUNITY WORLDS</p>
           <h1 id="public-guild-title">Your next world awaits.</h1>
-          <p className={styles.publicGuildIntro}>Browse the creator games and community servers. Sign in to Sanctuary to enter the Guild's original browser arcade.</p>
+          <p className={styles.publicGuildIntro}>{isAuthenticated
+            ? 'Explore creator projects and community servers, or enter the Guild’s original browser arcade.'
+            : 'Browse creator games and community servers. Sign in to Sanctuary to enter the Guild’s original browser arcade.'}</p>
+          {isAuthenticated && <button type="button" className={styles.enterPublicGuild} onClick={enterGuild}>Enter Guild Arcade <span aria-hidden="true">↗</span></button>}
           <GamesHub />
         </main>
       )}
