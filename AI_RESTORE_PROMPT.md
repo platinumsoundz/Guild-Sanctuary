@@ -27,6 +27,15 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 - The Supabase migration has not been applied to the user's project. Functions are not deployed. No Stripe Price IDs, keys, or webhook secret were provided or configured.
 - The earlier GitHub `validate` workflow was reported passing for commit `b08d405622bc32207050824e8af8c80719d867aa`; this predates the latest Shorts/PWA code. The current edits have not been typechecked, built, browser-tested, or deployed. The prior workspace had no shell/command tool and no `node_modules`; do not claim current checks passed.
 
+## Front-end work checkpoint — 2026-10-28
+
+- Latest mainline was refreshed from commit `0b05cdbd2216d329491167d8c20a4e6f6b7c3f3e` before starting front-end work.
+- Current branch: `feat/sanctuary-frontend-polish-2026-10-28`.
+- `src/components/Navigation.tsx` now groups the drawer into Start here, Connect, Your space, Explore, Sanctuary tools, and Stewardship. Role-gated admin visibility is preserved; no moderation/backend wiring was changed.
+- `src/components/Navigation.module.css` adds grouped section headings, spacing and refined navigation touch styling.
+- Existing compact notification panel, full notifications destination, top-left drawer trigger, and mobile bottom tabs are retained.
+- The changes are committed to the feature branch through the repository editor, but no browser QA, merge, or deployment is claimed. Continue front-end-first; avoid touching admin/moderation backend integration while the other agent owns it. Use this branch as the current UI working context.
+
 ## Latest changes and exact status
 
 - Shorts: `supabase/migrations/20261013000000_short_engagement_stats.sql` adds server-side `get_short_engagement_stats` and `toggle_short_like`. `src/modules/shorts/service.ts`, `ShortsFeed.tsx`, and generated DB types use those RPCs for aggregate likes/counts. Comment reads/posts still use Supabase browser queries and depend on the existing social schema/RLS plus `20261011000000_repair_social_engagement_insert_policies.sql`. Guest engagement controls are disabled. The migrations are not confirmed applied; no staging like/comment check has run.
