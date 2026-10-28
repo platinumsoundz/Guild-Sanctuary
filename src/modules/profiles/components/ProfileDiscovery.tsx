@@ -262,9 +262,12 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     { id: 'topics', label: 'Topics', icon: Compass, description: 'Explore public reflections and shared ideas.' },
   ];
 
-  const renderProfileResults = (items: PublicProfile[], interestMap: Map<string, string[]>, sharedMap?: Map<string, string[]>) => (
+  const renderProfileResults = (items: PublicProfile[], interestMap: Map<string, string[]>, sharedMap?: Map<string, string[]>) => {
+    const visibleItems = items.filter((profile) => !relationshipStates.get(profile.userId)?.hidden);
+    if (visibleItems.length === 0) return <p className={styles.stateMessage}>{items.length ? 'You have hidden these profiles from discovery.' : 'No public profiles are available to show yet.'}</p>;
+    return (
     <div className={styles.results}>
-      {items.map((profile) => (
+      {visibleItems.map((profile) => (
         <article className={styles.profileRow} key={profile.profileId}>
           <div className={styles.avatar} aria-hidden="true">
             {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
@@ -321,7 +324,8 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
         </article>
       ))}
     </div>
-  );
+    );
+  };
 
   return (
     <main className={styles.discovery}>
