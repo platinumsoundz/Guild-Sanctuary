@@ -153,7 +153,16 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
       setControllerConnected(Boolean(pad));
       if (pad && isPageVisible) {
         const { buttons, pressed } = readGamepadButtons(pad, lastButtons.current);
-        if (!worldOpen && !entryOpen && pressed(0)) setEntryOpen(true);
+        if (!worldOpen && pressed(0)) {
+          if (!entryOpen) setEntryOpen(true);
+          else if (!isAuthenticated || !userId) setNotice('Sign in to your Sanctuary account first. Your Guild will use that same identity.');
+          else {
+            setNotice('');
+            setWorldOpen(true);
+            setEntryOpen(false);
+            setBest(readBest());
+          }
+        }
         if (worldOpen) {
           if (pressed(1) || pressed(9)) closeWorld();
           if (time - gamepadActionAt.current > 140) {
@@ -185,7 +194,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
     };
     frame = window.requestAnimationFrame(poll);
     return () => { active = false; window.cancelAnimationFrame(frame); };
-  }, [closeWorld, entryOpen, gameState, isPageVisible, moveShip, startGame, togglePause, worldOpen]);
+  }, [closeWorld, entryOpen, gameState, isAuthenticated, isPageVisible, moveShip, startGame, togglePause, userId, worldOpen]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
