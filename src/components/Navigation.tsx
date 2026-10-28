@@ -55,6 +55,15 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
+const navigationGroups: { label: string; items: NavigationState[] }[] = [
+  { label: 'Start here', items: ['today', 'feed'] },
+  { label: 'Connect', items: ['discover', 'messages', 'events', 'shorts'] },
+  { label: 'Your space', items: ['profile', 'planner', 'wallet'] },
+  { label: 'Explore', items: ['games', 'support', 'shop'] },
+  { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'settings'] },
+  { label: 'Stewardship', items: ['admin'] },
+];
+
 interface NavigationProps {
   activeNavigation: NavigationState;
   currentUser: AuthSession | null;
@@ -213,22 +222,35 @@ export function Navigation({
                     </button>
                   </div>
                   <nav aria-label="Main navigation">
-                    <div className={styles.drawerNavigationItems}>
-                      {visibleNavigationItems.map((item) => (
-                        <button
-                          key={item.id}
-                          className={styles.drawerNavigationButton}
-                          type="button"
-                          aria-current={activeNavigation === item.id ? 'page' : undefined}
-                          onClick={() => {
-                            onNavigate(item.id);
-                            closeMenuAndRestoreFocus();
-                          }}
-                        >
-                          <item.icon size={19} strokeWidth={1.8} aria-hidden="true" />
-                          <span>{item.label}</span>
-                        </button>
-                      ))}
+                    <div className={styles.drawerNavigationGroups}>
+                      {navigationGroups.map((group) => {
+                        const groupItems = group.items
+                          .map((id) => visibleNavigationItems.find((item) => item.id === id))
+                          .filter((item): item is typeof navigationItems[number] => Boolean(item));
+                        if (!groupItems.length) return null;
+                        return (
+                          <section className={styles.drawerNavigationGroup} key={group.label} aria-label={group.label}>
+                            <h2 className={styles.drawerGroupLabel}>{group.label}</h2>
+                            <div className={styles.drawerNavigationItems}>
+                              {groupItems.map((item) => (
+                                <button
+                                  key={item.id}
+                                  className={styles.drawerNavigationButton}
+                                  type="button"
+                                  aria-current={activeNavigation === item.id ? 'page' : undefined}
+                                  onClick={() => {
+                                    onNavigate(item.id);
+                                    closeMenuAndRestoreFocus();
+                                  }}
+                                >
+                                  <item.icon size={19} strokeWidth={1.8} aria-hidden="true" />
+                                  <span>{item.label}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </section>
+                        );
+                      })}
                     </div>
                   </nav>
                   <p className={styles.drawerAccountName}>{currentUser?.profile.displayName ?? (isGuest ? 'Guest mode · exploring' : 'Welcome to the Sanctuary')}</p>
