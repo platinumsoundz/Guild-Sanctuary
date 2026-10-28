@@ -148,7 +148,7 @@ export async function requestConnection(userId: string, targetId: string): Promi
     const existing = store.connections.find((row) => pairKey(row.requesterId, row.addresseeId) === pairKey(userId, targetId));
     if (existing?.status === 'accepted') throw new Error('You are already connected.');
     if (existing?.status === 'pending') throw new Error('A connection request already exists.');
-    store.connections = store.connections.filter((row) => pairKey(row.requesterId, row.addresseeId) !== pairKey(userId, targetId));
+    if (existing?.status === 'declined') throw new Error('This member declined a previous request. Please respect their decision.');
     store.connections.push({ id: makeId(), requesterId: userId, addresseeId: targetId, status: 'pending', createdAt: new Date().toISOString() });
     writeLocalStore(store); return;
   }
@@ -159,10 +159,7 @@ export async function requestConnection(userId: string, targetId: string): Promi
   if (lookupError) throw new Error(`Could not check existing connection: ${lookupError.message}`);
   if (existing?.status === 'accepted') throw new Error('You are already connected.');
   if (existing?.status === 'pending') throw new Error('A connection request already exists.');
-  if (existing?.status === 'declined') {
-    const { error } = await client.from('profile_connections').delete().eq('id', existing.id);
-    if (error) throw new Error(`Could not renew the connection request: ${error.message}`);
-  }
+  if (existing?.status === 'declined') throw new Error('This member declined a previous request. Please respect their decision.');
   const [memberLowId, memberHighId] = [userId, targetId].sort();
   const { error } = await client.from('profile_connections').insert({
     member_low_id: memberLowId, member_high_id: memberHighId,
