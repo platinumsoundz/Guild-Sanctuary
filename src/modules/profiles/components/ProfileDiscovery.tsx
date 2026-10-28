@@ -264,7 +264,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
             <button className={styles.viewButton} type="button" onClick={() => onView(profile)}>View profile</button>
             <button className={styles.relationshipButton} type="button" disabled={relationshipBusyId === profile.userId || relationshipStates.get(profile.userId)?.blocked}
               onClick={() => runRelationshipAction(profile.userId, relationshipStates.get(profile.userId)?.following ? 'unfollow' : 'follow')}>
-              <UserMinus size={13} aria-hidden="true" /> {relationshipStates.get(profile.userId)?.following ? 'Following' : 'Follow'}
+              {relationshipStates.get(profile.userId)?.following ? <UserMinus size={13} aria-hidden="true" /> : <UserPlus size={13} aria-hidden="true" />} {relationshipStates.get(profile.userId)?.following ? 'Following' : 'Follow'}
             </button>
             <button className={styles.relationshipButton} type="button" disabled={relationshipBusyId === profile.userId || ['outgoing', 'incoming', 'connected'].includes(relationshipStates.get(profile.userId)?.connection ?? 'none') || relationshipStates.get(profile.userId)?.blocked}
               onClick={() => runRelationshipAction(profile.userId, 'connect')}>
