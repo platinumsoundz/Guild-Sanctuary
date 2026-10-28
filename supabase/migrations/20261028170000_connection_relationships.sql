@@ -159,6 +159,16 @@ begin
     new.responded_at := coalesce(new.responded_at, now());
   end if;
 
+  if tg_table_name = 'profile_connections' and tg_op = 'UPDATE'
+    and new.status = 'declined'
+    and exists (
+      select 1 from public.profile_blocks b
+      where (b.blocker_id = left_id and b.blocked_id = right_id)
+         or (b.blocker_id = right_id and b.blocked_id = left_id)
+    ) then
+    return new;
+  end if;
+
   if exists (
     select 1 from public.profile_blocks b
     where (b.blocker_id = left_id and b.blocked_id = right_id)
