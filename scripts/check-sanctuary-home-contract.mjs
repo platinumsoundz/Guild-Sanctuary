@@ -22,6 +22,11 @@ assert.match(home, /CosmicSanctuaryArt/, 'home hero includes the dedicated cosmi
 assert.match(art, /luminous portal|luminous/i, 'cosmic artwork documents its visual subject');
 assert.match(art, /cosmic-wing-feathers/, 'cosmic artwork includes wing details');
 assert.match(art, /cosmic-energy/, 'cosmic artwork includes flowing cosmic energy');
+assert.match(home, /world-destinations-title/, 'home has a distinct destination section');
+assert.match(home, /onNavigate\('games'\)/, 'Cosmic Arcade has its own destination');
+assert.match(home, /onNavigate\('support'\)/, 'Support the Creator has its own destination');
+assert.match(home, /onNavigate\('shop'\)/, 'shop has its own destination');
+assert.match(css, /worldGrid \{ display: grid/, 'destination cards use a responsive grid');
 assert.match(css, /@media \(max-width: 560px\)/, 'cosmic hero has a dedicated mobile layout');
 
 console.log('Sanctuary home contract checks passed.');
