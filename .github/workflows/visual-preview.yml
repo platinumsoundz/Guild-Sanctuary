@@ -1,0 +1,113 @@
+name: Visual Preview Screenshots
+
+on:
+  pull_request:
+    # Re-run only when app UI, its runtime, or this workflow changes.
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.*'
+      - 'postcss.config.*'
+      - 'tailwind.config.*'
+      - '.github/workflows/visual-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-preview-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    name: Capture desktop and mobile screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the application
+        run: npm run build
+
+      - name: Install Chromium for Playwright
+        run: npx --yes playwright install --with-deps chromium
+
+      - name: Start the production server
+        run: |
+          npm run start -- --hostname 127.0.0.1 > /tmp/sanctuary-next.log 2>&1 &
+          echo $! > /tmp/sanctuary-next.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/ > /dev/null; then
+              echo "Sanctuary is responding on port 3000."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Sanctuary did not start. Server log:"
+          cat /tmp/sanctuary-next.log
+          exit 1
+
+      - name: Capture desktop and mobile views
+        run: |
+          mkdir -p visual-preview
+          npx --yes playwright screenshot \
+            --browser chromium \
+            --viewport-size="1440,1000" \
+            --full-page \
+            --wait-for-timeout=1500 \
+            http://127.0.0.1:3000/ \
+            visual-preview/sanctuary-desktop.png
+          npx --yes playwright screenshot \
+            --browser chromium \
+            --viewport-size="390,844" \
+            --full-page \
+            --wait-for-timeout=1500 \
+            http://127.0.0.1:3000/ \
+            visual-preview/sanctuary-mobile.png
+          npx --yes playwright screenshot \
+            --browser chromium \
+            --viewport-size="360,800" \
+            --full-page \
+            --wait-for-timeout=1500 \
+            http://127.0.0.1:3000/ \
+            visual-preview/sanctuary-small-mobile.png
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanctuary-visual-preview-pr-${{ github.event.pull_request.number || 'manual' }}
+          path: visual-preview/*.png
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Add artifact instructions to run summary
+        run: |
+          {
+            echo "## Sanctuary visual preview"
+            echo
+            echo "The workflow captured three screenshots from the production build:"
+            echo
+            echo "- Desktop: 1440 × 1000"
+            echo "- Mobile: 390 × 844"
+            echo "- Small mobile: 360 × 800"
+            echo
+            echo "Download the `sanctuary-visual-preview` artifact from this run's **Artifacts** section to inspect the PNG files."
+            echo
+            echo "These screenshots are a visual aid, not a full accessibility, interaction, or cross-browser test."
+          } >> "$GITHUB_STEP_SUMMARY"
