@@ -43,5 +43,10 @@ assert.ok(guild.includes('closeButtonRef.current?.focus'), 'dialog moves focus t
 assert.ok(guild.includes('if (entryOpen || controllerConnected) enterButtonRef.current?.focus'), 'revealed entry receives keyboard focus');
 assert.ok(guild.includes("type GameState = 'ready' | 'playing' | 'paused' | 'won' | 'lost'"), 'trial supports an explicit paused state');
 assert.ok(guild.includes("gameState === 'paused' ? 'Resume' : 'Pause'"), 'player can pause and resume from the game HUD');
-assert.match(workspace, /isAuthenticated && !isGuest/, 'guest sessions cannot enter the Guild');
+assert.match(workspace, /isGuest && activeNavigation === 'guild'/, 'guests get a read-only Guild lobby');
+assert.match(guild, /!isAuthenticated && \(/, 'read-only Guild lobby is rendered for guests');
+assert.match(guild, /isAuthenticated && worldOpen/, 'original browser arcade stays behind authenticated Guild entry');
+assert.match(guild, /<GamesHub \/>/, 'creator games hub is visible in the public Guild lobby');
+assert.match(guild, /Sign in to Sanctuary to enter the Guild's original browser arcade/, 'guest lobby explains the account boundary');
+assert.match(workspace, /isAuthenticated && !isGuest/, 'authenticated Guild identity is required for original arcade');
 console.log('Guild browser Arcade contract checks passed.');
