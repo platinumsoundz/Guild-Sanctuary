@@ -11,6 +11,7 @@ const relationshipMigration = readFileSync(new URL('../supabase/migrations/20261
 const relationshipService = readFileSync(new URL('../src/modules/profiles/connectionService.ts', import.meta.url), 'utf8');
 const intentionsService = readFileSync(new URL('../src/modules/profiles/discoveryIntentions.ts', import.meta.url), 'utf8');
 const intentionsEditor = readFileSync(new URL('../src/modules/profiles/components/ProfileDiscoveryIntentionsEditor.tsx', import.meta.url), 'utf8');
+const profileDashboard = readFileSync(new URL('../src/modules/profiles/components/ProfileDashboard.tsx', import.meta.url), 'utf8');
 
 for (const required of [
   'create table if not exists public.profile_interests',
@@ -91,6 +92,7 @@ assert.ok(discovery.includes('ReportContentButton targetType="user"'), 'members 
 assert.ok(intentionsService.includes('MAX_DISCOVERY_INTENTIONS = 3'), 'discovery intentions must be capped');
 assert.ok(intentionsService.includes('isPublic'), 'intention visibility must be explicit');
 assert.ok(intentionsEditor.includes('Keep these intentions private'), 'intentions must be private by default');
+assert.ok(profileDashboard.includes('<ProfileDiscoveryIntentionsEditor userId={profile.userId} />'), 'intention editor must be connected to the member profile dashboard');
 assert.ok(discovery.includes('findUserIdsBySharedPublicIntentions'), 'suggestions should include public intention overlap');
 assert.ok(publicProfile.includes('fetchPublicDiscoveryIntentions'), 'public profiles should show only approved intentions');
 const notificationBar = readFileSync(new URL('../src/components/NotificationBar.tsx', import.meta.url), 'utf8');
