@@ -233,3 +233,41 @@
 @media (max-width: 850px) { .discoveryStudio { grid-template-columns: 1fr; } .discoveryIntro h2 { max-width: 650px; } }
 @media (max-width: 560px) { .discoveryStudio { margin: 24px 0 30px; padding: 16px; } .discoveryControls button { flex: 1; } .discoveryResultRows > div { align-items: flex-start; flex-direction: column; gap: 5px; } .discoveryResultRows strong { text-align: left; } .discoveryConsent .discoveryVisibility { margin-left: 8px; } }
 @media (prefers-reduced-motion: reduce) { .discoveryProgress span { transition: none; } }
+
+
+/* Front-end polish: resilient layouts, clear keyboard focus, and comfortable touch targets. */
+@media (hover: hover) and (pointer: fine) {
+  .quickRow button { transition: border-color var(--motion-fast) ease, background-color var(--motion-fast) ease, transform var(--motion-fast) ease; }
+  .quickRow button:hover { transform: translateY(-2px); }
+}
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.quickRow button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.primaryButton:active,
+.secondaryButton:active,
+.quickRow button:active { transform: translateY(0); }
+@media (max-width: 760px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .heroNote { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; column-gap: 16px; }
+  .heroNote .orbit { grid-row: span 2; margin: 0; }
+  .heroNote .statusLegend { grid-column: 1 / -1; }
+  .quickRow { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 30px; }
+}
+@media (max-width: 420px) {
+  .page { padding: 14px 12px 30px; }
+  .hero { padding: 20px 16px; gap: 22px; }
+  .hero h1 { font-size: clamp(32px, 10vw, 42px); }
+  .intro { font-size: 14px; line-height: 1.7; }
+  .heroActions > a, .heroActions > button { flex: 1 1 100%; }
+  .heroNote { padding: 16px; }
+  .quickRow { gap: 8px; }
+  .quickRow button { align-items: flex-start; gap: 8px; padding: 12px 10px; }
+  .quickRow strong { white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quickRow button { transition: none; }
+  .quickRow button:hover { transform: none; }
+}
