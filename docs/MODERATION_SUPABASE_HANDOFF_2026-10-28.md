@@ -27,3 +27,20 @@ The UI is not an authorization boundary. The connected agent must enforce every 
 ## Verification status
 
 No Supabase connection was available in this session. No live database, roles, grants, RLS policies, data, Auth settings, or deployments were changed. The RPC added to the client is an integration contract and will not work until the connected agent implements and validates it. Run the repository type/build/contract checks after the database contract is finalized.
+
+
+## Live schema audit update — 2026-10-28
+
+A read-only check against the active Guild-Sanctuary Supabase project confirmed that `public.get_moderation_queue()` is **absent**. This matches the dashboard's known backend blocker. No SQL, migration, grant, role, policy, or data was changed during this audit.
+
+The live project does expose `public.apply_moderation_action(...)`, but its existence and an authenticated execute grant alone do not prove that its hierarchy checks, target/report matching, rationale validation, audit behaviour, or concurrent role-demotion handling are safe. Inspect the complete live definition and its dependent helpers before designing a queue RPC or relying on any moderation action.
+
+### Required next batch
+
+1. Capture the live definitions, signatures, grants, enum labels, and relevant table columns for the report queue and action path.
+2. Compare them with the checked-in migration ledger and every candidate migration; record drift without attempting a blind `supabase db push`.
+3. Build the queue RPC only against verified live column names. Keep the result bounded and read-only, avoid leaking reporter/target private fields, and preserve reports whose targets were deleted.
+4. Test with disposable staging accounts at every role tier and across every supported report target type. Include inactive users, self-targets, equal/higher-ranked targets, mismatched report/target IDs, deleted content, missing rationale, report resolution and audit evidence.
+5. Keep this PR draft until the RPC and action path have independent security review plus staging evidence. Production remains explicitly out of scope.
+
+This audit update documents evidence and sequencing only; it does not claim the moderation queue is fixed or ready to release.
