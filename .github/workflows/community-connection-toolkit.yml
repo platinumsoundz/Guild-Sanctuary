@@ -1,0 +1,38 @@
+name: Community connection toolkit contract
+
+on:
+  pull_request:
+    paths:
+      - 'src/modules/feeds/communityConnection.ts'
+      - 'src/modules/feeds/components/FeedContent.tsx'
+      - 'src/modules/feeds/components/FeedContent.module.css'
+      - 'scripts/check-community-connection-toolkit.mjs'
+      - 'docs/COMMUNITY_CONNECTION_TOOLKIT.md'
+      - '.github/workflows/community-connection-toolkit.yml'
+  push:
+    branches:
+      - feat/event-discovery-map-explorer-2026-10-28
+    paths:
+      - 'src/modules/feeds/communityConnection.ts'
+      - 'src/modules/feeds/components/FeedContent.tsx'
+      - 'src/modules/feeds/components/FeedContent.module.css'
+      - 'scripts/check-community-connection-toolkit.mjs'
+      - 'docs/COMMUNITY_CONNECTION_TOOLKIT.md'
+      - '.github/workflows/community-connection-toolkit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  community-connection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/check-community-connection-toolkit.mjs
+      - run: npm run typecheck
+      - run: npm run build
