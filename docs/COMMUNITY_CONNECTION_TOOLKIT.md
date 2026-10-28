@@ -1,6 +1,6 @@
 # Community Connection Toolkit — branch task contract
 
-**Branch:** `feat/event-discovery-map-explorer-2026-10-28`  
+**Branch:** `feat/community-connection-toolkit-2026-10-28`  
 **Base:** `main`  
 **Owner:** Product & Experience  
 **Status:** implementation complete; automated contract/runtime tests, typecheck, production build, and repository CI passed on the current implementation head. Browser/device QA remains pending because the Vercel preview hit its daily deployment limit.
