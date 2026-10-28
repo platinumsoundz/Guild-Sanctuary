@@ -753,3 +753,12 @@ Current Guild implementation is now a **first UI/gameplay prototype**, not 0% co
 - Audio/video source implementation includes one-to-one WebRTC calls, private signalling, browser permission prompts, mute/camera toggles, timeouts and reconnect feedback. It is **not yet verified as production-ready**: no authenticated two-device end-to-end test has been run, and TURN relay configuration is absent, so some networks may fail to connect.
 - Next Guild improvements should prioritize playable browser games, a more useful local-first library, keyboard/controller navigation, accessibility, and clear native-game integration boundaries rather than spending time on Cloud Lab provisioning.
 
+
+
+## Full-beta readiness gate — 2026-10-28
+
+- Added [docs/full-beta-release-gate.md](docs/full-beta-release-gate.md) as the staged release checklist across CI/build, auth, RLS/migrations, messaging, calling, moderation, payments, privacy, accessibility, PWA/mobile and operations.
+- The checklist is a gate, not a readiness claim. P0 items require evidence from a successful source build and authorized staging tests. Static contract checks alone do not satisfy browser/device or security verification.
+- Current blockers remain: draft PR #205 needs fresh complete CI; Guild library and Cloud Lab migrations are staged but not applied; call-ICE/TURN configuration is not deployed; calls need two-account/two-device network tests; the active inbox/thread service is still in-memory demo state; several older roadmap PRs need safe reconciliation rather than blind merges.
+- Cloud Lab remains In development and pinned for later. Native game scanning/launch, verified platform achievement sync, cloud media backup and group calls remain future infrastructure work.
+- This branch has not been merged or deployed. No production migration or paid compute was initiated.
