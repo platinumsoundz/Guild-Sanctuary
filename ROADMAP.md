@@ -669,3 +669,13 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Implemented on feature branch:** Tighten shared page typography and responsive spacing, preserve content above fixed bottom navigation, and respect reduced-motion preferences.
 - **Validation outstanding:** Run the theme and theme-contrast contract scripts, TypeScript check, production build, and visual QA at narrow phone widths and desktop widths. Verify light/ocean/dusk/stone themes, keyboard navigation, screen-reader names, and iOS/Android safe areas before merge/release.
 - This pass is CSS-focused and intentionally avoids changing auth, persistence, database schemas, or service integrations.
+
+
+## Guest-mode safety and preview access — 2026-10-28
+
+- **Implemented on branch `feat/guest-safe-preview-access-2026-10-28`:** guests can browse Today, the Cosmic Arcade, Sanctuary Roadmap, Guild Roadmap and community support information.
+- Guest access is explicitly read-only at the workspace routing layer. Routes that can post, react, comment, message, modify a profile, use the planner, or touch wallet/shop features show a sign-in prompt instead of mounting account-oriented components under the synthetic guest ID.
+- Profile post loading is skipped for guest sessions so the synthetic guest identity is not sent to the author-post service.
+- Added `npm run check:guest-access` and wired it into CI.
+- **Still to verify:** full CI/typecheck/build on the exact branch, browser checks for each allowed and restricted route, and any deeper service-level mutation protections. This UI gate complements but does not replace server-side authentication/authorization.
+- No database migration, provider configuration, production deployment, or payment changes are included.
