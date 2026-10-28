@@ -16,6 +16,7 @@
 - Extends the existing moderation/admin static contract check to cover these behaviors.
 - Adds a client-side moderation media URL guard that rejects non-HTTPS, malformed, credential-bearing, and excessively long URLs before rendering them as links; invalid links fail closed with explanatory UI.
 - Adds `noopener noreferrer` to new-tab media links and extends the static contract check for the media URL policy. This is defense-in-depth only; the server must enforce its own media origin/access policy.
+- Adds visible `:focus-visible` outlines and consistent enabled/disabled cursor affordances to the admin/member and moderation controls; contract checks now guard both stylesheets.
 - Adds `docs/ADMIN_MODERATION_INDUSTRY_BENCHMARK_2026-10-28.md`, documenting the representative Reddit, Discord, YouTube, Shopify and GitHub comparison, current gaps, prioritized P0/P1/P2 roadmap, release gates and source links.
 - Adds `docs/ADMIN_CONTROL_CENTRE_RELEASE_GATES_2026-10-28.md` with server authorization, auditability, staging and deployment acceptance requirements.
 
@@ -28,7 +29,8 @@
 
 ## Verification
 - Earlier GitHub Actions CI run `40722135640` on commit `f7a26577c795361446fada9d3e2751ad5f6f16ec`: **completed successfully**.
-- A new CI run `40723925501` was triggered for the frontend media-link hardening commit and was **in progress at last check**; latest-head success is not yet claimed.
+- CI run `40723925501` passed for the media-link hardening commit `03854f573e0432862e60ce7b9f8d3ab848b5a124`.
+- The current head `efa190f50948d3c8e06e0ae756c52f0aa09325d4` adds keyboard-focus styling and associated static assertions; no workflow run was returned for this newest head at last check, so those latest changes are not yet CI-verified.
 - This is source/CI evidence only; no live Supabase integration, browser acceptance, or production behavior is claimed.
 - Browser verification should cover role/status filters, empty results, failed search clearing, keyboard operation, confirmation cancel/accept, and a server-rejected role change.
 - Live integration and authorization checks must be completed after the Supabase-connected agent restores access.
