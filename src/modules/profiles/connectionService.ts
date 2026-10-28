@@ -222,3 +222,13 @@ export async function fetchIncomingConnectionRequests(userId: string): Promise<I
   if (error) throw new Error(`Incoming connection requests could not be loaded: ${error.message}`);
   return data.map((row) => ({ id: row.id, requesterId: row.requester_id, createdAt: row.created_at }));
 }
+
+export async function fetchBlockedProfileIds(userId: string): Promise<string[]> {
+  if (!isSupabaseCommunityStorageConfigured()) {
+    return readLocalStore().blocks.filter((row) => row.blockerId === userId).map((row) => row.blockedId);
+  }
+  await requireCommunityStorageUser(userId);
+  const { data, error } = await getSupabaseBrowserClient().from('profile_blocks').select('blocked_id').eq('blocker_id', userId);
+  if (error) throw new Error(`Blocked members could not be loaded: ${error.message}`);
+  return data.map((row) => row.blocked_id);
+}
