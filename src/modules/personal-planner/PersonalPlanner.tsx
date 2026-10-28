@@ -116,8 +116,12 @@ export function PersonalPlanner({ userId }: { userId: string }) {
               .upsert({ user_id: userId, planner_data: { ...loadedData } }, { onConflict: 'user_id' });
             if (migrateError) throw new Error(`Your existing planner could not be transferred to the database: ${migrateError.message}`);
             // Only remove the old copy after the database confirms the transfer.
-            window.localStorage.removeItem(storageKey);
-            setStatus('Your existing planner has been transferred to your account database.');
+            try {
+              window.localStorage.removeItem(storageKey);
+              setStatus('Your existing planner has been transferred to your account database.');
+            } catch {
+              setStatus('Your existing planner has been transferred to your account database, but the old browser copy could not be removed.');
+            }
           }
         }
 
