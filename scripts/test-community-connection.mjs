@@ -36,6 +36,10 @@ const conversation = buildCommunityPost({
 assert.equal(conversation.error, null);
 assert.equal(conversation.storyTag, 'Question');
 assert.match(conversation.content, /A little context/);
+const ignoresInactiveFields = buildCommunityPost({
+  mode: 'conversation', context: 'Context', lesson: 'x'.repeat(1201), helpfulNow: 'x'.repeat(1201), question: 'A valid question?',
+}, '', '', false);
+assert.equal(ignoresInactiveFields.error, null, 'inactive life-lesson fields must not block conversation posts');
 assert.match(conversation.content, /What small habit helps you feel grounded\?/);
 
 assert.equal(buildCommunityPost({ ...base, mode: 'life-lesson', lesson: 'x'.repeat(1201) }, '', '').error,
