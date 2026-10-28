@@ -22,6 +22,7 @@ export function MeetupCalendarPlaceholder() {
   const [longitude, setLongitude] = useState('');
   const [editingEvent, setEditingEvent] = useState<EventView | null>(null);
   const [selectedMapEventId, setSelectedMapEventId] = useState<string | null>(null);
+  const [nearbyRadiusKm, setNearbyRadiusKm] = useState(10);
   const [formError, setFormError] = useState<string | null>(null);
   const [creatorProfiles, setCreatorProfiles] = useState<Record<string, PublicProfile>>({});
 
@@ -56,7 +57,7 @@ export function MeetupCalendarPlaceholder() {
         ) }))
         .filter(({ event, distanceKm }) =>
           event.id !== selectedMapEvent.id
-          && distanceKm <= 10
+          && distanceKm <= nearbyRadiusKm
           && Boolean(getMapLinks(String(event.locationCoords.latitude), String(event.locationCoords.longitude))),
         )
         .sort((a, b) => a.distanceKm - b.distanceKm)
@@ -231,8 +232,19 @@ export function MeetupCalendarPlaceholder() {
               {selectedMapLinks && (
                 <section className={styles.nearbyPanel} aria-labelledby="nearby-events-title">
                   <div className={styles.nearbyHeading}>
-                    <h4 id="nearby-events-title">Happening within 10 km</h4>
-                    <span>{nearbyEvents.length} {nearbyEvents.length === 1 ? 'event' : 'events'}</span>
+                    <h4 id="nearby-events-title">Happening within {nearbyRadiusKm} km</h4>
+                    <div className={styles.nearbyControls}>
+                      <span>{nearbyEvents.length} {nearbyEvents.length === 1 ? 'event' : 'events'}</span>
+                      <label className={styles.nearbyRadiusLabel}>
+                        <span>Radius</span>
+                        <select aria-label="Nearby event search radius" value={nearbyRadiusKm} onChange={(event) => setNearbyRadiusKm(Number(event.currentTarget.value))}>
+                          <option value={5}>5 km</option>
+                          <option value={10}>10 km</option>
+                          <option value={25}>25 km</option>
+                          <option value={50}>50 km</option>
+                        </select>
+                      </label>
+                    </div>
                   </div>
                   {nearbyEvents.length > 0 ? (
                     <div className={styles.nearbyList} aria-label="Events near selected map location">
@@ -250,7 +262,7 @@ export function MeetupCalendarPlaceholder() {
                       ))}
                     </div>
                   ) : (
-                    <p className={styles.nearbyEmpty}>No other events with valid locations are within 10 km of this pin.</p>
+                    <p className={styles.nearbyEmpty}>No other events with valid locations are within {nearbyRadiusKm} km of this pin.</p>
                   )}
                 </section>
               )}
