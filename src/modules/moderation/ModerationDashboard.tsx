@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { RefreshCw, Search } from 'lucide-react';
 import type { ModerationAction } from '@/services/supabase';
 import { fetchModerationQueue, takeModerationAction, type ModerationQueueItem } from './service';
 import styles from './ModerationDashboard.module.css';
@@ -12,9 +13,12 @@ interface ModerationDashboardProps {
 export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardProps) {
   const [reports, setReports] = useState<ModerationQueueItem[]>([]);
   const [rationales, setRationales] = useState<Record<string, string>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busyReportId, setBusyReportId] = useState<string | null>(null);
 
   const canWarn = ['moderator', 'admin', 'developer', 'owner'].includes(role);
@@ -23,11 +27,12 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const queue = await fetchModerationQueue();
       setReports(queue);
       setIsAuthorized(true);
-      setError(null);
+      setNotice(null);
     } catch (loadError) {
       setIsAuthorized(false);
       setError(loadError instanceof Error ? loadError.message : 'Moderation queue could not be loaded.');
@@ -38,9 +43,40 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
 
   useEffect(() => { void refresh(); }, [refresh]);
 
+  const availableTypes = useMemo(
+    () => Array.from(new Set(reports.map((report) => report.target_type))).sort(),
+    [reports],
+  );
+
+  const filteredReports = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase();
+    return reports.filter((report) => {
+      if (typeFilter !== 'all' && report.target_type !== typeFilter) return false;
+      if (!query) return true;
+      const searchable = [
+        report.target_type,
+        report.reason,
+        report.details,
+        report.targetTitle,
+        report.targetContent,
+        report.targetOwnerUsername,
+        report.targetOwnerDisplayName,
+        report.targetState,
+      ].filter(Boolean).join(' ').toLocaleLowerCase();
+      return searchable.includes(query);
+    });
+  }, [reports, searchQuery, typeFilter]);
+
   const act = async (report: ModerationQueueItem, action: ModerationAction, temporarySuspension = false) => {
+    const destructive = action === 'remove' || action === 'ban' || action === 'suspend';
+    if (destructive) {
+      const actionLabel = action === 'remove' ? 'remove this content' : action === 'ban' ? 'ban this member' : 'suspend this member for 24 hours';
+      if (!window.confirm(`Are you sure you want to ${actionLabel}? This action will be recorded in the moderation audit trail.`)) return;
+    }
+
     setBusyReportId(report.id);
     setError(null);
+    setNotice(null);
     try {
       await takeModerationAction({ report, action, rationale: rationales[report.id] ?? '', temporarySuspension });
       setReports((current) => current.filter((item) => item.id !== report.id));
@@ -49,6 +85,7 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
         delete next[report.id];
         return next;
       });
+      setNotice(`Action “${action}” submitted successfully. The report has been removed from this view.`);
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : 'Moderation action could not be applied.');
     } finally {
@@ -61,16 +98,61 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
       <header>
         <p className={styles.eyebrow}>TRUST & SAFETY</p>
         <h1>Moderation queue</h1>
-        <p>Review the reported content and its author before taking action. Every action requires a rationale and is written to the audit log.</p>
+        <p>Review reported content and its author before taking action. Every action requires a rationale and is recorded by the server.</p>
       </header>
+
+      <section className={styles.queueTools} aria-label="Moderation queue tools">
+        <div className={styles.queueSummary}>
+          <div className={styles.summaryCard}>
+            <span>Open reports loaded</span>
+            <strong>{reports.length}</strong>
+          </div>
+          <div className={styles.summaryCard}>
+            <span>Showing</span>
+            <strong>{filteredReports.length}</strong>
+          </div>
+          <div className={styles.summaryCard}>
+            <span>Report types</span>
+            <strong>{availableTypes.length}</strong>
+          </div>
+        </div>
+        <div className={styles.filters}>
+          <label className={styles.searchBox}>
+            <Search size={17} aria-hidden="true" />
+            <span className={styles.srOnly}>Search reports</span>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.currentTarget.value)}
+              placeholder="Search content, member, reason…"
+              maxLength={120}
+            />
+          </label>
+          <label className={styles.typeFilter}>
+            <span>Content type</span>
+            <select value={typeFilter} onChange={(event) => setTypeFilter(event.currentTarget.value)}>
+              <option value="all">All types</option>
+              {availableTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+            </select>
+          </label>
+          <button className={styles.refreshButton} type="button" onClick={() => void refresh()} disabled={isLoading || busyReportId !== null}>
+            <RefreshCw size={16} aria-hidden="true" className={isLoading ? styles.spinning : undefined} />
+            {isLoading ? 'Refreshing…' : 'Refresh queue'}
+          </button>
+        </div>
+      </section>
+
       {error && <p className={styles.error} role="alert">{error}</p>}
+      {notice && <p className={styles.success} role="status">{notice}</p>}
       {isLoading ? <p role="status">Loading moderation access…</p> : !isAuthorized ? (
-        <p className={styles.notice}>This area is restricted to active moderators and administrators.</p>
+        <p className={styles.notice}>This area is restricted to active moderators and administrators. Resolve the access or backend error above, then refresh.</p>
       ) : reports.length === 0 ? (
-        <p className={styles.notice}>No open reports.</p>
+        <p className={styles.notice}>No open reports were returned by the moderation service.</p>
+      ) : filteredReports.length === 0 ? (
+        <p className={styles.notice}>No reports match these filters. Try a different search or content type.</p>
       ) : (
         <section className={styles.queue} aria-label="Open reports">
-          {reports.map((report) => (
+          {filteredReports.map((report) => (
             <article className={styles.report} key={report.id}>
               <div className={styles.reportHeader}>
                 <strong>{report.target_type} report</strong>
