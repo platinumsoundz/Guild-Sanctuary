@@ -669,3 +669,17 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Implemented on feature branch:** Tighten shared page typography and responsive spacing, preserve content above fixed bottom navigation, and respect reduced-motion preferences.
 - **Validation outstanding:** Run the theme and theme-contrast contract scripts, TypeScript check, production build, and visual QA at narrow phone widths and desktop widths. Verify light/ocean/dusk/stone themes, keyboard navigation, screen-reader names, and iOS/Android safe areas before merge/release.
 - This pass is CSS-focused and intentionally avoids changing auth, persistence, database schemas, or service integrations.
+
+
+## Guild implementation checkpoint — 2026-10-28
+
+A first browser-first Guild implementation has started on `feat/guild-browser-arcade-first-2026-10-28`, based on the cosmic mobile UI work so both can be reviewed together. This is a prototype checkpoint, not a release-ready feature.
+
+- Added a hidden Guild entry surface revealed by a connected gamepad or the keyboard accessibility override `Ctrl+Shift+G`; no ordinary navigation item or public Guild route was added.
+- Added an original, browser-native **Orbital Drift** arcade trial with keyboard/WASD, gamepad, and touch-button controls, a timed win/loss loop, and a device-local best score.
+- The entry requires the existing authenticated Sanctuary identity. No new account, provider linking, cloud rewards, Guild database tables, or cross-world sharing is introduced.
+- Added a focused static contract check. It must be run alongside typecheck/build and browser testing; source-contract checks alone do not verify actual controller behaviour.
+- **Not yet complete:** focus trapping/return, controller mapping QA across browsers, mobile-device tests, pausing/background behaviour, gamepad reconnect handling, Supabase/RLS design, trusted progression, catalogue expansion, and licensed/open-source game selection.
+- **Security note:** the hidden entry is a discoverability choice only. This prototype stores its best score in local storage and does not treat it as a verified achievement or reward.
+
+Current Guild implementation is now a **first UI/gameplay prototype**, not 0% code. Release verification remains 0% until browser/device, auth, and security tests produce evidence.
