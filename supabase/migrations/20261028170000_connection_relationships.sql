@@ -200,14 +200,14 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $$
   select exists (
     select 1
     from public.profile_blocks b
     where ((select auth.uid()) = b.blocker_id and b.blocked_id = requested_profile_id)
        or ((select auth.uid()) = b.blocked_id and b.blocker_id = requested_profile_id)
   );
-$;
+$$;
 
 revoke all on function private.is_profile_blocked(uuid) from public, anon;
 grant execute on function private.is_profile_blocked(uuid) to authenticated, anon;
@@ -289,7 +289,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   if exists (
     select 1
@@ -311,7 +311,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 revoke all on function private.guard_direct_message_blocks() from public, anon, authenticated;
 
@@ -325,7 +325,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   if exists (
     select 1 from public.profile_blocks b
@@ -336,7 +336,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 revoke all on function private.guard_direct_conversation_blocks() from public, anon, authenticated;
 
@@ -364,13 +364,13 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   insert into public.notifications (recipient_id, actor_id, notification_type, target_type, target_id)
   values (new.followee_id, new.follower_id, 'follow', 'user', new.follower_id);
   return new;
 end;
-$;
+$$;
 revoke all on function private.notify_profile_follow() from public, anon, authenticated;
 
 drop trigger if exists notify_profile_follow on public.profile_follows;
@@ -383,7 +383,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   if tg_op = 'INSERT' and new.status = 'pending' then
     insert into public.notifications (recipient_id, actor_id, notification_type, target_type, target_id)
@@ -394,7 +394,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 revoke all on function private.notify_connection_request() from public, anon, authenticated;
 
 drop trigger if exists notify_connection_request on public.profile_connections;
