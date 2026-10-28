@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ExternalLink, Gamepad2, Image as ImageIcon, Library, Music2, Plus, ShieldCheck, Trash2 } from 'lucide-react';
+import { ExternalLink, Gamepad2, Image as ImageIcon, Library, Music2, Plus, ShieldCheck, Terminal, Trash2 } from 'lucide-react';
 import styles from './GuildCompanionHub.module.css';
 
 type LocalGame = { id: string; title: string; platform: string; launchUrl: string };
@@ -138,6 +138,12 @@ export function GuildCompanionHub() {
         </section>
       </div>
       {mediaMessage && <p className={styles.status} role="status">{mediaMessage}</p>}
+
+      <section className={styles.panel} aria-labelledby="guild-cloud-lab-title">
+        <div className={styles.panelHeading}><span className={styles.icon}><Terminal size={19} /></span><div><h3 id="guild-cloud-lab-title">Cloud Lab · persistent Linux</h3><p>Infrastructure design is underway; this is deliberately not a simulated terminal.</p></div></div>
+        <div className={styles.notice}><strong>Not provisioned yet.</strong> A real Linux workspace needs an isolated container or VM, persistent per-user storage, authentication, CPU/memory/disk quotas, network egress controls, package-install policy, lifecycle management and audit logs. No shell commands can run from this panel today.</div>
+        <div className={styles.serviceChips}><span>Per-user isolation</span><span>Persistent home directory</span><span>Resource quotas</span><span>Secure terminal gateway</span><span>Stop / reset controls</span><span>Cost and abuse limits</span></div>
+      </section>
 
       <section className={styles.panel} aria-labelledby="guild-connect-title">
         <div className={styles.panelHeading}><span className={styles.icon}><Gamepad2 size={19} /></span><div><h3 id="guild-connect-title">Gaming worlds & achievements</h3><p>Official destinations now; authenticated account connections are future work.</p></div></div>
