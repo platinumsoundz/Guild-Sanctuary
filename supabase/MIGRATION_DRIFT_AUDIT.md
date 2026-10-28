@@ -55,6 +55,7 @@ The following live migrations were added to this branch with their matching vers
 - `20261028161009_tighten_table_privilege_grants`
 - `20261028161415_restore_column_level_write_grants`
 - `20261028162026_harden_remaining_table_privileges`
+- `20261028162320_harden_postgres_default_privileges`
 
 ## Recommended reconciliation workflow
 
@@ -63,3 +64,7 @@ The following live migrations were added to this branch with their matching vers
 3. For changes already present under another live migration, use the Supabase CLI migration repair/fetch workflow only after confirming the SQL equivalence and desired history model.
 4. Rebuild a fresh disposable branch/database from the proposed local migration sequence and verify it converges to the intended schema before any production migration push.
 5. Re-run Security and Performance Advisors and authenticated multi-user RLS tests after reconciliation.
+
+## Default privilege note
+
+The migration owner (`postgres`) now has restrictive defaults for future public-schema tables, sequences, and functions, and existing client sequence grants were revoked. The connector cannot change the separate `supabase_admin` default ACLs due a permission boundary; avoid creating application tables/functions under that role without explicitly revoking/granting privileges. Normal tracked migrations should continue to run as `postgres`.
