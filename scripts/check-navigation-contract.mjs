@@ -7,7 +7,8 @@ const navigationStyles = read('../src/components/Navigation.module.css');
 const shellStyles = read('../src/components/ResponsiveShell.module.css');
 
 for (const [label, pattern] of [
-  ['mobile navigation exposes a Today destination for the planner', /\{ id: 'planner', label: 'Today'/],
+  ['mobile navigation exposes the Today home destination', /\{ id: 'today', label: 'Today'/],
+  ['the Daily Planner remains available separately', /\{ id: 'planner', label: 'Daily Planner'/],
   ['mobile navigation exposes Community feed', /\{ id: 'feed', label: 'Community'/],
   ['mobile navigation exposes Discover, Messages, and You', /\{ id: 'discover', label: 'Discover'/] ,
 ]) {
