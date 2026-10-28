@@ -349,6 +349,13 @@
   font-weight: 400;
 }
 
+.organizerName {
+  margin: 5px 0 2px;
+  color: var(--accent);
+  font: 700 11px/1.45 Arial, sans-serif;
+  overflow-wrap: anywhere;
+}
+
 .eventMain > p {
   margin: 6px 0;
   color: var(--muted);
