@@ -30,3 +30,8 @@ When the member answers the learning prompt, the result additionally offers a sm
 3. Run `npm run build`.
 4. Manually test keyboard-only navigation, skipped learning answers, each learning option, answer edits, clear-session behavior, export, and mobile layout.
 5. Do not add persistent save/resume or profile sharing until the existing privacy contract, schema, RLS, consent and deletion flows have been reviewed and owner-approved.
+
+
+## Follow-up polish
+
+The result explains which selected preferences informed the learning suggestion. The explicit text export includes the learning path, rationale and non-clinical disclaimer if the member answered the learning prompt. The export still happens only when the member clicks the download control.
