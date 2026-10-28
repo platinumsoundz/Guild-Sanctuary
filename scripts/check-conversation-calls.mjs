@@ -7,7 +7,7 @@ const migration = readFileSync('supabase/migrations/20261028202753_sanctuary_cal
 const senderHardening = readFileSync('supabase/migrations/20261028203010_harden_call_signal_sender.sql', 'utf8');
 const iceConfig = readFileSync('supabase/functions/call-ice-config/index.ts', 'utf8');
 
-for (const token of ['getUserMedia', 'getUser', 'setAuth', 'RTCPeerConnection', 'createOffer', 'createAnswer', 'addIceCandidate', "type: 'invite'", "type: 'hangup'", 'toggleMute', 'toggleCamera', 'isGroup', '45_000', '30_000', 'config: { private: true }', 'remoteAudio', 'reconnectTimer', 'trying to reconnect']) {
+for (const token of ['isSignalPayload', 'SIGNAL_TYPES', '256_000', 'getUserMedia', 'getUser', 'setAuth', 'RTCPeerConnection', 'createOffer', 'createAnswer', 'addIceCandidate', "type: 'invite'", "type: 'hangup'", 'toggleMute', 'toggleCamera', 'isGroup', '45_000', '30_000', 'config: { private: true }', 'remoteAudio', 'reconnectTimer', 'trying to reconnect']) {
   assert.ok(component.includes(token), `Call panel must include ${token}`);
 }
 assert.ok(thread.includes('ConversationCallPanel'), 'Call controls must be integrated into Sanctuary messages');
