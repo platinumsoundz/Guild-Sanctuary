@@ -36,3 +36,15 @@ Use the approved Sanctuary concept image (project reference artwork) as the visu
 - Do not invent or imply backend capabilities, and do not alter Supabase/security boundaries as part of visual work.
 - Avoid adding large binary assets through text-only APIs. The concept image can be committed as a normal image asset in a follow-up using a binary-capable Git workflow if it is not already present in the repository.
 - No production deployment is performed by this change.
+
+
+## Default theme decision — 2026-10-28
+
+The cosmic Sanctuary theme is now the product's default visual direction, not merely a homepage skin. The global semantic tokens in `src/app/globals.css` define midnight-indigo surfaces, lavender-violet accents, cyan highlights, and celestial status colors. Shared body atmosphere and feature modules should consume these semantic tokens so Feed, Events, profile, Support, shop, notifications, navigation, and future pages remain coherent. Existing `light`, `stone`, `ocean`, and `dusk` theme overrides remain separate alternatives; this work does not remove future theme choice.
+
+### Rollout sequence
+1. Global cosmic tokens as the default and a regression contract to keep them stable.
+2. Shared shell, navigation, notifications, buttons, inputs, cards, dialogs, and page surfaces adopt the semantic tokens consistently.
+3. Feature-by-feature refinement for Feed, Events, profiles, creator support, shop, Sanctuary Intelligence, and Cosmic Arcade.
+4. Mobile and accessibility review: contrast, focus, reduced motion, safe areas, overflow, and touch targets.
+5. Run full CI/typecheck/build and visual QA before merging or deployment. No deployment is implied by this theme change.
