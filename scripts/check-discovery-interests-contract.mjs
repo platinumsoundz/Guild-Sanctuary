@@ -7,6 +7,8 @@ const editor = readFileSync(new URL('../src/modules/profiles/components/ProfileI
 const discovery = readFileSync(new URL('../src/modules/profiles/components/ProfileDiscovery.tsx', import.meta.url), 'utf8');
 const workspace = readFileSync(new URL('../src/components/AppWorkspace.tsx', import.meta.url), 'utf8');
 const publicProfile = readFileSync(new URL('../src/modules/profiles/components/PublicProfilePage.tsx', import.meta.url), 'utf8');
+const relationshipMigration = readFileSync(new URL('../supabase/migrations/20261028170000_connection_relationships.sql', import.meta.url), 'utf8');
+const relationshipService = readFileSync(new URL('../src/modules/profiles/connectionService.ts', import.meta.url), 'utf8');
 
 for (const required of [
   'create table if not exists public.profile_interests',
@@ -35,4 +37,34 @@ assert.ok(discovery.includes('fetchFeed()'), 'topic discovery should reuse the e
 assert.ok(discovery.includes('fetchEvents(currentUserId)'), 'community gathering discovery should reuse existing events');
 assert.ok(workspace.includes("onExploreFeed={() => setActiveNavigation('feed')}"), 'topic actions must navigate to the existing feed');
 assert.ok(workspace.includes("onExploreEvents={() => setActiveNavigation('events')}"), 'gathering actions must navigate to existing events');
-console.log('Discovery interest contract checks passed.');
+for (const required of [
+  'create table if not exists public.profile_follows',
+  'create table if not exists public.profile_connections',
+  'create table if not exists public.profile_blocks',
+  'alter table public.profile_follows enable row level security',
+  'alter table public.profile_connections enable row level security',
+  'alter table public.profile_blocks enable row level security',
+  'private.guard_profile_relationships',
+  'private.apply_profile_block_cleanup',
+  'private.is_profile_blocked',
+  'requester_id = (select auth.uid())',
+  'recipients respond to connection requests',
+  'revoke all on table public.profile_follows, public.profile_connections, public.profile_blocks from anon, authenticated',
+]) assert.ok(relationshipMigration.includes(required), `missing relationship security contract: ${required}`);
+
+for (const required of [
+  'fetchRelationshipStates',
+  'followProfile',
+  'unfollowProfile',
+  'requestConnection',
+  'respondToConnection',
+  'blockProfile',
+  'unblockProfile',
+  'fetchIncomingConnectionRequests',
+  'fetchBlockedProfileIds',
+]) assert.ok(relationshipService.includes(required), `missing relationship service action: ${required}`);
+
+assert.ok(discovery.includes('Connection requests'), 'discovery must expose incoming connection requests');
+assert.ok(discovery.includes('Block member'), 'discovery must provide a block control');
+assert.ok(discovery.includes('Blocked members'), 'members must be able to manage their block list');
+console.log('Discovery interest and relationship contract checks passed.');
