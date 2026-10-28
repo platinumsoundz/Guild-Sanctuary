@@ -92,15 +92,27 @@ export function CosmicArcade() {
         const directions = readGamepadDirections(pad, pressed);
         if (time - lastNavigationAt.current > 180 && (directions.left || directions.right || directions.up || directions.down)) {
           if (onGameTabs) selectGameByOffset(directions.left || directions.up ? -1 : 1);
-          else {
+          else if (selectedGameRef.current === 'snake') {
             const key = directions.left ? 'ArrowLeft' : directions.right ? 'ArrowRight' : directions.up ? 'ArrowUp' : 'ArrowDown';
             window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+          } else {
+            const controls = Array.from(arcadeRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex="0"]') ?? [])
+              .filter((element) => element.offsetParent !== null && !element.closest('[role="tablist"]'));
+            const currentIndex = controls.indexOf(document.activeElement as HTMLElement);
+            const nextIndex = (currentIndex + 1 + controls.length) % controls.length;
+            controls[nextIndex]?.focus({ preventScroll: true });
           }
           lastNavigationAt.current = time;
         }
         if (pressed(0)) {
-          if (onGameTabs) activeElement?.click();
-          else if (activeElement && activeElement !== document.body && activeElement.tagName !== 'BODY') activeElement.click();
+          if (onGameTabs) {
+            activeElement?.click();
+            requestAnimationFrame(() => {
+              const controls = Array.from(arcadeRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex="0"]') ?? [])
+                .filter((element) => element.offsetParent !== null && !element.closest('[role="tablist"]'));
+              controls[0]?.focus({ preventScroll: true });
+            });
+          } else if (activeElement && activeElement !== document.body && activeElement.tagName !== 'BODY') activeElement.click();
           else arcadeRef.current?.querySelector<HTMLButtonElement>('[data-arcade-game="' + selectedGameRef.current + '"]')?.focus();
         }
         if (pressed(1)) {
