@@ -20,4 +20,11 @@ assert.ok(service.includes('requested_rationale: rationale'), 'action rationale 
 assert.ok(service.includes('client.auth.getUser()'), 'queue access must verify an authenticated account');
 assert.ok(service.includes("profile.status !== 'active'"), 'queue access must reject inactive accounts');
 
+assert.ok(dashboard.includes('searchQuery'), 'queue must expose client-side report search');
+assert.ok(dashboard.includes('typeFilter'), 'queue must expose report-type filtering');
+assert.ok(dashboard.includes('filteredReports.map'), 'rendered queue must respect active filters');
+assert.ok(dashboard.includes('onClick={() => void refresh()}'), 'moderators must be able to refresh the queue manually');
+assert.ok(dashboard.includes('window.confirm'), 'destructive moderation actions must require an explicit confirmation');
+assert.ok(dashboard.includes('setNotice('), 'successful action submission must provide visible status feedback');
+
 console.log('Moderation dashboard contract checks passed.');
