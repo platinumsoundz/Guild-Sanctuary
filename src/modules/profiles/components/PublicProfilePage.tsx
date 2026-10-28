@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { Post, PublicProfile } from '@/types/database';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import { fetchPublicProfileById } from '../service';
+import { fetchPublicDiscoveryInterests } from '../discoveryInterests';
 import { ProfileCard } from './ProfileCard';
 import styles from './PublicProfilePage.module.css';
 
@@ -16,6 +17,7 @@ interface PublicProfilePageProps {
 export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }: PublicProfilePageProps) {
   const [profile, setProfile] = useState(initialProfile);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [publicInterests, setPublicInterests] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +30,8 @@ export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }
     Promise.all([
       fetchPublicProfileById(initialProfile.userId),
       fetchPostsByAuthor(initialProfile.userId),
-    ]).then(([latestProfile, authorPosts]) => {
+      fetchPublicDiscoveryInterests([initialProfile.userId]),
+    ]).then(([latestProfile, authorPosts, interestMap]) => {
       if (cancelled) return;
       if (!latestProfile) {
         setError('This profile is private or no longer available.');
@@ -37,6 +40,7 @@ export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }
       }
       setProfile(latestProfile);
       setPosts(authorPosts);
+      setPublicInterests(interestMap.get(initialProfile.userId) ?? []);
     }).catch(() => {
       if (!cancelled) setError('This profile could not be loaded right now.');
     }).finally(() => {
@@ -85,6 +89,14 @@ export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }
         )}
       </section>
 
+      {publicInterests.length > 0 && (
+        <section className={styles.interests} aria-labelledby="public-interests-heading">
+          <h2 id="public-interests-heading">Interests</h2>
+          <div className={styles.interestTags}>
+            {publicInterests.map((interest) => <span key={interest}>#{interest}</span>)}
+          </div>
+        </section>
+      )}
       <ProfileCard profile={profile} />
     </main>
   );
