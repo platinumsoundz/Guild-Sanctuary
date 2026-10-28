@@ -16,8 +16,12 @@ const supportPanel = readFileSync('src/modules/support/SupportPanel.tsx', 'utf8'
 assert.match(navigation, /id:\s*'games',\s*label:\s*'Cosmic Arcade'/, 'Cosmic Arcade remains reachable from navigation');
 assert.match(workspace, /activeNavigation === 'games' \? \(\s*<CosmicArcade \/>/, 'Cosmic Arcade route renders only the Sanctuary-built arcade');
 assert.doesNotMatch(gamesHub, /import \{ CosmicArcade \}/, 'external creator projects do not embed the Sanctuary-built arcade');
+assert.doesNotMatch(arcade, /GamesHub|The 5 Sleeves 2D|The 5 Sleeves 3D|My Roblox World|Minecraft|Platinum Survival/, 'Cosmic Arcade contains no external creator-world links');
+assert.match(workspace, /activeNavigation === 'support' \? \([\s\S]*?<SupportPanel \/>/, 'Support navigation renders the dedicated creator-support page');
 assert.match(supportPanel, /<GamesHub \/>/, 'creator support page retains external creator projects');
+assert.doesNotMatch(supportPanel, /<CosmicArcade \/>/, 'creator support page does not embed the separate Cosmic Arcade page');
 assert.match(gamesHub, /The 5 Sleeves 2D/,'creator projects retain The 5 Sleeves 2D');
+assert.match(gamesHub, /Creator projects and community worlds/, 'external game links are clearly labelled as creator projects on the support page');
 assert.match(gamesHub, /The 5 Sleeves 3D/,'creator projects retain The 5 Sleeves 3D');
 assert.match(gamesHub, /My Roblox World/,'creator projects retain the Roblox experience');
 assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the Bedrock server');
