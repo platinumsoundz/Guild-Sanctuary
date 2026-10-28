@@ -27,6 +27,8 @@ for (const required of [
   'isGuest',
   'publishPost',
   'role="alert"',
+  'role="group" aria-labelledby="connection-toolkit-heading"',
+  'What did you learn? <em>(required)</em>',
 ]) assert.ok(composer.includes(required), `missing guided composer contract: ${required}`);
 
 for (const required of ['.connectionToolkit', '.guidedFields', '@media (max-width: 580px)', ':focus-visible']) {
@@ -35,4 +37,5 @@ for (const required of ['.connectionToolkit', '.guidedFields', '@media (max-widt
 assert.match(roadmap, /Life lessons[\s\S]{0,260}bridge between wisdom sharing and the feed/i);
 assert.ok(!composer.includes('localStorage') && !helper.includes('localStorage'), 'guided drafts must not introduce a new persistence path');
 assert.ok(!composer.includes('fetch(') && !helper.includes('fetch('), 'guided drafts must not add an external request');
+assert.ok(helper.includes("draft.mode === 'life-lesson'\n    ? [draft.context, draft.lesson, draft.helpfulNow, draft.question].map(clean)\n    : [draft.context, draft.question].map(clean)"), 'validate only fields visible in the active guided mode');
 console.log('Community connection toolkit contract checks passed.');
