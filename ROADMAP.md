@@ -638,6 +638,6 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 ## Private Daily Reflection client restoration — 2026-10-28
 
-- **In code on `feat/private-daily-reflection-client-restore-2026-10-28`; validation pending:** restore the account-backed reflection client and compact mood controls; legacy browser data can only be imported after an explicit confirmation.
+- **Implemented on `feat/private-daily-reflection-client-restore-2026-10-28`; Daily Reflection contract, CI/typecheck/build and Cloudflare Worker build passed; deployment skipped for PR:** restore the account-backed reflection client and compact mood controls; legacy browser data can only be imported after an explicit confirmation.
 - Read-only inspection of the active Guild-Sanctuary database confirmed the `daily_reflections` table, owner-only RLS policies for all CRUD operations, and a unique `(user_id, reflection_date)` index. This batch does not add or apply migrations.
 - Remaining gates: exact-head contract/typecheck/build, authenticated browser testing, and cross-account isolation. No production deployment or auth/payment/provider changes.
