@@ -1,23 +1,13 @@
 /* Cosmic Sanctuary — first visual-system layer inspired by the approved concept art. */
 .cosmicTheme {
-  --bg: #07091d;
-  --surface: #0d1230;
-  --surface-raised: #15183c;
-  --ink: #f6f2ff;
-  --muted: #c0c4e7;
-  --line: rgb(151 126 255 / 30%);
-  --accent: #b18cff;
-  --accent-contrast: #fff;
-  --accent-soft: rgb(153 91 255 / 18%);
-  --shadow-card: 0 16px 48px rgb(2 3 20 / 42%);
   position: relative;
   isolation: isolate;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 50% -12%, rgb(95 65 230 / 30%), transparent 42rem),
-    radial-gradient(ellipse at 100% 34%, rgb(18 104 211 / 17%), transparent 38rem),
-    radial-gradient(ellipse at 0% 72%, rgb(174 53 226 / 13%), transparent 34rem),
-    linear-gradient(180deg, #080a20 0%, #0b0d27 45%, #080a20 100%);
+    radial-gradient(ellipse at 50% -12%, color-mix(in srgb, var(--cosmic-violet) 24%, transparent), transparent 42rem),
+    radial-gradient(ellipse at 100% 34%, color-mix(in srgb, var(--cosmic-cyan) 12%, transparent), transparent 38rem),
+    radial-gradient(ellipse at 0% 72%, color-mix(in srgb, var(--cosmic-violet) 10%, transparent), transparent 34rem),
+    linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 90%, var(--cosmic-violet)) 45%, var(--bg) 100%);
   color: var(--ink);
 }
 .cosmicTheme::before {
@@ -61,7 +51,7 @@
 .cosmicTheme :global([class*="Card"]),
 .cosmicTheme :global([class*="panel"]),
 .cosmicTheme :global([class*="Panel"]) {
-  border-color: color-mix(in srgb, var(--line) 85%, transparent);
+  border-color: color-mix(in srgb, var(--line) 85%, var(--cosmic-violet));
 }
 @media (prefers-reduced-motion: reduce) {
   .cosmicTheme :global(*),
