@@ -159,6 +159,12 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     };
   }, [sendSignal, callState]);
 
+  useEffect(() => {
+    if (callState !== 'idle' && localVideo.current && streamRef.current) {
+      localVideo.current.srcObject = streamRef.current;
+    }
+  }, [callState, callKind]);
+
   const preparePeer = async (kind: CallKind) => {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('This browser does not support microphone or camera access. Use a secure HTTPS connection and a supported browser.');
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: kind === 'video' });
