@@ -4,10 +4,11 @@ import { useMemo, useState } from 'react';
 import { CosmicSnake } from './CosmicSnake';
 import { LunarSolitaire } from './LunarSolitaire';
 import { CelestialCrossword } from './CelestialCrossword';
+import { ArcadeClassics } from './ArcadeClassics';
 import { BookOpen, CreditCard, Gem, LockKeyhole, MoonStar, Puzzle, RotateCcw, Sparkles, Star } from 'lucide-react';
 import styles from './CosmicArcade.module.css';
 
-type ArcadeGame = 'wordsearch' | 'crossword' | 'solitaire' | 'mahjong' | 'snake';
+type ArcadeGame = 'wordsearch' | 'crossword' | 'solitaire' | 'mahjong' | 'snake' | 'classics';
 type Cell = { row: number; col: number };
 
 const games: { id: ArcadeGame; title: string; subtitle: string; icon: typeof Star; status: string }[] = [
@@ -16,6 +17,7 @@ const games: { id: ArcadeGame; title: string; subtitle: string; icon: typeof Sta
   { id: 'solitaire', title: 'Lunar Solitaire', subtitle: 'A calm, moonlit take on a classic card game.', icon: MoonStar, status: 'Playable preview' },
   { id: 'mahjong', title: 'Zodiac Mahjong', subtitle: 'Match celestial tiles and zodiac symbols.', icon: Gem, status: 'Coming soon' },
   { id: 'snake', title: 'Cosmic Snake', subtitle: 'Collect stardust and see how long you survive.', icon: Sparkles, status: 'Playable preview' },
+  { id: 'classics', title: 'Arcade Classics', subtitle: 'A collection of quick puzzles, memory games and arcade challenges.', icon: Star, status: '16 playable games' },
 ];
 
 const wordGrid = [
@@ -128,7 +130,7 @@ export function CosmicArcade() {
         })}
       </div>
 
-      {selectedGame === 'crossword' ? <CelestialCrossword /> : selectedGame === 'snake' ? <CosmicSnake /> : selectedGame === 'solitaire' ? <LunarSolitaire /> : selectedGame === 'wordsearch' ? (
+      {selectedGame === 'classics' ? <ArcadeClassics /> : selectedGame === 'crossword' ? <CelestialCrossword /> : selectedGame === 'snake' ? <CosmicSnake /> : selectedGame === 'solitaire' ? <LunarSolitaire /> : selectedGame === 'wordsearch' ? (
         <div className={styles.playArea}>
           <div className={styles.playHeader}>
             <div><p className={styles.eyebrow}>MINDFUL PUZZLE</p><h2>Starseed Word Search</h2><p>Choose a word's first letter, then its last letter in a straight line. Horizontal, vertical and diagonal words all count.</p></div>
