@@ -498,3 +498,50 @@
     transform: none;
   }
 }
+
+
+/* Consistent focus and motion behaviour across the profile editor and showcase. */
+.editButton,
+.saveButton,
+.field input,
+.field textarea,
+.field select,
+.showcaseItem {
+  transition: border-color var(--motion-fast) ease, background-color var(--motion-fast) ease, transform var(--motion-fast) ease;
+}
+.editButton:focus-visible,
+.saveButton:focus-visible,
+.uploadLabel:focus-within,
+.privacyToggle:focus-within,
+.field input:focus-visible,
+.field textarea:focus-visible,
+.field select:focus-visible {
+  outline: 3px solid var(--profile-color);
+  outline-offset: 3px;
+}
+.editButton:hover,
+.saveButton:hover {
+  border-color: var(--profile-color);
+  filter: brightness(1.06);
+}
+.field input,
+.field textarea,
+.field select { min-width: 0; }
+@media (max-width: 420px) {
+  .pageHeader h1 { font-size: clamp(22px, 7vw, 28px); }
+  .imageFields,
+  .detailGrid { grid-template-columns: minmax(0, 1fr); }
+  .saveRow { justify-content: stretch; }
+  .saveButton { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .editButton,
+  .saveButton,
+  .showcaseItem,
+  .field input,
+  .field textarea,
+  .field select { transition: none; }
+  .editButton:hover,
+  .saveButton:hover,
+  .showcaseItem:hover { transform: none; }
+}
