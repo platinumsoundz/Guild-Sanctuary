@@ -64,4 +64,39 @@ create trigger set_guild_library_entry_updated_at
 before update on public.guild_library_entries
 for each row execute function public.set_guild_library_entry_updated_at();
 
+
+-- Enforce the same 500-entry ceiling on the server, not just in the browser.
+-- The per-owner transaction lock makes concurrent inserts respect the cap.
+create or replace function public.enforce_guild_library_entry_limit()
+returns trigger
+language plpgsql
+set search_path = ''
+as $
+declare
+  current_count bigint;
+begin
+  if tg_op = 'UPDATE' then
+    if new.user_id is distinct from old.user_id then
+      raise exception using errcode = '42501', message = 'Guild library ownership cannot be changed.';
+    end if;
+    return new;
+  end if;
+
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(new.user_id::text, 0));
+  select pg_catalog.count(*) into current_count
+  from public.guild_library_entries
+  where user_id = new.user_id;
+
+  if current_count >= 500 then
+    raise exception using errcode = '54000', message = 'Guild library entry limit reached (500).';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists enforce_guild_library_entry_limit on public.guild_library_entries;
+create trigger enforce_guild_library_entry_limit
+before insert or update of user_id on public.guild_library_entries
+for each row execute function public.enforce_guild_library_entry_limit();
+
 commit;
