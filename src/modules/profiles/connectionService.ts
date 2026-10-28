@@ -46,7 +46,7 @@ function readLocalStore(): LocalRelationshipStore {
       savedProfiles: Array.isArray(value.savedProfiles) ? value.savedProfiles : [],
     };
   } catch {
-    return { follows: [], connections: [], blocks: [] };
+    return { follows: [], connections: [], blocks: [], hiddenProfiles: [], savedProfiles: [] };
   }
 }
 function writeLocalStore(store: LocalRelationshipStore): void {
