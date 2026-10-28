@@ -3,7 +3,7 @@
 **Branch:** `feat/event-discovery-map-explorer-2026-10-28`  
 **Base:** `main`  
 **Owner:** Product & Experience  
-**Status:** implementation complete; automated CI and browser/device QA verification pending on the current branch head.
+**Status:** implementation complete; automated contract/runtime tests, typecheck, production build, and repository CI passed on the current implementation head. Browser/device QA remains pending because the Vercel preview hit its daily deployment limit.
 
 ## User outcome
 Members who want to share something meaningful can use a gentle structure for a life lesson or a conversation starter, making it easier for others to understand, respond, and connect.
