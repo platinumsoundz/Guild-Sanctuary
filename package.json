@@ -32,7 +32,8 @@
     "check:guild-companion-hub": "node scripts/check-guild-companion-hub.mjs",
     "check:guild-cloud-lab": "node scripts/check-guild-cloud-lab.mjs",
     "check:conversation-calls": "node scripts/check-conversation-calls.mjs",
-    "check:guild-cloud-lab-control": "node scripts/check-guild-cloud-lab-control.mjs"
+    "check:guild-cloud-lab-control": "node scripts/check-guild-cloud-lab-control.mjs",
+    "check:roadmaps": "node scripts/check-roadmaps.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
