@@ -25,6 +25,7 @@ import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import styles from './AppWorkspace.module.css';
+import cosmicStyles from './CosmicTheme.module.css';
 
 export function AppWorkspace() {
   const {
@@ -214,7 +215,7 @@ export function AppWorkspace() {
     <MotionConfig reducedMotion="user">
       <ResponsiveShell>
         <div
-          className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`}
+          className={`${styles.worldSurface} ${cosmicStyles.cosmicTheme} w-full min-w-0 max-w-full overflow-x-clip`}
           data-world="sanctuary"
           style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}
         >
