@@ -313,3 +313,89 @@ export function createSelfDiscoveryReflection(input: unknown): SelfDiscoveryRefl
     disclaimer: 'This is a private, non-clinical reflection based only on the answers you chose to share here. It may not fit your experience. It is not a diagnosis or professional advice; you can edit or delete your answers.',
   };
 }
+
+
+export interface PersonalizedLearningPlan {
+  title: string;
+  approach: string;
+  firstStep: string;
+  practice: string;
+  reflectionPrompt: string;
+  basis: string[];
+  disclaimer: string;
+}
+
+/**
+ * Build an explainable, optional learning suggestion from answers the member
+ * explicitly chose. This is a preference snapshot, not a validated learning
+ * style, diagnosis, or prediction. It deliberately performs no persistence.
+ */
+export function createPersonalizedLearningPlan(input: unknown): PersonalizedLearningPlan | null {
+  const answers = validateSelfDiscoveryAnswers(input);
+  const learning = answers.learning;
+  if (!learning) return null;
+
+  const approaches: Record<string, { title: string; approach: string; firstStep: string; practice: string }> = {
+    reading: {
+      title: 'Start with a clear explanation',
+      approach: 'Try a short written explanation, then put the idea into your own words.',
+      firstStep: 'Choose one question you are curious about and read for five minutes.',
+      practice: 'Write three key points and one thing you would like to check.',
+    },
+    watching: {
+      title: 'Learn by seeing an example',
+      approach: 'A brief demonstration may be a comfortable starting point for this topic.',
+      firstStep: 'Find one short, trustworthy demonstration and watch it without multitasking.',
+      practice: 'Pause once and describe the next step before the demonstration shows it.',
+    },
+    practice: {
+      title: 'Learn by trying a small step',
+      approach: 'A hands-on first attempt may help you explore the idea in context.',
+      firstStep: 'Choose a beginner-friendly exercise that feels safe and easy to stop.',
+      practice: 'Try it for ten minutes, then note what you learned—not how well you scored.',
+    },
+    discussion: {
+      title: 'Explore the idea in conversation',
+      approach: 'Talking through a question with someone you trust may help you organise your thinking.',
+      firstStep: 'Write one question you would like to discuss or ask a trusted person to explore it with you.',
+      practice: 'Explain the idea in your own words and invite one different perspective.',
+    },
+    mix: {
+      title: 'Combine a few approaches',
+      approach: 'You chose a mix, so try a small explanation followed by a chance to use the idea.',
+      firstStep: 'Spend five minutes reading or watching an introduction to one topic.',
+      practice: 'Try one small example, then explain what made sense and what remains unclear.',
+    },
+  };
+  const selected = approaches[learning];
+  if (!selected) return null;
+
+  const motivation = answers.motivation;
+  const motivationNotes: Record<string, string> = {
+    'tiny-step': 'Keep the first session short and define a two-minute starting action.',
+    company: 'If useful, try the activity alongside a supportive person; working alone is also fine.',
+    purpose: 'Before you begin, write one sentence about why this topic matters to you.',
+    structure: 'Set a gentle start and stop time, and choose one small outcome for the session.',
+    unsure: 'Treat this as an experiment and notice what feels useful without judging yourself.',
+  };
+  const decisions = answers.decisions;
+  const decisionNotes: Record<string, string> = {
+    facts: 'Afterwards, note what you learned and one question that remains.',
+    talk: 'You could explain the idea to someone you trust, if conversation helps.',
+    time: 'Give yourself a little space after the session before deciding what to try next.',
+    'small-step': 'Choose a low-pressure next step that is easy to change or stop.',
+    unsure: 'Adjust the pace to the topic and your circumstances.',
+  };
+
+  return {
+    ...selected,
+    practice: [selected.practice, motivation ? motivationNotes[motivation] : '', decisions ? decisionNotes[decisions] : ''].filter(Boolean).join(' '),
+    reflectionPrompt: 'What helped me understand this, what felt difficult, and what would I like to try differently next time?',
+    basis: [
+      'learning preference: ' + learning,
+      ...(motivation ? ['starting preference: ' + motivation] : []),
+      ...(decisions ? ['decision support preference: ' + decisions] : []),
+    ],
+    disclaimer: 'This is a small suggestion based on your selected answers, not a fixed learning type or a validated assessment. Preferences can change with the topic, setting, and day.',
+  };
+}

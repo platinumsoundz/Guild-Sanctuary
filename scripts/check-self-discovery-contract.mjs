@@ -64,4 +64,31 @@ assert.ok(component.includes('setTimeout(() => URL.revokeObjectURL(url), 1000)')
 assert.ok(component.includes('sanctuary-reflection-'), 'exported file must have a recognizable filename');
 assert.ok(profile.includes('<SelfDiscoveryCentre />'), 'self-discovery centre must be available from the member profile');
 
+for (const required of [
+  'export interface PersonalizedLearningPlan',
+  'export function createPersonalizedLearningPlan(input: unknown)',
+  "if (!learning) return null;",
+  "title: 'Start with a clear explanation'",
+  "title: 'Learn by seeing an example'",
+  "title: 'Learn by trying a small step'",
+  "title: 'Explore the idea in conversation'",
+  "title: 'Combine a few approaches'",
+  'not a fixed learning type',
+  'decision support preference:',
+]) {
+  assert.ok(source.includes(required), `missing personalised learning contract: ${required}`);
+}
+assert.ok(source.includes('const answers = validateSelfDiscoveryAnswers(input);'), 'learning suggestions must validate all supplied answers');
+assert.ok(source.includes('This is a small suggestion based on your selected answers'), 'learning suggestions must explain their limits');
+assert.ok(component.includes('createPersonalizedLearningPlan'), 'questionnaire result must generate the optional learning plan');
+assert.ok(component.includes('A learning path to try'), 'questionnaire result must render the learning plan');
+assert.ok(component.includes('SANCTUARY INTELLIGENCE'), 'learning plan must be clearly identified');
+
+assert.ok(component.includes("learningPlan.basis.map((item) => <li key={item}>{item}</li>)"), 'learning path must show which selected preferences informed the suggestion');
+assert.ok(component.includes("'Sanctuary Intelligence — Learning Path'"), 'download must include the learning path when one exists');
+assert.ok(component.includes("...learningPlan.basis.map((item) => '- ' + item)"), 'download must include the learning plan explanation basis');
+assert.ok(component.includes('learningPlan.disclaimer'), 'downloaded learning path must preserve its non-clinical disclaimer');
+
+
+
 console.log('Self-discovery contract checks passed: domains, answer coverage, input validation, multi-answer outputs, non-clinical language, and no hidden persistence/network calls.');

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import {
   createSelfDiscoveryReflection,
+  createPersonalizedLearningPlan,
   SELF_DISCOVERY_QUESTIONS,
   type SelfDiscoveryAnswers,
 } from '../reflection';
@@ -20,6 +21,10 @@ export function SelfDiscoveryCentre() {
   const answeredCount = Object.keys(answers).length;
   const reflection = useMemo(
     () => (hasFinished ? createSelfDiscoveryReflection(answers) : null),
+    [answers, hasFinished],
+  );
+  const learningPlan = useMemo(
+    () => (hasFinished ? createPersonalizedLearningPlan(answers) : null),
     [answers, hasFinished],
   );
 
@@ -70,6 +75,18 @@ export function SelfDiscoveryCentre() {
         '',
         'A question for your journal',
         reflection.journalPrompt,
+        ...(learningPlan ? [
+          '',
+          'Sanctuary Intelligence — Learning Path',
+          learningPlan.title,
+          learningPlan.approach,
+          'Start here: ' + learningPlan.firstStep,
+          'Try this: ' + learningPlan.practice,
+          'Reflect: ' + learningPlan.reflectionPrompt,
+          'Why this suggestion:',
+          ...learningPlan.basis.map((item) => '- ' + item),
+          learningPlan.disclaimer,
+        ] : []),
         '',
         reflection.disclaimer,
         '',
@@ -143,6 +160,22 @@ export function SelfDiscoveryCentre() {
           <h3>A little lesson</h3>
           <p>{reflection.microLesson}</p>
         </div>
+        {learningPlan && (
+          <div className={styles.resultBlock} aria-labelledby="personal-learning-plan-heading">
+            <p className={styles.eyebrow}>SANCTUARY INTELLIGENCE</p>
+            <h3 id="personal-learning-plan-heading">A learning path to try</h3>
+            <p><strong>{learningPlan.title}</strong></p>
+            <p>{learningPlan.approach}</p>
+            <p><strong>Start here:</strong> {learningPlan.firstStep}</p>
+            <p><strong>Try this:</strong> {learningPlan.practice}</p>
+            <p><strong>Reflect:</strong> {learningPlan.reflectionPrompt}</p>
+            <p><strong>Why this suggestion:</strong></p>
+            <ul className={styles.promiseList}>
+              {learningPlan.basis.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+            <p className={styles.disclaimer}>{learningPlan.disclaimer}</p>
+          </div>
+        )}
         <div className={styles.resultBlock}>
           <h3>A question for your journal</h3>
           <p>{reflection.journalPrompt}</p>
