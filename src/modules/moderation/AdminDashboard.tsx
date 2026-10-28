@@ -70,7 +70,7 @@ function RoleManagement() {
     const previousLabel = roles.find((item) => item.value === selected.role)?.label ?? selected.role;
     const nextLabel = roles.find((item) => item.value === role)?.label ?? role;
     const isPrivilegeIncrease = roles.findIndex((item) => item.value === role) > roles.findIndex((item) => item.value === selected.role);
-    const warning = isPrivilegeIncrease ? '\\n\\nThis increases the member’s privilege level. The server must independently authorize this change.' : '\\n\\nThe server must independently authorize this change.';
+    const warning = isPrivilegeIncrease ? '\n\nThis increases the member’s privilege level. The server must independently authorize this change.' : '\n\nThe server must independently authorize this change.';
     if (!window.confirm('Change @' + selected.username + ' from ' + previousLabel + ' to ' + nextLabel + '?' + warning)) return;
     setSaving(true);
     setMessage('');
