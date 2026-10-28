@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { ExternalLink, MapPin, MapPinned } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useEvents, type EventView } from '@/modules/events';
 import { EventEngagement } from './EventEngagement';
@@ -18,7 +19,11 @@ export function MeetupCalendarPlaceholder() {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [editingEvent, setEditingEvent] = useState<EventView | null>(null);
+  const [selectedMapEventId, setSelectedMapEventId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const selectedMapEvent = events.find((event) => event.id === selectedMapEventId) ?? events[0] ?? null;
+  const coordinatePreview = getMapLinks(latitude, longitude);
 
   const clearForm = () => {
     setTitle('');
@@ -68,6 +73,7 @@ export function MeetupCalendarPlaceholder() {
     setFormError(null);
     try {
       await removeEvent(eventId);
+      if (selectedMapEventId === eventId) setSelectedMapEventId(null);
     } catch (deleteError) {
       setFormError(deleteError instanceof Error ? deleteError.message : 'The event could not be deleted.');
     }
@@ -88,6 +94,7 @@ export function MeetupCalendarPlaceholder() {
         <div>
           <p className={styles.eyebrow}>GATHER WITH CARE</p>
           <h1>Community events</h1>
+          <p className={styles.intro}>Find what is happening around you, explore event locations, and choose where to join in.</p>
         </div>
         <span className={styles.worldTag}>THE SANCTUARY</span>
       </header>
@@ -103,7 +110,7 @@ export function MeetupCalendarPlaceholder() {
             <span>Description</span>
             <textarea value={description} onChange={(event) => setDescription(event.currentTarget.value)} maxLength={2000} rows={3} />
           </label>
-          <p className={styles.formNote}>The date and time are entered in your device’s local timezone and converted for consistent storage. Venue coordinates are required in this version; address search is not available yet.</p>
+          <p className={styles.formNote}>Dates use your device’s local timezone. Add the venue coordinates below, then preview the pin on a real map before publishing. A venue name or address is not stored in this version, so the event will show its map pin instead.</p>
           <div className={styles.formRow}>
             <label className={styles.field}>
               <span>Event date (your local time)</span>
@@ -114,14 +121,21 @@ export function MeetupCalendarPlaceholder() {
               <input type="time" step="60" value={startTime} onChange={(event) => setStartTime(event.currentTarget.value)} required />
             </label>
             <label className={styles.field}>
-              <span>Latitude (venue map pin)</span>
-              <input type="number" min="-90" max="90" step="any" value={latitude} onChange={(event) => setLatitude(event.currentTarget.value)} required />
+              <span>Latitude</span>
+              <input type="number" min="-90" max="90" step="any" inputMode="decimal" value={latitude} onChange={(event) => setLatitude(event.currentTarget.value)} required />
             </label>
             <label className={styles.field}>
-              <span>Longitude (venue map pin)</span>
-              <input type="number" min="-180" max="180" step="any" value={longitude} onChange={(event) => setLongitude(event.currentTarget.value)} required />
+              <span>Longitude</span>
+              <input type="number" min="-180" max="180" step="any" inputMode="decimal" value={longitude} onChange={(event) => setLongitude(event.currentTarget.value)} required />
             </label>
           </div>
+          {coordinatePreview && (
+            <div className={styles.coordinatePreview}>
+              <MapPin size={17} aria-hidden="true" />
+              <span>Location pin preview is ready.</span>
+              <a href={coordinatePreview.open} target="_blank" rel="noreferrer">Check pin on OpenStreetMap <ExternalLink size={13} aria-hidden="true" /></a>
+            </div>
+          )}
           {formError && <p className={styles.error} role="alert">{formError}</p>}
           <div className={styles.formActions}>
             {editingEvent && <button className={styles.textButton} type="button" onClick={clearForm}>Cancel edit</button>}
@@ -132,45 +146,113 @@ export function MeetupCalendarPlaceholder() {
 
       <section className={styles.eventsSection} aria-labelledby="upcoming-events-title">
         <div className={styles.sectionHeading}>
-          <h2 id="upcoming-events-title">Upcoming</h2>
+          <div>
+            <p className={styles.eyebrow}>EXPLORE THE AREA</p>
+            <h2 id="upcoming-events-title">Upcoming events</h2>
+          </div>
           <span>{events.length} {events.length === 1 ? 'event' : 'events'}</span>
         </div>
-        {isLoading ? <p className={styles.emptyState}>Loading events...</p> : error ? (
+
+        {isLoading ? <p className={styles.emptyState}>Loading events and map pins…</p> : error ? (
           <p className={styles.error} role="alert">{error}</p>
         ) : events.length === 0 ? (
-          <p className={styles.emptyState}>No events yet. Start one for your community.</p>
-        ) : (
-          <div className={styles.eventList}>
-            {events.map((event) => (
-              <article className={styles.eventCard} key={event.id}>
-                <div className={styles.eventMain}>
-                  <time className={styles.eventDate} dateTime={event.startsAt}>{formatEventDateTime(event.startsAt)}</time>
-                  <h3>{event.title}</h3>
-                  <p>{event.description || 'No description provided.'}</p>
-                  <span className={styles.locationText}>Location: {event.locationCoords.latitude.toFixed(3)}, {event.locationCoords.longitude.toFixed(3)}</span>
-                  <span className={styles.attendeeCount}>{event.rsvpCount} going</span>
-                  {userId && <EventEngagement eventId={event.id} userId={userId} />}
-                  {userId && <ReportContentButton targetType="event" targetId={event.id} />}
-                </div>
-                {userId && <div className={styles.eventActions}>
-                  <button className={event.viewerStatus === 'going' ? styles.selectedButton : styles.secondaryButton} type="button" onClick={() => void handleRsvp(event.id, event.viewerStatus === 'going' ? 'cancelled' : 'going')}>
-                    {event.viewerStatus === 'going' ? 'Going' : 'RSVP'}
-                  </button>
-                  <button className={event.viewerStatus === 'interested' ? styles.selectedButton : styles.textButton} type="button" onClick={() => void handleRsvp(event.id, 'interested')}>Interested</button>
-                  {event.creatorId === userId && (
-                    <>
-                      <button className={styles.textButton} type="button" onClick={() => beginEdit(event)}>Edit</button>
-                      <button className={styles.textButton} type="button" onClick={() => void handleDelete(event.id)}>Delete</button>
-                    </>
-                  )}
-                </div>} 
-              </article>
-            ))}
+          <div className={styles.emptyState}>
+            <MapPinned size={25} aria-hidden="true" />
+            <p>No events to map yet. When your community creates an event, its location pin will appear here.</p>
           </div>
+        ) : (
+          <>
+            <section className={styles.mapExplorer} aria-labelledby="map-explorer-title">
+              <div className={styles.mapHeading}>
+                <div>
+                  <p className={styles.eyebrow}>MAP EXPLORER</p>
+                  <h3 id="map-explorer-title">{selectedMapEvent ? selectedMapEvent.title : 'Choose an event pin'}</h3>
+                  <p>Select an event below to focus the map on its location and inspect the event details.</p>
+                </div>
+                {selectedMapEvent && (
+                  <a className={styles.mapExternalLink} href={getMapLinks(String(selectedMapEvent.locationCoords.latitude), String(selectedMapEvent.locationCoords.longitude))?.open} target="_blank" rel="noreferrer">
+                    Open full map <ExternalLink size={14} aria-hidden="true" />
+                  </a>
+                )}
+              </div>
+              {selectedMapEvent && (
+                <div className={styles.mapFrameWrap} aria-label="Map showing the selected event location">
+                  <iframe
+                    className={styles.mapFrame}
+                    title={`OpenStreetMap location for ${selectedMapEvent.title}`}
+                    src={getMapLinks(String(selectedMapEvent.locationCoords.latitude), String(selectedMapEvent.locationCoords.longitude))?.embed}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                  />
+                  <p className={styles.mapAttribution}>Map data © OpenStreetMap contributors. Map opens on OpenStreetMap in a new tab.</p>
+                </div>
+              )}
+              <div className={styles.pinList} role="group" aria-label="Choose an event map pin">
+                {events.map((event, index) => (
+                  <button
+                    className={selectedMapEvent?.id === event.id ? styles.activePin : styles.mapPin}
+                    key={event.id}
+                    type="button"
+                    aria-pressed={selectedMapEvent?.id === event.id}
+                    onClick={() => setSelectedMapEventId(event.id)}
+                  >
+                    <span className={styles.pinNumber}><MapPin size={13} aria-hidden="true" /> {index + 1}</span>
+                    <span className={styles.pinText}><strong>{event.title}</strong><small>{formatShortDate(event.startsAt)}</small></span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <div className={styles.eventList} aria-label="Upcoming event details">
+              {events.map((event) => (
+                <article className={selectedMapEvent?.id === event.id ? styles.eventCardActive : styles.eventCard} key={event.id}>
+                  <div className={styles.eventMain}>
+                    <time className={styles.eventDate} dateTime={event.startsAt}>{formatEventDateTime(event.startsAt)}</time>
+                    <h3>{event.title}</h3>
+                    <p>{event.description || 'No description provided.'}</p>
+                    <span className={styles.locationText}><MapPin size={13} aria-hidden="true" /> Map pin available · {event.locationCoords.latitude.toFixed(3)}, {event.locationCoords.longitude.toFixed(3)}</span>
+                    <span className={styles.attendeeCount}>{event.rsvpCount} going</span>
+                    {userId && <EventEngagement eventId={event.id} userId={userId} />}
+                    {userId && <ReportContentButton targetType="event" targetId={event.id} />}
+                  </div>
+                  <div className={styles.eventActions}>
+                    <button className={styles.secondaryButton} type="button" onClick={() => setSelectedMapEventId(event.id)} aria-pressed={selectedMapEvent?.id === event.id}>
+                      <MapPin size={14} aria-hidden="true" /> {selectedMapEvent?.id === event.id ? 'On map' : 'Show on map'}
+                    </button>
+                    {userId && <>
+                      <button className={event.viewerStatus === 'going' ? styles.selectedButton : styles.secondaryButton} type="button" onClick={() => void handleRsvp(event.id, event.viewerStatus === 'going' ? 'cancelled' : 'going')}>
+                        {event.viewerStatus === 'going' ? 'Going' : 'RSVP'}
+                      </button>
+                      <button className={event.viewerStatus === 'interested' ? styles.selectedButton : styles.textButton} type="button" onClick={() => void handleRsvp(event.id, 'interested')}>Interested</button>
+                      {event.creatorId === userId && <>
+                        <button className={styles.textButton} type="button" onClick={() => beginEdit(event)}>Edit</button>
+                        <button className={styles.textButton} type="button" onClick={() => void handleDelete(event.id)}>Delete</button>
+                      </>}
+                    </>}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
         )}
       </section>
     </main>
   );
+}
+
+function getMapLinks(latitudeValue: string, longitudeValue: string): { embed: string; open: string } | null {
+  if (!latitudeValue.trim() || !longitudeValue.trim()) return null;
+  const latitude = Number(latitudeValue);
+  const longitude = Number(longitudeValue);
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+    return null;
+  }
+  const delta = 0.012;
+  const bounds = [longitude - delta, latitude - delta, longitude + delta, latitude + delta].join('%2C');
+  return {
+    embed: `https://www.openstreetmap.org/export/embed.html?bbox=${bounds}&layer=mapnik&marker=${latitude}%2C${longitude}`,
+    open: `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=16/${latitude}/${longitude}`,
+  };
 }
 
 function toIsoDateTime(dateValue: string, timeValue: string): string {
@@ -197,4 +279,10 @@ function formatEventDateTime(isoDate: string): string {
     weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
     hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
   }).format(date);
+}
+
+function formatShortDate(isoDate: string): string {
+  const date = new Date(isoDate);
+  if (!Number.isFinite(date.getTime())) return 'Time to be confirmed';
+  return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(date);
 }
