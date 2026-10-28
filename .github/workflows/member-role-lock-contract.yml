@@ -1,0 +1,32 @@
+name: Member Role Lock Contract
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/20261027030000_lock_member_role_authority.sql'
+      - 'scripts/check-member-role-lock-contract.mjs'
+      - '.github/workflows/member-role-lock-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20261027030000_lock_member_role_authority.sql'
+      - 'scripts/check-member-role-lock-contract.mjs'
+      - '.github/workflows/member-role-lock-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  member-role-lock-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/check-member-role-lock-contract.mjs
+      - run: npm run typecheck
+      - run: npm run build
