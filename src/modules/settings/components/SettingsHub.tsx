@@ -289,6 +289,7 @@ export function SettingsHub({
 
           <section className={styles.panel} aria-labelledby="layout-title">
             <h2 id="layout-title">Layout arrangement</h2>
+            <p className={styles.hint}>Choose how much space the main Sanctuary pages use. Compact fits more content on screen; Comfortable keeps the roomier default. This preference follows your account across devices.</p>
             <div className={styles.layoutChoices}>
               <label><input type="radio" name="layout" value="comfortable" checked={settings.preferences.layout === 'comfortable'} onChange={() => void updatePreferences({ layout: 'comfortable' }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Comfortable</label>
               <label><input type="radio" name="layout" value="compact" checked={settings.preferences.layout === 'compact'} onChange={() => void updatePreferences({ layout: 'compact' }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Compact</label>

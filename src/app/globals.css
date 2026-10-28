@@ -28,8 +28,44 @@
   --space-3: 12px;
   --space-4: 16px;
   --space-6: 24px;
+  --layout-page-padding: 22px clamp(20px, 5vw, 68px) 58px;
+  --layout-panel-padding: 17px;
+  --layout-section-gap: 16px;
+  --layout-card-gap: 10px;
+  --layout-content-top: 26px;
+  --layout-row-padding: 20px 4px;
+  --layout-planner-padding: 36px clamp(16px, 4vw, 44px) 52px;
+  --layout-messages-padding: 48px clamp(20px, 5vw, 68px);
+  --layout-reflection-padding: clamp(18px, 3vw, 28px);
+  --layout-form-gap: 20px;
   --motion-fast: 140ms;
   --motion-normal: 200ms;
+}
+
+:root[data-layout="comfortable"] {
+  --layout-page-padding: 22px clamp(20px, 5vw, 68px) 58px;
+  --layout-panel-padding: 17px;
+  --layout-section-gap: 16px;
+  --layout-card-gap: 10px;
+  --layout-content-top: 26px;
+  --layout-row-padding: 20px 4px;
+  --layout-planner-padding: 36px clamp(16px, 4vw, 44px) 52px;
+  --layout-messages-padding: 48px clamp(20px, 5vw, 68px);
+  --layout-reflection-padding: clamp(18px, 3vw, 28px);
+  --layout-form-gap: 20px;
+}
+
+:root[data-layout="compact"] {
+  --layout-page-padding: 12px clamp(12px, 3vw, 32px) 32px;
+  --layout-panel-padding: 12px;
+  --layout-section-gap: 10px;
+  --layout-card-gap: 7px;
+  --layout-content-top: 14px;
+  --layout-row-padding: 11px 4px;
+  --layout-planner-padding: 20px clamp(12px, 3vw, 30px) 32px;
+  --layout-messages-padding: 24px clamp(12px, 3vw, 30px);
+  --layout-reflection-padding: clamp(12px, 2vw, 20px);
+  --layout-form-gap: 12px;
 }
 
 :root[data-theme="light"] {

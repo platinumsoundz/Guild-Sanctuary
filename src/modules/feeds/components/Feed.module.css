@@ -1,7 +1,7 @@
 .feed {
   width: min(100%, 1040px);
   margin: 0 auto;
-  padding: 22px clamp(20px, 5vw, 68px) 58px;
+  padding: var(--layout-page-padding);
 }
 
 @media (max-width: 767px) {

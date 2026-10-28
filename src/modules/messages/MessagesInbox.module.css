@@ -1,6 +1,6 @@
 .inbox {
   min-height: 360px;
-  padding: 48px clamp(20px, 5vw, 68px);
+  padding: var(--layout-messages-padding);
 }
 
 .eyebrow {
@@ -42,9 +42,9 @@
 .groups,
 .conversations {
   display: grid;
-  gap: 12px;
-  margin-top: 26px;
-  padding: 16px;
+  gap: var(--layout-card-gap);
+  margin-top: var(--layout-section-gap);
+  padding: var(--layout-panel-padding);
   border: 1px solid var(--line);
   border-radius: 5px;
   background: var(--surface-raised);

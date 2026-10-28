@@ -1,5 +1,5 @@
 .card {
-  width: min(100%, 1050px); margin: 0 auto 22px; padding: clamp(18px, 3vw, 28px);
+  width: min(100%, 1050px); margin: 0 auto 22px; padding: var(--layout-reflection-padding);
   border: 1px solid var(--line, #dce4dc); border-radius: 18px;
   background: var(--surface-raised, #fff); color: var(--ink, #25372c);
   box-shadow: 0 8px 28px rgb(25 45 31 / 5%);
@@ -9,7 +9,7 @@
 .eyebrow { margin: 0 0 5px; color: var(--accent, #52765c); font-size: 10px; font-weight: 750; letter-spacing: .12em; }
 .heading h2 { margin: 0; font-size: clamp(21px, 3vw, 27px); font-weight: 650; letter-spacing: -.025em; }
 .description { max-width: 680px; margin: 8px 0 0; color: var(--muted, #68776c); font-size: 14px; line-height: 1.6; }
-.form { display: grid; gap: 20px; margin-top: 24px; }
+.form { display: grid; gap: var(--layout-form-gap); margin-top: var(--layout-section-gap); }
 .moodFieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 .moodFieldset legend { margin-bottom: 11px; font-size: 14px; font-weight: 650; }
 .moodOptions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }

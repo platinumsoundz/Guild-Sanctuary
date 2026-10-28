@@ -1,5 +1,5 @@
 .content {
-  padding-top: 26px;
+  padding-top: var(--layout-content-top);
 }
 
 .sectionHeading {
@@ -44,9 +44,9 @@
 
 .composer {
   display: grid;
-  gap: 10px;
-  margin: 8px 0 24px;
-  padding: 17px;
+  gap: var(--layout-card-gap);
+  margin: 8px 0 var(--layout-section-gap);
+  padding: var(--layout-panel-padding);
   border: 1px solid var(--line);
   border-radius: 5px;
   background: var(--surface-raised);
@@ -230,7 +230,7 @@
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  padding: 20px 4px;
+  padding: var(--layout-row-padding);
   border-bottom: 1px solid var(--line);
 }
 

@@ -46,3 +46,13 @@ assert.ok(css.includes('background-attachment: fixed'), 'cosmic atmosphere shoul
 assert.ok(css.includes('.ai-tag') && css.includes('.cosmic-badge') && css.includes('.cosmic-outline') && css.includes('.chat-bubble'), 'custom cosmic UI accents must be available');
 assert.ok(css.includes('prefers-reduced-motion: reduce'), 'cosmic effects must preserve reduced-motion support');
 console.log('Theme contract checks passed. Static checks only; visual browser verification is still required.');
+
+assert.ok(settings.includes("document.documentElement.dataset.layout = settings.preferences.layout"), 'layout choice must apply immediately when settings load');
+assert.ok(appContext.includes("document.documentElement.dataset.layout = preferences.layout"), 'saved layout must apply across the app after account session restore');
+assert.ok(service.includes("layout: 'comfortable'") && service.includes("record.layout === 'compact'"), 'layout preference must have a safe default and normalize supported values');
+assert.ok(service.includes("preferences.layout !== 'comfortable' && preferences.layout !== 'compact'"), 'layout save must validate supported modes');
+assert.ok(css.includes(':root[data-layout="compact"]') && css.includes('--layout-page-padding: 12px'), 'compact mode must define a visibly denser global layout');
+for (const path of ['../src/modules/feeds/components/Feed.module.css','../src/modules/feeds/components/FeedContent.module.css','../src/modules/personal-planner/PersonalPlanner.module.css','../src/modules/messages/MessagesInbox.module.css','../src/modules/practice/components/DailyReflection.module.css']) {
+  const moduleCss = read(path);
+  assert.ok(moduleCss.includes('var(--layout-'), `layout mode tokens must be consumed by ${path}`);
+}
