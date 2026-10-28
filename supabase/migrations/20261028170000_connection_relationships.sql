@@ -210,7 +210,7 @@ as $
 $;
 
 revoke all on function private.is_profile_blocked(uuid) from public, anon;
-grant execute on function private.is_profile_blocked(uuid) to authenticated;
+grant execute on function private.is_profile_blocked(uuid) to authenticated, anon;
 
 drop policy if exists "public profile projection readable" on private.public_profile_projection;
 create policy "public profile projection readable"
