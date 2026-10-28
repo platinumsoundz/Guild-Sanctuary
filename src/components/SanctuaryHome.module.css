@@ -233,3 +233,71 @@
 @media (max-width: 850px) { .discoveryStudio { grid-template-columns: 1fr; } .discoveryIntro h2 { max-width: 650px; } }
 @media (max-width: 560px) { .discoveryStudio { margin: 24px 0 30px; padding: 16px; } .discoveryControls button { flex: 1; } .discoveryResultRows > div { align-items: flex-start; flex-direction: column; gap: 5px; } .discoveryResultRows strong { text-align: left; } .discoveryConsent .discoveryVisibility { margin-left: 8px; } }
 @media (prefers-reduced-motion: reduce) { .discoveryProgress span { transition: none; } }
+
+
+/* Cosmic Sanctuary hero — original inline artwork, layered atmosphere, responsive composition. */
+.hero {
+  position: relative;
+  grid-template-columns: minmax(0, .94fr) minmax(0, 1.06fr);
+  gap: clamp(24px, 4vw, 52px);
+  overflow: hidden;
+  min-height: 420px;
+  padding: clamp(22px, 3.8vw, 44px);
+  border-color: rgb(171 145 255 / 34%);
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse at 76% 42%, rgb(91 86 231 / 17%), transparent 45%),
+    linear-gradient(132deg, rgb(12 14 44 / 98%), rgb(17 17 55 / 96%) 52%, rgb(11 19 48 / 98%));
+  box-shadow: 0 24px 70px rgb(3 4 23 / 38%), inset 0 1px rgb(255 255 255 / 5%);
+}
+.hero::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgb(10 12 36 / 16%), transparent 66%);
+  content: '';
+  pointer-events: none;
+}
+.heroCopy, .heroArtwork { position: relative; z-index: 1; min-width: 0; }
+.heroCopy { max-width: 640px; }
+.hero .eyebrow { color: #a9eaff; letter-spacing: 1.8px; }
+.hero h1 { max-width: 620px; font-size: clamp(38px, 5.4vw, 70px); line-height: .99; letter-spacing: -.052em; }
+.hero h1 em { color: #c7a7ff; text-shadow: 0 0 36px rgb(165 123 255 / 34%); }
+.hero .intro { max-width: 500px; color: #d0d3f0; font-size: 14px; line-height: 1.85; }
+.hero .primaryButton { min-height: 48px; padding: 12px 17px; border-color: #bca0ff; border-radius: 11px; background: linear-gradient(110deg, #a77cff, #8066e8); box-shadow: 0 7px 26px rgb(130 91 242 / 26%); color: #fff; }
+.hero .secondaryButton { min-height: 48px; padding: 12px 16px; border-color: rgb(172 173 255 / 30%); border-radius: 11px; background: rgb(255 255 255 / 4%); color: #f3efff; }
+.hero .primaryButton:hover, .hero .secondaryButton:hover { transform: translateY(-2px); }
+.heroTrust { display: flex; flex-wrap: wrap; gap: 9px 18px; margin-top: 22px; color: #c8c9e8; font: 11px/1.5 Arial, sans-serif; }
+.heroTrust > span { display: inline-flex; align-items: center; gap: 7px; }
+.trustStar { color: #8de8ff; text-shadow: 0 0 12px rgb(141 232 255 / 65%); }
+.heroArtwork { display: grid; align-content: center; gap: 10px; min-width: 0; }
+.heroIllustration { display: block; width: 100%; height: auto; max-height: 360px; overflow: visible; border: 1px solid rgb(177 159 255 / 28%); border-radius: 18px; box-shadow: 0 18px 50px rgb(2 4 25 / 40%), 0 0 40px rgb(109 91 255 / 12%); }
+.artCaption { display: flex; align-items: center; gap: 8px; color: #c6c5ee; font: 700 9px/1.5 Arial, sans-serif; letter-spacing: 1.4px; }
+.artCaption > span:last-child { margin-left: auto; color: #9beaff; font-size: 18px; }
+.artPulse { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #9beaff; box-shadow: 0 0 12px #9beaff; }
+.hero .heroNote { margin-top: 4px; padding: 15px 16px; border-color: rgb(168 145 255 / 22%); border-radius: 13px; background: rgb(14 17 48 / 72%); backdrop-filter: blur(12px); }
+.hero .noteLabel { margin-bottom: 5px; color: #f5efff; font-size: 13px; }
+.hero .heroNote > p:not(.noteLabel) { color: #c4c8e8; font-size: 11px; line-height: 1.7; }
+.hero .statusLegend { gap: 14px; margin-top: 10px; padding-top: 10px; border-color: rgb(171 145 255 / 20%); }
+.hero .statusLegend span { font-size: 9px; }
+.hero .dotAvailable { background: #93e8ff; }
+.hero .dotPreview { background: #d7b0ff; }
+.hero .dotDesign { background: #969cce; }
+@media (max-width: 850px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .heroCopy { max-width: 720px; }
+  .heroArtwork { grid-template-columns: minmax(0, 1fr); }
+  .heroIllustration { max-height: none; }
+}
+@media (max-width: 560px) {
+  .page { padding: 12px; }
+  .hero { gap: 20px; min-height: 0; padding: 22px 17px; border-radius: 18px; }
+  .hero h1 { font-size: clamp(38px, 11vw, 52px); }
+  .hero .intro { margin-top: 14px; font-size: 13px; }
+  .heroActions { align-items: stretch; flex-direction: column; }
+  .heroActions > * { width: 100%; box-sizing: border-box; }
+  .heroTrust { gap: 7px 12px; font-size: 10px; }
+  .heroIllustration { border-radius: 13px; }
+  .hero .heroNote { padding: 13px; }
+}
