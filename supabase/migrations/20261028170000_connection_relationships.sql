@@ -150,8 +150,10 @@ begin
       or new.addressee_id is distinct from old.addressee_id
       or new.member_low_id is distinct from old.member_low_id
       or new.member_high_id is distinct from old.member_high_id
-      or old.status <> 'pending'
-      or new.status not in ('accepted', 'declined') then
+      or not (
+        (old.status = 'pending' and new.status in ('accepted', 'declined'))
+        or (old.status = 'accepted' and new.status = 'declined')
+      ) then
       raise exception 'Only the recipient may respond to a pending connection request.';
     end if;
     new.responded_at := coalesce(new.responded_at, now());
