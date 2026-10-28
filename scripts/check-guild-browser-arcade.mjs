@@ -24,6 +24,7 @@ assert.match(css, /env\(safe-area-inset-bottom\)/, 'entry respects mobile safe a
 assert.ok(guild.includes("document.addEventListener('visibilitychange'"), 'background tabs pause the timer');
 assert.match(guild, /querySelectorAll<HTMLElement>/, 'controller can move focus between interactive controls');
 assert.ok(guild.includes('closeButtonRef.current?.focus'), 'dialog moves focus to a close control');
+assert.ok(guild.includes('if (entryOpen || controllerConnected) enterButtonRef.current?.focus'), 'revealed entry receives keyboard focus');
 assert.ok(guild.includes("type GameState = 'ready' | 'playing' | 'paused' | 'won' | 'lost'"), 'trial supports an explicit paused state');
 assert.ok(guild.includes("gameState === 'paused' ? 'Resume' : 'Pause'"), 'player can pause and resume from the game HUD');
 assert.match(workspace, /isAuthenticated && !isGuest/, 'guest sessions cannot enter the Guild');
