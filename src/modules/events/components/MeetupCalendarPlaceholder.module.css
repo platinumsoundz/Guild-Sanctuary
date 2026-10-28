@@ -268,11 +268,41 @@
   font-weight: 500;
 }
 
-.nearbyHeading > span,
+.nearbyControls > span,
 .nearbyEvent small,
 .nearbyEmpty {
   color: var(--muted);
   font: 10px/1.5 Arial, sans-serif;
+}
+
+.nearbyControls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.nearbyRadiusLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font: 10px/1.4 Arial, sans-serif;
+}
+
+.nearbyRadiusLabel select {
+  min-height: 30px;
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 11px Arial, sans-serif;
+}
+
+.nearbyRadiusLabel select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .nearbyList {
