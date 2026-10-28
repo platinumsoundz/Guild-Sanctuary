@@ -1,5 +1,5 @@
 begin;
-select plan(15);
+select plan(19);
 
 select ok(
   (select c.relrowsecurity from pg_catalog.pg_class c where c.oid = 'public.profile_follows'::regclass),
@@ -59,6 +59,30 @@ select ok(exists (
   select 1 from pg_catalog.pg_trigger
   where tgname = 'notify_connection_request' and not tgisinternal
 ), 'connection requests use the notification system');
+
+select ok(exists (
+  select 1 from pg_catalog.pg_policies
+  where schemaname = 'public' and tablename = 'posts'
+    and policyname = 'blocked profiles excluded from posts' and permissive = 'RESTRICTIVE'
+), 'blocked members are excluded from public feed posts');
+
+select ok(exists (
+  select 1 from pg_catalog.pg_policies
+  where schemaname = 'public' and tablename = 'short_videos'
+    and policyname = 'blocked profiles excluded from short videos' and permissive = 'RESTRICTIVE'
+), 'blocked members are excluded from short videos');
+
+select ok(exists (
+  select 1 from pg_catalog.pg_policies
+  where schemaname = 'public' and tablename = 'events'
+    and policyname = 'blocked profiles excluded from events' and permissive = 'RESTRICTIVE'
+), 'blocked members are excluded from event discovery');
+
+select ok(exists (
+  select 1 from pg_catalog.pg_policies
+  where schemaname = 'public' and tablename = 'social_comments'
+    and policyname = 'blocked profiles excluded from comments' and permissive = 'RESTRICTIVE'
+), 'blocked members are excluded from public comments');
 
 select * from finish();
 rollback;
