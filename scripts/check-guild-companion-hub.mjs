@@ -15,7 +15,7 @@ for (const text of [
   'Memory gallery', 'Cloud Lab', 'persistent Linux', 'not a simulated terminal',
   'RetroArch', 'RetroAchievements', 'Steam', 'Xbox', 'GOG', 'itch.io',
   'localStorage', 'libraryLoaded', 'MAX_MEDIA_FILES', 'MAX_AUDIO_BYTES',
-  'MAX_IMAGE_BYTES', 'safeWebUrl', 'exportLibrary', 'importLibrary',
+  'MAX_IMAGE_BYTES', 'MAX_AUDIO_TOTAL_BYTES', 'MAX_IMAGE_TOTAL_BYTES', 'safeWebUrl', 'exportLibrary', 'importLibrary',
   'sanctuary-guild-library', 'games.length >= 500', '500-game limit',
   'noopener noreferrer', 'URL.createObjectURL', 'not uploaded', 'https:',
   'target="_blank"', 'rel="noopener noreferrer"',
