@@ -31,6 +31,8 @@ export function GuildCompanionHub() {
   const [mediaMessage, setMediaMessage] = useState('');
   const audioInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
+  const audioFilesRef = useRef<MediaFile[]>([]);
+  const photosRef = useRef<MediaFile[]>([]);
 
   useEffect(() => {
     try {
@@ -48,12 +50,12 @@ export function GuildCompanionHub() {
     try { window.localStorage.setItem(LIBRARY_KEY, JSON.stringify(games)); } catch { /* Private browsing may disable storage. */ }
   }, [games]);
 
-  useEffect(() => {
-    return () => {
-      audioFiles.forEach((item) => URL.revokeObjectURL(item.url));
-      photos.forEach((item) => URL.revokeObjectURL(item.url));
-    };
-  }, [audioFiles, photos]);
+  useEffect(() => { audioFilesRef.current = audioFiles; }, [audioFiles]);
+  useEffect(() => { photosRef.current = photos; }, [photos]);
+  useEffect(() => () => {
+    audioFilesRef.current.forEach((item) => URL.revokeObjectURL(item.url));
+    photosRef.current.forEach((item) => URL.revokeObjectURL(item.url));
+  }, []);
 
   useEffect(() => {
     if (!slideshow || photos.length < 2) return;
@@ -120,7 +122,7 @@ export function GuildCompanionHub() {
           <div className={styles.panelHeading}><span className={styles.icon}><Music2 size={19} /></span><div><h3 id="guild-music-title">Music lounge</h3><p>Select audio from your device to play in the Guild.</p></div></div>
           <input ref={audioInput} className={styles.hiddenInput} type="file" accept="audio/*" multiple onChange={(event) => addFiles(event.target.files, 'audio')} />
           <button type="button" className={styles.secondary} onClick={() => audioInput.current?.click()}><Plus size={15} /> Choose music files</button>
-          {audioFiles.length > 0 ? <div className={styles.audioList}>{audioFiles.map((item) => <div className={styles.audioItem} key={item.id}><strong title={item.file.name}>{item.file.name}</strong><audio controls preload="metadata" src={item.url}>Your browser does not support audio playback.</audio><button type="button" className={styles.textButton} onClick={() => setAudioFiles((current) => current.filter((file) => file.id !== item.id))}>Remove</button></div>)}</div> : <div className={styles.empty}>No audio selected. Playback is local to this page; streaming-service account linking is a separate future integration.</div>}
+          {audioFiles.length > 0 ? <div className={styles.audioList}>{audioFiles.map((item) => <div className={styles.audioItem} key={item.id}><strong title={item.file.name}>{item.file.name}</strong><audio controls preload="metadata" src={item.url}>Your browser does not support audio playback.</audio><button type="button" className={styles.textButton} onClick={() => { URL.revokeObjectURL(item.url); setAudioFiles((current) => current.filter((file) => file.id !== item.id)); }}>Remove</button></div>)}</div> : <div className={styles.empty}>No audio selected. Playback is local to this page; streaming-service account linking is a separate future integration.</div>}
         </section>
 
         <section className={styles.panel} aria-labelledby="guild-gallery-title">
@@ -131,7 +133,7 @@ export function GuildCompanionHub() {
             <img src={photos[photoIndex]?.url} alt={photos[photoIndex]?.file.name || 'Selected personal photo'} />
             <div className={styles.galleryControls}><button type="button" className={styles.secondary} onClick={() => { setSlideshow(false); setPhotoIndex((index) => (index - 1 + photos.length) % photos.length); }}>Previous</button><span>{photoIndex + 1} / {photos.length}</span><button type="button" className={styles.secondary} onClick={() => { setSlideshow(false); setPhotoIndex((index) => (index + 1) % photos.length); }}>Next</button></div>
             <button type="button" className={styles.primary} onClick={() => setSlideshow((value) => !value)}>{slideshow ? 'Pause slideshow' : 'Start 5-second slideshow'}</button>
-            <button type="button" className={styles.textButton} onClick={() => { setPhotos([]); setPhotoIndex(0); setSlideshow(false); }}>Clear selected photos</button>
+            <button type="button" className={styles.textButton} onClick={() => { photos.forEach((item) => URL.revokeObjectURL(item.url)); setPhotos([]); setPhotoIndex(0); setSlideshow(false); }}>Clear selected photos</button>
           </div> : <div className={styles.empty}>No photos selected. Your images are previewed locally and are not uploaded to Sanctuary.</div>}
         </section>
       </div>
