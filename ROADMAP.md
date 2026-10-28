@@ -679,11 +679,13 @@ Help people discover people, communities, and ideas they may resonate with throu
 **In progress — first integration slice committed on this branch.**
 
 - Audited the current discovery entry point and confirmed existing reusable modules: public profile search/profile pages, public feed retrieval, event retrieval, and the private self-discovery centre.
-- Updated the existing profile discovery component into a responsive, keyboard-accessible People / Communities & Gatherings / Topics hub. People continues to use existing public username/display-name search; Topics queries the existing public feed and filters visible reflections by story tag/content; Communities & Gatherings surfaces upcoming events from the existing event service.
-- Connected the discovery actions to the existing feed and events navigation in AppWorkspace rather than introducing duplicate feed/event systems.
-- Added loading/error/empty states, responsive cards, explicit messaging-disabled state, and a note that private reflections are not used in these searches.
+- Updated the existing profile discovery component into a responsive, keyboard-accessible People / Communities & Gatherings / Topics hub. People uses existing public username/display-name search and now also searches member-approved public interest tags; Topics queries the existing public feed and filters visible reflections by story tag/content; Communities & Gatherings surfaces upcoming events from the existing event service.
+- Added a member-controlled interest editor on the profile dashboard, with a 12-interest limit, private-by-default visibility, and an explicit public-discovery toggle.
+- Added `profile_interests` migration and TypeScript database typing. RLS permits members to manage their own interests and limits public reads to interests belonging to discoverable profiles in the public profile projection.
+- Connected discovery actions to existing feed/events navigation in AppWorkspace rather than introducing duplicate feed/event systems.
+- Added loading/error/empty states, responsive cards, keyboard focus styling, messaging-disabled state, and a note that private reflections are not used in these searches.
 - Scope honesty: this first slice does **not** yet implement dedicated community/group discovery, interest-based profile matching, persistent interest tags, friend/connection requests, save/hide/block controls, or questionnaire-to-discovery integration. These remain roadmap work; do not imply they are shipped.
-- Verification status: remote file writes succeeded. No local typecheck, lint, build, browser/device test, or database/RLS test has been run in this environment; the latest commit had no reported GitHub status checks. These checks remain outstanding before considering this slice verified.
+- Verification status: remote file writes succeeded. No local typecheck, lint, build, browser/device test, or database/RLS test has been run in this environment; direct repository cloning was unavailable in this runtime and the latest commit had no reported GitHub status checks. The new migration has been committed to the branch but has not been applied to Supabase. These checks remain outstanding before considering this slice verified.
 
 ### Success measures
 
