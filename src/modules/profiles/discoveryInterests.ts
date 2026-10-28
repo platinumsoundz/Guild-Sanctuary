@@ -57,6 +57,10 @@ export async function fetchMemberDiscoveryInterests(userId: string): Promise<Mem
 
 export async function saveMemberDiscoveryInterests(userId: string, values: string[], isPublic: boolean): Promise<MemberDiscoveryInterest[]> {
   if (!userId) throw new Error('Sign in before saving discovery interests.');
+  const normalizedValues = values.map(normalizeInterest).filter((value): value is string => value !== null);
+  if (new Set(normalizedValues).size > MAX_INTERESTS) {
+    throw new Error(`Choose up to ${MAX_INTERESTS} interests.`);
+  }
   const interests = normalizeList(values, isPublic);
   if (values.some((value) => value.trim() && !normalizeInterest(value))) {
     throw new Error('Interests must be 2–32 characters and use letters, numbers, spaces, hyphens, or underscores.');
