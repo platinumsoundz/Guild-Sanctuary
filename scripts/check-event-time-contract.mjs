@@ -41,3 +41,10 @@ assert.ok(eventsHook.includes('requestId !== requestGeneration.current'), 'stale
 assert.ok(eventsHook.includes('if (generation !== requestGeneration.current) return;'), 'stale event mutations must not overwrite the active account state');
 assert.ok(eventsHook.includes('isLoading: !sessionReady || isLoading'), 'account transitions must show a loading state instead of stale event data');
 console.log('Event account-isolation contract checks passed.');
+
+
+const eventService = readFileSync(new URL('../src/modules/events/service.ts', import.meta.url), 'utf8');
+assert.ok(component.includes("locationCoords: { latitude: Number(latitude), longitude: Number(longitude) }"), 'editing an event must submit the updated coordinates');
+assert.ok(eventService.includes("validateCoordinates(input.locationCoords);"), 'event updates must validate coordinate bounds');
+assert.ok(eventService.includes("latitude: input.locationCoords.latitude") && eventService.includes("longitude: input.locationCoords.longitude"), 'event updates must persist both coordinate values');
+console.log('Event location editing contract checks passed.');
