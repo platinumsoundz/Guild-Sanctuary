@@ -5,7 +5,7 @@ const service = readFileSync(new URL('../src/modules/shorts/service.ts', import.
 const migration = readFileSync(new URL('../supabase/migrations/20261026233000_repair_short_engagement_rpc.sql', import.meta.url), 'utf8');
 const types = readFileSync(new URL('../src/services/supabase/database.types.ts', import.meta.url), 'utf8');
 
-assert.match(service, /rpc\('get_short_engagement_stats',\s*\{\s*requested_short_id:\s*shortId\s*\}\)/, 'engagement stats RPC name and argument must match the database function');
+assert.match(service, /rpc\('get_short_engagement_stats',\s*\{\s*requested_short_id:\s*shortId,?\s*\}\)/, 'engagement stats RPC name and argument must match the database function');
 assert.match(service, /rpc\('toggle_short_like',\s*\{\s*requested_short_id:\s*shortId\s*\}\)/, 'toggle-like RPC name and argument must match the database function');
 assert.ok(service.includes('Short video reactions could not be loaded:'), 'engagement failures must remain visible to the caller');
 assert.ok(service.includes('Your reaction could not be saved:'), 'reaction write failures must remain visible to the caller');
