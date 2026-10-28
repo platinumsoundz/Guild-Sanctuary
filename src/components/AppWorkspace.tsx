@@ -111,7 +111,7 @@ export function AppWorkspace() {
 
   const authenticatedContent = activeNavigation === 'today' ? (
     <SanctuaryHome onNavigate={openNavigation} />
-  ) : isGuest && !['support', 'games', 'roadmap', 'guild-roadmap'].includes(activeNavigation) ? (
+  ) : isGuest && !['support', 'games', 'guild', 'roadmap', 'guild-roadmap'].includes(activeNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
       <h1 id="guest-access-title">Explore before you join</h1>
@@ -142,6 +142,8 @@ export function AppWorkspace() {
     <main className={styles.supportPage}>
       <SupportPanel />
     </main>
+  ) : isGuest && activeNavigation === 'guild' ? (
+    <GuildWorld userId={null} isAuthenticated={false} />
   ) : isAuthenticated && currentUser ? (
     <>
       {activeNavigation === 'planner' ? (
