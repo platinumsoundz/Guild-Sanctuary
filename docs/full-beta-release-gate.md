@@ -25,6 +25,7 @@
 - [ ] **Cosmic Arcade and Guild:** run keyboard/touch/controller testing, reduced-motion and mobile layout checks, game reset/restart tests, and controller disconnect/reconnect tests. Validate original games and avoid implying native installed-game scan/launch exists.
 - [ ] **Events:** verify timezone handling, event create/edit/cancel, map/location permission, RSVP concurrency, past-event filtering, and persistence on refresh.
 - [ ] **Profiles, preferences and themes:** verify server-backed vs local-only preferences, privacy visibility, account-switch isolation, layout mode, contrast per theme, and mobile navigation state.
+- [ ] **Roadmap clarity:** run `npm run check:roadmaps`; confirm the member-facing Sanctuary roadmap excludes separate games, deeper details are collapsible, and the Guild has a distinct roadmap.
 - [ ] **PWA and Android:** verify install prompts, offline fallback, service-worker updates, stale-cache recovery, deep links, permissions, Android release signing, and real-device smoke tests. No release artifact should contain development credentials.
 - [ ] **Creator projects and support:** validate external URLs and ownership, configure the 2D game host, confirm the 3D host, and keep contribution/checkout disabled until the owner verifies the live provider setup.
 
