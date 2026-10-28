@@ -60,6 +60,7 @@ The following live migrations were added to this branch with their matching vers
 - `20261028163036_account_settings_updated_at_trigger`
 - `20261028163256_moderate_reported_messages`
 - `20261028163709_daily_reflection_updated_at_trigger`
+- `20261028165508_scope_message_reports_to_members`
 
 ## Recommended reconciliation workflow
 
@@ -75,6 +76,7 @@ The following live migrations were added to this branch with their matching vers
 - Existing browser planner data is imported only when the database has no planner row, and the old browser key is removed only after the database confirms the import. The planner no longer writes new changes to localStorage. If Supabase is unavailable or the signed-in user does not match, the planner stays locked and displays an actionable error instead of silently saving private content locally.
 - `account_settings.updated_at` and `daily_reflections.updated_at` are now database-managed by triggers, so settings/reflection writes no longer need to set protected timestamp columns.
 - `apply_moderation_action` now validates that a reported message still exists and updates its visibility state for hide/remove/restore actions, with the existing moderator check, report-target match, and audit log retained.
+- `submit_content_report` now permits message reports only for visible messages in conversations the reporting account actively belongs to; a rollback-only test confirmed a member can report a message while a nonmember is rejected.
 - `daily_reflections` now backs the Daily Reflection UI too; legacy local entries are imported only for dates missing from the database, and new reflections are no longer written to browser storage.
 - The current advisor run reports an informational `rls_enabled_no_policy` notice for `game_wallet_sessions` (consistent with server-only access), 12 signed-in-callable `SECURITY DEFINER` RPCs that need ongoing review, leaked-password protection disabled, and unused-index notices. The admin RPCs checked here verify role/status internally. Do not remove helper-function grants without first confirming RLS policies and dependent RPCs still work.
 
