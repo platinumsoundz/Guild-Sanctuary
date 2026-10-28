@@ -18,7 +18,6 @@ import { ShortsFeed } from '@/modules/shorts';
 import { SettingsHub } from '@/modules/settings';
 import { PersonalPlanner } from '@/modules/personal-planner/PersonalPlanner';
 import { TokenShopPanel, WalletPanel } from '@/modules/economy';
-import { GamesHub } from '@/components/GamesHub';
 import { CosmicArcade } from '@/components/CosmicArcade';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
