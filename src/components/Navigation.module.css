@@ -439,3 +439,18 @@
 .mobileBottomButton[aria-current='page'] { border-color: rgb(162 145 255 / 25%); background: linear-gradient(145deg, rgb(143 113 255 / 19%), rgb(78 180 255 / 8%)); }
 .mobileBottomButton[aria-current='page'] svg { filter: drop-shadow(0 0 5px rgb(143 234 255 / 40%)); }
 @media (prefers-reduced-motion: reduce) { .menuButton, .mobileQuickButton, .accountButton, .notificationButton, .guestButton, .desktopNavigationButton { transition: none; } }
+
+/* Shared shell inherits the default cosmic theme tokens, including alternate theme compatibility. */
+.header { background: color-mix(in srgb, var(--surface) 86%, transparent); backdrop-filter: blur(18px); border-bottom-color: color-mix(in srgb, var(--line) 80%, var(--cosmic-violet)); }
+.siteName { text-shadow: 0 0 24px color-mix(in srgb, var(--cosmic-violet) 22%, transparent); }
+.menuButton, .mobileQuickButton, .accountButton, .notificationButton, .guestButton {
+  border-color: color-mix(in srgb, var(--line) 78%, var(--cosmic-violet));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-raised) 92%, transparent);
+}
+.desktopNavigation { background: color-mix(in srgb, var(--surface) 84%, transparent); backdrop-filter: blur(16px); border-bottom-color: color-mix(in srgb, var(--line) 80%, var(--cosmic-violet)); }
+.desktopNavigationButton[aria-current='page'] { color: var(--ink); }
+.desktopNavigationButton[aria-current='page']::after { background: linear-gradient(90deg, var(--cosmic-violet), var(--cosmic-cyan)); box-shadow: 0 0 12px color-mix(in srgb, var(--cosmic-cyan) 35%, transparent); }
+.mobileBottomNavigation { background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(20px); border-top-color: color-mix(in srgb, var(--line) 80%, var(--cosmic-violet)); }
+.drawerOverlay { backdrop-filter: blur(5px); }
+.mobileDrawer { background: linear-gradient(180deg, var(--surface-raised), var(--bg)); }
