@@ -86,6 +86,13 @@ export interface Database {
   public: {
     Tables: {
       profiles: Table<ProfileRow>;
+      profile_interests: Table<{
+        user_id: string;
+        interest: string;
+        is_public: boolean;
+        created_at: string;
+        updated_at: string;
+      }>;
       community_tips: Table<{
         stripe_event_id: string;
         checkout_session_id: string;
