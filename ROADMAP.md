@@ -679,7 +679,8 @@ A first browser-first Guild implementation has started on `feat/guild-browser-ar
 - Added an original, browser-native **Orbital Drift** arcade trial with keyboard/WASD, gamepad, and touch-button controls, a timed win/loss loop, and a device-local best score.
 - The entry requires the existing authenticated Sanctuary identity. No new account, provider linking, cloud rewards, Guild database tables, or cross-world sharing is introduced.
 - Added a focused static contract check. It must be run alongside typecheck/build and browser testing; source-contract checks alone do not verify actual controller behaviour.
-- **Not yet complete:** focus trapping/return, controller mapping QA across browsers, mobile-device tests, pausing/background behaviour, gamepad reconnect handling, Supabase/RLS design, trusted progression, catalogue expansion, and licensed/open-source game selection.
+- **Progress in the next build pass:** added an explicit pause/resume state and visible HUD control, with keyboard `P` and controller start-button support. Controller input is ignored while the page is backgrounded. Guest sessions are now explicitly excluded from Guild entry, and the contract check covers that guard.
+- **Not yet complete:** physical controller mapping QA across browsers, mobile-device tests, gamepad reconnect handling, Supabase/RLS design, trusted progression, catalogue expansion, and licensed/open-source game selection.
 - **Security note:** the hidden entry is a discoverability choice only. This prototype stores its best score in local storage and does not treat it as a verified achievement or reward.
 
 Current Guild implementation is now a **first UI/gameplay prototype**, not 0% code. Release verification remains 0% until browser/device, auth, and security tests produce evidence.
