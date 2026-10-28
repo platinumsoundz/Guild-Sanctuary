@@ -407,3 +407,39 @@
 .featureIcon{box-shadow:0 0 25px rgb(125 85 255 / 25%),inset 0 0 12px rgb(209 179 255 / 8%)}
 @media(max-width:900px){.hero{min-height:570px}.heroCopy{width:70%;max-width:560px}.heroArtwork{background-position:57% center}.hero::before{background:linear-gradient(90deg,rgb(3 5 24 / 97%) 0%,rgb(4 5 27 / 85%) 36%,rgb(5 6 30 / 42%) 67%,rgb(5 6 30 / 10%) 100%),linear-gradient(0deg,rgb(4 5 25 / 70%),transparent 45%)}.quickRow{margin-top:-38px}}
 @media(max-width:560px){.hero{min-height:640px;padding:32px 22px 110px;border-radius:20px}.heroArtwork{inset:0;background-position:60% center;background-size:auto 100%;opacity:1}.heroCopy{width:100%;max-width:440px;padding-top:6px}.hero::before{background:linear-gradient(180deg,rgb(3 5 24 / 98%) 0%,rgb(4 5 27 / 88%) 29%,rgb(5 6 30 / 47%) 53%,rgb(5 6 30 / 10%) 75%),linear-gradient(90deg,rgb(3 5 24 / 32%),transparent 100%),linear-gradient(0deg,rgb(4 5 25 / 55%),transparent 32%)}.hero h1{font-size:clamp(42px,11vw,57px);line-height:1.02;margin-top:18px}.intro{max-width:330px;font-size:13px;line-height:1.8;margin-top:18px}.heroActions{flex-direction:column;align-items:flex-start;margin-top:24px;max-width:290px}.heroActions>.primaryButton,.heroActions>.secondaryButton{width:100%;min-height:48px}.quickRow{margin-top:-78px;gap:9px}.quickRow button{min-height:90px;padding:11px 9px;gap:7px}.quickRow button>svg:first-child{width:36px;height:36px;padding:8px}.quickRow button strong{font-size:11px}.quickRow button span{font-size:10px}.featureCard::before,.featureCard::after{height:94px}}
+
+
+/* Celestial craft pass: coded atmosphere, depth, and responsive interaction details. */
+.heroArtwork{overflow:hidden;transform-origin:58% 50%;animation:sanctuary-scene-arrive 900ms cubic-bezier(.2,.7,.2,1) both}
+.heroArtwork::before,.heroArtwork::after{position:absolute;inset:-12%;content:"";pointer-events:none}
+.heroArtwork::before{background:radial-gradient(ellipse at 70% 35%,rgb(206 157 255 / 18%),transparent 22%),radial-gradient(ellipse at 83% 62%,rgb(83 143 255 / 15%),transparent 27%),radial-gradient(ellipse at 55% 90%,rgb(44 205 255 / 11%),transparent 34%);mix-blend-mode:screen;animation:sanctuary-nebula-breathe 13s ease-in-out infinite alternate}
+.heroArtwork::after{inset:8% 3% auto auto;width:clamp(190px,28vw,390px);height:clamp(190px,28vw,390px);border:1px solid rgb(220 201 255 / 16%);border-radius:50%;box-shadow:0 0 0 18px rgb(181 154 255 / 3%),0 0 0 42px rgb(181 154 255 / 2%),inset 0 0 50px rgb(162 112 255 / 8%);transform:rotate(-24deg) scaleX(1.35);mask-image:linear-gradient(180deg,#000 0%,transparent 88%)}
+.heroCopy{animation:sanctuary-copy-arrive 720ms 100ms cubic-bezier(.2,.7,.2,1) both}
+.heroCopy>.eyebrow{width:fit-content;padding:8px 0}
+.hero h1 em{background:linear-gradient(105deg,#f2dfff 4%,#c3a4ff 44%,#9bdcff 88%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px rgb(153 105 255 / 22%))}
+.heroActions>.primaryButton{position:relative;overflow:hidden;isolation:isolate}
+.heroActions>.primaryButton::after{position:absolute;z-index:-1;inset:0;content:"";background:linear-gradient(110deg,transparent 20%,rgb(255 255 255 / 28%) 48%,transparent 72%);transform:translateX(-130%);transition:transform 650ms ease}
+.heroActions>.primaryButton:hover::after,.heroActions>.primaryButton:focus-visible::after{transform:translateX(130%)}
+.quickRow button{transition:transform 180ms ease,border-color 180ms ease,box-shadow 180ms ease,background 180ms ease}
+.quickRow button::before{position:absolute;inset:0;border-radius:inherit;content:"";pointer-events:none;background:linear-gradient(125deg,rgb(202 172 255 / 9%),transparent 38%,transparent 72%,rgb(108 172 255 / 6%));opacity:.8}
+.quickRow button:hover{transform:translateY(-3px);box-shadow:0 18px 38px rgb(1 2 20 / 40%),0 0 0 1px rgb(195 161 255 / 9%) inset}
+.featureCard{isolation:isolate;transition:transform 220ms ease,border-color 220ms ease,box-shadow 220ms ease}
+.featureCard::after{position:absolute;z-index:-1;top:12px;right:-22px;width:145px;height:68px;border:1px solid rgb(214 193 255 / 30%);border-radius:50%;content:"";pointer-events:none;transform:rotate(-24deg);box-shadow:0 0 0 8px rgb(173 133 255 / 3%),0 0 24px rgb(140 91 255 / 8%)}
+.featureCard:nth-child(3n + 2)::after{border-color:rgb(247 173 255 / 34%);transform:rotate(18deg) scale(.88)}
+.featureCard:nth-child(3n)::after{border-color:rgb(135 212 255 / 36%);transform:rotate(-10deg) scale(1.12)}
+.featureCard:hover{transform:translateY(-4px);border-color:rgb(191 159 255 / 62%);box-shadow:0 20px 44px rgb(2 3 23 / 32%),inset 0 1px 0 rgb(255 255 255 / 7%)}
+.onboardingTask,.onboardingTaskDone,.voteChoice,.voteChoiceSelected,.discoveryOption,.discoveryOptionSelected,.radarCard{transition:border-color 180ms ease,background-color 180ms ease,box-shadow 180ms ease}
+.onboardingTask:hover,.onboardingTaskDone:hover{border-bottom-color:rgb(179 147 255 / 48%)}
+.voteChoice:hover,.discoveryOption:hover{box-shadow:0 7px 22px rgb(104 73 210 / 10%)}
+.feedbackForm input,.feedbackForm select,.feedbackForm textarea,.discoverySelect{min-height:44px;border-radius:11px;transition:border-color 160ms ease,box-shadow 160ms ease}
+.feedbackForm textarea{min-height:112px}
+.feedbackForm input:focus-visible,.feedbackForm select:focus-visible,.feedbackForm textarea:focus-visible,.discoverySelect:focus-visible{border-color:#b99aff;outline:2px solid rgb(185 154 255 / 32%);outline-offset:1px;box-shadow:0 0 0 5px rgb(146 99 255 / 8%)}
+.filter,.filterActive{min-height:40px;transition:color 160ms ease,background 160ms ease,border-color 160ms ease,transform 160ms ease}
+.filter:hover{border-color:rgb(177 146 255 / 58%);color:var(--ink);transform:translateY(-1px)}
+.closeButton:focus-visible,.taskCheck:focus-visible,.taskAction:focus-visible,.cardAction:focus-visible,.radarCard button:focus-visible,.footer button:focus-visible,.onboardingFooter button:focus-visible{outline:2px solid #c3a5ff;outline-offset:3px}
+@keyframes sanctuary-scene-arrive{from{opacity:.68;transform:scale(1.045)}to{opacity:1;transform:scale(1)}}
+@keyframes sanctuary-copy-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sanctuary-nebula-breathe{from{opacity:.58;transform:translate3d(-1%,1%,0) scale(.98)}to{opacity:1;transform:translate3d(1%,-1%,0) scale(1.035)}}
+@media(max-width:760px){.heroCopy{width:min(100%,610px)}.heroArtwork::after{top:28%;right:0;width:210px;height:210px;opacity:.58}.quickRow{margin-top:-28px}}
+@media(max-width:560px){.heroCopy{width:100%;padding-bottom:18px}.heroArtwork{animation-duration:650ms}.heroArtwork::before{inset:0;background:radial-gradient(ellipse at 68% 54%,rgb(178 126 255 / 18%),transparent 38%),radial-gradient(ellipse at 45% 88%,rgb(56 190 255 / 12%),transparent 42%)}.heroArtwork::after{top:42%;right:-24px;width:170px;height:170px;opacity:.46}.quickRow{margin-top:-22px}.featureCard::after{top:8px;right:-32px;width:112px;height:58px}.filter,.filterActive{min-height:42px}}
+@media(prefers-reduced-motion:reduce){.heroArtwork,.heroCopy{animation:none}.heroArtwork::before{animation:none}.heroActions>.primaryButton::after{display:none}.quickRow button,.featureCard,.onboardingTask,.onboardingTaskDone,.voteChoice,.voteChoiceSelected,.discoveryOption,.discoveryOptionSelected,.radarCard{transition:none}.quickRow button:hover,.featureCard:hover{transform:none}}
