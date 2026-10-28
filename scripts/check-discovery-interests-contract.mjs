@@ -25,6 +25,7 @@ assert.ok(service.includes('MAX_INTERESTS = 12'), 'interest editor must keep a c
 assert.ok(service.includes('is_public'), 'interest visibility must be explicit');
 assert.ok(service.includes('requireCommunityStorageUser(userId)'), 'writes must be bound to the authenticated member');
 assert.ok(service.includes('findUserIdsByPublicInterest'), 'public interests should be searchable');
+assert.ok(service.includes('findUserIdsBySharedPublicInterests'), 'shared public interests should support suggestions');
 assert.ok(editor.includes('Keep these interests private'), 'private-by-default choice must be visible');
 assert.ok(editor.includes('Show these interests in discovery'), 'public visibility must be explicit and opt-in');
 assert.ok(discovery.includes('fetchPublicDiscoveryInterests'), 'discovery cards must read only public interests');
