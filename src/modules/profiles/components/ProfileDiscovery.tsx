@@ -165,7 +165,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     fetchBlockedProfileIds(currentUserId)
       .then(async (ids) => {
         const profiles = await Promise.all(ids.map((id) => fetchPublicProfileById(id)));
-        if (!cancelled) setBlockedProfiles(profiles.filter((profile): profile is PublicProfile => profile !== null).map((profile) => ({ userId: profile.userId, displayName: profile.displayName, username: profile.username })));
+        if (!cancelled) setBlockedProfiles(ids.map((id, index) => { const profile = profiles[index]; return { userId: id, displayName: profile?.displayName ?? 'Blocked member', username: profile ? `@${profile.username}` : `Member ${id.slice(0, 8)}` }; }));
       })
       .catch(() => { if (!cancelled) setRelationshipError('Blocked members could not be loaded.'); });
     fetchIncomingConnectionRequests(currentUserId)
@@ -198,7 +198,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
       setRelationshipStates(await fetchRelationshipStates(currentUserId, visibleProfiles.map((profile) => profile.userId)));
       const blockedIds = await fetchBlockedProfileIds(currentUserId);
       const blocked = await Promise.all(blockedIds.map((id) => fetchPublicProfileById(id)));
-      setBlockedProfiles(blocked.filter((profile): profile is PublicProfile => profile !== null).map((profile) => ({ userId: profile.userId, displayName: profile.displayName, username: profile.username })));
+      setBlockedProfiles(blockedIds.map((id, index) => { const profile = blocked[index]; return { userId: id, displayName: profile?.displayName ?? 'Blocked member', username: profile ? `@${profile.username}` : `Member ${id.slice(0, 8)}` }; }));
       const requests = await fetchIncomingConnectionRequests(currentUserId);
       const hydrated = await Promise.all(requests.map(async (request) => {
         const profile = await fetchPublicProfileById(request.requesterId);
