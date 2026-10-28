@@ -59,7 +59,7 @@ export function ProfileInterestsEditor({ userId }: ProfileInterestsEditorProps) 
           <h2 id="profile-interests-heading">Your interests</h2>
         </div>
       </div>
-      <p className={styles.description}>Add up to 12 topics that you enjoy exploring. These are separate from private reflections and questionnaire answers.</p>
+      <p className={styles.description}>Add up to 12 topics that you enjoy exploring. These are separate from private reflections and questionnaire answers. Public interests are searchable only while your profile is publicly discoverable.</p>
       <form onSubmit={save}>
         <label className={styles.field} htmlFor="discovery-interests">
           <span>Interests, separated by commas</span>
