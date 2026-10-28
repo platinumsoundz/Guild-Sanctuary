@@ -27,7 +27,7 @@ const makeLights = () => Array.from({ length: 25 }, () => Math.random() > 0.5);
 const makeMemory = () => ['☾','☾','✦','✦','☀','☀','♆','♆','✧','✧','☄','☄','♄','♄','♃','♃'].sort(() => Math.random() - 0.5);
 const make2048 = () => { const grid = Array.from({ length: 4 }, () => Array(4).fill(0)); addTile(grid); addTile(grid); return grid; };
 function addTile(grid: number[][]) { const empty: [number,number][] = []; grid.forEach((row,r)=>row.forEach((v,c)=>{if(!v)empty.push([r,c]);})); if(empty.length){const [r,c]=empty[Math.floor(Math.random()*empty.length)];grid[r][c]=Math.random()<0.9?2:4;} }
-const makeMines = () => Array.from({ length: 64 }, (_, i) => i).sort(() => Math.random() - 0.5).slice(0, 10);
+const makeMines = (count = 10) => Array.from({ length: 64 }, (_, i) => i).sort(() => Math.random() - 0.5).slice(0, Math.max(1, Math.min(30, count)));
 const makeFifteen = () => { const a = Array.from({length:16},(_,i)=>(i+1)%16); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
 const makeConnect = () => Array.from({length:6},()=>Array(7).fill(''));
 const makeLife = () => Array.from({length:10},()=>Array.from({length:10},()=>Math.random()>.78));
@@ -100,7 +100,7 @@ export function ArcadeClassics() {
   const levelTarget = 2048 * Math.min(4, Math.max(1, Math.ceil(level / 3)));
   const levelComplete = useMemo(() => {
     if (game === '2048') return grid2048.some(row => row.some(value => value >= levelTarget));
-    if (game === 'mines') return revealed.length === 54 && !revealed.some(i => mineCells.includes(i));
+    if (game === 'mines') return revealed.length === 64 - mineCells.length && !revealed.some(i => mineCells.includes(i));
     if (game === 'lights') return lights.every(value => !value);
     if (game === 'memory') return matched.length === memory.length;
     if (game === 'wordle') return guesses.includes(word);
@@ -128,7 +128,7 @@ export function ArcadeClassics() {
     setHanoi([[4,3,2,1],[],[]]);setHanoiFrom(null);setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);setLife(makeLife());setMole(Math.floor(Math.random()*16));setHits(0);setQuestion(0);setScore(0);setFifteen(makeFifteen());setSimon([]);setSimonInput([]);setMessage('');setPong({ballX:4,ballY:3,dx:1,dy:1,paddle:3,score:0,over:false});setBricks(Array.from({length:24},()=>true));setBrickBall({x:3,y:5,dx:1,dy:-1,paddle:3,lives:3});setBlocks(Array.from({length:10},()=>Array(6).fill(0)));setActiveShape([[1,1,1],[0,1,0]]);setBlockX(1);setSudoku(Array.from({length:81},(_,i)=>[0,1,4,9,12,13,20,21,22,25,27,31,35,36,39,41,44,45,49,51,53,55,57,62,63,66,67,68,69,72,76,79,80].includes(i)?((i*7)%9)+1:0));setMazePos(0);setTypingInput('');setAsteroidPos(2);setInvaderScore(0);setInvaders(Array.from({length:15},(_,i)=>i));
   };
   const tapLight = (i:number) => setLights(current=>current.map((v,j)=> directions.reduce((on,[dr,dc])=>{const r=Math.floor(i/5),c=i%5,rr=Math.floor(j/5),cc=j%5;return on || (j===i)||(rr===r+dr&&cc===c+dc);},false)?!v:v));
-  const advanceLevel = () => {completedRunRef.current='';setLevel(n=>n+1);setSavedScore(false);setMessage(`Level ${level+1} ready — a fresh challenge has been generated.`);if(game==='mines'){setMineCells(makeMines());setRevealed([]);setFlags([]);}if(game==='lights')setLights(makeLights());if(game==='memory'){setMemory(makeMemory());setFlipped([]);setMatched([]);}if(game==='2048')setGrid2048(make2048());if(game==='fifteen')setFifteen(makeFifteen());if(game==='flood'){setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);}if(game==='maze')setMazePos(0);};
+  const advanceLevel = () => {completedRunRef.current='';setLevel(n=>n+1);setSavedScore(false);setMessage(`Level ${level+1} ready — a fresh challenge has been generated.`);if(game==='mines'){setMineCells(makeMines(Math.min(30, Math.max(5, 8 + level + (difficulty === 'expert' ? 8 : difficulty === 'chill' ? -3 : 0)))));setRevealed([]);setFlags([]);}if(game==='lights')setLights(makeLights());if(game==='memory'){setMemory(makeMemory());setFlipped([]);setMatched([]);}if(game==='2048')setGrid2048(make2048());if(game==='fifteen')setFifteen(makeFifteen());if(game==='flood'){setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);}if(game==='maze')setMazePos(0);};
   const saveScore = () => {const entry={name:playerName.trim().slice(0,24)||'Player',game:options.find(o=>o.id===game)?.title||game,score:Math.round(pointsForRun),level};setLeaderboard(old=>[...old,entry].sort((a,b)=>b.score-a.score||b.level-a.level).slice(0,20));setSavedScore(true);};
   useEffect(() => {
     if (!levelComplete) return;
@@ -141,7 +141,7 @@ export function ArcadeClassics() {
     setMessage(`Level ${level} complete! +${Math.round(100 * (difficulty === 'expert' ? 2 : 1))} clear bonus. Loading level ${level + 1}…`);
     setLevel(value => value + 1);
     if (game === '2048') setGrid2048(make2048());
-    if (game === 'mines') { setMineCells(makeMines()); setRevealed([]); setFlags([]); }
+    if (game === 'mines') { setMineCells(makeMines(Math.min(30, Math.max(5, 8 + level + (difficulty === 'expert' ? 8 : difficulty === 'chill' ? -3 : 0))))); setRevealed([]); setFlags([]); }
     if (game === 'lights') setLights(makeLights());
     if (game === 'memory') { setMemory(makeMemory()); setFlipped([]); setMatched([]); }
     if (game === 'wordle' || game === 'hangman') { setWord(wordBank[Math.floor(Math.random()*wordBank.length)]); setGuess(''); setGuesses([]); setHangLetters([]); }
