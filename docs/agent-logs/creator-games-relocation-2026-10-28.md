@@ -12,7 +12,12 @@ Move the creator-project/community-world hub off the Support the creator page an
 - Keep Sanctuary-built Cosmic Arcade distinct from external creator projects.
 - No URL, provider, database, save, identity-linking, or token-spending changes.
 
-## Validation required
+## Validation status
+- Exact-head CI passed, including Guild, guest-access and Cosmic Arcade contracts, TypeScript and production build.
+- Visual Preview Screenshots workflow passed. Vercel's daily deployment limit was reported on preview attempts; no production deployment occurred.
+- Real mobile/desktop browser and game interaction QA remains outstanding.
+
+## Remaining validation
 - Run `npm run check:guild-browser-arcade` and `npm run check:guest-access`.
 - Run TypeScript and production build.
 - Verify Guild game links and embeds on mobile and desktop; confirm Support page no longer includes the games hub.
