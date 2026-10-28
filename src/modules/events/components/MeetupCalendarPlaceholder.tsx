@@ -46,6 +46,19 @@ export function MeetupCalendarPlaceholder() {
     ? getMapLinks(String(selectedMapEvent.locationCoords.latitude), String(selectedMapEvent.locationCoords.longitude))
     : null;
   const coordinatePreview = getMapLinks(latitude, longitude);
+  const nearbyEvents = selectedMapLinks && selectedMapEvent
+    ? events
+        .map((event) => ({ event, distanceKm: getDistanceKm(
+          selectedMapEvent.locationCoords.latitude,
+          selectedMapEvent.locationCoords.longitude,
+          event.locationCoords.latitude,
+          event.locationCoords.longitude,
+        ) }))
+        .filter(({ event, distanceKm }) =>
+          distanceKm <= 10 && Boolean(getMapLinks(String(event.locationCoords.latitude), String(event.locationCoords.longitude))),
+        )
+        .sort((a, b) => a.distanceKm - b.distanceKm)
+    : [];
 
   const clearForm = () => {
     setTitle('');
@@ -213,6 +226,32 @@ export function MeetupCalendarPlaceholder() {
                   This event has missing or invalid coordinates, so its map cannot be shown. The event details are still available below.
                 </div>
               ) : null}
+              {selectedMapLinks && (
+                <section className={styles.nearbyPanel} aria-labelledby="nearby-events-title">
+                  <div className={styles.nearbyHeading}>
+                    <h4 id="nearby-events-title">Happening within 10 km</h4>
+                    <span>{nearbyEvents.length} {nearbyEvents.length === 1 ? 'event' : 'events'}</span>
+                  </div>
+                  {nearbyEvents.length > 0 ? (
+                    <div className={styles.nearbyList} aria-label="Events near selected map location">
+                      {nearbyEvents.map(({ event, distanceKm }) => (
+                        <button
+                          key={event.id}
+                          type="button"
+                          className={selectedMapEvent?.id === event.id ? styles.nearbyEventActive : styles.nearbyEvent}
+                          aria-pressed={selectedMapEvent?.id === event.id}
+                          onClick={() => setSelectedMapEventId(event.id)}
+                        >
+                          <span><strong>{event.title}</strong><small>{formatShortDate(event.startsAt)}</small></span>
+                          <small>{formatDistance(distanceKm)}</small>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className={styles.nearbyEmpty}>No other events with valid locations are within 10 km of this pin.</p>
+                  )}
+                </section>
+              )}
               <div className={styles.pinList} role="group" aria-label="Choose an event map pin">
                 {events.map((event, index) => (
                   <button
@@ -285,6 +324,20 @@ function getMapLinks(latitudeValue: string, longitudeValue: string): { embed: st
     embed: `https://www.openstreetmap.org/export/embed.html?bbox=${bounds}&layer=mapnik&marker=${latitude}%2C${longitude}`,
     open: `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=16/${latitude}/${longitude}`,
   };
+}
+
+function getDistanceKm(latitudeA: number, longitudeA: number, latitudeB: number, longitudeB: number): number {
+  const radians = (degrees: number) => (degrees * Math.PI) / 180;
+  const latitudeDelta = radians(latitudeB - latitudeA);
+  const longitudeDelta = radians(longitudeB - longitudeA);
+  const haversine = Math.sin(latitudeDelta / 2) ** 2
+    + Math.cos(radians(latitudeA)) * Math.cos(radians(latitudeB)) * Math.sin(longitudeDelta / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(Math.min(1, Math.max(0, haversine))));
+}
+
+function formatDistance(distanceKm: number): string {
+  if (distanceKm < 1) return `${Math.round(distanceKm * 1000)} m away`;
+  return `${distanceKm.toFixed(distanceKm < 10 ? 1 : 0)} km away`;
 }
 
 function toIsoDateTime(dateValue: string, timeValue: string): string {
