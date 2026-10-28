@@ -57,3 +57,8 @@ Status: design and implementation checklist only. No terminal runtime, compute p
 - No shell runs in the browser itself.
 - No public game server or arbitrary inbound port mapping.
 - No automatic recording, transcription, or end-to-end-encryption claim for Sanctuary text messages.
+
+
+## Storage strategy alignment
+
+The default is server-authoritative account data with bounded local caching, not unconditional server upload of every local file. See `docs/sanctuary-storage-strategy.md` for data placement and sync rules. A future Linux workspace must use an encrypted persistent server volume; localStorage is not a substitute for a Linux home directory. The Guild library schema is staged in `supabase/migrations/20261028214500_guild_library_entries.sql`, but that migration has not been applied and the current browser UI is not yet connected to it. User-selected music and photos remain on-device unless a separate, explicitly opted-in cloud backup is implemented with quotas and deletion guarantees.
