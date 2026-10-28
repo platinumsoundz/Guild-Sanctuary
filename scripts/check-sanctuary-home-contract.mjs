@@ -9,6 +9,7 @@ const css = readFileSync('src/components/SanctuaryHome.module.css', 'utf8');
 const art = readFileSync('src/components/CosmicSanctuaryArt.tsx', 'utf8');
 const navigationCss = readFileSync('src/components/Navigation.module.css', 'utf8');
 const notificationCss = readFileSync('src/components/NotificationBar.module.css', 'utf8');
+const workspaceCss = readFileSync('src/components/AppWorkspace.module.css', 'utf8');
 
 assert.match(workspace, /activeNavigation === 'today'[\s\S]*?<SanctuaryHome onNavigate=\{openNavigation\} \/>/, 'Today route renders the Sanctuary home');
 assert.match(context, /NavigationState = 'today'/, 'Today is a supported navigation state');
@@ -34,5 +35,8 @@ assert.match(css, /@media \(max-width: 560px\)/, 'cosmic hero has a dedicated mo
 assert.match(navigationCss, /luminous active states/, 'navigation has cosmic glass styling');
 assert.match(navigationCss, /mobileBottomNavigation \\{ background: rgb\\(10 13 38/, 'mobile navigation has a cosmic glass surface');
 assert.match(notificationCss, /Cosmic glass treatment/, 'notifications share the cosmic visual system');
+assert.match(workspaceCss, /Extend the cosmic art direction/, 'routed workspace shares the cosmic art direction');
+assert.match(workspaceCss, /linear-gradient\\(145deg, rgb\\(20 24 61/, 'section surfaces use the midnight glass palette');
+assert.match(workspaceCss, /text-wrap: balance/, 'section headings use balanced typography');
 
 console.log('Sanctuary home contract checks passed.');
