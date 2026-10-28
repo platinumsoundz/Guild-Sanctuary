@@ -85,6 +85,19 @@ export type ModerationAction = 'warn' | 'hide' | 'remove' | 'restore' | 'suspend
 export interface Database {
   public: {
     Tables: {
+      daily_reflections: Table<{
+        id: string;
+        user_id: string;
+        reflection_date: string;
+        title: string;
+        intention: string;
+        content: string;
+        mood: string | null;
+        prompts: unknown;
+        tags: unknown;
+        created_at: string;
+        updated_at: string;
+      }>;
       profiles: Table<ProfileRow>;
       community_tips: Table<{
         stripe_event_id: string;
