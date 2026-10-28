@@ -34,7 +34,7 @@ using (user_id = (select auth.uid()) and public.is_active_user());
 
 grant select on public.guild_workspace_status to authenticated;
 revoke insert, update, delete, truncate, references, trigger on public.guild_workspace_status from authenticated;
-revoke all on public.guild_workspace_status from anon;
+revoke all on public.guild_workspace_status from public, anon;
 
 create table if not exists public.guild_workspace_runtime_private (
   workspace_id uuid primary key references public.guild_workspace_status(id) on delete cascade,
@@ -50,7 +50,7 @@ comment on table public.guild_workspace_runtime_private is
   'Server-only mapping to infrastructure resources. Never expose provider instance identifiers or persistent volume references to browser clients.';
 
 alter table public.guild_workspace_runtime_private enable row level security;
-revoke all on public.guild_workspace_runtime_private from anon, authenticated;
+revoke all on public.guild_workspace_runtime_private from public, anon, authenticated;
 revoke all on public.guild_workspace_status from anon;
 
 grant select, insert, update, delete on public.guild_workspace_status to service_role;
