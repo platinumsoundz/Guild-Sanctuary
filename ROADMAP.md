@@ -688,3 +688,15 @@ A first browser-first Guild implementation has started on `feat/guild-browser-ar
 - **Security note:** the hidden entry is a discoverability choice only. This prototype stores its best score in local storage and does not treat it as a verified achievement or reward.
 
 Current Guild implementation is now a **first UI/gameplay prototype**, not 0% code. Release verification remains 0% until browser/device, auth, and security tests produce evidence.
+
+
+## Guild companion hub and retro gaming groundwork (2026-10-28)
+
+- **Implemented in the Guild UI; device QA pending:** a local-first unified game library where members can save game titles, platform labels, and optional HTTP(S) links. The list is stored in the current browser's local storage. This is a personal catalogue, not an installed-game scanner.
+- **Implemented in the Guild UI; device QA pending:** a local music lounge that plays user-selected audio files through the browser, and a photo gallery with previous/next controls and an optional five-second slideshow. Selected media uses temporary browser object URLs and is not uploaded to Sanctuary by this component.
+- **Gaming ecosystem directory:** official links for RetroArch, RetroAchievements, Steam, Xbox, GOG and itch.io, with plain-language status explaining that account linking, achievement sync, automatic game discovery and native launching are not connected yet.
+- **RetroArch plan:** support a user's own compatible RetroArch installation and legally obtained game files; do not host or distribute ROMs. Investigate documented RetroAchievements support and authorised Steam/Xbox APIs before implementing OAuth, achievement import or verified progression. Do not treat self-entered achievements as verified.
+- **Required companion architecture:** optional signed Windows companion for user-approved game discovery and launching; Android companion integration must respect package visibility and system launch rules. Native launch protocols must be tested against exact platforms and never accepted from arbitrary user input in the web app.
+- **Cloud Linux environment remains separate work:** requires isolated per-user compute, persistent storage, quotas, authentication, abuse controls, observability and explicit cost limits. Do not simulate this as a privileged browser terminal.
+- **Privacy boundary:** current local media selection is session-only; game titles are browser-local. No cloud media upload, automatic file scan, external account linking, cloud persistence or platform reward verification is enabled.
+- **Contract check:** `npm run check:guild-companion-hub` verifies key source-level feature and safety guardrails. It is not a substitute for typecheck, browser QA, security review or device testing.
