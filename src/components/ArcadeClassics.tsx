@@ -30,7 +30,7 @@ const makeSudoku = () => { const solution = Array.from({length:81},(_,i) => { co
 const makeMemory = () => ['☾','☾','✦','✦','☀','☀','♆','♆','✧','✧','☄','☄','♄','♄','♃','♃'].sort(() => Math.random() - 0.5);
 const make2048 = () => { const grid = Array.from({ length: 4 }, () => Array(4).fill(0)); addTile(grid); addTile(grid); return grid; };
 function addTile(grid: number[][]) { const empty: [number,number][] = []; grid.forEach((row,r)=>row.forEach((v,c)=>{if(!v)empty.push([r,c]);})); if(empty.length){const [r,c]=empty[Math.floor(Math.random()*empty.length)];grid[r][c]=Math.random()<0.9?2:4;} }
-const makeMines = (count = 10) => Array.from({ length: 64 }, (_, i) => i).sort(() => Math.random() - 0.5).slice(0, Math.max(1, Math.min(30, count)));
+const makeMines = (count = 10, safeCell?: number) => Array.from({ length: 64 }, (_, i) => i).filter(i => i !== safeCell).sort(() => Math.random() - 0.5).slice(0, Math.max(1, Math.min(30, count)));
 const makeFifteen = () => { const board = Array.from({length:16},(_,i)=>(i+1)%16); let empty = 15, previous = -1; for (let step = 0; step < 120; step++) { const row = Math.floor(empty / 4), col = empty % 4; const choices = [[row-1,col],[row+1,col],[row,col-1],[row,col+1]].filter(([r,c]) => r >= 0 && r < 4 && c >= 0 && c < 4).map(([r,c]) => r * 4 + c).filter(index => index !== previous); const next = choices[Math.floor(Math.random() * choices.length)]; [board[empty], board[next]] = [board[next], board[empty]]; previous = empty; empty = next; } return board; };
 const makeConnect = () => Array.from({length:6},()=>Array(7).fill(''));
 const makeLife = () => Array.from({length:10},()=>Array.from({length:10},()=>Math.random()>.78));
