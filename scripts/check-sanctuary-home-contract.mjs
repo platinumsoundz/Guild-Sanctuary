@@ -65,4 +65,6 @@ assert.doesNotMatch(workspaceCss.slice(workspaceCss.indexOf('/* Routed workspace
 assert.match(css, /sanctuary-portal-drift/, 'portal art has restrained celestial movement');
 assert.match(css, /\.heroIllustration, \.artPulse \{ animation: none; \}/, 'portal animation is disabled for reduced-motion users');
 
+assert.match(workspaceCss, /sectionEyebrow \{ color: var\(--accent\)/, 'routed eyebrow labels retain contrast across selected themes');
+
 console.log('Sanctuary home contract checks passed.');
