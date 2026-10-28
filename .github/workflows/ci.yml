@@ -44,6 +44,7 @@ jobs:
       - run: npm run check:token-spend
       - run: npm run check:cosmic-arcade
       - run: npm run check:guild-browser-arcade
+      - run: npm run check:guild-companion-hub
       - run: npm run check:sanctuary-home
       - run: deno check supabase/functions/token-checkout/index.ts supabase/functions/stripe-token-webhook/index.ts
       - run: npm run typecheck
