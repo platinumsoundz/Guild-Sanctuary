@@ -34,13 +34,11 @@ export function ProfileDiscoveryIntentionsEditor({ userId }: ProfileDiscoveryInt
   }, [userId]);
 
   const toggle = (id: DiscoveryIntentionId, checked: boolean) => {
-    setSelected((current) => {
-      const next = checked
-        ? current.length < 3 ? [...current, id] : current
-        : current.filter((item) => item !== id);
-      if (next.length === 0) setIsPublic(false);
-      return next;
-    });
+    const next = checked
+      ? selected.length < 3 ? [...selected, id] : selected
+      : selected.filter((item) => item !== id);
+    setSelected(next);
+    if (next.length === 0) setIsPublic(false);
     setMessage(null);
   };
 
