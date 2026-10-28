@@ -31,4 +31,8 @@ assert.match(home, /onNavigate\('shop'\)/, 'shop has its own destination');
 assert.match(css, /worldGrid \{ display: grid/, 'destination cards use a responsive grid');
 assert.match(css, /@media \(max-width: 560px\)/, 'cosmic hero has a dedicated mobile layout');
 
+assert.match(navigationCss, /luminous active states/, 'navigation has cosmic glass styling');
+assert.match(navigationCss, /mobileBottomNavigation \\{ background: rgb\\(10 13 38/, 'mobile navigation has a cosmic glass surface');
+assert.match(notificationCss, /Cosmic glass treatment/, 'notifications share the cosmic visual system');
+
 console.log('Sanctuary home contract checks passed.');
