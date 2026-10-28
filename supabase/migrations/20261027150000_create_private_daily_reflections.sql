@@ -18,6 +18,7 @@ create table if not exists public.daily_reflections (
   constraint daily_reflections_content_length check (char_length(content) <= 1200),
   constraint daily_reflections_title_length check (char_length(title) <= 160),
   constraint daily_reflections_mood_length check (mood is null or char_length(mood) <= 48),
+  constraint daily_reflections_mood_allowed check (mood is null or mood in ('low', 'heavy', 'steady', 'good', 'bright')),
   constraint daily_reflections_prompts_array check (jsonb_typeof(prompts) = 'array'),
   constraint daily_reflections_tags_array check (jsonb_typeof(tags) = 'array')
 );
@@ -51,7 +52,7 @@ create policy "Users can delete their own daily reflections"
   on public.daily_reflections for delete to authenticated
   using (auth.uid() = user_id);
 
+revoke all on public.daily_reflections from public, anon;
 grant select, insert, update, delete on public.daily_reflections to authenticated;
-revoke all on public.daily_reflections from anon;
 
 commit;
