@@ -4,11 +4,14 @@ import { readFileSync } from 'node:fs';
 const arcade = readFileSync('src/components/CosmicArcade.tsx', 'utf8');
 const snake = readFileSync('src/components/CosmicSnake.tsx', 'utf8');
 const solitaire = readFileSync('src/components/LunarSolitaire.tsx', 'utf8');
+const crossword = readFileSync('src/components/CelestialCrossword.tsx', 'utf8');
 const css = readFileSync('src/components/CosmicArcade.module.css', 'utf8');
 const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
 
 assert.match(navigation, /id:\s*'games',\s*label:\s*'Cosmic Arcade'/, 'Cosmic Arcade remains reachable from navigation');
 assert.match(arcade, /Starseed Word Search/, 'word search preview remains available');
+assert.match(arcade, /selectedGame === 'crossword' \\? <CelestialCrossword \\/>/, 'crossword is connected to the game selector');
+assert.match(arcade, /selectedGame === 'crossword'[\\s\\S]*?status: 'Playable preview'/, 'crossword is advertised as playable');
 assert.match(arcade, /selectedGame === 'snake' \? <CosmicSnake \/>/, 'snake is connected to the game selector');
 assert.match(arcade, /Purchases locked/, 'arcade token purchases remain locked');
 assert.match(arcade, /disabled><LockKeyhole/, 'theme purchase controls remain disabled');
