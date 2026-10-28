@@ -6,6 +6,7 @@ const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
 const context = readFileSync('src/context/AppContext.tsx', 'utf8');
 const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
 const css = readFileSync('src/components/SanctuaryHome.module.css', 'utf8');
+const art = readFileSync('src/components/CosmicSanctuaryArt.tsx', 'utf8');
 
 assert.match(workspace, /activeNavigation === 'today'[\s\S]*?<SanctuaryHome onNavigate=\{openNavigation\} \/>/, 'Today route renders the Sanctuary home');
 assert.match(context, /NavigationState = 'today'/, 'Today is a supported navigation state');
@@ -16,5 +17,11 @@ assert.match(home, /target: 'feed'/, 'home has a community destination');
 assert.match(home, /target: 'discover'/, 'home has a discovery destination');
 assert.match(css, /@media/, 'home has responsive layout rules');
 assert.match(css, /prefers-reduced-motion/, 'home respects reduced-motion preferences');
+assert.match(home, /Find your place among the/, 'home hero reflects the cosmic Sanctuary direction');
+assert.match(home, /CosmicSanctuaryArt/, 'home hero includes the dedicated cosmic artwork');
+assert.match(art, /luminous portal|luminous/i, 'cosmic artwork documents its visual subject');
+assert.match(art, /cosmic-wing-feathers/, 'cosmic artwork includes wing details');
+assert.match(art, /cosmic-energy/, 'cosmic artwork includes flowing cosmic energy');
+assert.match(css, /@media \(max-width: 560px\)/, 'cosmic hero has a dedicated mobile layout');
 
 console.log('Sanctuary home contract checks passed.');
