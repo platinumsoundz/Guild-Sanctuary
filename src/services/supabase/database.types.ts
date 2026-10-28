@@ -86,6 +86,26 @@ export interface Database {
   public: {
     Tables: {
       profiles: Table<ProfileRow>;
+      profile_follows: Table<{
+        follower_id: string;
+        followee_id: string;
+        created_at: string;
+      }>;
+      profile_connections: Table<{
+        id: string;
+        member_low_id: string;
+        member_high_id: string;
+        requester_id: string;
+        addressee_id: string;
+        status: 'pending' | 'accepted' | 'declined';
+        created_at: string;
+        responded_at: string | null;
+      }>;
+      profile_blocks: Table<{
+        blocker_id: string;
+        blocked_id: string;
+        created_at: string;
+      }>;
       profile_interests: Table<{
         user_id: string;
         interest: string;
