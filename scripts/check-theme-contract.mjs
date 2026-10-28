@@ -17,6 +17,7 @@ for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean']) {
   assert.ok(settings.includes(`value="${theme}"`), `missing ${theme} option in Settings`);
 }
 assert.ok(layout.includes("localStorage.getItem('sanctuary-theme')"), 'theme bootstrap must read device preference');
+assert.ok(layout.includes("themeColor: '#080b1b'"), 'browser chrome must match the cosmic default palette');
 assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'theme bootstrap must apply selected palette before render');
 assert.ok(layout.includes("saved === 'stone' || saved === 'ocean'"), 'pre-render bootstrap must accept new palettes');
 assert.ok(layout.includes("? saved : 'dark'"), 'fresh visits must default to the cosmic dark palette');
