@@ -325,3 +325,17 @@
     animation: none;
   }
 }
+ 
+/* Keep keyboard focus visible on every queue control, including compact filters. */
+.dashboard :is(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #315f3d;
+  outline-offset: 3px;
+}
+
+.dashboard button:not(:disabled) {
+  cursor: pointer;
+}
+
+.dashboard :is(button, select, input, textarea):disabled {
+  cursor: not-allowed;
+}
