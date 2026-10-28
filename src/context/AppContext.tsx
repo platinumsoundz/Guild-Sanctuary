@@ -36,7 +36,7 @@ import type { Database } from '@/services/supabase/database.types';
 import { normalizeSocialLinks } from '@/lib/socialLinks';
 import { fetchAccountSettings } from '@/modules/settings/service';
 
-export type NavigationState = 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'planner';
+export type NavigationState = 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'planner';
 
 export type UserSession = AuthSession;
 
@@ -71,7 +71,7 @@ interface AppContextProviderProps {
 }
 
 export function AppContextProvider({ children }: AppContextProviderProps) {
-  const [activeNavigation, setActiveNavigation] = useState<NavigationState>('feed');
+  const [activeNavigation, setActiveNavigation] = useState<NavigationState>('today');
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
   const [isGuest, setIsGuest] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
@@ -162,7 +162,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     if (persist) persistActiveSession(session);
     setCurrentUser(session);
     setIsGuest(false);
-    setActiveNavigation('feed');
+    setActiveNavigation('today');
     setPendingEmail(null);
     setPendingTwoFactorEmail(null);
     setPendingTotp(null);
