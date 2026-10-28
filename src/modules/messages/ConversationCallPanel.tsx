@@ -122,8 +122,9 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
       channel = client.channel(`sanctuary-call:${conversationId}`, { config: { private: true } });
       channelRef.current = channel;
       channel.on('broadcast', { event: 'signal' }, ({ payload }) => {
-        const signal = payload as Signal;
-        if (!signal || signal.from === currentUserId || typeof signal.callId !== 'string') return;
+        if (!isSignalPayload(payload)) return;
+        const signal = payload;
+        if (signal.from === currentUserId) return;
         if (signal.type === 'invite') {
           if (activeCallRef.current === null && incomingRef.current === null) {
             incomingRef.current = signal;
@@ -169,7 +170,8 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
               for (const candidate of queuedCandidates.current.splice(0)) await pc.addIceCandidate(candidate);
             } else if (signal.type === 'ice' && signal.candidate) {
               if (pc.remoteDescription) await pc.addIceCandidate(signal.candidate);
-              else queuedCandidates.current.push(signal.candidate);
+              else if (queuedCandidates.current.length < 256) queuedCandidates.current.push(signal.candidate);
+              else setError('Too many pending network candidates were received. Hang up and retry the call.');
             }
           } catch {
             setError('The call connection failed. Check your connection and try again.');
