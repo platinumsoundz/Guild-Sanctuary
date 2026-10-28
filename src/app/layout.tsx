@@ -31,6 +31,7 @@ const themeBootstrap = `
     document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
   } catch {
     document.documentElement.dataset.theme = 'dark';
+    document.documentElement.dataset.layout = 'comfortable';
     document.documentElement.classList.add('dark');
   }
 })();
