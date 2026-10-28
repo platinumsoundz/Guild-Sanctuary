@@ -5,13 +5,21 @@ import type { ModerationAction } from '@/services/supabase';
 import { fetchModerationQueue, takeModerationAction, type ModerationQueueItem } from './service';
 import styles from './ModerationDashboard.module.css';
 
-export function ModerationDashboard() {
+interface ModerationDashboardProps {
+  role?: string;
+}
+
+export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardProps) {
   const [reports, setReports] = useState<ModerationQueueItem[]>([]);
   const [rationales, setRationales] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyReportId, setBusyReportId] = useState<string | null>(null);
+
+  const canWarn = ['moderator', 'admin', 'developer', 'owner'].includes(role);
+  const canSuspend = ['admin', 'developer', 'owner'].includes(role);
+  const canBan = ['developer', 'owner'].includes(role);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
@@ -36,6 +44,11 @@ export function ModerationDashboard() {
     try {
       await takeModerationAction({ report, action, rationale: rationales[report.id] ?? '', temporarySuspension });
       setReports((current) => current.filter((item) => item.id !== report.id));
+      setRationales((current) => {
+        const next = { ...current };
+        delete next[report.id];
+        return next;
+      });
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : 'Moderation action could not be applied.');
     } finally {
@@ -48,7 +61,7 @@ export function ModerationDashboard() {
       <header>
         <p className={styles.eyebrow}>TRUST & SAFETY</p>
         <h1>Moderation queue</h1>
-        <p>Review community reports. Every action requires a rationale and is written to the audit log.</p>
+        <p>Review the reported content and its author before taking action. Every action requires a rationale and is written to the audit log.</p>
       </header>
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isLoading ? <p role="status">Loading moderation access…</p> : !isAuthorized ? (
@@ -63,24 +76,44 @@ export function ModerationDashboard() {
                 <strong>{report.target_type} report</strong>
                 <time dateTime={report.created_at}>{new Date(report.created_at).toLocaleString()}</time>
               </div>
+              <section className={styles.contentPreview} aria-label="Reported content">
+                <div className={styles.contentHeading}>
+                  <strong>Reported content</strong>
+                  <span className={styles.statePill}>{report.targetState ?? 'Unavailable'}</span>
+                </div>
+                {report.targetTitle && <h2>{report.targetTitle}</h2>}
+                <p className={styles.contentBody}>{report.targetContent?.trim() || 'The original content is unavailable (it may have been deleted). The report and audit record are retained for review.'}</p>
+                {report.targetMediaUrl && (
+                  <p className={styles.mediaLink}>
+                    <a href={report.targetMediaUrl} target="_blank" rel="noreferrer">Open attached media</a>
+                  </p>
+                )}
+                {report.targetCreatedAt && <p className={styles.contentMeta}>Published {new Date(report.targetCreatedAt).toLocaleString()}</p>}
+              </section>
               <p><b>Reason:</b> {report.reason}</p>
-              {report.details && <p className={styles.details}>{report.details}</p>}
+              {report.details && <p className={styles.details}><b>Reporter’s details:</b> {report.details}</p>}
+              <div className={styles.authorPanel}>
+                <b>Content owner</b>
+                <span>{report.targetOwnerDisplayName || 'Unknown member'}{report.targetOwnerUsername ? ` (@${report.targetOwnerUsername})` : ''}</span>
+              </div>
               <label className={styles.rationale}>
-                <span>Action rationale</span>
+                <span>Action rationale (required)</span>
                 <textarea
                   value={rationales[report.id] ?? ''}
                   onChange={(event) => setRationales((current) => ({ ...current, [report.id]: event.currentTarget.value }))}
                   minLength={3}
                   maxLength={1000}
                   rows={2}
+                  aria-describedby={`rationale-help-${report.id}`}
                 />
+                <small id={`rationale-help-${report.id}`}>Use at least 3 characters. This is stored in the moderation audit trail.</small>
               </label>
               <div className={styles.actions}>
                 <button disabled={busyReportId === report.id || !rationales[report.id]?.trim()} onClick={() => void act(report, 'hide')}>Hide content</button>
                 <button disabled={busyReportId === report.id || !rationales[report.id]?.trim()} onClick={() => void act(report, 'remove')}>Remove content</button>
-                <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'warn')}>Warn member</button>
-                <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'suspend', true)}>Suspend 24 hours</button>
-                <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'ban')}>Ban member</button>
+                {canWarn && <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'warn')}>Warn member</button>}
+                {canSuspend && <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'suspend', true)}>Suspend 24 hours</button>}
+                {canBan && <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'ban')}>Ban member</button>}
               </div>
             </article>
           ))}
