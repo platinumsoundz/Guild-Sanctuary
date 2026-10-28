@@ -14,6 +14,9 @@ assert.match(arcade, /selectedGame === 'crossword' \? <CelestialCrossword \/>/, 
 assert.match(arcade, /id: 'crossword',[^\n]*status: 'Playable preview'/, 'crossword is advertised as playable');
 assert.match(crossword, /const entries: Entry\[\]/, 'crossword defines across and down entries');
 assert.match(crossword, /completeCount === entries.length/, 'crossword detects completion');
+assert.match(crossword, /ArrowRight/, 'crossword supports arrow-key grid navigation');
+assert.match(crossword, /chooseClue = \(entry: Entry\)/, 'selecting a clue focuses its first cell');
+assert.match(crossword, /aria-pressed=\{active === entry.number\}/, 'active crossword clues expose selected state');
 assert.match(css, /crosswordGrid/, 'crossword grid styling is present');
 assert.match(css, /crosswordClues/, 'crossword clues have responsive styling');
 assert.match(arcade, /selectedGame === 'snake' \? <CosmicSnake \/>/, 'snake is connected to the game selector');
