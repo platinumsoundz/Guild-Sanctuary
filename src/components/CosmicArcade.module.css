@@ -46,3 +46,23 @@
 .reviveNote > svg { flex-shrink:0; color:var(--accent); }
 .reviveNote strong { font-size:13px; }.reviveNote p { margin:5px 0 0; color:var(--muted); font-size:11px; line-height:1.6; }
 @media (max-width:760px) { .gameTabs { grid-template-columns:repeat(2,minmax(0,1fr)); } .puzzleLayout { grid-template-columns:1fr; } .themeGrid { grid-template-columns:1fr; } .themeCard p { min-height:0; } .sectionHeading { flex-direction:column; } }
+
+
+.snakeStats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:18px 0; }
+.snakeStats > div { display:flex; flex-direction:column; gap:5px; padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.snakeStats span { color:var(--muted); font-size:9px; font-weight:800; letter-spacing:1px; }
+.snakeStats strong { font-size:22px; font-variant-numeric:tabular-nums; }
+.snakeBoardWrap { display:flex; justify-content:center; padding:clamp(8px,2vw,18px); border:1px solid var(--line); border-radius:14px; background:radial-gradient(circle at 50% 20%,color-mix(in srgb,var(--accent) 12%,var(--surface)),var(--surface)); }
+.snakeBoard { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); width:min(100%,520px); aspect-ratio:1; gap:3px; }
+.snakeCell { display:grid; place-items:center; min-width:0; border-radius:4px; background:color-mix(in srgb,var(--line) 35%,var(--surface)); color:var(--ink); font-size:clamp(8px,1.6vw,16px); }
+.snakeHead { background:var(--accent); color:white; box-shadow:0 0 12px color-mix(in srgb,var(--accent) 65%,transparent); }
+.snakeBody { background:color-mix(in srgb,var(--accent) 50%,var(--surface)); }
+.snakeFood { background:color-mix(in srgb,#eab308 24%,var(--surface)); color:#eab308; text-shadow:0 0 8px #eab308; }
+.snakeGameOver { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:12px; margin-top:14px; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.snakeGameOver strong { font-size:14px; }.snakeGameOver span { color:var(--muted); font-size:12px; }
+.snakeControls { display:flex; flex-direction:column; align-items:center; gap:8px; margin:18px auto 8px; }
+.snakeControls > div { display:flex; gap:8px; }
+.snakeControls button { display:grid; place-items:center; width:48px; height:44px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); cursor:pointer; touch-action:manipulation; }
+.snakeControls button:focus-visible,.letter:focus-visible,.tab:focus-visible,.activeTab:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.snakeControls button:active { background:color-mix(in srgb,var(--accent) 20%,var(--surface)); }
+@media (max-width:420px) { .snakeStats > div { padding:10px; }.snakeStats strong { font-size:18px; }.snakeBoard { gap:2px; }.snakeCell { border-radius:2px; } }
