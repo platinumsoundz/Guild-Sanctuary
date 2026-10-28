@@ -44,3 +44,13 @@
 - Nearby event cards are keyboard accessible and select/focus that event on the map; invalid/missing coordinates are excluded from proximity results.
 - Added responsive styling and contract assertions for distance ranking and the empty state.
 - Source contract execution, typecheck/build, and browser/device QA remain outstanding; this is source progress only, not a verified release.
+
+
+## Release-readiness upgrades — 2026-10-28 UTC
+- Added a user-selectable nearby search radius (5, 10, 25, or 50 km), with results re-ranked by distance and a radius-aware empty state. The currently selected event is excluded from its own nearby results.
+- Improved map bounding-box generation by clamping latitude/longitude bounds at the poles and date line so valid edge coordinates do not create out-of-range map extents.
+- Fixed the event-edit flow end-to-end so edited latitude/longitude values are submitted, validated, and persisted through the existing event service and hook. This necessarily touches `src/modules/events/service.ts` and `src/modules/events/useEvents.ts`; account isolation and database schema remain unchanged.
+- Expanded the existing event contract script to cover adjustable radius behavior, selected-event exclusion, coordinate edit persistence, and map bounds at geographic edges.
+- Responsive CSS allows the radius controls to wrap on narrow screens.
+- Verification blocker: the runtime cannot resolve `github.com` for a local clone. No local contract execution, typecheck, build, browser/device review, or GitHub Actions run has been completed on the current head. Vercel previously reported a build-rate-limit failure. The next verification step is a draft PR CI/preview during this owner-requested release pass; production deployment remains separately gated.
+- Remaining known product limitation: event records store coordinates but no venue name/address, so the UI cannot reliably show human-readable place names without a separately reviewed schema/migration and location-source decision.
