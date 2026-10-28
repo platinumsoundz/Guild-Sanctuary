@@ -5,6 +5,7 @@ import type { Post, PublicProfile } from '@/types/database';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import { fetchPublicProfileById } from '../service';
 import { fetchPublicDiscoveryInterests } from '../discoveryInterests';
+import { DISCOVERY_INTENTIONS, fetchPublicDiscoveryIntentions, type DiscoveryIntentionId } from '../discoveryIntentions';
 import { ProfileCard } from './ProfileCard';
 import styles from './PublicProfilePage.module.css';
 
@@ -18,6 +19,7 @@ export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }
   const [profile, setProfile] = useState(initialProfile);
   const [posts, setPosts] = useState<Post[]>([]);
   const [publicInterests, setPublicInterests] = useState<string[]>([]);
+  const [publicIntentions, setPublicIntentions] = useState<DiscoveryIntentionId[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +33,8 @@ export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }
       fetchPublicProfileById(initialProfile.userId),
       fetchPostsByAuthor(initialProfile.userId),
       fetchPublicDiscoveryInterests([initialProfile.userId]).catch(() => new Map<string, string[]>()),
-    ]).then(([latestProfile, authorPosts, interestMap]) => {
+      fetchPublicDiscoveryIntentions([initialProfile.userId]).catch(() => new Map<string, DiscoveryIntentionId[]>()),
+    ]).then(([latestProfile, authorPosts, interestMap, intentionMap]) => {
       if (cancelled) return;
       if (!latestProfile) {
         setError('This profile is private or no longer available.');
@@ -41,6 +44,7 @@ export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }
       setProfile(latestProfile);
       setPosts(authorPosts);
       setPublicInterests(interestMap.get(initialProfile.userId) ?? []);
+      setPublicIntentions(intentionMap.get(initialProfile.userId) ?? []);
     }).catch(() => {
       if (!cancelled) setError('This profile could not be loaded right now.');
     }).finally(() => {
@@ -94,6 +98,16 @@ export function PublicProfilePage({ profile: initialProfile, onBack, onMessage }
           <h2 id="public-interests-heading">Interests</h2>
           <div className={styles.interestTags}>
             {publicInterests.map((interest) => <span key={interest}>#{interest}</span>)}
+          </div>
+        </section>
+      )}
+      {publicIntentions.length > 0 && (
+        <section className={styles.interests} aria-labelledby="public-intentions-heading">
+          <h2 id="public-intentions-heading">Connection intentions</h2>
+          <div className={styles.intentionTags}>
+            {publicIntentions.map((intention) => (
+              <span key={intention}>{DISCOVERY_INTENTIONS.find((item) => item.id === intention)?.label ?? intention}</span>
+            ))}
           </div>
         </section>
       )}
