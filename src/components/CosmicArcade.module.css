@@ -98,7 +98,7 @@
 .crosswordGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:3px; width:min(100%,330px); margin-inline:auto; }
 .crosswordBlock { aspect-ratio:1; background:color-mix(in srgb,var(--surface) 55%,#070b1b); border:1px solid var(--line); border-radius:3px; }
 .crosswordCell { position:relative; aspect-ratio:1; min-width:0; border:1px solid var(--line); border-radius:4px; background:var(--surface); }
-.crosswordCell input { width:100%; height:100%; padding:10% 0 0; border:0; outline:0; background:transparent; color:var(--text); text-align:center; text-transform:uppercase; font-size:clamp(16px,3vw,24px); font-weight:800; }
+.crosswordCell input { width:100%; height:100%; padding:10% 0 0; border:0; outline:0; background:transparent; color:var(--ink); text-align:center; text-transform:uppercase; font-size:clamp(16px,3vw,24px); font-weight:800; }
 .crosswordCell:focus-within { outline:2px solid var(--accent); outline-offset:1px; z-index:1; }
 .crosswordActive { background:color-mix(in srgb,var(--accent) 15%,var(--surface)); border-color:var(--accent); }
 .crosswordNumber { position:absolute; top:2px; left:3px; color:var(--muted); font-size:9px; pointer-events:none; }
@@ -106,7 +106,7 @@
 .crosswordIncorrect { background:color-mix(in srgb,#f43f5e 16%,var(--surface)); border-color:#f43f5e; }
 .crosswordClues { display:flex; flex-direction:column; gap:18px; }
 .crosswordClues h3 { margin:0 0 8px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
-.clueButton,.clueActive { display:block; width:100%; padding:10px 11px; margin:4px 0; border:1px solid var(--line); border-radius:9px; color:var(--text); background:transparent; text-align:left; line-height:1.45; cursor:pointer; }
+.clueButton,.clueActive { display:block; width:100%; padding:10px 11px; margin:4px 0; border:1px solid var(--line); border-radius:9px; color:var(--ink); background:transparent; text-align:left; line-height:1.45; cursor:pointer; }
 .clueActive { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 13%,transparent); }
 @media (max-width:620px) {
   .crosswordLayout { grid-template-columns:1fr; }
