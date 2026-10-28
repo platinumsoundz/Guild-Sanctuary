@@ -287,3 +287,9 @@
 .panelHeader { border-bottom-color: rgb(164 145 255 / 23%); background: linear-gradient(100deg, rgb(112 86 206 / 12%), transparent); }
 .item:hover, .unread { background: linear-gradient(100deg, rgb(143 113 255 / 14%), rgb(78 180 255 / 5%)); }
 .markAllButton, .closeButton { border-radius: 8px; border-color: rgb(164 145 255 / 28%); background: rgb(24 28 67 / 90%); }
+
+/* Notification panel shares the house glass style while respecting the selected theme tokens. */
+.panel { border-color: color-mix(in srgb, var(--line) 72%, var(--cosmic-violet)); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--surface-raised) 94%, transparent); box-shadow: var(--shadow-card), 0 0 28px color-mix(in srgb, var(--cosmic-violet) 10%, transparent); backdrop-filter: blur(20px); }
+.panelHeader { border-bottom-color: color-mix(in srgb, var(--line) 75%, var(--cosmic-violet)); background: linear-gradient(100deg, color-mix(in srgb, var(--cosmic-violet) 10%, transparent), transparent); }
+.item:hover, .unread { background: linear-gradient(100deg, color-mix(in srgb, var(--cosmic-violet) 13%, transparent), color-mix(in srgb, var(--cosmic-cyan) 5%, transparent)); }
+.markAllButton, .closeButton { border-radius: var(--radius-sm); }
