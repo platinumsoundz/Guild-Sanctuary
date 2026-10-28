@@ -12,7 +12,7 @@ on:
       - '.github/workflows/community-connection-toolkit.yml'
   push:
     branches:
-      - feat/event-discovery-map-explorer-2026-10-28
+      - feat/community-connection-toolkit-2026-10-28
     paths:
       - 'src/modules/feeds/communityConnection.ts'
       - 'src/modules/feeds/components/FeedContent.tsx'
