@@ -72,7 +72,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
       const signal = payload as Signal;
       if (!signal || signal.from === currentUserId || typeof signal.callId !== 'string') return;
       if (signal.type === 'invite') {
-        if (callState === 'idle') setIncoming(signal);
+        if (activeCallRef.current === null) setIncoming(signal);
         return;
       }
       if (signal.callId !== activeCallRef.current) return;
