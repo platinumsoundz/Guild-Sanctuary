@@ -18,7 +18,12 @@ assert.ok(component.includes('timeZoneName: \'short\''), 'event cards must displ
 assert.ok(component.includes('formatEventDateTime(event.startsAt)'), 'event cards must use the timezone-aware formatter');
 assert.ok(!component.includes("event.startsAt.replace('T', ' ').slice(0, 16)} UTC"), 'event cards must not label raw ISO timestamps as UTC without conversion');
 assert.ok(component.includes('latitude < -90') && component.includes('longitude > 180'), 'invalid map coordinates must not be embedded');
+assert.ok(component.includes('const selectedMapLinks = selectedMapEvent'), 'selected event map links must be validated once before rendering');
+assert.ok(component.includes('src={selectedMapLinks.embed}'), 'map iframe must only receive a validated URL');
+assert.ok(component.includes('This event has missing or invalid coordinates'), 'invalid event coordinates must produce a readable map fallback');
+assert.ok(component.includes('Location unavailable · coordinates are missing or invalid'), 'invalid coordinates must not be presented as a usable map pin');
 assert.ok(styles.includes('.mapExplorer') && styles.includes('.mapFrame'), 'map explorer must have dedicated layout styles');
+assert.ok(styles.includes('.mapUnavailable'), 'invalid event locations must have a styled fallback state');
 assert.ok(styles.includes('@media (max-width: 760px)'), 'map and event controls must adapt to smaller screens');
 assert.ok(styles.includes(':focus-visible'), 'interactive map controls must have visible keyboard focus');
 assert.ok(styles.includes('prefers-reduced-motion: reduce'), 'motion must respect reduced-motion preferences');
