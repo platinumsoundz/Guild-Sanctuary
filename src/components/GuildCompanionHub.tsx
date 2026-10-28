@@ -301,16 +301,16 @@ export function GuildCompanionHub() {
           <button type="button" className={styles.primary} onClick={() => void syncLibrary()} disabled={syncBusy}><ShieldCheck size={14} /> {syncBusy ? 'Syncing…' : 'Sign in & sync'}</button>
           <button type="button" className={styles.secondary} onClick={exportLibrary}><Download size={14} /> Export backup</button>
           <input ref={libraryImportInput} className={styles.hiddenInput} type="file" accept="application/json,.json" onChange={(event) => void importLibrary(event.target.files?.[0])} />
-          <button type="button" className={styles.secondary} onClick={() => libraryImportInput.current?.click()}><Upload size={14} /> Import backup</button>
+          <button type="button" className={styles.secondary} onClick={() => libraryImportInput.current?.click()} disabled={syncBusy}><Upload size={14} /> Import backup</button>
         </div>
         <form className={styles.gameForm} onSubmit={(event) => { event.preventDefault(); addGame(); }}>
-          <label>Game name<input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Celestial Racer" maxLength={80} required /></label>
-          <label>Platform<select value={platform} onChange={(event) => setPlatform(event.target.value)}>{platforms.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <label className={styles.urlField}>Optional web game / store link<input value={launchUrl} onChange={(event) => setLaunchUrl(event.target.value)} placeholder="https://…" inputMode="url" /></label>
-          <button type="submit" className={styles.primary}><Plus size={15} /> Add to library</button>
+          <label>Game name<input disabled={syncBusy} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Celestial Racer" maxLength={80} required /></label>
+          <label>Platform<select disabled={syncBusy} value={platform} onChange={(event) => setPlatform(event.target.value)}>{platforms.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label className={styles.urlField}>Optional web game / store link<input disabled={syncBusy} value={launchUrl} onChange={(event) => setLaunchUrl(event.target.value)} placeholder="https://…" inputMode="url" /></label>
+          <button type="submit" className={styles.primary} disabled={syncBusy}><Plus size={15} /> Add to library</button>
         </form>
         <p className={styles.status} role="status" aria-live="polite">{syncMessage}</p>
-        {games.length ? <ul className={styles.gameList}>{games.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={safeWebUrl(game.launchUrl)} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => removeGame(game)}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
+        {games.length ? <ul className={styles.gameList}>{games.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={safeWebUrl(game.launchUrl)} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => removeGame(game)} disabled={syncBusy}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
         <div className={styles.notice}><strong>Next integration:</strong> an optional signed Sanctuary Companion can request permission to scan supported game locations and launch compatible installed titles. A website alone cannot enumerate your device or execute arbitrary local apps.</div>
       </section>
 
