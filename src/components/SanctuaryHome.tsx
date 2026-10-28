@@ -194,6 +194,27 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
         <button type="button" onClick={() => onNavigate('roadmap')}><Layers3 size={18} /><span><strong>Full product map</strong><small>See all systems</small></span><ArrowRight size={15} /></button>
       </section>
 
+      <section className={styles.worldDestinations} aria-labelledby="world-destinations-title">
+        <div className={styles.worldHeading}>
+          <div><p className={styles.eyebrow}>CHOOSE YOUR PATH</p><h2 id="world-destinations-title">Different worlds. One Sanctuary.</h2><p>Step into the part of the Sanctuary that feels right for you.</p></div>
+          <span className={styles.worldSigil} aria-hidden="true">✧</span>
+        </div>
+        <div className={styles.worldGrid}>
+          <button className={styles.worldCardCommunity} type="button" onClick={() => onNavigate('feed')}>
+            <span className={styles.worldIcon}><MessageCircle size={23} aria-hidden="true" /></span><span className={styles.worldKicker}>CONNECTION</span><strong>Community</strong><span className={styles.worldDescription}>Stories, conversations, and people to grow alongside.</span><span className={styles.worldAction}>Enter the community <ArrowRight size={15} /></span>
+          </button>
+          <button className={styles.worldCardArcade} type="button" onClick={() => onNavigate('games')}>
+            <span className={styles.worldIcon}><Layers3 size={23} aria-hidden="true" /></span><span className={styles.worldKicker}>PLAY & EXPLORE</span><strong>Cosmic Arcade</strong><span className={styles.worldDescription}>Discover Sanctuary game experiences in their own space.</span><span className={styles.worldAction}>Explore games <ArrowRight size={15} /></span>
+          </button>
+          <button className={styles.worldCardCreator} type="button" onClick={() => onNavigate('support')}>
+            <span className={styles.worldIcon}><Heart size={23} aria-hidden="true" /></span><span className={styles.worldKicker}>MADE WITH HEART</span><strong>Support the Creator</strong><span className={styles.worldDescription}>Find creator projects and ways to support the work behind the world.</span><span className={styles.worldAction}>Meet the creator <ArrowRight size={15} /></span>
+          </button>
+          <button className={styles.worldCardShop} type="button" onClick={() => onNavigate('shop')}>
+            <span className={styles.worldIcon}><WalletCards size={23} aria-hidden="true" /></span><span className={styles.worldKicker}>COSMIC FINDS</span><strong>Token Shop</strong><span className={styles.worldDescription}>Browse the shop; purchases remain subject to the current release safeguards.</span><span className={styles.worldAction}>Visit the shop <ArrowRight size={15} /></span>
+          </button>
+        </div>
+      </section>
+
       <section className={styles.explorer} id="feature-explorer" aria-labelledby="feature-explorer-title">
         <div className={styles.sectionHeading}>
           <div><p className={styles.eyebrow}>THE EXPERIENCE</p><h2 id="feature-explorer-title">Explore the Sanctuary</h2><p>Open a working area or tap a concept to see how it could feel.</p></div>
