@@ -37,7 +37,9 @@ export function buildCommunityPost(draft: CommunityPostDraft, openDraft: string,
     return { content, storyTag: openTag || null, error: null };
   }
 
-  const fields = [draft.context, draft.lesson, draft.helpfulNow, draft.question].map(clean);
+  const fields = draft.mode === 'life-lesson'
+    ? [draft.context, draft.lesson, draft.helpfulNow, draft.question].map(clean)
+    : [draft.context, draft.question].map(clean);
   if (fields.some(tooLong)) return { content: '', storyTag: null, error: 'Each guided answer must be 1,200 characters or fewer.' };
 
   let content = '';
@@ -55,7 +57,7 @@ export function buildCommunityPost(draft: CommunityPostDraft, openDraft: string,
     ].filter(Boolean).join('\n\n');
     storyTag = 'Life lesson';
   } else {
-    const [context, , , question] = fields;
+    const [context, question] = fields;
     if (!question) return { content: '', storyTag: null, error: 'Add a question you would genuinely like to discuss.' };
     content = [
       'A question for the community',
