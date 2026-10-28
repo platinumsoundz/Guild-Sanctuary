@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CosmicSnake } from './CosmicSnake';
 import { LunarSolitaire } from './LunarSolitaire';
 import { CelestialCrossword } from './CelestialCrossword';
 import { ArcadeClassics } from './ArcadeClassics';
-import { BookOpen, CreditCard, Gem, LockKeyhole, MoonStar, Puzzle, RotateCcw, Sparkles, Star } from 'lucide-react';
+import { BookOpen, CreditCard, Expand, Gamepad2, Gem, LockKeyhole, Minimize2, MoonStar, Puzzle, RotateCcw, Sparkles, Star } from 'lucide-react';
+import { getConnectedGamepad, readGamepadButtons, readGamepadDirections } from '@/lib/controllerInput';
 import styles from './CosmicArcade.module.css';
 
 type ArcadeGame = 'wordsearch' | 'crossword' | 'solitaire' | 'mahjong' | 'snake' | 'classics';
@@ -59,6 +60,72 @@ export function CosmicArcade() {
   const [foundCells, setFoundCells] = useState<string[]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [notice, setNotice] = useState('');
+  const [controllerConnected, setControllerConnected] = useState(false);
+  const [bigPicture, setBigPicture] = useState(false);
+  const arcadeRef = useRef<HTMLElement>(null);
+  const lastButtons = useRef<boolean[]>([]);
+  const lastNavigationAt = useRef(0);
+  const selectedGameRef = useRef<ArcadeGame>(selectedGame);
+  const bigPictureRef = useRef(bigPicture);
+  useEffect(() => { selectedGameRef.current = selectedGame; }, [selectedGame]);
+  useEffect(() => { bigPictureRef.current = bigPicture; }, [bigPicture]);
+  const gameIndex = useCallback((id: ArcadeGame) => games.findIndex((game) => game.id === id), []);
+  const selectGameByOffset = useCallback((offset: number) => {
+    const next = (gameIndex(selectedGameRef.current) + offset + games.length) % games.length;
+    const game = games[next];
+    selectedGameRef.current = game.id;
+    setSelectedGame(game.id);
+    setNotice('');
+    requestAnimationFrame(() => arcadeRef.current?.querySelector<HTMLButtonElement>('[data-arcade-game="' + game.id + '"]')?.focus({ preventScroll: true }));
+  }, [gameIndex]);
+  useEffect(() => {
+    let frame = 0;
+    let active = true;
+    const poll = (time: number) => {
+      if (!active) return;
+      const pad = getConnectedGamepad();
+      setControllerConnected(Boolean(pad));
+      if (pad && document.visibilityState === 'visible') {
+        const { buttons, pressed } = readGamepadButtons(pad, lastButtons.current);
+        const activeElement = document.activeElement as HTMLElement | null;
+        const onGameTabs = Boolean(activeElement?.closest('[role="tablist"]'));
+        const directions = readGamepadDirections(pad, pressed);
+        if (time - lastNavigationAt.current > 180 && (directions.left || directions.right || directions.up || directions.down)) {
+          if (onGameTabs) selectGameByOffset(directions.left || directions.up ? -1 : 1);
+          else {
+            const key = directions.left ? 'ArrowLeft' : directions.right ? 'ArrowRight' : directions.up ? 'ArrowUp' : 'ArrowDown';
+            window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+          }
+          lastNavigationAt.current = time;
+        }
+        if (pressed(0)) {
+          if (onGameTabs) activeElement?.click();
+          else if (activeElement && activeElement !== document.body && activeElement.tagName !== 'BODY') activeElement.click();
+          else arcadeRef.current?.querySelector<HTMLButtonElement>('[data-arcade-game="' + selectedGameRef.current + '"]')?.focus();
+        }
+        if (pressed(1)) {
+          if (bigPictureRef.current) setBigPicture(false);
+          else arcadeRef.current?.querySelector<HTMLButtonElement>('[data-arcade-game="' + selectedGameRef.current + '"]')?.focus();
+        }
+        if (pressed(9) && time - lastNavigationAt.current > 180) {
+          setBigPicture((value) => !value);
+          lastNavigationAt.current = time;
+        }
+        lastButtons.current = buttons;
+      } else lastButtons.current = [];
+      frame = window.requestAnimationFrame(poll);
+    };
+    frame = window.requestAnimationFrame(poll);
+    return () => { active = false; window.cancelAnimationFrame(frame); };
+  }, [selectGameByOffset]);
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && bigPictureRef.current) setBigPicture(false);
+      if (event.key === 'F6') { event.preventDefault(); setBigPicture((value) => !value); }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
   const progress = useMemo(() => Math.round((foundWords.length / words.length) * 100), [foundWords.length]);
 
   const chooseCell = (row: number, col: number) => {
@@ -113,18 +180,18 @@ export function CosmicArcade() {
   };
 
   return (
-    <section className={styles.arcade} aria-labelledby="arcade-title">
+    <section ref={arcadeRef} className={`${styles.arcade} ${bigPicture ? styles.bigPicture : ""}`} aria-labelledby="arcade-title">
       <header className={styles.hero}>
         <p className={styles.eyebrow}><Sparkles size={14} /> THE SANCTUARY ARCADE</p>
         <h1 id="arcade-title">Play among the stars</h1>
         <p>Mindful little games inspired by the cosmos, symbolism, spiritual traditions and the zodiac. Play for fun, earn in-game progress, and personalise your experience.</p>
-        <div className={styles.heroNote}><MoonStar size={18} /><span>Games are for reflection and entertainment, not predictions or professional advice.</span></div>
+        <div className={styles.heroNote}><MoonStar size={18} /><span>Games are for reflection and entertainment, not predictions or professional advice.</span></div><div className={styles.arcadeActions}><span className={styles.controllerStatus}><Gamepad2 size={16} /> {controllerConnected ? "Controller connected · D-pad navigate · A select · B back · Start Big Picture" : "Controller-ready · Keyboard and touch supported"}</span><button type="button" className={styles.bigPictureButton} onClick={() => setBigPicture((value) => !value)}>{bigPicture ? <Minimize2 size={16} /> : <Expand size={16} />}{bigPicture ? "Exit Big Picture" : "Big Picture mode"}</button></div>
       </header>
 
       <div className={styles.gameTabs} role="tablist" aria-label="Arcade games">
         {games.map((game) => {
           const Icon = game.icon;
-          return <button key={game.id} type="button" role="tab" aria-selected={selectedGame === game.id} className={selectedGame === game.id ? styles.activeTab : styles.tab} onClick={() => { setSelectedGame(game.id); setNotice(''); }}>
+          return <button key={game.id} data-arcade-game={game.id} type="button" role="tab" aria-selected={selectedGame === game.id} className={selectedGame === game.id ? styles.activeTab : styles.tab} onClick={() => { setSelectedGame(game.id); setNotice(''); }}>
             <Icon size={18} /><span>{game.title}</span><small>{game.status}</small>
           </button>;
         })}
