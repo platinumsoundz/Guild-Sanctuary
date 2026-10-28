@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ExternalLink, Search, ShieldCheck, UserCog } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { ModerationDashboard } from './ModerationDashboard';
@@ -20,6 +20,8 @@ const roles: { value: SanctuaryRole; label: string; description: string }[] = [
 
 function RoleManagement() {
   const [query, setQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [selected, setSelected] = useState<MemberRow | null>(null);
   const [role, setRole] = useState<SanctuaryRole>('user');
@@ -27,7 +29,22 @@ function RoleManagement() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
+  const filteredMembers = useMemo(() => members.filter((member) => {
+    if (roleFilter !== 'all' && member.role !== roleFilter) return false;
+    if (statusFilter !== 'all' && member.status !== statusFilter) return false;
+    return true;
+  }), [members, roleFilter, statusFilter]);
+
+  const availableStatuses = useMemo(() => Array.from(new Set(members.map((member) => member.status))).sort(), [members]);
+
   const searchMembers = async () => {
+    const requestedQuery = query.trim();
+    if (!requestedQuery) {
+      setMessage('Enter a username to search.');
+      setMembers([]);
+      setSelected(null);
+      return;
+    }
     setLoading(true);
     setMessage('');
     setSelected(null);
@@ -35,11 +52,13 @@ function RoleManagement() {
       const client = getSupabaseBrowserClient();
       const { data: authData, error: authError } = await client.auth.getUser();
       if (authError || !authData.user) throw new Error('Sign in with your Sanctuary account first.');
-      const { data, error } = await client.rpc('search_members_for_admin', { requested_query: query.trim() });
+      const { data, error } = await client.rpc('search_members_for_admin', { requested_query: requestedQuery });
       if (error) throw new Error(error.message);
       setMembers((data ?? []) as MemberRow[]);
       if (!data?.length) setMessage('No matching members found.');
     } catch (error) {
+      setMembers([]);
+      setSelected(null);
       setMessage(error instanceof Error ? error.message : 'Member search failed.');
     } finally {
       setLoading(false);
@@ -47,7 +66,12 @@ function RoleManagement() {
   };
 
   const changeRole = async () => {
-    if (!selected) return;
+    if (!selected || role === selected.role || saving) return;
+    const previousLabel = roles.find((item) => item.value === selected.role)?.label ?? selected.role;
+    const nextLabel = roles.find((item) => item.value === role)?.label ?? role;
+    const isPrivilegeIncrease = roles.findIndex((item) => item.value === role) > roles.findIndex((item) => item.value === selected.role);
+    const warning = isPrivilegeIncrease ? '\\n\\nThis increases the member’s privilege level. The server must independently authorize this change.' : '\\n\\nThe server must independently authorize this change.';
+    if (!window.confirm('Change @' + selected.username + ' from ' + previousLabel + ' to ' + nextLabel + '?' + warning)) return;
     setSaving(true);
     setMessage('');
     try {
@@ -77,19 +101,29 @@ function RoleManagement() {
       </div>
       <form className={styles.searchForm} onSubmit={(event) => { event.preventDefault(); void searchMembers(); }}>
         <label className={styles.srOnly} htmlFor="member-search">Search member usernames</label>
-        <input id="member-search" value={query} onChange={(event) => setQuery(event.target.value)} minLength={1} maxLength={24} placeholder="Search username…" required />
+        <input id="member-search" value={query} onChange={(event) => setQuery(event.target.value)} minLength={1} maxLength={24} placeholder="Search username…" disabled={loading || saving} required />
         <button type="submit" disabled={loading}><Search size={16} aria-hidden="true" /> {loading ? 'Searching…' : 'Search'}</button>
       </form>
       {message && <p className={styles.message} role="status">{message}</p>}
       {members.length > 0 && (
-        <div className={styles.memberList}>
-          {members.map((member) => (
-            <button type="button" key={member.id} className={`${styles.memberRow} ${selected?.id === member.id ? styles.selectedMember : ''}`} onClick={() => { setSelected(member); setRole(member.role); setMessage(''); }}>
+        <section className={styles.memberResults} aria-label="Member search results">
+          <div className={styles.resultsToolbar}>
+            <p className={styles.resultsCount} role="status">Showing <strong>{filteredMembers.length}</strong> of <strong>{members.length}</strong> matching members</p>
+            <div className={styles.resultFilters}>
+              <label><span>Role</span><select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)} disabled={saving}><option value="all">All roles</option>{roles.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+              <label><span>Status</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} disabled={saving}><option value="all">All statuses</option>{availableStatuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
+              {(roleFilter !== 'all' || statusFilter !== 'all') && <button type="button" className={styles.clearFilters} onClick={() => { setRoleFilter('all'); setStatusFilter('all'); }}>Clear filters</button>}
+            </div>
+          </div>
+          {filteredMembers.length > 0 ? <div className={styles.memberList}>
+          {filteredMembers.map((member) => (
+            <button type="button" key={member.id} className={`${styles.memberRow} ${selected?.id === member.id ? styles.selectedMember : ''}`} disabled={saving} aria-pressed={selected?.id === member.id} onClick={() => { setSelected(member); setRole(member.role); setMessage(''); }}>
               <span><strong>{member.display_name}</strong><small>@{member.username} · {member.status}</small></span>
               <span className={styles.rolePill}>{roles.find((item) => item.value === member.role)?.label ?? member.role}</span>
             </button>
           ))}
-        </div>
+          </div> : <p className={styles.emptyResults}>No members match these role and status filters.</p>}
+        </section>
       )}
       {selected && (
         <div className={styles.roleEditor}>
@@ -97,7 +131,8 @@ function RoleManagement() {
           <select id="role-select" value={role} onChange={(event) => setRole(event.target.value as SanctuaryRole)}>
             {roles.map((item) => <option key={item.value} value={item.value}>{item.label} — {item.description}</option>)}
           </select>
-          <button type="button" onClick={() => void changeRole()} disabled={saving || role === selected.role}>{saving ? 'Saving…' : 'Save role change'}</button>
+          <div className={styles.roleChangePreview} aria-live="polite"><span>Current: <strong>{roles.find((item) => item.value === selected.role)?.label ?? selected.role}</strong></span><span>Requested: <strong>{roles.find((item) => item.value === role)?.label ?? role}</strong></span></div>
+          <button type="button" onClick={() => void changeRole()} disabled={saving || role === selected.role}>{saving ? 'Saving…' : 'Review & save role change'}</button>
           <p>Higher roles and Owner assignment are restricted by database policy. Your account may not be permitted to grant every role.</p>
         </div>
       )}
@@ -116,6 +151,11 @@ export function AdminDashboard({ role }: { role: string }) {
         <h1><ShieldCheck size={27} aria-hidden="true" /> Admin & Moderation</h1>
         <p>Manage reports and member permissions with server-enforced access checks.</p>
       </header>
+      <section className={styles.overview} aria-label="Admin access overview">
+        <article className={styles.overviewCard}><span className={styles.overviewLabel}>Signed-in access tier</span><strong>{roles.find((item) => item.value === role)?.label ?? role}</strong><p>Displayed role only; server policy remains authoritative.</p></article>
+        <article className={styles.overviewCard}><span className={styles.overviewLabel}>Member permissions</span><strong>{canManageRoles ? 'Available' : 'Restricted'}</strong><p>{canManageRoles ? 'Member search and role-change requests are available.' : 'An admin, developer or owner role is required to open this panel.'}</p>{canManageRoles && <a href="#role-management-title">Go to member permissions</a>}</article>
+        <article className={styles.overviewCard}><span className={styles.overviewLabel}>Moderation</span><strong>{canModerate ? 'Available' : 'Restricted'}</strong><p>{canModerate ? 'Report review controls are available for this role.' : 'A moderator role or higher is required.'}</p>{canModerate && <a href="#moderation-queue-title">Go to moderation queue</a>}</article>
+      </section>
       {!canModerate && (
         <section className={styles.notice} role="status" aria-label="Admin access requirements">
           <strong>This account does not have moderation access.</strong>
