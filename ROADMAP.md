@@ -2,6 +2,55 @@
 
 Last updated: 2026-10-28
 
+## Sanctuary Connection Discovery — product direction and implementation plan (2026-10-28)
+
+**Status: Planned; implementation not yet started on this branch.** This is the agreed product direction for connecting Sanctuary Intelligence/self-discovery with the existing social ecosystem. Do not describe the feature as shipped or verified until implementation, automated checks, and browser/device QA have evidence recorded.
+
+### Product mission
+
+Help people discover people, communities, and ideas they may resonate with through shared interests, compatible connection intentions, complementary perspectives, and chosen activities—not romantic matching, appearance-based ranking, or judgement. One-to-one connections are one valid path, not the whole purpose. Members must also be able to explore topics and groups without being pressured to connect.
+
+### Scope and experience
+
+- **Three equal discovery paths:** People, Communities, and Topics. Integrate them into existing navigation rather than adding a crowded set of top-level destinations.
+- **Optional progressive self-discovery:** short, skippable questionnaires for interests, current exploration, connection intentions, conversation preferences, community preferences, and learning preferences. Answers can change over time; incomplete profiles must still be able to browse.
+- **Member-controlled discovery intentions:** e.g. Find My Community, Explore Ideas, Grow Together, Find Collaborators, Find My Circle, and Broaden My Perspective. These are flexible filters, not permanent identity labels.
+- **Transparent relevance recommendations:** begin with an understandable, configurable rules-based model considering shared interests, compatible intentions, complementary interests/goals, conversation preferences, and shared activities. Initial example weights may be tested (30/25/20/15/10), but are hypotheses—not scientific compatibility scores—and must be tuned with feedback.
+- **Discovery cards:** member-approved profile information, relevant shared interests, optional public journey note, and a brief explanation of why the recommendation appears. Actions may include view, follow, connect, save, or hide.
+- **Profiles and feeds:** optional journey/profile notes, interests and normalised hashtags, and member-controlled profile feeds. Reuse the existing post/feed, follow, search, group, event, notification, and messaging systems wherever possible; do not create duplicate social primitives.
+- **Connection lifecycle:** explicit follow, save, request, accept/decline, messaging permission, block, report, and pause/hide-discovery behaviours. Server-side permissions—not UI-only hiding—must enforce boundaries.
+- **AI assistance, introduced only where useful:** natural-language preference refinement, topic/community discovery, and understandable explanations based only on permitted member-approved information. AI suggestions remain editable and must not assign rigid identities.
+
+### Privacy, safety, and non-goals
+
+- Self-discovery is optional and private by default. Private reflections, private messages, sensitive questionnaire answers, inferred mental-health conditions, trauma disclosures, or other intimate information must not silently become public profile fields or matching signals.
+- Members control profile visibility, discoverability, location use, connection requests, messaging access, and whether optional self-discovery information informs personalisation. Provide pause/reset controls where applicable.
+- Blocked/restricted accounts and content must be excluded across every discovery path. Respect reporting, moderation, rate limits, and repeated-request protections.
+- No romantic compatibility score, appearance ranking, popularity leaderboard, pressure-based engagement optimisation, or assumptions that a profile view implies interest.
+- Do not optimise solely for time spent, swipes, or number of connections. Evaluate relevance, useful community participation, member feedback, safety, and control.
+
+### Implementation sequence and acceptance gates
+
+1. **Audit current architecture:** inspect profiles, feeds/posts, follows/relationships, search, groups/events, messaging/notifications, Sanctuary Intelligence questionnaires, database/RLS, UI patterns, tests, and active branches. Document what is reusable and avoid parallel implementations.
+2. **Data/permissions foundation:** extend existing schema where possible for interests/tags, explicit discovery preferences, public profile notes, connection state, saved profiles, and explicit discovery feedback. Add indexes, server-side validation, and reviewed RLS/permission tests only where needed.
+3. **Connection Intelligence service:** implement relevance scoring, hard privacy/eligibility filters, safe explanations, feedback, and useful fallback for sparse profiles. No sensitive inference.
+4. **Discovery UI:** responsive People/Communities/Topics surfaces, search/filter controls, explainable cards, and helpful empty states. Use real integrated data, not static mock recommendations.
+5. **Profile and feed integration:** interests/hashtags, optional journey note, permitted feed sharing, and navigation to relevant topics/groups/events.
+6. **Connection lifecycle:** requests, acceptance/rejection, follow, save, hide, block/report, notification and messaging-permission integration, duplicate-request handling.
+7. **Sanctuary Intelligence integration:** connect optional questionnaire results through explicit member controls; no duplicate questionnaire or leaking private reflections.
+8. **Verification and branch closeout:** run typecheck, lint, relevant tests and build; add focused regression/security tests; inspect diffs and integration points; fix failures; record what is and is not verified. Browser/mobile/accessibility QA and staging/RLS verification remain explicit gates, not assumed from a successful build.
+
+### Success measures
+
+Track discovery relevance feedback, useful profile/community/topic engagement, follows/connections accepted by both sides, useful discussions/groups/events reached, preference adjustments, safety incidents, privacy-control usability, mobile accessibility, and regressions. Avoid treating raw connection volume as the sole success metric.
+
+### Branch and release handling
+
+- Working branch: `feat/sanctuary-connection-discovery-2026-10-28`.
+- Keep this work coordinated on the branch; do not deploy during implementation. Complete the audit and implementation, tests, integration review, and branch summary before the project's later combined release/push/deploy decision.
+- Align this roadmap with `MASTER_BLUEPRINT.md` and `AI_RESTORE_PROMPT.md` when decisions or implementation status change.
+
+
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
 ## Support and creator-project navigation (2026-10-28)
