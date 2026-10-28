@@ -50,8 +50,11 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
   const channelRef = useRef<ReturnType<ReturnType<typeof getSupabaseBrowserClient>['channel']> | null>(null);
   const activeCallRef = useRef<string | null>(null);
   const queuedCandidates = useRef<RTCIceCandidateInit[]>([]);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stopMedia = useCallback(() => {
+    if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+    reconnectTimer.current = null;
     peerRef.current?.close();
     peerRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -215,9 +218,23 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
       }
     };
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'connected') setCallState('connected');
-      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-        setError('The call connection was interrupted. You can hang up and try again.');
+      if (pc.connectionState === 'connected') {
+        if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+        reconnectTimer.current = null;
+        setCallState('connected');
+        setError((current) => current === 'Connection interrupted; trying to reconnect…' ? null : current);
+      } else if (pc.connectionState === 'disconnected') {
+        setCallState('connecting');
+        setError('Connection interrupted; trying to reconnect…');
+        if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+        reconnectTimer.current = setTimeout(() => {
+          if (peerRef.current?.connectionState !== 'connected') setError('The call could not reconnect. Hang up and try again.');
+          reconnectTimer.current = null;
+        }, 10_000);
+      } else if (pc.connectionState === 'failed') {
+        if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+        reconnectTimer.current = null;
+        setError('The call connection failed. Hang up and try again.');
       }
     };
   }, [sendSignal, callState, callKind]);
