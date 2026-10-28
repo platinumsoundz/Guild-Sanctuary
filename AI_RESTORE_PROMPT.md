@@ -2,6 +2,19 @@
 
 Read `MASTER_BLUEPRINT.md` first; it is the product and technical roadmap. Preserve the existing modular Next.js App Router + TypeScript project structure and read project/Next.js guidance before changing code.
 
+
+## Current handoff: Sanctuary Connection Discovery (2026-10-28)
+
+Read the new Sanctuary Connection Discovery section in ROADMAP.md and the corresponding locked product decision in MASTER_BLUEPRINT.md before starting implementation.
+
+- Working branch: feat/sanctuary-connection-discovery-2026-10-28.
+- Agreed direction: People, Communities, and Topics are equally valid discovery paths; this is meaningful community connection, not dating.
+- Build in sequence: repository/schema/security audit → data and permissions foundation → explainable relevance engine → discovery UI → profile/feed integration → connection lifecycle → optional Sanctuary Intelligence integration → tests, accessibility/security review, and branch closeout.
+- Reuse existing social systems; do not create duplicate profiles, feeds, follows, or messaging primitives.
+- Keep questionnaires optional and private by default. Never silently use private reflections, messages, sensitive disclosures, or inferred health traits for matching. Use member-approved data, explicit controls, transparent explanations, block/report enforcement, and server-side permissions.
+- No deployment during this work. Finish implementation and checks on the branch, report outstanding staging/browser/device gates accurately, and leave combined release decisions for later.
+- The roadmap records a plan, not completed implementation. Update status only with evidence.
+
 ## Current product decisions
 
 - The product is **The Sanctuary**. Guild Hall / dual-world switching is retired.
