@@ -18,9 +18,8 @@ function normalizeInterest(value: string): string | null {
 }
 
 function escapeLikePattern(value: string): string {
-  return value.replace(/[\\%_]/g, '\\function localKey(userId: string): string {');
+  return value.replace(/[\\%_]/g, '\\$&');
 }
-
 function localKey(userId: string): string {
   return `sanctuary-discovery-interests:${userId}`;
 }
