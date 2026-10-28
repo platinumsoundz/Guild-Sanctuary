@@ -113,10 +113,11 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     void fetchAccountSettings(currentUser.user.id).then(({ preferences }) => {
       if (cancelled) return;
       const preference = preferences.theme;
+      document.documentElement.dataset.layout = preferences.layout;
       const applyTheme = () => {
         const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
         document.documentElement.dataset.theme = theme;
-        document.documentElement.classList.toggle('dark', theme !== 'light' && theme !== 'stone');
+        document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
       };
       applyTheme();
       try {
@@ -149,7 +150,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     if (preference !== 'system') {
       if (preference === 'dark' || preference === 'dusk' || preference === 'ocean' || preference === 'stone' || preference === 'light') {
         document.documentElement.dataset.theme = preference;
-        document.documentElement.classList.toggle('dark', preference !== 'light' && preference !== 'stone');
+        document.documentElement.classList.toggle('dark', preference === 'dark' || preference === 'dusk' || preference === 'ocean');
       } else {
         document.documentElement.dataset.theme = 'dark';
         document.documentElement.classList.add('dark');
