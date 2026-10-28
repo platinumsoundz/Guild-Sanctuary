@@ -291,6 +291,29 @@ export interface Database {
         };
         Returns: string;
       };
+      get_moderation_queue: {
+        Args: Record<string, never>;
+        Returns: {
+          report_id: string;
+          reporter_id: string;
+          target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+          target_id: string;
+          reason: string;
+          details: string | null;
+          report_status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          reported_at: string;
+          target_owner_id: string | null;
+          target_owner_username: string | null;
+          target_owner_display_name: string | null;
+          target_content: string | null;
+          target_title: string | null;
+          target_media_url: string | null;
+          target_state: string | null;
+          target_created_at: string | null;
+        }[];
+      };
       get_report_target_owner: {
         Args: {
           requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
