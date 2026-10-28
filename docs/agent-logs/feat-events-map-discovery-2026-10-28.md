@@ -22,3 +22,10 @@
 - Deployment: deferred per owner instruction; not deployed or browser-verified.
 - Rollback: close the eventual PR or revert the isolated UI commits; no data migration is planned.
 - Next: resolve profile UI/security overlap with open draft PR #85 and audit server-side profile visibility before implementing independent search/messages/feed privacy controls.
+
+
+## Invalid-coordinate resilience follow-up — 2026-10-28 UTC
+- Hardened selected-event map rendering so invalid or missing coordinates never become an undefined iframe URL or an unusable external link.
+- Added an accessible fallback message and changed event cards to disclose unavailable locations instead of presenting invalid values as usable pins.
+- Extended the event contract assertions for validated map URLs and fallback UI.
+- Source checks, typecheck, production build, browser/device QA, and deployment remain unrun; automatic preview/deployment is not being treated as verification.
