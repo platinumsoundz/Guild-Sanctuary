@@ -420,3 +420,22 @@
     scroll-behavior: auto;
   }
 }
+
+/* Cosmic Sanctuary navigation polish: luminous active states and translucent surfaces. */
+.header { background: linear-gradient(100deg, rgb(9 12 35 / 92%), rgb(18 17 54 / 90%)); border-bottom-color: rgb(157 139 255 / 24%); backdrop-filter: blur(18px); }
+.siteName { letter-spacing: -.035em; text-shadow: 0 0 24px rgb(165 143 255 / 20%); }
+.menuButton, .mobileQuickButton, .accountButton, .notificationButton, .guestButton { border-color: rgb(166 151 255 / 28%); border-radius: 10px; background: rgb(21 24 60 / 72%); transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease; }
+.menuButton:hover, .mobileQuickButton:hover, .accountButton:hover, .notificationButton:hover, .guestButton:hover { border-color: rgb(156 234 255 / 72%); box-shadow: 0 0 18px rgb(126 115 255 / 12%); }
+.desktopNavigation { background: rgb(11 14 42 / 82%); border-bottom-color: rgb(157 139 255 / 22%); backdrop-filter: blur(16px); }
+.desktopNavigationItems { gap: clamp(12px, 1.7vw, 22px); }
+.desktopNavigationButton { transition: color 160ms ease; }
+.desktopNavigationButton[aria-current='page'] { color: #f8f4ff; }
+.desktopNavigationButton[aria-current='page']::after { height: 3px; border-radius: 5px 5px 0 0; background: linear-gradient(90deg, #a78bfa, #8feaff); box-shadow: 0 0 12px rgb(143 234 255 / 40%); }
+.drawerOverlay { background: rgb(4 5 24 / 72%); backdrop-filter: blur(5px); }
+.mobileDrawer { border-right-color: rgb(160 142 255 / 34%); background: linear-gradient(180deg, #111436, #090d27); box-shadow: 18px 0 48px rgb(3 4 23 / 48%); }
+.drawerNavigationButton[aria-current='page'] { border-color: rgb(160 142 255 / 35%); background: linear-gradient(100deg, rgb(143 113 255 / 19%), rgb(78 180 255 / 8%)); box-shadow: inset 3px 0 #b99aff; }
+.mobileBottomNavigation { background: rgb(10 13 38 / 94%); border-top-color: rgb(157 139 255 / 28%); backdrop-filter: blur(20px); box-shadow: 0 -8px 30px rgb(3 4 23 / 34%); }
+.mobileBottomButton { border-radius: 11px; }
+.mobileBottomButton[aria-current='page'] { border-color: rgb(162 145 255 / 25%); background: linear-gradient(145deg, rgb(143 113 255 / 19%), rgb(78 180 255 / 8%)); }
+.mobileBottomButton[aria-current='page'] svg { filter: drop-shadow(0 0 5px rgb(143 234 255 / 40%)); }
+@media (prefers-reduced-motion: reduce) { .menuButton, .mobileQuickButton, .accountButton, .notificationButton, .guestButton, .desktopNavigationButton { transition: none; } }
