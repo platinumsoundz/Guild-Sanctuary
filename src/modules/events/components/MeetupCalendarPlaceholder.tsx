@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { ExternalLink, MapPin, MapPinned } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useEvents, type EventView } from '@/modules/events';
+import { fetchPublicProfileById } from '@/modules/profiles';
+import type { PublicProfile } from '@/types/database';
 import { EventEngagement } from './EventEngagement';
 import { ReportContentButton } from '@/modules/moderation';
 import styles from './MeetupCalendarPlaceholder.module.css';
@@ -21,6 +23,23 @@ export function MeetupCalendarPlaceholder() {
   const [editingEvent, setEditingEvent] = useState<EventView | null>(null);
   const [selectedMapEventId, setSelectedMapEventId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [creatorProfiles, setCreatorProfiles] = useState<Record<string, PublicProfile>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    const creatorIds = [...new Set(events.map((event) => event.creatorId))];
+    void Promise.all(creatorIds.map(async (creatorId) => {
+      try {
+        const profile = await fetchPublicProfileById(creatorId);
+        return profile ? [creatorId, profile] as const : null;
+      } catch {
+        return null;
+      }
+    })).then((profiles) => {
+      if (!cancelled) setCreatorProfiles(Object.fromEntries(profiles.filter((profile): profile is NonNullable<typeof profile> => profile !== null)));
+    });
+    return () => { cancelled = true; };
+  }, [events]);
 
   const selectedMapEvent = events.find((event) => event.id === selectedMapEventId) ?? events[0] ?? null;
   const selectedMapLinks = selectedMapEvent
@@ -216,6 +235,7 @@ export function MeetupCalendarPlaceholder() {
                   <div className={styles.eventMain}>
                     <time className={styles.eventDate} dateTime={event.startsAt}>{formatEventDateTime(event.startsAt)}</time>
                     <h3>{event.title}</h3>
+                    <p className={styles.organizerName}>Hosted by {event.creatorId === userId && currentUser ? `${currentUser.profile.displayName} (@${currentUser.profile.username})` : creatorProfiles[event.creatorId] ? `${creatorProfiles[event.creatorId].displayName} (@${creatorProfiles[event.creatorId].username})` : 'Community member'}</p>
                     <p>{event.description || 'No description provided.'}</p>
                     <span className={styles.locationText}>
                       <MapPin size={13} aria-hidden="true" />
