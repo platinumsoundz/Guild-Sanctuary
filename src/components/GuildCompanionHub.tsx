@@ -9,6 +9,7 @@ type LocalGame = { id: string; title: string; platform: string; launchUrl: strin
 type MediaFile = { id: string; file: File; url: string };
 
 const LIBRARY_KEY = 'sanctuary-guild-local-library-v1';
+const DELETED_IDS_KEY = 'sanctuary-guild-library-deleted-v1';
 const platforms = ['Browser', 'Steam', 'Xbox', 'RetroArch', 'Other'];
 const MAX_MEDIA_FILES = 30;
 const MAX_AUDIO_BYTES = 100 * 1024 * 1024;
@@ -36,7 +37,7 @@ export function GuildCompanionHub() {
   const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [storageWarning, setStorageWarning] = useState(false);
   const [syncBusy, setSyncBusy] = useState(false);
-  const [syncMessage, setSyncMessage] = useState('Server sync is not connected yet.');
+  const [syncMessage, setSyncMessage] = useState('Sign in and sync to merge this device library with your account library.');
   const [title, setTitle] = useState('');
   const [platform, setPlatform] = useState('Browser');
   const [launchUrl, setLaunchUrl] = useState('');
@@ -178,7 +179,26 @@ export function GuildCompanionHub() {
         return;
       }
 
-      const remote = (remoteRows || []) as Array<{ id: string; title: string; platform: string; launch_url: string; updated_at: string }>;
+      let pendingDeletes: string[] = [];
+      try {
+        const savedDeletes = window.localStorage.getItem(DELETED_IDS_KEY);
+        const parsedDeletes: unknown = savedDeletes ? JSON.parse(savedDeletes) : [];
+        if (Array.isArray(parsedDeletes)) pendingDeletes = parsedDeletes.filter((id): id is string => typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id)).slice(0, 500);
+      } catch {
+        setStorageWarning(true);
+        setSyncMessage('Could not read the pending deletion queue. Nothing was deleted from the server; check browser storage before syncing again.');
+        return;
+      }
+      for (const id of pendingDeletes) {
+        const { error: deleteError } = await supabase.from('guild_library_entries').delete().eq('id', id);
+        if (deleteError) {
+          setSyncMessage(`Could not finish syncing a library removal (${deleteError.message}). Pending removals are kept for your next attempt.`);
+          return;
+        }
+      }
+
+      const removedIds = new Set(pendingDeletes);
+      const remote = ((remoteRows || []) as Array<{ id: string; title: string; platform: string; launch_url: string; updated_at: string }>).filter((item) => !removedIds.has(item.id));
       const remoteKeys = new Set(remote.map((item) => `${item.platform.toLowerCase()}::${item.title.trim().toLowerCase()}`));
       let added = 0;
       for (const item of games) {
@@ -210,14 +230,32 @@ export function GuildCompanionHub() {
       const synced = ((finalRows || []) as Array<{ id: string; title: string; platform: string; launch_url: string }>)
         .map((item) => ({ id: item.id, title: item.title, platform: item.platform, launchUrl: safeWebUrl(item.launch_url) }));
       setGames(synced);
-      setStorageWarning(false);
-      setSyncMessage(`Synced ${synced.length} game entries to your Sanctuary account. Added ${added} new entr${added === 1 ? 'y' : 'ies'} from this device.`);
+      try {
+        window.localStorage.removeItem(DELETED_IDS_KEY);
+        setStorageWarning(false);
+      } catch {
+        setStorageWarning(true);
+      }
+      setSyncMessage(`Synced ${synced.length} game entries to your Sanctuary account. Added ${added} new entr${added === 1 ? 'y' : 'ies'} from this device; queued removals were applied.`);
     } catch (error) {
       const detail = error instanceof Error ? error.message : 'Unknown connection error';
       setSyncMessage(`Server sync could not start: ${detail}. Your local library remains available.`);
     } finally {
       setSyncBusy(false);
     }
+  };
+
+  const removeGame = (game: LocalGame) => {
+    try {
+      const saved = window.localStorage.getItem(DELETED_IDS_KEY);
+      const parsed: unknown = saved ? JSON.parse(saved) : [];
+      const ids = Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
+      if (!ids.includes(game.id)) window.localStorage.setItem(DELETED_IDS_KEY, JSON.stringify([...ids, game.id].slice(-500)));
+    } catch {
+      setStorageWarning(true);
+      setMediaMessage('This browser could not queue the removal for server sync. The entry will be removed from this view, but may return when you sync.');
+    }
+    setGames((current) => current.filter((item) => item.id !== game.id));
   };
 
   const addGame = () => {
@@ -253,12 +291,12 @@ export function GuildCompanionHub() {
   return (
     <section className={styles.hub} aria-label="Guild companion features">
       <div className={styles.heading}>
-        <div><p className={styles.eyebrow}>YOUR PERSONAL ORBIT</p><h2>Library & lounges</h2><p>Designed for server-backed account sync, with private media kept on your device by default. The library below is device-local until secure sync is implemented.</p></div>
-        <span className={styles.privacy}><ShieldCheck size={15} /> Device-local today</span>
+        <div><p className={styles.eyebrow}>YOUR PERSONAL ORBIT</p><h2>Library & lounges</h2><p>Account library sync is available when signed in and the database migration is installed. Personal media stays on your device by default.</p></div>
+        <span className={styles.privacy}><ShieldCheck size={15} /> Local cache + account sync</span>
       </div>
 
       <section className={styles.panel} aria-labelledby="guild-library-title">
-        <div className={styles.panelHeading}><span className={styles.icon}><Library size={19} /></span><div><h3 id="guild-library-title">Unified game library</h3><p>Saved on this device today. Cross-device sync is planned, not connected. No installed-game scan has been performed.</p></div></div>
+        <div className={styles.panelHeading}><span className={styles.icon}><Library size={19} /></span><div><h3 id="guild-library-title">Unified game library</h3><p>Add titles locally, then use Sign in & sync to merge them with your account library. No installed-game scan has been performed.</p></div></div>
         <div className={styles.libraryTools}>
           <button type="button" className={styles.primary} onClick={() => void syncLibrary()} disabled={syncBusy}><ShieldCheck size={14} /> {syncBusy ? 'Syncing…' : 'Sign in & sync'}</button>
           <button type="button" className={styles.secondary} onClick={exportLibrary}><Download size={14} /> Export backup</button>
@@ -272,7 +310,7 @@ export function GuildCompanionHub() {
           <button type="submit" className={styles.primary}><Plus size={15} /> Add to library</button>
         </form>
         <p className={styles.status} role="status" aria-live="polite">{syncMessage}</p>
-        {games.length ? <ul className={styles.gameList}>{games.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={safeWebUrl(game.launchUrl)} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => setGames((current) => current.filter((item) => item.id !== game.id))}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
+        {games.length ? <ul className={styles.gameList}>{games.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={safeWebUrl(game.launchUrl)} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => removeGame(game)}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
         <div className={styles.notice}><strong>Next integration:</strong> an optional signed Sanctuary Companion can request permission to scan supported game locations and launch compatible installed titles. A website alone cannot enumerate your device or execute arbitrary local apps.</div>
       </section>
 
@@ -310,7 +348,7 @@ export function GuildCompanionHub() {
         <div className={styles.services}>{services.map((service) => <article className={styles.service} key={service.name}><div className={styles.serviceTop}><strong>{service.name}</strong><span>{service.kind}</span></div><p>{service.description}</p><a href={service.url} target="_blank" rel="noopener noreferrer">Open official site <ExternalLink size={13} /></a></article>)}</div>
         <div className={styles.notice}><strong>RetroArch & RetroAchievements:</strong> use a compatible RetroArch installation and your own legally obtained game files. The Guild will not provide ROM downloads. Future integration can import supported achievement data with your consent; achievement verification must come from the platform, not a self-reported score.</div>
       </section>
-      <p className={styles.footnote}>Storage plan: server-backed account data and sync, local caching for resilience, and device-local media by default. Selected media stays in this browser session and is not uploaded. Your game list is stored in this browser only today; if this browser blocks storage, the warning above explains that no cloud copy exists yet. Cross-device sync, cloud media backup, account linking, automatic scanning and native launch are not enabled yet.</p>
+      <p className={styles.footnote}>Storage plan: server-backed account data and sync, local caching for resilience, and device-local media by default. Selected media stays in this browser session and is not uploaded. Your game list is cached in this browser and can be synced to your account when the library migration is installed. Cloud media backup, account linking to gaming platforms, automatic scanning and native launch are not enabled yet.</p>
     </section>
   );
 }
