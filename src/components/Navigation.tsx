@@ -147,8 +147,8 @@ export function Navigation({
             <button ref={menuButtonRef} className={styles.menuButton} type="button" aria-label="Open main navigation" aria-expanded={isMenuOpen} aria-controls="mobile-navigation-drawer" onClick={() => setIsMenuOpen(true)}>
               <Menu size={21} strokeWidth={1.8} aria-hidden="true" />
             </button>
-          <span className={styles.siteName}>The Sanctuary</span>
           )}
+          <span className={styles.siteName}>The Sanctuary</span>
         </div>
         <div className={styles.accountArea}>
           {isSessionReady && <NotificationBar compact />}
