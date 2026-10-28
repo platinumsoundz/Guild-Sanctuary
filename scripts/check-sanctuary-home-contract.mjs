@@ -10,6 +10,7 @@ const art = readFileSync('src/components/CosmicSanctuaryArt.tsx', 'utf8');
 const navigationCss = readFileSync('src/components/Navigation.module.css', 'utf8');
 const notificationCss = readFileSync('src/components/NotificationBar.module.css', 'utf8');
 const workspaceCss = readFileSync('src/components/AppWorkspace.module.css', 'utf8');
+const globalCss = readFileSync('src/app/globals.css', 'utf8');
 
 assert.match(workspace, /activeNavigation === 'today'[\s\S]*?<SanctuaryHome onNavigate=\{openNavigation\} \/>/, 'Today route renders the Sanctuary home');
 assert.match(context, /NavigationState = 'today'/, 'Today is a supported navigation state');
@@ -38,5 +39,9 @@ assert.match(notificationCss, /Cosmic glass treatment/, 'notifications share the
 assert.match(workspaceCss, /Extend the cosmic art direction/, 'routed workspace shares the cosmic art direction');
 assert.match(workspaceCss, /linear-gradient\\(145deg, rgb\\(20 24 61/, 'section surfaces use the midnight glass palette');
 assert.match(workspaceCss, /text-wrap: balance/, 'section headings use balanced typography');
+assert.match(globalCss, /--bg: #090d25/, 'cosmic midnight is the default theme');
+assert.match(globalCss, /--cosmic-violet: #a995ff/, 'default theme exposes cosmic accent tokens');
+assert.match(globalCss, /:root\\[data-theme=\\"ocean\\"\\]/, 'alternate ocean theme remains independently selectable');
+assert.match(globalCss, /:root\\[data-theme=\\"dusk\\"\\]/, 'alternate dusk theme remains independently selectable');
 
 console.log('Sanctuary home contract checks passed.');
