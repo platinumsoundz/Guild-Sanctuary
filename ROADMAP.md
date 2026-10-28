@@ -2,82 +2,49 @@
 
 Last updated: 2026-10-28
 
-## Sanctuary Connection Discovery — product direction and implementation plan (2026-10-28)
-
-**Status: Planned; implementation not yet started on this branch.** This is the agreed product direction for connecting Sanctuary Intelligence/self-discovery with the existing social ecosystem. Do not describe the feature as shipped or verified until implementation, automated checks, and browser/device QA have evidence recorded.
-
-### Product mission
-
-Help people discover people, communities, and ideas they may resonate with through shared interests, compatible connection intentions, complementary perspectives, and chosen activities—not romantic matching, appearance-based ranking, or judgement. One-to-one connections are one valid path, not the whole purpose. Members must also be able to explore topics and groups without being pressured to connect.
-
-### Scope and experience
-
-- **Three equal discovery paths:** People, Communities, and Topics. Integrate them into existing navigation rather than adding a crowded set of top-level destinations.
-- **Optional progressive self-discovery:** short, skippable questionnaires for interests, current exploration, connection intentions, conversation preferences, community preferences, and learning preferences. Answers can change over time; incomplete profiles must still be able to browse.
-- **Member-controlled discovery intentions:** e.g. Find My Community, Explore Ideas, Grow Together, Find Collaborators, Find My Circle, and Broaden My Perspective. These are flexible filters, not permanent identity labels.
-- **Transparent relevance recommendations:** begin with an understandable, configurable rules-based model considering shared interests, compatible intentions, complementary interests/goals, conversation preferences, and shared activities. Initial example weights may be tested (30/25/20/15/10), but are hypotheses—not scientific compatibility scores—and must be tuned with feedback.
-- **Discovery cards:** member-approved profile information, relevant shared interests, optional public journey note, and a brief explanation of why the recommendation appears. Actions may include view, follow, connect, save, or hide.
-- **Profiles and feeds:** optional journey/profile notes, interests and normalised hashtags, and member-controlled profile feeds. Reuse the existing post/feed, follow, search, group, event, notification, and messaging systems wherever possible; do not create duplicate social primitives.
-- **Connection lifecycle:** explicit follow, save, request, accept/decline, messaging permission, block, report, and pause/hide-discovery behaviours. Server-side permissions—not UI-only hiding—must enforce boundaries.
-- **AI assistance, introduced only where useful:** natural-language preference refinement, topic/community discovery, and understandable explanations based only on permitted member-approved information. AI suggestions remain editable and must not assign rigid identities.
-
-### Privacy, safety, and non-goals
-
-- Self-discovery is optional and private by default. Private reflections, private messages, sensitive questionnaire answers, inferred mental-health conditions, trauma disclosures, or other intimate information must not silently become public profile fields or matching signals.
-- Members control profile visibility, discoverability, location use, connection requests, messaging access, and whether optional self-discovery information informs personalisation. Provide pause/reset controls where applicable.
-- Blocked/restricted accounts and content must be excluded across every discovery path. Respect reporting, moderation, rate limits, and repeated-request protections.
-- No romantic compatibility score, appearance ranking, popularity leaderboard, pressure-based engagement optimisation, or assumptions that a profile view implies interest.
-- Do not optimise solely for time spent, swipes, or number of connections. Evaluate relevance, useful community participation, member feedback, safety, and control.
-
-### Implementation sequence and acceptance gates
-
-1. **Audit current architecture:** inspect profiles, feeds/posts, follows/relationships, search, groups/events, messaging/notifications, Sanctuary Intelligence questionnaires, database/RLS, UI patterns, tests, and active branches. Document what is reusable and avoid parallel implementations.
-2. **Data/permissions foundation:** extend existing schema where possible for interests/tags, explicit discovery preferences, public profile notes, connection state, saved profiles, and explicit discovery feedback. Add indexes, server-side validation, and reviewed RLS/permission tests only where needed.
-3. **Connection Intelligence service:** implement relevance scoring, hard privacy/eligibility filters, safe explanations, feedback, and useful fallback for sparse profiles. No sensitive inference.
-4. **Discovery UI:** responsive People/Communities/Topics surfaces, search/filter controls, explainable cards, and helpful empty states. Use real integrated data, not static mock recommendations.
-5. **Profile and feed integration:** interests/hashtags, optional journey note, permitted feed sharing, and navigation to relevant topics/groups/events.
-6. **Connection lifecycle:** requests, acceptance/rejection, follow, save, hide, block/report, notification and messaging-permission integration, duplicate-request handling.
-7. **Sanctuary Intelligence integration:** connect optional questionnaire results through explicit member controls; no duplicate questionnaire or leaking private reflections.
-8. **Verification and branch closeout:** run typecheck, lint, relevant tests and build; add focused regression/security tests; inspect diffs and integration points; fix failures; record what is and is not verified. Browser/mobile/accessibility QA and staging/RLS verification remain explicit gates, not assumed from a successful build.
-
-### Implementation progress log (2026-10-28)
-
-**In progress — first integration slice committed on this branch.**
-
-- Audited the current discovery entry point and confirmed existing reusable modules: public profile search/profile pages, public feed retrieval, event retrieval, and the private self-discovery centre.
-- Updated the existing profile discovery component into a responsive, keyboard-accessible People / Communities & Gatherings / Topics hub. People continues to use existing public username/display-name search; Topics queries the existing public feed and filters visible reflections by story tag/content; Communities & Gatherings surfaces upcoming events from the existing event service.
-- Connected the discovery actions to the existing feed and events navigation in AppWorkspace rather than introducing duplicate feed/event systems.
-- Added loading/error/empty states, responsive cards, explicit messaging-disabled state, and a note that private reflections are not used in these searches.
-- Scope honesty: this first slice does **not** yet implement dedicated community/group discovery, interest-based profile matching, persistent interest tags, friend/connection requests, save/hide/block controls, or questionnaire-to-discovery integration. These remain roadmap work; do not imply they are shipped.
-- Verification status: remote file writes succeeded. No local typecheck, lint, build, browser/device test, or database/RLS test has been run in this environment; the latest commit had no reported GitHub status checks. These checks remain outstanding before considering this slice verified.
-
-### Success measures
-
-Track discovery relevance feedback, useful profile/community/topic engagement, follows/connections accepted by both sides, useful discussions/groups/events reached, preference adjustments, safety incidents, privacy-control usability, mobile accessibility, and regressions. Avoid treating raw connection volume as the sole success metric.
-
-### Branch and release handling
-
-- Working branch: `feat/sanctuary-connection-discovery-2026-10-28`.
-- Keep this work coordinated on the branch; do not deploy during implementation. Complete the audit and implementation, tests, integration review, and branch summary before the project's later combined release/push/deploy decision.
-- Align this roadmap with `MASTER_BLUEPRINT.md` and `AI_RESTORE_PROMPT.md` when decisions or implementation status change.
-
-
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
+
+## Integration batch checkpoint — 2026-10-28
+
+The following focused PRs have been merged into `main` as a single integration batch:
+
+- PR [#185](https://github.com/platinumsoundz/Guild-Sanctuary/pull/185), merge commit `a832dd366b7cd5f397cc5d47a4a269fb4dc7c585`: production Cloudflare deploys now require explicit workflow dispatch while this integration batch is assembled. PR/main CI and Cloudflare builds remain enabled; provider secrets/settings were not changed.
+- PR [#184](https://github.com/platinumsoundz/Guild-Sanctuary/pull/184), merge commit `3a74b959761d76ffc68e0aad7d50080b16031c54`: map-based event discovery, accessible pins, nearby radius, past-event filtering and coordinate-edit persistence.
+- PR [#183](https://github.com/platinumsoundz/Guild-Sanctuary/pull/183), merge commit `5b09b2d6e7a935bbae978624b6b9b4f95d9809ae`: Life Lesson and Conversation Starter feed templates.
+- PR [#181](https://github.com/platinumsoundz/Guild-Sanctuary/pull/181), merge commit `4e8c276e7d429f9b706d91c7aa935b014e874c98`: explainable, deterministic personalised learning path in Sanctuary Intelligence.
+- PR [#178](https://github.com/platinumsoundz/Guild-Sanctuary/pull/178), merge commit `b611c7cda823dcebbd22a3682b395d820705837b`: Today landing page and responsive navigation.
+- PR [#179](https://github.com/platinumsoundz/Guild-Sanctuary/pull/179), merge commit `5e0b06afb0884374779fb62a667e96319eae470c`: separate Sanctuary-built Cosmic Arcade from external creator projects; add classic mini-games and progression contracts; keep token spending disabled. The leaderboard migration is repository code only and has not been applied.
+
+### Verification and release status
+
+- The exact feature heads passed their GitHub CI / contract / build checks, including typecheck and production build. The final #179 integration head `093c8c29c4325617651428b7096665a50621e222` passed CI, the Cloudflare Worker build, and focused contracts. An intermediate typecheck caught a malformed JSX grouping during navigation integration; it was corrected and the final head passed.
+- Mainline CI passed on merge head `5e0b06afb0884374779fb62a667e96319eae470c` (run [40703200916](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40703200916)).
+- Mainline Cloudflare Worker build was still running at the time of this entry. The deploy step is guarded to skip on PR/push and run only for explicit `workflow_dispatch`; verify the completed workflow before claiming its build result. No production deployment was intentionally initiated.
+- Vercel preview checks report a provider build-rate-limit failure. Browser/device, keyboard/screen-reader and real-user journey QA remain outstanding; CI success is not a substitute for those checks.
+
+### Remaining open work — do not merge blindly
+
+- [#145 — database-backed Daily Reflection](https://github.com/platinumsoundz/Guild-Sanctuary/pull/145): branch is behind current main and includes a private-storage migration. Owner must approve the local-to-account-backed storage transition, reconcile migration history, and run authenticated cross-account/deletion/failure tests before merge or application.
+- [#81 — moderation hierarchy](https://github.com/platinumsoundz/Guild-Sanctuary/pull/81) and [#84 — member-role authorization lock](https://github.com/platinumsoundz/Guild-Sanctuary/pull/84): static contracts pass on recorded heads, but the SQL changes remain gated on independent security review and owner-approved staging/concurrency authorization tests.
+- [#85 — beta showcase](https://github.com/platinumsoundz/Guild-Sanctuary/pull/85): broad, heavily diverged and non-mergeable. Do not force-merge; split/reconcile unique work against the now-merged Today, Arcade and Intelligence slices.
+- [#5 — game wallet bridge](https://github.com/platinumsoundz/Guild-Sanctuary/pull/5): targets `feature/token-shop-and-games-hub`, not `main`; that base is substantially diverged from current main. Reconcile the wallet/session/migration dependency chain and retarget only after reviewing the full diff. Token spending remains disabled.
+- Old unreferenced feature branches have not been deleted: identify unique work and confirm it is merged or superseded before cleanup. No branch was force-pushed or deleted in this pass.
+
 
 ## Support and creator-project navigation (2026-10-28)
 
-- **In code, QA pending:** The Support page presents voluntary contribution options first, then embeds the existing games/creator-project hub beneath them.
+- **Merged to main; QA pending:** The Support page presents voluntary contribution options first, then embeds the external creator-project hub beneath them.
 - The Support page heading is “Support the creator”; the navigation label remains “Support the community”.
-- The dedicated **Cosmic Arcade** navigation entry remains available. The embedded Games hub includes the Cosmic Arcade and creator game links without nesting a second `main` landmark.
+- The dedicated **Cosmic Arcade** navigation entry opens Sanctuary-built mini-games; the Support page keeps external creator projects separate. The Arcade/creator separation is merged in PR #179.
 - Contribution checkout, provider settings, and external game host configuration remain gated by owner-only setup and verification.
 
 ## Sanctuary home showcase — clean integration slice (2026-10-28)
 
-- **In code on a clean branch, CI pending:** Ported the Today landing/showcase component and responsive styles from the conflicted beta showcase branch onto current `main`.
+- **Merged to main; automated checks passed, browser/device QA pending:** Ported the Today landing/showcase component and responsive styles from the conflicted beta showcase branch onto current `main` in PR #178.
 - Added a dedicated Today route and made it the initial destination for fresh sessions, with Today accessible on mobile and desktop navigation.
 - Added a focused static contract for route wiring, navigation reachability, responsive CSS, reduced motion, and non-clinical copy.
 - This slice intentionally does **not** port the conflicted self-discovery persistence UI or migration. Private self-discovery remains a separate privacy/RLS review and owner-approved staging task.
-- Branch: `feat/sanctuary-home-clean-integration`. Run CI and review the exact head before merge; browser/device QA remains pending.
+- Source: PR #178, merge commit `b611c7cda823dcebbd22a3682b395d820705837b`. Browser/device QA remains pending.
 
 ## Mainline PR reconciliation (2026-10-28)
 
@@ -667,3 +634,66 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 
 - **Follow-up polish (2026-10-28):** Learning-path results show the exact selected preferences used to shape the suggestion, and the user-requested local text export includes the learning path, its rationale and its non-clinical disclaimer when a learning preference was answered. Answers remain session-only; export remains an explicit local user action.
+
+
+## Sanctuary Connection Discovery — product direction and implementation plan (2026-10-28)
+
+**Status: Planned; implementation not yet started on this branch.** This is the agreed product direction for connecting Sanctuary Intelligence/self-discovery with the existing social ecosystem. Do not describe the feature as shipped or verified until implementation, automated checks, and browser/device QA have evidence recorded.
+
+### Product mission
+
+Help people discover people, communities, and ideas they may resonate with through shared interests, compatible connection intentions, complementary perspectives, and chosen activities—not romantic matching, appearance-based ranking, or judgement. One-to-one connections are one valid path, not the whole purpose. Members must also be able to explore topics and groups without being pressured to connect.
+
+### Scope and experience
+
+- **Three equal discovery paths:** People, Communities, and Topics. Integrate them into existing navigation rather than adding a crowded set of top-level destinations.
+- **Optional progressive self-discovery:** short, skippable questionnaires for interests, current exploration, connection intentions, conversation preferences, community preferences, and learning preferences. Answers can change over time; incomplete profiles must still be able to browse.
+- **Member-controlled discovery intentions:** e.g. Find My Community, Explore Ideas, Grow Together, Find Collaborators, Find My Circle, and Broaden My Perspective. These are flexible filters, not permanent identity labels.
+- **Transparent relevance recommendations:** begin with an understandable, configurable rules-based model considering shared interests, compatible intentions, complementary interests/goals, conversation preferences, and shared activities. Initial example weights may be tested (30/25/20/15/10), but are hypotheses—not scientific compatibility scores—and must be tuned with feedback.
+- **Discovery cards:** member-approved profile information, relevant shared interests, optional public journey note, and a brief explanation of why the recommendation appears. Actions may include view, follow, connect, save, or hide.
+- **Profiles and feeds:** optional journey/profile notes, interests and normalised hashtags, and member-controlled profile feeds. Reuse the existing post/feed, follow, search, group, event, notification, and messaging systems wherever possible; do not create duplicate social primitives.
+- **Connection lifecycle:** explicit follow, save, request, accept/decline, messaging permission, block, report, and pause/hide-discovery behaviours. Server-side permissions—not UI-only hiding—must enforce boundaries.
+- **AI assistance, introduced only where useful:** natural-language preference refinement, topic/community discovery, and understandable explanations based only on permitted member-approved information. AI suggestions remain editable and must not assign rigid identities.
+
+### Privacy, safety, and non-goals
+
+- Self-discovery is optional and private by default. Private reflections, private messages, sensitive questionnaire answers, inferred mental-health conditions, trauma disclosures, or other intimate information must not silently become public profile fields or matching signals.
+- Members control profile visibility, discoverability, location use, connection requests, messaging access, and whether optional self-discovery information informs personalisation. Provide pause/reset controls where applicable.
+- Blocked/restricted accounts and content must be excluded across every discovery path. Respect reporting, moderation, rate limits, and repeated-request protections.
+- No romantic compatibility score, appearance ranking, popularity leaderboard, pressure-based engagement optimisation, or assumptions that a profile view implies interest.
+- Do not optimise solely for time spent, swipes, or number of connections. Evaluate relevance, useful community participation, member feedback, safety, and control.
+
+### Implementation sequence and acceptance gates
+
+1. **Audit current architecture:** inspect profiles, feeds/posts, follows/relationships, search, groups/events, messaging/notifications, Sanctuary Intelligence questionnaires, database/RLS, UI patterns, tests, and active branches. Document what is reusable and avoid parallel implementations.
+2. **Data/permissions foundation:** extend existing schema where possible for interests/tags, explicit discovery preferences, public profile notes, connection state, saved profiles, and explicit discovery feedback. Add indexes, server-side validation, and reviewed RLS/permission tests only where needed.
+3. **Connection Intelligence service:** implement relevance scoring, hard privacy/eligibility filters, safe explanations, feedback, and useful fallback for sparse profiles. No sensitive inference.
+4. **Discovery UI:** responsive People/Communities/Topics surfaces, search/filter controls, explainable cards, and helpful empty states. Use real integrated data, not static mock recommendations.
+5. **Profile and feed integration:** interests/hashtags, optional journey note, permitted feed sharing, and navigation to relevant topics/groups/events.
+6. **Connection lifecycle:** requests, acceptance/rejection, follow, save, hide, block/report, notification and messaging-permission integration, duplicate-request handling.
+7. **Sanctuary Intelligence integration:** connect optional questionnaire results through explicit member controls; no duplicate questionnaire or leaking private reflections.
+8. **Verification and branch closeout:** run typecheck, lint, relevant tests and build; add focused regression/security tests; inspect diffs and integration points; fix failures; record what is and is not verified. Browser/mobile/accessibility QA and staging/RLS verification remain explicit gates, not assumed from a successful build.
+
+### Implementation progress log (2026-10-28)
+
+**In progress — first integration slice committed on this branch.**
+
+- Audited the current discovery entry point and confirmed existing reusable modules: public profile search/profile pages, public feed retrieval, event retrieval, and the private self-discovery centre.
+- Updated the existing profile discovery component into a responsive, keyboard-accessible People / Communities & Gatherings / Topics hub. People continues to use existing public username/display-name search; Topics queries the existing public feed and filters visible reflections by story tag/content; Communities & Gatherings surfaces upcoming events from the existing event service.
+- Connected the discovery actions to the existing feed and events navigation in AppWorkspace rather than introducing duplicate feed/event systems.
+- Added loading/error/empty states, responsive cards, explicit messaging-disabled state, and a note that private reflections are not used in these searches.
+- Scope honesty: this first slice does **not** yet implement dedicated community/group discovery, interest-based profile matching, persistent interest tags, friend/connection requests, save/hide/block controls, or questionnaire-to-discovery integration. These remain roadmap work; do not imply they are shipped.
+- Verification status: remote file writes succeeded. No local typecheck, lint, build, browser/device test, or database/RLS test has been run in this environment; the latest commit had no reported GitHub status checks. These checks remain outstanding before considering this slice verified.
+
+### Success measures
+
+Track discovery relevance feedback, useful profile/community/topic engagement, follows/connections accepted by both sides, useful discussions/groups/events reached, preference adjustments, safety incidents, privacy-control usability, mobile accessibility, and regressions. Avoid treating raw connection volume as the sole success metric.
+
+### Branch and release handling
+
+- Working branch: `feat/sanctuary-connection-discovery-2026-10-28`.
+- Keep this work coordinated on the branch; do not deploy during implementation. Complete the audit and implementation, tests, integration review, and branch summary before the project's later combined release/push/deploy decision.
+- Align this roadmap with `MASTER_BLUEPRINT.md` and `AI_RESTORE_PROMPT.md` when decisions or implementation status change.
+
+
+Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
