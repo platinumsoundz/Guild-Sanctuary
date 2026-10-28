@@ -48,6 +48,9 @@ assert.match(classics, /mazeEdges\.includes\(edge\)/, 'maze movement respects ge
 assert.match(classics, /makeSudoku/, 'Sudoku uses a valid generated solution and clue mask');
 assert.match(classics, /sudokuGiven\[i\]/, 'Sudoku clue cells cannot be edited');
 assert.match(classics, /mineLost/, 'Minesweeper locks a failed run');
+assert.match(classics, /First reveal protected/, 'Minesweeper guarantees a safe first reveal');
+assert.match(classics, /let empty = 15, previous = -1; for \(let step = 0; step < 120; step\+\+\)/, '15 Puzzle uses legal moves from the solved board so every generated board is solvable');
+assert.match(classics, /if \(game === 'whack'\) return hits >= 10/, 'Whack-a-Star has a completable level objective');
 const arcadeMigration = readFileSync('supabase/migrations/20261028134500_arcade_leaderboard_foundation.sql', 'utf8');
 assert.match(arcadeMigration, /enable row level security/i, 'online leaderboard table enables RLS');
 assert.match(arcadeMigration, /using \(verified = true\)/i, 'only verified score rows are visible');

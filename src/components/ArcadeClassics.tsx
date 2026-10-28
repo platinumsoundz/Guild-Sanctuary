@@ -31,7 +31,7 @@ const makeMemory = () => ['☾','☾','✦','✦','☀','☀','♆','♆','✧',
 const make2048 = () => { const grid = Array.from({ length: 4 }, () => Array(4).fill(0)); addTile(grid); addTile(grid); return grid; };
 function addTile(grid: number[][]) { const empty: [number,number][] = []; grid.forEach((row,r)=>row.forEach((v,c)=>{if(!v)empty.push([r,c]);})); if(empty.length){const [r,c]=empty[Math.floor(Math.random()*empty.length)];grid[r][c]=Math.random()<0.9?2:4;} }
 const makeMines = (count = 10) => Array.from({ length: 64 }, (_, i) => i).sort(() => Math.random() - 0.5).slice(0, Math.max(1, Math.min(30, count)));
-const makeFifteen = () => { const a = Array.from({length:16},(_,i)=>(i+1)%16); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const makeFifteen = () => { const board = Array.from({length:16},(_,i)=>(i+1)%16); let empty = 15, previous = -1; for (let step = 0; step < 120; step++) { const row = Math.floor(empty / 4), col = empty % 4; const choices = [[row-1,col],[row+1,col],[row,col-1],[row,col+1]].filter(([r,c]) => r >= 0 && r < 4 && c >= 0 && c < 4).map(([r,c]) => r * 4 + c).filter(index => index !== previous); const next = choices[Math.floor(Math.random() * choices.length)]; [board[empty], board[next]] = [board[next], board[empty]]; previous = empty; empty = next; } return board; };
 const makeConnect = () => Array.from({length:6},()=>Array(7).fill(''));
 const makeLife = () => Array.from({length:10},()=>Array.from({length:10},()=>Math.random()>.78));
 const directions = [[-1,0],[1,0],[0,-1],[0,1]];
@@ -61,6 +61,7 @@ export function ArcadeClassics() {
   const [grid2048,setGrid2048]=useState(make2048);
   const [mineCells,setMineCells]=useState<number[]>(makeMines);
   const [mineLost,setMineLost]=useState(false);
+  const [mineStarted,setMineStarted]=useState(false);
   const [revealed,setRevealed]=useState<number[]>([]);
   const [flags,setFlags]=useState<number[]>([]);
   const [lights,setLights]=useState<boolean[]>(makeLights);
@@ -111,6 +112,7 @@ export function ArcadeClassics() {
   const wonConnect=useMemo(()=>connect.some((row,r)=>row.some((v,c)=>!!v&&[[0,1],[1,0],[1,1],[1,-1]].some(([dr,dc])=>[0,1,2,3].every(k=>{const rr=r+dr*k,cc=c+dc*k;return rr>=0&&rr<6&&cc>=0&&cc<7&&connect[rr][cc]===v;})))),[connect]);
   const levelComplete = useMemo(() => {
     if (game === '2048') return grid2048.some(row => row.some(value => value >= levelTarget));
+    if (game === 'whack') return hits >= 10;
     if (game === 'mines') return !mineLost && revealed.length === 64 - mineCells.length && !revealed.some(i => mineCells.includes(i));
     if (game === 'lights') return lights.every(value => !value);
     if (game === 'memory') return matched.length === memory.length;
@@ -130,10 +132,10 @@ export function ArcadeClassics() {
     if (game === 'simon') return simon.length > 0 && simonInput.length === simon.length && simon.every((value, index) => value === simonInput[index]);
     if (game === 'pong') return pong.score >= 5;
     return false;
-  }, [game, grid2048, levelTarget, revealed, mineCells, mineLost, lights, matched, memory, guesses, word, hangLetters, hanoi, flood, floodMoves, wonTic, wonConnect, fifteen, mazePos, sudoku, sudokuSolution, typingInput, invaders, bricks, question, simon, simonInput, pong.score]);
+  }, [game, grid2048, levelTarget, revealed, mineCells, mineLost, lights, matched, memory, guesses, word, hangLetters, hanoi, flood, floodMoves, wonTic, wonConnect, fifteen, mazePos, sudoku, sudokuSolution, typingInput, invaders, bricks, question, simon, simonInput, pong.score, hits]);
 
   const reset = () => {
-    setLevel(1);completedRunRef.current='';setSavedScore(false);setGrid2048(make2048());setMineCells(makeMines(Math.min(30,Math.max(5,8+(difficulty==='expert'?8:difficulty==='chill'?-3:0)))));setMineLost(false);setRevealed([]);setFlags([]);setLights(makeLights());setMemory(makeMemory());setFlipped([]);setMatched([]);
+    setLevel(1);completedRunRef.current='';setSavedScore(false);setGrid2048(make2048());setMineCells(makeMines(Math.min(30,Math.max(5,8+(difficulty==='expert'?8:difficulty==='chill'?-3:0)))));setMineLost(false);setMineStarted(false);setRevealed([]);setFlags([]);setLights(makeLights());setMemory(makeMemory());setFlipped([]);setMatched([]);
     setWord(wordBank[Math.floor(Math.random()*wordBank.length)]);setGuess('');setGuesses([]);setHangLetters([]);setBoard(Array(9).fill(''));setConnect(makeConnect());setTurn('🔴');setRps('');
     setHanoi([[4,3,2,1],[],[]]);setHanoiFrom(null);setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);setLife(makeLife());setMole(Math.floor(Math.random()*16));setHits(0);setQuestion(0);setScore(0);setFifteen(makeFifteen());setSimon([]);setSimonInput([]);setMessage('');setPong({ballX:4,ballY:3,dx:1,dy:1,paddle:3,score:0,over:false});setBricks(Array.from({length:24},()=>true));setBrickBall({x:3,y:5,dx:1,dy:-1,paddle:3,lives:3});setBlocks(Array.from({length:10},()=>Array(6).fill(0)));setActiveShape([[1,1,1],[0,1,0]]);setBlockX(1);const nextSudoku=makeSudoku();setSudoku(nextSudoku.board);setSudokuSolution(nextSudoku.solution);setSudokuGiven(nextSudoku.given);setMazePos(0);setMazeEdges(makeMazeEdges());setTypingInput('');setAsteroidPos(2);setInvaderScore(0);setInvaders(Array.from({length:15},(_,i)=>i));
   };
@@ -151,7 +153,7 @@ export function ArcadeClassics() {
     setMessage(`Level ${level} complete! +${Math.round(100 * (difficulty === 'expert' ? 2 : 1))} clear bonus. Loading level ${level + 1}…`);
     setLevel(value => value + 1);
     if (game === '2048') setGrid2048(make2048());
-    if (game === 'mines') { setMineCells(makeMines(Math.min(30, Math.max(5, 8 + level + (difficulty === 'expert' ? 8 : difficulty === 'chill' ? -3 : 0))))); setMineLost(false); setRevealed([]); setFlags([]); }
+    if (game === 'mines') { setMineCells(makeMines(Math.min(30, Math.max(5, 8 + level + (difficulty === 'expert' ? 8 : difficulty === 'chill' ? -3 : 0))))); setMineLost(false); setMineStarted(false); setRevealed([]); setFlags([]); }
     if (game === 'lights') setLights(makeLights());
     if (game === 'memory') { setMemory(makeMemory()); setFlipped([]); setMatched([]); }
     if (game === 'wordle' || game === 'hangman') { setWord(wordBank[Math.floor(Math.random()*wordBank.length)]); setGuess(''); setGuesses([]); setHangLetters([]); }
@@ -168,6 +170,7 @@ export function ArcadeClassics() {
     if (game === 'trivia') { setQuestion(0); setScore(0); }
     if (game === 'simon') { setSimon([]); setSimonInput([]); }
     if (game === 'pong') setPong({ballX:4,ballY:3,dx:1,dy:1,paddle:3,score:0,over:false});
+    if (game === 'whack') { setHits(0); setMole(Math.floor(Math.random()*16)); }
   }, [levelComplete, game, level, playerName, pointsForRun, difficulty]);
   const submitWord = () => {const value=guess.toUpperCase().replace(/[^A-Z]/g,'').slice(0,6);if(value.length!==word.length)return;setGuesses(v=>[...v,value]);setGuess('');if(value===word)setMessage('Correct! You found the hidden word.');else if(guesses.length>=5)setMessage(`The word was ${word}.`);};
   const moveMaze = (target:number) => { const edge=[mazePos,target].sort((a,b)=>a-b).join('-'); if(target>=0&&target<25&&Math.abs(Math.floor(target/5)-Math.floor(mazePos/5))+Math.abs(target%5-mazePos%5)===1&&mazeEdges.includes(edge))setMazePos(target); };
@@ -180,7 +183,7 @@ export function ArcadeClassics() {
     <p className={styles.runStats}>Run score <strong>{Math.round(pointsForRun).toLocaleString()}</strong> · Difficulty multiplier <strong>{difficulty === 'expert' ? '2×' : difficulty === 'chill' ? '0.75×' : '1×'}</strong> · {levelComplete ? 'Objective complete' : 'Objective in progress'}</p>
     <div className={styles.play}>
     {game==='2048' && <><h3>2048</h3><p>Slide tiles in a direction to combine matching numbers.</p><div className={styles.grid4} role="group" aria-label="2048 board">{grid2048.flat().map((v,i)=><span key={i} className={styles.tile} aria-label={v ? `${v} tile` : 'Empty tile'}>{v||''}</span>)}</div><div className={styles.controls}>{['up','left','down','right'].map(d=><button key={d} type="button" onClick={()=>setGrid2048(g=>slide2048(g,d))}>{d}</button>)}</div></>}
-    {game==='mines' && <><h3>Minesweeper</h3><p>Reveal cells, flag suspected mines, and avoid the hidden stars.</p><div className={styles.grid8}>{Array.from({length:64},(_,i)=><button key={i} type="button" className={styles.cell} aria-label={flags.includes(i)?'Flagged cell':revealed.includes(i)?(mineCells.includes(i)?'Mine':'Safe cell'):'Hidden cell'} onContextMenu={e=>{e.preventDefault();setFlags(a=>a.includes(i)?a.filter(n=>n!==i):[...a,i]);}} onClick={()=>{if(flags.includes(i)||mineLost||revealed.includes(i))return;if(mineCells.includes(i)){setMineLost(true);setRevealed(Array.from({length:64},(_,n)=>n));setMessage('A star mine! Run ended. Reset to try again.');}else{setRevealed(a=>a.includes(i)?a:[...a,i]);setMessage('Safe cell revealed. Right-click to flag a suspected mine.');}}}>{revealed.includes(i)?mineCells.includes(i)?'✹':mineCells.filter(m=>Math.abs(Math.floor(m/8)-Math.floor(i/8))<=1&&Math.abs(m%8-i%8)<=1).length||'·':flags.includes(i)?'⚑':''}</button>)}</div></>}
+    {game==='mines' && <><h3>Minesweeper</h3><p>Reveal cells, flag suspected mines, and avoid the hidden stars.</p><div className={styles.grid8}>{Array.from({length:64},(_,i)=><button key={i} type="button" className={styles.cell} aria-label={flags.includes(i)?'Flagged cell':revealed.includes(i)?(mineCells.includes(i)?'Mine':'Safe cell'):'Hidden cell'} onContextMenu={e=>{e.preventDefault();setFlags(a=>a.includes(i)?a.filter(n=>n!==i):[...a,i]);}} onClick={()=>{if(flags.includes(i)||mineLost||revealed.includes(i))return;if(mineCells.includes(i)&&!mineStarted){setMineCells(makeMines(mineCells.length,i));setMineStarted(true);setRevealed(a=>a.includes(i)?a:[...a,i]);setMessage('First reveal protected — the minefield has been reshuffled.');}else if(mineCells.includes(i)){setMineLost(true);setRevealed(Array.from({length:64},(_,n)=>n));setMessage('A star mine! Run ended. Reset to try again.');}else{setMineStarted(true);setRevealed(a=>a.includes(i)?a:[...a,i]);setMessage('Safe cell revealed. Right-click to flag a suspected mine.');}}}>{revealed.includes(i)?mineCells.includes(i)?'✹':mineCells.filter(m=>Math.abs(Math.floor(m/8)-Math.floor(i/8))<=1&&Math.abs(m%8-i%8)<=1).length||'·':flags.includes(i)?'⚑':''}</button>)}</div></>}
     {game==='lights' && <><h3>Lights Out</h3><p>Switch every light off. Each tap toggles the selected light and its neighbours.</p><div className={styles.grid5}>{lights.map((on,i)=><button key={i} type="button" className={on?styles.lightOn:styles.lightOff} onClick={()=>tapLight(i)} aria-label={`Light ${i+1} ${on?'on':'off'}`}>{on?'✦':''}</button>)}</div><p>{lights.filter(Boolean).length} lights remain on.</p></>}
     {game==='memory' && <><h3>Memory Match</h3><p>Find all eight matching pairs.</p><div className={styles.grid4}>{memory.map((v,i)=><button key={i} type="button" className={styles.tile} onClick={()=>{if(flipped.includes(i)||matched.includes(i))return;const next=[...flipped,i];setFlipped(next);if(next.length===2){if(memory[next[0]]===memory[next[1]])setMatched(a=>[...a,...next]);setTimeout(()=>setFlipped([]),650);}}}>{flipped.includes(i)||matched.includes(i)?v:'✧'}</button>)}</div><p>{matched.length/2} / 8 pairs matched</p></>}
     {game==='wordle' && <><h3>Cosmic Word Guess</h3><p>Guess the hidden word in six attempts. The answer uses {word.length} letters.</p><form className={styles.inlineForm} onSubmit={e=>{e.preventDefault();submitWord();}}><input value={guess} onChange={e=>setGuess(e.target.value.toUpperCase().slice(0,word.length))} maxLength={word.length} aria-label="Word guess" /><button type="submit">Guess</button></form>{guesses.map((g,i)=><div className={styles.wordRow} key={i}>{[...g].map((ch,j)=><span key={j} className={ch===word[j]?styles.correct:word.includes(ch)?styles.present:styles.absent}>{ch}</span>)}</div>)}</>}
