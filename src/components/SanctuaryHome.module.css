@@ -395,3 +395,24 @@
   .quickRow button, .primaryButton, .secondaryButton, .featureCard { transition: none; }
   .quickRow button:hover, .primaryButton:hover, .secondaryButton:hover { transform: none; }
 }
+
+
+/* Slow celestial movement gives the portal a living feel without demanding attention. */
+.heroIllustration {
+  animation: sanctuary-portal-drift 16s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+.artPulse {
+  animation: sanctuary-star-pulse 3.8s ease-in-out infinite;
+}
+@keyframes sanctuary-portal-drift {
+  0%, 100% { transform: translateY(0); filter: saturate(1); }
+  50% { transform: translateY(-4px); filter: saturate(1.08); }
+}
+@keyframes sanctuary-star-pulse {
+  0%, 100% { opacity: .72; box-shadow: 0 0 8px color-mix(in srgb, var(--cosmic-cyan) 45%, transparent); }
+  50% { opacity: 1; box-shadow: 0 0 14px color-mix(in srgb, var(--cosmic-cyan) 78%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroIllustration, .artPulse { animation: none; }
+}
