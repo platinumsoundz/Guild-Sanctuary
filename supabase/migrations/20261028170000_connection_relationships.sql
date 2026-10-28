@@ -345,4 +345,61 @@ create trigger guard_direct_conversation_blocks
   before insert on public.direct_conversation_pairs
   for each row execute function private.guard_direct_conversation_blocks();
 
+
+-- Social relationship events reuse the existing in-app notification system.
+alter table public.notifications
+  drop constraint if exists notifications_notification_type_check;
+alter table public.notifications
+  add constraint notifications_notification_type_check
+  check (notification_type in ('like', 'comment', 'follow', 'connection_request', 'connection_accepted'));
+
+alter table public.notifications
+  drop constraint if exists notifications_target_type_check;
+alter table public.notifications
+  add constraint notifications_target_type_check
+  check (target_type in ('post', 'short', 'event', 'user'));
+
+create or replace function private.notify_profile_follow()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  insert into public.notifications (recipient_id, actor_id, notification_type, target_type, target_id)
+  values (new.followee_id, new.follower_id, 'follow', 'user', new.follower_id);
+  return new;
+end;
+$;
+revoke all on function private.notify_profile_follow() from public, anon, authenticated;
+
+drop trigger if exists notify_profile_follow on public.profile_follows;
+create trigger notify_profile_follow
+  after insert on public.profile_follows
+  for each row execute function private.notify_profile_follow();
+
+create or replace function private.notify_connection_request()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if tg_op = 'INSERT' and new.status = 'pending' then
+    insert into public.notifications (recipient_id, actor_id, notification_type, target_type, target_id)
+    values (new.addressee_id, new.requester_id, 'connection_request', 'user', new.requester_id);
+  elsif tg_op = 'UPDATE' and old.status = 'pending' and new.status = 'accepted' then
+    insert into public.notifications (recipient_id, actor_id, notification_type, target_type, target_id)
+    values (new.requester_id, new.addressee_id, 'connection_accepted', 'user', new.addressee_id);
+  end if;
+  return new;
+end;
+$;
+revoke all on function private.notify_connection_request() from public, anon, authenticated;
+
+drop trigger if exists notify_connection_request on public.profile_connections;
+create trigger notify_connection_request
+  after insert or update on public.profile_connections
+  for each row execute function private.notify_connection_request();
+
 commit;
