@@ -104,7 +104,7 @@ export function GuildCompanionHub() {
       link.href = url;
       link.download = 'sanctuary-guild-library.json';
       link.click();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setMediaMessage('Library backup exported to your device. It contains game titles, platform labels and web links only.');
     } catch {
       setMediaMessage('Could not export the library in this browser.');
