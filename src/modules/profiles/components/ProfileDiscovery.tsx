@@ -8,7 +8,7 @@ import { fetchEvents } from '@/modules/events';
 import type { EventView } from '@/modules/events';
 import { fetchPublicProfileById, searchPublicProfiles } from '../service';
 import { fetchMemberDiscoveryInterests, fetchPublicDiscoveryInterests, findUserIdsByPublicInterest, findUserIdsBySharedPublicInterests } from '../discoveryInterests';
-import { blockProfile, fetchIncomingConnectionRequests, fetchRelationshipStates, followProfile, requestConnection, respondToConnection, unfollowProfile, type RelationshipState } from '../connectionService';
+import { blockProfile, fetchBlockedProfileIds, fetchIncomingConnectionRequests, fetchRelationshipStates, followProfile, requestConnection, respondToConnection, unblockProfile, unfollowProfile, type RelationshipState } from '../connectionService';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
@@ -43,6 +43,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
   const [incomingRequests, setIncomingRequests] = useState<Array<{ id: string; requesterId: string; displayName: string; username: string }>>([]);
   const [relationshipBusyId, setRelationshipBusyId] = useState<string | null>(null);
   const [relationshipError, setRelationshipError] = useState<string | null>(null);
+  const [blockedProfiles, setBlockedProfiles] = useState<Array<{ userId: string; displayName: string; username: string }>>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [events, setEvents] = useState<EventView[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -161,6 +162,12 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     fetchRelationshipStates(currentUserId, visibleProfiles.map((profile) => profile.userId))
       .then((states) => { if (!cancelled) setRelationshipStates(states); })
       .catch(() => { if (!cancelled) setRelationshipError('Relationship controls could not be loaded. Please retry.'); });
+    fetchBlockedProfileIds(currentUserId)
+      .then(async (ids) => {
+        const profiles = await Promise.all(ids.map((id) => fetchPublicProfileById(id)));
+        if (!cancelled) setBlockedProfiles(profiles.filter((profile): profile is PublicProfile => profile !== null).map((profile) => ({ userId: profile.userId, displayName: profile.displayName, username: profile.username })));
+      })
+      .catch(() => { if (!cancelled) setRelationshipError('Blocked members could not be loaded.'); });
     fetchIncomingConnectionRequests(currentUserId)
       .then(async (requests) => {
         const hydrated = await Promise.all(requests.map(async (request) => {
@@ -173,7 +180,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     return () => { cancelled = true; };
   }, [activeTab, currentUserId, profiles, query, suggestedProfiles]);
 
-  const runRelationshipAction = async (targetId: string, action: 'follow' | 'unfollow' | 'connect' | 'accept' | 'decline' | 'block', connectionId?: string) => {
+  const runRelationshipAction = async (targetId: string, action: 'follow' | 'unfollow' | 'connect' | 'accept' | 'decline' | 'block' | 'unblock', connectionId?: string) => {
     setRelationshipBusyId(connectionId ?? targetId);
     setRelationshipError(null);
     try {
@@ -183,11 +190,15 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
       if (action === 'accept' && connectionId) await respondToConnection(currentUserId, connectionId, 'accepted');
       if (action === 'decline' && connectionId) await respondToConnection(currentUserId, connectionId, 'declined');
       if (action === 'block') {
-        if (!window.confirm('Block this member? This removes follows and closes pending connection requests between you.')) return;
+        if (!window.confirm('Block this member? This removes follows and closes connection requests between you.')) return;
         await blockProfile(currentUserId, targetId);
       }
+      if (action === 'unblock') await unblockProfile(currentUserId, targetId);
       const visibleProfiles = query.trim().length >= 2 ? profiles : suggestedProfiles;
       setRelationshipStates(await fetchRelationshipStates(currentUserId, visibleProfiles.map((profile) => profile.userId)));
+      const blockedIds = await fetchBlockedProfileIds(currentUserId);
+      const blocked = await Promise.all(blockedIds.map((id) => fetchPublicProfileById(id)));
+      setBlockedProfiles(blocked.filter((profile): profile is PublicProfile => profile !== null).map((profile) => ({ userId: profile.userId, displayName: profile.displayName, username: profile.username })));
       const requests = await fetchIncomingConnectionRequests(currentUserId);
       const hydrated = await Promise.all(requests.map(async (request) => {
         const profile = await fetchPublicProfileById(request.requesterId);
@@ -301,6 +312,17 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
             placeholder={activeTab === 'people' ? 'Username or display name' : activeTab === 'topics' ? 'Try mindfulness or #philosophy' : 'Try a gathering or interest'} /></span>
         </label>
 
+        {activeTab === 'people' && blockedProfiles.length > 0 && (
+          <section className={styles.requestsPanel} aria-labelledby="blocked-members-heading">
+            <h2 id="blocked-members-heading">Blocked members</h2>
+            {blockedProfiles.map((profile) => (
+              <div className={styles.requestRow} key={profile.userId}>
+                <span><strong>{profile.displayName}</strong> <span>@{profile.username}</span></span>
+                <div><button type="button" disabled={relationshipBusyId === profile.userId} onClick={() => runRelationshipAction(profile.userId, 'unblock')}>Unblock</button></div>
+              </div>
+            ))}
+          </section>
+        )}
         {activeTab === 'people' && incomingRequests.length > 0 && (
           <section className={styles.requestsPanel} aria-labelledby="connection-requests-heading">
             <h2 id="connection-requests-heading">Connection requests</h2>
