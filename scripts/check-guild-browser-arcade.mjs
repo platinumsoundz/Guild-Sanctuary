@@ -12,7 +12,7 @@ assert.match(guild, /ctrlKey && event\.shiftKey/, 'keyboard accessibility overri
 assert.match(guild, /Orbital Drift/, 'first original browser game is present');
 assert.match(guild, /localStorage\.setItem\(BEST_KEY/, 'best run is stored locally');
 assert.match(guild, /No cloud rewards or cross-world sharing are enabled/, 'prototype does not claim cloud progression');
-assert.match(guild, /isAuthenticated \|\|!isAuthenticated \\|\\| !userId/, 'Guild entry requires the shared authenticated identity');
+assert.match(guild, /if \\(!isAuthenticated \\|\\| !userId\\)/, 'Guild entry requires the shared authenticated identity');
 assert.match(guild, /setSeconds\(START_SECONDS\)/, 'game run has a resettable countdown');
 assert.match(guild, /nextScore >= TARGET/, 'game has a defined completion condition');
 assert.match(css, /prefers-reduced-motion:reduce/, 'motion respects reduced-motion preference');
