@@ -129,9 +129,9 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
       <section className={styles.hero} aria-labelledby="sanctuary-home-title">
         <div className={styles.heroArtwork} aria-hidden="true" />
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}><Sun size={14} aria-hidden="true" /> THE SANCTUARY · BETA</p>
-          <h1 id="sanctuary-home-title">A calmer place to <em>grow together.</em></h1>
-          <p className={styles.intro}>Explore what is here today, try the current previews, and help shape what comes next. This is a living product showcase—not just a roadmap.</p>
+          <p className={styles.eyebrow}><Sun size={14} aria-hidden="true" /> THE SANCTUARY COMMUNITY</p>
+          <h1 id="sanctuary-home-title">A safe space for <em>dreamers, creators & explorers.</em></h1>
+          <p className={styles.intro}>Find your people, share what you create, discover new worlds and become part of something bigger. There is room here to begin again, find your spark, and grow together.</p>
           <div className={styles.heroActions}>
             <button className={styles.primaryButton} type="button" onClick={() => onNavigate('feed')}>Explore the community <ArrowRight size={16} aria-hidden="true" /></button>
             <a className={styles.secondaryButton} href="#feature-explorer">Explore upcoming features <ArrowDownRight size={16} aria-hidden="true" /></a>
