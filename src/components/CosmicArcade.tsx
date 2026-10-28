@@ -92,9 +92,15 @@ export function CosmicArcade() {
         const directions = readGamepadDirections(pad, pressed);
         if (time - lastNavigationAt.current > 180 && (directions.left || directions.right || directions.up || directions.down)) {
           if (onGameTabs) selectGameByOffset(directions.left || directions.up ? -1 : 1);
-          else if (selectedGameRef.current === 'snake') {
+          else if (selectedGameRef.current === 'snake' || selectedGameRef.current === 'crossword') {
             const key = directions.left ? 'ArrowLeft' : directions.right ? 'ArrowRight' : directions.up ? 'ArrowUp' : 'ArrowDown';
             window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+          } else if (selectedGameRef.current === 'wordsearch' && activeElement?.hasAttribute('data-grid-row')) {
+            const row = Number(activeElement.getAttribute('data-grid-row'));
+            const col = Number(activeElement.getAttribute('data-grid-col'));
+            const nextRow = Math.max(0, Math.min(7, row + (directions.down ? 1 : directions.up ? -1 : 0)));
+            const nextCol = Math.max(0, Math.min(7, col + (directions.right ? 1 : directions.left ? -1 : 0)));
+            arcadeRef.current?.querySelector<HTMLButtonElement>('[data-grid-row="' + nextRow + '"][data-grid-col="' + nextCol + '"]')?.focus({ preventScroll: true });
           } else {
             const controls = Array.from(arcadeRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex="0"]') ?? [])
               .filter((element) => element.offsetParent !== null && !element.closest('[role="tablist"]'));
@@ -108,9 +114,13 @@ export function CosmicArcade() {
           if (onGameTabs) {
             activeElement?.click();
             requestAnimationFrame(() => {
-              const controls = Array.from(arcadeRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex="0"]') ?? [])
-                .filter((element) => element.offsetParent !== null && !element.closest('[role="tablist"]'));
-              controls[0]?.focus({ preventScroll: true });
+              const gridStart = selectedGameRef.current === 'wordsearch' ? arcadeRef.current?.querySelector<HTMLButtonElement>('[data-grid-row="0"][data-grid-col="0"]') : null;
+              if (gridStart) gridStart.focus({ preventScroll: true });
+              else {
+                const controls = Array.from(arcadeRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex="0"]') ?? [])
+                  .filter((element) => element.offsetParent !== null && !element.closest('[role="tablist"]'));
+                controls[0]?.focus({ preventScroll: true });
+              }
             });
           } else if (activeElement && activeElement !== document.body && activeElement.tagName !== 'BODY') activeElement.click();
           else arcadeRef.current?.querySelector<HTMLButtonElement>('[data-arcade-game="' + selectedGameRef.current + '"]')?.focus();
@@ -221,7 +231,7 @@ export function CosmicArcade() {
                 const key = `${r}-${c}`;
                 const isSelected = selectedCells.includes(key);
                 const isFound = foundCells.includes(key);
-                return <button key={key} type="button" aria-label={`Row ${r + 1}, column ${c + 1}, ${letter}${isFound ? ', part of a found word' : ''}`} aria-pressed={isSelected} className={`${styles.letter} ${isSelected ? styles.selectedLetter : ''} ${isFound ? styles.foundLetter : ''}`} onClick={() => chooseCell(r, c)}>{letter}</button>;
+                return <button key={key} type="button" aria-label={`Row ${r + 1}, column ${c + 1}, ${letter}${isFound ? ', part of a found word' : ''}`} data-grid-row={r} data-grid-col={c} aria-pressed={isSelected} className={`${styles.letter} ${isSelected ? styles.selectedLetter : ''} ${isFound ? styles.foundLetter : ''}`} onClick={() => chooseCell(r, c)}>{letter}</button>;
               }))}
             </div>
             <aside className={styles.wordList}>
