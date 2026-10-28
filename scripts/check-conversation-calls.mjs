@@ -15,8 +15,6 @@ assert.ok(component.includes('candidate.description.sdp.length > 256_000'), 'SDP
 assert.ok(component.includes('candidate.candidate.length > 4_096'), 'ICE candidate strings must be bounded');
 assert.ok(component.includes('if (!isSignalPayload(payload)) return;'), 'Incoming broadcast payloads must be validated before processing');
 assert.ok(component.includes('queuedCandidates.current.length < 256'), 'Pending ICE candidates must be capped');
-assert.ok(component.includes('if (!isSignalPayload(payload)) return;'), 'Every incoming broadcast must pass payload validation');
-assert.ok(component.includes('queuedCandidates.current.length < 256'), 'Queued ICE candidates must have a strict upper bound');
 assert.ok(component.includes('activeCallRef.current === null && incomingRef.current === null'), 'Only one incoming call may be pending');
 assert.ok(thread.includes('ConversationCallPanel'), 'Call controls must be integrated into Sanctuary messages');
 assert.ok(migration.includes('conversation_members'), 'Call signalling must check conversation membership');
