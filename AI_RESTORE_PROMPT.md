@@ -224,39 +224,24 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 ## Current handoff: Sanctuary Connection Discovery (2026-10-28)
 
-Read the new Sanctuary Connection Discovery section in ROADMAP.md and the corresponding locked product decision in MASTER_BLUEPRINT.md before starting implementation.
+Read the “Sanctuary Connection Discovery” section in ROADMAP.md and the locked product direction in MASTER_BLUEPRINT.md before continuing.
 
 - Working branch: feat/sanctuary-connection-discovery-2026-10-28.
-- Agreed direction: People, Communities, and Topics are equally valid discovery paths; this is meaningful community connection, not dating.
-- Build in sequence: repository/schema/security audit → data and permissions foundation → explainable relevance engine → discovery UI → profile/feed integration → connection lifecycle → optional Sanctuary Intelligence integration → tests, accessibility/security review, and branch closeout.
-- Reuse existing social systems; do not create duplicate profiles, feeds, follows, or messaging primitives.
-- Keep questionnaires optional and private by default. Never silently use private reflections, messages, sensitive disclosures, or inferred health traits for matching. Use member-approved data, explicit controls, transparent explanations, block/report enforcement, and server-side permissions.
-- No deployment during this work. Finish implementation and checks on the branch, report outstanding staging/browser/device gates accurately, and leave combined release decisions for later.
-- The roadmap records a plan, not completed implementation. Update status only with evidence.
-
-
-### Latest implementation checkpoint (2026-10-28)
-
-A first discovery integration slice is now on the branch:
-- `src/modules/profiles/components/ProfileDiscovery.tsx` now offers People, Communities & Gatherings, and Topics tabs.
-- People search reuses the public profile search service, can match member-approved public interest tags, and offers suggestions based on shared public interests with the overlap shown on the card.
-- Topics reuses `fetchFeed` and filters existing public feed reflections by story tag/content.
-- Communities & Gatherings reuses `fetchEvents` and surfaces upcoming events; this is not yet dedicated group/community discovery.
-- `src/modules/profiles/components/ProfileInterestsEditor.tsx` lets members add up to 12 interests and choose private or public discovery visibility. Approved public interests appear on discovery cards and public profile pages.
-- `src/modules/profiles/discoveryInterests.ts`, `src/services/supabase/database.types.ts`, and `supabase/migrations/20261028150000_member_discovery_interests.sql` add the interests service, typing, and an RLS-protected table. Public reads are constrained to interests of profiles in the public discoverable-profile projection.
-- `src/components/AppWorkspace.tsx` connects discovery actions to existing feed/events navigation, and the discovery CSS has responsive layouts and keyboard focus states.
-- The private self-discovery centre remains separate; private questionnaire answers and reflections are not used by the new discovery tabs.
-
-**Still outstanding:** audit DB/RLS and existing friendship/connection capabilities; add persistent member-controlled interest/tag preferences only after schema audit; implement explainable matching; dedicated groups/communities discovery; connection request/follow/save/hide/block/report lifecycle where missing; integrate questionnaire data only via explicit member controls; run typecheck/lint/build and focused tests; inspect mobile/browser behaviour and security permissions. No deployment has been run. Remote commits succeeded, but no local build or runtime test was available and the latest commit reports no GitHub status checks, so do not mark the branch verified.
+- Agreed direction: People, Communities, and Topics are equally valid discovery paths. This is meaningful community connection, not dating.
+- Reuse existing profile, feed, event, messaging, notification, and navigation systems; avoid duplicate social primitives.
+- Keep private self-discovery reflections and questionnaire answers separate from discovery. Member interests are private by default; public interest discovery is opt-in and is gated by the public discoverable-profile projection.
+- Current implementation includes People / Communities & Gatherings / Topics tabs, public-feed topic filtering, upcoming-event discovery, profile interest editing, public interest display, interest search, and explainable shared-public-interest suggestions.
+- Database migration: supabase/migrations/20261028150000_member_discovery_interests.sql. It is committed but has not been applied to Supabase.
+- Still outstanding: dedicated groups/community discovery, persistent connection requests/follows/saves/hides/blocks/reports as appropriate, broader intention/preferences and questionnaire integration, final upstream sync, and full validation.
+- The branch is currently 3 commits behind main. Before merge, reconcile upstream changes and review shared workspace/docs.
+- Validation is incomplete: repository cloning was blocked by this runtime's network access. Vercel status reports a build-rate-limit/upgrade-plan failure, not compiler diagnostics; typecheck, lint, build, browser/device QA, and database/RLS tests remain unverified.
+- Do not deploy during implementation. Finish integration and checks on the branch, document remaining staging gates, and leave release to the project's later combined release decision.
 
 ### Latest implementation checkpoint (2026-10-28)
 
-A first discovery integration slice is now on the branch:
-- `src/modules/profiles/components/ProfileDiscovery.tsx` now offers People, Communities & Gatherings, and Topics tabs.
-- People search reuses the existing public profile search service.
-- Topics reuses `fetchFeed` and filters existing public feed reflections by story tag/content.
-- Communities & Gatherings reuses `fetchEvents` and surfaces upcoming events; this is not yet dedicated group/community discovery.
-- `src/components/AppWorkspace.tsx` connects the discovery actions to existing feed/events navigation, and the discovery CSS was made responsive with accessible tab and focus states.
-- The private self-discovery centre remains separate; no private answers are used by the new discovery tabs.
+- src/modules/profiles/components/ProfileDiscovery.tsx: accessible People, Communities & Gatherings, and Topics tabs; people search by public name or public interests; shared-interest suggestions explain the overlapping tags; topics use the existing public feed; gatherings use existing events.
+- src/modules/profiles/components/ProfileInterestsEditor.tsx and src/modules/profiles/discoveryInterests.ts: member-controlled interests (up to 12), private by default, optional public discovery, local-demo fallback, and public-interest lookup.
+- src/modules/profiles/components/PublicProfilePage.tsx: displays member-approved public interests while keeping profile/feed loading resilient if the optional interest lookup fails.
+- supabase/migrations/20261028150000_member_discovery_interests.sql and src/services/supabase/database.types.ts: RLS-protected interest persistence and type definitions.
+- scripts/check-discovery-interests-contract.mjs and npm run check:discovery-interests: added static contract checks; they have not been executed in this environment.
 
-**Still outstanding:** audit DB/RLS and existing friendship/connection capabilities; add persistent member-controlled interest/tag preferences only after schema audit; implement explainable matching; dedicated groups/communities discovery; connection request/follow/save/hide/block/report lifecycle where missing; integrate questionnaire data only via explicit member controls; run typecheck/lint/build and focused tests; inspect mobile/browser behaviour and security permissions. No deployment has been run. Remote commits succeeded, but no local build or runtime test was available and the latest commit reports no GitHub status checks, so do not mark the branch verified.
