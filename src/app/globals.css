@@ -240,3 +240,154 @@ body::before {
     background-attachment: scroll;
   }
 }
+
+
+/*
+ * Cosmic mobile experience — reference-led responsive layer.
+ * Keep the theme tokens central and preserve each alternate theme.
+ */
+:root {
+  --bg: #080b1b;
+  --surface: #11152b;
+  --surface-raised: #191e3a;
+  --ink: #f4f2ff;
+  --muted: #b6b7d4;
+  --line: rgb(153 151 226 / 22%);
+  --accent: #b5a0ff;
+  --accent-contrast: #11102a;
+  --accent-soft: rgb(181 160 255 / 14%);
+  --shadow-card: 0 12px 34px rgb(0 0 0 / 26%);
+  --radius-sm: 10px;
+  --radius-md: 15px;
+  --radius-lg: 22px;
+}
+
+:root[data-theme="dark"] {
+  --bg: #080b1b;
+  --surface: #11152b;
+  --surface-raised: #191e3a;
+  --ink: #f4f2ff;
+  --muted: #b6b7d4;
+  --line: rgb(153 151 226 / 22%);
+  --accent: #b5a0ff;
+  --accent-contrast: #11102a;
+  --accent-soft: rgb(181 160 255 / 14%);
+  --shadow-card: 0 12px 34px rgb(0 0 0 / 26%);
+}
+
+/* Soft nebula glow is decorative only; all content remains above it. */
+body {
+  background-image:
+    radial-gradient(ellipse at 12% 0%, rgb(96 75 186 / 16%), transparent 34rem),
+    radial-gradient(ellipse at 100% 32%, rgb(30 126 176 / 10%), transparent 32rem);
+  background-attachment: fixed;
+}
+
+:where(button, [role="button"], a, input, select, textarea) {
+  touch-action: manipulation;
+}
+
+:where(button, [role="button"], a) {
+  transition:
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+
+:where(button, [role="button"]):active {
+  transform: scale(0.985);
+}
+
+:where(input, select, textarea) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+:where(img, video, canvas, svg) {
+  max-width: 100%;
+}
+
+@media (max-width: 700px) {
+  html {
+    scroll-padding-top: 5.25rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-attachment: scroll;
+    background-image:
+      radial-gradient(ellipse at 5% 0%, rgb(96 75 186 / 18%), transparent 22rem),
+      radial-gradient(ellipse at 100% 25%, rgb(30 126 176 / 12%), transparent 20rem);
+  }
+
+  :where(main, [role="main"]) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  :where(h1, h2, h3) {
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  :where(button, [role="button"], input, select, textarea) {
+    min-height: 42px;
+  }
+
+  :where(input, select, textarea) {
+    font-size: 16px;
+  }
+
+  :where(button, [role="button"]) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Make existing glass/card surfaces feel intentional on narrow screens. */
+  :where([class*="card"], [class*="Card"], .cosmic-outline) {
+    min-width: 0;
+    border-color: var(--line);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+  }
+
+  :where([class*="grid"], [class*="Grid"]) {
+    min-width: 0;
+  }
+
+  :where([class*="row"], [class*="Row"]) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  :where(pre, code) {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+
+  /* Respect phone safe areas for bottom navigation and sticky actions. */
+  :where([class*="bottomNav"], [class*="bottom-nav"], [class*="BottomNav"], [data-mobile-nav]) {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  :where([class*="sticky"], [class*="Sticky"]) {
+    scroll-margin-bottom: 5.5rem;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --space-4: 12px;
+    --space-6: 18px;
+    --radius-lg: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(button, [role="button"], a) {
+    transition: none;
+  }
+
+  :where(button, [role="button"]):active {
+    transform: none;
+  }
+}
