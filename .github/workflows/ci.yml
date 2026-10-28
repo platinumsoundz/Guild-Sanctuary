@@ -35,6 +35,7 @@ jobs:
       - run: npm run check:daily-reflection
       - run: npm run check:navigation
       - run: npm run check:feed-polish
+      - run: npm run check:comment-actions
       - run: npm run check:event-time
       - run: npm run check:personal-planner
       - run: npm run check:personal-habits

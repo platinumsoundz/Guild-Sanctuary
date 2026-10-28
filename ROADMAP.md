@@ -634,3 +634,11 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 
 - **Follow-up polish (2026-10-28):** Learning-path results show the exact selected preferences used to shape the suggestion, and the user-requested local text export includes the learning path, its rationale and its non-clinical disclaimer when a learning preference was answered. Answers remain session-only; export remains an explicit local user action.
+
+
+## Community comment reliability — 2026-10-28
+
+- **Implemented on `fix/community-comment-action-reliability-2026-10-28`; validation pending:** comment loading now has a visible pending state and prevents repeat loads; successful empty results are distinguished from failed/uncompleted loads; posting trims empty text and blocks duplicate submits while pending.
+- Existing edit/delete/like/report actions are preserved. A focused static contract is wired into CI.
+- Remaining gates: exact-head contract, TypeScript/build, and desktop/mobile authenticated interaction tests. This is a client reliability improvement, not a replacement for database authorization/RLS.
+- No database migration, production deployment, account, payment, or provider settings changed.
