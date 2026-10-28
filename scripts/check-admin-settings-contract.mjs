@@ -6,6 +6,7 @@ const admin = read('../src/modules/moderation/AdminDashboard.tsx');
 const moderation = read('../src/modules/moderation/ModerationDashboard.tsx');
 const service = read('../src/modules/moderation/service.ts');
 const messageMigration = read('../supabase/migrations/20261028163256_moderate_reported_messages.sql');
+const messageReportMigration = read('../supabase/migrations/20261028165508_scope_message_reports_to_members.sql');
 const types = read('../src/services/supabase/database.types.ts');
 
 const checks = [
@@ -19,6 +20,7 @@ const checks = [
   ['moderation actions use the server-side authorization RPC', /rpc\('apply_moderation_action'/.test(service)],
   ['message hide/remove/restore actions update message visibility', /requested_target_type='message'[\s\S]*?update public\.messages set state/.test(messageMigration)],
   ['message moderation validates that the target still exists', /requested_target_type = 'message' and not exists\(select 1 from public\.messages/.test(messageMigration)],
+  ['message reports require a visible message in a conversation the reporter belongs to', /state = ''visible''::public\.content_state/.test(messageReportMigration) && /public\.is_active_conversation_member\(conversation_id\)/.test(messageReportMigration)],
   ['message target-owner lookup is typed for the frontend', /get_report_target_owner:[\s\S]*?Returns: string \| null/.test(types)],
 ];
 
