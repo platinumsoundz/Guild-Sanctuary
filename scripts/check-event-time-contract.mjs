@@ -25,6 +25,8 @@ assert.ok(component.includes('Location unavailable · coordinates are missing or
 assert.ok(component.includes('Happening within 10 km'), 'selected map areas must show nearby event discovery');
 assert.ok(component.includes('getDistanceKm(') && component.includes('formatDistance(distanceKm)'), 'nearby events must be distance-ranked and show readable distance');
 assert.ok(component.includes('No other events with valid locations are within 10 km'), 'nearby discovery must have a clear empty state');
+assert.ok(component.includes("event.id !== selectedMapEvent.id"), 'nearby results must exclude the currently selected event');
+assert.ok(component.includes("locationCoords: { latitude: Number(latitude), longitude: Number(longitude) }"), 'editing an event must persist coordinate changes');
 assert.ok(styles.includes('.mapExplorer') && styles.includes('.mapFrame'), 'map explorer must have dedicated layout styles');
 assert.ok(styles.includes('.mapUnavailable'), 'invalid event locations must have a styled fallback state');
 assert.ok(styles.includes('.nearbyPanel') && styles.includes('.nearbyEventActive'), 'nearby event discovery must have responsive selectable styles');
