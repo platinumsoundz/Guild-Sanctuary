@@ -82,6 +82,18 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
       }
       if (signal.type === 'accept' && activeCallRef.current) {
         setCallState('connecting');
+        const pc = peerRef.current;
+        if (pc && !pc.localDescription) {
+          void (async () => {
+            try {
+              const offer = await pc.createOffer();
+              await pc.setLocalDescription(offer);
+              await sendSignal({ type: 'offer', callId: signal.callId, description: offer });
+            } catch {
+              setError('The call offer could not be created. Hang up and try again.');
+            }
+          })();
+        }
         return;
       }
       const pc = peerRef.current;
@@ -165,12 +177,9 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     activeCallRef.current = id;
     setCallId(id);
     try {
-      const pc = await preparePeer(kind);
+      await preparePeer(kind);
       setCallState('calling');
       await sendSignal({ type: 'invite', callId: id, kind });
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      await sendSignal({ type: 'offer', callId: id, description: offer });
     } catch (callError) {
       resetCall();
       setError(callError instanceof Error ? callError.message : 'Could not start the call.');
