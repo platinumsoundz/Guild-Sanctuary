@@ -11,6 +11,13 @@ Status: design and implementation checklist only. No terminal runtime, compute p
 - Persistent home storage survives workspace stop/restart; reset and delete require confirmation and explain data-loss impact.
 - Package installation is performed by the actual isolated guest OS, subject to disk, CPU, memory, process, runtime and network quotas.
 
+### Repository control-plane groundwork
+
+- A staged migration now defines a safe, owner-readable `guild_workspace_status` row for lifecycle state and bounded disk/CPU/memory/runtime quotas.
+- Infrastructure mappings live separately in `guild_workspace_runtime_private`; provider instance IDs and persistent-volume references are not granted to browser roles. Only `service_role` receives table privileges for this private mapping.
+- Authenticated members can read only their own active-account status row. They cannot directly create, change, or delete workspace status through the browser; a future server-side orchestrator must own lifecycle transitions.
+- These tables are schema groundwork only. The migration is not applied, and no provider, runtime, volume, terminal gateway, or billing path has been provisioned.
+
 ### Required control plane
 1. Authenticate every action with the current Sanctuary session and resolve the account from verified claims, never from a client-supplied user ID.
 2. Check active-account status, workspace ownership, plan limits and abuse/rate limits before provisioning or opening a terminal.
