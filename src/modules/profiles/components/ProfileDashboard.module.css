@@ -293,3 +293,208 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Profile refresh: stronger hierarchy, calmer surfaces, and accessible controls. */
+.dashboard {
+  gap: clamp(16px, 2.2vw, 26px);
+  padding: clamp(20px, 4vw, 48px) clamp(16px, 5vw, 64px) 64px;
+}
+
+.pageHeader {
+  align-items: flex-end;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.pageHeader h1 {
+  font-size: clamp(27px, 3vw, 36px);
+  letter-spacing: -0.035em;
+}
+
+.pageHeader .eyebrow {
+  margin-bottom: 8px;
+  letter-spacing: 1.35px;
+}
+
+.profileActions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.editButton,
+.saveButton {
+  min-height: 42px;
+  padding: 10px 17px;
+  border-radius: 999px;
+  transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.editButton:hover,
+.saveButton:hover {
+  transform: translateY(-1px);
+}
+
+.editor,
+.showcase {
+  padding: clamp(16px, 2.5vw, 26px);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.editor {
+  gap: 24px;
+}
+
+.sectionHeading {
+  align-items: flex-end;
+  padding-bottom: 14px;
+}
+
+.sectionHeading h2 {
+  font-size: clamp(20px, 2vw, 25px);
+  letter-spacing: -0.025em;
+}
+
+.imageFields,
+.detailGrid {
+  gap: 16px;
+}
+
+.field {
+  gap: 8px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.field input,
+.field textarea,
+.field select {
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.field textarea {
+  min-height: 100px;
+}
+
+.field input:focus-visible,
+.field textarea:focus-visible,
+.field select:focus-visible,
+.themeControl input:focus-visible,
+.editButton:focus-visible,
+.saveButton:focus-visible,
+.uploadLabel input:focus-visible {
+  outline: 2px solid var(--profile-color);
+  outline-offset: 3px;
+  border-color: var(--profile-color);
+}
+
+.showcaseGrid {
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.showcaseItem {
+  gap: 10px;
+  padding: 15px;
+  border-radius: 10px;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+
+.showcaseItem:hover {
+  border-color: color-mix(in srgb, var(--profile-color) 45%, var(--line));
+  transform: translateY(-1px);
+}
+
+.showcaseItem p {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.showcaseItem img,
+.showcaseItem audio,
+.showcaseItem video {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.showcaseItem video {
+  max-height: 300px;
+}
+
+.showcaseWorld,
+.storyTag {
+  letter-spacing: 0.65px;
+}
+
+.storyTag {
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+
+.emptyShowcase {
+  padding: 18px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  line-height: 1.6;
+}
+
+.error {
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, #b33b32 35%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, #b33b32 6%, transparent);
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .pageHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profileActions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 580px) {
+  .dashboard {
+    gap: 14px;
+    padding: 18px 12px 34px;
+  }
+
+  .editor,
+  .showcase {
+    padding: 14px;
+    border-radius: 11px;
+  }
+
+  .sectionHeading {
+    align-items: flex-start;
+  }
+
+  .showcaseGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editButton,
+  .saveButton,
+  .showcaseItem,
+  .field input,
+  .field textarea,
+  .field select {
+    transition: none;
+  }
+
+  .editButton:hover,
+  .saveButton:hover,
+  .showcaseItem:hover {
+    transform: none;
+  }
+}
