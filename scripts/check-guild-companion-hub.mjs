@@ -7,8 +7,8 @@ const guild = readFileSync('src/components/GuildWorld.tsx', 'utf8');
 const migration = readFileSync('supabase/migrations/20261028214500_guild_library_entries.sql', 'utf8');
 
 for (const text of [
-  'Designed for server-backed account sync', 'Device-local today',
-  'Sign in & sync', 'syncLibrary', 'supabase.auth.getUser()',
+  'Account library sync is available', 'Local cache + account sync', 'DELETED_IDS_KEY', 'removeGame', 'queued removals were applied',
+  'Sign in & sync', 'syncLibrary', 'supabase.auth.getUser()', 'pendingDeletes', 'guild_library_entries').delete().eq('id', id),
   "from('guild_library_entries')", 'Your local library is unchanged',
   'Syncing…', 'storageWarning', 'could not read or save the device-local cache', 'Sign in and sync to keep a server copy',
   'persistent home volume', 'Unified game library', 'Music lounge',
