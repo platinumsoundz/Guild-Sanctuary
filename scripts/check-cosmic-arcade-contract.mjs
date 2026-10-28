@@ -7,8 +7,18 @@ const solitaire = readFileSync('src/components/LunarSolitaire.tsx', 'utf8');
 const crossword = readFileSync('src/components/CelestialCrossword.tsx', 'utf8');
 const css = readFileSync('src/components/CosmicArcade.module.css', 'utf8');
 const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
+const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
+const gamesHub = readFileSync('src/components/GamesHub.tsx', 'utf8');
+const supportPanel = readFileSync('src/modules/support/SupportPanel.tsx', 'utf8');
 
 assert.match(navigation, /id:\s*'games',\s*label:\s*'Cosmic Arcade'/, 'Cosmic Arcade remains reachable from navigation');
+assert.match(workspace, /activeNavigation === 'games' \? \(\s*<CosmicArcade \/>/, 'Cosmic Arcade route renders only the Sanctuary-built arcade');
+assert.doesNotMatch(gamesHub, /import \{ CosmicArcade \}/, 'external creator projects do not embed the Sanctuary-built arcade');
+assert.match(supportPanel, /<GamesHub \/>/, 'creator support page retains external creator projects');
+assert.match(gamesHub, /The 5 Sleeves 2D/,'creator projects retain The 5 Sleeves 2D');
+assert.match(gamesHub, /The 5 Sleeves 3D/,'creator projects retain The 5 Sleeves 3D');
+assert.match(gamesHub, /My Roblox World/,'creator projects retain the Roblox experience');
+assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the Bedrock server');
 assert.match(arcade, /Starseed Word Search/, 'word search preview remains available');
 assert.match(arcade, /selectedGame === 'crossword' \? <CelestialCrossword \/>/, 'crossword is connected to the game selector');
 assert.match(arcade, /id: 'crossword',[^\n]*status: 'Playable preview'/, 'crossword is advertised as playable');
