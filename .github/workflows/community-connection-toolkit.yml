@@ -34,5 +34,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node scripts/check-community-connection-toolkit.mjs
+      - run: node --experimental-strip-types scripts/test-community-connection.mjs
       - run: npm run typecheck
       - run: npm run build
