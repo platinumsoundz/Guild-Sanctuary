@@ -21,7 +21,7 @@ for (const required of [
   'buildCommunityPost',
   'Life lesson',
   'Conversation starter',
-  'A question for the community',
+  'What would you like to ask?',
   'isGuest',
   'publishPost',
   'role="alert"',
