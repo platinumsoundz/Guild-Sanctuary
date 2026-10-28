@@ -28,6 +28,7 @@ function RoleManagement() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageIsError, setMessageIsError] = useState(false);
 
   const filteredMembers = useMemo(() => members.filter((member) => {
     if (roleFilter !== 'all' && member.role !== roleFilter) return false;
@@ -40,6 +41,7 @@ function RoleManagement() {
   const searchMembers = async () => {
     const requestedQuery = query.trim();
     if (!requestedQuery) {
+      setMessageIsError(true);
       setMessage('Enter a username to search.');
       setMembers([]);
       setSelected(null);
@@ -47,6 +49,7 @@ function RoleManagement() {
     }
     setLoading(true);
     setMessage('');
+    setMessageIsError(false);
     setSelected(null);
     try {
       const client = getSupabaseBrowserClient();
@@ -59,6 +62,7 @@ function RoleManagement() {
     } catch (error) {
       setMembers([]);
       setSelected(null);
+      setMessageIsError(true);
       setMessage(error instanceof Error ? error.message : 'Member search failed.');
     } finally {
       setLoading(false);
@@ -74,6 +78,7 @@ function RoleManagement() {
     if (!window.confirm('Change @' + selected.username + ' from ' + previousLabel + ' to ' + nextLabel + '?' + warning)) return;
     setSaving(true);
     setMessage('');
+    setMessageIsError(false);
     try {
       const { error } = await getSupabaseBrowserClient().rpc('set_member_role', {
         requested_user_id: selected.id,
@@ -84,6 +89,7 @@ function RoleManagement() {
       setSelected({ ...selected, role });
       setMessage(`Role updated for @${selected.username} to ${roles.find((item) => item.value === role)?.label ?? role}.`);
     } catch (error) {
+      setMessageIsError(true);
       setMessage(error instanceof Error ? error.message : 'Role change was rejected.');
     } finally {
       setSaving(false);
@@ -104,7 +110,7 @@ function RoleManagement() {
         <input id="member-search" value={query} onChange={(event) => setQuery(event.target.value)} minLength={1} maxLength={24} placeholder="Search username…" disabled={loading || saving} required />
         <button type="submit" disabled={loading}><Search size={16} aria-hidden="true" /> {loading ? 'Searching…' : 'Search'}</button>
       </form>
-      {message && <p className={styles.message} role="status">{message}</p>}
+      {message && <p className={`${styles.message} ${messageIsError ? styles.messageError : ''}`} role={messageIsError ? 'alert' : 'status'}>{message}</p>}
       {members.length > 0 && (
         <section className={styles.memberResults} aria-label="Member search results">
           <div className={styles.resultsToolbar}>
@@ -117,7 +123,7 @@ function RoleManagement() {
           </div>
           {filteredMembers.length > 0 ? <div className={styles.memberList}>
           {filteredMembers.map((member) => (
-            <button type="button" key={member.id} className={`${styles.memberRow} ${selected?.id === member.id ? styles.selectedMember : ''}`} disabled={saving} aria-pressed={selected?.id === member.id} onClick={() => { setSelected(member); setRole(member.role); setMessage(''); }}>
+            <button type="button" key={member.id} className={`${styles.memberRow} ${selected?.id === member.id ? styles.selectedMember : ''}`} disabled={saving} aria-pressed={selected?.id === member.id} onClick={() => { setSelected(member); setRole(member.role); setMessage(''); setMessageIsError(false); }}>
               <span><strong>{member.display_name}</strong><small>@{member.username} · {member.status}</small></span>
               <span className={styles.rolePill}>{roles.find((item) => item.value === member.role)?.label ?? member.role}</span>
             </button>
