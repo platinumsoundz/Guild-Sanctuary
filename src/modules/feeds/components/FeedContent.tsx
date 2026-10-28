@@ -38,6 +38,7 @@ export function FeedContent() {
   const [lessonContext, setLessonContext] = useState('');
   const [lessonLearned, setLessonLearned] = useState('');
   const [lessonHelpfulNow, setLessonHelpfulNow] = useState('');
+  const [lessonQuestion, setLessonQuestion] = useState('');
   const [conversationContext, setConversationContext] = useState('');
   const [communityQuestion, setCommunityQuestion] = useState('');
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
@@ -77,7 +78,7 @@ export function FeedContent() {
       context: postMode === 'conversation' ? conversationContext : lessonContext,
       lesson: lessonLearned,
       helpfulNow: lessonHelpfulNow,
-      question: communityQuestion,
+      question: postMode === 'conversation' ? communityQuestion : lessonQuestion,
     }, draft, storyTag, Boolean(attachmentFile));
     if (preparedPost.error) {
       setActionError(preparedPost.error);
@@ -101,6 +102,7 @@ export function FeedContent() {
       setLessonContext('');
       setLessonLearned('');
       setLessonHelpfulNow('');
+      setLessonQuestion('');
       setConversationContext('');
       setCommunityQuestion('');
       setAttachmentError(null);
@@ -164,7 +166,7 @@ export function FeedContent() {
   return (
     <section className={styles.content} aria-live="polite" aria-labelledby="feed-heading">
       {currentUser && !isGuest && <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
-        <label className={styles.composerLabel} htmlFor="post-content">Share with Sanctuary</label>
+        <label className={styles.composerLabel} htmlFor={postMode === 'open' ? 'post-content' : postMode === 'life-lesson' ? 'lesson-learned' : 'community-question'}>Share with Sanctuary</label>
         <div className={styles.connectionToolkit} aria-label="Choose a way to share">
           <p className={styles.toolkitHeading}>A little structure can help people connect</p>
           <div className={styles.templateChoices}>
@@ -192,7 +194,7 @@ export function FeedContent() {
               </label>
               <label className={styles.guidedField} htmlFor="lesson-question">
                 <span>Invite a conversation <em>(optional)</em></span>
-                <textarea id="lesson-question" value={communityQuestion} maxLength={1200} onChange={(event) => setCommunityQuestion(event.currentTarget.value)} placeholder="What would you ask others about this?" />
+                <textarea id="lesson-question" value={lessonQuestion} maxLength={1200} onChange={(event) => setLessonQuestion(event.currentTarget.value)} placeholder="What would you ask others about this?" />
               </label>
             </div>
           )}
@@ -253,7 +255,7 @@ export function FeedContent() {
         {(attachmentError || actionError) && <p className={styles.error} role="alert">{attachmentError ?? actionError}</p>}
         {attachmentFile && <p className={styles.attachmentName}>Selected {attachmentType}: {attachmentName}</p>}
         <div className={styles.composerFooter}>
-          <span>{postMode === 'open' ? draft.length : postMode === 'life-lesson' ? lessonContext.length + lessonLearned.length + lessonHelpfulNow.length + communityQuestion.length : conversationContext.length + communityQuestion.length} characters</span>
+          <span>{postMode === 'open' ? draft.length : postMode === 'life-lesson' ? lessonContext.length + lessonLearned.length + lessonHelpfulNow.length + lessonQuestion.length : conversationContext.length + communityQuestion.length} characters</span>
           <button className={styles.actionButton} type="submit">{postMode === 'life-lesson' ? 'Share life lesson' : postMode === 'conversation' ? 'Start conversation' : 'Publish'}</button>
         </div>
       </form>}
