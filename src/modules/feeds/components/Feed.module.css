@@ -17,3 +17,24 @@
     padding-left: 12px;
   }
 }
+
+
+/* Consistent card rhythm and mobile safe-area breathing room. */
+.feed {
+  min-width: 0;
+  padding-bottom: max(58px, calc(env(safe-area-inset-bottom) + 36px));
+}
+.feed :where(button, a, input, textarea, select) { scroll-margin-block: 18px; }
+.feed :where(button, a):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (min-width: 768px) {
+  .feed { padding-top: clamp(24px, 3vw, 38px); }
+}
+@media (max-width: 480px) {
+  .feed { padding-top: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed * { scroll-behavior: auto; }
+}
