@@ -240,6 +240,39 @@ begin
       or (requester_id = new.blocked_id and addressee_id = new.blocker_id)
     );
 
+  -- Close existing direct conversations and hide their history from normal
+  -- visible-message queries after a block, without affecting shared group chats.
+  update public.messages m
+  set state = 'hidden'
+  where m.conversation_id in (
+    select c.id from public.conversations c
+    where c.kind = 'direct'
+      and exists (
+        select 1 from public.conversation_members cm
+        where cm.conversation_id = c.id and cm.user_id = new.blocker_id
+      )
+      and exists (
+        select 1 from public.conversation_members cm
+        where cm.conversation_id = c.id and cm.user_id = new.blocked_id
+      )
+  );
+
+  update public.conversation_members cm
+  set left_at = coalesce(cm.left_at, now())
+  where cm.user_id in (new.blocker_id, new.blocked_id)
+    and cm.conversation_id in (
+      select c.id from public.conversations c
+      where c.kind = 'direct'
+        and exists (
+          select 1 from public.conversation_members other_member
+          where other_member.conversation_id = c.id and other_member.user_id = new.blocker_id
+        )
+        and exists (
+          select 1 from public.conversation_members other_member
+          where other_member.conversation_id = c.id and other_member.user_id = new.blocked_id
+        )
+    );
+
   return new;
 end;
 $$;
@@ -250,5 +283,41 @@ drop trigger if exists apply_profile_block_cleanup on public.profile_blocks;
 create trigger apply_profile_block_cleanup
   after insert on public.profile_blocks
   for each row execute function private.apply_profile_block_cleanup();
+
+create or replace function private.guard_direct_message_blocks()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if exists (
+    select 1
+    from public.conversations c
+    join public.conversation_members sender_member
+      on sender_member.conversation_id = c.id
+     and sender_member.user_id = new.sender_id
+     and sender_member.left_at is null
+    join public.conversation_members recipient_member
+      on recipient_member.conversation_id = c.id
+     and recipient_member.user_id <> new.sender_id
+     and recipient_member.left_at is null
+    join public.profile_blocks b
+      on (b.blocker_id = new.sender_id and b.blocked_id = recipient_member.user_id)
+      or (b.blocker_id = recipient_member.user_id and b.blocked_id = new.sender_id)
+    where c.id = new.conversation_id and c.kind = 'direct'
+  ) then
+    raise exception 'Messaging is unavailable because a member has blocked the other.';
+  end if;
+  return new;
+end;
+$;
+
+revoke all on function private.guard_direct_message_blocks() from public, anon, authenticated;
+
+drop trigger if exists guard_direct_message_blocks on public.messages;
+create trigger guard_direct_message_blocks
+  before insert on public.messages
+  for each row execute function private.guard_direct_message_blocks();
 
 commit;
