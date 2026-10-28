@@ -36,6 +36,10 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   const [orb, setOrb] = useState({ x: 28, y: 35 });
   const [best, setBest] = useState(0);
   const [notice, setNotice] = useState('');
+  const [isPageVisible, setIsPageVisible] = useState(true);
+  const enterButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
   const lastButtons = useRef<boolean[]>([]);
   const lastAxes = useRef({ x: 0, y: 0 });
   const gamepadActionAt = useRef(0);
@@ -93,7 +97,14 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   }, []);
 
   useEffect(() => {
-    if (gameState !== 'playing') return;
+    const updateVisibility = () => setIsPageVisible(document.visibilityState === 'visible');
+    updateVisibility();
+    document.addEventListener('visibilitychange', updateVisibility);
+    return () => document.removeEventListener('visibilitychange', updateVisibility);
+  }, []);
+
+  useEffect(() => {
+    if (gameState !== 'playing' || !isPageVisible) return;
     const timer = window.setInterval(() => {
       setSeconds((remaining) => {
         if (remaining <= 1) {
@@ -105,7 +116,27 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
       });
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [gameState]);
+  }, [gameState, isPageVisible]);
+
+  useEffect(() => {
+    if (!worldOpen) {
+      enterButtonRef.current?.focus({ preventScroll: true });
+      return;
+    }
+    closeButtonRef.current?.focus({ preventScroll: true });
+    const onDialogKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+        .filter((element) => element.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onDialogKeyDown);
+    return () => document.removeEventListener('keydown', onDialogKeyDown);
+  }, [worldOpen]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -192,16 +223,16 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
             <strong>{controllerConnected ? 'Controller detected' : 'Accessibility entry'}</strong>
             <span>{notice || "The Guild is ready when you are."}</span>
           </div>
-          <button type="button" className={styles.enterButton} onClick={enterGuild}>Enter Guild <span aria-hidden="true">↗</span></button>
+          <button ref={enterButtonRef} type="button" className={styles.enterButton} onClick={enterGuild}>Enter Guild <span aria-hidden="true">↗</span></button>
           {!controllerConnected && <button type="button" className={styles.dismiss} aria-label="Close Guild entry" onClick={() => setEntryOpen(false)}><X size={16} /></button>}
         </aside>
       )}
       {worldOpen && (
         <div className={styles.backdrop} role="dialog" aria-modal="true" aria-labelledby="guild-title">
-          <section className={styles.world}>
+          <section ref={dialogRef} className={styles.world}>
             <header className={styles.topbar}>
               <div className={styles.brand}><span className={styles.brandMark}><Orbit size={20} /></span><span><small>THE SANCTUARY · HIDDEN WORLD</small><strong id="guild-title">The Guild</strong></span></div>
-              <div className={styles.topActions}><span className={styles.connected}><Gamepad2 size={14} /> {controllerConnected ? 'Controller connected' : 'Keyboard / touch'}</span><button type="button" className={styles.closeButton} onClick={closeWorld}><X size={18} /> Exit Guild</button></div>
+              <div className={styles.topActions}><span className={styles.connected}><Gamepad2 size={14} /> {controllerConnected ? 'Controller connected' : 'Keyboard / touch'}</span><button ref={closeButtonRef} type="button" className={styles.closeButton} onClick={closeWorld}><X size={18} /> Exit Guild</button></div>
             </header>
             <div className={styles.content}>
               <div className={styles.hero}>
