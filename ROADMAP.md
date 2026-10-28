@@ -745,3 +745,11 @@ Current Guild implementation is now a **first UI/gameplay prototype**, not 0% co
 - Added `npm run check:guild-cloud-lab-control` source-contract coverage and documented the current boundary.
 - This is not a working Linux terminal and has not been deployed. The Cloud Lab schema migration remains unapplied; runtime/provider credentials, encrypted persistent volumes, lifecycle queue, spend budget, and live authorization tests remain prerequisites.
 
+## Guild calling hardening and Cloud Lab pause (2026-10-28)
+
+- Cloud Lab is visibly labelled **In development** and pinned for later. The UI now explains that the app/database can provide account/control-plane groundwork, but a real persistent Linux guest requires isolated compute and durable storage. No provider is selected and no compute is provisioned.
+- Hardened the call receiver to reject malformed Realtime broadcast payloads before processing, and capped pending ICE candidates to 256 to avoid unbounded queue growth.
+- Expanded calling source-contract coverage and documented the remaining real-device release checks.
+- Audio/video source implementation includes one-to-one WebRTC calls, private signalling, browser permission prompts, mute/camera toggles, timeouts and reconnect feedback. It is **not yet verified as production-ready**: no authenticated two-device end-to-end test has been run, and TURN relay configuration is absent, so some networks may fail to connect.
+- Next Guild improvements should prioritize playable browser games, a more useful local-first library, keyboard/controller navigation, accessibility, and clear native-game integration boundaries rather than spending time on Cloud Lab provisioning.
+
