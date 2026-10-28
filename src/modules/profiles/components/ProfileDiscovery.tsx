@@ -11,6 +11,7 @@ import { fetchMemberDiscoveryInterests, fetchPublicDiscoveryInterests, findUserI
 import { blockProfile, fetchBlockedProfileIds, fetchIncomingConnectionRequests, fetchRelationshipStates, followProfile, requestConnection, respondToConnection, unblockProfile, unfollowProfile, type RelationshipState } from '../connectionService';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
+import { ReportContentButton } from '@/modules/moderation/ReportContentButton';
 
 type DiscoveryTab = 'people' | 'communities' | 'topics';
 
@@ -276,6 +277,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
               onClick={() => onMessage(profile)}><MessageCircle size={13} aria-hidden="true" /> {relationshipStates.get(profile.userId)?.blocked ? 'Blocked' : profile.allowDirectMessages ? 'Message' : 'Messages closed'}</button>
             <button className={styles.blockButton} type="button" disabled={relationshipBusyId === profile.userId || relationshipStates.get(profile.userId)?.blocked}
               onClick={() => runRelationshipAction(profile.userId, 'block')} aria-label={`Block ${profile.displayName}`} title="Block member"><Ban size={13} aria-hidden="true" /></button>
+            <ReportContentButton targetType="user" targetId={profile.userId} />
           </div>
         </article>
       ))}
