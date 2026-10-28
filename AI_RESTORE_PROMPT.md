@@ -243,7 +243,7 @@ A first discovery integration slice is now on the branch:
 - People search reuses the public profile search service and can match member-approved public interest tags.
 - Topics reuses `fetchFeed` and filters existing public feed reflections by story tag/content.
 - Communities & Gatherings reuses `fetchEvents` and surfaces upcoming events; this is not yet dedicated group/community discovery.
-- `src/modules/profiles/components/ProfileInterestsEditor.tsx` lets members add up to 12 interests and choose private or public discovery visibility.
+- `src/modules/profiles/components/ProfileInterestsEditor.tsx` lets members add up to 12 interests and choose private or public discovery visibility. Approved public interests appear on discovery cards and public profile pages.
 - `src/modules/profiles/discoveryInterests.ts`, `src/services/supabase/database.types.ts`, and `supabase/migrations/20261028150000_member_discovery_interests.sql` add the interests service, typing, and an RLS-protected table. Public reads are constrained to interests of profiles in the public discoverable-profile projection.
 - `src/components/AppWorkspace.tsx` connects discovery actions to existing feed/events navigation, and the discovery CSS has responsive layouts and keyboard focus states.
 - The private self-discovery centre remains separate; private questionnaire answers and reflections are not used by the new discovery tabs.
