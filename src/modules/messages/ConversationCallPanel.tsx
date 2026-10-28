@@ -27,6 +27,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
   const [cameraOff, setCameraOff] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [remoteReady, setRemoteReady] = useState(false);
+  const [signallingReady, setSignallingReady] = useState(false);
   const localVideo = useRef<HTMLVideoElement>(null);
   const remoteVideo = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -122,8 +123,10 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     channel.subscribe((status) => {
       if (cancelled) return;
       if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        setSignallingReady(false);
         setError('Secure call signalling is unavailable. Check the Sanctuary call-signalling database policy and try again.');
       } else if (status === 'SUBSCRIBED') {
+        setSignallingReady(true);
         setError((current) => current?.startsWith('Secure call signalling') ? null : current);
       }
     });
@@ -131,6 +134,7 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
       cancelled = true;
       void client.removeChannel(channel);
       if (channelRef.current === channel) channelRef.current = null;
+      setSignallingReady(false);
       resetCall();
     };
     // The subscription is scoped to the selected conversation and user.
@@ -250,8 +254,8 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
       </div>
       {callState === 'idle' && !incoming && (
         <div className={styles.actions}>
-          <button type="button" onClick={() => void startCall('audio')} disabled={!conversationId}><Phone size={15} aria-hidden="true" /> Voice call</button>
-          <button type="button" onClick={() => void startCall('video')} disabled={!conversationId}><Video size={15} aria-hidden="true" /> Video call</button>
+          <button type="button" onClick={() => void startCall('audio')} disabled={!conversationId || !signallingReady}><Phone size={15} aria-hidden="true" /> Voice call</button>
+          <button type="button" onClick={() => void startCall('video')} disabled={!conversationId || !signallingReady}><Video size={15} aria-hidden="true" /> Video call</button>
         </div>
       )}
       {incoming && callState === 'idle' && (
