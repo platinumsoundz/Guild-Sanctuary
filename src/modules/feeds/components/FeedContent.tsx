@@ -78,7 +78,7 @@ export function FeedContent() {
       lesson: lessonLearned,
       helpfulNow: lessonHelpfulNow,
       question: communityQuestion,
-    }, draft, storyTag);
+    }, draft, storyTag, Boolean(attachmentFile));
     if (preparedPost.error) {
       setActionError(preparedPost.error);
       return;
