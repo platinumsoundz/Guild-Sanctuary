@@ -264,6 +264,19 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     }
   };
 
+  const openSavedProfile = async (userId: string) => {
+    try {
+      const profile = await fetchPublicProfileById(userId);
+      if (!profile) {
+        setRelationshipError('This saved profile is no longer publicly available.');
+        return;
+      }
+      onView(profile);
+    } catch {
+      setRelationshipError('This saved profile could not be opened right now.');
+    }
+  };
+
   const filteredPosts = useMemo(() => {
     const term = query.trim().replace(/^#/, '').toLocaleLowerCase();
     return posts.filter((post) => !term || getTopicLabel(post).toLocaleLowerCase().includes(term)
@@ -406,7 +419,10 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
             {savedProfiles.map((profile) => (
               <div className={styles.requestRow} key={profile.userId}>
                 <span><strong>{profile.displayName}</strong> <span>{profile.username}</span></span>
-                <div><button type="button" disabled={relationshipBusyId === profile.userId} onClick={() => runRelationshipAction(profile.userId, 'unsave')}>Remove</button></div>
+                <div>
+                  <button type="button" onClick={() => void openSavedProfile(profile.userId)}>View</button>
+                  <button type="button" disabled={relationshipBusyId === profile.userId} onClick={() => runRelationshipAction(profile.userId, 'unsave')}>Remove</button>
+                </div>
               </div>
             ))}
           </section>
