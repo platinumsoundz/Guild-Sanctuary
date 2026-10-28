@@ -12,7 +12,12 @@
 - A unique index exists on `(user_id, reflection_date)`, matching the client upsert key; a user/date history index also exists.
 - No SQL writes, migrations, auth settings, payment settings, or production deployments were performed.
 
-## Validation and release gates
+## Validation status
+- Daily Reflection contract passed on the exact head.
+- CI passed, including TypeScript and production build.
+- Cloudflare Worker build passed; deployment was skipped for the PR event.
+
+## Remaining validation and release gates
 - Run the Daily Reflection contract, typecheck and production build on the exact PR head.
 - Test read/save/update/history/delete with two authenticated accounts and verify one account cannot access the other's entries.
 - Test explicit import with legacy browser data; do not delete browser copies automatically.
