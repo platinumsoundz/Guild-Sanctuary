@@ -61,4 +61,4 @@ Browser storage can be cleared, is quota-limited, may be unavailable in private 
 
 ## Current implementation boundary
 
-The current Guild companion stores library metadata in this browser's localStorage, keeps selected media in the current browser session, and offers JSON backup/restore. Cloud Lab is a design/status panel only. There is no server-side Guild library sync, cloud media store, persistent Linux runtime or provisioned workspace volume in this change. These boundaries must remain visible until the real services exist.
+The current Guild companion stores a local cache, offers JSON backup/restore, and contains an explicit authenticated sync path for the staged Guild library table. The migration is not applied or live-tested, so sync is not yet verified against the target project. Selected media stays in the current browser session. Cloud Lab is a design/status panel backed only by staged control-plane schema; there is no runtime, terminal gateway, cloud media store or provisioned workspace volume. These boundaries must remain visible until the real services exist.
