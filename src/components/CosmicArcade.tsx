@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { CosmicSnake } from './CosmicSnake';
+import { LunarSolitaire } from './LunarSolitaire';
 import { BookOpen, CreditCard, Gem, LockKeyhole, MoonStar, Puzzle, RotateCcw, Sparkles, Star } from 'lucide-react';
 import styles from './CosmicArcade.module.css';
 
@@ -11,7 +12,7 @@ type Cell = { row: number; col: number };
 const games: { id: ArcadeGame; title: string; subtitle: string; icon: typeof Star; status: string }[] = [
   { id: 'wordsearch', title: 'Starseed Word Search', subtitle: 'Find the cosmic words hidden in the grid.', icon: Puzzle, status: 'Playable preview' },
   { id: 'crossword', title: 'Celestial Crossword', subtitle: 'Reflect on stars, planets and spiritual traditions.', icon: BookOpen, status: 'Coming soon' },
-  { id: 'solitaire', title: 'Lunar Solitaire', subtitle: 'A calm, moonlit take on a classic card game.', icon: MoonStar, status: 'Coming soon' },
+  { id: 'solitaire', title: 'Lunar Solitaire', subtitle: 'A calm, moonlit take on a classic card game.', icon: MoonStar, status: 'Playable preview' },
   { id: 'mahjong', title: 'Zodiac Mahjong', subtitle: 'Match celestial tiles and zodiac symbols.', icon: Gem, status: 'Coming soon' },
   { id: 'snake', title: 'Cosmic Snake', subtitle: 'Collect stardust and see how long you survive.', icon: Sparkles, status: 'Playable preview' },
 ];
@@ -126,7 +127,7 @@ export function CosmicArcade() {
         })}
       </div>
 
-      {selectedGame === 'snake' ? <CosmicSnake /> : selectedGame === 'wordsearch' ? (
+      {selectedGame === 'snake' ? <CosmicSnake /> : selectedGame === 'solitaire' ? <LunarSolitaire /> : selectedGame === 'wordsearch' ? (
         <div className={styles.playArea}>
           <div className={styles.playHeader}>
             <div><p className={styles.eyebrow}>MINDFUL PUZZLE</p><h2>Starseed Word Search</h2><p>Choose a word's first letter, then its last letter in a straight line. Horizontal, vertical and diagonal words all count.</p></div>
