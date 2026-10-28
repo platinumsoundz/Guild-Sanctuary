@@ -1,5 +1,5 @@
 begin;
-select plan(12);
+select plan(15);
 
 select ok(
   (select c.relrowsecurity from pg_catalog.pg_class c where c.oid = 'public.profile_follows'::regclass),
@@ -44,6 +44,21 @@ select ok(exists (
   select 1 from pg_catalog.pg_trigger
   where tgname = 'apply_profile_block_cleanup' and not tgisinternal
 ), 'blocking triggers relationship cleanup');
+
+select ok(exists (
+  select 1 from pg_catalog.pg_trigger
+  where tgname = 'guard_direct_message_blocks' and not tgisinternal
+), 'blocked members cannot send new direct messages');
+
+select ok(exists (
+  select 1 from pg_catalog.pg_trigger
+  where tgname = 'guard_direct_conversation_blocks' and not tgisinternal
+), 'blocked members cannot create a new direct conversation');
+
+select ok(exists (
+  select 1 from pg_catalog.pg_trigger
+  where tgname = 'notify_connection_request' and not tgisinternal
+), 'connection requests use the notification system');
 
 select * from finish();
 rollback;
