@@ -240,7 +240,7 @@ Read the new Sanctuary Connection Discovery section in ROADMAP.md and the corres
 
 A first discovery integration slice is now on the branch:
 - `src/modules/profiles/components/ProfileDiscovery.tsx` now offers People, Communities & Gatherings, and Topics tabs.
-- People search reuses the public profile search service and can match member-approved public interest tags.
+- People search reuses the public profile search service, can match member-approved public interest tags, and offers suggestions based on shared public interests.
 - Topics reuses `fetchFeed` and filters existing public feed reflections by story tag/content.
 - Communities & Gatherings reuses `fetchEvents` and surfaces upcoming events; this is not yet dedicated group/community discovery.
 - `src/modules/profiles/components/ProfileInterestsEditor.tsx` lets members add up to 12 interests and choose private or public discovery visibility. Approved public interests appear on discovery cards and public profile pages.
