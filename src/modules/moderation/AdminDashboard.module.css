@@ -186,3 +186,21 @@
   border-left: 3px solid #d97777;
   padding-left: 10px;
 }
+
+/* Consistent, high-visibility keyboard focus across the member-management controls. */
+.dashboard :is(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #b8c9b4;
+  outline-offset: 3px;
+}
+
+.dashboard :is(button, select, input, textarea) {
+  font: inherit;
+}
+
+.dashboard button:not(:disabled) {
+  cursor: pointer;
+}
+
+.dashboard :is(button, select, input, textarea):disabled {
+  cursor: not-allowed;
+}
