@@ -70,7 +70,7 @@ export type MessageRow = {
 export type ContentReportRow = {
   id: string;
   reporter_id: string;
-  target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+  target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
   target_id: string;
   reason: string;
   details: string | null;
@@ -300,7 +300,7 @@ export interface Database {
       };
       submit_content_report: {
         Args: {
-          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
           requested_target_id: string;
           requested_reason: string;
           requested_details?: string | null;
