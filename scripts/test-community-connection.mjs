@@ -21,9 +21,9 @@ const lesson = buildCommunityPost({
 }, '', '', false);
 assert.equal(lesson.error, null);
 assert.equal(lesson.storyTag, 'Life lesson');
-assert.match(lesson.content, /What was happening:\\nA difficult season/);
-assert.match(lesson.content, /What I learned:\\nAsk for help sooner\./);
-assert.match(lesson.content, /A question for the community:\\nWhat has helped you\?/);
+assert.match(lesson.content, /What was happening:\nA difficult season/);
+assert.match(lesson.content, /What I learned:\nAsk for help sooner\./);
+assert.match(lesson.content, /A question for the community:\nWhat has helped you\?/);
 
 const conversationMissing = buildCommunityPost({ ...base, mode: 'conversation' }, '', '', false);
 assert.equal(conversationMissing.error, 'Add a question you would genuinely like to discuss.');
