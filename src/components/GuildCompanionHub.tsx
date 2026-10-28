@@ -242,14 +242,16 @@ export function GuildCompanionHub() {
       }
       const synced = ((finalRows || []) as Array<{ id: string; title: string; platform: string; launch_url: string }>)
         .map((item) => ({ id: item.id, title: item.title, platform: item.platform, launchUrl: safeWebUrl(item.launch_url) }));
-      setGames(synced);
       try {
         window.localStorage.setItem(OWNER_KEY, authData.user.id);
         window.localStorage.removeItem(DELETED_IDS_KEY);
         setStorageWarning(false);
       } catch {
         setStorageWarning(true);
+        setSyncMessage('The server responded, but this browser could not safely save its account binding. Your visible library was left unchanged; export a backup and check browser storage before switching accounts.');
+        return;
       }
+      setGames(synced);
       setSyncMessage(`Synced ${synced.length} game entries to your Sanctuary account. Added ${added} new entr${added === 1 ? 'y' : 'ies'} from this device; queued removals were applied.`);
     } catch (error) {
       const detail = error instanceof Error ? error.message : 'Unknown connection error';
