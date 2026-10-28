@@ -220,6 +220,27 @@ create policy "public profile projection readable"
     or not (select private.is_profile_blocked(id))
   );
 
+-- Apply block filtering to every authenticated public discovery surface, not just profiles.
+drop policy if exists "blocked profiles excluded from posts" on public.posts;
+create policy "blocked profiles excluded from posts"
+  as restrictive for select to authenticated
+  on public.posts using (not (select private.is_profile_blocked(author_id)));
+
+drop policy if exists "blocked profiles excluded from short videos" on public.short_videos;
+create policy "blocked profiles excluded from short videos"
+  as restrictive for select to authenticated
+  on public.short_videos using (not (select private.is_profile_blocked(author_id)));
+
+drop policy if exists "blocked profiles excluded from events" on public.events;
+create policy "blocked profiles excluded from events"
+  as restrictive for select to authenticated
+  on public.events using (not (select private.is_profile_blocked(creator_id)));
+
+drop policy if exists "blocked profiles excluded from comments" on public.social_comments;
+create policy "blocked profiles excluded from comments"
+  as restrictive for select to authenticated
+  on public.social_comments using (not (select private.is_profile_blocked(author_id)));
+
 -- Blocking immediately removes follow edges and closes pending requests both ways.
 create or replace function private.apply_profile_block_cleanup()
 returns trigger
