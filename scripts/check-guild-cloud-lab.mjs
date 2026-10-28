@@ -25,6 +25,8 @@ for (const text of [
   'runtime_limit_minutes between 5 and 240',
   'set search_path = \'\'',
   'set_guild_workspace_status_updated_at',
+  'guard_guild_workspace_status_owner',
+  'Cloud Lab workspace ownership cannot be changed.',
 ]) {
   assert.ok(migration.includes(text), `Missing Cloud Lab control-plane contract: ${text}`);
 }
