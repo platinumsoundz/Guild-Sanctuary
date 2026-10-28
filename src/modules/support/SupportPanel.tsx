@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import styles from './SupportPanel.module.css';
-import { GamesHub } from '@/components/GamesHub';
 
 const tipOptions = [
   { id: 'tip_5_usd', amount: '$5' },
@@ -181,12 +180,6 @@ export function SupportPanel() {
 
         </div>
       )}
-
-      <section aria-labelledby="community-projects-title" className={styles.providers}>
-        <h2 id="community-projects-title">Support the community</h2>
-        <p className={styles.providerNote}>Explore the creator’s other projects and community game worlds below.</p>
-        <GamesHub />
-      </section>
 
       <p className={styles.privacy}>
         Contributions are optional and do not affect community visibility. External payment providers process
