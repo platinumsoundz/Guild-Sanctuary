@@ -7,6 +7,7 @@ import { fetchPublicProfileById } from '@/modules/profiles';
 import { useFeed } from '@/modules/feeds';
 import { ReportContentButton } from '@/modules/moderation';
 import { PostEngagement } from './PostEngagement';
+import { buildCommunityPost, type CommunityPostMode } from '@/modules/feeds/communityConnection';
 import styles from './FeedContent.module.css';
 
 function formatPostTime(value: string): string {
@@ -33,6 +34,12 @@ export function FeedContent() {
   const [attachmentType, setAttachmentType] = useState<PostMediaType | ''>('');
   const [attachmentName, setAttachmentName] = useState('');
   const [storyTag, setStoryTag] = useState('');
+  const [postMode, setPostMode] = useState<CommunityPostMode>('open');
+  const [lessonContext, setLessonContext] = useState('');
+  const [lessonLearned, setLessonLearned] = useState('');
+  const [lessonHelpfulNow, setLessonHelpfulNow] = useState('');
+  const [conversationContext, setConversationContext] = useState('');
+  const [communityQuestion, setCommunityQuestion] = useState('');
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const [authors, setAuthors] = useState<Record<string, PublicProfile>>({});
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
@@ -65,13 +72,24 @@ export function FeedContent() {
   const handlePublish = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setActionError(null);
+    const preparedPost = buildCommunityPost({
+      mode: postMode,
+      context: postMode === 'conversation' ? conversationContext : lessonContext,
+      lesson: lessonLearned,
+      helpfulNow: lessonHelpfulNow,
+      question: communityQuestion,
+    }, draft, storyTag);
+    if (preparedPost.error) {
+      setActionError(preparedPost.error);
+      return;
+    }
     try {
       await publishPost({
-        content: draft,
+        content: preparedPost.content,
         mediaUrl: null,
         mediaType: attachmentUrl.trim() ? attachmentType || null : null,
         mediaFile: attachmentFile,
-        storyTag: storyTag || null,
+        storyTag: preparedPost.storyTag,
       });
       setDraft('');
       setAttachmentUrl('');
@@ -79,6 +97,12 @@ export function FeedContent() {
       setAttachmentType('');
       setAttachmentName('');
       setStoryTag('');
+      setPostMode('open');
+      setLessonContext('');
+      setLessonLearned('');
+      setLessonHelpfulNow('');
+      setConversationContext('');
+      setCommunityQuestion('');
       setAttachmentError(null);
     } catch (submitError) {
       setActionError(submitError instanceof Error ? submitError.message : 'Post could not be published.');
@@ -141,14 +165,61 @@ export function FeedContent() {
     <section className={styles.content} aria-live="polite" aria-labelledby="feed-heading">
       {currentUser && !isGuest && <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
         <label className={styles.composerLabel} htmlFor="post-content">Share with Sanctuary</label>
-        <textarea
-          className="w-full max-w-full"
-          id="post-content"
-          value={draft}
-          onChange={(event) => setDraft(event.currentTarget.value)}
-          maxLength={2800}
-          placeholder="A reflection, thought, or moment..."
-        />
+        <div className={styles.connectionToolkit} aria-label="Choose a way to share">
+          <p className={styles.toolkitHeading}>A little structure can help people connect</p>
+          <div className={styles.templateChoices}>
+            <button className={styles.templateChoice} type="button" aria-pressed={postMode === 'open'} onClick={() => setPostMode('open')}>Free-form</button>
+            <button className={styles.templateChoice} type="button" aria-pressed={postMode === 'life-lesson'} onClick={() => setPostMode('life-lesson')}>Life lesson</button>
+            <button className={styles.templateChoice} type="button" aria-pressed={postMode === 'conversation'} onClick={() => setPostMode('conversation')}>Conversation starter</button>
+          </div>
+          {postMode === 'open' && (
+            <p className={styles.templateHint}>Share however feels natural. You can leave this completely unstructured.</p>
+          )}
+          {postMode === 'life-lesson' && (
+            <div className={styles.guidedFields}>
+              <p className={styles.templateHint}>Share only what feels comfortable. The optional details help others understand the lesson without needing your whole story.</p>
+              <label className={styles.guidedField} htmlFor="lesson-context">
+                <span>What was happening? <em>(optional)</em></span>
+                <textarea id="lesson-context" value={lessonContext} maxLength={1200} onChange={(event) => setLessonContext(event.currentTarget.value)} placeholder="A little context, only if useful..." />
+              </label>
+              <label className={styles.guidedField} htmlFor="lesson-learned">
+                <span>What did you learn? <em>(required)</em></span>
+                <textarea id="lesson-learned" value={lessonLearned} maxLength={1200} onChange={(event) => setLessonLearned(event.currentTarget.value)} placeholder="The part you want to pass on..." required />
+              </label>
+              <label className={styles.guidedField} htmlFor="lesson-helpful">
+                <span>What helps you now? <em>(optional)</em></span>
+                <textarea id="lesson-helpful" value={lessonHelpfulNow} maxLength={1200} onChange={(event) => setLessonHelpfulNow(event.currentTarget.value)} placeholder="A practice, reminder, or small step..." />
+              </label>
+              <label className={styles.guidedField} htmlFor="lesson-question">
+                <span>Invite a conversation <em>(optional)</em></span>
+                <textarea id="lesson-question" value={communityQuestion} maxLength={1200} onChange={(event) => setCommunityQuestion(event.currentTarget.value)} placeholder="What would you ask others about this?" />
+              </label>
+            </div>
+          )}
+          {postMode === 'conversation' && (
+            <div className={styles.guidedFields}>
+              <p className={styles.templateHint}>A genuine question is enough. Keep it kind, open, and comfortable to answer.</p>
+              <label className={styles.guidedField} htmlFor="conversation-context">
+                <span>A little context <em>(optional)</em></span>
+                <textarea id="conversation-context" value={conversationContext} maxLength={1200} onChange={(event) => setConversationContext(event.currentTarget.value)} placeholder="What made you think about this?" />
+              </label>
+              <label className={styles.guidedField} htmlFor="community-question">
+                <span>What would you like to ask? <em>(required)</em></span>
+                <textarea id="community-question" value={communityQuestion} maxLength={1200} onChange={(event) => setCommunityQuestion(event.currentTarget.value)} placeholder="What would you like to hear from others?" required />
+              </label>
+            </div>
+          )}
+        </div>
+        {postMode === 'open' && (
+          <textarea
+            className="w-full max-w-full"
+            id="post-content"
+            value={draft}
+            onChange={(event) => setDraft(event.currentTarget.value)}
+            maxLength={2800}
+            placeholder="A reflection, thought, or moment..."
+          />
+        )}
         <div className={styles.attachmentControls}>
           <label className={styles.uploadButton}>
             <span>{attachmentName ? `Change media: ${attachmentName}` : 'Add an image, audio, or video'}</span>
@@ -169,7 +240,7 @@ export function FeedContent() {
             </button>
           )}
         </div>
-        <label className={styles.storyTagField}>
+        {postMode === 'open' && <label className={styles.storyTagField}>
           <span>Story tag</span>
           <select value={storyTag} onChange={(event) => setStoryTag(event.currentTarget.value)}>
             <option value="">No tag</option>
@@ -178,12 +249,12 @@ export function FeedContent() {
             <option value="Story">Story</option>
 
           </select>
-        </label>
+        </label>}
         {(attachmentError || actionError) && <p className={styles.error} role="alert">{attachmentError ?? actionError}</p>}
         {attachmentFile && <p className={styles.attachmentName}>Selected {attachmentType}: {attachmentName}</p>}
         <div className={styles.composerFooter}>
-          <span>{draft.length}/2800</span>
-          <button className={styles.actionButton} type="submit">Publish</button>
+          <span>{postMode === 'open' ? draft.length : postMode === 'life-lesson' ? lessonContext.length + lessonLearned.length + lessonHelpfulNow.length + communityQuestion.length : conversationContext.length + communityQuestion.length} characters</span>
+          <button className={styles.actionButton} type="submit">{postMode === 'life-lesson' ? 'Share life lesson' : postMode === 'conversation' ? 'Start conversation' : 'Publish'}</button>
         </div>
       </form>}
       <div className={styles.sectionHeading}>
