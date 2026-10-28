@@ -67,76 +67,87 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
     if (!conversationId || !currentUserId || isGroup) return;
     let cancelled = false;
     const client = getSupabaseBrowserClient();
-    const channel = client.channel(`sanctuary-call:${conversationId}`, { config: { private: true } });
-    channelRef.current = channel;
-    channel.on('broadcast', { event: 'signal' }, ({ payload }) => {
-      const signal = payload as Signal;
-      if (!signal || signal.from === currentUserId || typeof signal.callId !== 'string') return;
-      if (signal.type === 'invite') {
-        if (activeCallRef.current === null) setIncoming(signal);
+    let channel: ReturnType<typeof client.channel> | null = null;
+
+    void (async () => {
+      const { data, error: authError } = await client.auth.getUser();
+      if (cancelled) return;
+      if (authError || !data.user || data.user.id !== currentUserId) {
+        setError('Live Sanctuary calling requires a valid signed-in session. Please sign in again.');
         return;
       }
-      if (signal.callId !== activeCallRef.current) return;
-      if (signal.type === 'reject' || signal.type === 'hangup') {
-        resetCall();
-        return;
-      }
-      if (signal.type === 'accept' && activeCallRef.current) {
-        setCallState('connecting');
-        const pc = peerRef.current;
-        if (pc && !pc.localDescription) {
-          void (async () => {
-            try {
-              const offer = await pc.createOffer();
-              await pc.setLocalDescription(offer);
-              await sendSignal({ type: 'offer', callId: signal.callId, description: offer });
-            } catch {
-              setError('The call offer could not be created. Hang up and try again.');
-            }
-          })();
+
+      await client.realtime.setAuth();
+      if (cancelled) return;
+      channel = client.channel(`sanctuary-call:${conversationId}`, { config: { private: true } });
+      channelRef.current = channel;
+      channel.on('broadcast', { event: 'signal' }, ({ payload }) => {
+        const signal = payload as Signal;
+        if (!signal || signal.from === currentUserId || typeof signal.callId !== 'string') return;
+        if (signal.type === 'invite') {
+          if (activeCallRef.current === null) setIncoming(signal);
+          return;
         }
-        return;
-      }
-      const pc = peerRef.current;
-      if (!pc) return;
-      void (async () => {
-        try {
-          if (signal.type === 'offer' && signal.description) {
-            await pc.setRemoteDescription(signal.description);
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            await sendSignal({ type: 'answer', callId: signal.callId, description: answer });
-            for (const candidate of queuedCandidates.current.splice(0)) await pc.addIceCandidate(candidate);
-          } else if (signal.type === 'answer' && signal.description) {
-            await pc.setRemoteDescription(signal.description);
-            for (const candidate of queuedCandidates.current.splice(0)) await pc.addIceCandidate(candidate);
-          } else if (signal.type === 'ice' && signal.candidate) {
-            if (pc.remoteDescription) await pc.addIceCandidate(signal.candidate);
-            else queuedCandidates.current.push(signal.candidate);
+        if (signal.callId !== activeCallRef.current) return;
+        if (signal.type === 'reject' || signal.type === 'hangup') {
+          resetCall();
+          return;
+        }
+        if (signal.type === 'accept' && activeCallRef.current) {
+          setCallState('connecting');
+          const pc = peerRef.current;
+          if (pc && !pc.localDescription) {
+            void (async () => {
+              try {
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                await sendSignal({ type: 'offer', callId: signal.callId, description: offer });
+              } catch {
+                setError('The call offer could not be created. Hang up and try again.');
+              }
+            })();
           }
-        } catch {
-          setError('The call connection failed. Check your connection and try again.');
+          return;
         }
-      })();
-    });
-    void client.realtime.setAuth().then(() => {
-      if (cancelled) return;
-      channel.subscribe((status) => {
-      if (cancelled) return;
-      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-        setSignallingReady(false);
-        setError('Secure call signalling is unavailable. Check the Sanctuary call-signalling database policy and try again.');
-      } else if (status === 'SUBSCRIBED') {
-        setSignallingReady(true);
-        setError((current) => current?.startsWith('Secure call signalling') ? null : current);
-      }
+        const pc = peerRef.current;
+        if (!pc) return;
+        void (async () => {
+          try {
+            if (signal.type === 'offer' && signal.description) {
+              await pc.setRemoteDescription(signal.description);
+              const answer = await pc.createAnswer();
+              await pc.setLocalDescription(answer);
+              await sendSignal({ type: 'answer', callId: signal.callId, description: answer });
+              for (const candidate of queuedCandidates.current.splice(0)) await pc.addIceCandidate(candidate);
+            } else if (signal.type === 'answer' && signal.description) {
+              await pc.setRemoteDescription(signal.description);
+              for (const candidate of queuedCandidates.current.splice(0)) await pc.addIceCandidate(candidate);
+            } else if (signal.type === 'ice' && signal.candidate) {
+              if (pc.remoteDescription) await pc.addIceCandidate(signal.candidate);
+              else queuedCandidates.current.push(signal.candidate);
+            }
+          } catch {
+            setError('The call connection failed. Check your connection and try again.');
+          }
+        })();
       });
-    }).catch(() => {
+      channel.subscribe((status) => {
+        if (cancelled) return;
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          setSignallingReady(false);
+          setError('Secure call signalling is unavailable. Check the Sanctuary call-signalling database policy and try again.');
+        } else if (status === 'SUBSCRIBED') {
+          setSignallingReady(true);
+          setError((current) => current?.startsWith('Secure call signalling') ? null : current);
+        }
+      });
+    })().catch(() => {
       if (!cancelled) setError('Could not authenticate the private call channel. Please sign in again.');
     });
+
     return () => {
       cancelled = true;
-      void client.removeChannel(channel);
+      if (channel) void client.removeChannel(channel);
       if (channelRef.current === channel) channelRef.current = null;
       setSignallingReady(false);
       resetCall();
