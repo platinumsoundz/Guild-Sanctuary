@@ -145,6 +145,18 @@ begin
     raise exception 'You cannot create a relationship with yourself.';
   end if;
 
+  if tg_table_name = 'profile_connections' and tg_op = 'UPDATE' then
+    if new.requester_id is distinct from old.requester_id
+      or new.addressee_id is distinct from old.addressee_id
+      or new.member_low_id is distinct from old.member_low_id
+      or new.member_high_id is distinct from old.member_high_id
+      or old.status <> 'pending'
+      or new.status not in ('accepted', 'declined') then
+      raise exception 'Only the recipient may respond to a pending connection request.';
+    end if;
+    new.responded_at := coalesce(new.responded_at, now());
+  end if;
+
   if exists (
     select 1 from public.profile_blocks b
     where (b.blocker_id = left_id and b.blocked_id = right_id)
