@@ -7,22 +7,22 @@
  */
 :root {
   color-scheme: dark;
-  --bg: #101713;
-  --surface: #18221b;
-  --surface-raised: #202c23;
-  --ink: #edf4ed;
-  --muted: #b1beb4;
-  --line: #354438;
-  --accent: #a4c9a7;
-  --accent-contrast: #132016;
-  --accent-soft: rgb(164 201 167 / 12%);
+  --bg: #080b1b;
+  --surface: #11152b;
+  --surface-raised: #191e3a;
+  --ink: #f4f2ff;
+  --muted: #b6b7d4;
+  --line: rgb(153 151 226 / 22%);
+  --accent: #b5a0ff;
+  --accent-contrast: #11102a;
+  --accent-soft: rgb(181 160 255 / 14%);
   --danger: #ff8a80;
   --success: #8bd5a5;
   --warning: #f0c36d;
-  --shadow-card: 0 8px 28px rgb(0 0 0 / 22%);
-  --radius-sm: 7px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --shadow-card: 0 12px 34px rgb(0 0 0 / 26%);
+  --radius-sm: 10px;
+  --radius-md: 15px;
+  --radius-lg: 22px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
