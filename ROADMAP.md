@@ -1,8 +1,20 @@
 # The Sanctuary — Roadmap
 
-Last updated: 2026-10-27
+Last updated: 2026-10-28
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
+
+## Cosmic Arcade update (2026-10-28)
+
+- **In code, QA pending:** Restored a dedicated Games navigation entry labelled “Cosmic Arcade”; existing creator/community game links remain in the Games hub.
+- **Playable prototypes:** Starseed Word Search supports two-tap straight-line selection (horizontal, vertical, and diagonal), exact found-cell highlighting, progress, reset, and completion feedback. Cosmic Snake has keyboard and mobile controls, score, personal-best tracking for the current visit, and restart.
+- **Playable preview:** Lunar Solitaire has a shuffled 52-card deal, seven tableau columns, stock/waste recycling, alternating-colour descending tableau moves, Ace-to-King suit foundations, automatic reveal of newly exposed cards, restart, and responsive card styling. It is a client-side single-visit prototype; persistence and automated gameplay QA remain pending.
+- **Playable preview:** Celestial Crossword has across/down clues, shared letter cells, answer checking, keyboard arrow navigation between open cells, clue selection that focuses the first letter, reset, and responsive layout. It is a small starter puzzle, not yet a larger puzzle pack.
+- **Planned:** Zodiac Mahjong remains a concept and is not labelled playable.
+- **Regression contract added:** `npm run check:cosmic-arcade` checks key gameplay, crossword keyboard/clue-focus guardrails, navigation, styles, and spending-lock guardrails; it is a static source contract, not browser QA. The latest crossword interaction and contract-check changes are pushed to the branch; CI was queued when last checked and must finish before this revision is called verified.
+- **Token economy — design only / spending locked:** Theme previews and example consumables (hints, extra lives, and a 50-token Snake revive) are shown as future ideas. No arcade item is purchasable and this UI does not deduct tokens.
+- **Required before token spending:** Implement a server-authoritative game economy/RPC with authenticated ownership, wallet balance checks, idempotency keys, game-session validation, and immutable ledger entries. Define whether revives/boosts are consumables, expiry/refund rules, and exploit/rate limits. Require owner-approved Supabase migration and isolated staging tests before enabling spending.
+- **Validation status:** CI for the latest crossword keyboard-navigation and regression-check changes was queued at last inspection. Keyboard/screen-reader review, interactive mobile gameplay QA, persistence tests, and end-to-end wallet/RPC tests remain pending.
 
 Owner: product owner (Ashley)
 Status: planning document. Nothing here is built unless it says so.

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Copy, ExternalLink, Gamepad2, Maximize2, X } from 'lucide-react';
 import styles from './GamesHub.module.css';
+import { CosmicArcade } from './CosmicArcade';
 
 type GameId = 'sleeves2d' | 'sleeves3d';
 
@@ -49,6 +50,7 @@ export function GamesHub() {
 
   return (
     <main className={styles.hub}>
+      <CosmicArcade />
       <header className={styles.header}>
         <p className={styles.eyebrow}>THE SANCTUARY ARCADE</p>
         <h1>Games</h1>
