@@ -6,7 +6,8 @@ import { CalendarDays, Compass, Globe2, MapPin, MessageCircle, Search, Sparkles,
 import { fetchFeed } from '@/modules/feeds';
 import { fetchEvents } from '@/modules/events';
 import type { EventView } from '@/modules/events';
-import { searchPublicProfiles } from '../service';
+import { fetchPublicProfileById, searchPublicProfiles } from '../service';
+import { fetchPublicDiscoveryInterests, findUserIdsByPublicInterest } from '../discoveryInterests';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
@@ -31,6 +32,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
   const [activeTab, setActiveTab] = useState<DiscoveryTab>('people');
   const [query, setQuery] = useState('');
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
+  const [publicInterests, setPublicInterests] = useState<Map<string, string[]>>(new Map());
   const [posts, setPosts] = useState<Post[]>([]);
   const [events, setEvents] = useState<EventView[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -42,6 +44,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     const normalizedQuery = query.trim();
     if (activeTab !== 'people' || normalizedQuery.length < 2) {
       setProfiles([]);
+      setPublicInterests(new Map());
       setError(null);
       setIsSearching(false);
       return;
@@ -51,9 +54,22 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     setIsSearching(true);
     setError(null);
     const timeout = setTimeout(() => {
-      searchPublicProfiles(normalizedQuery)
-        .then((results) => {
-          if (!cancelled) setProfiles(results.filter((profile) => profile.userId !== currentUserId));
+      Promise.all([
+        searchPublicProfiles(normalizedQuery),
+        findUserIdsByPublicInterest(normalizedQuery),
+      ])
+        .then(async ([nameResults, interestUserIds]) => {
+          const interestProfiles = await Promise.all(interestUserIds.map((userId) => fetchPublicProfileById(userId)));
+          const unique = new Map<string, PublicProfile>();
+          for (const profile of [...nameResults, ...interestProfiles.filter((item): item is PublicProfile => item !== null)]) {
+            if (profile.userId !== currentUserId) unique.set(profile.userId, profile);
+          }
+          const merged = [...unique.values()].slice(0, 40);
+          const interests = await fetchPublicDiscoveryInterests(merged.map((profile) => profile.userId));
+          if (!cancelled) {
+            setProfiles(merged);
+            setPublicInterests(interests);
+          }
         })
         .catch(() => {
           if (!cancelled) setError('People could not be searched right now. Please try again.');
@@ -158,6 +174,11 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
                 <div className={styles.profileCopy}>
                   <div className={styles.nameLine}><h2>{profile.displayName}</h2><span>@{profile.username}</span></div>
                   <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
+                  {(publicInterests.get(profile.userId) ?? []).length > 0 && (
+                    <div className={styles.interestTags} aria-label="Public interests">
+                      {(publicInterests.get(profile.userId) ?? []).map((interest) => <span key={interest}>#{interest}</span>)}
+                    </div>
+                  )}
                   <ProfileSocialLinks links={profile.socialLinks} />
                   {(profile.location || profile.age || profile.starSign || profile.belief) && (
                     <div className={styles.publicDetails}>
