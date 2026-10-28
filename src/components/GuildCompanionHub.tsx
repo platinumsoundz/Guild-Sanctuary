@@ -116,7 +116,7 @@ export function GuildCompanionHub() {
       setSlideshow(false);
     }
     const skipped = files.length - selected.length;
-    setMediaMessage(selected.length ? `${selected.length} ${type === 'audio' ? 'audio file(s)' : 'photo(s)'} selected. ${skipped ? `${skipped} skipped (unsupported type, size limit, or 30-file limit). ` : ''}Files stay in this browser session; they are not uploaded.` : `No files added. Choose supported ${type === 'audio' ? 'audio up to 100 MB each (250 MB total)' : 'images up to 25 MB each (100 MB total)'}; the limit is 30 files per lounge.`);
+    setMediaMessage(selected.length ? `${selected.length} ${type === 'audio' ? 'audio file(s)' : 'photo(s)'} selected. ${skipped ? `${skipped} skipped (unsupported type, per-file/total-size limit, or 30-file limit). ` : ''}Files stay in this browser session; they are not uploaded.` : `No files added. Choose supported ${type === 'audio' ? 'audio up to 100 MB each (250 MB total)' : 'images up to 25 MB each (100 MB total)'}; the limit is 30 files per lounge.`);
   };
 
   const exportLibrary = () => {
