@@ -19,7 +19,7 @@ function atLeast(version, minimum) {
 
 assert.ok(nextVersion && atLeast(nextVersion, '16.4.1'), 'Next.js must be at least 16.4.1 to include the October 2026 critical security fixes');
 assert.equal(envVersion, nextVersion, '@next/env must match the locked Next.js version');
-assert.match(nextSpec ?? '', /^\\^16\\.4\\.[1-9]\\d*$/, 'package.json must keep Next.js on the patched 16.4.x line');
+assert.ok(typeof nextSpec === 'string' && nextSpec.startsWith('^16.4.') && atLeast(nextSpec.slice(1), '16.4.1'), 'package.json must keep Next.js on the patched 16.4.x line');
 for (const name of Object.keys(lock.packages).filter((key) => key.startsWith('node_modules/@next/swc-'))) {
   assert.equal(lock.packages[name].version, nextVersion, name + ' must match the locked Next.js version');
   assert.ok(lock.packages[name].integrity?.startsWith('sha512-'), name + ' must retain package integrity verification');
