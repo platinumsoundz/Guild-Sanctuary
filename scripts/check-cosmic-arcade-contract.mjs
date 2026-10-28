@@ -26,6 +26,9 @@ assert.match(arcade, /getConnectedGamepad/, 'Cosmic Arcade polls for connected c
 assert.match(arcade, /readGamepadDirections/, 'Cosmic Arcade maps controller directions');
 assert.match(arcade, /pressed\(0\)/, 'Cosmic Arcade maps the primary controller button to selection');
 assert.match(arcade, /data-arcade-game/, 'controller navigation can focus game tabs');
+assert.match(arcade, /data-grid-row=\{r\} data-grid-col=\{c\}/, 'word-search cells expose coordinates for two-dimensional controller navigation');
+assert.match(arcade, /nextRow = Math.max\(0, Math.min\(7/, 'word-search controller navigation stays within grid rows');
+assert.match(arcade, /selectedGameRef.current === 'crossword'/, 'crossword receives controller directional input');
 assert.match(arcade, /bigPicture/, 'Cosmic Arcade supports immersive Big Picture mode');
 assert.match(arcade, /F6/, 'Big Picture mode has a keyboard accessibility shortcut');
 assert.match(css, /\.bigPicture/, 'Cosmic Arcade Big Picture mode has immersive layout styling');
