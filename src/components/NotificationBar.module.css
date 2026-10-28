@@ -282,3 +282,8 @@
     z-index: 1200;
   }
 }
+/* Cosmic glass treatment for the activity panel; positioning remains viewport-safe on phones. */
+.panel { border-color: rgb(164 145 255 / 34%); border-radius: 15px; background: rgb(14 17 48 / 96%); box-shadow: 0 20px 55px rgb(2 3 20 / 48%), 0 0 28px rgb(126 102 255 / 10%); backdrop-filter: blur(20px); }
+.panelHeader { border-bottom-color: rgb(164 145 255 / 23%); background: linear-gradient(100deg, rgb(112 86 206 / 12%), transparent); }
+.item:hover, .unread { background: linear-gradient(100deg, rgb(143 113 255 / 14%), rgb(78 180 255 / 5%)); }
+.markAllButton, .closeButton { border-radius: 8px; border-color: rgb(164 145 255 / 28%); background: rgb(24 28 67 / 90%); }
