@@ -7,19 +7,24 @@
  */
 :root {
   color-scheme: dark;
-  --bg: #101713;
-  --surface: #18221b;
+  --bg: #090d25;
+  --surface: #111735;
   --surface-raised: #202c23;
-  --ink: #edf4ed;
-  --muted: #b1beb4;
-  --line: #354438;
-  --accent: #a4c9a7;
-  --accent-contrast: #132016;
-  --accent-soft: rgb(164 201 167 / 12%);
-  --danger: #ff8a80;
-  --success: #8bd5a5;
-  --warning: #f0c36d;
-  --shadow-card: 0 8px 28px rgb(0 0 0 / 22%);
+  --ink: #f2f1ff;
+  --muted: #b9c4e7;
+  --line: #343b70;
+  --accent: #a995ff;
+  --accent-contrast: #100d2b;
+  --accent-soft: rgb(169 149 255 / 16%);
+  --danger: #ff9aab;
+  --success: #8fe7d0;
+  --warning: #f3d38a;
+  --shadow-card: 0 12px 34px rgb(2 4 25 / 32%);
+  --cosmic-violet: #a995ff;
+  --cosmic-lavender: #d5c6ff;
+  --cosmic-cyan: #8be9ff;
+  --cosmic-gold: #f3d38a;
+  --surface-glass: rgb(17 23 53 / 78%);
   --radius-sm: 7px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -161,9 +166,10 @@ body {
   position: relative;
   isolation: isolate;
   background-image:
-    radial-gradient(ellipse at 12% 4%, rgb(106 83 219 / 10%), transparent 38rem),
-    radial-gradient(ellipse at 88% 16%, rgb(42 177 198 / 8%), transparent 34rem),
-    radial-gradient(ellipse at 52% 100%, rgb(177 111 220 / 7%), transparent 42rem);
+    radial-gradient(ellipse at 12% 4%, rgb(106 83 219 / 18%), transparent 38rem),
+    radial-gradient(ellipse at 88% 16%, rgb(42 177 198 / 13%), transparent 34rem),
+    radial-gradient(ellipse at 52% 100%, rgb(177 111 220 / 11%), transparent 42rem),
+    linear-gradient(180deg, #090d25 0%, #0b1030 54%, #090d25 100%);
   background-attachment: fixed;
 }
 
