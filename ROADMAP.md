@@ -587,3 +587,12 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 ### Owner-only provider handoff
 Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment setup; Cloudflare/Vercel account settings, secrets, domains and provider configuration remain owner tasks. No provider account settings or secrets were edited as part of this cleanup.
+
+
+## Sanctuary Intelligence — first-release learning path (2026-10-28)
+
+- **In code on feature branch; validation pending:** Extend the existing private, session-only self-discovery questionnaire with an explainable personalised learning suggestion based on the member's chosen learning approach and, when provided, motivation and decision-support preferences.
+- Suggestions include a starting action, a practice step, a reflection prompt, and explicit explanation that these are changeable preferences—not a validated learning style, diagnosis, or prediction.
+- Raw answers remain in component memory for the active session. No account persistence, analytics, profile projection, public sharing, new database table, migration, or provider setting is introduced.
+- Reuses the existing self-discovery module and contract check to avoid duplicating questionnaire engines or overlapping the unfinished account-backed work in PR #145 and the broad beta showcase PR #85.
+- **Release status:** feature branch only; run the existing self-discovery contract, TypeScript check, and production build on the exact head. Browser/device and accessibility QA remain outstanding.
