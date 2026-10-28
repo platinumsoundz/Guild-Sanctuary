@@ -1,5 +1,12 @@
 # The Sanctuary — Roadmap
 
+## Server-authoritative storage direction — 2026-10-28
+
+- Recommended architecture: server-backed canonical account data and cross-device sync, with bounded local caching for offline resilience. Keep large personal music/photos on-device by default unless a member explicitly opts into a quota-backed private cloud backup.
+- Added `docs/sanctuary-storage-strategy.md` with data placement, sync rules, quotas, retention/deletion requirements and a staged migration plan.
+- Guild Companion now says the game library is device-local today, describes server sync as planned rather than available, and warns if this browser cannot persist the local library. Cloud Lab copy now recommends an encrypted server-side home volume and explicitly avoids provisioning paid compute without an approved provider and spend ceiling.
+- This is an architecture/UI hardening step only. Server-backed Guild library sync, cloud media backup, Linux compute and persistent workspace volumes are not implemented or provisioned by this change.
+
 Last updated: 2026-10-28
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
