@@ -31,6 +31,6 @@ for (const text of [
   assert.ok(migration.includes(text), `Missing Cloud Lab control-plane contract: ${text}`);
 }
 assert.ok(architecture.includes('provider credentials in server-side secrets'));
-assert.ok(architecture.includes('persistent home directory'));
+assert.ok(architecture.includes('Persistent home storage'));
 assert.ok(architecture.includes('spend budgets'));
 console.log('Guild Cloud Lab control-plane contract passed.');
