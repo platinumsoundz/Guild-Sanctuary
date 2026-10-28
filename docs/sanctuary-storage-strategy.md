@@ -50,8 +50,8 @@ Browser storage can be cleared, is quota-limited, may be unavailable in private 
 
 ## Migration path
 
-1. Keep the current Guild library explicitly labelled device-local, with JSON export/import until its authenticated server API and row-level policies are implemented and tested.
-2. Implement account-scoped library metadata storage and sync status; test two accounts, multiple devices, offline edits, deletion and quota failures before changing the UI's claim.
+1. Keep the Guild library labelled as a local cache plus optional account sync until the migration is applied and the authenticated flow is tested against the target Supabase project.
+2. The initial account-scoped metadata table, row-level policies, 500-entry server cap and explicit sync action now exist in repository code. Before treating sync as production-ready, test two accounts, multiple devices, offline edits and queued deletions, concurrent inserts, migration rollback/recovery, and quota failures.
 3. Keep audio/photo selection local. Consider a separate opt-in private-media backup only after storage quotas, signed upload/download URLs, access policies, retention and deletion tests exist.
 4. Provision Cloud Lab only after a provider, region, isolation boundary, storage class, backup policy, cost ceiling and emergency shutdown path are approved.
 5. Use an encrypted per-workspace persistent volume for Linux home directories. A workspace stop/start must preserve that volume; reset/delete must clearly warn about data loss and remove related snapshots according to policy.
