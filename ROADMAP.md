@@ -680,7 +680,7 @@ Help people discover people, communities, and ideas they may resonate with throu
 
 - Audited the current discovery entry point and confirmed existing reusable modules: public profile search/profile pages, public feed retrieval, event retrieval, and the private self-discovery centre.
 - Updated the existing profile discovery component into a responsive, keyboard-accessible People / Communities & Gatherings / Topics hub. People uses existing public username/display-name search and now also searches member-approved public interest tags; Topics queries the existing public feed and filters visible reflections by story tag/content; Communities & Gatherings surfaces upcoming events from the existing event service.
-- Added a member-controlled interest editor on the profile dashboard, with a 12-interest limit, private-by-default visibility, and an explicit public-discovery toggle.
+- Added a member-controlled interest editor on the profile dashboard, with a 12-interest limit, private-by-default visibility, and an explicit public-discovery toggle. Member-approved public interests now appear on discovery cards and public profile pages.
 - Added `profile_interests` migration and TypeScript database typing. RLS permits members to manage their own interests and limits public reads to interests belonging to discoverable profiles in the public profile projection.
 - Connected discovery actions to existing feed/events navigation in AppWorkspace rather than introducing duplicate feed/event systems.
 - Added loading/error/empty states, responsive cards, keyboard focus styling, messaging-disabled state, and a note that private reflections are not used in these searches.
