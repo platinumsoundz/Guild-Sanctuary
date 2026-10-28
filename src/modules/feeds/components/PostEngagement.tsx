@@ -20,6 +20,9 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
   const [commentAuthors, setCommentAuthors] = useState<Record<string, string>>({});
   const [draft, setDraft] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [loadedCommentsForPostId, setLoadedCommentsForPostId] = useState<string | null>(null);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingBody, setEditingBody] = useState('');
@@ -29,6 +32,9 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
     setComments([]);
     setCommentAuthors({});
     setIsOpen(false);
+    setIsLoadingComments(false);
+    setLoadedCommentsForPostId(null);
+    setIsSubmittingComment(false);
     setError(null);
     setEditingCommentId(null);
     setEditingBody('');
@@ -45,9 +51,12 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
   }, [postId, userId]);
 
   const toggleComments = async () => {
+    if (isLoadingComments) return;
     const nextIsOpen = !isOpen;
     setIsOpen(nextIsOpen);
-    if (nextIsOpen && comments.length === 0) {
+    if (nextIsOpen && loadedCommentsForPostId !== postId) {
+      setIsLoadingComments(true);
+      setError(null);
       try {
         const items = await fetchPostComments(postId);
         setComments(items);
@@ -66,8 +75,11 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
           await getCommentEngagement(comment.id, userId),
         ] as const));
         setCommentEngagement((current) => ({ ...current, ...Object.fromEntries(engagement) }));
+        setLoadedCommentsForPostId(postId);
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Comments could not be loaded.');
+      } finally {
+        setIsLoadingComments(false);
       }
     }
   };
@@ -119,15 +131,21 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
 
   const handleComment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const body = draft.trim();
+    if (!body || isSubmittingComment) return;
+    setIsSubmittingComment(true);
     try {
-      const comment = await addPostComment(postId, userId, draft);
+      const comment = await addPostComment(postId, userId, body);
       setComments((current) => [...current, comment]);
+      setLoadedCommentsForPostId(postId);
       setCommentEngagement((current) => ({ ...current, [comment.id]: { liked: false, count: 0 } }));
       setStats((current) => ({ ...current, commentsCount: current.commentsCount + 1 }));
       setDraft('');
       setError(null);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Your comment could not be posted.');
+    } finally {
+      setIsSubmittingComment(false);
     }
   };
 
@@ -137,13 +155,13 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
         <button type="button" aria-pressed={stats.liked} onClick={() => void handleLike()}>
           <Heart size={15} fill={stats.liked ? 'currentColor' : 'none'} /> Like <span>{stats.likesCount}</span>
         </button>
-        <button type="button" aria-expanded={isOpen} onClick={() => void toggleComments()}>
+        <button type="button" aria-expanded={isOpen} aria-busy={isLoadingComments} disabled={isLoadingComments} onClick={() => void toggleComments()}>
           <MessageCircle size={15} /> Comments <span>{stats.commentsCount}</span>
         </button>
       </div>
       {isOpen && (
         <div className={styles.commentPanel}>
-          {comments.length === 0 ? <p className={styles.empty}>No comments yet.</p> : comments.map((comment) => (
+          {isLoadingComments ? <p className={styles.empty} role="status">Loading comments…</p> : comments.length === 0 && loadedCommentsForPostId === postId && !error ? <p className={styles.empty}>No comments yet.</p> : comments.map((comment) => (
             <article className={styles.commentItem} key={comment.id}>
               <p className={styles.comment}><strong>{commentAuthors[comment.authorId] ?? (comment.authorId === userId ? 'You' : 'Community member')}</strong></p>
               {editingCommentId === comment.id ? (
@@ -166,8 +184,8 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
             </article>
           ))}
           <form onSubmit={handleComment}>
-            <input value={draft} onChange={(event) => setDraft(event.currentTarget.value)} maxLength={1000} placeholder="Write a comment…" required />
-            <button type="submit">Post</button>
+            <input value={draft} onChange={(event) => setDraft(event.currentTarget.value)} maxLength={1000} placeholder="Write a comment…" required disabled={isSubmittingComment} />
+            <button type="submit" disabled={isSubmittingComment || !draft.trim()}>{isSubmittingComment ? 'Posting…' : 'Post'}</button>
           </form>
         </div>
       )}
