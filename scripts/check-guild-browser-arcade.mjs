@@ -14,6 +14,15 @@ assert.match(controller, /button.value > 0.65/, 'controller abstraction supports
 assert.match(controller, /horizontal < -0.45/, 'controller abstraction supports analog stick movement');
 assert.match(guild, /ctrlKey && event\.shiftKey/, 'keyboard accessibility override exists');
 assert.match(guild, /Orbital Drift/, 'first original browser game is present');
+assert.match(guild, /GuildCometDodge/, 'second playable arcade trial is wired into the Guild');
+const comet = readFileSync('src/components/GuildCometDodge.tsx', 'utf8');
+const cometCss = readFileSync('src/components/GuildCometDodge.module.css', 'utf8');
+assert.match(comet, /Comet Dodge/, 'second original browser game is present');
+assert.match(comet, /ROUND_SECONDS = 20/, 'Comet Dodge has a bounded survival round');
+assert.match(comet, /Math\.abs\(next\.x - shipRef\.current\) < 10/, 'Comet Dodge detects collisions with the player ship');
+assert.match(comet, /readGamepadDirections/, 'Comet Dodge accepts controller directions');
+assert.match(comet, /Move ship left/, 'Comet Dodge includes touch-friendly directional controls');
+assert.match(cometCss, /prefers-reduced-motion:reduce/, 'Comet Dodge respects reduced motion');
 assert.match(guild, /localStorage\.setItem\(BEST_KEY/, 'best run is stored locally');
 assert.match(guild, /No cloud rewards or cross-world sharing are enabled/, 'prototype does not claim cloud progression');
 assert.match(guild, /!isAuthenticated\s*\|\|\s*!userId/, 'Guild entry requires the shared authenticated identity');
