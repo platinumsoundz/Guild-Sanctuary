@@ -6,6 +6,7 @@ const service = readFileSync(new URL('../src/modules/profiles/discoveryInterests
 const editor = readFileSync(new URL('../src/modules/profiles/components/ProfileInterestsEditor.tsx', import.meta.url), 'utf8');
 const discovery = readFileSync(new URL('../src/modules/profiles/components/ProfileDiscovery.tsx', import.meta.url), 'utf8');
 const workspace = readFileSync(new URL('../src/components/AppWorkspace.tsx', import.meta.url), 'utf8');
+const publicProfile = readFileSync(new URL('../src/modules/profiles/components/PublicProfilePage.tsx', import.meta.url), 'utf8');
 
 for (const required of [
   'create table if not exists public.profile_interests',
@@ -28,6 +29,7 @@ assert.ok(editor.includes('Keep these interests private'), 'private-by-default c
 assert.ok(editor.includes('Show these interests in discovery'), 'public visibility must be explicit and opt-in');
 assert.ok(discovery.includes('fetchPublicDiscoveryInterests'), 'discovery cards must read only public interests');
 assert.ok(discovery.includes('findUserIdsByPublicInterest'), 'people discovery must search opted-in interests');
+assert.ok(publicProfile.includes('fetchPublicDiscoveryInterests'), 'public profile must expose only public interests');
 assert.ok(discovery.includes('fetchFeed()'), 'topic discovery should reuse the existing public feed');
 assert.ok(discovery.includes('fetchEvents(currentUserId)'), 'community gathering discovery should reuse existing events');
 assert.ok(workspace.includes("onExploreFeed={() => setActiveNavigation('feed')}"), 'topic actions must navigate to the existing feed');
