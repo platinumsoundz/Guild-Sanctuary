@@ -30,7 +30,7 @@
 ## Verification
 - Earlier GitHub Actions CI run `40722135640` on commit `f7a26577c795361446fada9d3e2751ad5f6f16ec`: **completed successfully**.
 - CI run `40723925501` passed for the media-link hardening commit `03854f573e0432862e60ce7b9f8d3ab848b5a124`.
-- The current head `efa190f50948d3c8e06e0ae756c52f0aa09325d4` adds keyboard-focus styling and associated static assertions; no workflow run was returned for this newest head at last check, so those latest changes are not yet CI-verified.
+- CI run `40724222154` completed successfully for commit `efa190f50948d3c8e06e0ae756c52f0aa09325d4`, including keyboard-focus styling and associated static assertions.
 - This is source/CI evidence only; no live Supabase integration, browser acceptance, or production behavior is claimed.
 - Browser verification should cover role/status filters, empty results, failed search clearing, keyboard operation, confirmation cancel/accept, and a server-rejected role change.
 - Live integration and authorization checks must be completed after the Supabase-connected agent restores access.
