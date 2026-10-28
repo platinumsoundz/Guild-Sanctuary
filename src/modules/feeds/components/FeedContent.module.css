@@ -52,6 +52,83 @@
   background: var(--surface-raised);
 }
 
+.connectionToolkit {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.toolkitHeading {
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.templateChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.templateChoice {
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
+  font: 12px Arial, sans-serif;
+}
+
+.templateChoice[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.templateChoice:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.templateHint {
+  margin: 0;
+  color: var(--muted);
+  font: 12px/1.55 Arial, sans-serif;
+}
+
+.guidedFields {
+  display: grid;
+  gap: 12px;
+}
+
+.guidedField {
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+  font: 12px Arial, sans-serif;
+}
+
+.guidedField span {
+  font-weight: 600;
+}
+
+.guidedField em {
+  color: var(--muted);
+  font-style: normal;
+  font-weight: 400;
+}
+
+.guidedField textarea {
+  min-height: 68px;
+}
+
 .composerLabel {
   color: var(--ink);
   font-family: Arial, sans-serif;
