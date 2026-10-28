@@ -253,7 +253,7 @@ export function AppWorkspace() {
           </motion.div>
         </AnimatePresence>
         </div>
-        <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated} />
+        <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
       </ResponsiveShell>
     </MotionConfig>
   );
