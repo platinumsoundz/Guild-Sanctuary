@@ -3,7 +3,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { PostMediaType, PublicProfile } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
-import { getLocalPublicProfileById } from '@/modules/auth';
+import { fetchPublicProfileById } from '@/modules/profiles';
 import { useFeed } from '@/modules/feeds';
 import { ReportContentButton } from '@/modules/moderation';
 import { PostEngagement } from './PostEngagement';
@@ -42,18 +42,17 @@ export function FeedContent() {
   useEffect(() => {
     let cancelled = false;
     const uniqueAuthorIds = [...new Set(posts.map((post) => post.authorId))];
-    const profiles = uniqueAuthorIds.flatMap((authorId) => {
+    void Promise.all(uniqueAuthorIds.map(async (authorId) => {
       try {
-        const profile = getLocalPublicProfileById(authorId);
-        return profile ? [[authorId, profile] as const] : [];
+        const profile = await fetchPublicProfileById(authorId);
+        return profile ? [authorId, profile] as const : null;
       } catch {
-        return [];
+        // A missing/unavailable profile should not prevent the feed itself rendering.
+        return null;
       }
+    })).then((profiles) => {
+      if (!cancelled) setAuthors(Object.fromEntries(profiles.filter((profile): profile is NonNullable<typeof profile> => profile !== null)));
     });
-
-    if (!cancelled) {
-      setAuthors(Object.fromEntries(profiles));
-    }
     return () => {
       cancelled = true;
     };
