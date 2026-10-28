@@ -296,7 +296,7 @@ export function GuildCompanionHub() {
           </div> : <div className={styles.empty}>No photos selected. Your images are previewed locally and are not uploaded to Sanctuary.</div>}
         </section>
       </div>
-      {storageWarning && <p className={styles.status} role="status">This browser could not read or save the local library. Export or restore a backup if available; no cloud copy exists yet.</p>}
+      {storageWarning && <p className={styles.status} role="status">This browser could not read or save the device-local cache. Sign in and sync to keep a server copy; changes may not persist on this device.</p>}
       {mediaMessage && <p className={styles.status} role="status">{mediaMessage}</p>}
 
       <section className={styles.panel} aria-labelledby="guild-cloud-lab-title">
