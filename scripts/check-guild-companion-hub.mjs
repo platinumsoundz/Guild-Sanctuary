@@ -5,7 +5,7 @@ const component = readFileSync('src/components/GuildCompanionHub.tsx', 'utf8');
 const styles = readFileSync('src/components/GuildCompanionHub.module.css', 'utf8');
 const guild = readFileSync('src/components/GuildWorld.tsx', 'utf8');
 
-for (const text of ['Unified game library', 'Music lounge', 'Memory gallery', 'Cloud Lab', 'persistent Linux', 'not a simulated terminal', 'RetroArch', 'RetroAchievements', 'Steam', 'Xbox', 'GOG', 'itch.io', 'localStorage', 'libraryLoaded', 'MAX_MEDIA_FILES', 'MAX_AUDIO_BYTES', 'MAX_IMAGE_BYTES', 'safeWebUrl', 'exportLibrary', 'importLibrary', 'sanctuary-guild-library', 'noopener noreferrer', 'URL.createObjectURL', 'not uploaded', 'https:', 'target="_blank"', 'rel="noopener noreferrer"']) {
+for (const text of ['Unified game library', 'Music lounge', 'Memory gallery', 'Cloud Lab', 'persistent Linux', 'not a simulated terminal', 'RetroArch', 'RetroAchievements', 'Steam', 'Xbox', 'GOG', 'itch.io', 'localStorage', 'libraryLoaded', 'MAX_MEDIA_FILES', 'MAX_AUDIO_BYTES', 'MAX_IMAGE_BYTES', 'safeWebUrl', 'exportLibrary', 'importLibrary', 'sanctuary-guild-library', 'games.length >= 500', '500-game limit', 'noopener noreferrer', 'URL.createObjectURL', 'not uploaded', 'https:', 'target="_blank"', 'rel="noopener noreferrer"']) {
   assert.ok(component.includes(text), `Missing Guild companion feature contract: ${text}`);
 }
 assert.ok(component.includes('file.type.startsWith(\'audio/\')'));
