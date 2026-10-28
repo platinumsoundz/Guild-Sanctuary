@@ -1,0 +1,59 @@
+# Guild Cloud Lab and calling scale-out architecture
+
+Status: design and implementation checklist only. No terminal runtime, compute provider, TURN provider, SFU, or cloud media storage is provisioned by this document.
+
+## Guild Cloud Lab: persistent Linux workspace
+
+### User experience
+- Guild shows a clear provisioned / stopped / starting / error state and never presents a fake shell.
+- A member explicitly creates a workspace, sees its storage and runtime quota, and can start, stop, reset, export, or delete it.
+- Terminal output is streamed to the member's authenticated browser. Session reconnect restores the same workspace after a browser refresh.
+- Persistent home storage survives workspace stop/restart; reset and delete require confirmation and explain data-loss impact.
+- Package installation is performed by the actual isolated guest OS, subject to disk, CPU, memory, process, runtime and network quotas.
+
+### Required control plane
+1. Authenticate every action with the current Sanctuary session and resolve the account from verified claims, never from a client-supplied user ID.
+2. Check active-account status, workspace ownership, plan limits and abuse/rate limits before provisioning or opening a terminal.
+3. Keep provider credentials in server-side secrets. Browser code receives only short-lived, narrowly scoped connection credentials.
+4. Maintain a server-side workspace record with owner, provider instance ID, lifecycle state, quota, timestamps and storage reference. Never store shell output or arbitrary secrets in ordinary application logs.
+5. Use an authenticated gateway to a dedicated per-workspace runtime. Revalidate ownership on every WebSocket connection and reconnect.
+6. Mount only that workspace's persistent home volume. Never mount host paths, provider sockets, application secrets or another user's volume into the guest.
+
+### Isolation and operations
+- Prefer a hardened VM or microVM boundary for untrusted package installs and user code. If containers are chosen, require a separately reviewed isolation profile and document the residual shared-kernel risk.
+- Run as a non-root guest user; apply CPU, memory, disk, process and wall-clock limits; cap concurrent workspaces; enforce idle shutdown and maximum lifetime.
+- Default to restricted outbound networking. Block cloud metadata endpoints, internal control-plane addresses, private networks and abuse-prone ports; use an explicit allowlist or controlled egress proxy where feasible.
+- Do not offer privileged Docker-in-Docker, host networking, arbitrary port exposure, inbound public listeners, or unrestricted persistent daemons in the first release.
+- Encrypt persistent volumes, use per-workspace access controls, define retention and deletion behavior, and test deletion of both active instances and snapshots.
+- Emit minimal audit events for provision/start/stop/reset/delete and policy denials. Never log terminal input, environment variables or credential contents by default.
+- Add provider spend budgets, concurrency caps, abuse alerts, incident shutdown, backup/restore drills and a documented kill switch before enabling general access.
+
+### Release sequence
+1. Decide provider, runtime boundary, region, retention and cost ceiling.
+2. Implement schema and owner-only administrative provisioning with idempotent lifecycle operations.
+3. Add authenticated gateway and a single disposable test workspace; run cross-account authorization tests.
+4. Add persistent volumes and verify restart, backup, restore, quota enforcement and complete deletion.
+5. Run isolation, SSRF/egress, secret-leakage, abuse and load tests.
+6. Launch behind an explicit opt-in/allowlist with a hard spending cap. Expand only after real operational evidence.
+
+## Calling: production rollout and group-call path
+
+### Current one-to-one path
+- Sanctuary message threads own call invitations and private Realtime signalling.
+- WebRTC carries media directly or through a configured TURN relay; Realtime carries negotiation metadata only.
+- TURN credentials must be short-lived, authenticated, no-store, and minted only for an active conversation member.
+- Before production, verify Realtime public-access settings, migration history, two-account membership RLS, private-channel sender binding, HTTPS/media permissions, browser backgrounding, network changes, device switching and disconnect recovery.
+- Deploy the ICE configuration Edge Function only after setting the canonical HTTPS `APP_BASE_URL`. Configure `TURN_SERVER_URLS` and `TURN_SHARED_SECRET` as server-only function secrets if the selected TURN provider supports the expected REST/HMAC credential format.
+- Do not treat the existing STUN fallback as reliable connectivity across restrictive networks.
+
+### Group calling
+- Do not extend the current peer-to-peer mesh to large groups: every client would send separate media streams to every other participant, multiplying upload bandwidth and connection complexity.
+- Use an SFU for group media, with authenticated room creation, active-conversation membership checks, short-lived room tokens, participant limits, rate limits and explicit join/leave signalling.
+- Keep the media plane and room tokens separate from text-message storage. Do not record calls by default; if recording is ever introduced, require explicit consent, visible indicators, retention/deletion policy and jurisdiction review.
+- Ship group calling only after one-to-one reliability, abuse handling, permission UX, reconnect behavior and cross-account security tests pass.
+
+## Explicit non-goals for this stage
+- No provider credentials or infrastructure are created by this specification.
+- No shell runs in the browser itself.
+- No public game server or arbitrary inbound port mapping.
+- No automatic recording, transcription, or end-to-end-encryption claim for Sanctuary text messages.
