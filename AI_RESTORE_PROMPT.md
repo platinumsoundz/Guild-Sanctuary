@@ -245,3 +245,13 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Files touched in this batch: `src/components/AppWorkspace.module.css`, `src/components/ResponsiveShell.module.css`, `src/components/NotificationBar.module.css`, `src/modules/feeds/components/FeedContent.module.css`, `src/modules/profiles/components/ProfileDiscovery.module.css`, `src/modules/profiles/components/PublicProfilePage.module.css`, and `src/modules/self-discovery/components/SelfDiscoveryCentre.module.css`.
 - Backend/admin/moderation integrations remain out of scope for this frontend branch.
 - Automated checks and browser/device QA remain outstanding; do not describe this as tested, merged, or deployed.
+
+
+### Roadmap and Guild beta-readiness checkpoint — 2026-10-28
+- Active working branch: `feat/guild-browser-arcade-first-2026-10-28`; draft PR #205: https://github.com/platinumsoundz/Guild-Sanctuary/pull/205.
+- The in-app **Sanctuary Roadmap** is now a simple member-facing view focused only on Sanctuary features and beta readiness. The 5 Sleeves projects and the former three-project tracker are excluded. Detailed explanations are behind accessible native “More info” disclosures.
+- Added a separate **Guild Roadmap** reachable from navigation. It covers the cosmic browser world, arcade/controller UX, library sync, local media lounge, future platform integrations, calling, Cloud Lab and Guild beta testing. It explicitly labels account sync as unverified and Cloud Lab as blocked until real isolated compute and persistent storage are available.
+- Added `npm run check:roadmaps` and made CI run it. The contract passed in the first CI run. That run caught a CSS Modules universal-selector error in the Guild roadmap reduced-motion rule; the selector has been scoped to `.page *` and a fresh full build/CI run is in progress.
+- Updated `ROADMAP.md`, README, and `docs/full-beta-release-gate.md` to distinguish public roadmaps from engineering documentation and add roadmap clarity to the beta gate.
+- Branch integration is intentionally stacked on `feat/cosmic-mobile-ui-2026-10-28`. Comparison against `main` reports 266 commits ahead and 1 behind; do not blindly rebase or retarget. Reconcile the branch history deliberately before final integration.
+- Vercel reports an external build-rate-limit failure. No merge, deployment, migration application, or paid infrastructure provisioning was performed. Do not mark beta-ready until complete CI and browser/device/security checks pass.
