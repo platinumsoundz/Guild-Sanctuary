@@ -46,7 +46,9 @@ Browser storage can be cleared, is quota-limited, may be unavailable in private 
 3. Use stable record IDs, updated timestamps or revisions, idempotent writes and explicit conflict handling.
 4. Show sync states such as **Synced**, **Saving**, **Offline changes**, and **Needs attention**. Do not label a local-only save as cloud-synced.
 5. Queue small metadata changes while offline; do not queue large media uploads without clear user consent.
-6. Keep server secrets out of browser bundles, localStorage, URLs and diagnostic logs.
+6. Bind a synced local cache to its Sanctuary account and refuse to sync it under a different account without an explicit export/switch flow; never merge one member's private cache into another member's account.
+7. Persist deletion tombstones locally until the server confirms the next authenticated sync, and make sync retryable after partial inserts or network failure.
+8. Keep server secrets out of browser bundles, localStorage, URLs and diagnostic logs.
 
 ## Migration path
 
