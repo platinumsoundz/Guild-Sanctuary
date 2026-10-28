@@ -1,0 +1,38 @@
+# Cosmic Sanctuary Visual Direction — 2026-10-28
+
+## North star
+
+Use the approved Sanctuary concept image (project reference artwork) as the visual destination: a welcoming celestial sanctuary with luminous angel wings, a portal/citadel skyline, floating islands, planets, stars, cosmic-energy clouds, and a deep indigo/violet palette accented by electric cyan and soft magenta. The result should feel like a living world, not a generic dashboard with a purple background.
+
+## First implementation slice
+
+- Add a semantic cosmic palette to the workspace so existing pages inherit consistent midnight-indigo surfaces, lavender highlights, readable cool-white text, and subtle cyan accents.
+- Add a lightweight, CSS-only starfield and layered nebula gradients; no external network calls, large background downloads, or new dependencies.
+- Preserve current navigation, feature behavior, theme contrast, responsive layouts, keyboard focus visibility, and reduced-motion preferences.
+- Keep real Sanctuary feature routes and Support the Creator distinct. Cosmic Games remains a separate destination; creator links belong in Support the Creator.
+
+## Design language
+
+- **Palette:** void navy `#07091d`, deep indigo `#0d1230`, raised cosmic glass `#15183c`, starlight `#f6f2ff`, lavender `#b18cff`, cyan highlights, restrained magenta.
+- **Atmosphere:** layered radial nebulae, sparse stars, soft luminous edges, distant skyline silhouettes, and aurora/cosmic-energy ribbons.
+- **Surfaces:** translucent glass panels with fine violet borders, soft depth, and restrained glow. Avoid making every card equally bright.
+- **Typography:** elegant display serif for major emotional statements; clean sans-serif for navigation, body copy, controls, and data.
+- **Imagery:** use the supplied concept art as art direction. Prioritise bespoke wings, portals, skyline panoramas, planets, and cosmic clouds. Optimise imagery, provide meaningful alt text, and never let decorative art obscure content.
+- **Motion:** slow ambient drift only where useful; reduced-motion users get a still experience. Avoid distracting parallax and heavy animation on mobile.
+- **Accessibility:** maintain WCAG-aware text contrast, visible keyboard focus, clear labels, usable touch targets, and content that remains legible over imagery.
+
+## Build sequence
+
+1. **Theme foundation (this PR):** introduce scoped semantic cosmic tokens, a layered CSS starfield, focus states, and reduced-motion safeguards without changing feature logic.
+2. **Sanctuary home hero:** rebuild the top of Today around a wide portal-and-wings visual, strong headline, two clear calls to action, and a mobile-first crop.
+3. **Navigation and glass surfaces:** refine header, active route indicators, panels, buttons, notification surfaces, and small-screen navigation without compromising current behavior.
+4. **World discovery tiles:** build distinct destinations for Community, Cosmic Games, Support the Creator, and Shop; ensure external creator projects are only represented on the creator-support route.
+5. **Worldscape art and polish:** add skyline/planet/energy artwork, responsive image delivery, subtle hover/focus treatments, empty/loading states, and visual regression checks.
+6. **QA and batch release:** run typecheck, build, contract tests, contrast/responsive checks, and mobile browser QA; then batch-merge/deploy after review.
+
+## Guardrails
+
+- This PR is a foundation, not a claim that the full concept image has already been reproduced.
+- Do not invent or imply backend capabilities, and do not alter Supabase/security boundaries as part of visual work.
+- Avoid adding large binary assets through text-only APIs. The concept image can be committed as a normal image asset in a follow-up using a binary-capable Git workflow if it is not already present in the repository.
+- No production deployment is performed by this change.
