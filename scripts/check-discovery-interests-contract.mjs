@@ -9,6 +9,8 @@ const workspace = readFileSync(new URL('../src/components/AppWorkspace.tsx', imp
 const publicProfile = readFileSync(new URL('../src/modules/profiles/components/PublicProfilePage.tsx', import.meta.url), 'utf8');
 const relationshipMigration = readFileSync(new URL('../supabase/migrations/20261028170000_connection_relationships.sql', import.meta.url), 'utf8');
 const relationshipService = readFileSync(new URL('../src/modules/profiles/connectionService.ts', import.meta.url), 'utf8');
+const intentionsService = readFileSync(new URL('../src/modules/profiles/discoveryIntentions.ts', import.meta.url), 'utf8');
+const intentionsEditor = readFileSync(new URL('../src/modules/profiles/components/ProfileDiscoveryIntentionsEditor.tsx', import.meta.url), 'utf8');
 
 for (const required of [
   'create table if not exists public.profile_interests',
@@ -43,6 +45,8 @@ for (const required of [
   'create table if not exists public.profile_blocks',
   'create table if not exists public.profile_discovery_hidden',
   'create table if not exists public.profile_discovery_saved',
+  'create table if not exists public.profile_discovery_intentions',
+  'members read own or public intentions',
   'alter table public.profile_follows enable row level security',
   'alter table public.profile_connections enable row level security',
   'alter table public.profile_blocks enable row level security',
@@ -84,6 +88,11 @@ assert.ok(discovery.includes('Connection requests'), 'discovery must expose inco
 assert.ok(discovery.includes('Block member'), 'discovery must provide a block control');
 assert.ok(discovery.includes('Blocked members'), 'members must be able to manage their block list');
 assert.ok(discovery.includes('ReportContentButton targetType="user"'), 'members must be able to report profiles');
+assert.ok(intentionsService.includes('MAX_DISCOVERY_INTENTIONS = 3'), 'discovery intentions must be capped');
+assert.ok(intentionsService.includes('isPublic'), 'intention visibility must be explicit');
+assert.ok(intentionsEditor.includes('Keep these intentions private'), 'intentions must be private by default');
+assert.ok(discovery.includes('findUserIdsBySharedPublicIntentions'), 'suggestions should include public intention overlap');
+assert.ok(publicProfile.includes('fetchPublicDiscoveryIntentions'), 'public profiles should show only approved intentions');
 const notificationBar = readFileSync(new URL('../src/components/NotificationBar.tsx', import.meta.url), 'utf8');
 assert.ok(notificationBar.includes('connection_request'), 'notification panel must render connection request events');
 assert.ok(notificationBar.includes('started following you'), 'notification panel must render follow events');
