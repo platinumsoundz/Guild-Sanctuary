@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import type { PublicProfile } from '@/types/database';
 import type { Conversation } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
+import { fetchPublicProfileById } from '@/modules/profiles';
 import { useDirectMessages } from './useDirectMessages';
 import { ReportContentButton } from '@/modules/moderation';
 import styles from './DirectMessageThread.module.css';
@@ -19,10 +20,37 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
   const { currentUser } = useAppContext();
   const { messages, isLoading, isSending, error, send } = useDirectMessages(peer?.userId ?? null, conversation?.id ?? null);
   const [draft, setDraft] = useState('');
-  const title = conversation?.kind === 'group' ? conversation.name ?? 'Group conversation' : peer?.displayName ?? 'Direct conversation';
+  const [senderProfiles, setSenderProfiles] = useState<Record<string, PublicProfile>>({});
+  const peerId = peer?.userId ?? conversation?.participantIds.find((participantId) => participantId !== currentUser?.user.id);
+  const resolvedPeer = peer ?? (peerId ? senderProfiles[peerId] : undefined);
+  const title = conversation?.kind === 'group' ? conversation.name ?? 'Group conversation' : resolvedPeer?.displayName ?? (resolvedPeer?.username ? `@${resolvedPeer.username}` : 'Member profile unavailable');
   const subtitle = conversation?.kind === 'group'
     ? `${conversation.participantIds.length} members`
-    : peer ? `@${peer.username}` : 'Private conversation';
+    : resolvedPeer ? `@${resolvedPeer.username}` : 'Private conversation';
+
+  useEffect(() => {
+    let cancelled = false;
+    const ids = [...new Set([
+      ...(conversation?.participantIds ?? []),
+      ...messages.map((message) => message.senderId),
+    ])].filter((id) => id && id !== currentUser?.user.id);
+    void Promise.all(ids.map(async (id) => {
+      try {
+        const profile = await fetchPublicProfileById(id);
+        return profile ? [id, profile] as const : null;
+      } catch {
+        return null;
+      }
+    })).then((profiles) => {
+      if (!cancelled) {
+        setSenderProfiles((current) => ({
+          ...current,
+          ...Object.fromEntries(profiles.filter((profile): profile is NonNullable<typeof profile> => profile !== null)),
+        }));
+      }
+    });
+    return () => { cancelled = true; };
+  }, [conversation?.id, conversation?.participantIds, currentUser?.user.id, messages]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -36,7 +64,7 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
       <header className={styles.threadHeader}>
         <button className={styles.backButton} type="button" onClick={onBack}>Conversations</button>
         <div className={styles.peer}>
-          <div className={styles.avatar} aria-hidden="true">{peer?.avatarUrl ? <img src={peer.avatarUrl} alt="" /> : title.slice(0, 1).toUpperCase()}</div>
+          <div className={styles.avatar} aria-hidden="true">{resolvedPeer?.avatarUrl ? <img src={resolvedPeer.avatarUrl} alt="" /> : title.slice(0, 1).toUpperCase()}</div>
           <div>
             <h1>{title}</h1>
             <span>{subtitle}</span>
@@ -49,7 +77,7 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
           <p className={styles.emptyMessage}>This is the beginning of your conversation.</p>
         ) : messages.map((message) => (
           <article className={message.senderId === currentUser?.user.id ? styles.ownMessage : styles.peerMessage} key={message.id}>
-            {conversation?.kind === 'group' && message.senderId !== currentUser?.user.id && <span className={styles.senderName}>{message.senderId}</span>}
+            {conversation?.kind === 'group' && <span className={styles.senderName}>{message.senderId === currentUser?.user.id ? currentUser.profile.displayName : senderProfiles[message.senderId]?.displayName ?? (senderProfiles[message.senderId]?.username ? `@${senderProfiles[message.senderId].username}` : 'Member profile unavailable')}</span>}
             <p>{message.body}</p>
             <time dateTime={message.sentAt}>{message.sentAt.slice(11, 16)} UTC</time>
             {message.senderId !== currentUser?.user.id && <ReportContentButton targetType="message" targetId={message.id} />}

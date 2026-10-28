@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Conversation, PublicProfile } from '@/types/database';
-import { searchPublicProfiles } from '@/modules/profiles';
+import { fetchPublicProfileById, searchPublicProfiles } from '@/modules/profiles';
 import { createGroupConversation, fetchUserConversations } from './service';
 import styles from './MessagesInbox.module.css';
 import { MessagePrivacyNotice } from './MessagePrivacyNotice';
@@ -15,6 +15,7 @@ interface MessagesInboxProps {
 
 export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversation }: MessagesInboxProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [participantProfiles, setParticipantProfiles] = useState<Record<string, PublicProfile>>({});
   const [sessionUserId, setSessionUserId] = useState(currentUserId);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PublicProfile[]>([]);
@@ -31,6 +32,28 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   const sessionReady = sessionUserId === currentUserId;
   const visibleConversations = sessionReady ? conversations : [];
   const visibleSelectedMembers = sessionReady ? selectedMembers : [];
+
+  useEffect(() => {
+    let cancelled = false;
+    const participantIds = [...new Set(conversations.flatMap((conversation) =>
+      conversation.participantIds.filter((participantId) => participantId !== currentUserId),
+    ))];
+    void Promise.all(participantIds.map(async (participantId) => {
+      try {
+        const profile = await fetchPublicProfileById(participantId);
+        return profile ? [participantId, profile] as const : null;
+      } catch {
+        return null;
+      }
+    })).then((profiles) => {
+      if (!cancelled) {
+        setParticipantProfiles(Object.fromEntries(
+          profiles.filter((profile): profile is NonNullable<typeof profile> => profile !== null),
+        ));
+      }
+    });
+    return () => { cancelled = true; };
+  }, [conversations, currentUserId]);
 
   const refresh = useCallback(async () => {
     const requestId = ++inboxRequest.current;
@@ -58,6 +81,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
     searchRequest.current += 1;
     groupRequest.current += 1;
     setConversations([]);
+    setParticipantProfiles({});
     setQuery('');
     setResults([]);
     setSelectedMembers([]);
@@ -184,8 +208,19 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
           <p className={styles.description}>No conversations yet.</p>
         ) : visibleConversations.map((conversation) => (
           <button className={styles.conversation} key={conversation.id} type="button" onClick={() => onOpenConversation(conversation)}>
-            <strong>{conversation.name ?? 'Direct message'}</strong>
-            <span>{conversation.kind === 'group' ? `${conversation.participantIds.length} members` : 'Private conversation'}</span>
+            <strong>{conversation.kind === 'group'
+              ? conversation.name ?? 'Group conversation'
+              : (() => {
+                  const peerId = conversation.participantIds.find((participantId) => participantId !== currentUserId);
+                  return (peerId && participantProfiles[peerId]?.displayName) || (peerId && participantProfiles[peerId]?.username && `@${participantProfiles[peerId].username}`) || 'Member profile unavailable';
+                })()}</strong>
+            <span>{conversation.kind === 'group'
+              ? `${conversation.participantIds.length} members`
+              : (() => {
+                  const peerId = conversation.participantIds.find((participantId) => participantId !== currentUserId);
+                  const profile = peerId ? participantProfiles[peerId] : undefined;
+                  return profile ? `@${profile.username} · Private conversation` : 'Private conversation';
+                })()}</span>
           </button>
         ))}
       </section>

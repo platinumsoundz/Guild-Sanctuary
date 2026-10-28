@@ -108,6 +108,7 @@ existing launch gate and must complete before any live payment.
 | Component primitives | Planned | Button, Card, Dialog, Sheet, Tabs, Toast, EmptyState, Skeleton, Avatar, Badge |
 | Navigation restructure | In code, partial | Desktop labels and touch targets improved; mobile fixed bottom tabs currently expose Today, Community, Discover, Messages, You with safe-area/content spacing. Circles and Practice destinations plus desktop rail redesign remain planned; browser/device QA pending |
 | Feed polish | In code, partial | Relative/local post timestamps with exact local time available, readable post metadata, comment author IDs replaced by display names or a safe fallback, and Report moved into a compact post overflow menu; CI and browser QA pending |
+| Social author identity | In code, QA pending | Feed posts, inbox direct-conversation rows, direct-thread headers, and group-message sender labels resolve public profile names instead of showing generic labels or raw sender IDs; missing-profile fallback remains; CI and browser QA pending |
 | Event form fix | Planned | Replace raw latitude/longitude with place search, timezone, online/offline |
 
 **Dark mode and theming design**
