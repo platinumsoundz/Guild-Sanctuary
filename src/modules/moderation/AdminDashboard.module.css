@@ -26,3 +26,156 @@
 .footer { margin-top: 26px; color: var(--muted-foreground, #a3a3a3); font-size: .82rem; line-height: 1.5; }
 .srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @media (max-width: 520px) { .searchForm { flex-direction: column; } .searchForm button { width: 100%; } .memberRow { align-items: flex-start; } .rolePill { font-size: .7rem; } }
+
+
+.overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0 28px;
+}
+
+.overviewCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, .24);
+  border-radius: 14px;
+  padding: 16px;
+  background: rgba(15, 23, 42, .34);
+}
+
+.overviewLabel {
+  color: var(--muted-foreground, #a3a3a3);
+  font-size: .76rem;
+  font-weight: 750;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.overviewCard > strong {
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+
+.overviewCard p {
+  margin: 0;
+  color: var(--muted-foreground, #a3a3a3);
+  font-size: .85rem;
+  line-height: 1.45;
+}
+
+.overviewCard a {
+  margin-top: auto;
+  color: #dce8d7;
+  font-size: .86rem;
+  font-weight: 750;
+  text-underline-offset: .2em;
+}
+
+.memberResults {
+  margin-top: 14px;
+}
+
+.resultsToolbar {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.resultsCount {
+  margin: 0;
+  color: var(--muted-foreground, #a3a3a3);
+  font-size: .85rem;
+}
+
+.resultFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+
+.resultFilters label {
+  display: grid;
+  gap: 5px;
+  min-width: 140px;
+  color: var(--muted-foreground, #a3a3a3);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.resultFilters select {
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, .34);
+  border-radius: 9px;
+  padding: 9px 10px;
+  color: inherit;
+  background: rgba(2, 6, 23, .65);
+}
+
+.clearFilters {
+  border: 1px solid rgba(148, 163, 184, .34);
+  border-radius: 9px;
+  padding: 9px 12px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.emptyResults {
+  border: 1px dashed rgba(148, 163, 184, .3);
+  border-radius: 10px;
+  padding: 14px;
+  color: var(--muted-foreground, #a3a3a3);
+}
+
+.roleChangePreview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  border-radius: 9px;
+  padding: 10px 12px;
+  background: rgba(148, 163, 184, .09);
+  font-size: .86rem;
+}
+
+.roleChangePreview span {
+  color: var(--muted-foreground, #a3a3a3);
+}
+
+.roleChangePreview strong {
+  color: inherit;
+}
+
+.memberRow:disabled {
+  cursor: wait;
+  opacity: .7;
+}
+
+@media (max-width: 760px) {
+  .overview {
+    grid-template-columns: 1fr;
+  }
+
+  .overviewCard {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  .resultFilters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .resultFilters label {
+    width: 100%;
+  }
+
+  .clearFilters {
+    width: 100%;
+  }
+}
