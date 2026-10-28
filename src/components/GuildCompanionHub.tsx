@@ -9,6 +9,17 @@ type MediaFile = { id: string; file: File; url: string };
 
 const LIBRARY_KEY = 'sanctuary-guild-local-library-v1';
 const platforms = ['Browser', 'Steam', 'Xbox', 'RetroArch', 'Other'];
+const MAX_MEDIA_FILES = 30;
+const MAX_AUDIO_BYTES = 100 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
+
+function safeWebUrl(value: string): string {
+  if (!value.trim()) return '';
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.toString() : '';
+  } catch { return ''; }
+}
 
 const services = [
   { name: 'RetroArch', kind: 'Emulator frontend', description: 'Use the official app for local emulation. The Guild does not download ROMs or launch desktop emulators from a browser.', url: 'https://www.retroarch.com/' },
@@ -21,6 +32,7 @@ const services = [
 
 export function GuildCompanionHub() {
   const [games, setGames] = useState<LocalGame[]>([]);
+  const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [title, setTitle] = useState('');
   const [platform, setPlatform] = useState('Browser');
   const [launchUrl, setLaunchUrl] = useState('');
@@ -41,14 +53,17 @@ export function GuildCompanionHub() {
         const parsed: unknown = JSON.parse(saved);
         if (Array.isArray(parsed)) setGames(parsed.filter((item): item is LocalGame =>
           item && typeof item.id === 'string' && typeof item.title === 'string' &&
-          typeof item.platform === 'string' && typeof item.launchUrl === 'string'));
+          typeof item.platform === 'string' && typeof item.launchUrl === 'string' &&
+          ['Browser', 'Steam', 'Xbox', 'RetroArch', 'Other'].includes(item.platform)).map((item: LocalGame) => ({ ...item, launchUrl: safeWebUrl(item.launchUrl) })));
       }
     } catch { /* A local library is optional and can be rebuilt. */ }
+    finally { setLibraryLoaded(true); }
   }, []);
 
   useEffect(() => {
+    if (!libraryLoaded) return;
     try { window.localStorage.setItem(LIBRARY_KEY, JSON.stringify(games)); } catch { /* Private browsing may disable storage. */ }
-  }, [games]);
+  }, [games, libraryLoaded]);
 
   useEffect(() => { audioFilesRef.current = audioFiles; }, [audioFiles]);
   useEffect(() => { photosRef.current = photos; }, [photos]);
@@ -65,7 +80,10 @@ export function GuildCompanionHub() {
 
   const addFiles = (files: FileList | null, type: 'audio' | 'photo') => {
     if (!files) return;
-    const selected = Array.from(files).filter((file) => type === 'audio' ? file.type.startsWith('audio/') : file.type.startsWith('image/'));
+    const remaining = Math.max(0, MAX_MEDIA_FILES - (type === 'audio' ? audioFilesRef.current.length : photosRef.current.length));
+    const maxBytes = type === 'audio' ? MAX_AUDIO_BYTES : MAX_IMAGE_BYTES;
+    const eligible = Array.from(files).filter((file) => (type === 'audio' ? file.type.startsWith('audio/') : file.type.startsWith('image/')) && file.size > 0 && file.size <= maxBytes);
+    const selected = eligible.slice(0, remaining);
     const additions = selected.map((file) => ({ id: crypto.randomUUID(), file, url: URL.createObjectURL(file) }));
     if (type === 'audio') setAudioFiles((current) => [...current, ...additions]);
     else {
@@ -73,7 +91,8 @@ export function GuildCompanionHub() {
       setPhotoIndex(0);
       setSlideshow(false);
     }
-    setMediaMessage(selected.length ? `${selected.length} ${type === 'audio' ? 'audio file(s)' : 'photo(s)'} selected. Files stay in this browser session; they are not uploaded.` : 'Choose supported audio or image files.');
+    const skipped = files.length - selected.length;
+    setMediaMessage(selected.length ? `${selected.length} ${type === 'audio' ? 'audio file(s)' : 'photo(s)'} selected. ${skipped ? `${skipped} skipped (unsupported type, size limit, or 30-file limit). ` : ''}Files stay in this browser session; they are not uploaded.` : `No files added. Choose supported ${type === 'audio' ? 'audio up to 100 MB' : 'images up to 25 MB'}; the limit is 30 files per lounge.`);
   };
 
   const addGame = () => {
@@ -92,6 +111,10 @@ export function GuildCompanionHub() {
         setMediaMessage('Enter a complete https:// or http:// link, or leave the link blank for a saved library entry.');
         return;
       }
+    }
+    if (games.some((item) => item.title.toLowerCase() === cleanTitle.toLowerCase() && item.platform === platform)) {
+      setMediaMessage('That title is already in your library for this platform.');
+      return;
     }
     setGames((current) => [...current, { id: crypto.randomUUID(), title: cleanTitle, platform, launchUrl: cleanUrl }]);
     setTitle('');
@@ -113,7 +136,7 @@ export function GuildCompanionHub() {
           <label className={styles.urlField}>Optional web game / store link<input value={launchUrl} onChange={(event) => setLaunchUrl(event.target.value)} placeholder="https://…" inputMode="url" /></label>
           <button type="submit" className={styles.primary}><Plus size={15} /> Add to library</button>
         </form>
-        {games.length ? <ul className={styles.gameList}>{games.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={game.launchUrl} target="_blank" rel="noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => setGames((current) => current.filter((item) => item.id !== game.id))}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
+        {games.length ? <ul className={styles.gameList}>{games.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={safeWebUrl(game.launchUrl)} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => setGames((current) => current.filter((item) => item.id !== game.id))}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
         <div className={styles.notice}><strong>Next integration:</strong> an optional signed Sanctuary Companion can request permission to scan supported game locations and launch compatible installed titles. A website alone cannot enumerate your device or execute arbitrary local apps.</div>
       </section>
 
@@ -147,7 +170,7 @@ export function GuildCompanionHub() {
 
       <section className={styles.panel} aria-labelledby="guild-connect-title">
         <div className={styles.panelHeading}><span className={styles.icon}><Gamepad2 size={19} /></span><div><h3 id="guild-connect-title">Gaming worlds & achievements</h3><p>Official destinations now; authenticated account connections are future work.</p></div></div>
-        <div className={styles.services}>{services.map((service) => <article className={styles.service} key={service.name}><div className={styles.serviceTop}><strong>{service.name}</strong><span>{service.kind}</span></div><p>{service.description}</p><a href={service.url} target="_blank" rel="noreferrer">Open official site <ExternalLink size={13} /></a></article>)}</div>
+        <div className={styles.services}>{services.map((service) => <article className={styles.service} key={service.name}><div className={styles.serviceTop}><strong>{service.name}</strong><span>{service.kind}</span></div><p>{service.description}</p><a href={service.url} target="_blank" rel="noopener noreferrer">Open official site <ExternalLink size={13} /></a></article>)}</div>
         <div className={styles.notice}><strong>RetroArch & RetroAchievements:</strong> use a compatible RetroArch installation and your own legally obtained game files. The Guild will not provide ROM downloads. Future integration can import supported achievement data with your consent; achievement verification must come from the platform, not a self-reported score.</div>
       </section>
       <p className={styles.footnote}>Privacy: selected media stays in this browser session and is not uploaded. Your game list is stored in this browser only. Cross-device sync, cloud storage, account linking, automatic scanning and native launch are not enabled yet.</p>
