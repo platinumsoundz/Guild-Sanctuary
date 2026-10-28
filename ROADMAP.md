@@ -1,8 +1,17 @@
 # The Sanctuary — Roadmap
 
-Last updated: 2026-10-27
+Last updated: 2026-10-28
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
+
+## Cosmic Arcade update (2026-10-28)
+
+- **In code, QA pending:** Restored a dedicated Games navigation entry labelled “Cosmic Arcade”; existing creator/community game links remain in the Games hub.
+- **Playable prototype:** Added a themed Starseed Word Search preview with letter selection, found-word progress, reset, and responsive layout.
+- **Planned:** Celestial Crossword, Lunar Solitaire, Zodiac Mahjong, and Cosmic Snake are visible as roadmap concepts, not falsely presented as playable.
+- **Token economy — design only / spending locked:** Theme previews and example consumables (hints, extra lives, and a 50-token Snake revive) are shown as future ideas. No arcade item is purchasable and this UI does not deduct tokens.
+- **Required before token spending:** Implement a server-authoritative game economy/RPC with authenticated ownership, wallet balance checks, idempotency keys, game-session validation, and immutable ledger entries. Define whether revives/boosts are consumables, expiry/refund rules, and exploit/rate limits. Require owner-approved Supabase migration and isolated staging tests before enabling spending.
+- **Validation pending:** Typecheck, production build, keyboard/screen-reader checks, mobile gameplay QA, and end-to-end wallet/RPC tests have not been run.
 
 Owner: product owner (Ashley)
 Status: planning document. Nothing here is built unless it says so.
