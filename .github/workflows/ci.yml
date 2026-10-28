@@ -35,18 +35,19 @@ jobs:
       - run: npm run check:daily-reflection
       - run: npm run check:navigation
       - run: npm run check:feed-polish
+      - run: npm run check:comment-actions
       - run: npm run check:event-time
       - run: npm run check:personal-planner
       - run: npm run check:personal-habits
       - run: npm run check:theme
       - run: npm run check:theme-contrast
       - run: npm run check:notifications
-      - run: npm run check:short-engagement-rpc
-      - run: npm run check:shorts-full-size
       - run: npm run check:token-spend
       - run: npm run check:cosmic-arcade
       - run: npm run check:sanctuary-home
       - run: npm run check:roadmaps
+      - run: npm run check:shorts-full-size
+      - run: npm run check:short-engagement-rpc
       - run: deno check supabase/functions/token-checkout/index.ts supabase/functions/stripe-token-webhook/index.ts
       - run: npm run typecheck
       - run: npm run build
