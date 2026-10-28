@@ -15,8 +15,9 @@ using (
     select 1
     from public.conversation_members cm
     where cm.conversation_id::text = split_part(realtime.topic(), ':', 2)
-      and cm.user_id = auth.uid()
+      and cm.user_id = (select auth.uid())
       and cm.left_at is null
+      and public.is_active_user()
   )
 );
 
@@ -32,8 +33,9 @@ with check (
     select 1
     from public.conversation_members cm
     where cm.conversation_id::text = split_part(realtime.topic(), ':', 2)
-      and cm.user_id = auth.uid()
+      and cm.user_id = (select auth.uid())
       and cm.left_at is null
+      and public.is_active_user()
   )
 );
 
