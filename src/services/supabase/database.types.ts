@@ -70,7 +70,7 @@ export type MessageRow = {
 export type ContentReportRow = {
   id: string;
   reporter_id: string;
-  target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+  target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
   target_id: string;
   reason: string;
   details: string | null;
@@ -86,6 +86,50 @@ export interface Database {
   public: {
     Tables: {
       profiles: Table<ProfileRow>;
+      profile_follows: Table<{
+        follower_id: string;
+        followee_id: string;
+        created_at: string;
+      }>;
+      profile_connections: Table<{
+        id: string;
+        member_low_id: string;
+        member_high_id: string;
+        requester_id: string;
+        addressee_id: string;
+        status: 'pending' | 'accepted' | 'declined';
+        created_at: string;
+        responded_at: string | null;
+      }>;
+      profile_blocks: Table<{
+        blocker_id: string;
+        blocked_id: string;
+        created_at: string;
+      }>;
+      profile_discovery_hidden: Table<{
+        user_id: string;
+        hidden_profile_id: string;
+        created_at: string;
+      }>;
+      profile_discovery_saved: Table<{
+        user_id: string;
+        saved_profile_id: string;
+        created_at: string;
+      }>;
+      profile_discovery_intentions: Table<{
+        user_id: string;
+        intention: 'find_community' | 'explore_ideas' | 'grow_together' | 'collaborate' | 'find_circle' | 'broaden_perspective';
+        is_public: boolean;
+        created_at: string;
+        updated_at: string;
+      }>;
+      profile_interests: Table<{
+        user_id: string;
+        interest: string;
+        is_public: boolean;
+        created_at: string;
+        updated_at: string;
+      }>;
       community_tips: Table<{
         stripe_event_id: string;
         checkout_session_id: string;
@@ -191,8 +235,8 @@ export interface Database {
         id: string;
         recipient_id: string;
         actor_id: string;
-        notification_type: 'like' | 'comment';
-        target_type: 'post' | 'short' | 'event';
+        notification_type: 'like' | 'comment' | 'follow' | 'connection_request' | 'connection_accepted';
+        target_type: 'post' | 'short' | 'event' | 'user';
         target_id: string;
         created_at: string;
         read_at: string | null;
@@ -273,7 +317,7 @@ export interface Database {
       };
       submit_content_report: {
         Args: {
-          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
           requested_target_id: string;
           requested_reason: string;
           requested_details?: string | null;
@@ -293,7 +337,7 @@ export interface Database {
       };
       get_report_target_owner: {
         Args: {
-          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
           requested_target_id: string;
         };
         Returns: string | null;
@@ -368,7 +412,7 @@ export interface Database {
       conversation_kind: 'direct' | 'group';
       content_state: 'visible' | 'hidden' | 'removed';
       report_status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
-      report_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+      report_target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
       moderation_action_type: ModerationAction;
     };
     CompositeTypes: Record<string, never>;

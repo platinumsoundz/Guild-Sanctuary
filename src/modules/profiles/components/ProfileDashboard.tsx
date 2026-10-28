@@ -5,6 +5,8 @@ import type { Post, Profile } from '@/types/database';
 import { normalizeSocialLinks, socialLinkFields } from '@/lib/socialLinks';
 import { ProfileCard } from './ProfileCard';
 import { SelfDiscoveryCentre } from '@/modules/self-discovery/components/SelfDiscoveryCentre';
+import { ProfileInterestsEditor } from './ProfileInterestsEditor';
+import { ProfileDiscoveryIntentionsEditor } from './ProfileDiscoveryIntentionsEditor';
 import styles from './ProfileDashboard.module.css';
 
 interface ProfileDashboardProps {
@@ -112,6 +114,9 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
           </button>
         </div>
       </header>
+
+      <ProfileInterestsEditor userId={profile.userId} />
+      <ProfileDiscoveryIntentionsEditor userId={profile.userId} />
 
       <section className={styles.showcase} aria-labelledby="showcase-heading">
         <div className={styles.sectionHeading}>

@@ -634,3 +634,73 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 
 - **Follow-up polish (2026-10-28):** Learning-path results show the exact selected preferences used to shape the suggestion, and the user-requested local text export includes the learning path, its rationale and its non-clinical disclaimer when a learning preference was answered. Answers remain session-only; export remains an explicit local user action.
+
+
+## Sanctuary Connection Discovery — product direction and implementation plan (2026-10-28)
+
+**Status: In progress; discovery and first relationship lifecycle slice implemented on the feature branch, pending automated and staging verification.** This is the agreed product direction for connecting Sanctuary Intelligence/self-discovery with the existing social ecosystem. Do not describe the feature as shipped or verified until implementation, automated checks, and browser/device QA have evidence recorded.
+
+### Product mission
+
+Help people discover people, communities, and ideas they may resonate with through shared interests, compatible connection intentions, complementary perspectives, and chosen activities—not romantic matching, appearance-based ranking, or judgement. One-to-one connections are one valid path, not the whole purpose. Members must also be able to explore topics and groups without being pressured to connect.
+
+### Scope and experience
+
+- **Three equal discovery paths:** People, Communities, and Topics. Integrate them into existing navigation rather than adding a crowded set of top-level destinations.
+- **Optional progressive self-discovery:** short, skippable questionnaires for interests, current exploration, connection intentions, conversation preferences, community preferences, and learning preferences. Answers can change over time; incomplete profiles must still be able to browse.
+- **Member-controlled discovery intentions:** e.g. Find My Community, Explore Ideas, Grow Together, Find Collaborators, Find My Circle, and Broaden My Perspective. These are flexible filters, not permanent identity labels.
+- **Transparent relevance recommendations:** begin with an understandable, configurable rules-based model considering shared interests, compatible intentions, complementary interests/goals, conversation preferences, and shared activities. Initial example weights may be tested (30/25/20/15/10), but are hypotheses—not scientific compatibility scores—and must be tuned with feedback.
+- **Discovery cards:** member-approved profile information, relevant shared interests, optional public journey note, and a brief explanation of why the recommendation appears. Actions may include view, follow, connect, save, or hide.
+- **Profiles and feeds:** optional journey/profile notes, interests and normalised hashtags, and member-controlled profile feeds. Reuse the existing post/feed, follow, search, group, event, notification, and messaging systems wherever possible; do not create duplicate social primitives.
+- **Connection lifecycle:** explicit follow, save, request, accept/decline, messaging permission, block, report, and pause/hide-discovery behaviours. Server-side permissions—not UI-only hiding—must enforce boundaries.
+- **AI assistance, introduced only where useful:** natural-language preference refinement, topic/community discovery, and understandable explanations based only on permitted member-approved information. AI suggestions remain editable and must not assign rigid identities.
+
+### Privacy, safety, and non-goals
+
+- Self-discovery is optional and private by default. Private reflections, private messages, sensitive questionnaire answers, inferred mental-health conditions, trauma disclosures, or other intimate information must not silently become public profile fields or matching signals.
+- Members control profile visibility, discoverability, location use, connection requests, messaging access, and whether optional self-discovery information informs personalisation. Provide pause/reset controls where applicable.
+- Blocked/restricted accounts and content must be excluded across every discovery path. Respect reporting, moderation, rate limits, and repeated-request protections.
+- No romantic compatibility score, appearance ranking, popularity leaderboard, pressure-based engagement optimisation, or assumptions that a profile view implies interest.
+- Do not optimise solely for time spent, swipes, or number of connections. Evaluate relevance, useful community participation, member feedback, safety, and control.
+
+### Implementation sequence and acceptance gates
+
+1. **Audit current architecture:** inspect profiles, feeds/posts, follows/relationships, search, groups/events, messaging/notifications, Sanctuary Intelligence questionnaires, database/RLS, UI patterns, tests, and active branches. Document what is reusable and avoid parallel implementations.
+2. **Data/permissions foundation:** extend existing schema where possible for interests/tags, explicit discovery preferences, public profile notes, connection state, saved profiles, and explicit discovery feedback. Add indexes, server-side validation, and reviewed RLS/permission tests only where needed.
+3. **Connection Intelligence service:** implement relevance scoring, hard privacy/eligibility filters, safe explanations, feedback, and useful fallback for sparse profiles. No sensitive inference.
+4. **Discovery UI:** responsive People/Communities/Topics surfaces, search/filter controls, explainable cards, and helpful empty states. Use real integrated data, not static mock recommendations.
+5. **Profile and feed integration:** interests/hashtags, optional journey note, permitted feed sharing, and navigation to relevant topics/groups/events.
+6. **Connection lifecycle:** requests, acceptance/rejection, follow, save, hide, block/report, notification and messaging-permission integration, duplicate-request handling.
+7. **Sanctuary Intelligence integration:** connect optional questionnaire results through explicit member controls; no duplicate questionnaire or leaking private reflections.
+8. **Verification and branch closeout:** run typecheck, lint, relevant tests and build; add focused regression/security tests; inspect diffs and integration points; fix failures; record what is and is not verified. Browser/mobile/accessibility QA and staging/RLS verification remain explicit gates, not assumed from a successful build.
+
+### Implementation progress log (2026-10-28)
+
+**In progress — first integration slice committed on this branch.**
+
+- Audited the current discovery entry point and confirmed existing reusable modules: public profile search/profile pages, public feed retrieval, event retrieval, and the private self-discovery centre.
+- Updated the existing profile discovery component into a responsive, keyboard-accessible People / Communities & Gatherings / Topics hub. People uses existing public username/display-name search, searches member-approved public interest tags, and suggests people who share the member's public interests or explicitly public connection intentions, with visible explanations of the overlap; Topics queries the existing public feed and filters visible reflections by story tag/content; Communities & Gatherings surfaces upcoming events from the existing event service.
+- Added a member-controlled interest editor on the profile dashboard, with a 12-interest limit, private-by-default visibility, and an explicit public-discovery toggle. Member-approved public interests now appear on discovery cards and public profile pages.
+- Added `profile_discovery_intentions` persistence and `ProfileDiscoveryIntentionsEditor`: members can select up to three flexible intentions (community, ideas, growth, collaboration, circle, perspective), private by default, and opt into public discovery. Public intentions are shown on discovery cards/profile pages and can contribute to explainable suggestions; private intentions are not queried for other members.
+- Added `profile_interests` migration and TypeScript database typing. RLS permits members to manage their own interests and limits public reads to interests belonging to discoverable profiles in the public profile projection.
+- Connected discovery actions to existing feed/events navigation in AppWorkspace rather than introducing duplicate feed/event systems.
+- Added `src/modules/profiles/connectionService.ts` with Supabase and local-demo implementations for following/unfollowing, sending/responding to connection requests, blocking/unblocking, loading relationship state, and retrieving incoming requests and blocked-member IDs. Discovery cards now expose Follow, Connect, Message, Block, Report, Save, and Hide actions; incoming requests can be accepted/declined, and blocked/hidden/saved-member panels support management.
+- Added relationship-table types and `supabase/tests/connection_relationships_rls.test.sql` to check RLS activation, anonymous privilege denial, authenticated table grants, recipient-only response policy, block-aware profile projection, and block cleanup trigger. Expanded the discovery contract check to cover relationship safety and actions.
+- Added loading/error/empty states, responsive cards, keyboard focus styling, messaging-disabled state, and a note that private reflections are not used in these searches.
+- Added `scripts/check-discovery-interests-contract.mjs`, registered `npm run check:discovery-interests`, and wired it into the GitHub Actions CI workflow to assert the core schema, privacy, editor, and feature-bridge contracts. This check has been added but has not yet been executed.
+- Added the first persistent relationship lifecycle slice in `supabase/migrations/20261028170000_connection_relationships.sql`: one-way follows, normalized mutual connection requests (pending/accepted/declined), private block lists, private saved/hidden profile lists, participant-only relationship reads, recipient-only request responses, immutable request participants, block-aware public-profile projection and content filtering, and trigger-enforced cleanup of follows/pending or accepted connections when blocking. The migration has not been applied to Supabase. The same migration prevents direct-conversation creation and new direct messages across a block, closes existing direct conversations, hides their prior visible messages, and sends follow/request/accept notifications through the existing notification system.
+- Added `supabase/migrations/20261028180000_add_profile_report_target.sql` and `20261028180100_profile_report_rpc.sql` to route profile reports through the existing moderation queue, with self-report rejection and existing rate limits. Discovery cards now expose the existing report form rather than inventing a separate reporting workflow.
+- Verification status: remote file writes succeeded. Draft PR [#189](https://github.com/platinumsoundz/Guild-Sanctuary/pull/189) is open against `main` (140 commits, 26 changed files) for review and CI. The static discovery contract check and pgTAP RLS test have been expanded for relationships, messaging blocks, notifications, profile reports, private save/hide preferences, and public-intention privacy; neither has been executed in this runtime. No local typecheck, lint, build, browser/device test, or database/RLS test has run because repository cloning is unavailable. The only reported commit status is Vercel `failure` pointing to the external `build-rate-limit`/upgrade-plan page; no GitHub Actions run was returned for the PR head, so this is not evidence of a compiler failure or a green CI result. All four new migrations are committed to the branch but none has been applied to Supabase. Upstream `main` was reconciled in merge commit `25b10a2c500f40a40cff8962b374787d7a728a57`; the branch is now ahead of `main` with no commits behind. Shared workspace, navigation, Arcade, profile dashboard styling, CI workflows, and upstream handoff docs were included in the merge tree. Do not mark the feature verified until checks and staging RLS tests pass.
+
+### Success measures
+
+Track discovery relevance feedback, useful profile/community/topic engagement, follows/connections accepted by both sides, useful discussions/groups/events reached, preference adjustments, safety incidents, privacy-control usability, mobile accessibility, and regressions. Avoid treating raw connection volume as the sole success metric.
+
+### Branch and release handling
+
+- Working branch: `feat/sanctuary-connection-discovery-2026-10-28`.
+- Keep this work coordinated on the branch; do not deploy during implementation. Complete the audit and implementation, tests, integration review, and branch summary before the project's later combined release/push/deploy decision.
+- Align this roadmap with `MASTER_BLUEPRINT.md` and `AI_RESTORE_PROMPT.md` when decisions or implementation status change.
+
+
+Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.

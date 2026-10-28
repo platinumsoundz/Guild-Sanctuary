@@ -221,3 +221,29 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 ### Owner-only provider handoff
 Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment setup; Cloudflare/Vercel account settings, secrets, domains and provider configuration remain owner tasks. No provider account settings or secrets were edited as part of this cleanup.
+
+## Current handoff: Sanctuary Connection Discovery (2026-10-28)
+
+Read the “Sanctuary Connection Discovery” section in ROADMAP.md and the locked product direction in MASTER_BLUEPRINT.md before continuing.
+
+- Working branch: feat/sanctuary-connection-discovery-2026-10-28.
+- Agreed direction: People, Communities, and Topics are equally valid discovery paths. This is meaningful community connection, not dating.
+- Reuse existing profile, feed, event, messaging, notification, and navigation systems; avoid duplicate social primitives.
+- Keep private self-discovery reflections and questionnaire answers separate from discovery. Member interests are private by default; public interest discovery is opt-in and is gated by the public discoverable-profile projection.
+- Current implementation includes People / Communities & Gatherings / Topics tabs, public-feed topic filtering, upcoming-event discovery, profile interest editing, public interest display, interest search, and explainable shared-public-interest suggestions. A first relationship slice now adds follow/unfollow, mutual connection requests with accept/decline, block/unblock, incoming request controls, private saved/hidden profile lists, profile reports through existing moderation, relationship notifications, RLS policies, and block-aware profile/feed/topic/event/comment filtering. Draft PR #189 is open against main; it is not merged. Review the full diff, run `npm run check:discovery-interests`, `npm run typecheck`, and `npm run build`, then apply the four new Supabase migrations only in the approved staging workflow and execute pgTAP/RLS tests. Vercel's current check points to the external build-rate-limit/upgrade-plan blocker; no successful CI or deployment is claimed. Members can select up to three discovery intentions, private by default with opt-in public display; suggestions can explain shared public interests or public intentions. Blocking also closes direct conversations, hides their prior visible messages, and prevents new direct conversations/messages.
+- Database migrations: supabase/migrations/20261028150000_member_discovery_interests.sql, supabase/migrations/20261028170000_connection_relationships.sql, supabase/migrations/20261028180000_add_profile_report_target.sql, and supabase/migrations/20261028180100_profile_report_rpc.sql. All are committed but none has been applied to Supabase.
+- Still outstanding: dedicated groups/community discovery, message-request policy integration, richer intention/preferences and questionnaire integration, connection request rate limiting/history, and full validation.
+- Upstream main was reconciled into this branch by merge commit 25b10a2c500f40a40cff8962b374787d7a728a57; the branch is now ahead of main and not behind. A final integration review and full suite are still required before any PR/merge.
+- Validation is incomplete: repository cloning was blocked by this runtime's network access. Vercel status reports a build-rate-limit/upgrade-plan failure, not compiler diagnostics; typecheck, lint, build, browser/device QA, and database/RLS tests remain unverified.
+- Do not deploy during implementation. Finish integration and checks on the branch, document remaining staging gates, and leave release to the project's later combined release decision.
+
+### Latest implementation checkpoint (2026-10-28)
+
+- src/modules/profiles/components/ProfileDiscovery.tsx: accessible People, Communities & Gatherings, and Topics tabs; people search by public name or public interests; suggestions explain shared public interests or public intentions; cards support follow/connect/message/block/report/save/hide; incoming requests and private saved/hidden/blocked lists are manageable; topics use the existing public feed; gatherings use existing events.
+- src/modules/profiles/components/ProfileInterestsEditor.tsx and src/modules/profiles/discoveryInterests.ts: member-controlled interests (up to 12), private by default, optional public discovery, local-demo fallback, and public-interest lookup.
+- src/modules/profiles/components/ProfileDiscoveryIntentionsEditor.tsx and src/modules/profiles/discoveryIntentions.ts: members choose up to three intentions, private by default with opt-in public display and matching.
+- src/modules/profiles/components/PublicProfilePage.tsx: displays member-approved public interests and intentions while keeping profile/feed loading resilient if optional lookup fails.
+- src/modules/profiles/connectionService.ts and supabase/migrations/20261028170000_connection_relationships.sql: follow/connection/block/save/hide tables and services; block enforcement hides profiles and content, closes direct conversations, hides prior visible direct messages, prevents new direct conversations/messages, and sends relationship notifications. These migration changes are not applied.
+- supabase/migrations/20261028150000_member_discovery_interests.sql and src/services/supabase/database.types.ts: RLS-protected interest persistence and type definitions.
+- scripts/check-discovery-interests-contract.mjs and npm run check:discovery-interests: static contract checks are wired into .github/workflows/ci.yml but have not been executed. supabase/tests/connection_relationships_rls.test.sql adds pgTAP schema/policy checks; these have not been run.
+

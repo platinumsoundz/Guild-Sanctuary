@@ -325,3 +325,17 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 ### Owner-only provider handoff
 Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment setup; Cloudflare/Vercel account settings, secrets, domains and provider configuration remain owner tasks. No provider account settings or secrets were edited as part of this cleanup.
+
+
+## Locked product direction: Sanctuary Connection Discovery (2026-10-28)
+
+The agreed direction is to help members discover **people, communities, and topics** as equally valid paths to meaningful connection. This is community/self-discovery—not a dating product. Use shared interests, compatible connection intentions, complementary perspectives, chosen activities, and conversation preferences for transparent recommendations. Start with explainable rules-based relevance, not opaque or sensitive psychological inference.
+
+- Self-discovery questionnaires are optional, progressive, skippable, and private by default.
+- Members control which approved interests/preferences inform discovery and can edit/reset them.
+- Private reflections, private messages, sensitive answers, trauma disclosures, and inferred health/mental-health traits must never silently become public profile content or matching signals.
+- Profiles may include member-controlled interests/hashtags, an optional journey note, and a profile feed integrated with existing social primitives.
+- Reuse existing profiles, feeds, follows, messaging, groups, events, notifications, search, and moderation; avoid duplicate relationship or publishing systems.
+- Connection requests and messaging must enforce server-side permissions. Blocking, reporting, visibility, discoverability, and pause/reset controls are core requirements.
+- No romantic compatibility scores, appearance ranking, popularity leaderboards, or assumption that a profile view means interest.
+- Roadmap source of truth: ROADMAP.md, section “Sanctuary Connection Discovery — product direction and implementation plan”. Current branch: feat/sanctuary-connection-discovery-2026-10-28. Status is **In progress, unverified**: the first discovery, privacy-first intentions, relationship lifecycle, save/hide, block enforcement, profile reporting, and notification integration are implemented on the branch; database migrations are not applied and automated/browser/RLS verification is outstanding.

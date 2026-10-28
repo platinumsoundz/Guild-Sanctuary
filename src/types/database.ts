@@ -1,7 +1,7 @@
 import type { Coordinates } from './index';
 
 export type UserStatus = 'active' | 'suspended';
-export type FriendshipStatus = 'pending' | 'accepted' | 'blocked';
+export type FriendshipStatus = 'pending' | 'accepted' | 'declined' | 'blocked';
 export type UserPermission = 'feed:read' | 'post:create' | 'event:rsvp' | 'message:send' | 'profile:edit';
 export type ProfileVisibility = 'public' | 'private';
 export type EventRsvpStatus = 'going' | 'interested' | 'cancelled';
