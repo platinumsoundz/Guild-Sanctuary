@@ -1,6 +1,6 @@
 # The Sanctuary — Roadmap
 
-Last updated: 2026-10-27
+Last updated: 2026-10-28
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
@@ -88,7 +88,7 @@ Status labels used below:
 | Guest mode | Read-only; no posting, spending, or DMs |
 | Moderation hierarchy | Strict rank hierarchy applies to account and content actions; no self-targeting; actor must strictly outrank target/owner; missing role/owner data fails closed; all actions require rationale and audit trail |
 
-## 4. Workstreams
+## Recent navigation and support update (2026-10-28)\n\n| Support creator page and community projects | In code, QA pending | The navigation keeps “Support the community”; the support page is titled “Support the creator”, and the games/projects hub is placed below the contribution options. Navigation entry for the standalone Games page is removed. Build, responsive layout, and link QA pending |\n\n## 4. Workstreams
 
 Workstreams are not strict phases; several can run in parallel. W1 is the
 existing launch gate and must complete before any live payment.
