@@ -27,7 +27,8 @@
     "check:framework-security": "node scripts/check-framework-security.mjs",
     "check:token-spend": "node scripts/check-token-spend-contract.mjs",
     "check:cosmic-arcade": "node scripts/check-cosmic-arcade-contract.mjs",
-    "check:sanctuary-home": "node scripts/check-sanctuary-home-contract.mjs"
+    "check:sanctuary-home": "node scripts/check-sanctuary-home-contract.mjs",
+    "check:short-engagement": "node scripts/check-short-engagement-rpc-contract.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
