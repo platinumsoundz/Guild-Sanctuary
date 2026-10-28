@@ -4,20 +4,47 @@ Last updated: 2026-10-28
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
+## Integration batch checkpoint — 2026-10-28
+
+The following focused PRs have been merged into `main` as a single integration batch:
+
+- PR [#185](https://github.com/platinumsoundz/Guild-Sanctuary/pull/185), merge commit `a832dd366b7cd5f397cc5d47a4a269fb4dc7c585`: production Cloudflare deploys now require explicit workflow dispatch while this integration batch is assembled. PR/main CI and Cloudflare builds remain enabled; provider secrets/settings were not changed.
+- PR [#184](https://github.com/platinumsoundz/Guild-Sanctuary/pull/184), merge commit `3a74b959761d76ffc68e0aad7d50080b16031c54`: map-based event discovery, accessible pins, nearby radius, past-event filtering and coordinate-edit persistence.
+- PR [#183](https://github.com/platinumsoundz/Guild-Sanctuary/pull/183), merge commit `5b09b2d6e7a935bbae978624b6b9b4f95d9809ae`: Life Lesson and Conversation Starter feed templates.
+- PR [#181](https://github.com/platinumsoundz/Guild-Sanctuary/pull/181), merge commit `4e8c276e7d429f9b706d91c7aa935b014e874c98`: explainable, deterministic personalised learning path in Sanctuary Intelligence.
+- PR [#178](https://github.com/platinumsoundz/Guild-Sanctuary/pull/178), merge commit `b611c7cda823dcebbd22a3682b395d820705837b`: Today landing page and responsive navigation.
+- PR [#179](https://github.com/platinumsoundz/Guild-Sanctuary/pull/179), merge commit `5e0b06afb0884374779fb62a667e96319eae470c`: separate Sanctuary-built Cosmic Arcade from external creator projects; add classic mini-games and progression contracts; keep token spending disabled. The leaderboard migration is repository code only and has not been applied.
+
+### Verification and release status
+
+- The exact feature heads passed their GitHub CI / contract / build checks, including typecheck and production build. The final #179 integration head `093c8c29c4325617651428b7096665a50621e222` passed CI, the Cloudflare Worker build, and focused contracts. An intermediate typecheck caught a malformed JSX grouping during navigation integration; it was corrected and the final head passed.
+- Mainline CI passed on merge head `5e0b06afb0884374779fb62a667e96319eae470c` (run [40703200916](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40703200916)).
+- Mainline Cloudflare Worker build was still running at the time of this entry. The deploy step is guarded to skip on PR/push and run only for explicit `workflow_dispatch`; verify the completed workflow before claiming its build result. No production deployment was intentionally initiated.
+- Vercel preview checks report a provider build-rate-limit failure. Browser/device, keyboard/screen-reader and real-user journey QA remain outstanding; CI success is not a substitute for those checks.
+
+### Remaining open work — do not merge blindly
+
+- [#145 — database-backed Daily Reflection](https://github.com/platinumsoundz/Guild-Sanctuary/pull/145): branch is behind current main and includes a private-storage migration. Owner must approve the local-to-account-backed storage transition, reconcile migration history, and run authenticated cross-account/deletion/failure tests before merge or application.
+- [#81 — moderation hierarchy](https://github.com/platinumsoundz/Guild-Sanctuary/pull/81) and [#84 — member-role authorization lock](https://github.com/platinumsoundz/Guild-Sanctuary/pull/84): static contracts pass on recorded heads, but the SQL changes remain gated on independent security review and owner-approved staging/concurrency authorization tests.
+- [#85 — beta showcase](https://github.com/platinumsoundz/Guild-Sanctuary/pull/85): broad, heavily diverged and non-mergeable. Do not force-merge; split/reconcile unique work against the now-merged Today, Arcade and Intelligence slices.
+- [#5 — game wallet bridge](https://github.com/platinumsoundz/Guild-Sanctuary/pull/5): targets `feature/token-shop-and-games-hub`, not `main`; that base is substantially diverged from current main. Reconcile the wallet/session/migration dependency chain and retarget only after reviewing the full diff. Token spending remains disabled.
+- Old unreferenced feature branches have not been deleted: identify unique work and confirm it is merged or superseded before cleanup. No branch was force-pushed or deleted in this pass.
+
+
 ## Support and creator-project navigation (2026-10-28)
 
-- **In code, QA pending:** The Support page presents voluntary contribution options first, then embeds the existing games/creator-project hub beneath them.
+- **Merged to main; QA pending:** The Support page presents voluntary contribution options first, then embeds the external creator-project hub beneath them.
 - The Support page heading is “Support the creator”; the navigation label remains “Support the community”.
-- The dedicated **Cosmic Arcade** navigation entry remains available. The embedded Games hub includes the Cosmic Arcade and creator game links without nesting a second `main` landmark.
+- The dedicated **Cosmic Arcade** navigation entry opens Sanctuary-built mini-games; the Support page keeps external creator projects separate. The Arcade/creator separation is merged in PR #179.
 - Contribution checkout, provider settings, and external game host configuration remain gated by owner-only setup and verification.
 
 ## Sanctuary home showcase — clean integration slice (2026-10-28)
 
-- **In code on a clean branch, CI pending:** Ported the Today landing/showcase component and responsive styles from the conflicted beta showcase branch onto current `main`.
+- **Merged to main; automated checks passed, browser/device QA pending:** Ported the Today landing/showcase component and responsive styles from the conflicted beta showcase branch onto current `main` in PR #178.
 - Added a dedicated Today route and made it the initial destination for fresh sessions, with Today accessible on mobile and desktop navigation.
 - Added a focused static contract for route wiring, navigation reachability, responsive CSS, reduced motion, and non-clinical copy.
 - This slice intentionally does **not** port the conflicted self-discovery persistence UI or migration. Private self-discovery remains a separate privacy/RLS review and owner-approved staging task.
-- Branch: `feat/sanctuary-home-clean-integration`. Run CI and review the exact head before merge; browser/device QA remains pending.
+- Source: PR #178, merge commit `b611c7cda823dcebbd22a3682b395d820705837b`. Browser/device QA remains pending.
 
 ## Mainline PR reconciliation (2026-10-28)
 
