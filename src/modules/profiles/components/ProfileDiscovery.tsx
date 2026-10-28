@@ -7,7 +7,7 @@ import { fetchFeed } from '@/modules/feeds';
 import { fetchEvents } from '@/modules/events';
 import type { EventView } from '@/modules/events';
 import { fetchPublicProfileById, searchPublicProfiles } from '../service';
-import { fetchPublicDiscoveryInterests, findUserIdsByPublicInterest, findUserIdsBySharedPublicInterests } from '../discoveryInterests';
+import { fetchMemberDiscoveryInterests, fetchPublicDiscoveryInterests, findUserIdsByPublicInterest, findUserIdsBySharedPublicInterests } from '../discoveryInterests';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
@@ -35,6 +35,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
   const [publicInterests, setPublicInterests] = useState<Map<string, string[]>>(new Map());
   const [suggestedProfiles, setSuggestedProfiles] = useState<PublicProfile[]>([]);
   const [suggestedInterests, setSuggestedInterests] = useState<Map<string, string[]>>(new Map());
+  const [sharedInterestMatches, setSharedInterestMatches] = useState<Map<string, string[]>>(new Map());
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -102,10 +103,20 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
           if (profile && profile.userId !== currentUserId) unique.set(profile.userId, profile);
         }
         const profilesToShow = [...unique.values()].slice(0, 12);
-        const interests = await fetchPublicDiscoveryInterests(profilesToShow.map((profile) => profile.userId));
+        const [interests, ownInterests] = await Promise.all([
+          fetchPublicDiscoveryInterests(profilesToShow.map((profile) => profile.userId)),
+          fetchMemberDiscoveryInterests(currentUserId),
+        ]);
+        const ownPublic = new Set(ownInterests.filter((item) => item.isPublic).map((item) => item.interest));
+        const shared = new Map<string, string[]>();
+        for (const profile of profilesToShow) {
+          const overlap = (interests.get(profile.userId) ?? []).filter((interest) => ownPublic.has(interest));
+          if (overlap.length) shared.set(profile.userId, overlap);
+        }
         if (!cancelled) {
           setSuggestedProfiles(profilesToShow);
           setSuggestedInterests(interests);
+          setSharedInterestMatches(shared);
         }
       })
       .catch(() => {
@@ -158,7 +169,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     { id: 'topics', label: 'Topics', icon: Compass, description: 'Explore public reflections and shared ideas.' },
   ];
 
-  const renderProfileResults = (items: PublicProfile[], interestMap: Map<string, string[]>) => (
+  const renderProfileResults = (items: PublicProfile[], interestMap: Map<string, string[]>, sharedMap?: Map<string, string[]>) => (
     <div className={styles.results}>
       {items.map((profile) => (
         <article className={styles.profileRow} key={profile.profileId}>
@@ -172,6 +183,9 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
               <div className={styles.interestTags} aria-label="Public interests">
                 {(interestMap.get(profile.userId) ?? []).map((interest) => <span key={interest}>#{interest}</span>)}
               </div>
+            )}
+            {(sharedMap?.get(profile.userId) ?? []).length > 0 && (
+              <p className={styles.matchReason}>You both list {(sharedMap?.get(profile.userId) ?? []).map((interest) => `#${interest}`).join(', ')}</p>
             )}
             <ProfileSocialLinks links={profile.socialLinks} />
             {(profile.location || profile.age || profile.starSign || profile.belief) && (
@@ -230,7 +244,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
           : suggestedProfiles.length > 0 ? (
             <>
               <p className={styles.stateMessage}>Suggested because you share public interests</p>
-              {renderProfileResults(suggestedProfiles, suggestedInterests)}
+              {renderProfileResults(suggestedProfiles, suggestedInterests, sharedInterestMatches)}
             </>
           ) : (
             <div className={styles.emptyState}><Users size={23} aria-hidden="true" /><p>Add public interests on your profile to discover people with similar interests, or search for a public name or username. You can explore topics and gatherings without contacting anyone.</p></div>
