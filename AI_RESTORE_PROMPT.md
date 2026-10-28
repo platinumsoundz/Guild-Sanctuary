@@ -238,3 +238,10 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Updated `src/components/SanctuaryHome.module.css`, `src/modules/feeds/components/Feed.module.css`, and `src/modules/profiles/components/ProfileDashboard.module.css`.
 - This is presentation-only work. Admin/moderation and backend integration remain assigned to the separate backend agent.
 - Browser/device QA and automated checks remain outstanding; do not describe this branch as tested, merged, or deployed.
+
+
+### Cross-surface UI refinement checkpoint — 2026-10-28
+- Extended the frontend-only branch with touch-target, keyboard-focus, small-screen wrapping, media sizing, and notification popover refinements.
+- Files touched in this batch: `src/components/AppWorkspace.module.css`, `src/components/ResponsiveShell.module.css`, `src/components/NotificationBar.module.css`, `src/modules/feeds/components/FeedContent.module.css`, `src/modules/profiles/components/ProfileDiscovery.module.css`, `src/modules/profiles/components/PublicProfilePage.module.css`, and `src/modules/self-discovery/components/SelfDiscoveryCentre.module.css`.
+- Backend/admin/moderation integrations remain out of scope for this frontend branch.
+- Automated checks and browser/device QA remain outstanding; do not describe this as tested, merged, or deployed.
