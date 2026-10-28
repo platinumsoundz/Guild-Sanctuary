@@ -1,25 +1,30 @@
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
-const component = readFileSync(new URL('../src/modules/practice/components/DailyReflection.tsx', import.meta.url), 'utf8');
-const styles = readFileSync(new URL('../src/modules/practice/components/DailyReflection.module.css', import.meta.url), 'utf8');
+
+const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
+const component = read('../src/modules/practice/components/DailyReflection.tsx');
+const styles = read('../src/modules/practice/components/DailyReflection.module.css');
+const types = read('../src/services/supabase/database.types.ts');
+
 const checks = [
-  ['reflection data is namespaced per user and versioned', /sanctuary-daily-reflection:v1:\$\{encodeURIComponent\(userId\)\}/.test(component)],
-  ['guest mode cannot write reflections', /if \(isGuest\)[\s\S]*?Sign in to keep a reflection/.test(component)],
-  ['account switch does not render the previous account reflection while loading', /loadedKey !== key/.test(component) && /setLoadedKey\(key\)/.test(component)],
-  ['mood is required before save', /if \(!mood\)[\s\S]*?Choose the mood/.test(component)],
-  ['free-text fields have bounded lengths', /maxLength=\{180\}/.test(component) && /maxLength=\{1200\}/.test(component)],
-  ['only a bounded history is retained', /\.slice\(0, 90\)/.test(component)],
-  ['recent previous entries can be revisited without leaving the feed', /Previous reflections/.test(component) && /\.slice\(0, 7\)/.test(component) && /<details/.test(component)],
-  ['history deletion requires explicit confirmation', /window\.confirm\('Delete all Sanctuary reflections/.test(component)],
-  ['storage errors are handled instead of crashing', /catch[\s\S]*?browser could not save the reflection/.test(component)],
-  ['privacy note explains local-only storage and shared-browser risk', /not synced to your account or sent to Sanctuary servers/.test(component) && /may be able to read it/.test(component)],
-  ['feature is framed as reflection, not medical care', /not medical advice, diagnosis or treatment/.test(component)],
-  ['form and status messaging are accessible', /aria-live="polite"/.test(component) && /fieldset/.test(component) && /legend/.test(component)],
-  ['responsive layouts and reduced-motion preferences are respected', /@media \(max-width: 760px\)/.test(styles) && /prefers-reduced-motion: reduce/.test(styles)],
+  ['normal persistence uses the authenticated Supabase database', /getSupabaseBrowserClient/.test(component) && /from\('daily_reflections'\)/.test(component)],
+  ['the current authenticated user is verified before data access', /auth\.getUser\(\)/.test(component) && /data\.user\.id !== expectedUserId/.test(component)],
+  ['reads and writes are scoped to the verified owner id', /\.eq\('user_id', ownerId\)/.test(component) && /user_id: ownerId/.test(component)],
+  ['history is bounded to 90 entries and sorted newest first', /\.limit\(90\)/.test(component) && /order\('reflection_date', \{ ascending: false \}\)/.test(component)],
+  ['one entry per user per day is saved with the unique upsert key', /onConflict: 'user_id,reflection_date'/.test(component)],
+  ['delete history is confirmed and restricted to the active owner', /window\.confirm\('Delete all Sanctuary reflections/.test(component) && /\.delete\(\)\.eq\('user_id', ownerId\)/.test(component)],
+  ['guest mode remains read-only', /if \(isGuest\)[\s\S]*?Sign in to save private diary entries/.test(component)],
+  ['legacy browser entries are read only for an explicit, confirmed import', /localStorage\.getItem\(/.test(component) && /const importBrowserReflections = async/.test(component) && /This uploads private mood and reflection text/.test(component) && !component.includes('localStorage.setItem(') && !component.includes('localStorage.removeItem(')],
+  ['existing account entries are not overwritten during import', /ignoreDuplicates: true/.test(component) && /existingDates = new Set\(entries\.map\(\(entry\) => entry\.date\)\)/.test(component)],
+  ['failed loads block editing rather than showing an empty diary as valid', /const sessionReady = loadedKey === key && !loadError/.test(component) && /if \(!sessionReady\)/.test(component)],
+  ['the database types include every column used by the reflection component', /daily_reflections: Table<[\s\S]*?reflection_date: string;[\s\S]*?intention: string;[\s\S]*?content: string;[\s\S]*?mood: string \| null;[\s\S]*?updated_at: string;/.test(types)],
+  ['the UI states private account storage and public-feed separation', /Private to your account/.test(component) && /public feed/.test(component)],
+  ['the feature keeps a non-clinical disclaimer and accessible mood controls', /not medical advice, diagnosis or treatment/.test(component) && /fieldset/.test(component) && /legend/.test(component) && /aria-live="polite"/.test(component)],
+  ['responsive and reduced-motion styles remain present', /@media \(max-width: 760px\)/.test(styles) && /prefers-reduced-motion: reduce/.test(styles)],
 ];
-checks.push(
-  ['unreadable reflection storage fails closed instead of masquerading as an empty history', /const sessionReady = loadedKey === key && readableKey === key/.test(component) && /Saved reflections are unavailable/.test(component) && /Your existing data has not been changed/.test(component)],
-  ['account changes clear old reflection state and gate writes until storage is readable', /setLoadedKey\(null\)/.test(component) && /setEntries\(\[\]\)/.test(component) && /if \(!sessionReady\)/.test(component)],
-);
-for (const [label, passed] of checks) { console.log((passed ? 'PASS ' : 'FAIL ') + label); assert.ok(passed, label); }
-console.log('Daily reflection contract checks passed: ' + checks.length + '. Static checks only; browser integration is still required.');
+
+for (const [label, passed] of checks) {
+  console.log(`${passed ? 'PASS' : 'FAIL'} ${label}`);
+  assert.ok(passed, label);
+}
+console.log(`Daily Reflection database contract checks passed: ${checks.length}. Static checks only; authenticated browser and cross-account testing are still required.`);
