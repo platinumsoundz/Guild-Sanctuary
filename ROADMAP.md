@@ -31,6 +31,13 @@ The following focused PRs have been merged into `main` as a single integration b
 - Old unreferenced feature branches have not been deleted: identify unique work and confirm it is merged or superseded before cleanup. No branch was force-pushed or deleted in this pass.
 
 
+## Front-end navigation clarity (2026-10-28)
+
+- **In code on branch `feat/sanctuary-frontend-polish-2026-10-28`:** the main navigation drawer groups destinations by member intent: Start here, Connect, Your space, Explore, Sanctuary tools, and Stewardship. The admin group remains hidden unless the existing role gate allows access.
+- The existing top-left navigation trigger, persistent page underneath the compact notification panel, unread indicator, Escape/outside-click dismissal, and “Open full notifications” path are preserved.
+- This is a front-end-only change based on current `main`; no backend schema, moderation workflow, deployment configuration, or live service was changed.
+- Automated/browser/device QA has not been run for this branch. Check keyboard navigation, mobile drawer scrolling, active destination highlighting, and role-gated Stewardship visibility during normal front-end QA.
+
 ## Support and creator-project navigation (2026-10-28)
 
 - **Merged to main; QA pending:** The Support page presents voluntary contribution options first, then embeds the external creator-project hub beneath them.
