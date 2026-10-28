@@ -196,8 +196,8 @@ export function LunarSolitaire() {
     setNotice(`${faceLabel(card)} placed in its foundation.`);
   };
 
-  const cardButton = (card: Card | undefined, label: string, onClick: () => void, isSelected = false) => (
-    <button type="button" className={`${styles.solitaireCard} ${card?.faceUp ? styles.solitaireFace : styles.solitaireBack} ${card && redSuits.includes(card.suit) ? styles.solitaireRed : ''} ${isSelected ? styles.solitaireSelected : ''}`} onClick={onClick} aria-label={label}>
+  const cardButton = (card: Card | undefined, label: string, onClick: () => void, isSelected = false, key?: string) => (
+    <button key={key} type="button" className={`${styles.solitaireCard} ${card?.faceUp ? styles.solitaireFace : styles.solitaireBack} ${card && redSuits.includes(card.suit) ? styles.solitaireRed : ''} ${isSelected ? styles.solitaireSelected : ''}`} onClick={onClick} aria-label={label}>
       {card?.faceUp ? faceLabel(card) : card ? '✦' : '✧'}
     </button>
   );
@@ -228,7 +228,7 @@ export function LunarSolitaire() {
       </div>
       <div className={styles.solitaireTableau} aria-label="Solitaire tableau columns">
         {deal.tableau.map((pile, column) => <div className={styles.solitaireColumn} key={column} aria-label={`Tableau column ${column + 1}`}>
-          {pile.map((card, index) => cardButton(card, card.faceUp ? `${faceLabel(card)}, column ${column + 1}, position ${index + 1}` : `Face-down card, column ${column + 1}, position ${index + 1}`, () => chooseTableau(column, index), selected?.pile === 'tableau' && selected.column === column && index >= selected.index))}
+          {pile.map((card, index) => cardButton(card, card.faceUp ? `${faceLabel(card)}, column ${column + 1}, position ${index + 1}` : `Face-down card, column ${column + 1}, position ${index + 1}`, () => chooseTableau(column, index), selected?.pile === 'tableau' && selected.column === column && index >= selected.index, `tableau-${column}-${index}`))}
           <button type="button" className={styles.solitaireEmpty} aria-label={`Move selected cards to empty column ${column + 1}`} onClick={() => moveToTableau(column)}>+</button>
         </div>)}
       </div>
