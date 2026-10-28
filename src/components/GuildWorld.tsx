@@ -124,7 +124,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
 
   useEffect(() => {
     if (!worldOpen) {
-      enterButtonRef.current?.focus({ preventScroll: true });
+      if (entryOpen || controllerConnected) enterButtonRef.current?.focus({ preventScroll: true });
       return;
     }
     closeButtonRef.current?.focus({ preventScroll: true });
@@ -140,7 +140,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
     };
     document.addEventListener('keydown', onDialogKeyDown);
     return () => document.removeEventListener('keydown', onDialogKeyDown);
-  }, [worldOpen]);
+  }, [controllerConnected, entryOpen, worldOpen]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
