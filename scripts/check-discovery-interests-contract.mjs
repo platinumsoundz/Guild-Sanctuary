@@ -47,6 +47,12 @@ for (const required of [
   'private.guard_profile_relationships',
   'private.apply_profile_block_cleanup',
   'private.is_profile_blocked',
+  'private.guard_direct_message_blocks',
+  'private.guard_direct_conversation_blocks',
+  'private.notify_profile_follow',
+  'private.notify_connection_request',
+  "'connection_request'",
+  "'connection_accepted'",
   'requester_id = (select auth.uid())',
   'recipients respond to connection requests',
   'revoke all on table public.profile_follows, public.profile_connections, public.profile_blocks from anon, authenticated',
@@ -67,4 +73,7 @@ for (const required of [
 assert.ok(discovery.includes('Connection requests'), 'discovery must expose incoming connection requests');
 assert.ok(discovery.includes('Block member'), 'discovery must provide a block control');
 assert.ok(discovery.includes('Blocked members'), 'members must be able to manage their block list');
+const notificationBar = readFileSync(new URL('../src/components/NotificationBar.tsx', import.meta.url), 'utf8');
+assert.ok(notificationBar.includes('connection_request'), 'notification panel must render connection request events');
+assert.ok(notificationBar.includes('started following you'), 'notification panel must render follow events');
 console.log('Discovery interest and relationship contract checks passed.');
