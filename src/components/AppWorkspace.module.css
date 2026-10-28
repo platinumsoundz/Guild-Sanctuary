@@ -4,7 +4,10 @@
   min-width: 0;
   max-width: 100%;
   overflow-x: clip;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  background-image:
+    radial-gradient(ellipse at 4% 0%, rgb(126 103 235 / 4%), transparent 34rem),
+    radial-gradient(ellipse at 96% 72%, rgb(58 190 207 / 3%), transparent 30rem);
   color: var(--ink);
   transition: background-color 180ms ease, color 180ms ease;
 }

@@ -91,6 +91,7 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
       <header className={styles.pageHeader}>
         <div>
           <p className={styles.eyebrow}>YOUR SANCTUARY PROFILE</p>
+          <span className="cosmic-badge">Your space, your style</span>
           <h1>Your profile</h1>
         </div>
         <div className={styles.profileActions}>
