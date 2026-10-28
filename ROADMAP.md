@@ -698,3 +698,10 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - The Support page now remains focused on voluntary contributions and checkout notices. The existing Cosmic Arcade mini-games remain a separate Sanctuary-built games area.
 - Add a static contract requiring the games hub to render in the Guild and not in Support. This does not change game hosting URLs, game saves, account linking, or token integration.
 - **Release status:** run Guild/guest contracts, typecheck and production build on the exact head; interactive browser/device QA remains required. No production deployment is claimed.
+
+
+## Guild public game lobby follow-up — 2026-10-28
+
+- **In code on `feat/move-creator-games-into-guild-2026-10-28`; validation pending:** the Guild route now has a read-only guest lobby listing creator projects and community worlds. The original Guild browser arcade remains gated to authenticated users.
+- This prevents moving game links from Support the creator into a route guests cannot actually use. Support stays focused on contributions; Cosmic Arcade stays distinct.
+- No Supabase migration, production deployment, payment/provider change, game-host change, or account-linking change.
