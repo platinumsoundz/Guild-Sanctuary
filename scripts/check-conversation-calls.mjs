@@ -10,6 +10,10 @@ const iceConfig = readFileSync('supabase/functions/call-ice-config/index.ts', 'u
 for (const token of ['isSignalPayload', 'SIGNAL_TYPES', '256_000', 'incomingRef', "type: 'reject'", 'getUserMedia', 'getUser', 'setAuth', 'RTCPeerConnection', 'createOffer', 'createAnswer', 'addIceCandidate', "type: 'invite'", "type: 'hangup'", 'toggleMute', 'toggleCamera', 'isGroup', '45_000', '30_000', 'config: { private: true }', 'remoteAudio', 'reconnectTimer', 'trying to reconnect']) {
   assert.ok(component.includes(token), `Call panel must include ${token}`);
 }
+assert.ok(component.includes('candidate.description.type !== candidate.type'), 'SDP type must match the signal type');
+assert.ok(component.includes('candidate.description.sdp.length > 256_000'), 'SDP payloads must be bounded');
+assert.ok(component.includes('candidate.candidate.length > 4_096'), 'ICE candidate strings must be bounded');
+assert.ok(component.includes('activeCallRef.current === null && incomingRef.current === null'), 'Only one incoming call may be pending');
 assert.ok(thread.includes('ConversationCallPanel'), 'Call controls must be integrated into Sanctuary messages');
 assert.ok(migration.includes('conversation_members'), 'Call signalling must check conversation membership');
 assert.ok(migration.includes('auth.uid()'), 'Call signalling must be restricted to the authenticated user');
