@@ -94,3 +94,34 @@ The owner must handle Supabase schema/migrations/RLS/owner bootstrap, Stripe and
 
 ### Owner-only provider handoff
 Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment setup; Cloudflare/Vercel account settings, secrets, domains and provider configuration remain owner tasks. No provider account settings or secrets were changed in this cleanup.
+
+
+## Final cleanup checkpoint — 2026-10-28 10:15 UTC
+
+### Latest mainline verification
+- Current main commit at the start of this checkpoint: `2342b8d6f061239ca46ffe88d6208998b3b94613` (token-spending fail-closed integration).
+- CI passed on that exact SHA: [run 40674535609](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40674535609).
+- Automated build/roadmap check passed on that exact SHA: [run 40674535516](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40674535516).
+- Phase 1 dependency-map contract passed on that exact SHA: [run 40674535505](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40674535505).
+- Repository Cloudflare workflow completed successfully on that exact SHA: [run 40674535617](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40674535617). Treat this as workflow evidence only; authenticated browser acceptance is still outstanding.
+
+### Completed integration and safety decisions
+- PR #122 is now merged as [commit 2342b8d](https://github.com/platinumsoundz/Guild-Sanctuary/commit/2342b8d6f061239ca46ffe88d6208998b3b94613). Token-shop spending is intentionally disabled in the UI and the spend RPC remains revoked until owner-approved migration reconciliation and authenticated staging checks pass. This is a safety lock, not a live purchase feature.
+- PR #124's static token-spend contract check is merged as [commit f635b54](https://github.com/platinumsoundz/Guild-Sanctuary/commit/f635b54712df8c3f8c520c2668d39c5a623c5b6a).
+- The account/session isolation and reflection-storage changes from #157–#170 remain integrated in mainline as previously documented.
+
+### Remaining open draft PRs (current queue)
+- [#145 — private database-backed Daily Reflection](https://github.com/platinumsoundz/Guild-Sanctuary/pull/145): do not merge until the owner approves the local-to-account-backed privacy/storage transition and applies/reconciles the migration. Require authenticated cross-account, deletion and failure-recovery tests.
+- [#84 — member-role authorization](https://github.com/platinumsoundz/Guild-Sanctuary/pull/84) and [#81 — moderation hierarchy](https://github.com/platinumsoundz/Guild-Sanctuary/pull/81): remain draft pending independent security review and owner-approved staging/concurrency authorization tests.
+- [#85 — beta showcase](https://github.com/platinumsoundz/Guild-Sanctuary/pull/85): remains draft/non-mergeable; reconcile broad overlapping changes before promoting.
+- [#5 — game wallet bridge](https://github.com/platinumsoundz/Guild-Sanctuary/pull/5): remains draft; prior Cloudflare Workers builds failed. Diagnose the build and reconcile wallet schema/session authorization before promotion.
+
+### Explicit release gates — not complete
+- Authenticated browser/device QA across settings, planner, reflections, events, inbox, threads, notifications, mobile navigation, keyboard/focus, and storage-denial recovery.
+- Live Supabase RLS/RPC authorization and two-account messaging tests; static contracts are not proof of production authorization.
+- Messaging is **not end-to-end encrypted**. The E2EE readiness document is a plan, not a cryptographic implementation.
+- Planner and reflection are still browser-local unless and until the owner-approved Daily Reflection migration is applied and verified; self-discovery results remain session-only.
+- Backup/restore and rollback review, independent security review, staging sign-off and human release approval remain required for Phase 1.
+
+### Owner-only provider handoff
+Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment setup; Cloudflare/Vercel account settings, secrets, domains and provider configuration remain owner tasks. No provider account settings or secrets were edited as part of this cleanup.
