@@ -6,6 +6,7 @@ import { BookOpen, CreditCard, Gem, LockKeyhole, MoonStar, Puzzle, RotateCcw, Sp
 import styles from './CosmicArcade.module.css';
 
 type ArcadeGame = 'wordsearch' | 'crossword' | 'solitaire' | 'mahjong' | 'snake';
+type Cell = { row: number; col: number };
 
 const games: { id: ArcadeGame; title: string; subtitle: string; icon: typeof Star; status: string }[] = [
   { id: 'wordsearch', title: 'Starseed Word Search', subtitle: 'Find the cosmic words hidden in the grid.', icon: Puzzle, status: 'Playable preview' },
@@ -32,32 +33,77 @@ const themes = [
   { id: 'zodiac', name: 'Zodiac Wheel', desc: 'Twelve signs in a cosmic ring' },
 ];
 
+const cellKey = ({ row, col }: Cell) => `${row}-${col}`;
+
+function getStraightPath(start: Cell, end: Cell): Cell[] | null {
+  const rowDelta = end.row - start.row;
+  const colDelta = end.col - start.col;
+  if (rowDelta === 0 && colDelta === 0) return [start];
+  if (rowDelta !== 0 && colDelta !== 0 && Math.abs(rowDelta) !== Math.abs(colDelta)) return null;
+  const rowStep = Math.sign(rowDelta);
+  const colStep = Math.sign(colDelta);
+  const distance = Math.max(Math.abs(rowDelta), Math.abs(colDelta));
+  return Array.from({ length: distance + 1 }, (_, index) => ({
+    row: start.row + rowStep * index,
+    col: start.col + colStep * index,
+  }));
+}
+
 export function CosmicArcade() {
   const [selectedGame, setSelectedGame] = useState<ArcadeGame>('wordsearch');
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
+  const [foundCells, setFoundCells] = useState<string[]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [notice, setNotice] = useState('');
   const progress = useMemo(() => Math.round((foundWords.length / words.length) * 100), [foundWords.length]);
 
-  const toggleCell = (key: string) => {
+  const chooseCell = (row: number, col: number) => {
+    const cell = { row, col };
+    const key = cellKey(cell);
     setNotice('');
-    setSelectedCells((previous) => {
-      const next = previous.includes(key) ? previous.filter((cell) => cell !== key) : [...previous, key];
-      const guess = next.map((cell) => cell.split('-')).sort((a, b) => Number(a[0]) - Number(b[0])).map(([row, col]) => wordGrid[Number(row)][Number(col)]).join('');
-      const reverse = guess.split('').reverse().join('');
-      const match = words.find((word) => word === guess || word === reverse);
-      if (match && !foundWords.includes(match)) {
-        setFoundWords((current) => [...current, match]);
-        setNotice(`You found ${match}! Cosmic alignment +1 ✨`);
-        return [];
-      }
-      if (next.length >= 8) return [];
-      return next;
-    });
+
+    if (foundCells.includes(key)) {
+      setSelectedCells([]);
+      setNotice('That star path has already been discovered. Choose another word.');
+      return;
+    }
+
+    if (selectedCells.length !== 1) {
+      setSelectedCells([key]);
+      setNotice(`Start selected at row ${row + 1}, column ${col + 1}. Now choose the final letter.`);
+      return;
+    }
+
+    const [startRow, startCol] = selectedCells[0].split('-').map(Number);
+    const path = getStraightPath({ row: startRow, col: startCol }, cell);
+    if (!path || path.length < 2) {
+      setSelectedCells([key]);
+      setNotice('Choose a straight horizontal, vertical or diagonal line. Start reset to this letter.');
+      return;
+    }
+
+    const pathKeys = path.map(cellKey);
+    const guess = path.map(({ row: r, col: c }) => wordGrid[r][c]).join('');
+    const reverse = guess.split('').reverse().join('');
+    const match = words.find((word) => word === guess || word === reverse);
+
+    if (match && !foundWords.includes(match)) {
+      setFoundWords((current) => [...current, match]);
+      setFoundCells((current) => [...new Set([...current, ...pathKeys])]);
+      setSelectedCells([]);
+      setNotice(foundWords.length + 1 === words.length
+        ? `You found ${match}! Every cosmic word is aligned — puzzle complete ✨`
+        : `You found ${match}! Cosmic alignment +1 ✨`);
+      return;
+    }
+
+    setSelectedCells([]);
+    setNotice(match ? `${match} was already discovered. Find another word.` : 'Not a word this time. Choose a new starting letter and try again.');
   };
 
   const resetWordSearch = () => {
     setSelectedCells([]);
+    setFoundCells([]);
     setFoundWords([]);
     setNotice('The star map has been reset.');
   };
@@ -83,26 +129,28 @@ export function CosmicArcade() {
       {selectedGame === 'snake' ? <CosmicSnake /> : selectedGame === 'wordsearch' ? (
         <div className={styles.playArea}>
           <div className={styles.playHeader}>
-            <div><p className={styles.eyebrow}>MINDFUL PUZZLE</p><h2>Starseed Word Search</h2><p>Tap letters to find words running left-to-right. Words you find will be marked below.</p></div>
+            <div><p className={styles.eyebrow}>MINDFUL PUZZLE</p><h2>Starseed Word Search</h2><p>Choose a word's first letter, then its last letter in a straight line. Horizontal, vertical and diagonal words all count.</p></div>
             <button className={styles.resetButton} type="button" onClick={resetWordSearch}><RotateCcw size={15} /> Reset</button>
           </div>
           <div className={styles.puzzleLayout}>
             <div className={styles.letterGrid} aria-label="Word search letter grid">
               {wordGrid.map((row, r) => row.map((letter, c) => {
                 const key = `${r}-${c}`;
-                const isFound = foundWords.some((word) => wordGrid[r].slice(c, c + word.length).join('') === word);
-                return <button key={key} type="button" aria-label={`Row ${r + 1}, column ${c + 1}, ${letter}`} className={`${styles.letter} ${selectedCells.includes(key) ? styles.selectedLetter : ''} ${isFound ? styles.foundLetter : ''}`} onClick={() => toggleCell(key)}>{letter}</button>;
+                const isSelected = selectedCells.includes(key);
+                const isFound = foundCells.includes(key);
+                return <button key={key} type="button" aria-label={`Row ${r + 1}, column ${c + 1}, ${letter}${isFound ? ', part of a found word' : ''}`} aria-pressed={isSelected} className={`${styles.letter} ${isSelected ? styles.selectedLetter : ''} ${isFound ? styles.foundLetter : ''}`} onClick={() => chooseCell(r, c)}>{letter}</button>;
               }))}
             </div>
             <aside className={styles.wordList}>
               <h3>Words of the cosmos</h3>
-              <div className={styles.progressTrack}><span style={{ width: `${progress}%` }} /></div>
+              <div className={styles.progressTrack} role="progressbar" aria-label="Word search progress" aria-valuemin={0} aria-valuemax={words.length} aria-valuenow={foundWords.length}><span style={{ width: `${progress}%` }} /></div>
               <p className={styles.progressText}>{foundWords.length} of {words.length} discovered</p>
               {words.map((word) => <p key={word} className={foundWords.includes(word) ? styles.wordFound : styles.word}>{foundWords.includes(word) ? '✦ ' : '◇ '}{word}</p>)}
               {notice && <p className={styles.notice} role="status">{notice}</p>}
+              {foundWords.length === words.length && <p className={styles.notice}>Puzzle complete. Take a breath, then play again whenever you like.</p>}
             </aside>
           </div>
-          <p className={styles.helper}>Preview rules: select letters in order, left-to-right. This first build is a small playable prototype; additional directions and generated puzzles are planned.</p>
+          <p className={styles.helper}>Accessible two-tap selection: choose the first letter and then the last letter. Reset anytime to replay; progress is kept for this visit only.</p>
         </div>
       ) : (
         <div className={styles.comingSoon}>
