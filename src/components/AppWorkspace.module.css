@@ -89,3 +89,75 @@
     font-size: 13px;
   }
 }
+/* Extend the cosmic art direction beyond the landing page into every routed workspace. */
+.worldSurface {
+  background-color: #090d25;
+  background-image:
+    radial-gradient(ellipse at 8% 0%, rgb(129 103 245 / 13%), transparent 34rem),
+    radial-gradient(ellipse at 96% 22%, rgb(67 190 233 / 9%), transparent 30rem),
+    radial-gradient(ellipse at 48% 100%, rgb(115 68 192 / 8%), transparent 38rem),
+    linear-gradient(180deg, rgb(10 13 38 / 98%), rgb(8 11 30 / 98%));
+}
+.sectionPage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgb(160 142 255 / 18%);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 85% 8%, rgb(125 112 255 / 16%), transparent 38%),
+    radial-gradient(ellipse at 12% 100%, rgb(65 190 231 / 9%), transparent 38%),
+    linear-gradient(145deg, rgb(20 24 61 / 88%), rgb(10 14 39 / 90%));
+  box-shadow: 0 22px 58px rgb(2 4 25 / 19%), inset 0 1px rgb(255 255 255 / 3%);
+}
+.sectionPage::before {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(177 163 255 / 68%), rgb(135 233 255 / 42%), transparent);
+  content: '';
+}
+.sectionEyebrow {
+  color: #b8a5ff;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+.sectionPage h1 {
+  max-width: 850px;
+  color: #f4f1ff;
+  letter-spacing: -.045em;
+  line-height: 1.08;
+  text-wrap: balance;
+  text-shadow: 0 0 34px rgb(142 121 255 / 12%);
+}
+.sectionDescription {
+  color: #c0c7e8;
+  line-height: 1.8;
+}
+.profilePage {
+  border: 1px solid rgb(160 142 255 / 17%);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgb(129 103 245 / 12%), transparent 38%),
+    linear-gradient(145deg, rgb(17 21 55 / 86%), rgb(9 13 35 / 92%));
+}
+.supportPage {
+  border: 1px solid rgb(160 142 255 / 17%);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgb(129 103 245 / 10%), transparent 36%),
+    linear-gradient(145deg, rgb(17 21 55 / 62%), rgb(9 13 35 / 72%));
+}
+.sessionLoading {
+  color: #c1c9ec;
+}
+@media (max-width: 700px) {
+  .sectionPage, .profilePage, .supportPage { border-radius: 15px; }
+  .sectionPage { padding-top: 34px; padding-bottom: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .worldSurface { transition: none; }
+}
