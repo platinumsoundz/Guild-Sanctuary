@@ -60,6 +60,24 @@ revoke all on public.guild_workspace_status from anon;
 grant select, insert, update, delete on public.guild_workspace_status to service_role;
 grant select, insert, update, delete on public.guild_workspace_runtime_private to service_role;
 
+create or replace function public.guard_guild_workspace_status_owner()
+returns trigger
+language plpgsql
+set search_path = ''
+as $
+begin
+  if new.user_id is distinct from old.user_id then
+    raise exception using errcode = '42501', message = 'Cloud Lab workspace ownership cannot be changed.';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists guard_guild_workspace_status_owner on public.guild_workspace_status;
+create trigger guard_guild_workspace_status_owner
+before update of user_id on public.guild_workspace_status
+for each row execute function public.guard_guild_workspace_status_owner();
+
 create or replace function public.set_guild_workspace_status_updated_at()
 returns trigger
 language plpgsql
