@@ -57,3 +57,15 @@ A read-only inspection of the current `public.apply_moderation_action(...)` defi
 - Live report target enum labels are `post`, `short`, `event`, `message`, and `comment`; content states are `visible`, `hidden`, and `removed`.
 
 These findings are based on the inspected live function definition and metadata, not an exploit test. Do not treat the existing function as proven vulnerable to a specific attack without reproducing it in disposable staging; equally, do not treat its current guards as sufficient. Before implementing the queue, prepare a separate security-focused correction to the action function and test role hierarchy, self-targets, report-state transitions, deleted targets, and concurrent role demotion. Do not hot-patch production from this note.
+
+
+## Migration-ledger reconciliation snapshot — 2026-10-28
+
+A second read-only query of the active project's `supabase_migrations.schema_migrations` table returned recent versions through `20261028203010` (`harden_call_signal_sender`), including `20261028163256` (`moderate_reported_messages`) and the earlier messaging/DM fixes. The live ledger therefore contains migrations later than some feature branches' recorded baselines. The latest 30 rows also show repeated migration names at distinct versions (for example, `restore_moderation_and_comment_controls`), so reconciliation must use version IDs and file contents, not migration names alone.
+
+At the same time, live metadata still shows `public.get_moderation_queue()` absent while `public.apply_moderation_action(...)` is present. The ledger name `moderate_reported_messages` is not proof that a queue RPC was installed. Before writing a queue migration, compare exact version IDs and SQL file hashes/contents from the repository against the live ledger and inspect the deployed function definitions. No ledger rows or database objects were changed by this audit.
+
+### Additional release gate
+- Produce a version-by-version migration reconciliation table (repo migration version/file, live ledger presence, object effects verified, drift/conflict notes).
+- Do not re-run a version, rename live ledger rows, or apply a guessed replacement migration to production.
+- Test the queue and action path against a disposable staging clone after reconciliation; require an explicit owner-approved deployment plan and independent security review.
