@@ -13,6 +13,7 @@
     "check:pwa": "node scripts/check-pwa-assets.mjs",
     "check:auth": "node scripts/check-auth-flows.mjs",
     "check:account-settings": "node scripts/check-account-settings-permissions.mjs",
+    "check:admin-settings": "node scripts/check-admin-settings-contract.mjs",
     "check:messages": "node scripts/check-message-persistence.mjs",
     "check:self-discovery": "node scripts/check-self-discovery-contract.mjs",
     "check:personal-planner": "node scripts/check-personal-planner-contract.mjs",
@@ -27,7 +28,10 @@
     "check:framework-security": "node scripts/check-framework-security.mjs",
     "check:token-spend": "node scripts/check-token-spend-contract.mjs",
     "check:cosmic-arcade": "node scripts/check-cosmic-arcade-contract.mjs",
-    "check:sanctuary-home": "node scripts/check-sanctuary-home-contract.mjs"
+    "check:sanctuary-home": "node scripts/check-sanctuary-home-contract.mjs",
+    "check:supabase-config": "node scripts/check-supabase-config.mjs",
+    "check:supabase-rpc-security": "node scripts/check-supabase-rpc-security.mjs",
+    "check:supabase-migration-filenames": "node scripts/check-supabase-migration-filenames.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",

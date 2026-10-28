@@ -47,3 +47,8 @@ Revert the feature PR. The module is additive. If a future removal needs to dele
 ## Next step
 
 Review the PR and run browser QA. Keep the feature marked as unverified until manual checks have evidence.
+
+
+## Follow-up — account-backed persistence — 2026-10-28
+
+The original local-only storage implementation has been superseded on `fix/supabase-connection-hardening`. The live `public.daily_reflections` table is now the source of truth for authenticated entries. The UI reads/writes entries under the active Supabase user, imports legacy browser entries only for dates missing from the database, removes the old key only after a successful import, and deletes history from the database after explicit confirmation. `updated_at` is now server-managed. Browser end-to-end tests remain pending; static contract checks have been updated but have not been executed in a local Node environment in this session.

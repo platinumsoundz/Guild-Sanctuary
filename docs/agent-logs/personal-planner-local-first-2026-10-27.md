@@ -14,3 +14,8 @@
 ## Integration audit follow-up — 2026-10-27
 - PR #129 corrected the stale Phase 1 dependency-map contract on `main`; this branch is being revalidated against the updated base before integration.
 - Planner data remains browser-local and is not encrypted or synced across devices. No provider setup or database migration is part of this PR.
+
+
+## Follow-up — database-backed planner — 2026-10-28
+
+The local-first implementation was superseded by the account-backed integration in PR #200. The planner now reads and writes `public.personal_planner_data` under authenticated RLS. Existing local data is imported once only when no database row exists, and the old local key is removed only after the database confirms the import. New planner changes are not written to browser localStorage. The prior local-first verification claims above describe the earlier implementation and should not be used as the current storage contract.

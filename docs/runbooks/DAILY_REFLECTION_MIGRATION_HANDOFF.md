@@ -1,6 +1,6 @@
 # Private Daily Reflection migration handoff
 
-**Status:** repository migration proposal only; not applied to any Supabase project.
+**Status:** live database migration is applied and read-back verified; UI database integration is now implemented in PR #200. Browser end-to-end verification remains pending.
 **Owner:** Ashley
 **Related work:** private Daily Reflection database integration PRs #127 and #128.
 
@@ -12,17 +12,18 @@
 - Row-level security with owner-scoped SELECT, INSERT, UPDATE and DELETE policies.
 - Authenticated-only table grants and an explicit revoke for `anon`.
 
-## Owner-only actions before applying
+## Live verification
 
-1. Confirm the target Supabase project and environment.
-2. Review the migration against the live schema and migration ledger; do not blindly replay it if the table or policies already exist.
-3. Inspect the SQL and verify RLS is enabled, policies use `auth.uid() = user_id`, and anonymous access remains revoked.
-4. Apply it through the approved migration workflow and record the resulting migration version.
-5. Read back the table definition, indexes, grants and RLS policies.
-6. Test with two authenticated accounts: each account must be unable to read, update or delete the other's reflections; unauthenticated/anonymous access must fail.
+The table, unique user/date index, owner-scoped SELECT/INSERT/UPDATE/DELETE policies, and authenticated-only grants are present in the connected project. The `updated_at` timestamp is now set by a database trigger. Anonymous SELECT access is not granted.
+
+## Remaining verification
+
+1. Sign in as two different authenticated users and confirm neither can read, update, or delete the other's reflections.
+2. Test save, update, history load, clear-history, and account switching in a real browser.
+3. Confirm legacy local entries migrate only when absent from the database and are removed from local storage only after a successful database write.
 
 ## Important integration gate
 
-The database-backed Daily Reflection UI must not be merged/enabled until Ashley confirms the migration is applied and read-back verified. Until then, the feature may surface a schema error. It must not silently fall back to a different storage mechanism or imply entries were saved.
+The UI now uses the database as its authoritative store and does not write new reflections to localStorage. If the database is unavailable or the active auth user does not match the supplied account ID, it fails closed and displays an error rather than silently switching storage. Legacy browser entries are imported once, preserving database rows as authoritative for dates already present.
 
 This PR does not connect to Supabase, execute SQL, change provider settings, or deploy anything. The migration is source code only.

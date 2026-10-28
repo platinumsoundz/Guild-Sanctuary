@@ -112,6 +112,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     let onSystemThemeChange: (() => void) | null = null;
     void fetchAccountSettings(currentUser.user.id).then(({ preferences }) => {
       if (cancelled) return;
+      document.documentElement.dataset.layout = preferences.layout;
       const preference = preferences.theme;
       const applyTheme = () => {
         const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;

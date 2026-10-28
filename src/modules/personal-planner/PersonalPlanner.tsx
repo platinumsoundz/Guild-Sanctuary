@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { getSupabaseBrowserClient } from '@/services/supabase';
+import { isSupabaseCommunityStorageConfigured } from '@/services/supabase/communityMedia';
 import { DailyReflection } from '@/modules/practice';
 import { SelfDiscoveryCentre } from '@/modules/self-discovery/components/SelfDiscoveryCentre';
 import styles from './PersonalPlanner.module.css';
@@ -55,45 +57,123 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   const [data, setData] = useState<PlannerData>(EMPTY_DATA);
   const [ready, setReady] = useState(false);
   const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
-  const [storageWritableKey, setStorageWritableKey] = useState<string | null>(null);
-  const sessionReady = ready && loadedStorageKey === storageKey;
+  const [databaseReadyKey, setDatabaseReadyKey] = useState<string | null>(null);
+  const [storageError, setStorageError] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved');
+  const saveQueue = useRef<Promise<void>>(Promise.resolve());
+  const saveGeneration = useRef(0);
+  const sessionReady = ready && loadedStorageKey === storageKey && databaseReadyKey === storageKey;
   const visibleData = sessionReady ? data : EMPTY_DATA;
   const [selectedDate, setSelectedDate] = useState(localDateKey);
   const [newTask, setNewTask] = useState('');
   const [newHabit, setNewHabit] = useState('');
   const [status, setStatus] = useState('');
-  const [storageWarning, setStorageWarning] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     setReady(false);
+    setLoadedStorageKey(null);
+    setDatabaseReadyKey(null);
+    setStorageError(null);
+    setSaveState('saved');
     setStatus('');
     setNewTask('');
     setNewHabit('');
-    try {
-      const loadedData = parseData(window.localStorage.getItem(storageKey));
-      setData(loadedData);
-      setStorageWritableKey(storageKey);
-      setStorageWarning(false);
-    } catch {
-      // Never persist another account's in-memory data when this storage read fails.
-      setData(EMPTY_DATA);
-      setStorageWritableKey(null);
-      setStorageWarning(true);
-    } finally {
-      setLoadedStorageKey(storageKey);
-      setReady(true);
-    }
-  }, [storageKey]);
+
+    const loadPlanner = async () => {
+      try {
+        if (!isSupabaseCommunityStorageConfigured()) {
+          throw new Error('Database storage is not configured. Your planner is locked rather than silently saving private notes only in this browser.');
+        }
+        const client = getSupabaseBrowserClient();
+        const { data: authData, error: authError } = await client.auth.getUser();
+        if (authError) throw new Error(`Your sign-in could not be verified: ${authError.message}`);
+        if (!authData.user || authData.user.id !== userId) {
+          throw new Error('Sign in with the same Sanctuary account to load your private planner.');
+        }
+
+        const { data: saved, error: loadError } = await client
+          .from('personal_planner_data')
+          .select('planner_data')
+          .eq('user_id', userId)
+          .maybeSingle();
+        if (loadError) throw new Error(`Your planner could not be loaded from the database: ${loadError.message}`);
+
+        let loadedData: PlannerData;
+        if (saved?.planner_data) {
+          loadedData = parseData(JSON.stringify(saved.planner_data));
+        } else {
+          let legacyRaw: string | null = null;
+          try {
+            legacyRaw = window.localStorage.getItem(storageKey);
+          } catch {
+            throw new Error('Your previous browser planner could not be read for migration. Allow browser storage temporarily and reload to transfer it safely.');
+          }
+          loadedData = parseData(legacyRaw);
+          const hasLegacyData = loadedData.tasks.length > 0 || loadedData.habits.length > 0 || Object.values(loadedData.notesByDate).some((note) => note.trim().length > 0);
+          if (hasLegacyData) {
+            const { error: migrateError } = await client.from('personal_planner_data')
+              .upsert({ user_id: userId, planner_data: { ...loadedData } }, { onConflict: 'user_id' });
+            if (migrateError) throw new Error(`Your existing planner could not be transferred to the database: ${migrateError.message}`);
+            // Only remove the old copy after the database confirms the transfer.
+            try {
+              window.localStorage.removeItem(storageKey);
+              setStatus('Your existing planner has been transferred to your account database.');
+            } catch {
+              setStatus('Your existing planner has been transferred to your account database, but the old browser copy could not be removed.');
+            }
+          }
+        }
+
+        if (cancelled) return;
+        setData(loadedData);
+        setDatabaseReadyKey(storageKey);
+      } catch (loadError) {
+        if (cancelled) return;
+        setData(EMPTY_DATA);
+        setDatabaseReadyKey(null);
+        setStorageError(loadError instanceof Error ? loadError.message : 'The planner database could not be reached.');
+      } finally {
+        if (!cancelled) {
+          setLoadedStorageKey(storageKey);
+          setReady(true);
+        }
+      }
+    };
+
+    void loadPlanner();
+    return () => { cancelled = true; };
+  }, [storageKey, userId]);
 
   useEffect(() => {
-    if (!ready || loadedStorageKey !== storageKey || storageWritableKey !== storageKey) return;
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify(data));
-      setStorageWarning(false);
-    } catch {
-      setStorageWarning(true);
-    }
-  }, [data, loadedStorageKey, ready, storageKey, storageWritableKey]);
+    if (!sessionReady) return;
+    const generation = ++saveGeneration.current;
+    setSaveState('saving');
+    const timeout = window.setTimeout(() => {
+      const snapshot: PlannerData = JSON.parse(JSON.stringify(data)) as PlannerData;
+      saveQueue.current = saveQueue.current.catch(() => undefined).then(async () => {
+        const client = getSupabaseBrowserClient();
+        const { data: authData, error: authError } = await client.auth.getUser();
+        if (authError || !authData.user || authData.user.id !== userId) {
+          throw new Error('Your active account changed. Sign in again before saving planner changes.');
+        }
+        const { error } = await client.from('personal_planner_data')
+          .upsert({ user_id: userId, planner_data: { ...snapshot } }, { onConflict: 'user_id' });
+        if (error) throw new Error(error.message);
+      }).then(() => {
+        if (generation === saveGeneration.current) {
+          setSaveState('saved');
+          setStorageError(null);
+        }
+      }).catch((saveError: unknown) => {
+        if (generation === saveGeneration.current) {
+          setSaveState('error');
+          setStorageError(saveError instanceof Error ? saveError.message : 'Planner changes could not be saved to the database.');
+        }
+      });
+    }, 450);
+    return () => window.clearTimeout(timeout);
+  }, [data, sessionReady, storageKey, userId]);
 
   const tasks = useMemo(() => visibleData.tasks.filter((task) => task.date === selectedDate), [visibleData.tasks, selectedDate]);
   const completedCount = tasks.filter((task) => task.done).length;
@@ -152,9 +232,9 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   };
 
   const clearData = () => {
-    if (!window.confirm('Delete all planner tasks, habits, check-ins, and daily notes saved in this browser for this account? This cannot be undone.')) return;
+    if (!window.confirm('Clear all planner tasks, habits, check-ins, and daily notes saved to your Sanctuary account? This cannot be undone.')) return;
     setData(EMPTY_DATA);
-    setStatus('All local planner data was cleared.');
+    setStatus('All planner content has been cleared from your account.');
   };
 
   return (
@@ -163,8 +243,8 @@ export function PersonalPlanner({ userId }: { userId: string }) {
       <h1>Daily planner</h1>
       <p className={styles.intro}>A gentle place to choose a next step and leave yourself a note. There are no streaks or scores.</p>
       <div className={styles.privacy} role="note">
-        <strong>Stored on this device only</strong>
-        <span>This first version saves to this browser's local storage, scoped to your account ID. It is not synced across devices. Anyone with access to this browser profile may be able to access it. Export anything you want to keep before clearing browser data.</span>
+        <strong>Private account database</strong>
+        <span>Your tasks, habits, check-ins and daily notes are stored in your Sanctuary account database and protected by row-level security. They can follow your account across devices. A one-time import transfers any existing planner saved in this browser after the database confirms the copy.</span>
       </div>
       <section className={styles.reflectionSection} aria-label="Daily reflection">
         <DailyReflection userId={userId} isGuest={false} />
@@ -172,7 +252,9 @@ export function PersonalPlanner({ userId }: { userId: string }) {
       <section className={styles.reflectionSection} aria-label="Self-discovery questionnaire">
         <SelfDiscoveryCentre key={userId} />
       </section>
-      {storageWarning && <p className={styles.warning} role="alert">Browser storage is unavailable or full. Changes may not survive a refresh; export or copy important notes before leaving.</p>}
+      {storageError && <p className={styles.warning} role="alert">{storageError}</p>}
+      {sessionReady && <p className={styles.status} role="status">{saveState === 'saving' ? 'Saving planner to your account…' : saveState === 'saved' ? 'Planner saved to your account.' : 'Planner changes are not saved yet.'}</p>}
+      {saveState === 'error' && sessionReady && <button type="button" onClick={() => setData((current) => ({ ...current }))}>Retry saving planner</button>}
       <label className={styles.dateLabel}>Day
         <input type="date" value={selectedDate} onChange={(event) => setSelectedDate(event.currentTarget.value)} />
       </label>
@@ -249,7 +331,7 @@ export function PersonalPlanner({ userId }: { userId: string }) {
       </section>
       <div className={styles.actions}>
         <button type="button" onClick={exportData} disabled={!sessionReady}>Export my planner</button>
-        <button type="button" className={styles.dangerButton} onClick={clearData} disabled={!ready}>Delete all local planner data</button>
+        <button type="button" className={styles.dangerButton} onClick={clearData} disabled={!sessionReady}>Clear all planner data</button>
       </div>
       <p className={styles.status} role="status" aria-live="polite">{status}</p>
     </main>

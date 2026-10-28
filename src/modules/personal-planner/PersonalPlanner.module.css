@@ -3,13 +3,13 @@
   max-width: 900px;
   min-height: 360px;
   margin: 0 auto;
-  padding: 36px clamp(16px, 4vw, 44px) 52px;
+  padding: var(--layout-planner-padding);
   color: var(--ink);
 }
 .eyebrow { margin: 0 0 10px; color: var(--accent); font: 700 10px Arial, sans-serif; letter-spacing: .08em; }
 .planner h1 { margin: 0; font-size: clamp(30px, 5vw, 42px); font-weight: 400; }
 .intro { max-width: 620px; color: var(--muted); font: 14px/1.65 Arial, sans-serif; }
-.reflectionSection { margin: 24px 0; }
+.reflectionSection { margin: var(--layout-section-gap) 0; }
 .reflectionSection > section { max-width: none; }
 .privacy { display: grid; gap: 6px; margin: 20px 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-raised); font: 14px/1.6 Arial, sans-serif; }
 .privacy span { color: var(--muted); }
@@ -18,7 +18,7 @@
 .dateLabel { max-width: 260px; margin: 20px 0; }
 .planner input:not([type="checkbox"]), .planner textarea { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-raised); color: var(--ink); font: 15px Arial, sans-serif; }
 .planner input:focus-visible, .planner textarea:focus-visible, .planner button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.panel { display: grid; gap: 14px; margin-top: 16px; padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-raised); }
+.panel { display: grid; gap: var(--layout-card-gap); margin-top: var(--layout-section-gap); padding: var(--layout-panel-padding); border: 1px solid var(--line); border-radius: 8px; background: var(--surface-raised); }
 .sectionHeading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
 .sectionHeading h2 { margin: 0; font-size: 19px; font-weight: 500; }
 .sectionHeading > span, .characterCount { color: var(--muted); font: 12px Arial, sans-serif; }
@@ -26,7 +26,7 @@
 .planner button { min-height: 38px; padding: 8px 13px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: white; cursor: pointer; font: 700 14px Arial, sans-serif; }
 .planner button:disabled { opacity: .55; cursor: not-allowed; }
 .empty { margin: 0; color: var(--muted); font: 14px/1.6 Arial, sans-serif; }
-.taskList { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.taskList { display: grid; gap: var(--layout-card-gap); margin: 0; padding: 0; list-style: none; }
 .taskList li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
 .taskList li label { display: flex; min-width: 0; align-items: flex-start; gap: 10px; font: 13px/1.5 Arial, sans-serif; overflow-wrap: anywhere; }
 .taskList li input { margin-top: 3px; accent-color: var(--accent); }

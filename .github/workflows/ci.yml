@@ -30,6 +30,9 @@ jobs:
       - run: npm run check:pwa
       - run: npm run check:auth
       - run: npm run check:account-settings
+      - run: npm run check:admin-settings
+      - run: npm run check:supabase-rpc-security
+      - run: npm run check:supabase-migration-filenames
       - run: npm run check:messages
       - run: npm run check:self-discovery
       - run: npm run check:daily-reflection
