@@ -24,6 +24,7 @@ import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
+import { GuildWorld } from '@/components/GuildWorld';
 import styles from './AppWorkspace.module.css';
 
 export function AppWorkspace() {
@@ -252,6 +253,7 @@ export function AppWorkspace() {
           </motion.div>
         </AnimatePresence>
         </div>
+        <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated} />
       </ResponsiveShell>
     </MotionConfig>
   );
