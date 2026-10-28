@@ -48,7 +48,7 @@ export function GamesHub() {
   const selectedGame = games.find((game) => game.id === activeGame);
 
   return (
-    <main className={styles.hub}>
+    <div className={styles.hub}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>THE SANCTUARY ARCADE</p>
         <h1>Games</h1>
@@ -223,6 +223,6 @@ export function GamesHub() {
           <p>The games are listed and launchable here, but their existing in-game credits are not yet linked to your Sanctuary Token wallet. We will not show a fake shared balance; the secure account bridge and server-authoritative spend flow are the next integration step.</p>
         </div>
       </aside>
-    </main>
+    </div>
   );
 }
