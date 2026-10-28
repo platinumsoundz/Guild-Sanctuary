@@ -20,7 +20,7 @@ assert.ok(component.includes('Native app launching needs the optional companion.
 assert.ok(styles.includes('@media(max-width:760px)'));
 assert.ok(styles.includes(':focus-visible'));
 assert.ok(guild.includes('GuildCometDodge'));
-for (const text of ['create table if not exists public.guild_library_entries', 'references auth.users(id) on delete cascade', 'enable row level security', 'user_id = (select auth.uid())', 'public.is_active_user()', 'for select', 'for insert', 'for update', 'for delete', "platform in ('Browser', 'Steam', 'Xbox', 'RetroArch', 'Other')", "launch_url = '' or launch_url ~* '^https?://'", 'guild_library_entries_owner_title_platform_uidx', 'repository code only']) {
+for (const text of ['create table if not exists public.guild_library_entries', 'references auth.users(id) on delete cascade', 'enable row level security', 'user_id = (select auth.uid())', 'public.is_active_user()', 'for select', 'for insert', 'for update', 'for delete', "platform in ('Browser', 'Steam', 'Xbox', 'RetroArch', 'Other')", "launch_url = '' or launch_url ~* '^https?://'", 'guild_library_entries_owner_title_platform_uidx', 'enforce_guild_library_entry_limit', 'pg_advisory_xact_lock', 'entry limit reached (500)', 'Guild library ownership cannot be changed.', 'repository code only']) {
   assert.ok(migration.includes(text), `Missing Guild server-library schema contract: ${text}`);
 }
 console.log('Guild companion hub contract passed.');
