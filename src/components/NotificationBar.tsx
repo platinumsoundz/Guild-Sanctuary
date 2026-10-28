@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Bell, CheckCheck, Heart, MessageCircle, X } from 'lucide-react';
+import { Bell, CheckCheck, Heart, MessageCircle, UserCheck, UserPlus, X } from 'lucide-react';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import styles from './NotificationBar.module.css';
@@ -9,8 +9,8 @@ import styles from './NotificationBar.module.css';
 type NotificationItem = {
   id: string;
   actor_id: string;
-  notification_type: 'like' | 'comment';
-  target_type: 'post' | 'short' | 'event';
+  notification_type: 'like' | 'comment' | 'follow' | 'connection_request' | 'connection_accepted';
+  target_type: 'post' | 'short' | 'event' | 'user';
   target_id: string;
   created_at: string;
   read_at: string | null;
@@ -22,6 +22,7 @@ const destinationFor: Record<NotificationItem['target_type'], NavigationState> =
   post: 'feed',
   short: 'shorts',
   event: 'events',
+  user: 'discover',
 };
 
 export function NotificationBar({ fullPage = false, compact = false }: { fullPage?: boolean; compact?: boolean }) {
@@ -255,7 +256,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
           <header className={styles.panelHeader}>
             <div>
               <h2>Notifications</h2>
-              <p>Likes and comments on your community posts.</p>
+              <p>Connection updates and activity from your community.</p>
             </div>
             <div className={styles.panelActions}>
               {isConnected && unreadCount > 0 && (
@@ -283,7 +284,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
           ) : !isConnected ? (
             <p className={styles.emptyState}>Sign in with your connected Sanctuary account to enable notifications.</p>
           ) : items.length === 0 ? (
-            <p className={styles.emptyState}>You're all caught up. New likes and comments will appear here.</p>
+            <p className={styles.emptyState}>You're all caught up. New follows, connection updates, likes, and comments will appear here.</p>
           ) : (
             <ul className={styles.list}>
               {items.map((item) => (
@@ -294,10 +295,18 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
                     onClick={() => void openNotification(item)}
                   >
                     <span className={styles.itemIcon} aria-hidden="true">
-                      {item.notification_type === 'like' ? <Heart size={17} /> : <MessageCircle size={17} />}
+                      {item.notification_type === 'like' ? <Heart size={17} />
+                        : item.notification_type === 'comment' ? <MessageCircle size={17} />
+                        : item.notification_type === 'connection_accepted' ? <UserCheck size={17} />
+                        : <UserPlus size={17} />}
                     </span>
                     <span className={styles.itemCopy}>
-                      <span><strong>{item.actorName}</strong> {item.notification_type === 'like' ? 'liked your' : 'commented on your'} {item.target_type === 'short' ? 'Short' : item.target_type}.</span>
+                      <span><strong>{item.actorName}</strong>{' '}
+                        {item.notification_type === 'like' ? `liked your ${item.target_type === 'short' ? 'Short' : item.target_type}`
+                          : item.notification_type === 'comment' ? `commented on your ${item.target_type === 'short' ? 'Short' : item.target_type}`
+                          : item.notification_type === 'follow' ? 'started following you'
+                          : item.notification_type === 'connection_request' ? 'sent you a connection request'
+                          : 'accepted your connection request'}.</span>
                       <time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</time>
                     </span>
                     {!item.read_at && <span className={styles.unreadDot} aria-label="Unread" />}
