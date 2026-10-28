@@ -1,0 +1,77 @@
+/* Cosmic Sanctuary — first visual-system layer inspired by the approved concept art. */
+.cosmicTheme {
+  --bg: #07091d;
+  --surface: #0d1230;
+  --surface-raised: #15183c;
+  --ink: #f6f2ff;
+  --muted: #c0c4e7;
+  --line: rgb(151 126 255 / 30%);
+  --accent: #b18cff;
+  --accent-contrast: #fff;
+  --accent-soft: rgb(153 91 255 / 18%);
+  --shadow-card: 0 16px 48px rgb(2 3 20 / 42%);
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% -12%, rgb(95 65 230 / 30%), transparent 42rem),
+    radial-gradient(ellipse at 100% 34%, rgb(18 104 211 / 17%), transparent 38rem),
+    radial-gradient(ellipse at 0% 72%, rgb(174 53 226 / 13%), transparent 34rem),
+    linear-gradient(180deg, #080a20 0%, #0b0d27 45%, #080a20 100%);
+  color: var(--ink);
+}
+.cosmicTheme::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: .52;
+  background-image:
+    radial-gradient(1px 1px at 8% 11%, #fff 98%, transparent),
+    radial-gradient(1px 1px at 21% 32%, #c7caff 98%, transparent),
+    radial-gradient(1.5px 1.5px at 36% 8%, #fff 98%, transparent),
+    radial-gradient(1px 1px at 48% 25%, #8feaff 98%, transparent),
+    radial-gradient(1px 1px at 62% 14%, #fff 98%, transparent),
+    radial-gradient(1.5px 1.5px at 76% 36%, #d6b7ff 98%, transparent),
+    radial-gradient(1px 1px at 91% 17%, #fff 98%, transparent),
+    radial-gradient(1px 1px at 84% 66%, #a9b9ff 98%, transparent),
+    radial-gradient(1px 1px at 15% 78%, #fff 98%, transparent),
+    radial-gradient(1px 1px at 57% 87%, #b9caff 98%, transparent);
+  background-size: 390px 330px;
+}
+.cosmicTheme :global(h1),
+.cosmicTheme :global(h2),
+.cosmicTheme :global(h3) {
+  text-wrap: balance;
+}
+.cosmicTheme :global(button),
+.cosmicTheme :global(a) {
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+.cosmicTheme :global(button:focus-visible),
+.cosmicTheme :global(a:focus-visible),
+.cosmicTheme :global(input:focus-visible),
+.cosmicTheme :global(select:focus-visible),
+.cosmicTheme :global(textarea:focus-visible) {
+  outline: 2px solid #9cecff;
+  outline-offset: 3px;
+}
+.cosmicTheme :global([class*="card"]),
+.cosmicTheme :global([class*="Card"]),
+.cosmicTheme :global([class*="panel"]),
+.cosmicTheme :global([class*="Panel"]) {
+  border-color: color-mix(in srgb, var(--line) 85%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cosmicTheme :global(*),
+  .cosmicTheme :global(*::before),
+  .cosmicTheme :global(*::after) {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+@media (max-width: 640px) {
+  .cosmicTheme { background-attachment: scroll; }
+}
