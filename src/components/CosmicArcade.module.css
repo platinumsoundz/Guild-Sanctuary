@@ -114,3 +114,42 @@
   .crosswordClues { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .crosswordClues > .progressText,.crosswordClues > button { grid-column:1 / -1; }
 }
+
+
+/* Arcade panels share the Sanctuary's nebula/glass visual system. */
+.gameCard,
+.arcadeCard,
+.gamePanel,
+.panel {
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--line));
+  background-image: linear-gradient(145deg, rgb(151 132 255 / 5%), transparent 52%);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 17%), inset 0 1px 0 rgb(255 255 255 / 3%);
+}
+
+:where(.gameCard, .arcadeCard, .gamePanel, .panel) :where(button, [role="button"]) {
+  touch-action: manipulation;
+}
+
+@media (max-width: 620px) {
+  .crosswordLayout {
+    gap: 16px;
+  }
+
+  .crosswordGrid {
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .crosswordClues {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .crosswordClues > .progressText,
+  .crosswordClues > button {
+    grid-column: auto;
+  }
+
+  :where(button, [role="button"]) {
+    min-height: 42px;
+  }
+}
