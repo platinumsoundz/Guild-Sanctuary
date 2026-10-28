@@ -106,7 +106,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
 
   const tabs: { id: DiscoveryTab; label: string; icon: typeof Users; description: string }[] = [
     { id: 'people', label: 'People', icon: Users, description: 'Find people by public name or username.' },
-    { id: 'communities', label: 'Communities', icon: CalendarDays, description: 'Find upcoming gatherings where connections can grow.' },
+    { id: 'communities', label: 'Communities & gatherings', icon: CalendarDays, description: 'Find upcoming gatherings where connections can grow.' },
     { id: 'topics', label: 'Topics', icon: Compass, description: 'Explore public reflections and shared ideas.' },
   ];
 
@@ -189,7 +189,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
 
         {activeTab === 'communities' && (isLoadingExplore ? <p className={styles.stateMessage} role="status">Finding upcoming gatherings…</p>
           : exploreError ? <p className={styles.error} role="alert">{exploreError}</p>
-          : filteredEvents.length === 0 ? <div className={styles.emptyState}><CalendarDays size={23} aria-hidden="true" /><p>No upcoming gatherings match those terms. The events area is where members can discover and create shared activities.</p><button type="button" className={styles.viewButton} onClick={onExploreEvents}>Explore all events</button></div>
+          : filteredEvents.length === 0 ? <div className={styles.emptyState}><CalendarDays size={23} aria-hidden="true" /><p>No upcoming gatherings match those terms. Current community discovery surfaces upcoming events; dedicated group discovery is a later integration.</p><button type="button" className={styles.viewButton} onClick={onExploreEvents}>Explore gatherings and events</button></div>
           : <div className={styles.topicGrid}>{filteredEvents.slice(0, 12).map((event: EventView) => <article className={styles.topicCard} key={event.id}>
               <span className={styles.topicLabel}><CalendarDays size={13} aria-hidden="true" /> {new Date(event.startsAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
               <h2>{event.title}</h2><p>{event.description || 'A community gathering.'}</p>
