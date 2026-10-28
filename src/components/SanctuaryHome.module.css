@@ -336,11 +336,11 @@
 .hero {
   position: relative;
   overflow: hidden;
-  border-color: rgb(160 142 255 / 30%);
+  border-color: color-mix(in srgb, var(--cosmic-violet) 30%, transparent);
   background:
-    radial-gradient(ellipse at 78% 12%, rgb(139 119 255 / 18%), transparent 36%),
-    radial-gradient(ellipse at 5% 100%, rgb(74 192 233 / 10%), transparent 42%),
-    linear-gradient(135deg, rgb(18 22 59 / 98%), rgb(8 13 36 / 98%));
+    radial-gradient(ellipse at 78% 12%, color-mix(in srgb, var(--cosmic-violet) 18%, transparent), transparent 36%),
+    radial-gradient(ellipse at 5% 100%, color-mix(in srgb, var(--cosmic-cyan) 10%, transparent), transparent 42%),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface-raised) 92%, var(--cosmic-violet)), var(--bg));
   box-shadow: 0 24px 70px rgb(2 3 22 / 22%), inset 0 1px rgb(255 255 255 / 4%);
 }
 .hero::after {
@@ -349,43 +349,43 @@
   right: 0;
   left: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgb(184 164 255 / 75%), rgb(133 231 255 / 52%), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--cosmic-violet) 75%, transparent), color-mix(in srgb, var(--cosmic-cyan) 52%, transparent), transparent);
   content: '';
   pointer-events: none;
 }
-.hero h1 { color: #f7f4ff; text-wrap: balance; }
-.hero h1 em { color: #c3aaff; text-shadow: 0 0 28px rgb(166 139 255 / 20%); }
-.intro { color: #c4cbed; }
+.hero h1 { color: var(--ink); text-wrap: balance; }
+.hero h1 em { color: var(--cosmic-lavender); text-shadow: 0 0 28px color-mix(in srgb, var(--cosmic-violet) 20%, transparent); }
+.intro { color: var(--muted); }
 .heroNote {
-  border-color: rgb(163 148 255 / 26%);
-  background: linear-gradient(150deg, rgb(30 34 82 / 86%), rgb(13 18 47 / 90%));
+  border-color: color-mix(in srgb, var(--cosmic-violet) 26%, var(--line));
+  background: linear-gradient(150deg, color-mix(in srgb, var(--surface-raised) 86%, var(--cosmic-violet)), color-mix(in srgb, var(--surface) 90%, var(--bg)));
   box-shadow: inset 0 1px rgb(255 255 255 / 4%);
 }
-.orbit { border-color: rgb(165 147 255 / 50%); color: #a6ecff; box-shadow: 0 0 28px rgb(126 115 255 / 13%); }
-.orbit::before, .orbit::after { border-color: rgb(162 153 255 / 36%); }
-.orbit span { background: #a3edff; box-shadow: 0 0 9px rgb(143 234 255 / 65%); }
+.orbit { border-color: color-mix(in srgb, var(--cosmic-violet) 50%, var(--line)); color: var(--cosmic-cyan); box-shadow: 0 0 28px color-mix(in srgb, var(--cosmic-violet) 13%, transparent); }
+.orbit::before, .orbit::after { border-color: color-mix(in srgb, var(--cosmic-violet) 36%, transparent); }
+.orbit span { background: var(--cosmic-cyan); box-shadow: 0 0 9px color-mix(in srgb, var(--cosmic-cyan) 65%, transparent); }
 .quickRow button {
-  border-color: rgb(160 142 255 / 22%);
-  background: linear-gradient(145deg, rgb(25 29 72 / 88%), rgb(11 16 42 / 94%));
+  border-color: color-mix(in srgb, var(--cosmic-violet) 22%, var(--line));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--surface-raised) 88%, var(--cosmic-violet)), color-mix(in srgb, var(--surface) 94%, var(--bg)));
   transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
-.quickRow button:hover { border-color: rgb(153 224 255 / 60%); background: linear-gradient(145deg, rgb(42 43 100 / 92%), rgb(13 25 53 / 96%)); box-shadow: 0 8px 22px rgb(3 4 25 / 24%); transform: translateY(-2px); }
-.sectionHeading h2, .feedbackIntro h2 { color: #f3f0ff; }
-.sectionHeading > div > p:last-child { color: #c0c7e8; }
-.featureCount, .filter, .filterActive { border-color: rgb(160 142 255 / 25%); background-color: rgb(17 21 54 / 88%); color: #c2c9e9; }
-.filterActive { border-color: rgb(156 234 255 / 62%); background: linear-gradient(100deg, rgb(143 113 255 / 24%), rgb(78 180 255 / 10%)); color: #fbf9ff; }
+.quickRow button:hover { border-color: color-mix(in srgb, var(--cosmic-cyan) 60%, var(--line)); background: linear-gradient(145deg, color-mix(in srgb, var(--surface-raised) 92%, var(--cosmic-violet)), color-mix(in srgb, var(--surface) 96%, var(--cosmic-cyan))); box-shadow: 0 8px 22px rgb(3 4 25 / 24%); transform: translateY(-2px); }
+.sectionHeading h2, .feedbackIntro h2 { color: var(--ink); }
+.sectionHeading > div > p:last-child { color: var(--muted); }
+.featureCount, .filter, .filterActive { border-color: color-mix(in srgb, var(--cosmic-violet) 25%, var(--line)); background-color: color-mix(in srgb, var(--surface-raised) 88%, var(--bg)); color: var(--muted); }
+.filterActive { border-color: color-mix(in srgb, var(--cosmic-cyan) 62%, var(--line)); background: linear-gradient(100deg, color-mix(in srgb, var(--cosmic-violet) 24%, transparent), color-mix(in srgb, var(--cosmic-cyan) 10%, transparent)); color: var(--ink); }
 .featureCard {
-  border-color: rgb(160 142 255 / 21%);
+  border-color: color-mix(in srgb, var(--cosmic-violet) 21%, var(--line));
   border-radius: 14px;
-  background: linear-gradient(155deg, rgb(23 27 67 / 92%), rgb(10 15 39 / 96%));
+  background: linear-gradient(155deg, color-mix(in srgb, var(--surface-raised) 92%, var(--cosmic-violet)), color-mix(in srgb, var(--surface) 96%, var(--bg)));
   box-shadow: inset 0 1px rgb(255 255 255 / 2%);
 }
-.featureCard:hover { border-color: rgb(155 225 255 / 56%); box-shadow: 0 14px 32px rgb(2 4 26 / 24%); }
-.featureCard h3 { color: #f1eeff; }
-.featureCard p { color: #c0c7e8; }
-.primaryButton { border-color: #b7a1ff; background: linear-gradient(105deg, #9b80f5, #7467dd); color: #fff; box-shadow: 0 8px 22px rgb(113 93 224 / 22%); }
-.secondaryButton { border-color: rgb(160 142 255 / 34%); background: rgb(22 27 65 / 88%); color: #eeeaff; }
-.primaryButton:focus-visible, .secondaryButton:focus-visible, .quickRow button:focus-visible, .filter:focus-visible, .filterActive:focus-visible { outline: 2px solid #9cecff; outline-offset: 3px; }
+.featureCard:hover { border-color: color-mix(in srgb, var(--cosmic-cyan) 56%, var(--line)); box-shadow: 0 14px 32px rgb(2 4 26 / 24%); }
+.featureCard h3 { color: var(--ink); }
+.featureCard p { color: var(--muted); }
+.primaryButton { border-color: var(--cosmic-violet); background: linear-gradient(105deg, color-mix(in srgb, var(--cosmic-violet) 90%, var(--surface)), color-mix(in srgb, var(--cosmic-violet) 72%, var(--surface))); color: var(--accent-contrast); box-shadow: 0 8px 22px rgb(113 93 224 / 22%); }
+.secondaryButton { border-color: color-mix(in srgb, var(--cosmic-violet) 34%, var(--line)); background: color-mix(in srgb, var(--surface-raised) 88%, var(--bg)); color: var(--ink); }
+.primaryButton:focus-visible, .secondaryButton:focus-visible, .quickRow button:focus-visible, .filter:focus-visible, .filterActive:focus-visible { outline: 2px solid var(--cosmic-cyan); outline-offset: 3px; }
 @media (max-width: 700px) {
   .hero { border-radius: 15px; }
   .quickRow button { padding: 12px; }
