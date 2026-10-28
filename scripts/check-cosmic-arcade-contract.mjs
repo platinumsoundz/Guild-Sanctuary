@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const arcade = readFileSync('src/components/CosmicArcade.tsx', 'utf8');
+const classics = readFileSync('src/components/ArcadeClassics.tsx', 'utf8');
+const classicsCss = readFileSync('src/components/ArcadeClassics.module.css', 'utf8');
 const snake = readFileSync('src/components/CosmicSnake.tsx', 'utf8');
 const solitaire = readFileSync('src/components/LunarSolitaire.tsx', 'utf8');
 const crossword = readFileSync('src/components/CelestialCrossword.tsx', 'utf8');
@@ -20,6 +22,14 @@ assert.match(gamesHub, /The 5 Sleeves 3D/,'creator projects retain The 5 Sleeves
 assert.match(gamesHub, /My Roblox World/,'creator projects retain the Roblox experience');
 assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the Bedrock server');
 assert.match(arcade, /Starseed Word Search/, 'word search preview remains available');
+assert.match(arcade, /selectedGame === 'classics' \\? <ArcadeClassics \\/>/, 'arcade classics are connected to the main selector');
+assert.match(arcade, /16 playable games/, 'the classic games collection is advertised');
+for (const game of ['2048', 'Minesweeper', 'Lights Out', 'Memory Match', 'Word Guess', 'Hangman', 'Tic-Tac-Toe', 'Connect Four', 'Tower of Hanoi', 'Flood Fill', 'Game of Life', 'Whack-a-Star', 'Cosmic Trivia', '15 Puzzle', 'Simon Memory']) assert.ok(classics.includes(game), `classic collection includes ${game}`);
+assert.match(classics, /function slide2048/, '2048 merges tiles');
+assert.match(classics, /mineCells/, 'Minesweeper uses a hidden minefield');
+assert.match(classics, /setLife\\(a=>a\\.map/, 'Game of Life advances cellular rules');
+assert.match(classics, /aria-label/, 'classic games include accessible control labels');
+assert.match(classicsCss, /@media\\(max-width:600px\\)/, 'classic games have mobile styles');
 assert.match(arcade, /selectedGame === 'crossword' \? <CelestialCrossword \/>/, 'crossword is connected to the game selector');
 assert.match(arcade, /id: 'crossword',[^\n]*status: 'Playable preview'/, 'crossword is advertised as playable');
 assert.match(crossword, /const entries: Entry\[\]/, 'crossword defines across and down entries');

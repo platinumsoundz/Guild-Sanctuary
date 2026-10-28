@@ -73,18 +73,16 @@ export function ArcadeClassics() {
   const [simon,setSimon]=useState<number[]>([]);
   const [simonInput,setSimonInput]=useState<number[]>([]);
   const [message,setMessage]=useState('');
-  const [attempts,setAttempts]=useState(0);
   const wonTic=useMemo(()=>['012','345','678','036','147','258','048','246'].some(line=>[...line].every(i=>board[Number(i)]==='X')), [board]);
   const wonConnect=useMemo(()=>connect.some((row,r)=>row.some((v,c)=>!!v&&[[0,1],[1,0],[1,1],[1,-1]].some(([dr,dc])=>[0,1,2,3].every(k=>{const rr=r+dr*k,cc=c+dc*k;return rr>=0&&rr<6&&cc>=0&&cc<7&&connect[rr][cc]===v;})))),[connect]);
   const reset = () => {
     setGrid2048(make2048());setMineCells(makeMines());setRevealed([]);setFlags([]);setLights(makeLights());setMemory(makeMemory());setFlipped([]);setMatched([]);
     setWord(wordBank[Math.floor(Math.random()*wordBank.length)]);setGuess('');setGuesses([]);setHangLetters([]);setBoard(Array(9).fill(''));setConnect(makeConnect());setTurn('🔴');setRps('');
-    setHanoi([[4,3,2,1],[],[]]);setHanoiFrom(null);setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);setLife(makeLife());setMole(Math.floor(Math.random()*16));setHits(0);setQuestion(0);setScore(0);setFifteen(makeFifteen());setSimon([]);setSimonInput([]);setMessage('');setAttempts(0);
+    setHanoi([[4,3,2,1],[],[]]);setHanoiFrom(null);setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);setLife(makeLife());setMole(Math.floor(Math.random()*16));setHits(0);setQuestion(0);setScore(0);setFifteen(makeFifteen());setSimon([]);setSimonInput([]);setMessage('');
   };
   const tapLight = (i:number) => setLights(current=>current.map((v,j)=> directions.reduce((on,[dr,dc])=>{const r=Math.floor(i/5),c=i%5,rr=Math.floor(j/5),cc=j%5;return on || (j===i)||(rr===r+dr&&cc===c+dc);},false)?!v:v));
   const submitWord = () => {const value=guess.toUpperCase().replace(/[^A-Z]/g,'').slice(0,6);if(value.length!==word.length)return;setGuesses(v=>[...v,value]);setGuess('');if(value===word)setMessage('Correct! You found the hidden word.');else if(guesses.length>=5)setMessage(`The word was ${word}.`);};
   const moveFifteen = (i:number) => {const empty=fifteen.indexOf(0);if(Math.abs(Math.floor(i/4)-Math.floor(empty/4))+Math.abs(i%4-empty%4)!==1)return;setFifteen(a=>{const b=a.slice();[b[i],b[empty]]=[b[empty],b[i]];return b;});};
-  const renderBoard = () => <div className={styles.grid4}>{grid2048.flat().map((v,i)=><button key={i} className={styles.tile} onClick={()=>{}} aria-label={String(v||'empty')}>{v||''}</button>)}</div>;
   return <section className={styles.wrap} aria-labelledby="classics-title">
     <div className={styles.heading}><div><p className={styles.eyebrow}><Sparkles size={13}/> ARCADE CLASSICS</p><h2 id="classics-title">Pick your next little challenge</h2><p>Sixteen compact games with local, session-only progress. No tokens, accounts or purchases required.</p></div><button className={styles.reset} onClick={reset} type="button"><RotateCcw size={14}/> Reset game</button></div>
     <label className={styles.selectorLabel} htmlFor="classic-game-select">Choose a game</label>
