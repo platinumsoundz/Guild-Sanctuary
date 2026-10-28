@@ -94,8 +94,6 @@ export function Navigation({
     currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role),
   );
   const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || canAccessAdmin);
-  // Keep utility destinations in the drawer so the top navigation stays focused.
-  const desktopNavigationItems = visibleNavigationItems.filter((item) => item.id !== 'shop' && item.id !== 'admin');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -150,6 +148,7 @@ export function Navigation({
               <Menu size={21} strokeWidth={1.8} aria-hidden="true" />
             </button>
           )}
+          <span className={styles.siteName}>The Sanctuary</span>
         </div>
         <div className={styles.accountArea}>
           {isSessionReady && <NotificationBar compact />}
@@ -177,23 +176,6 @@ export function Navigation({
       </header>
       {isSessionReady && (
         <>
-          <nav className={styles.desktopNavigation} aria-label="Main navigation">
-            <div className={styles.desktopNavigationItems}>
-              {desktopNavigationItems.map((item) => (
-                <button
-                  key={item.id}
-                  className={styles.desktopNavigationButton}
-                  type="button"
-                  aria-current={activeNavigation === item.id ? 'page' : undefined}
-                  onClick={() => onNavigate(item.id)}
-                >
-                  <item.icon size={15} strokeWidth={1.8} aria-hidden="true" />
-                  {item.label}
-                </button>
-              ))}
-            </div>
-            <span className={styles.accountName}>{currentUser?.profile.displayName ?? (isGuest ? 'Guest mode' : '')}</span>
-          </nav>
           <AnimatePresence>
             {isMenuOpen && (
               <>

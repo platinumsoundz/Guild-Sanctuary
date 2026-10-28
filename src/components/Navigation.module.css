@@ -9,13 +9,24 @@
   transition: border-color 180ms ease;
 }
 
-.headerIdentity {
+ .headerIdentity {
   grid-column: 1;
   grid-row: 1;
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+}
+
+.siteName {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 
@@ -24,7 +35,7 @@
 
 
 .menuButton {
-  display: none;
+  display: inline-flex;
   width: 40px;
   height: 40px;
   flex: 0 0 auto;
@@ -110,7 +121,7 @@
 }
 
 .desktopNavigation {
-  display: flex;
+  display: none;
   min-height: 56px;
   align-items: center;
   justify-content: space-between;

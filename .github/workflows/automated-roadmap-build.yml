@@ -1,12 +1,7 @@
-name: Automated hourly build and roadmap check
+name: On-demand build and roadmap check
 
+# Temporarily manual-only through the October 2026 quota reset.
 on:
-  schedule:
-    # Offset from the top of the hour to reduce GitHub queue delays.
-    - cron: '17 * * * *'
-  push:
-    branches: ['**']
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -19,7 +14,7 @@ concurrency:
 jobs:
   build-test-roadmap:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

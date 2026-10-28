@@ -7,13 +7,6 @@ on:
       - 'src/components/ResponsiveShell.module.css'
       - 'scripts/check-install-banner-contract.mjs'
       - '.github/workflows/install-banner-contract.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'src/components/ResponsiveShell.tsx'
-      - 'src/components/ResponsiveShell.module.css'
-      - 'scripts/check-install-banner-contract.mjs'
-      - '.github/workflows/install-banner-contract.yml'
   workflow_dispatch:
 
 permissions:
