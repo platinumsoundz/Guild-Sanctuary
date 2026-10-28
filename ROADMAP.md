@@ -596,3 +596,6 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Raw answers remain in component memory for the active session. No account persistence, analytics, profile projection, public sharing, new database table, migration, or provider setting is introduced.
 - Reuses the existing self-discovery module and contract check to avoid duplicating questionnaire engines or overlapping the unfinished account-backed work in PR #145 and the broad beta showcase PR #85.
 - **Release status:** feature branch only; run the existing self-discovery contract, TypeScript check, and production build on the exact head. Browser/device and accessibility QA remain outstanding.
+
+
+- **Follow-up polish (2026-10-28):** Learning-path results show the exact selected preferences used to shape the suggestion, and the user-requested local text export includes the learning path, its rationale and its non-clinical disclaimer when a learning preference was answered. Answers remain session-only; export remains an explicit local user action.
