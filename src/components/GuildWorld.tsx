@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Gamepad2, LockKeyhole, Orbit, Play, RotateCcw, Trophy, X } from 'lucide-react';
 import styles from './GuildWorld.module.css';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections } from '@/lib/controllerInput';
+import { GuildCometDodge } from './GuildCometDodge';
 
 type GuildWorldProps = {
   userId: string | null;
@@ -271,6 +272,8 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
                 <div className={styles.gameControls}><span><kbd>← ↑ ↓ →</kbd> or <kbd>W A S D</kbd> move</span><span><kbd>A / ✕</kbd> on controller · <kbd>Esc / B</kbd> exit</span><div className={styles.touchControls}><button type="button" aria-label="Move up" onClick={() => moveShip(0, -5)}>↑</button><div><button type="button" aria-label="Move left" onClick={() => moveShip(-5, 0)}>←</button><button type="button" aria-label="Move down" onClick={() => moveShip(0, 5)}>↓</button><button type="button" aria-label="Move right" onClick={() => moveShip(5, 0)}>→</button></div></div></div>
                 {notice && <p className={styles.notice} role="status">{notice}</p>}
               </section>
+              <div className={styles.sectionHead}><div><p className={styles.eyebrow}>THE ARCADE · 02</p><h2>Comet Dodge</h2></div><span className={styles.localPill}>20-SECOND SURVIVAL</span></div>
+              <GuildCometDodge />
               <footer className={styles.footer}><span>THE GUILD · ALPHA PROTOTYPE</span><span>Sanctuary identity · isolated game state · no verified rewards</span></footer>
             </div>
           </section>
