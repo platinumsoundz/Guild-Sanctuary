@@ -30,7 +30,8 @@
     "check:cosmic-arcade": "node scripts/check-cosmic-arcade-contract.mjs",
     "check:sanctuary-home": "node scripts/check-sanctuary-home-contract.mjs",
     "check:supabase-config": "node scripts/check-supabase-config.mjs",
-    "check:supabase-rpc-security": "node scripts/check-supabase-rpc-security.mjs"
+    "check:supabase-rpc-security": "node scripts/check-supabase-rpc-security.mjs",
+    "check:supabase-migration-filenames": "node scripts/check-supabase-migration-filenames.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
