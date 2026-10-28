@@ -201,7 +201,9 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       permissions: [],
     };
     setCurrentUser(guestSession);
-    setActiveNavigation('feed');
+    // Start guests on the public welcome page instead of dropping them into a
+    // community route that requires a real account for posting and reactions.
+    setActiveNavigation('today');
     setSessionError(null);
   };
 
