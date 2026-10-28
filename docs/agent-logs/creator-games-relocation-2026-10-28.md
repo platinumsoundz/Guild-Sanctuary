@@ -8,6 +8,7 @@ Move the creator-project/community-world hub off the Support the creator page an
 - Roblox experience
 - Platinum Survival Minecraft Java and Bedrock endpoints
 - Keep the Support page focused on optional contributions.
+- Guests can browse a read-only Guild game lobby; the original Guild browser arcade remains authenticated-only.
 - Keep Sanctuary-built Cosmic Arcade distinct from external creator projects.
 - No URL, provider, database, save, identity-linking, or token-spending changes.
 
