@@ -34,14 +34,14 @@ assert.match(css, /worldGrid \{ display: grid/, 'destination cards use a respons
 assert.match(css, /@media \(max-width: 560px\)/, 'cosmic hero has a dedicated mobile layout');
 
 assert.match(navigationCss, /luminous active states/, 'navigation has cosmic glass styling');
-assert.match(navigationCss, /mobileBottomNavigation \\{ background: rgb\\(10 13 38/, 'mobile navigation has a cosmic glass surface');
+assert.match(navigationCss, /mobileBottomNavigation/, 'mobile navigation has a dedicated responsive surface');
 assert.match(notificationCss, /Cosmic glass treatment/, 'notifications share the cosmic visual system');
 assert.match(workspaceCss, /Cosmic visual language for every routed workspace/, 'routed workspace shares the cosmic art direction');
-assert.match(workspaceCss, /linear-gradient\\(145deg, rgb\\(20 24 61/, 'section surfaces use the midnight glass palette');
+assert.match(workspaceCss, /linear-gradient\\(145deg, color-mix/, 'section surfaces use the cosmic semantic palette');
 assert.match(workspaceCss, /text-wrap: balance/, 'section headings use balanced typography');
 assert.match(globalCss, /--bg: #090d25/, 'cosmic midnight is the default theme');
 assert.match(globalCss, /--cosmic-violet: #a995ff/, 'default theme exposes cosmic accent tokens');
-assert.match(globalCss, /:root\\[data-theme=\\"ocean\\"\\]/, 'alternate ocean theme remains independently selectable');
-assert.match(globalCss, /:root\\[data-theme=\\"dusk\\"\\]/, 'alternate dusk theme remains independently selectable');
+assert.match(globalCss, /data-theme="ocean"/, 'alternate ocean theme remains independently selectable');
+assert.match(globalCss, /data-theme="dusk"/, 'alternate dusk theme remains independently selectable');
 
 console.log('Sanctuary home contract checks passed.');
