@@ -11,6 +11,17 @@ Status reconciliation: this update corrects stale theme/notification labels from
 - The dedicated **Cosmic Arcade** navigation entry remains available. The embedded Games hub includes the Cosmic Arcade and creator game links without nesting a second `main` landmark.
 - Contribution checkout, provider settings, and external game host configuration remain gated by owner-only setup and verification.
 
+## Mainline PR reconciliation (2026-10-28)
+
+The following focused changes are now merged into `main`:
+
+- PR [#172](https://github.com/platinumsoundz/Guild-Sanctuary/pull/172), merge commit `3b2eba2b58135b3c65de67abe4ae21798719f00d`: subtle theme-aware cosmic visual polish. CI, Cloudflare workflow, and Vercel check passed on its PR head; visual/device QA remains pending.
+- PR [#173](https://github.com/platinumsoundz/Guild-Sanctuary/pull/173), merge commit `089a0a0bcc92ca32c089f9208d99d1cb15b2ff33`: public-profile names in feed and messaging surfaces. CI and Cloudflare workflow passed on its PR head; Vercel check failed with a build-rate-limit link.
+- PR [#175](https://github.com/platinumsoundz/Guild-Sanctuary/pull/175), merge commit `9492d65944dbaa1e2424999752023418b74aca2a`: Cosmic Arcade prototypes and README refresh. CI and Cloudflare workflow passed on its PR head; Vercel check failed with a build-rate-limit link.
+- PR [#176](https://github.com/platinumsoundz/Guild-Sanctuary/pull/176), merge commit `b8499f255ee08826b35b83c53b0b16d44bc37f61`: Support page creator-project hub integration, reconciled against the merged arcade navigation. CI and automated roadmap/build check passed on its PR head; Cloudflare workflow was still running at merge time and Vercel reported the build-rate-limit blocker.
+
+**Important:** a green CI or Cloudflare workflow is not proof that the current public production domain serves that commit. Vercel build-rate-limit failures require owner-side account/plan action; provider and deployment settings remain owner-controlled. Browser/device QA and exact live-deployment SHA confirmation remain outstanding.
+
 ## Cosmic Arcade update (2026-10-28)
 
 - **In code, QA pending:** Restored a dedicated Games navigation entry labelled “Cosmic Arcade”; existing creator/community game links remain in the Games hub.
@@ -18,10 +29,10 @@ Status reconciliation: this update corrects stale theme/notification labels from
 - **Playable preview:** Lunar Solitaire has a shuffled 52-card deal, seven tableau columns, stock/waste recycling, alternating-colour descending tableau moves, Ace-to-King suit foundations, automatic reveal of newly exposed cards, restart, and responsive card styling. It is a client-side single-visit prototype; persistence and automated gameplay QA remain pending.
 - **Playable preview:** Celestial Crossword has across/down clues, shared letter cells, answer checking, keyboard arrow navigation between open cells, clue selection that focuses the first letter, reset, and responsive layout. It is a small starter puzzle, not yet a larger puzzle pack.
 - **Planned:** Zodiac Mahjong remains a concept and is not labelled playable.
-- **Regression contract added:** `npm run check:cosmic-arcade` checks key gameplay, crossword keyboard/clue-focus guardrails, navigation, styles, and spending-lock guardrails; it is a static source contract, not browser QA. The latest crossword interaction and contract-check changes are pushed to the branch; CI was queued when last checked and must finish before this revision is called verified.
+- **Regression contract added:** `npm run check:cosmic-arcade` checks key gameplay, crossword keyboard/clue-focus guardrails, navigation, styles, and spending-lock guardrails; it is a static source contract, not browser QA. CI typecheck/build and the arcade contract passed for the PR #175 head before merge. Interactive browser/device QA, accessibility review, persistence tests, and wallet/RPC tests remain pending.
 - **Token economy — design only / spending locked:** Theme previews and example consumables (hints, extra lives, and a 50-token Snake revive) are shown as future ideas. No arcade item is purchasable and this UI does not deduct tokens.
 - **Required before token spending:** Implement a server-authoritative game economy/RPC with authenticated ownership, wallet balance checks, idempotency keys, game-session validation, and immutable ledger entries. Define whether revives/boosts are consumables, expiry/refund rules, and exploit/rate limits. Require owner-approved Supabase migration and isolated staging tests before enabling spending.
-- **Validation status:** CI for the latest crossword keyboard-navigation and regression-check changes was queued at last inspection. Keyboard/screen-reader review, interactive mobile gameplay QA, persistence tests, and end-to-end wallet/RPC tests remain pending.
+- **Validation status:** The arcade PR's CI and Cloudflare workflow completed successfully before merge; the Vercel check failed with a build-rate-limit link, so no Vercel deployment is claimed. Keyboard/screen-reader review, interactive mobile gameplay QA, persistence tests, and end-to-end wallet/RPC tests remain pending.
 
 Owner: product owner (Ashley)
 Status: planning document. Nothing here is built unless it says so.
