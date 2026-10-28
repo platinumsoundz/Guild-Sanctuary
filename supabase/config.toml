@@ -37,3 +37,6 @@ verify_jwt = false
 
 [functions.call-ice-config]
 verify_jwt = true
+
+[functions.guild-cloud-lab-control]
+verify_jwt = true
