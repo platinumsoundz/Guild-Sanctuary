@@ -7,6 +7,7 @@ import { fetchConversationThread, createDirectConversation, sendConversationMess
 
 interface UseDirectMessagesResult {
   messages: Message[];
+  conversationId: string | null;
   isLoading: boolean;
   isSending: boolean;
   error: string | null;
@@ -158,5 +159,5 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     };
   }, [conversationId, userId]);
 
-  return { messages: visibleMessages, isLoading, isSending, error, send };
+  return { messages: visibleMessages, conversationId: messagesThreadKey === threadKey ? conversationId : null, isLoading, isSending, error, send };
 }
