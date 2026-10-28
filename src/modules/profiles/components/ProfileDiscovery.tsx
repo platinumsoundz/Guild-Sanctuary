@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { PublicProfile, Post } from '@/types/database';
-import { Ban, CalendarDays, Check, Compass, Globe2, MapPin, MessageCircle, Search, Sparkles, UserCheck, UserMinus, UserPlus, Users, X } from 'lucide-react';
+import { Ban, Bookmark, CalendarDays, Check, Compass, EyeOff, Globe2, MapPin, MessageCircle, Search, Sparkles, UserCheck, UserMinus, UserPlus, Users, X } from 'lucide-react';
 import { fetchFeed } from '@/modules/feeds';
 import { fetchEvents } from '@/modules/events';
 import type { EventView } from '@/modules/events';
 import { fetchPublicProfileById, searchPublicProfiles } from '../service';
 import { fetchMemberDiscoveryInterests, fetchPublicDiscoveryInterests, findUserIdsByPublicInterest, findUserIdsBySharedPublicInterests } from '../discoveryInterests';
-import { blockProfile, fetchBlockedProfileIds, fetchIncomingConnectionRequests, fetchRelationshipStates, followProfile, requestConnection, respondToConnection, unblockProfile, unfollowProfile, type RelationshipState } from '../connectionService';
+import { blockProfile, fetchBlockedProfileIds, fetchIncomingConnectionRequests, fetchPrivateDiscoveryProfileIds, fetchRelationshipStates, followProfile, hideProfileFromDiscovery, requestConnection, respondToConnection, saveProfileForLater, unblockProfile, unhideProfileInDiscovery, unfollowProfile, unsaveProfile, type RelationshipState } from '../connectionService';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 import { ReportContentButton } from '@/modules/moderation/ReportContentButton';
@@ -45,6 +45,8 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
   const [relationshipBusyId, setRelationshipBusyId] = useState<string | null>(null);
   const [relationshipError, setRelationshipError] = useState<string | null>(null);
   const [blockedProfiles, setBlockedProfiles] = useState<Array<{ userId: string; displayName: string; username: string }>>([]);
+  const [hiddenProfiles, setHiddenProfiles] = useState<Array<{ userId: string; displayName: string; username: string }>>([]);
+  const [savedProfiles, setSavedProfiles] = useState<Array<{ userId: string; displayName: string; username: string }>>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [events, setEvents] = useState<EventView[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -169,6 +171,19 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
         if (!cancelled) setBlockedProfiles(ids.map((id, index) => { const profile = profiles[index]; return { userId: id, displayName: profile?.displayName ?? 'Blocked member', username: profile ? `@${profile.username}` : `Member ${id.slice(0, 8)}` }; }));
       })
       .catch(() => { if (!cancelled) setRelationshipError('Blocked members could not be loaded.'); });
+    Promise.all([
+      fetchPrivateDiscoveryProfileIds(currentUserId, 'hidden'),
+      fetchPrivateDiscoveryProfileIds(currentUserId, 'saved'),
+    ]).then(async ([hiddenIds, savedIds]) => {
+      const [hidden, saved] = await Promise.all([
+        Promise.all(hiddenIds.map((id) => fetchPublicProfileById(id))),
+        Promise.all(savedIds.map((id) => fetchPublicProfileById(id))),
+      ]);
+      if (!cancelled) {
+        setHiddenProfiles(hiddenIds.map((id, index) => ({ userId: id, displayName: hidden[index]?.displayName ?? 'Hidden member', username: hidden[index] ? `@${hidden[index]!.username}` : `Member ${id.slice(0, 8)}` })));
+        setSavedProfiles(savedIds.map((id, index) => ({ userId: id, displayName: saved[index]?.displayName ?? 'Saved member', username: saved[index] ? `@${saved[index]!.username}` : `Member ${id.slice(0, 8)}` })));
+      }
+    }).catch(() => { if (!cancelled) setRelationshipError('Saved and hidden profiles could not be loaded.'); });
     fetchIncomingConnectionRequests(currentUserId)
       .then(async (requests) => {
         const hydrated = await Promise.all(requests.map(async (request) => {
@@ -181,7 +196,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     return () => { cancelled = true; };
   }, [activeTab, currentUserId, profiles, query, suggestedProfiles]);
 
-  const runRelationshipAction = async (targetId: string, action: 'follow' | 'unfollow' | 'connect' | 'accept' | 'decline' | 'block' | 'unblock', connectionId?: string) => {
+  const runRelationshipAction = async (targetId: string, action: 'follow' | 'unfollow' | 'connect' | 'accept' | 'decline' | 'block' | 'unblock' | 'hide' | 'unhide' | 'save' | 'unsave', connectionId?: string) => {
     setRelationshipBusyId(connectionId ?? targetId);
     setRelationshipError(null);
     try {
@@ -195,11 +210,25 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
         await blockProfile(currentUserId, targetId);
       }
       if (action === 'unblock') await unblockProfile(currentUserId, targetId);
+      if (action === 'hide') await hideProfileFromDiscovery(currentUserId, targetId);
+      if (action === 'unhide') await unhideProfileInDiscovery(currentUserId, targetId);
+      if (action === 'save') await saveProfileForLater(currentUserId, targetId);
+      if (action === 'unsave') await unsaveProfile(currentUserId, targetId);
       const visibleProfiles = query.trim().length >= 2 ? profiles : suggestedProfiles;
       setRelationshipStates(await fetchRelationshipStates(currentUserId, visibleProfiles.map((profile) => profile.userId)));
       const blockedIds = await fetchBlockedProfileIds(currentUserId);
       const blocked = await Promise.all(blockedIds.map((id) => fetchPublicProfileById(id)));
       setBlockedProfiles(blockedIds.map((id, index) => { const profile = blocked[index]; return { userId: id, displayName: profile?.displayName ?? 'Blocked member', username: profile ? `@${profile.username}` : `Member ${id.slice(0, 8)}` }; }));
+      const [hiddenIds, savedIds] = await Promise.all([
+        fetchPrivateDiscoveryProfileIds(currentUserId, 'hidden'),
+        fetchPrivateDiscoveryProfileIds(currentUserId, 'saved'),
+      ]);
+      const [hidden, saved] = await Promise.all([
+        Promise.all(hiddenIds.map((id) => fetchPublicProfileById(id))),
+        Promise.all(savedIds.map((id) => fetchPublicProfileById(id))),
+      ]);
+      setHiddenProfiles(hiddenIds.map((id, index) => ({ userId: id, displayName: hidden[index]?.displayName ?? 'Hidden member', username: hidden[index] ? `@${hidden[index]!.username}` : `Member ${id.slice(0, 8)}` })));
+      setSavedProfiles(savedIds.map((id, index) => ({ userId: id, displayName: saved[index]?.displayName ?? 'Saved member', username: saved[index] ? `@${saved[index]!.username}` : `Member ${id.slice(0, 8)}` })));
       const requests = await fetchIncomingConnectionRequests(currentUserId);
       const hydrated = await Promise.all(requests.map(async (request) => {
         const profile = await fetchPublicProfileById(request.requesterId);
@@ -275,6 +304,16 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
             <button className={styles.messageButton} type="button" disabled={!profile.allowDirectMessages || relationshipStates.get(profile.userId)?.blocked}
               title={relationshipStates.get(profile.userId)?.blocked ? 'Unblock this member to enable messaging.' : profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
               onClick={() => onMessage(profile)}><MessageCircle size={13} aria-hidden="true" /> {relationshipStates.get(profile.userId)?.blocked ? 'Blocked' : profile.allowDirectMessages ? 'Message' : 'Messages closed'}</button>
+            <button className={styles.relationshipButton} type="button" disabled={relationshipBusyId === profile.userId || relationshipStates.get(profile.userId)?.hidden}
+              onClick={() => runRelationshipAction(profile.userId, relationshipStates.get(profile.userId)?.hidden ? 'unhide' : 'hide')}
+              title={relationshipStates.get(profile.userId)?.hidden ? 'Unhide from discovery' : 'Hide from discovery'}>
+              <EyeOff size={13} aria-hidden="true" /> {relationshipStates.get(profile.userId)?.hidden ? 'Hidden' : 'Hide'}
+            </button>
+            <button className={styles.relationshipButton} type="button" disabled={relationshipBusyId === profile.userId}
+              onClick={() => runRelationshipAction(profile.userId, relationshipStates.get(profile.userId)?.saved ? 'unsave' : 'save')}
+              title={relationshipStates.get(profile.userId)?.saved ? 'Remove saved profile' : 'Save profile'}>
+              <Bookmark size={13} aria-hidden="true" /> {relationshipStates.get(profile.userId)?.saved ? 'Saved' : 'Save'}
+            </button>
             <button className={styles.blockButton} type="button" disabled={relationshipBusyId === profile.userId || relationshipStates.get(profile.userId)?.blocked}
               onClick={() => runRelationshipAction(profile.userId, 'block')} aria-label={`Block ${profile.displayName}`} title="Block member"><Ban size={13} aria-hidden="true" /></button>
             <ReportContentButton targetType="user" targetId={profile.userId} />
@@ -314,6 +353,28 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
             placeholder={activeTab === 'people' ? 'Username or display name' : activeTab === 'topics' ? 'Try mindfulness or #philosophy' : 'Try a gathering or interest'} /></span>
         </label>
 
+        {activeTab === 'people' && hiddenProfiles.length > 0 && (
+          <section className={styles.requestsPanel} aria-labelledby="hidden-members-heading">
+            <h2 id="hidden-members-heading">Hidden from discovery</h2>
+            {hiddenProfiles.map((profile) => (
+              <div className={styles.requestRow} key={profile.userId}>
+                <span><strong>{profile.displayName}</strong> <span>{profile.username}</span></span>
+                <div><button type="button" disabled={relationshipBusyId === profile.userId} onClick={() => runRelationshipAction(profile.userId, 'unhide')}>Unhide</button></div>
+              </div>
+            ))}
+          </section>
+        )}
+        {activeTab === 'people' && savedProfiles.length > 0 && (
+          <section className={styles.requestsPanel} aria-labelledby="saved-members-heading">
+            <h2 id="saved-members-heading">Saved profiles</h2>
+            {savedProfiles.map((profile) => (
+              <div className={styles.requestRow} key={profile.userId}>
+                <span><strong>{profile.displayName}</strong> <span>{profile.username}</span></span>
+                <div><button type="button" disabled={relationshipBusyId === profile.userId} onClick={() => runRelationshipAction(profile.userId, 'unsave')}>Remove</button></div>
+              </div>
+            ))}
+          </section>
+        )}
         {activeTab === 'people' && blockedProfiles.length > 0 && (
           <section className={styles.requestsPanel} aria-labelledby="blocked-members-heading">
             <h2 id="blocked-members-heading">Blocked members</h2>
