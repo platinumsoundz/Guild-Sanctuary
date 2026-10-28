@@ -5,6 +5,7 @@ const component = readFileSync('src/modules/messages/ConversationCallPanel.tsx',
 const thread = readFileSync('src/modules/messages/DirectMessageThread.tsx', 'utf8');
 const migration = readFileSync('supabase/migrations/20261028202753_sanctuary_call_signaling.sql', 'utf8');
 const senderHardening = readFileSync('supabase/migrations/20261028203010_harden_call_signal_sender.sql', 'utf8');
+const iceConfig = readFileSync('supabase/functions/call-ice-config/index.ts', 'utf8');
 
 for (const token of ['getUserMedia', 'getUser', 'setAuth', 'RTCPeerConnection', 'createOffer', 'createAnswer', 'addIceCandidate', "type: 'invite'", "type: 'hangup'", 'toggleMute', 'toggleCamera', 'isGroup', '45_000', '30_000', 'config: { private: true }']) {
   assert.ok(component.includes(token), `Call panel must include ${token}`);
@@ -17,4 +18,7 @@ assert.ok(migration.includes('is_active_user()'), 'Suspended or inactive account
 assert.ok(migration.includes("extension = 'broadcast'"), 'Policies must be scoped to broadcast signalling');
 assert.ok(senderHardening.includes('realtime.messages.private is true'), 'Signalling must require private Realtime channels');
 assert.ok(senderHardening.includes("payload ->> 'from' = (select auth.uid())::text"), 'Signalling sender identity must match the authenticated user');
+assert.ok(iceConfig.includes('TURN_SHARED_SECRET') && iceConfig.includes('TURN_SERVER_URLS'), 'TURN credentials must be created from server-side configuration');
+assert.ok(iceConfig.includes('conversation_members') && iceConfig.includes('left_at'), 'ICE configuration must require active conversation membership');
+assert.ok(iceConfig.includes('Cache-Control'), 'Temporary ICE credentials must not be cached');
 console.log('Conversation call source contracts passed.');
