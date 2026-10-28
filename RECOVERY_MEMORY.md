@@ -68,3 +68,29 @@ The owner must handle Supabase schema/migrations/RLS/owner bootstrap, Stripe and
 - On the exact PR head `7815b278c0f9938b5b3fa0dcf27e1071ea45fa22`, `npm ci` succeeded, the framework-security contract passed, full CI/typecheck/build passed, dependency-map contract passed, roadmap/build check passed, and the repository Cloudflare workflow passed. The same install log reported **0 vulnerabilities**.
 - Post-merge verification passed on mainline documentation head `edb5f63c571cc69852024920409f81de507e4461`: CI [40672038270](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40672038270), roadmap/build [40672037990](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40672037990), and Cloudflare build/deploy [40672038151](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40672038151). The CI install reports **0 vulnerabilities**, the framework-security contract passes, and the production build compiles.
 - This dependency patch does not replace browser/device QA, staging authorization tests, independent security review or the Phase 1 release gates. Token spending remains disabled; messaging is not end-to-end encrypted; owner-only provider setup remains unchanged.
+
+
+## Latest cleanup continuation — 2026-10-28
+
+### Mainline and checks
+- Current mainline integration/security checkpoint: `718210f99f9cc2316af784cf356219f9c42d8593`.
+- Mainline CI passed: [40672381006](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40672381006).
+- Mainline automated roadmap/build check passed: [40672381046](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40672381046).
+- Mainline repository Cloudflare workflow passed: [40672380786](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40672380786). This does not substitute for authenticated browser/device acceptance.
+- PR #171 is merged. Next.js was patched to 16.4.3 with aligned lockfile entries; its recorded exact-head `npm ci` reported zero vulnerabilities. The mainline post-merge checks above are green.
+
+### Current open draft queue (verified 2026-10-28)
+- [#145 — private database-backed Daily Reflection](https://github.com/platinumsoundz/Guild-Sanctuary/pull/145): fixed a duplicate SQL mood-constraint declaration and added a contract assertion that catches duplicates. CI, Daily Reflection contract, and dependency-map checks passed on exact head `e85ac8654cf678b15d6e1d843c94296af96b12cc`; Cloudflare deployment run was cancelled by a later branch update and must not be called deployed. Keep draft until the owner approves the local-to-account-backed storage transition and applies the migration through the approved Supabase workflow; then test authenticated cross-account, storage failure, and deletion behavior.
+- [#122 — token shop redemption](https://github.com/platinumsoundz/Guild-Sanctuary/pull/122): title/body now correctly state redemption remains locked pending staging. Fixed the static contract, which previously had contradictory grant-vs-revoke assertions and referenced undefined `resolve(root)`. The updated contract check passed on exact head `d87da8b8c7ac2063cd00d2f6c9a493bbb8f62247` ([run 40673060021](https://github.com/platinumsoundz/Guild-Sanctuary/actions/runs/40673060021)). `SPENDING_ENABLED = false`; the UI guard and SQL revoke migration keep spending disabled. Do not enable or merge as a live purchase feature until owner-approved migration reconciliation and authenticated staging ledger/idempotency/authorization tests pass.
+- [#81 — moderation hierarchy](https://github.com/platinumsoundz/Guild-Sanctuary/pull/81) and [#84 — member-role locking](https://github.com/platinumsoundz/Guild-Sanctuary/pull/84): their recorded static CI/contracts passed; keep draft pending independent security review and owner-approved staging/concurrency tests for the SQL functions.
+- [#85 — beta showcase](https://github.com/platinumsoundz/Guild-Sanctuary/pull/85): still non-mergeable; resolve overlapping broad changes before promotion.
+- [#5 — game wallet bridge](https://github.com/platinumsoundz/Guild-Sanctuary/pull/5): still draft; recorded Cloudflare Workers builds failed. Diagnose build errors and reconcile wallet schema/session authorization before considering merge.
+
+### Release gates remain open
+- Authenticated browser/device QA for account-switch isolation, private planner/reflection/settings, inbox/thread/events/notifications, mobile navigation, keyboard/focus, and storage-denial recovery.
+- Live Supabase RLS/RPC authorization and two-account messaging tests; static checks alone are insufficient.
+- Messaging is **not end-to-end encrypted**. Planner and reflection currently remain browser-local until the owner-approved Daily Reflection storage migration is applied and verified; self-discovery results remain session-only.
+- Phase 1 is not end-to-end verified until staging security tests, migration reconciliation, backup/restore and rollback review, independent review, and human owner release approval are documented.
+
+### Owner-only provider handoff
+Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment setup; Cloudflare/Vercel account settings, secrets, domains and provider configuration remain owner tasks. No provider account settings or secrets were changed in this cleanup.
