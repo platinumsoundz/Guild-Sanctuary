@@ -7,6 +7,8 @@ export interface RelationshipState {
   connection: ConnectionStatus;
   connectionId: string | null;
   blocked: boolean;
+  hidden: boolean;
+  saved: boolean;
 }
 export interface IncomingConnectionRequest {
   id: string;
@@ -25,11 +27,13 @@ type LocalRelationshipStore = {
   follows: Array<{ followerId: string; followeeId: string }>;
   connections: LocalConnection[];
   blocks: Array<{ blockerId: string; blockedId: string }>;
+  hiddenProfiles: Array<{ userId: string; profileId: string }>;
+  savedProfiles: Array<{ userId: string; profileId: string }>;
 };
 const LOCAL_KEY = 'sanctuary-connection-relationships:v1';
 
 function readLocalStore(): LocalRelationshipStore {
-  if (typeof window === 'undefined') return { follows: [], connections: [], blocks: [] };
+  if (typeof window === 'undefined') return { follows: [], connections: [], blocks: [], hiddenProfiles: [], savedProfiles: [] };
   try {
     const parsed: unknown = JSON.parse(window.localStorage.getItem(LOCAL_KEY) ?? '{}');
     if (!parsed || typeof parsed !== 'object') throw new Error('invalid store');
@@ -38,6 +42,8 @@ function readLocalStore(): LocalRelationshipStore {
       follows: Array.isArray(value.follows) ? value.follows : [],
       connections: Array.isArray(value.connections) ? value.connections : [],
       blocks: Array.isArray(value.blocks) ? value.blocks : [],
+      hiddenProfiles: Array.isArray(value.hiddenProfiles) ? value.hiddenProfiles : [],
+      savedProfiles: Array.isArray(value.savedProfiles) ? value.savedProfiles : [],
     };
   } catch {
     return { follows: [], connections: [], blocks: [] };
@@ -68,6 +74,8 @@ export async function fetchRelationshipStates(userId: string, targetIds: string[
       const state = result.get(id)!;
       state.following = store.follows.some((row) => row.followerId === userId && row.followeeId === id);
       state.blocked = store.blocks.some((row) => row.blockerId === userId && row.blockedId === id);
+      state.hidden = store.hiddenProfiles.some((row) => row.userId === userId && row.profileId === id);
+      state.saved = store.savedProfiles.some((row) => row.userId === userId && row.profileId === id);
       const connection = store.connections.find((row) =>
         pairKey(row.requesterId, row.addresseeId) === pairKey(userId, id) && row.status !== 'declined');
       if (connection?.status === 'accepted') {
@@ -83,24 +91,32 @@ export async function fetchRelationshipStates(userId: string, targetIds: string[
 
   await requireCommunityStorageUser(userId);
   const client = getSupabaseBrowserClient();
-  const [follows, connections, blocks] = await Promise.all([
+  const [follows, connections, blocks, hiddenProfiles, savedProfiles] = await Promise.all([
     client.from('profile_follows').select('followee_id').eq('follower_id', userId).in('followee_id', uniqueIds),
     client.from('profile_connections')
       .select('id, requester_id, addressee_id, status')
       .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
       .in('status', ['pending', 'accepted']),
     client.from('profile_blocks').select('blocked_id').eq('blocker_id', userId).in('blocked_id', uniqueIds),
+    client.from('profile_discovery_hidden').select('hidden_profile_id').eq('user_id', userId).in('hidden_profile_id', uniqueIds),
+    client.from('profile_discovery_saved').select('saved_profile_id').eq('user_id', userId).in('saved_profile_id', uniqueIds),
   ]);
   if (follows.error) throw new Error(`Follow status could not be loaded: ${follows.error.message}`);
   if (connections.error) throw new Error(`Connection status could not be loaded: ${connections.error.message}`);
   if (blocks.error) throw new Error(`Block status could not be loaded: ${blocks.error.message}`);
+  if (hiddenProfiles.error) throw new Error(`Hidden profiles could not be loaded: ${hiddenProfiles.error.message}`);
+  if (savedProfiles.error) throw new Error(`Saved profiles could not be loaded: ${savedProfiles.error.message}`);
 
   const followed = new Set(follows.data.map((row) => row.followee_id));
   const blocked = new Set(blocks.data.map((row) => row.blocked_id));
+  const hidden = new Set(hiddenProfiles.data.map((row) => row.hidden_profile_id));
+  const saved = new Set(savedProfiles.data.map((row) => row.saved_profile_id));
   for (const id of uniqueIds) {
     const state = result.get(id)!;
     state.following = followed.has(id);
     state.blocked = blocked.has(id);
+    state.hidden = hidden.has(id);
+    state.saved = saved.has(id);
     const row = connections.data.find((item) =>
       (item.requester_id === userId && item.addressee_id === id)
       || (item.requester_id === id && item.addressee_id === userId));
@@ -228,4 +244,60 @@ export async function fetchBlockedProfileIds(userId: string): Promise<string[]> 
   const { data, error } = await getSupabaseBrowserClient().from('profile_blocks').select('blocked_id').eq('blocker_id', userId);
   if (error) throw new Error(`Blocked members could not be loaded: ${error.message}`);
   return data.map((row) => row.blocked_id);
+}
+
+async function updatePrivateProfileList(
+  userId: string,
+  targetId: string,
+  kind: 'hidden' | 'saved',
+  shouldInclude: boolean,
+): Promise<void> {
+  if (!userId || !targetId || userId === targetId) throw new Error('Choose another member.');
+  const localField = kind === 'hidden' ? 'hiddenProfiles' : 'savedProfiles';
+  const idField = kind === 'hidden' ? 'hidden_profile_id' : 'saved_profile_id';
+  const table = kind === 'hidden' ? 'profile_discovery_hidden' : 'profile_discovery_saved';
+  if (!isSupabaseCommunityStorageConfigured()) {
+    const store = readLocalStore();
+    const existing = store[localField].some((row) => row.userId === userId && row.profileId === targetId);
+    if (shouldInclude && !existing) store[localField].push({ userId, profileId: targetId });
+    if (!shouldInclude) store[localField] = store[localField].filter((row) => !(row.userId === userId && row.profileId === targetId));
+    writeLocalStore(store); return;
+  }
+  await requireCommunityStorageUser(userId);
+  const client = getSupabaseBrowserClient();
+  if (shouldInclude) {
+    const payload = kind === 'hidden'
+      ? { user_id: userId, hidden_profile_id: targetId }
+      : { user_id: userId, saved_profile_id: targetId };
+    const { error } = await client.from(table).insert(payload);
+    if (error && error.code !== '23505') throw new Error(`Could not update your ${kind} profiles: ${error.message}`);
+  } else {
+    const { error } = kind === 'hidden'
+      ? await client.from('profile_discovery_hidden').delete().eq('user_id', userId).eq('hidden_profile_id', targetId)
+      : await client.from('profile_discovery_saved').delete().eq('user_id', userId).eq('saved_profile_id', targetId);
+    if (error) throw new Error(`Could not update your ${kind} profiles: ${error.message}`);
+  }
+}
+
+export const hideProfileFromDiscovery = (userId: string, targetId: string) =>
+  updatePrivateProfileList(userId, targetId, 'hidden', true);
+export const unhideProfileInDiscovery = (userId: string, targetId: string) =>
+  updatePrivateProfileList(userId, targetId, 'hidden', false);
+export const saveProfileForLater = (userId: string, targetId: string) =>
+  updatePrivateProfileList(userId, targetId, 'saved', true);
+export const unsaveProfile = (userId: string, targetId: string) =>
+  updatePrivateProfileList(userId, targetId, 'saved', false);
+
+export async function fetchPrivateDiscoveryProfileIds(userId: string, kind: 'hidden' | 'saved'): Promise<string[]> {
+  if (!isSupabaseCommunityStorageConfigured()) {
+    const store = readLocalStore();
+    return store[kind === 'hidden' ? 'hiddenProfiles' : 'savedProfiles']
+      .filter((row) => row.userId === userId).map((row) => row.profileId);
+  }
+  await requireCommunityStorageUser(userId);
+  const { data, error } = kind === 'hidden'
+    ? await getSupabaseBrowserClient().from('profile_discovery_hidden').select('hidden_profile_id').eq('user_id', userId)
+    : await getSupabaseBrowserClient().from('profile_discovery_saved').select('saved_profile_id').eq('user_id', userId);
+  if (error) throw new Error(`Could not load ${kind} profiles: ${error.message}`);
+  return data.map((row) => kind === 'hidden' ? ('hidden_profile_id' in row ? row.hidden_profile_id : '') : ('saved_profile_id' in row ? row.saved_profile_id : ''));
 }
