@@ -9,16 +9,7 @@ on:
       - docs/SUPABASE_MIGRATION_DRIFT_INVENTORY_2026-10-26.md
       - supabase/migrations/**
       - package.json
-  push:
-    branches:
-      - main
-    paths:
-      - docs/reports/phase1-dependency-map-2026-10-27.md
-      - scripts/check-phase1-dependency-map.mjs
-      - .github/workflows/phase1-dependency-map.yml
-      - docs/SUPABASE_MIGRATION_DRIFT_INVENTORY_2026-10-26.md
-      - supabase/migrations/**
-      - package.json
+  workflow_dispatch:
 
 permissions:
   contents: read

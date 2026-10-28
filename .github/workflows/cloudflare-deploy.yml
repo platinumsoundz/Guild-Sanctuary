@@ -1,8 +1,7 @@
 name: Sanctuary Cloudflare deployment
 
 on:
-  pull_request:
-    branches: [main]
+  # Quota-saver: build/deploy only from main; PRs use the regular CI workflow.
   push:
     branches: [main]
   workflow_dispatch:
@@ -17,6 +16,7 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://build-placeholder.supabase.co' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'build-placeholder-anon-key' }}

@@ -7,13 +7,6 @@ on:
       - 'src/components/AppWorkspace.tsx'
       - 'scripts/check-daily-reflection-contract.mjs'
       - '.github/workflows/daily-reflection-contract.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'src/modules/practice/**'
-      - 'src/components/AppWorkspace.tsx'
-      - 'scripts/check-daily-reflection-contract.mjs'
-      - '.github/workflows/daily-reflection-contract.yml'
   workflow_dispatch:
 
 permissions:
@@ -30,5 +23,3 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node scripts/check-daily-reflection-contract.mjs
-      - run: npm run typecheck
-      - run: npm run build
