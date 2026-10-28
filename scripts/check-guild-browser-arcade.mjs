@@ -17,4 +17,7 @@ assert.match(guild, /setSeconds\(START_SECONDS\)/, 'game run has a resettable co
 assert.match(guild, /nextScore >= TARGET/, 'game has a defined completion condition');
 assert.match(css, /prefers-reduced-motion:reduce/, 'motion respects reduced-motion preference');
 assert.match(css, /env\(safe-area-inset-bottom\)/, 'entry respects mobile safe areas');
+assert.match(guild, /document.addEventListener\\('visibilitychange'/, 'background tabs pause the timer');
+assert.match(guild, /querySelectorAll<HTMLElement>/, 'controller can move focus between interactive controls');
+assert.match(guild, /closeButtonRef.current\\?\\.focus/, 'dialog moves focus to a close control');
 console.log('Guild browser Arcade contract checks passed.');
