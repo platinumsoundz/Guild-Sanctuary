@@ -194,6 +194,14 @@ export function ConversationCallPanel({ conversationId, currentUserId, peerName,
 
     return () => {
       cancelled = true;
+      const activeId = activeCallRef.current;
+      if (channel && activeId) {
+        void channel.send({
+          type: 'broadcast',
+          event: 'signal',
+          payload: { type: 'hangup', callId: activeId, from: currentUserId },
+        }).catch(() => {});
+      }
       if (channel) void client.removeChannel(channel);
       if (channelRef.current === channel) channelRef.current = null;
       setSignallingReady(false);
