@@ -14,6 +14,7 @@ Status: design and implementation checklist only. No terminal runtime, compute p
 ### Repository control-plane groundwork
 
 - A staged migration now defines a safe, owner-readable `guild_workspace_status` row for lifecycle state and bounded disk/CPU/memory/runtime quotas.
+- The first release enforces one persistent workspace per account and makes status rows read-only to browser clients. A server-side orchestrator must perform lifecycle transitions after authorization, quota and spend checks.
 - Infrastructure mappings live separately in `guild_workspace_runtime_private`; provider instance IDs and persistent-volume references are not granted to browser roles. Only `service_role` receives table privileges for this private mapping.
 - Authenticated members can read only their own active-account status row. They cannot directly create, change, or delete workspace status through the browser; a future server-side orchestrator must own lifecycle transitions.
 - These tables are schema groundwork only. The migration is not applied, and no provider, runtime, volume, terminal gateway, or billing path has been provisioned.
