@@ -56,6 +56,9 @@ The following live migrations were added to this branch with their matching vers
 - `20261028161415_restore_column_level_write_grants`
 - `20261028162026_harden_remaining_table_privileges`
 - `20261028162320_harden_postgres_default_privileges`
+- `20261028162853_private_personal_planner_storage`
+- `20261028163036_account_settings_updated_at_trigger`
+- `20261028163256_moderate_reported_messages`
 
 ## Recommended reconciliation workflow
 
@@ -64,6 +67,14 @@ The following live migrations were added to this branch with their matching vers
 3. For changes already present under another live migration, use the Supabase CLI migration repair/fetch workflow only after confirming the SQL equivalence and desired history model.
 4. Rebuild a fresh disposable branch/database from the proposed local migration sequence and verify it converges to the intended schema before any production migration push.
 5. Re-run Security and Performance Advisors and authenticated multi-user RLS tests after reconciliation.
+
+## Planner and admin integration follow-up — 2026-10-28
+
+- `personal_planner_data` now stores each authenticated user's task list, daily notes, habits, and habit check-ins in a single versioned JSONB document. RLS scopes reads, inserts, updates, and deletes to `auth.uid() = user_id`; the client cannot change `user_id` or `updated_at`.
+- Existing browser planner data is imported only when the database has no planner row, and the old browser key is removed only after the database confirms the import. The planner no longer writes new changes to localStorage. If Supabase is unavailable or the signed-in user does not match, the planner stays locked and displays an actionable error instead of silently saving private content locally.
+- `account_settings.updated_at` is now database-managed by a trigger, so settings writes no longer attempt to update a protected timestamp column.
+- `apply_moderation_action` now validates that a reported message still exists and updates its visibility state for hide/remove/restore actions, with the existing moderator check, report-target match, and audit log retained.
+- The current advisor run reports an informational `rls_enabled_no_policy` notice for `game_wallet_sessions` (consistent with server-only access), 12 signed-in-callable `SECURITY DEFINER` RPCs that need ongoing review, leaked-password protection disabled, and unused-index notices. The admin RPCs checked here verify role/status internally. Do not remove helper-function grants without first confirming RLS policies and dependent RPCs still work.
 
 ## Default privilege note
 
