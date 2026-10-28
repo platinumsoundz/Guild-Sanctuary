@@ -31,6 +31,9 @@ assert.ok(classics.includes('setLife(a=>a.map'), 'Game of Life advances cellular
 assert.match(classics, /aria-label/, 'classic games include accessible control labels');
 assert.match(classics, /Optional game extras/, 'games expose a planned token-spending integration point');
 assert.match(classics, /Token spending is not enabled yet/, 'token spending remains locked until server-side wallet validation exists');
+assert.match(classics, /sanctuary-arcade-scores-v1/, 'scores are stored locally with an explicit versioned key');
+assert.match(classics, /Local high scores/, 'local scoreboard is visible');
+assert.match(classics, /advanceLevel/, 'level progression control is present');
 assert.match(classics, /Typing Sprint/, 'typing game is included');
 assert.match(classics, /Space Invaders/, 'space shooter is included');
 assert.ok(classicsCss.includes('@media(max-width:600px)'), 'classic games have mobile styles');
