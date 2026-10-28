@@ -37,4 +37,14 @@ assert.ok(admin.includes('roleChangePreview'), 'role editor must show current an
 assert.ok(admin.includes("role={messageIsError ? 'alert' : 'status'}"), 'member-management failures must be announced as alerts');
 assert.ok(admin.includes('messageError'), 'member-management errors must have distinct visual styling');
 
+
+const mediaGuard = readFileSync(new URL('../src/modules/moderation/media-url.ts', import.meta.url), 'utf8');
+assert.ok(dashboard.includes("import { getSafeModerationMediaUrl } from './media-url'"), 'moderation media links must pass through the client-side URL guard');
+assert.ok(dashboard.includes('getSafeModerationMediaUrl(report.targetMediaUrl)'), 'untrusted media URL values must be validated before rendering as links');
+assert.ok(dashboard.includes('rel="noopener noreferrer"'), 'new-tab media links must not expose the opener window');
+assert.ok(dashboard.includes('Media link hidden because its URL is invalid or uses an unsupported protocol.'), 'invalid media URLs must fail closed with a clear explanation');
+assert.ok(mediaGuard.includes("url.protocol !== 'https:'"), 'moderation media links must reject non-HTTPS protocols');
+assert.ok(mediaGuard.includes('url.username || url.password'), 'moderation media links must reject URLs containing embedded credentials');
+assert.ok(mediaGuard.includes('value.length > 4096'), 'moderation media URLs must have a defensive maximum length');
+
 console.log('Moderation dashboard contract checks passed.');
