@@ -31,13 +31,6 @@ The following focused PRs have been merged into `main` as a single integration b
 - Old unreferenced feature branches have not been deleted: identify unique work and confirm it is merged or superseded before cleanup. No branch was force-pushed or deleted in this pass.
 
 
-## Front-end navigation clarity (2026-10-28)
-
-- **In code on branch `feat/sanctuary-frontend-polish-2026-10-28`:** the main navigation drawer groups destinations by member intent: Start here, Connect, Your space, Explore, Sanctuary tools, and Stewardship. The admin group remains hidden unless the existing role gate allows access.
-- The existing top-left navigation trigger, persistent page underneath the compact notification panel, unread indicator, Escape/outside-click dismissal, and “Open full notifications” path are preserved.
-- This is a front-end-only change based on current `main`; no backend schema, moderation workflow, deployment configuration, or live service was changed.
-- Automated/browser/device QA has not been run for this branch. Check keyboard navigation, mobile drawer scrolling, active destination highlighting, and role-gated Stewardship visibility during normal front-end QA.
-
 ## Support and creator-project navigation (2026-10-28)
 
 - **Merged to main; QA pending:** The Support page presents voluntary contribution options first, then embeds the external creator-project hub beneath them.
@@ -641,6 +634,22 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 
 - **Follow-up polish (2026-10-28):** Learning-path results show the exact selected preferences used to shape the suggestion, and the user-requested local text export includes the learning path, its rationale and its non-clinical disclaimer when a learning preference was answered. Answers remain session-only; export remains an explicit local user action.
+
+
+## Community comment reliability — 2026-10-28
+
+- **Implemented on `fix/community-comment-action-reliability-2026-10-28`; validation pending:** comment loading now has a visible pending state and prevents repeat loads; successful empty results are distinguished from failed/uncompleted loads; posting trims empty text and blocks duplicate submits while pending.
+- Existing edit/delete/like/report actions are preserved. A focused static contract is wired into CI.
+- Remaining gates: exact-head contract, TypeScript/build, and desktop/mobile authenticated interaction tests. This is a client reliability improvement, not a replacement for database authorization/RLS.
+- No database migration, production deployment, account, payment, or provider settings changed.
+
+
+## Front-end navigation clarity (2026-10-28)
+
+- **In code on branch `feat/sanctuary-frontend-polish-2026-10-28`:** the main navigation drawer groups destinations by member intent: Start here, Connect, Your space, Explore, Sanctuary tools, and Stewardship. The admin group remains hidden unless the existing role gate allows access.
+- The existing top-left navigation trigger, persistent page underneath the compact notification panel, unread indicator, Escape/outside-click dismissal, and “Open full notifications” path are preserved.
+- This is a front-end-only change based on current `main`; no backend schema, moderation workflow, deployment configuration, or live service was changed.
+- Automated/browser/device QA has not been run for this branch. Check keyboard navigation, mobile drawer scrolling, active destination highlighting, and role-gated Stewardship visibility during normal front-end QA.
 
 
 ## Responsive front-end refinement (2026-10-28)
