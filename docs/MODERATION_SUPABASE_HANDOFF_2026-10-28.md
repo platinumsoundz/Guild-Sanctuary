@@ -44,3 +44,16 @@ The live project does expose `public.apply_moderation_action(...)`, but its exis
 5. Keep this PR draft until the RPC and action path have independent security review plus staging evidence. Production remains explicitly out of scope.
 
 This audit update documents evidence and sequencing only; it does not claim the moderation queue is fixed or ready to release.
+
+
+## Security review findings from the live action RPC
+
+A read-only inspection of the current `public.apply_moderation_action(...)` definition found concrete items that must be resolved before the moderation UI is considered release-ready:
+
+- The function checks `public.is_moderator()` and a non-empty rationale, but the inspected definition does not compare actor and target role ranks, reject self-targeting, or serialize authorization against concurrent role changes.
+- The function checks that a supplied report ID points at the requested target, but the inspected definition does not require the report to still be pending before applying an action. Concurrent or repeated actions need an explicit, tested policy.
+- It updates target state and resolves a report in the same function, which is useful for atomicity, but tests must verify all supported target types and failure/rollback behaviour.
+- The live role values observed in `profiles` are `admin`, `developer`, `owner`, and `vip`; no `moderator` role appeared in the current distinct-role result. The helper `is_moderator()` nevertheless includes the string `moderator`. This is an observed data snapshot, not proof that the role is invalid or cannot be assigned later.
+- Live report target enum labels are `post`, `short`, `event`, `message`, and `comment`; content states are `visible`, `hidden`, and `removed`.
+
+These findings are based on the inspected live function definition and metadata, not an exploit test. Do not treat the existing function as proven vulnerable to a specific attack without reproducing it in disposable staging; equally, do not treat its current guards as sufficient. Before implementing the queue, prepare a separate security-focused correction to the action function and test role hierarchy, self-targets, report-state transitions, deleted targets, and concurrent role demotion. Do not hot-patch production from this note.
