@@ -4,10 +4,14 @@ import { readFileSync } from 'node:fs';
 const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
 const guild = readFileSync('src/components/GuildWorld.tsx', 'utf8');
 const css = readFileSync('src/components/GuildWorld.module.css', 'utf8');
+const controller = readFileSync('src/lib/controllerInput.ts', 'utf8');
 
 assert.match(workspace, /<GuildWorld userId=\{currentUser\?\.user\.id \?\? null\} isAuthenticated=\{isAuthenticated\} \/>/, 'hidden Guild shell is mounted without a navigation item');
 assert.doesNotMatch(workspace, /activeNavigation === 'guild'|label:\s*'The Guild'/, 'Guild is not exposed in ordinary navigation');
-assert.match(guild, /getGamepads/, 'controller support polls connected gamepads');
+assert.match(guild, /getConnectedGamepad/, 'Guild uses the shared controller abstraction');
+assert.match(controller, /readGamepadDirections/, 'controller abstraction maps physical input to logical directions');
+assert.match(controller, /button.value > 0.65/, 'controller abstraction supports analog button thresholds');
+assert.match(controller, /horizontal < -0.45/, 'controller abstraction supports analog stick movement');
 assert.match(guild, /ctrlKey && event\.shiftKey/, 'keyboard accessibility override exists');
 assert.match(guild, /Orbital Drift/, 'first original browser game is present');
 assert.match(guild, /localStorage\.setItem\(BEST_KEY/, 'best run is stored locally');
