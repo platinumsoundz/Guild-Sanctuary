@@ -151,6 +151,10 @@ export function GuildCompanionHub() {
   const addGame = () => {
     const cleanTitle = title.trim();
     if (!cleanTitle) return;
+    if (games.length >= 500) {
+      setMediaMessage('Your library has reached the 500-game limit. Export a backup and remove entries before adding more.');
+      return;
+    }
     let cleanUrl = '';
     if (launchUrl.trim()) {
       try {
