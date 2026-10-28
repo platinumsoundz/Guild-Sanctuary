@@ -19,6 +19,7 @@ for (const text of [
   'sanctuary-guild-library', 'games.length >= 500', '500-game limit',
   'noopener noreferrer', 'URL.createObjectURL', 'not uploaded', 'https:',
   'target="_blank"', 'rel="noopener noreferrer"',
+  'librarySearch', 'libraryPlatformFilter', 'visibleGames', 'Search library', 'Filter games by platform', 'No games match these filters.',
 ]) {
   assert.ok(component.includes(text), `Missing Guild companion feature contract: ${text}`);
 }
@@ -32,6 +33,7 @@ assert.ok(component.includes('Files stay in this browser session') || component.
 assert.ok(component.includes('Native app launching needs the optional companion.'));
 assert.ok(styles.includes('@media(max-width:760px)'));
 assert.ok(styles.includes(':focus-visible'));
+assert.ok(styles.includes('.libraryFilters'));
 assert.ok(guild.includes('GuildCometDodge'));
 
 for (const text of [
