@@ -149,7 +149,7 @@
     grid-column: auto;
   }
 
-  :where(button, [role="button"]) {
+  .arcade :where(button, [role="button"]) {
     min-height: 42px;
   }
 }
