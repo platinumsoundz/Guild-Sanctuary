@@ -298,7 +298,7 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
   ];
 
   const renderProfileResults = (items: PublicProfile[], interestMap: Map<string, string[]>, sharedMap?: Map<string, string[]>, intentionMap: Map<string, DiscoveryIntentionId[]> = new Map(), sharedIntentionMap: Map<string, DiscoveryIntentionId[]> = new Map()) => {
-    const visibleItems = items.filter((profile) => !relationshipStates.get(profile.userId)?.hidden);
+    const visibleItems = items.filter((profile) => !relationshipStates.get(profile.userId)?.hidden && !relationshipStates.get(profile.userId)?.blocked);
     if (visibleItems.length === 0) return <p className={styles.stateMessage}>{items.length ? 'You have hidden these profiles from discovery.' : 'No public profiles are available to show yet.'}</p>;
     return (
     <div className={styles.results}>
