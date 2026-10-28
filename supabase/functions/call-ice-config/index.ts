@@ -1,6 +1,8 @@
 import { withSupabase } from 'npm:@supabase/server@1'
 
-const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
+type IceServerConfig = { urls: string | string[]; username?: string; credential?: string };
+
+const DEFAULT_ICE_SERVERS: IceServerConfig[] = [
   { urls: 'stun:stun.l.google.com:19302' },
 ]
 
@@ -98,7 +100,7 @@ export default {
     const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60
     const username = `${expiresAt}:${userId}`
     const credential = await createTurnCredential(username, turnSecret)
-    const iceServers: RTCIceServer[] = [
+    const iceServers: IceServerConfig[] = [
       ...DEFAULT_ICE_SERVERS,
       { urls: configuredUrls, username, credential },
     ]
