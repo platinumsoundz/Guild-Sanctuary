@@ -57,3 +57,8 @@ The default cosmic theme is intended to be the baseline for the whole product. G
 The shared navigation shell and notification panel use semantic cosmic glass surfaces and accent gradients. Cosmic Arcade has a dedicated treatment for its hero, game tabs, play areas, active states, and phone layout; it remains a separate Sanctuary destination and does not absorb creator links.
 
 Before release, run the repository's full CI, typecheck and production build on the final PR head. The CSS-only additions have regression assertions, but they are not a substitute for real browser visual QA, contrast review, or checking all feature-specific modules.
+
+
+## Theme compatibility and motion guardrails
+
+The home hero and routed-workspace surfaces now derive their page, card, border, and accent colours from the shared semantic theme tokens. This keeps the cosmic palette as the default while preventing the shared shell from forcing midnight colours onto the alternate light, stone, ocean, and dusk themes. The winged portal artwork uses only subtle, slow vertical drift and a soft star pulse; both animations are disabled when reduced motion is requested. The contract script checks these token and motion guardrails alongside the existing destination and responsive-layout assertions.
