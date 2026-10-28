@@ -114,3 +114,47 @@
   .crosswordClues { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .crosswordClues > .progressText,.crosswordClues > button { grid-column:1 / -1; }
 }
+
+/* Cosmic Arcade is a Sanctuary-built world: distinct from creator-project links, same house theme. */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--line) 65%, var(--cosmic-violet));
+  background:
+    radial-gradient(ellipse at 84% 10%, rgb(143 113 255 / 20%), transparent 38%),
+    radial-gradient(ellipse at 8% 100%, rgb(78 180 255 / 9%), transparent 40%),
+    linear-gradient(135deg, var(--surface-raised), var(--surface));
+  box-shadow: var(--shadow-card), inset 0 1px rgb(255 255 255 / 4%);
+}
+.hero::after {
+  position: absolute; top: 0; right: 0; left: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cosmic-violet), var(--cosmic-cyan), transparent);
+  content: ''; pointer-events: none;
+}
+.tab, .activeTab {
+  border-color: color-mix(in srgb, var(--line) 80%, var(--cosmic-violet));
+  border-radius: var(--radius-md);
+  background: linear-gradient(145deg, var(--surface-raised), var(--surface));
+  transition: border-color var(--motion-fast), box-shadow var(--motion-fast), transform var(--motion-fast);
+}
+.tab:hover { border-color: color-mix(in srgb, var(--cosmic-cyan) 55%, var(--line)); transform: translateY(-1px); }
+.activeTab {
+  border-color: var(--cosmic-violet);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--cosmic-violet) 16%, var(--surface-raised)), var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cosmic-violet) 65%, transparent), 0 0 22px rgb(143 113 255 / 9%);
+}
+.playArea, .comingSoon, .economy {
+  border-color: color-mix(in srgb, var(--line) 80%, var(--cosmic-violet));
+  background: linear-gradient(150deg, var(--surface-raised), var(--surface));
+  box-shadow: inset 0 1px rgb(255 255 255 / 2%);
+}
+.resetButton { border-radius: var(--radius-sm); }
+:where(.tab, .activeTab, .resetButton, .letter):focus-visible { outline: 2px solid var(--cosmic-cyan); outline-offset: 3px; }
+@media (max-width: 700px) {
+  .gameTabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .puzzleLayout { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab, .activeTab { transition: none; }
+  .tab:hover { transform: none; }
+}
