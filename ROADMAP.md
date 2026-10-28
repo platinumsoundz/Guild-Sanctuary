@@ -705,7 +705,8 @@ Current Guild implementation is now a **first UI/gameplay prototype**, not 0% co
 ## Sanctuary voice and video calls (2026-10-28)
 
 - Added one-to-one voice/video call controls directly inside the existing Sanctuary message thread, not as a Guild-only feature. Guild can reuse this shared messaging surface when it opens a Sanctuary conversation.
-- Added browser permission prompts, outgoing invitations, incoming accept/decline, WebRTC offer/answer/ICE exchange over a private Supabase Realtime channel, local/remote video surfaces, mute, camera toggle, hang-up handling, 45-second outgoing no-answer timeout and 30-second incoming invite expiry.
+- Added browser permission prompts, outgoing invitations, incoming accept/decline, WebRTC offer/answer/ICE exchange over a private Supabase Realtime channel, distinct audio/video playback surfaces, mute, camera toggle, hang-up handling, 45-second outgoing no-answer timeout, 30-second incoming invite expiry, and a 10-second recovery window for brief network interruptions.
+- Hardened the local Guild companion: wait for the saved library to load before persisting, validate saved links before rendering, prevent duplicate titles per platform, open external links with `noopener noreferrer`, and cap media selection at 30 files with 100 MB audio / 25 MB image per-file limits.
 - Added a Supabase Realtime RLS migration that limits call broadcast access to authenticated users who are active members of the conversation in the channel topic.
 - Added `npm run check:conversation-calls` to CI for source-contract checks.
 - Applied the `sanctuary_call_signaling` migration to the connected Supabase project on 2026-10-28. Read-back confirmed both SELECT and INSERT policies exist and restrict broadcast topics to active conversation members and active accounts.
