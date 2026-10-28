@@ -63,22 +63,38 @@ create table if not exists public.profile_discovery_saved (
   constraint profile_discovery_saved_no_self check (user_id <> saved_profile_id)
 );
 
+create table if not exists public.profile_discovery_intentions (
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  intention text not null check (intention in (
+    'find_community', 'explore_ideas', 'grow_together',
+    'collaborate', 'find_circle', 'broaden_perspective'
+  )),
+  is_public boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, intention)
+);
+
 create index if not exists profile_discovery_hidden_profile_idx
   on public.profile_discovery_hidden (hidden_profile_id, user_id);
 create index if not exists profile_discovery_saved_created_idx
   on public.profile_discovery_saved (user_id, created_at desc);
+create index if not exists profile_discovery_intentions_public_idx
+  on public.profile_discovery_intentions (intention, user_id) where is_public = true;
 
 alter table public.profile_follows enable row level security;
 alter table public.profile_connections enable row level security;
 alter table public.profile_blocks enable row level security;
 alter table public.profile_discovery_hidden enable row level security;
 alter table public.profile_discovery_saved enable row level security;
+alter table public.profile_discovery_intentions enable row level security;
 
-revoke all on table public.profile_follows, public.profile_connections, public.profile_blocks, public.profile_discovery_hidden, public.profile_discovery_saved from anon, authenticated;
+revoke all on table public.profile_follows, public.profile_connections, public.profile_blocks, public.profile_discovery_hidden, public.profile_discovery_saved, public.profile_discovery_intentions from anon, authenticated;
 grant select, insert, delete on table public.profile_follows to authenticated;
 grant select, insert, update, delete on table public.profile_connections to authenticated;
 grant select, insert, delete on table public.profile_blocks to authenticated;
 grant select, insert, delete on table public.profile_discovery_hidden, public.profile_discovery_saved to authenticated;
+grant select, insert, update, delete on table public.profile_discovery_intentions to authenticated;
 
 drop policy if exists "members read their follow edges" on public.profile_follows;
 create policy "members read their follow edges" on public.profile_follows
@@ -163,6 +179,27 @@ create policy "members save profiles" on public.profile_discovery_saved
   for insert to authenticated with check (user_id = (select auth.uid()) and public.is_active_user());
 drop policy if exists "members unsave profiles" on public.profile_discovery_saved;
 create policy "members unsave profiles" on public.profile_discovery_saved
+  for delete to authenticated using (user_id = (select auth.uid()));
+
+drop policy if exists "members read own or public intentions" on public.profile_discovery_intentions;
+create policy "members read own or public intentions" on public.profile_discovery_intentions
+  for select to authenticated using (
+    user_id = (select auth.uid())
+    or (
+      is_public
+      and public.is_active_user()
+      and exists (select 1 from private.public_profile_projection p where p.id = profile_discovery_intentions.user_id)
+    )
+  );
+drop policy if exists "members add own intentions" on public.profile_discovery_intentions;
+create policy "members add own intentions" on public.profile_discovery_intentions
+  for insert to authenticated with check (user_id = (select auth.uid()) and public.is_active_user());
+drop policy if exists "members update own intentions" on public.profile_discovery_intentions;
+create policy "members update own intentions" on public.profile_discovery_intentions
+  for update to authenticated using (user_id = (select auth.uid()) and public.is_active_user())
+  with check (user_id = (select auth.uid()) and public.is_active_user());
+drop policy if exists "members delete own intentions" on public.profile_discovery_intentions;
+create policy "members delete own intentions" on public.profile_discovery_intentions
   for delete to authenticated using (user_id = (select auth.uid()));
 
 -- Relationship writes must respect blocks in either direction. Keep the
