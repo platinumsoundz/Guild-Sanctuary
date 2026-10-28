@@ -7,7 +7,7 @@ import { fetchFeed } from '@/modules/feeds';
 import { fetchEvents } from '@/modules/events';
 import type { EventView } from '@/modules/events';
 import { fetchPublicProfileById, searchPublicProfiles } from '../service';
-import { fetchPublicDiscoveryInterests, findUserIdsByPublicInterest } from '../discoveryInterests';
+import { fetchPublicDiscoveryInterests, findUserIdsByPublicInterest, findUserIdsBySharedPublicInterests } from '../discoveryInterests';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
@@ -33,6 +33,10 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
   const [query, setQuery] = useState('');
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
   const [publicInterests, setPublicInterests] = useState<Map<string, string[]>>(new Map());
+  const [suggestedProfiles, setSuggestedProfiles] = useState<PublicProfile[]>([]);
+  const [suggestedInterests, setSuggestedInterests] = useState<Map<string, string[]>>(new Map());
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [events, setEvents] = useState<EventView[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -86,6 +90,34 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
   }, [activeTab, currentUserId, query]);
 
   useEffect(() => {
+    if (activeTab !== 'people' || query.trim().length >= 2) return;
+    let cancelled = false;
+    setIsLoadingSuggestions(true);
+    setSuggestionError(null);
+    findUserIdsBySharedPublicInterests(currentUserId)
+      .then(async (userIds) => {
+        const found = await Promise.all(userIds.map((userId) => fetchPublicProfileById(userId)));
+        const unique = new Map<string, PublicProfile>();
+        for (const profile of found) {
+          if (profile && profile.userId !== currentUserId) unique.set(profile.userId, profile);
+        }
+        const profilesToShow = [...unique.values()].slice(0, 12);
+        const interests = await fetchPublicDiscoveryInterests(profilesToShow.map((profile) => profile.userId));
+        if (!cancelled) {
+          setSuggestedProfiles(profilesToShow);
+          setSuggestedInterests(interests);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSuggestionError('Interest-based suggestions could not be loaded right now.');
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingSuggestions(false);
+      });
+    return () => { cancelled = true; };
+  }, [activeTab, currentUserId, query]);
+
+  useEffect(() => {
     if (activeTab === 'people') return;
     let cancelled = false;
     setIsLoadingExplore(true);
@@ -126,6 +158,42 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     { id: 'topics', label: 'Topics', icon: Compass, description: 'Explore public reflections and shared ideas.' },
   ];
 
+  const renderProfileResults = (items: PublicProfile[], interestMap: Map<string, string[]>) => (
+    <div className={styles.results}>
+      {items.map((profile) => (
+        <article className={styles.profileRow} key={profile.profileId}>
+          <div className={styles.avatar} aria-hidden="true">
+            {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
+          </div>
+          <div className={styles.profileCopy}>
+            <div className={styles.nameLine}><h2>{profile.displayName}</h2><span>@{profile.username}</span></div>
+            <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
+            {(interestMap.get(profile.userId) ?? []).length > 0 && (
+              <div className={styles.interestTags} aria-label="Public interests">
+                {(interestMap.get(profile.userId) ?? []).map((interest) => <span key={interest}>#{interest}</span>)}
+              </div>
+            )}
+            <ProfileSocialLinks links={profile.socialLinks} />
+            {(profile.location || profile.age || profile.starSign || profile.belief) && (
+              <div className={styles.publicDetails}>
+                {profile.location && <span><MapPin size={12} />{profile.location}</span>}
+                {profile.age && <span>{profile.age}</span>}
+                {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
+                {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
+              </div>
+            )}
+          </div>
+          <div className={styles.profileActions}>
+            <button className={styles.viewButton} type="button" onClick={() => onView(profile)}>View profile</button>
+            <button className={styles.messageButton} type="button" disabled={!profile.allowDirectMessages}
+              title={profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
+              onClick={() => onMessage(profile)}><MessageCircle size={13} aria-hidden="true" /> {profile.allowDirectMessages ? 'Message' : 'Messages closed'}</button>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+
   return (
     <main className={styles.discovery}>
       <header className={styles.header}>
@@ -157,48 +225,23 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
         </label>
 
         {activeTab === 'people' && (query.trim().length < 2 ? (
-          <div className={styles.emptyState}><Users size={23} aria-hidden="true" /><p>Start with a name or username. You can explore topics and community gatherings without contacting anyone.</p></div>
+          isLoadingSuggestions ? <p className={styles.stateMessage} role="status">Finding people who share your public interests…</p>
+          : suggestionError ? <p className={styles.error} role="alert">{suggestionError}</p>
+          : suggestedProfiles.length > 0 ? (
+            <>
+              <p className={styles.stateMessage}>Suggested because you share public interests</p>
+              {renderProfileResults(suggestedProfiles, suggestedInterests)}
+            </>
+          ) : (
+            <div className={styles.emptyState}><Users size={23} aria-hidden="true" /><p>Add public interests on your profile to discover people with similar interests, or search for a public name or username. You can explore topics and gatherings without contacting anyone.</p></div>
+          )
         ) : isSearching ? (
-          <p className={styles.stateMessage} role="status">Searching public profiles…</p>
+          <p className={styles.stateMessage} role="status">Searching public profiles and interests…</p>
         ) : error ? (
           <p className={styles.error} role="alert">{error}</p>
         ) : profiles.length === 0 ? (
-          <p className={styles.stateMessage}>No public profiles match that search.</p>
-        ) : (
-          <div className={styles.results}>
-            {profiles.map((profile) => (
-              <article className={styles.profileRow} key={profile.profileId}>
-                <div className={styles.avatar} aria-hidden="true">
-                  {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
-                </div>
-                <div className={styles.profileCopy}>
-                  <div className={styles.nameLine}><h2>{profile.displayName}</h2><span>@{profile.username}</span></div>
-                  <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
-                  {(publicInterests.get(profile.userId) ?? []).length > 0 && (
-                    <div className={styles.interestTags} aria-label="Public interests">
-                      {(publicInterests.get(profile.userId) ?? []).map((interest) => <span key={interest}>#{interest}</span>)}
-                    </div>
-                  )}
-                  <ProfileSocialLinks links={profile.socialLinks} />
-                  {(profile.location || profile.age || profile.starSign || profile.belief) && (
-                    <div className={styles.publicDetails}>
-                      {profile.location && <span><MapPin size={12} />{profile.location}</span>}
-                      {profile.age && <span>{profile.age}</span>}
-                      {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
-                      {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
-                    </div>
-                  )}
-                </div>
-                <div className={styles.profileActions}>
-                  <button className={styles.viewButton} type="button" onClick={() => onView(profile)}>View profile</button>
-                  <button className={styles.messageButton} type="button" disabled={!profile.allowDirectMessages}
-                    title={profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
-                    onClick={() => onMessage(profile)}><MessageCircle size={13} aria-hidden="true" /> {profile.allowDirectMessages ? 'Message' : 'Messages closed'}</button>
-                </div>
-              </article>
-            ))}
-          </div>
-        ))}
+          <p className={styles.stateMessage}>No public profiles or interests match that search.</p>
+        ) : renderProfileResults(profiles, publicInterests))}
 
         {activeTab === 'topics' && (isLoadingExplore ? <p className={styles.stateMessage} role="status">Exploring public reflections…</p>
           : exploreError ? <p className={styles.error} role="alert">{exploreError}</p>
