@@ -14,6 +14,7 @@ const options: { id: GameId; title: string; group: string }[] = [
   { id: 'flood', title: 'Flood Fill', group: 'Logic' }, { id: 'life', title: 'Game of Life', group: 'Simulation' },
   { id: 'whack', title: 'Whack-a-Star', group: 'Arcade' }, { id: 'trivia', title: 'Cosmic Trivia', group: 'Words' },
   { id: 'fifteen', title: '15 Puzzle', group: 'Puzzle' }, { id: 'simon', title: 'Simon Memory', group: 'Memory' },
+  { id: 'pong', title: 'Cosmic Pong', group: 'Arcade' }, { id: 'breakout', title: 'Brick Breaker', group: 'Arcade' }, { id: 'tetris', title: 'Starfall Blocks', group: 'Puzzle' },
 ];
 const wordBank = ['NEBULA', 'GALAXY', 'PLANET', 'COSMIC', 'ORBIT'];
 const trivia = [
@@ -74,12 +75,18 @@ export function ArcadeClassics() {
   const [simon,setSimon]=useState<number[]>([]);
   const [simonInput,setSimonInput]=useState<number[]>([]);
   const [message,setMessage]=useState('');
+  const [pong,setPong]=useState({ballX:4,ballY:3,dx:1,dy:1,paddle:3,score:0,over:false});
+  const [bricks,setBricks]=useState<boolean[]>(Array.from({length:24},()=>true));
+  const [brickBall,setBrickBall]=useState({x:3,y:5,dx:1,dy:-1,paddle:3,lives:3});
+  const [blocks,setBlocks]=useState<number[][]>(Array.from({length:10},()=>Array(6).fill(0)));
+  const [activeShape,setActiveShape]=useState<number[][]>([[1,1,1],[0,1,0]]);
+  const [blockX,setBlockX]=useState(1);
   const wonTic=useMemo(()=>['012','345','678','036','147','258','048','246'].some(line=>[...line].every(i=>board[Number(i)]==='X')), [board]);
   const wonConnect=useMemo(()=>connect.some((row,r)=>row.some((v,c)=>!!v&&[[0,1],[1,0],[1,1],[1,-1]].some(([dr,dc])=>[0,1,2,3].every(k=>{const rr=r+dr*k,cc=c+dc*k;return rr>=0&&rr<6&&cc>=0&&cc<7&&connect[rr][cc]===v;})))),[connect]);
   const reset = () => {
     setGrid2048(make2048());setMineCells(makeMines());setRevealed([]);setFlags([]);setLights(makeLights());setMemory(makeMemory());setFlipped([]);setMatched([]);
     setWord(wordBank[Math.floor(Math.random()*wordBank.length)]);setGuess('');setGuesses([]);setHangLetters([]);setBoard(Array(9).fill(''));setConnect(makeConnect());setTurn('🔴');setRps('');
-    setHanoi([[4,3,2,1],[],[]]);setHanoiFrom(null);setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);setLife(makeLife());setMole(Math.floor(Math.random()*16));setHits(0);setQuestion(0);setScore(0);setFifteen(makeFifteen());setSimon([]);setSimonInput([]);setMessage('');setPong({ballX:4,ballY:3,dx:1,dy:1,paddle:3,score:0,over:false});setBricks(Array.from({length:24},()=>true));setBrickBall({x:3,y:5,dx:1,dy:-1,paddle:3,lives:3});setBlocks(Array.from({length:10},()=>Array(6).fill(0)));setActiveShape([[1,1,1],[0,1,0]]);setBlockX(1);
+    setHanoi([[4,3,2,1],[],[]]);setHanoiFrom(null);setFlood(Array.from({length:64},()=>Math.floor(Math.random()*5)));setFloodMoves(0);setLife(makeLife());setMole(Math.floor(Math.random()*16));setHits(0);setQuestion(0);setScore(0);setFifteen(makeFifteen());setSimon([]);setSimonInput([]);setMessage('');setPong({ballX:4,ballY:3,dx:1,dy:1,paddle:3,score:0,over:false});setBricks(Array.from({length:24},()=>true));setBrickBall({x:3,y:5,dx:1,dy:-1,paddle:3,lives:3});setBlocks(Array.from({length:10},()=>Array(6).fill(0)));setActiveShape([[1,1,1],[0,1,0]]);setBlockX(1);setPong({ballX:4,ballY:3,dx:1,dy:1,paddle:3,score:0,over:false});setBricks(Array.from({length:24},()=>true));setBrickBall({x:3,y:5,dx:1,dy:-1,paddle:3,lives:3});setBlocks(Array.from({length:10},()=>Array(6).fill(0)));setActiveShape([[1,1,1],[0,1,0]]);setBlockX(1);
   };
   const tapLight = (i:number) => setLights(current=>current.map((v,j)=> directions.reduce((on,[dr,dc])=>{const r=Math.floor(i/5),c=i%5,rr=Math.floor(j/5),cc=j%5;return on || (j===i)||(rr===r+dr&&cc===c+dc);},false)?!v:v));
   const submitWord = () => {const value=guess.toUpperCase().replace(/[^A-Z]/g,'').slice(0,6);if(value.length!==word.length)return;setGuesses(v=>[...v,value]);setGuess('');if(value===word)setMessage('Correct! You found the hidden word.');else if(guesses.length>=5)setMessage(`The word was ${word}.`);};
