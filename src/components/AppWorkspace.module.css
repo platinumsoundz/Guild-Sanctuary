@@ -89,3 +89,13 @@
     font-size: 13px;
   }
 }
+/* Shared page-frame refinements for narrow screens and keyboard users. */
+.sectionPage :where(button, a, input, textarea, select):focus-visible,
+.supportPage :where(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (max-width: 420px) {
+  .supportPage { padding: 18px 12px; }
+  .sectionPage h1 { overflow-wrap: anywhere; }
+}
