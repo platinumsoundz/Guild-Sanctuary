@@ -11,6 +11,7 @@
 - Displays filtered/result counts and a clear empty-filter state.
 - Clears old actionable member results on failed/empty searches to reduce the risk of acting on stale results.
 - Adds a current-versus-requested role preview and explicit confirmation before every role change, with an additional warning when the selected role is higher in the existing displayed role order.
+- Announces search and role-change failures through an accessible alert and visually distinguishes errors from routine status messages.
 - Disables member selection/search controls while a role change is saving.
 - Extends the existing moderation/admin static contract check to cover these behaviors.
 
