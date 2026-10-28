@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { PublicProfile, Post } from '@/types/database';
-import { CalendarDays, Compass, Globe2, MapPin, MessageCircle, Search, Sparkles, Users } from 'lucide-react';
+import { Ban, CalendarDays, Check, Compass, Globe2, MapPin, MessageCircle, Search, Sparkles, UserCheck, UserMinus, UserPlus, Users, X } from 'lucide-react';
 import { fetchFeed } from '@/modules/feeds';
 import { fetchEvents } from '@/modules/events';
 import type { EventView } from '@/modules/events';
 import { fetchPublicProfileById, searchPublicProfiles } from '../service';
 import { fetchMemberDiscoveryInterests, fetchPublicDiscoveryInterests, findUserIdsByPublicInterest, findUserIdsBySharedPublicInterests } from '../discoveryInterests';
+import { blockProfile, fetchIncomingConnectionRequests, fetchRelationshipStates, followProfile, requestConnection, respondToConnection, unfollowProfile, type RelationshipState } from '../connectionService';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
@@ -38,6 +39,10 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
   const [sharedInterestMatches, setSharedInterestMatches] = useState<Map<string, string[]>>(new Map());
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
+  const [relationshipStates, setRelationshipStates] = useState<Map<string, RelationshipState>>(new Map());
+  const [incomingRequests, setIncomingRequests] = useState<Array<{ id: string; requesterId: string; displayName: string; username: string }>>([]);
+  const [relationshipBusyId, setRelationshipBusyId] = useState<string | null>(null);
+  const [relationshipError, setRelationshipError] = useState<string | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [events, setEvents] = useState<EventView[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -149,6 +154,53 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
     return () => { cancelled = true; };
   }, [activeTab, currentUserId]);
 
+  useEffect(() => {
+    if (activeTab !== 'people') return;
+    let cancelled = false;
+    const visibleProfiles = query.trim().length >= 2 ? profiles : suggestedProfiles;
+    fetchRelationshipStates(currentUserId, visibleProfiles.map((profile) => profile.userId))
+      .then((states) => { if (!cancelled) setRelationshipStates(states); })
+      .catch(() => { if (!cancelled) setRelationshipError('Relationship controls could not be loaded. Please retry.'); });
+    fetchIncomingConnectionRequests(currentUserId)
+      .then(async (requests) => {
+        const hydrated = await Promise.all(requests.map(async (request) => {
+          const profile = await fetchPublicProfileById(request.requesterId);
+          return profile ? { ...request, displayName: profile.displayName, username: profile.username } : null;
+        }));
+        if (!cancelled) setIncomingRequests(hydrated.filter((item): item is { id: string; requesterId: string; createdAt: string; displayName: string; username: string } => item !== null));
+      })
+      .catch(() => { if (!cancelled) setRelationshipError('Incoming connection requests could not be loaded.'); });
+    return () => { cancelled = true; };
+  }, [activeTab, currentUserId, profiles, query, suggestedProfiles]);
+
+  const runRelationshipAction = async (targetId: string, action: 'follow' | 'unfollow' | 'connect' | 'accept' | 'decline' | 'block', connectionId?: string) => {
+    setRelationshipBusyId(connectionId ?? targetId);
+    setRelationshipError(null);
+    try {
+      if (action === 'follow') await followProfile(currentUserId, targetId);
+      if (action === 'unfollow') await unfollowProfile(currentUserId, targetId);
+      if (action === 'connect') await requestConnection(currentUserId, targetId);
+      if (action === 'accept' && connectionId) await respondToConnection(currentUserId, connectionId, 'accepted');
+      if (action === 'decline' && connectionId) await respondToConnection(currentUserId, connectionId, 'declined');
+      if (action === 'block') {
+        if (!window.confirm('Block this member? This removes follows and closes pending connection requests between you.')) return;
+        await blockProfile(currentUserId, targetId);
+      }
+      const visibleProfiles = query.trim().length >= 2 ? profiles : suggestedProfiles;
+      setRelationshipStates(await fetchRelationshipStates(currentUserId, visibleProfiles.map((profile) => profile.userId)));
+      const requests = await fetchIncomingConnectionRequests(currentUserId);
+      const hydrated = await Promise.all(requests.map(async (request) => {
+        const profile = await fetchPublicProfileById(request.requesterId);
+        return profile ? { ...request, displayName: profile.displayName, username: profile.username } : null;
+      }));
+      setIncomingRequests(hydrated.filter((item): item is { id: string; requesterId: string; createdAt: string; displayName: string; username: string } => item !== null));
+    } catch (actionError) {
+      setRelationshipError(actionError instanceof Error ? actionError.message : 'That relationship action could not be completed.');
+    } finally {
+      setRelationshipBusyId(null);
+    }
+  };
+
   const filteredPosts = useMemo(() => {
     const term = query.trim().replace(/^#/, '').toLocaleLowerCase();
     return posts.filter((post) => !term || getTopicLabel(post).toLocaleLowerCase().includes(term)
@@ -199,9 +251,20 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
           </div>
           <div className={styles.profileActions}>
             <button className={styles.viewButton} type="button" onClick={() => onView(profile)}>View profile</button>
-            <button className={styles.messageButton} type="button" disabled={!profile.allowDirectMessages}
-              title={profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
-              onClick={() => onMessage(profile)}><MessageCircle size={13} aria-hidden="true" /> {profile.allowDirectMessages ? 'Message' : 'Messages closed'}</button>
+            <button className={styles.relationshipButton} type="button" disabled={relationshipBusyId === profile.userId || relationshipStates.get(profile.userId)?.blocked}
+              onClick={() => runRelationshipAction(profile.userId, relationshipStates.get(profile.userId)?.following ? 'unfollow' : 'follow')}>
+              <UserMinus size={13} aria-hidden="true" /> {relationshipStates.get(profile.userId)?.following ? 'Following' : 'Follow'}
+            </button>
+            <button className={styles.relationshipButton} type="button" disabled={relationshipBusyId === profile.userId || ['outgoing', 'incoming', 'connected'].includes(relationshipStates.get(profile.userId)?.connection ?? 'none') || relationshipStates.get(profile.userId)?.blocked}
+              onClick={() => runRelationshipAction(profile.userId, 'connect')}>
+              {relationshipStates.get(profile.userId)?.connection === 'connected' ? <UserCheck size={13} aria-hidden="true" /> : <UserPlus size={13} aria-hidden="true" />}
+              {relationshipStates.get(profile.userId)?.connection === 'connected' ? 'Connected' : relationshipStates.get(profile.userId)?.connection === 'outgoing' ? 'Request sent' : relationshipStates.get(profile.userId)?.connection === 'incoming' ? 'Respond below' : 'Connect'}
+            </button>
+            <button className={styles.messageButton} type="button" disabled={!profile.allowDirectMessages || relationshipStates.get(profile.userId)?.blocked}
+              title={relationshipStates.get(profile.userId)?.blocked ? 'Unblock this member to enable messaging.' : profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
+              onClick={() => onMessage(profile)}><MessageCircle size={13} aria-hidden="true" /> {relationshipStates.get(profile.userId)?.blocked ? 'Blocked' : profile.allowDirectMessages ? 'Message' : 'Messages closed'}</button>
+            <button className={styles.blockButton} type="button" disabled={relationshipBusyId === profile.userId || relationshipStates.get(profile.userId)?.blocked}
+              onClick={() => runRelationshipAction(profile.userId, 'block')} aria-label={`Block ${profile.displayName}`} title="Block member"><Ban size={13} aria-hidden="true" /></button>
           </div>
         </article>
       ))}
@@ -238,6 +301,21 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView, onExploreFe
             placeholder={activeTab === 'people' ? 'Username or display name' : activeTab === 'topics' ? 'Try mindfulness or #philosophy' : 'Try a gathering or interest'} /></span>
         </label>
 
+        {activeTab === 'people' && incomingRequests.length > 0 && (
+          <section className={styles.requestsPanel} aria-labelledby="connection-requests-heading">
+            <h2 id="connection-requests-heading">Connection requests</h2>
+            {incomingRequests.map((request) => (
+              <div className={styles.requestRow} key={request.id}>
+                <span><strong>{request.displayName}</strong> <span>@{request.username}</span></span>
+                <div>
+                  <button type="button" disabled={relationshipBusyId === request.id} onClick={() => runRelationshipAction(request.requesterId, 'accept', request.id)}><Check size={13} aria-hidden="true" /> Accept</button>
+                  <button type="button" disabled={relationshipBusyId === request.id} onClick={() => runRelationshipAction(request.requesterId, 'decline', request.id)}><X size={13} aria-hidden="true" /> Decline</button>
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+        {activeTab === 'people' && relationshipError && <p className={styles.error} role="alert">{relationshipError}</p>}
         {activeTab === 'people' && (query.trim().length < 2 ? (
           isLoadingSuggestions ? <p className={styles.stateMessage} role="status">Finding people who share your public interests…</p>
           : suggestionError ? <p className={styles.error} role="alert">{suggestionError}</p>
