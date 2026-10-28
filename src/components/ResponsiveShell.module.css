@@ -167,3 +167,13 @@
     transition: none;
   }
 }
+
+/* Safe-area and accessible interaction defaults for the responsive app shell. */
+@media (max-width: 640px) {
+  .workspace { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+}
+.installButton,
+.hideInstallButton { touch-action: manipulation; }
+@media (prefers-reduced-motion: reduce) {
+  .workspace * { scroll-behavior: auto; }
+}
