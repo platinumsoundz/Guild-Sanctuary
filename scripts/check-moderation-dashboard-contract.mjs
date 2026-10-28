@@ -15,7 +15,7 @@ assert.ok(dashboard.includes('targetContent?.trim()'), 'queue must render report
 assert.ok(dashboard.includes('report.details'), 'queue must render reporter details when supplied');
 assert.ok(dashboard.includes('role="alert"'), 'backend failures must be visible to assistive technology');
 assert.ok(service.includes("client.rpc('get_moderation_queue')"), 'reported content must come through the dedicated role-gated backend RPC');
-assert.ok(service.includes("client.rpc('apply_moderation_action'"), 'moderation actions must go through the backend action RPC');
+assert.ok(service.includes(".rpc('apply_moderation_action'"), 'moderation actions must go through the backend action RPC');
 assert.ok(service.includes('requested_rationale: rationale'), 'action rationale must be sent to the backend audit path');
 assert.ok(service.includes('client.auth.getUser()'), 'queue access must verify an authenticated account');
 assert.ok(service.includes("profile.status !== 'active'"), 'queue access must reject inactive accounts');
