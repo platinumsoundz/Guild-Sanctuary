@@ -73,6 +73,7 @@ for (const required of [
 assert.ok(discovery.includes('Connection requests'), 'discovery must expose incoming connection requests');
 assert.ok(discovery.includes('Block member'), 'discovery must provide a block control');
 assert.ok(discovery.includes('Blocked members'), 'members must be able to manage their block list');
+assert.ok(discovery.includes('ReportContentButton targetType="user"'), 'members must be able to report profiles');
 const notificationBar = readFileSync(new URL('../src/components/NotificationBar.tsx', import.meta.url), 'utf8');
 assert.ok(notificationBar.includes('connection_request'), 'notification panel must render connection request events');
 assert.ok(notificationBar.includes('started following you'), 'notification panel must render follow events');
