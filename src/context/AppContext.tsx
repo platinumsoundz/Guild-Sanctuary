@@ -161,7 +161,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     const applySystemTheme = () => {
       const theme = media.matches ? 'light' : 'dark';
       document.documentElement.dataset.theme = theme;
-      document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
+      document.documentElement.classList.toggle('dark', theme === 'dark');
     };
     applySystemTheme();
     media.addEventListener('change', applySystemTheme);
