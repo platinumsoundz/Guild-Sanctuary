@@ -18,6 +18,22 @@ interface Props {
 
 const ICE_SERVERS: RTCIceServer[] = [{ urls: 'stun:stun.l.google.com:19302' }];
 
+const SIGNAL_TYPES = new Set<Signal['type']>(['invite', 'accept', 'reject', 'offer', 'answer', 'ice', 'hangup']);
+
+function isSignalPayload(value: unknown): value is Signal {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<Signal>;
+  if (typeof candidate.from !== 'string' || candidate.from.length > 128) return false;
+  if (typeof candidate.callId !== 'string' || candidate.callId.length < 1 || candidate.callId.length > 128) return false;
+  if (!candidate.type || !SIGNAL_TYPES.has(candidate.type)) return false;
+  if (candidate.kind !== undefined && candidate.kind !== 'audio' && candidate.kind !== 'video') return false;
+  if ((candidate.type === 'offer' || candidate.type === 'answer') &&
+      (!candidate.description || (candidate.description.type !== 'offer' && candidate.description.type !== 'answer') ||
+       typeof candidate.description.sdp !== 'string' || candidate.description.sdp.length > 256_000)) return false;
+  if (candidate.type === 'ice' && (!candidate.candidate || typeof candidate.candidate !== 'object')) return false;
+  return true;
+}
+
 async function resolveIceServers(conversationId: string | null): Promise<RTCIceServer[]> {
   if (!conversationId) return ICE_SERVERS;
   try {
