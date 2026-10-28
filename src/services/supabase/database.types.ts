@@ -320,7 +320,7 @@ export interface Database {
       };
       get_report_target_owner: {
         Args: {
-          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
           requested_target_id: string;
         };
         Returns: string | null;
@@ -395,7 +395,7 @@ export interface Database {
       conversation_kind: 'direct' | 'group';
       content_state: 'visible' | 'hidden' | 'removed';
       report_status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
-      report_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+      report_target_type: 'post' | 'short' | 'event' | 'message' | 'comment' | 'user';
       moderation_action_type: ModerationAction;
     };
     CompositeTypes: Record<string, never>;
