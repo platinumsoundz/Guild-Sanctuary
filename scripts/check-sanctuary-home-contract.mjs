@@ -57,8 +57,8 @@ assert.doesNotMatch(arcadeCss, /var\(--text\)/, 'Arcade uses the shared semantic
 assert.match(arcadeCss, /Consistent keyboard and touch affordances/, 'all Arcade modes share keyboard and touch refinements');
 
 
-assert.match(homeCss, /linear-gradient\(135deg, color-mix\(in srgb, var\(--surface-raised\)/, 'home hero uses semantic surface tokens');
-assert.match(homeCss, /var\(--cosmic-cyan\)/, 'home artwork framing uses the cosmic cyan token');
+assert.match(css, /linear-gradient\(135deg, color-mix\(in srgb, var\(--surface-raised\)/, 'home hero uses semantic surface tokens');
+assert.match(css, /var\(--cosmic-cyan\)/, 'home artwork framing uses the cosmic cyan token');
 assert.match(workspaceCss, /background-color: var\(--bg\)/, 'routed workspaces respect the selected theme background');
 assert.doesNotMatch(workspaceCss.slice(workspaceCss.indexOf('/* Routed workspaces share')), /#[0-9a-fA-F]{3,8}/, 'routed workspace surfaces avoid hardcoded theme colours');
 
