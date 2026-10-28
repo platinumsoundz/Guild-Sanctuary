@@ -28,7 +28,6 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   const [controllerConnected, setControllerConnected] = useState(false);
   const [entryOpen, setEntryOpen] = useState(false);
   const [worldOpen, setWorldOpen] = useState(false);
-  const [selected, setSelected] = useState(0);
   const [gameState, setGameState] = useState<GameState>('ready');
   const [score, setScore] = useState(0);
   const [seconds, setSeconds] = useState(START_SECONDS);
@@ -41,7 +40,6 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const lastButtons = useRef<boolean[]>([]);
-  const lastAxes = useRef({ x: 0, y: 0 });
   const gamepadActionAt = useRef(0);
   const shipRef = useRef(ship);
   const orbRef = useRef(orb);
@@ -143,7 +141,6 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
     setBest(readBest());
     let frame = 0;
     let active = true;
-    let lastMove = 0;
     const poll = (time: number) => {
       if (!active) return;
       const pads = navigator.getGamepads?.() ?? [];
@@ -164,7 +161,13 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
             const down = pressed(13) || vertical > 0.45;
             if (left || right || up || down) {
               if (gameState === 'playing') moveShip((right ? 4 : left ? -4 : 0), (down ? 4 : up ? -4 : 0));
-              else setSelected((value) => (value + (down || right ? 1 : -1) + 2) % 2);
+              else {
+                const focusable = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled])') ?? []).filter((element) => element.offsetParent !== null);
+                const currentIndex = focusable.indexOf(document.activeElement as HTMLElement);
+                const direction = down || right ? 1 : -1;
+                const nextIndex = currentIndex < 0 ? 0 : (currentIndex + direction + focusable.length) % focusable.length;
+                focusable[nextIndex]?.focus();
+              }
               gamepadActionAt.current = time;
             }
             if (pressed(0)) {
@@ -174,7 +177,6 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
           }
         }
         lastButtons.current = buttons;
-        lastAxes.current = { x: pad.axes[0] ?? 0, y: pad.axes[1] ?? 0 };
       } else {
         lastButtons.current = [];
       }
@@ -193,8 +195,8 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
       }
       if (!worldOpen) return;
       if (event.key === 'Escape') closeWorld();
-      if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') { event.preventDefault(); if (gameState === 'playing') moveShip(-4, 0); else setSelected(0); }
-      if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') { event.preventDefault(); if (gameState === 'playing') moveShip(4, 0); else setSelected(1); }
+      if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') { event.preventDefault(); if (gameState === 'playing') moveShip(-4, 0); }
+      if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') { event.preventDefault(); if (gameState === 'playing') moveShip(4, 0); }
       if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') { event.preventDefault(); if (gameState === 'playing') moveShip(0, -4); }
       if (event.key === 'ArrowDown' || event.key.toLowerCase() === 's') { event.preventDefault(); if (gameState === 'playing') moveShip(0, 4); }
       if (event.key === 'Enter' || event.key === ' ') { if (gameState !== 'playing') startGame(); }
