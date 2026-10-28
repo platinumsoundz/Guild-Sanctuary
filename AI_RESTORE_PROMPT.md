@@ -15,6 +15,19 @@ Read the new Sanctuary Connection Discovery section in ROADMAP.md and the corres
 - No deployment during this work. Finish implementation and checks on the branch, report outstanding staging/browser/device gates accurately, and leave combined release decisions for later.
 - The roadmap records a plan, not completed implementation. Update status only with evidence.
 
+
+### Latest implementation checkpoint (2026-10-28)
+
+A first discovery integration slice is now on the branch:
+- `src/modules/profiles/components/ProfileDiscovery.tsx` now offers People, Communities & Gatherings, and Topics tabs.
+- People search reuses the existing public profile search service.
+- Topics reuses `fetchFeed` and filters existing public feed reflections by story tag/content.
+- Communities & Gatherings reuses `fetchEvents` and surfaces upcoming events; this is not yet dedicated group/community discovery.
+- `src/components/AppWorkspace.tsx` connects the discovery actions to existing feed/events navigation, and the discovery CSS was made responsive with accessible tab and focus states.
+- The private self-discovery centre remains separate; no private answers are used by the new discovery tabs.
+
+**Still outstanding:** audit DB/RLS and existing friendship/connection capabilities; add persistent member-controlled interest/tag preferences only after schema audit; implement explainable matching; dedicated groups/communities discovery; connection request/follow/save/hide/block/report lifecycle where missing; integrate questionnaire data only via explicit member controls; run typecheck/lint/build and focused tests; inspect mobile/browser behaviour and security permissions. No deployment has been run. Remote commits succeeded, but no local build or runtime test was available and the latest commit reports no GitHub status checks, so do not mark the branch verified.
+
 ## Current product decisions
 
 - The product is **The Sanctuary**. Guild Hall / dual-world switching is retired.
