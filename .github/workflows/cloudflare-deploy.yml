@@ -44,9 +44,14 @@ jobs:
         run: npx opennextjs-cloudflare build
 
       - name: Deploy to Cloudflare Workers
-        if: github.event_name != 'pull_request' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' && env.HAS_SUPABASE_CONFIG == 'true'
+        # Production deploys are explicit/manual only while the release batch is being assembled.
+        if: github.event_name == 'workflow_dispatch' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' && env.HAS_SUPABASE_CONFIG == 'true'
         run: npx opennextjs-cloudflare deploy
 
       - name: Explain skipped deployment
-        if: github.event_name != 'pull_request' && (env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' || env.HAS_SUPABASE_CONFIG != 'true')
+        if: github.event_name != 'workflow_dispatch'
+        run: echo "::notice::Build only. Production deployment is intentionally manual via workflow dispatch during release preparation."
+
+      - name: Explain missing deployment configuration
+        if: github.event_name == 'workflow_dispatch' && (env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' || env.HAS_SUPABASE_CONFIG != 'true')
         run: echo "::notice::Build passed, but deployment was skipped because Cloudflare write credentials or live Supabase configuration are missing. Add the required repository secrets to enable deployment."
