@@ -159,7 +159,6 @@ export function Navigation({
               <Menu size={21} strokeWidth={1.8} aria-hidden="true" />
             </button>
           )}
-          <span className={styles.siteName}>The Sanctuary</span>
         </div>
         <div className={styles.accountArea}>
           {isSessionReady && <NotificationBar compact />}
