@@ -13,6 +13,8 @@ for (const token of ['isSignalPayload', 'SIGNAL_TYPES', '256_000', 'incomingRef'
 assert.ok(component.includes('candidate.description.type !== candidate.type'), 'SDP type must match the signal type');
 assert.ok(component.includes('candidate.description.sdp.length > 256_000'), 'SDP payloads must be bounded');
 assert.ok(component.includes('candidate.candidate.length > 4_096'), 'ICE candidate strings must be bounded');
+assert.ok(component.includes('if (!isSignalPayload(payload)) return;'), 'Incoming broadcast payloads must be validated before processing');
+assert.ok(component.includes('queuedCandidates.current.length < 256'), 'Pending ICE candidates must be capped');
 assert.ok(component.includes('if (!isSignalPayload(payload)) return;'), 'Every incoming broadcast must pass payload validation');
 assert.ok(component.includes('queuedCandidates.current.length < 256'), 'Queued ICE candidates must have a strict upper bound');
 assert.ok(component.includes('activeCallRef.current === null && incomingRef.current === null'), 'Only one incoming call may be pending');
