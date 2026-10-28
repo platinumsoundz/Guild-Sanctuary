@@ -22,6 +22,14 @@ assert.match(gamesHub, /The 5 Sleeves 3D/,'creator projects retain The 5 Sleeves
 assert.match(gamesHub, /My Roblox World/,'creator projects retain the Roblox experience');
 assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the Bedrock server');
 assert.match(arcade, /Starseed Word Search/, 'word search preview remains available');
+assert.match(arcade, /getConnectedGamepad/, 'Cosmic Arcade polls for connected controllers');
+assert.match(arcade, /readGamepadDirections/, 'Cosmic Arcade maps controller directions');
+assert.match(arcade, /pressed\(0\)/, 'Cosmic Arcade maps the primary controller button to selection');
+assert.match(arcade, /data-arcade-game/, 'controller navigation can focus game tabs');
+assert.match(arcade, /bigPicture/, 'Cosmic Arcade supports immersive Big Picture mode');
+assert.match(arcade, /F6/, 'Big Picture mode has a keyboard accessibility shortcut');
+assert.match(css, /\.bigPicture/, 'Cosmic Arcade Big Picture mode has immersive layout styling');
+assert.match(css, /:focus-visible/, 'arcade controls have visible keyboard/controller focus styling');
 assert.ok(arcade.includes("selectedGame === 'classics' ? <ArcadeClassics />"), 'arcade classics are connected to the main selector');
 assert.match(arcade, /16 playable games/, 'the classic games collection is advertised');
 for (const game of ['2048', 'Minesweeper', 'Lights Out', 'Memory Match', 'Word Guess', 'Hangman', 'Tic-Tac-Toe', 'Connect Four', 'Tower of Hanoi', 'Flood Fill', 'Game of Life', 'Whack-a-Star', 'Cosmic Trivia', '15 Puzzle', 'Simon Memory', 'Cosmic Pong', 'Brick Breaker', 'Starfall Blocks', 'Sudoku', 'Maze Runner', 'Typing Sprint', 'Asteroid Dodge', 'Space Invaders']) assert.ok(classics.includes(game), `classic collection includes ${game}`);
