@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 
 const arcade = readFileSync('src/components/CosmicArcade.tsx', 'utf8');
 const snake = readFileSync('src/components/CosmicSnake.tsx', 'utf8');
+const solitaire = readFileSync('src/components/LunarSolitaire.tsx', 'utf8');
 const css = readFileSync('src/components/CosmicArcade.module.css', 'utf8');
 const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
 
@@ -17,6 +18,11 @@ assert.match(snake, /onClick=\{\(\) => steer\('left'\)\}/, 'touch-friendly direc
 assert.match(snake, /makeFood\(next\)/, 'food is respawned after collection');
 assert.match(snake, /hitWall \|\| hitSelf/, 'wall and self collisions end the game');
 assert.match(css, /snakeBoard/, 'snake board styles are present');
+assert.match(solitaire, /function newDeal\(\)/, 'solitaire creates a shuffled deal');
+assert.match(solitaire, /function canStack\(/, 'solitaire validates alternating-colour tableau moves');
+assert.match(solitaire, /function canFound\(/, 'solitaire validates suit foundations');
+assert.match(solitaire, /setStock|stock: current\.waste\.slice\(\)\.reverse\(\)/, 'solitaire can recycle the waste pile');
+assert.match(css, /solitaireTableau/, 'solitaire tableau styles are present');
 assert.match(css, /@media \(max-width:420px\)/, 'small-screen styles are present');
 assert.doesNotMatch(snake, /\.rpc\(|spend_tokens|token_balance/i, 'gameplay must not modify token balances from the client');
 
