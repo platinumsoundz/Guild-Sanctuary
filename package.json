@@ -29,7 +29,8 @@
     "check:cosmic-arcade": "node scripts/check-cosmic-arcade-contract.mjs",
     "check:sanctuary-home": "node scripts/check-sanctuary-home-contract.mjs",
     "check:guild-browser-arcade": "node scripts/check-guild-browser-arcade.mjs",
-    "check:guild-companion-hub": "node scripts/check-guild-companion-hub.mjs"
+    "check:guild-companion-hub": "node scripts/check-guild-companion-hub.mjs",
+    "check:conversation-calls": "node scripts/check-conversation-calls.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
