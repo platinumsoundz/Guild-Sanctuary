@@ -120,7 +120,7 @@
   background: linear-gradient(90deg, transparent, var(--cosmic-violet), var(--cosmic-cyan), transparent);
   content: '';
 }
-.sectionEyebrow { color: var(--cosmic-lavender); letter-spacing: 1.8px; text-transform: uppercase; }
+.sectionEyebrow { color: var(--accent); letter-spacing: 1.8px; text-transform: uppercase; }
 .sectionPage h1 { max-width: 850px; color: var(--ink); letter-spacing: -.045em; line-height: 1.08; text-wrap: balance; }
 .sectionDescription { color: var(--muted); line-height: 1.8; }
 .profilePage, .supportPage {
