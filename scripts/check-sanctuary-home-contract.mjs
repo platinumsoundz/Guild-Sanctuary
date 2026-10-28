@@ -62,4 +62,7 @@ assert.match(css, /var\(--cosmic-cyan\)/, 'home artwork framing uses the cosmic 
 assert.match(workspaceCss, /background-color: var\(--bg\)/, 'routed workspaces respect the selected theme background');
 assert.doesNotMatch(workspaceCss.slice(workspaceCss.indexOf('/* Routed workspaces share')), /#[0-9a-fA-F]{3,8}/, 'routed workspace surfaces avoid hardcoded theme colours');
 
+assert.match(css, /sanctuary-portal-drift/, 'portal art has restrained celestial movement');
+assert.match(css, /\.heroIllustration, \.artPulse \{ animation: none; \}/, 'portal animation is disabled for reduced-motion users');
+
 console.log('Sanctuary home contract checks passed.');
