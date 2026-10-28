@@ -41,6 +41,8 @@ for (const required of [
   'create table if not exists public.profile_follows',
   'create table if not exists public.profile_connections',
   'create table if not exists public.profile_blocks',
+  'create table if not exists public.profile_discovery_hidden',
+  'create table if not exists public.profile_discovery_saved',
   'alter table public.profile_follows enable row level security',
   'alter table public.profile_connections enable row level security',
   'alter table public.profile_blocks enable row level security',
@@ -72,6 +74,10 @@ for (const required of [
   'unblockProfile',
   'fetchIncomingConnectionRequests',
   'fetchBlockedProfileIds',
+  'hideProfileFromDiscovery',
+  'unhideProfileInDiscovery',
+  'saveProfileForLater',
+  'unsaveProfile',
 ]) assert.ok(relationshipService.includes(required), `missing relationship service action: ${required}`);
 
 assert.ok(discovery.includes('Connection requests'), 'discovery must expose incoming connection requests');
