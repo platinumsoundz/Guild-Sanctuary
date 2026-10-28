@@ -407,3 +407,11 @@
     transition: none;
   }
 }
+
+.matchReason {
+  margin: 8px 0 0;
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.5;
+}
