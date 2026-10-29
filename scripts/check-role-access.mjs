@@ -20,7 +20,8 @@ for (const page of ['shorts', 'events', 'wallet', 'shop']) {
 }
 assert.match(gates, /^\s*admin: 'moderator',$/m, 'moderation pages must require moderator or above');
 for (const page of ['games', 'guild-roadmap', 'guild']) {
-  assert.match(gates, new RegExp('^\\s*[\\'"]?' + page + "[\\'"]?: 'developer,$", 'm'), page + ' must require developer or owner');
+  const entry = page === 'guild-roadmap' ? "'guild-roadmap': 'developer'," : page + ": 'developer',";
+  assert.ok(gates.includes(entry), page + ' must require developer or owner');
 }
 assert.match(gates, /if \(role === 'owner'\) return true/, 'owner bypasses page gates');
 assert.match(gates, /if \(!\(page in pageMinimumRole\)\) return role === 'developer'/, 'unregistered/new pages fail closed to developer and owner');
