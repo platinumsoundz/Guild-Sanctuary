@@ -32,7 +32,7 @@ Use Sanctuary accounts and existing conversations to discover and authenticate t
 
 ## Implementation order
 
-1. **UI foundation (this change):** show clearly disabled audio/video entry points in direct messages; no false claim that calling works.
+1. **Implemented in this batch:** audio/video entry points, incoming accept/decline, outgoing invitations, WebRTC offer/answer/ICE negotiation, mute/camera controls, teardown, and membership-scoped private-channel RLS.
 2. **Remaining before beta:** review/apply the migration in staging, deliver invitations when the recipient is not currently viewing the thread, add TURN fallback, and verify channel authorization behavior against the live Supabase project.
 3. **Hardening:** server-verified sender identity, duplicate/replay protection, invitation timeout, missed-call handling and cleanup.
 4. **WebRTC client:** permission checks, offer/answer/ICE, mute/camera toggles, device selection where supported, responsive call surface, reconnect and teardown.
@@ -43,7 +43,7 @@ Use Sanctuary accounts and existing conversations to discover and authenticate t
 
 - Existing direct messages remain usable and unchanged.
 - Call actions are visible only in direct conversations, not group chats.
-- Actions remain disabled until a verified signalling transport and call lifecycle exist.
-- No new production schema/configuration is applied by this foundation.
-- UI does not claim calls, call privacy, or E2EE are active.
-- Automated checks validate the gate and the documented security requirements.
+- Actions are disabled until the authenticated private signalling channel subscribes successfully.
+- Migration remains unapplied to production until staging SQL/RLS review is complete.
+- UI does not claim independently audited E2EE; it describes standard WebRTC and current limitations.
+- Automated checks validate the call lifecycle primitives and documented authorization requirements.
