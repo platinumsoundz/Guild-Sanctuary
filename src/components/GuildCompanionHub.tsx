@@ -35,7 +35,9 @@ const services = [
   { name: 'itch.io', kind: 'Indie games', description: 'Browse indie games and add supported browser-playable titles to your personal library.', url: 'https://itch.io/' },
 ];
 
-export function GuildCompanionHub() {
+export type GuildCompanionView = 'all' | 'library' | 'music' | 'photos' | 'tools';
+
+export function GuildCompanionHub({ view = 'all' }: { view?: GuildCompanionView }) {
   const [games, setGames] = useState<LocalGame[]>([]);
   const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [storageWarning, setStorageWarning] = useState(false);
@@ -360,10 +362,11 @@ export function GuildCompanionHub() {
   return (
     <section className={styles.hub} aria-label="Guild companion features">
       <div className={styles.heading}>
-        <div><p className={styles.eyebrow}>YOUR PERSONAL ORBIT</p><h2>Library & lounges</h2><p>Account library sync is wired in code but remains unverified until its database migration is applied and tested. Personal media stays on your device by default.</p></div>
+        <div><p className={styles.eyebrow}>THE GUILD · PERSONAL SPACE</p><h2>{view === 'library' ? 'Game library' : view === 'music' ? 'Music player' : view === 'photos' ? 'Photo slideshow' : view === 'tools' ? 'Guild tools' : 'Library & lounges'}</h2><p>{view === 'music' ? 'Play audio you choose from this device. Files stay local to this browser session.' : view === 'photos' ? 'Create a private slideshow from photos selected on this device.' : view === 'library' ? 'Keep a personal catalogue alongside the featured Guild games. Account sync still depends on the staged database migration.' : 'Your game catalogue and personal media are separated into their own Guild pages. Personal media stays on your device by default.'}</p></div>
         <span className={styles.privacy}><ShieldCheck size={15} /> Local cache + account sync</span>
       </div>
 
+      {(view === 'all' || view === 'library') && (
       <section className={styles.panel} aria-labelledby="guild-library-title">
         <div className={styles.panelHeading}><span className={styles.icon}><Library size={19} /></span><div><h3 id="guild-library-title">Unified game library</h3><p>Add titles locally, then use Sign in & sync to merge them with your account library. No installed-game scan has been performed.</p></div></div>
         <div className={styles.libraryTools}>
@@ -385,17 +388,15 @@ export function GuildCompanionHub() {
           <span aria-live="polite">{visibleGames.length} of {games.length} games</span>
         </div>}
         {games.length ? visibleGames.length ? <ul className={styles.gameList}>{visibleGames.map((game) => <li key={game.id}><span className={styles.gameGlyph}><Gamepad2 size={18} /></span><div className={styles.gameInfo}><strong>{game.title}</strong><small>{game.platform}{game.launchUrl ? ' · link available' : ' · saved entry only'}</small></div>{game.launchUrl && <a className={styles.openLink} href={safeWebUrl(game.launchUrl)} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={13} /></a>}<button type="button" className={styles.iconButton} aria-label={`Remove ${game.title}`} onClick={() => removeGame(game)} disabled={!libraryLoaded || syncBusy}><Trash2 size={15} /></button></li>)}</ul> : <p className={styles.empty}>No games match these filters. Clear the search or choose another platform.</p> : <p className={styles.empty}>Your library is waiting. Add browser games or record titles you play on PC and console.</p>}
-        <div className={styles.notice}><strong>Next integration:</strong> an optional signed Sanctuary Companion can request permission to scan supported game locations and launch compatible installed titles. A website alone cannot enumerate your device or execute arbitrary local apps.</div>
-      </section>
-
-      <div className={styles.mediaGrid}>
+        <div className={styles.notice}><strong>Next integration:</strong> an optional signed Sanctuary Companion can request permission to scan supported game locations and launch compatible installed titles. A website alone cannot enumerate your device or execute arbitrary local apps.</div>      </section>)}
+      <div className={view === 'all' ? styles.mediaGrid : styles.singleMedia}>
+        {(view === 'all' || view === 'music') && (
         <section className={styles.panel} aria-labelledby="guild-music-title">
           <div className={styles.panelHeading}><span className={styles.icon}><Music2 size={19} /></span><div><h3 id="guild-music-title">Music lounge</h3><p>Select audio from your device to play in the Guild.</p></div></div>
           <input ref={audioInput} className={styles.hiddenInput} type="file" accept="audio/*" multiple onChange={(event) => addFiles(event.target.files, 'audio')} />
           <button type="button" className={styles.secondary} onClick={() => audioInput.current?.click()}><Plus size={15} /> Choose music files</button>
-          {audioFiles.length > 0 ? <div className={styles.audioList}>{audioFiles.map((item) => <div className={styles.audioItem} key={item.id}><strong title={item.file.name}>{item.file.name}</strong><audio controls preload="metadata" src={item.url}>Your browser does not support audio playback.</audio><button type="button" className={styles.textButton} onClick={() => { URL.revokeObjectURL(item.url); setAudioFiles((current) => current.filter((file) => file.id !== item.id)); }}>Remove</button></div>)}</div> : <div className={styles.empty}>No audio selected. Playback is local to this page; streaming-service account linking is a separate future integration.</div>}
-        </section>
-
+          {audioFiles.length > 0 ? <div className={styles.audioList}>{audioFiles.map((item) => <div className={styles.audioItem} key={item.id}><strong title={item.file.name}>{item.file.name}</strong><audio controls preload="metadata" src={item.url}>Your browser does not support audio playback.</audio><button type="button" className={styles.textButton} onClick={() => { URL.revokeObjectURL(item.url); setAudioFiles((current) => current.filter((file) => file.id !== item.id)); }}>Remove</button></div>)}</div> : <div className={styles.empty}>No audio selected. Playback is local to this page; streaming-service account linking is a separate future integration.</div>}        </section>)}
+        {(view === 'all' || view === 'photos') && (
         <section className={styles.panel} aria-labelledby="guild-gallery-title">
           <div className={styles.panelHeading}><span className={styles.icon}><ImageIcon size={19} /></span><div><h3 id="guild-gallery-title">Memory gallery</h3><p>Choose photos for a private, in-browser slideshow.</p></div></div>
           <input ref={photoInput} className={styles.hiddenInput} type="file" accept="image/*" multiple onChange={(event) => addFiles(event.target.files, 'photo')} />
@@ -405,12 +406,12 @@ export function GuildCompanionHub() {
             <div className={styles.galleryControls}><button type="button" className={styles.secondary} onClick={() => { setSlideshow(false); setPhotoIndex((index) => (index - 1 + photos.length) % photos.length); }}>Previous</button><span>{photoIndex + 1} / {photos.length}</span><button type="button" className={styles.secondary} onClick={() => { setSlideshow(false); setPhotoIndex((index) => (index + 1) % photos.length); }}>Next</button></div>
             <button type="button" className={styles.primary} onClick={() => setSlideshow((value) => !value)}>{slideshow ? 'Pause slideshow' : 'Start 5-second slideshow'}</button>
             <button type="button" className={styles.textButton} onClick={() => { photos.forEach((item) => URL.revokeObjectURL(item.url)); setPhotos([]); setPhotoIndex(0); setSlideshow(false); }}>Clear selected photos</button>
-          </div> : <div className={styles.empty}>No photos selected. Your images are previewed locally and are not uploaded to Sanctuary.</div>}
-        </section>
+          </div> : <div className={styles.empty}>No photos selected. Your images are previewed locally and are not uploaded to Sanctuary.</div>}        </section>)}
       </div>
-      {storageWarning && <p className={styles.status} role="status">This browser could not read or save the device-local cache. Sign in and sync to keep a server copy; changes may not persist on this device.</p>}
-      {mediaMessage && <p className={styles.status} role="status">{mediaMessage}</p>}
+      {(view === 'all' || view === 'library') && storageWarning && <p className={styles.status} role="status">This browser could not read or save the device-local cache. Sign in and sync to keep a server copy; changes may not persist on this device.</p>}
+      {(view === 'all' || view === 'music' || view === 'photos') && mediaMessage && <p className={styles.status} role="status">{mediaMessage}</p>}
 
+      {(view === 'all' || view === 'tools') && (
       <section className={styles.panel} aria-labelledby="guild-cloud-lab-title">
         <div className={styles.panelHeading}><span className={styles.icon}><Terminal size={19} /></span><div><h3 id="guild-cloud-lab-title">Cloud Lab · persistent Linux <span className={styles.statusPill}>In development</span></h3><p>Paused here until a safe runtime can be provided; this is deliberately not a simulated terminal.</p></div></div>
         <div className={styles.notice}><strong>Pinned for later development.</strong> The Sanctuary website and Supabase can handle the account, permissions and control-plane groundwork, but a real persistent Linux terminal also needs an isolated compute runtime and durable storage. Those are not included in the current app/database alone. No provider has been selected and no paid service is being started. For now, Cloud Lab stays labelled in development while Guild improvements continue.</div>
@@ -420,15 +421,13 @@ export function GuildCompanionHub() {
           </button>
         </div>
         <p className={styles.status} role="status" aria-live="polite">{cloudLabMessage}</p>
-        <div className={styles.serviceChips}><span>Per-user isolation</span><span>Persistent home directory</span><span>Resource quotas</span><span>Secure terminal gateway</span><span>Stop / reset controls</span><span>Cost and abuse limits</span></div>
-      </section>
-
+        <div className={styles.serviceChips}><span>Per-user isolation</span><span>Persistent home directory</span><span>Resource quotas</span><span>Secure terminal gateway</span><span>Stop / reset controls</span><span>Cost and abuse limits</span></div>      </section>)}
+      {(view === 'all' || view === 'tools') && (
       <section className={styles.panel} aria-labelledby="guild-connect-title">
         <div className={styles.panelHeading}><span className={styles.icon}><Gamepad2 size={19} /></span><div><h3 id="guild-connect-title">Gaming worlds & achievements</h3><p>Official destinations now; authenticated account connections are future work.</p></div></div>
         <div className={styles.services}>{services.map((service) => <article className={styles.service} key={service.name}><div className={styles.serviceTop}><strong>{service.name}</strong><span>{service.kind}</span></div><p>{service.description}</p><a href={service.url} target="_blank" rel="noopener noreferrer">Open official site <ExternalLink size={13} /></a></article>)}</div>
-        <div className={styles.notice}><strong>RetroArch & RetroAchievements:</strong> use a compatible RetroArch installation and your own legally obtained game files. The Guild will not provide ROM downloads. Future integration can import supported achievement data with your consent; achievement verification must come from the platform, not a self-reported score.</div>
-      </section>
-      <p className={styles.footnote}>Storage plan: server-backed account data and sync, local caching for resilience, and device-local media by default. Selected media stays in this browser session and is not uploaded. Your game list is cached in this browser and can be synced to your account when the library migration is installed. Cloud media backup, account linking to gaming platforms, automatic scanning and native launch are not enabled yet.</p>
+        <div className={styles.notice}><strong>RetroArch & RetroAchievements:</strong> use a compatible RetroArch installation and your own legally obtained game files. The Guild will not provide ROM downloads. Future integration can import supported achievement data with your consent; achievement verification must come from the platform, not a self-reported score.</div>      </section>)}
+      {(view === 'all' || view === 'tools') && <p className={styles.footnote}>Storage plan: server-backed account data and sync, local caching for resilience, and device-local media by default. Selected media stays in this browser session and is not uploaded. Your game list is cached in this browser and can be synced to your account when the library migration is installed. Cloud media backup, account linking to gaming platforms, automatic scanning and native launch are not enabled yet.</p>}
     </section>
   );
 }
