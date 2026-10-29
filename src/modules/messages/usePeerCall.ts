@@ -35,6 +35,10 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
   const remoteRef = useRef<MediaStream | null>(null);
   const activeCallId = useRef<string | null>(null);
   const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
+  const statusRef = useRef<CallStatus>(status);
+  const kindRef = useRef<CallKind>(kind);
+  statusRef.current = status;
+  kindRef.current = kind;
 
   const send = useCallback(async (signal: Signal) => {
     const channel = channelRef.current;
@@ -104,8 +108,9 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
     channel.on('broadcast', { event: 'signal' }, ({ payload }: { payload: Signal }) => {
       if (cancelled || !payload || payload.to !== userId || payload.from !== peerUserId) return;
       if (payload.type === 'invite') {
-        if (status === 'connected' || status === 'calling' || status === 'connecting' || status === 'ringing') return;
+        if (statusRef.current === 'connected' || statusRef.current === 'calling' || statusRef.current === 'connecting' || statusRef.current === 'ringing') return;
         activeCallId.current = payload.callId;
+        kindRef.current = payload.kind;
         setKind(payload.kind);
         setIncoming({ callId: payload.callId, kind: payload.kind, from: payload.from });
         setStatus('ringing');
@@ -118,10 +123,10 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
         return;
       }
       if (payload.type === 'accept') {
-        if (status !== 'calling' || !userId || !peerUserId) return;
+        if (statusRef.current !== 'calling' || !userId || !peerUserId) return;
         void (async () => {
           try {
-            const pc = await ensurePeerConnection(kind, payload.callId);
+            const pc = await ensurePeerConnection(kindRef.current, payload.callId);
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
             await send({ type: 'offer', callId: payload.callId, from: userId, to: peerUserId, description: offer });
@@ -136,7 +141,7 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
       void (async () => {
         try {
           if (payload.type === 'offer') {
-            const pc = await ensurePeerConnection(kind, payload.callId);
+            const pc = await ensurePeerConnection(kindRef.current, payload.callId);
             await pc.setRemoteDescription(payload.description);
             for (const candidate of pendingCandidates.current.splice(0)) await pc.addIceCandidate(candidate);
             const answer = await pc.createAnswer();
@@ -167,7 +172,7 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
       if (channelRef.current === channel) channelRef.current = null;
       cleanup('idle');
     };
-  // Status/kind are intentionally read for this subscription's event handler; refs avoid resubscribing on each state change.
+  // Refs keep latest status/kind without tearing down an active connection.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, userId, peerUserId]);
 
@@ -180,7 +185,7 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
       setError('Calls require HTTPS and a browser with microphone/camera support.');
       return;
     }
-    if (status === 'calling' || status === 'ringing' || status === 'connecting' || status === 'connected') return;
+    if (statusRef.current === 'calling' || statusRef.current === 'ringing' || statusRef.current === 'connecting' || statusRef.current === 'connected') return;
     const callId = crypto.randomUUID();
     activeCallId.current = callId;
     setKind(callKind);
