@@ -733,3 +733,11 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Still blocked:** #191 moderation queue and #199 role management require a live-schema reconciliation because public.get_moderation_queue() is absent, plus independent review of role hierarchy, self-targeting, concurrency and action authorization. No production SQL/migrations or permission changes have been applied.
 - **Superseded and closed:** #210, #213, #214, #215, #216, #222 and #192. Their relevant work was either rebuilt on current main or superseded by the strengthened #224 contract.
 - **No production deployment, live database write, payment/provider/secret change, or token-spending enablement is claimed by this reconciliation.
+
+
+## Private Daily Reflection client restoration — 2026-10-28
+
+- **Rebuilt directly on current main:** restore account-backed Daily Reflection persistence, compact mood controls and explicit-confirmation import of legacy browser entries. Existing local copies are not deleted automatically and existing account dates are not overwritten.
+- The current database was inspected read-only: the daily_reflections table, owner-only RLS and unique user/date index exist. No migration was added or applied.
+- Exact-head CI, Daily Reflection contract, TypeScript/production build and screenshot capture passed on the previous clean reconstruction; fresh checks are required for this final mainline head.
+- **Owner decision and release gates:** approve the local-to-account-backed transition; test two authenticated accounts for isolation; test save/read/update/delete and failure paths. No production deployment or data migration is authorized by this code PR.
