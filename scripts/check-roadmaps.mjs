@@ -24,7 +24,7 @@ assert.match(workspace, /contentNavigation === 'roadmap'[\s\S]*?<SanctuaryRoadma
 assert.match(workspace, /contentNavigation === 'guild-roadmap'[\s\S]*?<GuildRoadmap \/>/, 'Guild roadmap route is wired');
 assert.match(context, /'guild-roadmap'/, 'Guild roadmap is a valid navigation state');
 assert.match(navigation, /id: 'roadmap', label: 'Sanctuary Roadmap'/, 'Sanctuary roadmap has a clear navigation label');
-assert.match(navigation, /id: 'guild-roadmap', label: 'Guild Roadmap'/, 'Guild roadmap has a separate navigation label');
+assert.doesNotMatch(navigation.slice(navigation.indexOf('const navigationItems'), navigation.indexOf('const navigationGroups')), /id: 'guild-roadmap'|Guild Roadmap/, 'hidden Guild roadmap is not exposed in the Sanctuary page selector');
 assert.match(guildStyles, /@media\(max-width:560px\)/, 'Guild roadmap is responsive');
 assert.match(guildStyles, /:focus-visible/, 'Guild roadmap has visible keyboard focus');
 assert.match(sanctuaryStyles, /\.moreInfo summary:focus-visible/, 'Sanctuary More info has visible keyboard focus');
