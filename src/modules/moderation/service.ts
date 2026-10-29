@@ -80,7 +80,7 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
       const { data } = await client.from('posts').select('content,media_url,state,created_at').eq('id', report.target_id).maybeSingle();
       if (data) {
         targetContent = data.content?.slice(0, 600) ?? null;
-        targetMediaUrl = data.media_url && /^https?:\\/\\//i.test(data.media_url) ? data.media_url : null;
+        targetMediaUrl = data.media_url && (data.media_url.startsWith('https://') || data.media_url.startsWith('http://')) ? data.media_url : null;
         targetState = data.state;
         targetCreatedAt = data.created_at;
       }
@@ -88,7 +88,7 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
       const { data } = await client.from('short_videos').select('caption,video_url,state,created_at').eq('id', report.target_id).maybeSingle();
       if (data) {
         targetContent = data.caption?.slice(0, 600) ?? null;
-        targetMediaUrl = /^https?:\\/\\//i.test(data.video_url) ? data.video_url : null;
+        targetMediaUrl = data.video_url && (data.video_url.startsWith('https://') || data.video_url.startsWith('http://')) ? data.video_url : null;
         targetState = data.state;
         targetCreatedAt = data.created_at;
       }
