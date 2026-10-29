@@ -886,3 +886,16 @@ Branch: `fix/private-message-report-access-2026-10-29`
 - Tightened report-reason validation and retained report rate limiting, idempotent upsert behaviour, authenticated-only execution grants, and explicit PostgREST schema reload.
 - Extended the messaging persistence contract to guard the membership check and fail-closed behaviour.
 - **Not yet deployed:** this migration must be reviewed and applied through the approved staging process. Validate both a conversation member and a non-member using separate test accounts before production.
+
+
+## Navigation governance and staff-page separation — 2026-10-29
+
+Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
+
+- Split the staff navigation into **Admin** (member-role management) and **Moderation** (feed, Shorts, comment, event and message reports). Admin is admin+; Moderation is moderator+.
+- The Guild's hidden launch route is now available to authenticated basic users from Settings; Guild Roadmap remains developer/owner-only. This corrects the earlier role gate that accidentally treated the Guild console itself as a developer-only destination.
+- Added the `platform_page_visibility` table with RLS. Active members can read the global page switches; only active developer/owner accounts can change them. The Admin page exposes those controls to Developer and Owner.
+- Main Sanctuary navigation, mobile navigation, Guild navigation/quick search, and direct Sanctuary routing now read the shared visibility settings. Role gates remain independent: showing a page does not grant a role that cannot access it.
+- **Deployment boundary:** the migration is in the repository only. The visibility panel will show a save error until the migration is applied through the approved Supabase migration process. No live Supabase change is claimed.
+- Guild menu and Quick Menu are portaled to `document.body` and their overlays now use top-priority fixed stacking layers, so they should render above the active page and Sanctuary shell. Preview/browser confirmation is still needed across desktop and Android.
+- Added `check:admin-visibility` to CI and strengthened the Guild overlay contract checks.
