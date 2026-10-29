@@ -21,7 +21,7 @@ assert.match(docs, /Vercel and Cloudflare/, 'Docs must explain the cross-platfor
 assert.match(docs, /must not be guessed/, 'Docs must prohibit guessing the ads.txt publisher identity');
 assert.match(adsTxtRoute, /NEXT_PUBLIC_ADSENSE_CLIENT_ID/, 'ads.txt must use an explicitly configured publisher ID');
 assert.ok(adsTxtRoute.includes("if (!clientId || !/^ca-pub-\\d+$/.test(clientId))"), 'ads.txt must fail closed when publisher ID is missing or invalid');
-assert.match(adsTxtRoute, /google\\.com, \\$\\{publisherId\\}, DIRECT, f08c47fec0942fa0/, 'ads.txt must emit the correctly formatted Google seller record');
+assert.ok(adsTxtRoute.includes('google.com, ${publisherId}, DIRECT, f08c47fec0942fa0'), 'ads.txt must emit the correctly formatted Google seller record');
 assert.doesNotMatch(adsTxtRoute, /ADSENSE_CLIENT_ID\s*from/, 'ads.txt must not use the fallback publisher ID');
 
 console.log('AdSense platform-neutral release-gate checks passed.');
