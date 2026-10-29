@@ -322,7 +322,7 @@ export function Navigation({
       )}
       {isSessionReady && (
         <nav className={styles.mobileBottomNavigation} aria-label="Quick navigation">
-          {mobilePrimaryItems.map((item) => (
+          {mobilePrimaryItems.filter((item) => visibleNavigationItems.some((visible) => visible.id === item.id)).map((item) => (
             <button
               key={item.id}
               type="button"
