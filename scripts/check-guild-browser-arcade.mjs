@@ -152,3 +152,7 @@ assert.match(workspace, /<GamesHub autoLaunchRecent=\{guildAutoLaunchRecent\}/, 
 assert.match(gamesHub, /autoLaunchRecent = false/, 'the game library keeps direct recent launch opt-in');
 assert.match(gamesHub, /if \(autoLaunchRecent && safeRecent\[0\]\)/, 'Continue Playing opens the saved recent game rather than just the library');
 console.log('Guild Continue Playing launch contracts passed.');
+
+assert.match(guildQuickHud, /quickPanelRef\.current\?\.querySelectorAll/, 'quick HUD traps keyboard focus within its open dialog');
+assert.match(guildQuickHud, /quickButtonRef\.current\?\.focus\(\)/, 'quick HUD returns keyboard focus to its trigger on close');
+console.log('Guild quick HUD focus-management contracts passed.');
