@@ -26,6 +26,7 @@ import { GuildRoadmap } from '@/components/GuildRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
+import { FeedbackHub } from '@/components/FeedbackHub';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
@@ -231,6 +232,8 @@ export function AppWorkspace() {
         <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
       ) : activeNavigation === 'admin' ? (
         <AdminDashboard role={currentUser.profile.role} />
+      ) : activeNavigation === 'feedback' ? (
+        <FeedbackHub />
       ) : activeNavigation === 'roadmap' ? (
         <SanctuaryRoadmap />
       ) : activeNavigation === 'guild-roadmap' ? (
