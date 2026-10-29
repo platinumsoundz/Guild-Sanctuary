@@ -94,6 +94,8 @@ assert.match(gamesHub, /Launch in Guild/, 'the library labels in-hub game launch
 assert.match(gamesHub, /guild-library-recents-v1/, 'recent game launches use a versioned local preference key');
 assert.match(gamesHub, /guild-library-favourites-v1/, 'favourites use a versioned local preference key');
 assert.match(gamesHub, /Recently played/, 'the library provides a Continue Playing row when recent launches exist');
+assert.match(gamesHub, /aria-label="Clear recently played history"|className={styles\.clearHistory}/, 'players can clear browser-local recent game history');
+assert.match(gamesHub, /localStorage\.removeItem\(RECENTS_KEY\)/, 'clearing recent history removes its local storage record');
 assert.match(gamesHub, /Search your games/, 'the library exposes game search');
 assert.match(gamesHub, /Ready to play/, 'the library exposes a launch-readiness filter');
 assert.match(gamesHub, /aria-pressed=\{favourites\.includes\(game\.id\)\}/, 'favourite state is exposed accessibly');
