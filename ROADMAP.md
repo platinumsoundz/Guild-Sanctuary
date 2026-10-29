@@ -695,8 +695,8 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Merged to main:** PR [#218 — reconciled beta candidate](https://github.com/platinumsoundz/Guild-Sanctuary/pull/218), merge commit `645edf23d6507e11935c94e10735835d95513186`. Rebuilt from current main to resolve the original #210 divergence without overwriting the mainline community-comment reliability change.
 - Exact-head checks passed for CI/typecheck/build, screenshot capture, install-banner accessibility contract, dependency-map contract, Daily Reflection contract, community connection toolkit contract, and Cloudflare Worker build. Desktop, mobile and small-mobile screenshot artifacts were reviewed for the compact header, top-left navigation, install banner, notification control and responsive shell.
 - Vercel preview remains blocked by provider build-rate-limit status. No production deployment is claimed; Cloudflare's PR workflow completed successfully with production deployment guarded.
-- The original PR #210 is superseded by #218 and should be closed after branch-stack reconciliation. Guest access #213, Guild Arcade #214 and creator games #215 remain a dependency stack on the old release branch; rebuild the stack on current main before integrating.
-- PR #219 is the conflict-free current-main reconstruction of private Daily Reflection. Its fresh exact-head CI is pending. Keep it gated on live migration-ledger/RLS verification and authenticated two-account save/read/delete/failure-path tests.
+- The original PR #210 was closed unmerged as superseded by #218. Old stack-dependent PRs #213, #214, #215 and #222 were closed after clean-mainline replacements were built.
+- PR #220 is the conflict-resolved current-main reconstruction of private Daily Reflection. Exact-head CI and screenshot capture passed. Keep it gated on live migration-ledger/RLS verification and authenticated two-account save/read/delete/failure-path tests.
 - Moderation PRs #191/#199 remain gated on the absent live `get_moderation_queue()` RPC and independent authorization review. No production migrations or database writes have been performed.
 
 
@@ -705,7 +705,7 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Rebuilt against current `main` on 2026-10-29:** guest sessions start on the public Today page; public read-only routes are limited to support, Cosmic Arcade and the two roadmaps; account-only routes show a sign-in explainer.
 - Guest profile-post loading is skipped so the synthetic guest identity is not passed into the author-post service.
 - Added `check:guest-access` contract to CI while preserving current compact-shell and community-comment changes.
-- **Validation required:** fresh exact-head CI, mobile/desktop guest-route browser checks, and service/RLS authorization tests. This UI gate does not replace backend authorization.
+- **Automated validation passed:** exact-head CI, screenshot capture and dependency-map checks passed on PR #221 before merge. Mobile/desktop guest-route interaction and service/RLS authorization tests remain outstanding. This UI gate does not replace backend authorization.
 - No migration, production data change, provider setting, secret, billing or production deployment is included.
 
 
@@ -714,13 +714,22 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Rebuilt directly from current `main` to avoid the one-commit divergence created when guest access was merged.
 - Adds Guild Arcade navigation, a browser-playable Guild World, companion hub, Comet Dodge mini-game and controller-input helpers.
 - Guest route restrictions already present on main remain intact; Guild World receives authenticated user identity only for signed-in non-guest sessions.
-- A focused Guild browser arcade contract is wired into CI. Require exact-head CI and desktop/mobile interaction checks before merge.
+- A focused Guild browser arcade contract is wired into CI. PR #223 merged after exact-head CI, typecheck/build and screenshot workflows passed; desktop/mobile gameplay interaction QA remains outstanding.
 - No production deployment, database migration or token spending enablement is included.
 
 
 ## Creator games moved into the Guild — 2026-10-28
 
-- **Rebuilt on current mainline; exact-head CI and screenshot checks required:** Move the creator-project and community-world hub (The 5 Sleeves 2D, The 5 Sleeves 3D, Roblox, and Platinum Survival Java/Bedrock) out of the Support the creator page and into the Guild experience.
+- **Merged to main in PR #225 after exact-head CI, typecheck/build and screenshot capture passed:** Move the creator-project and community-world hub (The 5 Sleeves 2D, The 5 Sleeves 3D, Roblox, and Platinum Survival Java/Bedrock) out of the Support the creator page and into the Guild experience.
 - The Support page now remains focused on voluntary contributions and checkout notices. The existing Cosmic Arcade mini-games remain a separate Sanctuary-built games area.
 - Add a static contract requiring the games hub to render in the Guild and not in Support. This does not change game hosting URLs, game saves, account linking, or token integration.
-- **Release status:** run Guild/guest contracts, typecheck and production build on the exact head; interactive browser/device QA remains required. No production deployment is claimed.
+- **Release status:** automated contracts, typecheck/build and screenshot capture passed on the exact head; interactive browser/device QA remains required. No production deployment is claimed.
+
+## Roadmap status reconciliation — 2026-10-29 (current main)
+
+- **Merged to main:** #218 compact responsive shell/release-candidate reconciliation; #221 guest-safe read-only route boundary; #223 Guild browser arcade; #225 creator-game lobby relocation; #224 strengthened Shorts RPC migration security contract. These are repository merges, not confirmation of production deployment.
+- **Open, owner decision required:** #220 Daily Reflection account-backed persistence. Automated CI and screenshot capture passed; do not merge until the owner approves the local-to-account-backed transition and two-account isolation plus save/read/update/delete failure-path checks are completed.
+- **Open, fresh CI running/required:** creator-game/Guild interactions are still subject to real desktop/mobile browser QA. Vercel preview is still subject to provider rate limiting; Cloudflare PR workflows are guarded against production deployment.
+- **Still blocked:** #191 moderation queue and #199 role management require a live-schema reconciliation because public.get_moderation_queue() is absent, plus independent review of role hierarchy, self-targeting, concurrency and action authorization. No production SQL/migrations or permission changes have been applied.
+- **Superseded and closed:** #210, #213, #214, #215, #216, #222 and #192. Their relevant work was either rebuilt on current main or superseded by the strengthened #224 contract.
+- **No production deployment, live database write, payment/provider/secret change, or token-spending enablement is claimed by this reconciliation.
