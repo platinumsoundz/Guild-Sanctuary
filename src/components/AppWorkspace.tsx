@@ -68,6 +68,7 @@ export function AppWorkspace() {
   const [accountRestrictionReason, setAccountRestrictionReason] = useState<string | null>(null);
   const [guildPage, setGuildPage] = useState<GuildPage>('home');
   const [guildRecentTitle, setGuildRecentTitle] = useState<string | null>(null);
+  const [guildAutoLaunchRecent, setGuildAutoLaunchRecent] = useState(false);
   const guildInternalPages: GuildPage[] = ['home', 'arcade', 'trials', 'library', 'music', 'photos', 'tools'];
   const contentNavigation = activeNavigation === 'guild'
     ? (guildInternalPages.includes(guildPage) ? 'guild' : guildPage)
@@ -352,7 +353,7 @@ export function AppWorkspace() {
       <ResponsiveShell>
         {activeNavigation === 'guild' ? (
           <div className={styles.guildExperience} data-world="guild">
-            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={setGuildPage} onExit={() => setActiveNavigation('today')} />
+            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
             <motion.div className={styles.guildWorldContent}>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={guildPage} className={styles.guildPageContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
@@ -373,7 +374,7 @@ export function AppWorkspace() {
                     </section>
                     <section className={styles.guildContinue} aria-label="Continue playing">
                       <div><p className={styles.sectionEyebrow}>PICK UP WHERE YOU LEFT OFF</p><h2>{guildRecentTitle ?? 'Your next adventure starts here'}</h2><p>{guildRecentTitle ? 'Your last launch is saved on this device. Open the library to continue.' : 'Launch a game and your recent activity will appear here on this device.'}</p></div>
-                      <button type="button" onClick={() => setGuildPage('arcade')}><Play size={16} /> {guildRecentTitle ? 'Continue playing' : 'Explore games'}</button>
+                      <button type="button" onClick={() => { setGuildAutoLaunchRecent(Boolean(guildRecentTitle)); setGuildPage('arcade'); }}><Play size={16} /> {guildRecentTitle ? 'Continue playing' : 'Explore games'}</button>
                     </section>
                     <div className={styles.guildHomeSectionHead}><div><p className={styles.sectionEyebrow}>QUICK ACCESS</p><h2>Jump back in</h2></div><span>Touch · keyboard · controller</span></div>
                     <div className={styles.guildDestinationGrid}>
@@ -386,7 +387,7 @@ export function AppWorkspace() {
                       <button type="button" onClick={() => setGuildPage('today')}><span>07 · SANCTUARY</span><strong>Return to Sanctuary</strong><small>Community, messages, profile, planner and settings.</small></button>
                     </div>
                   </main>
-                ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub /></div>
+                ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub autoLaunchRecent={guildAutoLaunchRecent} /></div>
                 : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
                 : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /></div>
                 : ['music', 'photos', 'tools'].some((page) => page === guildPage) ? null
