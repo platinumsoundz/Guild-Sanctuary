@@ -371,7 +371,7 @@ export function AppWorkspace() {
   return (
     <MotionConfig reducedMotion="user">
       <ResponsiveShell>
-        {activeNavigation === 'guild' && canUseGuild ? (
+        {activeNavigation === 'guild' ? (canUseGuild ? (
           <div className={styles.guildExperience} data-world="guild">
             <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
             <motion.div className={styles.guildWorldContent}>
@@ -417,7 +417,7 @@ export function AppWorkspace() {
               <GuildCompanionHub view={guildPage === 'library' || guildPage === 'music' || guildPage === 'photos' || guildPage === 'tools' ? guildPage : 'all'} hidden={!(['library', 'music', 'photos', 'tools'] as GuildPage[]).includes(guildPage)} />
             </motion.div>
           </div>
-        ) : (
+        ) : authenticatedContent) : (
           <div className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`} data-world="sanctuary" style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}>
         <Navigation
           activeNavigation={activeNavigation}
