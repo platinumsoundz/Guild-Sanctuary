@@ -733,3 +733,11 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Still blocked:** #191 moderation queue and #199 role management require a live-schema reconciliation because public.get_moderation_queue() is absent, plus independent review of role hierarchy, self-targeting, concurrency and action authorization. No production SQL/migrations or permission changes have been applied.
 - **Superseded and closed:** #210, #213, #214, #215, #216, #220, #222 and #192. Their relevant work was either rebuilt on current main or superseded by the strengthened #224 contract.
 - **No production deployment, live database write, payment/provider/secret change, or token-spending enablement is claimed by this reconciliation.
+
+
+## Moderation dashboard integration gate — 2026-10-29
+
+- Rebuilt the content-preview and role-sensitive moderation UI directly on current main, with visible queue failures and required action rationales.
+- The live database audit found public.get_moderation_queue() absent. The client contract and TypeScript type do not create that RPC or make the queue usable by themselves.
+- Keep this PR draft until a reviewed migration defines the queue RPC and independent security review covers action authorization, role hierarchy, self-targeting, concurrent role changes and pending-report state.
+- No SQL migration or live database change is included or applied in this UI batch.
