@@ -90,3 +90,72 @@
 .error {
   color: #9b3131;
 }
+
+.contentPreview {
+  display: grid;
+  gap: 0.6rem;
+  border: 1px solid #cbd8cc;
+  border-left: 4px solid #78957d;
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+  background: #f5f8f5;
+  overflow-wrap: anywhere;
+}
+
+.contentHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.contentPreview h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.contentBody {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+}
+
+.contentMeta,
+.mediaLink {
+  margin: 0;
+  color: #69776d;
+  font-size: 0.82rem;
+}
+
+.mediaLink a {
+  color: #315f3d;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.statePill {
+  border-radius: 999px;
+  background: #e2e9e2;
+  color: #344b3b;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.authorPanel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  border-top: 1px solid #e0e7e0;
+  padding-top: 0.65rem;
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.rationale small {
+  color: #69776d;
+  line-height: 1.4;
+}
