@@ -342,7 +342,7 @@ export function MeetupCalendarPlaceholder() {
                     <span className={styles.locationText}>
                       <MapPin size={13} aria-hidden="true" />
                       {getMapLinks(String(event.locationCoords.latitude), String(event.locationCoords.longitude))
-                        ? `Map pin available · ${event.locationCoords.latitude.toFixed(3)}, ${event.locationCoords.longitude.toFixed(3)}`
+                        ? 'Map location available · Open the map to view this venue'
                         : 'Location unavailable · coordinates are missing or invalid'}
                     </span>
                     <span className={styles.attendeeCount}>{event.rsvpCount} going</span>
