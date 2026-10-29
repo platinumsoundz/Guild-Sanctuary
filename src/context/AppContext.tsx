@@ -201,7 +201,8 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       permissions: [],
     };
     setCurrentUser(guestSession);
-    setActiveNavigation('feed');
+    // Start guests on the public welcome page instead of an account-oriented feed.
+    setActiveNavigation('today');
     setSessionError(null);
   };
 
