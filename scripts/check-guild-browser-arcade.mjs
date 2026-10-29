@@ -62,8 +62,24 @@ assert.match(gamesHub, /<GuildConsolePlayer title=\{activeGame\.title\} url=\{ac
 assert.match(gamesHub, /Launch in Guild/, 'the library labels in-hub game launches clearly');
 assert.match(consolePlayer, /requestFullscreen\(\)/, 'console player requests browser fullscreen');
 assert.match(consolePlayer, /Exit to Guild home/, 'console overlay offers a visible exit to the library');
-assert.match(consolePlayer, /HOME_BUTTON_CANDIDATES = \[16\]/, 'console player checks the common gamepad Home button mapping');
+assert.match(consolePlayer, /pressed\(16\)/, 'console player checks the common gamepad Home button mapping');
 assert.match(consolePlayer, /setMenuOpen\(\(open\) => !open\)/, 'controller Home/Guide opens or closes the system overlay');
 assert.match(consolePlayer, /Game and controller settings/, 'system overlay exposes controller and game settings');
 assert.match(consolePlayer, /data-guild-audio/, 'audio controls are scoped to explicitly Guild-managed media');
-assert.match(consolePlayer, /cannot mute audio produced inside this cross-origin game iframe/, 'cross-origin iframe audio limits are communicated honestly');
+assert.match(consolePlayer, /cannot control sound inside this cross-origin game iframe/, 'cross-origin iframe audio limits are communicated honestly');
+
+assert.match(consolePlayer, /data-guild-action/, 'system menu actions share a semantic focus model');
+assert.match(consolePlayer, /moveMenuFocus/, 'directional inputs move focus through the console menu');
+assert.match(consolePlayer, /activateFocused/, 'virtual A/Select invokes the focused menu action');
+assert.match(consolePlayer, /const goBack/, 'virtual B/Back closes settings or returns from the menu');
+assert.match(consolePlayer, /Navigate up/, 'touch D-pad is rendered with accessible directional controls');
+assert.match(consolePlayer, /A button, select or confirm/, 'virtual A button is accessible');
+assert.match(consolePlayer, /B button, back or cancel/, 'virtual B button is accessible');
+assert.match(consolePlayer, /controlsVisible/, 'quick console controls can be hidden');
+assert.match(consolePlayer, /ArrowDown/, 'keyboard arrow navigation is supported');
+assert.match(consolePlayer, /pressed\(0\)/, 'physical A/confirm is supported');
+assert.match(consolePlayer, /pressed\(1\)/, 'physical B/back is supported');
+const consoleCss = readFileSync('src/components/GuildConsolePlayer.module.css', 'utf8');
+assert.match(consoleCss, /\.virtualControls/, 'touch navigation control surface has styling');
+assert.match(consoleCss, /touch-action:manipulation/, 'touch controls reduce delayed gesture handling');
+assert.match(consoleCss, /orientation:landscape/, 'console overlay adapts to landscape mobile screens');
