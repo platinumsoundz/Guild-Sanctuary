@@ -772,3 +772,11 @@ Two connected Supabase projects were inspected read-only: `kchrskkchoyqweowskxv`
 - Responsive layout: four launcher columns on wide screens, two on tablets, and stacked touch-friendly cards on narrow phones. Motion is disabled when the member requests reduced motion.
 - Extend the existing Today contract to cover all launcher destinations, semantic section labels, responsive breakpoints and reduced-motion behaviour. The existing `check:today-dashboard` package script remains the contract entry point.
 - **Release boundary:** this is a feature branch, not a production deployment. Exact-head CI, typecheck/build, and screenshot checks must pass; desktop/tablet/phone interaction review remains required before merge. This batch does not change authentication, database schema, payment settings, role assignments or token spending.
+
+
+## Guild phone navigation and touch controls — 2026-10-29
+
+- **Fix branch / PR #254:** correct the mobile console shell where fixed-position navigation overlays and touch controls were nested inside a sticky, blurred header. Render the drawer, Quick Menu, and touch-control cluster as viewport-level siblings so phone positioning is based on the viewport rather than the header.
+- Keep the Guild navigation drawer and Quick Menu above the Sanctuary mobile bottom bar; place the D-pad plus A/Select and B/Back controls above the bottom navigation while respecting safe-area insets.
+- Show touch navigation controls by default on narrow phone layouts, with the existing Hide controls toggle retained. Compress the toolbar at widths below 420px and hide nonessential text below 370px to prevent horizontal crowding.
+- **Release status:** PR #254 is open; changes are not merged or confirmed live. Vercel reported the free daily deployment limit. Exact-head CI/build and physical Android verification remain required. Check 320px, 360px, 390px and 430px widths, including drawer, Quick Menu, notifications, bottom navigation and touch controls.
