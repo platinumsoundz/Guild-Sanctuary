@@ -31,7 +31,8 @@
     "check:comment-actions": "node scripts/check-community-comment-actions.mjs",
     "check:roadmaps": "node scripts/check-roadmaps.mjs",
     "check:short-engagement-rpc": "node scripts/check-short-engagement-rpc.mjs",
-    "check:shorts-full-size": "node scripts/check-shorts-full-size.mjs"
+    "check:shorts-full-size": "node scripts/check-shorts-full-size.mjs",
+    "check:guest-access": "node scripts/check-guest-access.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
