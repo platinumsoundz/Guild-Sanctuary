@@ -76,7 +76,7 @@ export function GamesHub() {
                 <button type="button" className={styles.playButton} onClick={() => setActiveGame(game)} disabled={!game.url} aria-label={!game.url ? 'The 5 Sleeves 2D launch is waiting for its verified host URL' : `Launch ${game.title} inside The Guild`}><Play size={16} /> {game.url ? 'Launch in Guild' : 'Host URL needed'}</button>
                 {game.url && <a href={game.url} target="_blank" rel="noopener noreferrer" className={styles.externalLink}>Open separately <ExternalLink size={14} /></a>}
               </div>
-              {!game.url && <p className={styles.hint}>The verified Render URL is not configured in this build. The hub will not guess the production address.</p>}
+              {!game.url && <p className={styles.hint}>The verified 2D client URL is not configured in this build. Follow the 3D static-hosting pattern where possible; the hub will not guess a production address.</p>}
             </div>
           </article>
         ))}
