@@ -345,14 +345,13 @@ export function AppWorkspace() {
                     <p className={styles.sectionDescription}>A focused home for your games, music, memories and the Sanctuary spaces you already use. Open the menu at the top left to move between them.</p>
                     <div className={styles.guildDestinationGrid}>
                       <button type="button" onClick={() => setGuildPage('arcade')}><span>01 · PLAY</span><strong>Game Library</strong><small>Launch The 5 Sleeves and browser games.</small></button>
-                      <button type="button" onClick={() => setGuildPage('trials')}><span>02 · PLAY</span><strong>Guild Trials</strong><small>Play the original Orbital Drift and Comet Dodge arcade games.</button>
-                      <button type="button" onClick={() => setGuildPage('library')}><span>03 · COLLECT</span><strong>Game library</strong><small>The 5 Sleeves first, then your saved games.</small></button>
-                      <button type="button" onClick={() => setGuildPage('music')}><span>04 · LISTEN</span><strong>Music player</strong><small>Play audio files selected from this device.</small></button>
-                      <button type="button" onClick={() => setGuildPage('photos')}><span>05 · REMEMBER</span><strong>Photo slideshow</strong><small>Build a private, in-browser slideshow.</small></button>
-                      <button type="button" onClick={() => setGuildPage('tools')}><span>06 · EXPLORE</span><strong>Guild tools</strong><small>Cloud Lab status and gaming destinations.</small></button>
-                      <button type="button" onClick={() => setGuildPage('today')}><span>07 · SANCTUARY</span><strong>All your Sanctuary pages</strong><small>Community, messages, profile, planner, settings and more.</small></button>
-                    </div>
-                  </main>
+                      <button type="button" onClick={() => setGuildPage('trials')}><span>02 · PLAY</span><strong>Guild Trials</strong><small>Play the original Orbital Drift and Comet Dodge arcade games.</small></button>
+                      <button type="button" onClick={() => setGuildPage('library')}><span>03 · COLLECT</span><strong>My Game Collection</strong><small>Save and organize your personal game catalogue.</small></button>
+                      <button type="button" onClick={() => setGuildPage('music')}><span>04 · LISTEN</span><strong>Music Player</strong><small>Play audio files selected from this device.</small></button>
+                      <button type="button" onClick={() => setGuildPage('photos')}><span>05 · REMEMBER</span><strong>Photo Slideshow</strong><small>Build a private, in-browser slideshow.</small></button>
+                      <button type="button" onClick={() => setGuildPage('tools')}><span>06 · EXPLORE</span><strong>Guild Tools</strong><small>Cloud Lab status and gaming destinations.</small></button>
+                      <button type="button" onClick={() => setGuildPage('today')}><span>07 · SANCTUARY</span><strong>All Sanctuary Pages</strong><small>Community, messages, profile, planner, settings and more.</small></button>
+                    </div>                  </main>
                 ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub /></div>
                 : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
                 : guildPage === 'library' ? <div className={styles.guildSection}><GuildCompanionHub view="library" /></div>
