@@ -8,6 +8,7 @@ const hook = read('../src/modules/messages/useDirectMessages.ts');
 const inbox = read('../src/modules/messages/MessagesInbox.tsx');
 const thread = read('../src/modules/messages/DirectMessageThread.tsx');
 const privacyNotice = read('../src/modules/messages/MessagePrivacyNotice.tsx');
+const readme = read('../src/modules/messages/README.md');
 const encryptionPlan = read('../docs/design/END_TO_END_ENCRYPTION_READINESS.md');
 
 const migration = read('../supabase/migrations/20261027001557_restore_secure_persistent_messaging.sql');
@@ -72,6 +73,12 @@ checks.push(
   ['message sending is blocked while the rendered thread key is stale', /messagesThreadKey !== threadKey \|\| !sendingConversationId/.test(hook)],
   ['inbox hides prior-account conversations synchronously until the new session reset runs', /const sessionReady = sessionUserId === currentUserId/.test(inbox) && /const visibleConversations = sessionReady \? conversations : \[\]/.test(inbox) && /!sessionReady \|\| isLoading/.test(inbox)],
   ['inbox hides prior-account member selections and search results during account transitions', /const visibleSelectedMembers = sessionReady \? selectedMembers : \[\]/.test(inbox) && /sessionReady && results\.length > 0/.test(inbox) && /if \(!sessionReady \|\| isCreatingGroup/.test(inbox)],
+);
+
+checks.push(
+  ['active message threads recover missed Realtime events while visible', /window\.setInterval\(refreshWhenVisible, 15_000\)/.test(hook) && /document\.addEventListener\('visibilitychange', refreshWhenVisible\)/.test(hook)],
+  ['message inbox refreshes for conversations created on another device', /window\.setInterval\(refreshWhenVisible, 30_000\)/.test(inbox) && /document\.addEventListener\('visibilitychange', refreshWhenVisible\)/.test(inbox)],
+  ['messaging documentation accurately describes conditional durable mode and demo-only memory', /NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES=true/.test(readme) && /device-session-only/.test(readme) && /two real accounts/.test(readme)],
 );
 
 for (const [label, passed] of checks) {
