@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 const migration = read('../supabase/migrations/20261027144338_grant_account_settings_write_permissions.sql');
+const recoveryMigration = read('../supabase/migrations/20261029025110_restore_account_settings_authenticated_writes.sql');
 const service = read('../src/modules/settings/service.ts');
 const hook = read('../src/modules/settings/useAccountSettings.ts');
 
