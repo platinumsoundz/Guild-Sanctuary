@@ -1,0 +1,299 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getSupabaseBrowserClient } from '@/services/supabase';
+
+type CallKind = 'audio' | 'video';
+type CallStatus = 'idle' | 'ringing' | 'calling' | 'connecting' | 'connected' | 'ended' | 'error';
+type Signal =
+  | { type: 'invite'; callId: string; from: string; to: string; kind: CallKind }
+  | { type: 'accept'; callId: string; from: string; to: string }
+  | { type: 'decline' | 'hangup'; callId: string; from: string; to: string }
+  | { type: 'offer' | 'answer'; callId: string; from: string; to: string; description: RTCSessionDescriptionInit }
+  | { type: 'candidate'; callId: string; from: string; to: string; candidate: RTCIceCandidateInit };
+
+interface PeerCallOptions {
+  conversationId: string | null;
+  userId: string | null;
+  peerUserId: string | null;
+}
+
+const ICE_SERVERS: RTCIceServer[] = [{ urls: 'stun:stun.l.google.com:19302' }];
+const MAX_PENDING_CANDIDATES = 128;
+const MAX_SEEN_CALL_IDS = 64;
+
+function isValidSignal(value: unknown): value is Signal {
+  if (!value || typeof value !== 'object') return false;
+  const signal = value as Record<string, unknown>;
+  if (typeof signal.callId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(signal.callId)) return false;
+  if (typeof signal.from !== 'string' || typeof signal.to !== 'string' || signal.from === signal.to) return false;
+  if (!['invite', 'accept', 'decline', 'hangup', 'offer', 'answer', 'candidate'].includes(String(signal.type))) return false;
+  if (signal.type === 'invite' && signal.kind !== 'audio' && signal.kind !== 'video') return false;
+  if (signal.type === 'offer' || signal.type === 'answer') {
+    const description = signal.description as Record<string, unknown> | null;
+    if (!description || !['offer', 'answer'].includes(String(description.type)) ||
+        typeof description.sdp !== 'string' || description.sdp.length > 100_000) return false;
+  }
+  if (signal.type === 'candidate') {
+    const candidate = signal.candidate as Record<string, unknown> | null;
+    if (!candidate || typeof candidate.candidate !== 'string' || candidate.candidate.length > 4_096) return false;
+  }
+  return true;
+}
+
+export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOptions) {
+  const [status, setStatus] = useState<CallStatus>('idle');
+  const [kind, setKind] = useState<CallKind>('audio');
+  const [incoming, setIncoming] = useState<{ callId: string; kind: CallKind; from: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [muted, setMuted] = useState(false);
+  const [cameraOff, setCameraOff] = useState(false);
+  const [signallingReady, setSignallingReady] = useState(false);
+  const channelRef = useRef<ReturnType<ReturnType<typeof getSupabaseBrowserClient>['channel']> | null>(null);
+  const pcRef = useRef<RTCPeerConnection | null>(null);
+  const localRef = useRef<MediaStream | null>(null);
+  const remoteRef = useRef<MediaStream | null>(null);
+  const activeCallId = useRef<string | null>(null);
+  const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
+  const seenCallIds = useRef<string[]>([]);
+  const statusRef = useRef<CallStatus>(status);
+  const kindRef = useRef<CallKind>(kind);
+  statusRef.current = status;
+  kindRef.current = kind;
+
+  const send = useCallback(async (signal: Signal) => {
+    const channel = channelRef.current;
+    if (!channel) throw new Error('The secure call-signalling channel is not connected.');
+    const result = await channel.send({ type: 'broadcast', event: 'signal', payload: signal });
+    if (result !== 'ok') throw new Error('Call signalling failed. Check your connection and try again.');
+  }, []);
+
+  const cleanup = useCallback((nextStatus: CallStatus = 'ended') => {
+    pcRef.current?.close();
+    pcRef.current = null;
+    localRef.current?.getTracks().forEach((track) => track.stop());
+    localRef.current = null;
+    remoteRef.current?.getTracks().forEach((track) => track.stop());
+    remoteRef.current = null;
+    setLocalStream(null);
+    setRemoteStream(null);
+    setIncoming(null);
+    setMuted(false);
+    setCameraOff(false);
+    pendingCandidates.current = [];
+    activeCallId.current = null;
+    setStatus(nextStatus);
+  }, []);
+
+  const ensurePeerConnection = useCallback(async (callKind: CallKind, callId: string) => {
+    if (pcRef.current) return pcRef.current;
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error('Microphone/camera access requires a supported browser and a secure HTTPS connection.');
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callKind === 'video' });
+    } catch (cause) {
+      const mediaError = cause as { name?: string };
+      if (mediaError?.name === 'NotAllowedError' || mediaError?.name === 'PermissionDeniedError') {
+        throw new Error('Microphone or camera permission was denied. Allow access in your browser or device settings, then try again.');
+      }
+      if (mediaError?.name === 'NotFoundError' || mediaError?.name === 'DevicesNotFoundError') {
+        throw new Error(callKind === 'video'
+          ? 'A microphone or camera could not be found. Connect or enable a device and try again.'
+          : 'A microphone could not be found. Connect or enable a microphone and try again.');
+      }
+      if (mediaError?.name === 'NotReadableError' || mediaError?.name === 'TrackStartError') {
+        throw new Error('Your microphone or camera is busy in another app. Close other apps using it and try again.');
+      }
+      throw new Error('The microphone or camera could not be started. Check device permissions and try again.');
+    }
+    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    localRef.current = stream;
+    setLocalStream(stream);
+    const remote = new MediaStream();
+    remoteRef.current = remote;
+    setRemoteStream(remote);
+    stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+    pc.ontrack = (event) => {
+      const incomingTracks = event.streams[0]?.getTracks() ?? [event.track];
+      incomingTracks.forEach((track) => {
+        if (!remote.getTracks().some((existing) => existing.id === track.id)) remote.addTrack(track);
+      });
+      setRemoteStream(new MediaStream(remote.getTracks()));
+    };
+    pc.onicecandidate = (event) => {
+      if (event.candidate && userId && peerUserId) {
+        void send({ type: 'candidate', callId, from: userId, to: peerUserId, candidate: event.candidate.toJSON() }).catch((cause) => setError(cause instanceof Error ? cause.message : 'Could not send connection candidate.'));
+      }
+    };
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'connected') setStatus('connected');
+      else if (pc.connectionState === 'connecting') setStatus('connecting');
+      else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+        setError('The direct connection was interrupted. End the call and try again; relay fallback is not configured yet.');
+        if (pc.connectionState === 'failed') cleanup('error');
+      }
+    };
+    pcRef.current = pc;
+    return pc;
+  }, [cleanup, peerUserId, send, userId]);
+
+  useEffect(() => {
+    if (!conversationId || !userId || !peerUserId || !window.isSecureContext) return;
+    let cancelled = false;
+    const channel = getSupabaseBrowserClient().channel(`sanctuary-call:${conversationId}`, {
+      config: { private: true, broadcast: { self: false, ack: true } },
+    });
+    channelRef.current = channel;
+    channel.on('broadcast', { event: 'signal' }, ({ payload }: { payload: Signal }) => {
+      if (cancelled || !isValidSignal(payload) || payload.to !== userId || payload.from !== peerUserId) return;
+      if (payload.type === 'invite') {
+        if (seenCallIds.current.includes(payload.callId)) return;
+        if (statusRef.current === 'connected' || statusRef.current === 'calling' || statusRef.current === 'connecting' || statusRef.current === 'ringing') return;
+        seenCallIds.current = [...seenCallIds.current, payload.callId].slice(-MAX_SEEN_CALL_IDS);
+        activeCallId.current = payload.callId;
+        kindRef.current = payload.kind;
+        setKind(payload.kind);
+        setIncoming({ callId: payload.callId, kind: payload.kind, from: payload.from });
+        setStatus('ringing');
+        setError(null);
+        return;
+      }
+      if (!activeCallId.current || payload.callId !== activeCallId.current) return;
+      if (payload.type === 'decline' || payload.type === 'hangup') {
+        cleanup('ended');
+        return;
+      }
+      if (payload.type === 'accept') {
+        if (statusRef.current !== 'calling' || !userId || !peerUserId) return;
+        void (async () => {
+          try {
+            const pc = await ensurePeerConnection(kindRef.current, payload.callId);
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            await send({ type: 'offer', callId: payload.callId, from: userId, to: peerUserId, description: offer });
+            setStatus('connecting');
+          } catch (cause) {
+            setError(cause instanceof Error ? cause.message : 'Could not start the call.');
+            cleanup('error');
+          }
+        })();
+        return;
+      }
+      void (async () => {
+        try {
+          if (payload.type === 'offer') {
+            const pc = await ensurePeerConnection(kindRef.current, payload.callId);
+            await pc.setRemoteDescription(payload.description);
+            for (const candidate of pendingCandidates.current.splice(0)) await pc.addIceCandidate(candidate);
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            await send({ type: 'answer', callId: payload.callId, from: userId, to: peerUserId, description: answer });
+            setStatus('connecting');
+          } else if (payload.type === 'answer' && pcRef.current) {
+            await pcRef.current.setRemoteDescription(payload.description);
+            for (const candidate of pendingCandidates.current.splice(0)) await pcRef.current.addIceCandidate(candidate);
+          } else if (payload.type === 'candidate') {
+            if (pcRef.current?.remoteDescription) await pcRef.current.addIceCandidate(payload.candidate);
+            else if (pendingCandidates.current.length < MAX_PENDING_CANDIDATES) pendingCandidates.current.push(payload.candidate);
+          }
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : 'Call connection negotiation failed.');
+          cleanup('error');
+        }
+      })();
+    });
+    channel.subscribe((state) => {
+      setSignallingReady(state === 'SUBSCRIBED');
+      if (state === 'CHANNEL_ERROR' || state === 'TIMED_OUT' || state === 'CLOSED') {
+        setError('Call signalling is unavailable. Verify the private-channel authorization migration is applied.');
+      }
+    });
+    return () => {
+      cancelled = true;
+      setSignallingReady(false);
+      void getSupabaseBrowserClient().removeChannel(channel);
+      if (channelRef.current === channel) channelRef.current = null;
+      cleanup('idle');
+    };
+  // Refs keep latest status/kind without tearing down an active connection.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, userId, peerUserId]);
+
+  useEffect(() => {
+    if (status !== 'calling' && status !== 'ringing') return;
+    const timeout = window.setTimeout(() => {
+      cleanup('ended');
+      setError(status === 'calling' ? 'No answer. Try again when the other person is available.' : 'The incoming call expired.');
+    }, 45_000);
+    return () => window.clearTimeout(timeout);
+  }, [cleanup, status]);
+
+  const startCall = useCallback(async (callKind: CallKind) => {
+    if (!signallingReady) { setError('Call signalling is not ready yet. Keep this conversation open and try again in a moment.'); return; }
+    if (!conversationId || !userId || !peerUserId) {
+      setError('Open a persistent direct conversation with a signed-in account before calling.');
+      return;
+    }
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      setError('Calls require HTTPS and a browser with microphone/camera support.');
+      return;
+    }
+    if (statusRef.current === 'calling' || statusRef.current === 'ringing' || statusRef.current === 'connecting' || statusRef.current === 'connected') return;
+    const callId = crypto.randomUUID();
+    activeCallId.current = callId;
+    setKind(callKind);
+    setStatus('calling');
+    setError(null);
+    try {
+      await send({ type: 'invite', callId, from: userId, to: peerUserId, kind: callKind });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not send call invitation.');
+      cleanup('error');
+    }
+  }, [cleanup, conversationId, peerUserId, send, signallingReady, status, userId]);
+
+  const acceptCall = useCallback(async () => {
+    if (!incoming || !userId || !peerUserId) return;
+    try {
+      const callId = incoming.callId;
+      await ensurePeerConnection(incoming.kind, callId);
+      setIncoming(null);
+      setStatus('connecting');
+      await send({ type: 'accept', callId, from: userId, to: peerUserId });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not accept call.');
+      cleanup('error');
+    }
+  }, [cleanup, ensurePeerConnection, incoming, peerUserId, send, userId]);
+
+  const declineCall = useCallback(async () => {
+    if (incoming && userId && peerUserId) {
+      try { await send({ type: 'decline', callId: incoming.callId, from: userId, to: peerUserId }); } catch { /* local cleanup still required */ }
+    }
+    cleanup('ended');
+  }, [cleanup, incoming, peerUserId, send, userId]);
+
+  const endCall = useCallback(async () => {
+    const callId = activeCallId.current;
+    if (callId && userId && peerUserId) {
+      try { await send({ type: 'hangup', callId, from: userId, to: peerUserId }); } catch { /* tear down locally even offline */ }
+    }
+    cleanup('ended');
+  }, [cleanup, peerUserId, send, userId]);
+
+  const toggleMute = useCallback(() => {
+    const next = !muted;
+    localRef.current?.getAudioTracks().forEach((track) => { track.enabled = !next; });
+    setMuted(next);
+  }, [muted]);
+
+  const toggleCamera = useCallback(() => {
+    const next = !cameraOff;
+    localRef.current?.getVideoTracks().forEach((track) => { track.enabled = !next; });
+    setCameraOff(next);
+  }, [cameraOff]);
+
+  return { status, kind, incoming, error, localStream, remoteStream, muted, cameraOff, signallingReady, startCall, acceptCall, declineCall, endCall, toggleMute, toggleCamera };
+}

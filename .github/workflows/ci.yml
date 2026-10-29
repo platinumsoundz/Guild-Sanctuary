@@ -31,6 +31,7 @@ jobs:
       - run: npm run check:auth
       - run: npm run check:account-settings
       - run: npm run check:messages
+      - run: npm run check:calling
       - run: npm run check:self-discovery
       - run: npm run check:daily-reflection
       - run: npm run check:navigation

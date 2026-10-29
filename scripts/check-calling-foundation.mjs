@@ -1,0 +1,38 @@
+import { readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
+
+const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
+const controls = read('../src/modules/messages/CallControls.tsx');
+const hook = read('../src/modules/messages/usePeerCall.ts');
+const thread = read('../src/modules/messages/DirectMessageThread.tsx');
+const migration = read('../supabase/migrations/20261029000000_add_private_call_signalling_policies.sql');
+const plan = read('../docs/design/PEER_TO_PEER_CALLING_FOUNDATION.md');
+
+assert.match(controls, /Audio call/);
+assert.match(controls, /Video call/);
+assert.match(controls, /call\.startCall\('audio'\)/);
+assert.match(controls, /call\.startCall\('video'\)/);
+assert.match(controls, /Accept/);
+assert.match(controls, /Decline/);
+assert.match(controls, /End call/);
+assert.match(hook, /RTCPeerConnection/);
+assert.match(hook, /getUserMedia/);
+assert.match(hook, /setLocalDescription/);
+assert.match(hook, /setRemoteDescription/);
+assert.match(hook, /candidate/);
+assert.match(hook, /private: true/);
+assert.match(hook, /isValidSignal/);
+assert.match(hook, /Microphone or camera permission was denied/);
+assert.match(hook, /A microphone could not be found/);
+assert.match(hook, /MAX_PENDING_CANDIDATES/);
+assert.match(hook, /MAX_SEEN_CALL_IDS/);
+assert.match(hook, /seenCallIds\.current\.includes/);
+assert.match(thread, /conversationId={activeConversationId}/);
+assert.match(migration, /for select\s+to authenticated/i);
+assert.match(migration, /for insert\s+to authenticated/i);
+assert.match(migration, /public\.is_active_conversation_member/);
+assert.equal((migration.match(/c\.kind = 'direct'/g) ?? []).length, 2, 'both read and write policies must restrict call topics to direct conversations');
+assert.match(plan, /database\/channel authorization tied to the authenticated conversation membership/);
+assert.match(plan, /two-account\/two-device tests pass/);
+assert.match(plan, /Do not record calls or create call history by default/);
+console.log('Calling contract passed: UI, WebRTC lifecycle, bounded signal validation/replay protection, and private-channel authorization migration present.');

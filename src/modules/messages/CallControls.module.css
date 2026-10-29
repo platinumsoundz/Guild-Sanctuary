@@ -1,0 +1,110 @@
+.callControls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.callActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.callActions button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-raised);
+  color: var(--muted);
+  font: 700 11px Arial, sans-serif;
+  cursor: pointer;
+}
+
+.callActions button span {
+  font-size: 14px;
+}
+
+.callControls p {
+  margin: 0;
+  color: var(--muted);
+  font: 11px/1.5 Arial, sans-serif;
+}
+
+.callActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.callActions button:not(:disabled):hover {
+  border-color: var(--accent);
+}
+
+.incomingCall,
+.liveCall {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.videoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.videoGrid video {
+  width: 100%;
+  max-height: 280px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #111;
+  border-radius: 8px;
+}
+
+.callError {
+  color: var(--danger, #b42318) !important;
+}
+
+.callPrivacy {
+  opacity: 0.75;
+}
+
+.callActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.callActions button:not(:disabled):hover { border-color: var(--accent); }
+.incomingCall, .liveCall {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.videoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.videoGrid video {
+  width: 100%;
+  max-height: 280px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #111;
+  border-radius: 8px;
+}
+.callError { color: var(--danger, #b42318) !important; }
+.callPrivacy { opacity: 0.75; }
