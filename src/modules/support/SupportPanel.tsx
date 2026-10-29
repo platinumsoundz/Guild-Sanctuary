@@ -120,12 +120,12 @@ export function SupportPanel() {
                 Choose an amount with Stripe
               </a>
               <p className={styles.providerNote}>
-                Voluntary contributions do not purchase tokens or grant account perks.
+                A verified contribution grants VIP to the Sanctuary account used at checkout. No tokens are included.
               </p>
             </section>
           )}
           {!options.stripeDonationUrl && (
-            <p className={styles.status} role="status">External contribution links are disabled in this deployment.</p>
+            <p className={styles.status} role="status">Account-linked contributions are not configured in this deployment.</p>
           )}
 
           {options.lemonSqueezyCheckoutUrl && (
@@ -182,10 +182,7 @@ export function SupportPanel() {
       )}
 
       <p className={styles.privacy}>
-        Contributions are optional and do not affect community visibility. External payment providers process
-        transactions under their own terms. Voluntary contributions are not linked to your account; digital
-        purchases do not grant in-app entitlements until that service is implemented. We do not use behavioral
-        advertising.
+        Contributions are optional. Verified Stripe contributions grant VIP to the account used to sign in at checkout; they do not purchase tokens. External payment providers process transactions under their own terms. VIP access is applied only after the signed payment webhook is verified. We do not use behavioral advertising.
       </p>
     </section>
   );
