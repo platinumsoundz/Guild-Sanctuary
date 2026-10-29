@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Home, Gamepad2, Library, Music2, Image as ImageIcon, Settings, Newspaper, Search,
   MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard, Map,
-  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check
+  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
