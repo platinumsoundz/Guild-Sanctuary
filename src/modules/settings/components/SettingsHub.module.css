@@ -234,3 +234,50 @@
 @media (prefers-reduced-motion: reduce) {
   .primaryButton { transition: none; }
 }
+
+
+.guildAccessRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 10px;
+}
+.guildAccessRow .toggleRow { min-width: 0; }
+.launchGuildButton {
+  display: inline-flex;
+  min-width: 116px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 72%, var(--line));
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent, #10131a);
+  font: 700 13px/1.2 system-ui, sans-serif;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.launchGuildButton:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.launchGuildButton:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.launchGuildButton:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+@media (max-width: 520px) {
+  .guildAccessRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .launchGuildButton {
+    width: 100%;
+    min-height: 52px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .launchGuildButton { transition: none; }
+}
