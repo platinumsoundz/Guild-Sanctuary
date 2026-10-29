@@ -34,3 +34,8 @@ console.log('Navigation contract checks passed.');
 assert.doesNotMatch(navigation.slice(navigation.indexOf('const navigationItems'), navigation.indexOf('const navigationGroups')), /id: 'guild'|id: 'guild-roadmap'|Guild Arcade|Guild Roadmap/, 'hidden Guild console and its roadmap are not exposed in the Sanctuary page selector');
 assert.doesNotMatch(navigation.slice(navigation.indexOf('const navigationGroups'), navigation.indexOf('interface NavigationProps')), /label: 'Guild'|items: \['guild'|guild-roadmap/, 'Sanctuary selector has no Guild navigation group');
 console.log('Hidden Guild selector contract passed.');
+
+assert.match(navigation, /const restrictedNavigationIds: NavigationState\[\] = \['wallet', 'games', 'shop', 'shorts'\]/, 'Wallet, Cosmic Arcade, Token Shop and Shorts are restricted navigation destinations');
+assert.match(navigation, /\['vip', 'moderator', 'admin', 'developer', 'owner'\]\.includes\(role\)/, 'only VIP and higher roles can see restricted destinations');
+assert.match(navigation, /if \(restrictedNavigationIds\.includes\(item\.id\)\) return canAccessMemberExtras/, 'basic users do not see restricted destinations in the drawer');
+
