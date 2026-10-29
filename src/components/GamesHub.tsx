@@ -1,12 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { Copy, ExternalLink, Gamepad2, Play, ShieldCheck } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, Clock3, Copy, ExternalLink, Gamepad2, Heart, Play, Search, ShieldCheck, Sparkles } from 'lucide-react';
 import { GuildConsolePlayer } from './GuildConsolePlayer';
 import styles from './GamesHub.module.css';
 
 type GameId = 'sleeves2d' | 'sleeves3d';
 type GameEntry = { id: GameId; title: string; description: string; genre: string; url: string | null; badge: string; embed: 'supported' | 'verify' };
+type LaunchRecord = { id: GameId; at: number };
+type LibraryFilter = 'all' | 'ready' | 'favourites';
+const RECENTS_KEY = 'guild-library-recents-v1';
+const FAVOURITES_KEY = 'guild-library-favourites-v1';
 
 const games: GameEntry[] = [
   {
@@ -32,6 +36,47 @@ const games: GameEntry[] = [
 export function GamesHub() {
   const [activeGame, setActiveGame] = useState<GameEntry | null>(null);
   const [copiedServer, setCopiedServer] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<LibraryFilter>('all');
+  const [recentLaunches, setRecentLaunches] = useState<LaunchRecord[]>([]);
+  const [favourites, setFavourites] = useState<GameId[]>([]);
+  const [libraryReady, setLibraryReady] = useState(false);
+
+  useEffect(() => {
+    try {
+      const recentValue = window.localStorage.getItem(RECENTS_KEY);
+      const favouriteValue = window.localStorage.getItem(FAVOURITES_KEY);
+      if (recentValue) {
+        const parsed = JSON.parse(recentValue) as LaunchRecord[];
+        if (Array.isArray(parsed)) setRecentLaunches(parsed.filter((item) => item && games.some((game) => game.id === item.id) && Number.isFinite(item.at)).slice(0, 8));
+      }
+      if (favouriteValue) {
+        const parsed = JSON.parse(favouriteValue) as GameId[];
+        if (Array.isArray(parsed)) setFavourites(parsed.filter((id): id is GameId => games.some((game) => game.id === id)));
+      }
+    } catch { /* Preferences are optional; malformed local data must not block the library. */ }
+    finally { setLibraryReady(true); }
+  }, []);
+
+  const rememberLaunch = (game: GameEntry) => {
+    const next = [{ id: game.id, at: Date.now() }, ...recentLaunches.filter((item) => item.id !== game.id)].slice(0, 8);
+    setRecentLaunches(next);
+    try { window.localStorage.setItem(RECENTS_KEY, JSON.stringify(next)); } catch { /* Launching remains available when storage is blocked. */ }
+  };
+
+  const toggleFavourite = (id: GameId) => {
+    const next = favourites.includes(id) ? favourites.filter((item) => item !== id) : [...favourites, id];
+    setFavourites(next);
+    try { window.localStorage.setItem(FAVOURITES_KEY, JSON.stringify(next)); } catch { /* Keep in-memory preferences usable. */ }
+  };
+
+  const filteredGames = useMemo(() => games.filter((game) => {
+    const needle = query.trim().toLowerCase();
+    const matchesQuery = !needle || [game.title, game.description, game.genre, game.badge].some((value) => value.toLowerCase().includes(needle));
+    const matchesFilter = filter === 'all' || (filter === 'ready' && Boolean(game.url)) || (filter === 'favourites' && favourites.includes(game.id));
+    return matchesQuery && matchesFilter;
+  }), [query, filter, favourites]);
+  const recentGames = recentLaunches.map((record) => games.find((game) => game.id === record.id)).filter((game): game is GameEntry => Boolean(game));
   const copyServerAddress = async (address: string) => {
     try { await navigator.clipboard.writeText(address); setCopiedServer(address); }
     catch { setCopiedServer(null); }
@@ -63,17 +108,31 @@ export function GamesHub() {
         <span className={styles.libraryHint}>Hidden entry · shared Sanctuary identity and theme</span>
       </section>
 
+      <section className={styles.libraryControls} aria-label="Search and filter your game library">
+        <label className={styles.searchBox}><Search size={18} aria-hidden="true" /><span className={styles.visuallyHidden}>Search games</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search your games…" />{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search">×</button>}</label>
+        <div className={styles.filterRow} role="group" aria-label="Filter game library">
+          <button type="button" className={filter === "all" ? styles.filterActive : styles.filterButton} aria-pressed={filter === "all"} onClick={() => setFilter("all")}><Gamepad2 size={14} />All games</button>
+          <button type="button" className={filter === "ready" ? styles.filterActive : styles.filterButton} aria-pressed={filter === "ready"} onClick={() => setFilter("ready")}><Check size={14} />Ready to play</button>
+          <button type="button" className={filter === "favourites" ? styles.filterActive : styles.filterButton} aria-pressed={filter === "favourites"} onClick={() => setFilter("favourites")}><Heart size={14} />Favourites</button>
+          <span className={styles.resultCount}>{filteredGames.length} {filteredGames.length === 1 ? "game" : "games"}</span>
+        </div>
+      </section>
+      {recentGames.length > 0 && filter !== "favourites" && !query.trim() && <section className={styles.recentSection} aria-labelledby="guild-recent-heading">
+        <div className={styles.rowHeading}><div><p className={styles.eyebrow}>PICK UP WHERE YOU LEFT OFF</p><h2 id="guild-recent-heading"><Clock3 size={19} /> Recently played</h2></div><span>Saved on this device</span></div>
+        <div className={styles.recentRow}>{recentGames.map((game) => <article className={styles.recentCard} key={game.id}><div className={styles.recentOrb}><Gamepad2 size={22} /></div><div className={styles.recentCopy}><strong>{game.title}</strong><small>{game.url ? "Ready to launch" : "Host URL needed"}</small></div><button type="button" className={styles.recentPlay} disabled={!game.url} onClick={() => { rememberLaunch(game); setActiveGame(game); }} aria-label="Continue playing game"><Play size={15} /></button></article>)}</div>
+      </section>}
+
       <section className={styles.grid} aria-label="Guild game library">
-        {games.map((game) => (
+        {filteredGames.map((game) => (
           <article className={styles.card} key={game.id}>
-            <div className={styles.art} aria-hidden="true"><Gamepad2 size={44} strokeWidth={1.2} /></div>
+            <div className={styles.art} aria-hidden="true"><Gamepad2 size={44} strokeWidth={1.2} /><span className={styles.artCaption}>{game.url ? "READY TO PLAY" : "SETUP REQUIRED"}</span><button type="button" className={styles.favouriteButton} aria-pressed={favourites.includes(game.id)} aria-label="Toggle favourite" onClick={() => toggleFavourite(game.id)}><Heart size={18} fill={favourites.includes(game.id) ? "currentColor" : "none"} /></button></div>
             <div className={styles.cardBody}>
               <span className={styles.gameBadge}>{game.badge}</span>
               <h2>{game.title}</h2>
               <p className={styles.genre}>{game.genre}</p>
               <p className={styles.description}>{game.description}</p>
               <div className={styles.cardActions}>
-                <button type="button" className={styles.playButton} onClick={() => setActiveGame(game)} disabled={!game.url} aria-label={!game.url ? 'The 5 Sleeves 2D launch is waiting for its verified host URL' : `Launch ${game.title} inside The Guild`}><Play size={16} /> {game.url ? 'Launch in Guild' : 'Host URL needed'}</button>
+                <button type="button" className={styles.playButton} onClick={() => { rememberLaunch(game); setActiveGame(game); }} disabled={!game.url} aria-label={!game.url ? 'The 5 Sleeves 2D launch is waiting for its verified host URL' : `Launch ${game.title} inside The Guild`}><Play size={16} /> {game.url ? 'Launch in Guild' : 'Host URL needed'}</button>
                 {game.url && <a href={game.url} target="_blank" rel="noopener noreferrer" className={styles.externalLink}>Open separately <ExternalLink size={14} /></a>}
               </div>
               {!game.url && <p className={styles.hint}>The verified 2D client URL is not configured in this build. Follow the 3D static-hosting pattern where possible; the hub will not guess a production address.</p>}
@@ -81,6 +140,8 @@ export function GamesHub() {
           </article>
         ))}
       </section>
+      {filteredGames.length === 0 && <div className={styles.emptyState}><Sparkles size={24} /><h3>No games match this view</h3><p>Try a different search or switch back to all games. Favourites are stored on this device.</p><button type="button" className={styles.playButton} onClick={() => { setQuery(""); setFilter("all"); }}>Show all games</button></div>}
+      <p className={styles.localDataNote}>{libraryReady ? "Recent launches and favourites are stored locally in this browser." : "Loading local library preferences…"} They are not synced to your account yet.</p>
 
       <section className={styles.futureSection} aria-labelledby="guild-roadmap-title">
         <header className={styles.header}><p className={styles.eyebrow}>GUILD ROADMAP</p><h2 id="guild-roadmap-title">More ways to play together</h2><p>These remain planned features until the required game-side and server-side integration is implemented and tested.</p></header>
