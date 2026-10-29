@@ -29,6 +29,7 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
+  const [signallingReady, setSignallingReady] = useState(false);
   const channelRef = useRef<ReturnType<ReturnType<typeof getSupabaseBrowserClient>['channel']> | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localRef = useRef<MediaStream | null>(null);
@@ -162,12 +163,14 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
       })();
     });
     channel.subscribe((state) => {
+      setSignallingReady(state === 'SUBSCRIBED');
       if (state === 'CHANNEL_ERROR' || state === 'TIMED_OUT' || state === 'CLOSED') {
         setError('Call signalling is unavailable. Verify the private-channel authorization migration is applied.');
       }
     });
     return () => {
       cancelled = true;
+      setSignallingReady(false);
       void getSupabaseBrowserClient().removeChannel(channel);
       if (channelRef.current === channel) channelRef.current = null;
       cleanup('idle');
@@ -177,6 +180,7 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
   }, [conversationId, userId, peerUserId]);
 
   const startCall = useCallback(async (callKind: CallKind) => {
+    if (!signallingReady) { setError('Call signalling is not ready yet. Keep this conversation open and try again in a moment.'); return; }
     if (!conversationId || !userId || !peerUserId) {
       setError('Open a persistent direct conversation with a signed-in account before calling.');
       return;
@@ -197,7 +201,7 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
       setError(cause instanceof Error ? cause.message : 'Could not send call invitation.');
       cleanup('error');
     }
-  }, [cleanup, conversationId, peerUserId, send, status, userId]);
+  }, [cleanup, conversationId, peerUserId, send, signallingReady, status, userId]);
 
   const acceptCall = useCallback(async () => {
     if (!incoming || !userId || !peerUserId) return;
@@ -240,5 +244,5 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
     setCameraOff(next);
   }, [cameraOff]);
 
-  return { status, kind, incoming, error, localStream, remoteStream, muted, cameraOff, startCall, acceptCall, declineCall, endCall, toggleMute, toggleCamera };
+  return { status, kind, incoming, error, localStream, remoteStream, muted, cameraOff, signallingReady, startCall, acceptCall, declineCall, endCall, toggleMute, toggleCamera };
 }
