@@ -30,3 +30,7 @@ assert.doesNotMatch(navigation, /<nav className=\{styles\.desktopNavigation\}/, 
 assert.match(navigationStyles, /\.desktopNavigation\s*\{[^}]*display:\s*none/s, 'desktop navigation strip stays hidden');
 assert.match(navigationStyles, /\.mobileBottomButton\s*\{[^}]*min-height:\s*48px/s, 'mobile tabs provide a 48px minimum touch target');
 console.log('Navigation contract checks passed.');
+
+assert.doesNotMatch(navigation.slice(navigation.indexOf('const navigationItems'), navigation.indexOf('const navigationGroups')), /id: 'guild'|id: 'guild-roadmap'|Guild Arcade|Guild Roadmap/, 'hidden Guild console and its roadmap are not exposed in the Sanctuary page selector');
+assert.doesNotMatch(navigation.slice(navigation.indexOf('const navigationGroups'), navigation.indexOf('interface NavigationProps')), /label: 'Guild'|items: \['guild'|guild-roadmap/, 'Sanctuary selector has no Guild navigation group');
+console.log('Hidden Guild selector contract passed.');
