@@ -27,6 +27,7 @@ import type { NavigationState } from '@/context/AppContext';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
 import styles from './Navigation.module.css';
 import { NotificationBar } from '@/components/NotificationBar';
+import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 
 const mobilePrimaryItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
   { id: 'today', label: 'Today', icon: Sun },
@@ -99,10 +100,8 @@ export function Navigation({
   onSetTwoFactorEnabled,
   onLogout,
 }: NavigationProps) {
-  const canAccessAdmin = Boolean(
-    currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role),
-  );
-  const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || canAccessAdmin);
+  const role = currentUser?.profile.role ?? 'user';
+  const visibleNavigationItems = navigationItems.filter((item) => canAccessSanctuaryPage(item.id, role));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);
