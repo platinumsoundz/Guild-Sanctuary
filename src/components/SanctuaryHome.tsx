@@ -139,9 +139,8 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
         </div>
         <div className={styles.heroNote}>
           <div className={styles.orbit} aria-hidden="true"><span /><span /><span /><Sun size={34} /></div>
-          <p className={styles.noteLabel}>A platform in progress</p>
-          <p>Some areas are working features. Others are clickable concepts to make the direction tangible. Each card tells you which is which.</p>
-          <div className={styles.statusLegend}><span><i className={styles.dotAvailable} /> Available</span><span><i className={styles.dotPreview} /> Preview</span><span><i className={styles.dotDesign} /> In design</span></div>
+          <p className={styles.noteLabel}>A calmer starting point</p>
+          <p>Your daily home stays focused. Feature plans and build progress live in the roadmaps.</p>
         </div>
       </section>
 
