@@ -351,14 +351,14 @@ export function AppWorkspace() {
                       <button type="button" onClick={() => setGuildPage('photos')}><span>05 · REMEMBER</span><strong>Photo Slideshow</strong><small>Build a private, in-browser slideshow.</small></button>
                       <button type="button" onClick={() => setGuildPage('tools')}><span>06 · EXPLORE</span><strong>Guild Tools</strong><small>Cloud Lab status and gaming destinations.</small></button>
                       <button type="button" onClick={() => setGuildPage('today')}><span>07 · SANCTUARY</span><strong>All Sanctuary Pages</strong><small>Community, messages, profile, planner, settings and more.</small></button>
-                    </div>                  </main>
+                    </div>
+                  </main>
                 ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub /></div>
                 : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
-                : guildPage === 'library' ? <div className={styles.guildSection}><GuildCompanionHub view="library" /></div>
-                : guildPage === 'music' ? <div className={styles.guildSection}><GuildCompanionHub view="music" /></div>
-                : guildPage === 'photos' ? <div className={styles.guildSection}><GuildCompanionHub view="photos" /></div>
-                : guildPage === 'tools' ? <div className={styles.guildSection}><GuildCompanionHub view="tools" /></div>
+                : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /></div>
+                : ['music', 'photos', 'tools'].includes(guildPage) ? null
                 : authenticatedContent}
+                <GuildCompanionHub view={guildPage === 'library' || guildPage === 'music' || guildPage === 'photos' || guildPage === 'tools' ? guildPage : 'all'} hidden={!['library', 'music', 'photos', 'tools'].includes(guildPage)} />
               </motion.div>
             </AnimatePresence>
           </div>
