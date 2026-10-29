@@ -24,18 +24,21 @@ const MAX_SEEN_CALL_IDS = 64;
 
 function isValidSignal(value: unknown): value is Signal {
   if (!value || typeof value !== 'object') return false;
-  const signal = value as Partial<Signal>;
+  const signal = value as Record<string, unknown>;
   if (typeof signal.callId !== 'string' || !/^[0-9a-f-]{36}$/i.test(signal.callId)) return false;
   if (typeof signal.from !== 'string' || typeof signal.to !== 'string' || signal.from === signal.to) return false;
   if (!['invite', 'accept', 'decline', 'hangup', 'offer', 'answer', 'candidate'].includes(String(signal.type))) return false;
   if (signal.type === 'invite' && signal.kind !== 'audio' && signal.kind !== 'video') return false;
-  if ((signal.type === 'offer' || signal.type === 'answer') &&
-      (!signal.description || typeof signal.description !== 'object' ||
-       !['offer', 'answer'].includes(String(signal.description.type)) ||
-       typeof signal.description.sdp !== 'string' || signal.description.sdp.length > 100_000)) return false;
-  if (signal.type === 'candidate' &&
-      (!signal.candidate || typeof signal.candidate !== 'object' ||
-       (signal.candidate.candidate != null && (typeof signal.candidate.candidate !== 'string' || signal.candidate.candidate.length > 4_096)))) return false;
+  if (signal.type === 'offer' || signal.type === 'answer') {
+    const description = signal.description as Record<string, unknown> | null;
+    if (!description || !['offer', 'answer'].includes(String(description.type)) ||
+        typeof description.sdp !== 'string' || description.sdp.length > 100_000) return false;
+  }
+  if (signal.type === 'candidate') {
+    const candidate = signal.candidate as Record<string, unknown> | null;
+    if (!candidate || (candidate.candidate != null &&
+        (typeof candidate.candidate !== 'string' || candidate.candidate.length > 4_096))) return false;
+  }
   return true;
 }
 
