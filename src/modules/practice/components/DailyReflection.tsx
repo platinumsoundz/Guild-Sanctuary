@@ -150,7 +150,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
       if (!Array.isArray(parsed)) throw new Error('Saved reflection data is not a list.');
       localEntries = parsed.filter((item): item is LegacyReflectionEntry =>
         Boolean(item) && typeof item === 'object'
-        && typeof item.date === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(item.date)
+        && typeof item.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(item.date)
         && MOODS.some((option) => option.value === item.mood)
         && typeof item.intention === 'string' && typeof item.reflection === 'string'
         && typeof item.updatedAt === 'string',
