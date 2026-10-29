@@ -60,3 +60,25 @@ They are two experience modes built on the same Sanctuary application codebase, 
 4. Make database/schema changes backward-compatible for Sanctuary and Guild; test both experiences against the same staging data and identity model.
 5. Any wallet/shop write must be server-authoritative, authorized, auditable and idempotent. Never enable production spending solely because the UI exists.
 6. Track each item as planned, in progress, tested or live; do not describe planned features as delivered until verified.
+
+
+## Console-first UX and touchscreen requirements (owner direction, 2026-10-29)
+
+The Guild should feel like **Steam Big Picture Mode**: a controller-friendly console interface for browser-based games, entered from the hidden Guild activation. In the initial release, prioritize the owner's own games—**The 5 Sleeves 2D and The 5 Sleeves 3D**—before adding third-party catalog breadth. This is a design direction, not a claim of Steam affiliation.
+
+### Navigation and input parity
+- All core Guild flows must remain usable with touchscreen, mouse/tap and gamepad. Do not make a physical controller a requirement.
+- Make cards, settings, dialogs, back/close, launch, resume and return-to-library controls tappable with appropriately large touch targets and visible focus/pressed states.
+- Provide an on-screen console navigation control surface when helpful: directional pad or virtual joystick plus **A / Select / Confirm** and **B / Back/Cancel** at minimum. Add Start/Menu and other game-specific buttons where supported.
+- The D-pad/joystick and A/B controls must operate the Guild's own menus and selection model accessibly, including focus movement, selection and back/cancel. They must not be decorative.
+- In a game, virtual controls must map to actual game input. A parent-page overlay cannot inject keyboard/gamepad events into a cross-origin iframe reliably. Prefer the games' native touch controls; where missing, implement a deliberate, documented bridge such as a narrow postMessage protocol with strict origin/source validation and explicit game-side handlers, or put controls inside the game client. Never present buttons as working game controls until that path is implemented and tested.
+- Preserve ordinary taps/clicks even when a controller overlay is visible. Let users hide/reposition the virtual controller surface; avoid covering critical game HUD or touch targets. Adapt layout for portrait and landscape mobile screens.
+- Gamepad, touchscreen and keyboard/mouse should converge on the same semantic actions (up/down/left/right, confirm, back, menu) wherever practical, rather than building three unrelated navigation systems.
+- Test on Android touch browsers and desktop browsers, including touch-only operation, orientation changes, fullscreen exit/recovery, keyboard navigation, controller hot-plug and game iframe restrictions.
+
+### Initial delivery order
+1. Make the Guild library and system menu fully touch-usable and console-navigable.
+2. Verify the existing native touch controls in The 5 Sleeves 2D and 3D; fix gaps in those games rather than assuming a wrapper can control them.
+3. Add a visible, collapsible virtual D-pad/joystick + A/B console controls for Guild navigation and selection.
+4. For game controls, integrate only with game-side input support and verify actual movement/selection in each game.
+5. Keep the 2D static-client hosting investigation separate from input work; preserve its authoritative multiplayer server and avoid changing the existing deployment until the replacement is tested.
