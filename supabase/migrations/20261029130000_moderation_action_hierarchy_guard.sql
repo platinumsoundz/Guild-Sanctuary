@@ -38,6 +38,15 @@ begin
     raise exception 'Moderator authorization required' using errcode = '42501';
   end if;
 
+  -- UI role gates are not an authorization boundary. Enforce action-specific
+  -- permissions here so direct RPC calls cannot let a moderator ban or suspend.
+  if new.action = 'suspend' and actor_role not in ('admin', 'developer', 'owner') then
+    raise exception 'Admin authorization required for suspension' using errcode = '42501';
+  end if;
+  if new.action = 'ban' and actor_role not in ('developer', 'owner') then
+    raise exception 'Developer authorization required for bans' using errcode = '42501';
+  end if;
+
   case lower(new.target_type)
     when 'user' then
       target_owner_id := new.target_id;
