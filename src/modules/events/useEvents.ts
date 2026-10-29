@@ -8,7 +8,7 @@ interface UseEventsResult {
   isLoading: boolean;
   error: string | null;
   addEvent: (input: CreateEventInput) => Promise<void>;
-  editEvent: (eventId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt' | 'locationCoords'>) => Promise<void>;
+  editEvent: (eventId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt' | 'locationCoords' | 'locationLabel'>) => Promise<void>;
   removeEvent: (eventId: string) => Promise<void>;
   rsvp: (eventId: string, status: 'going' | 'interested' | 'cancelled') => Promise<void>;
 }
