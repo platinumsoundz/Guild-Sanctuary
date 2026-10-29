@@ -65,7 +65,7 @@ export function FeedbackHub() {
     setError(null);
     setNotice(null);
     try {
-      const pageUrl = typeof window === 'undefined' ? null : window.location.href;
+      const pageUrl = typeof window === 'undefined' ? null : window.location.origin + window.location.pathname;
       const { error: submitError } = await getSupabaseBrowserClient().from('platform_feedback').insert({
         submitter_id: userId,
         category,
