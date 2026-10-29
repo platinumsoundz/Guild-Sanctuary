@@ -388,3 +388,76 @@
   .card { transition: none; }
   .card:hover { transform: none; }
 }
+
+
+/* Console-first visual refinement: stronger focus, depth, artwork and touch targets. */
+.grid { gap: clamp(14px, 2vw, 22px); }
+.card, .player {
+  border-radius: 18px;
+  border-color: color-mix(in srgb, var(--line) 82%, var(--accent) 18%);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--surface-raised) 94%, var(--accent) 6%), var(--surface-raised));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .16);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.card:hover, .card:focus-within {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--line));
+  box-shadow: 0 20px 42px rgba(0, 0, 0, .24);
+}
+.art {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(170px, 21vw, 250px);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 75% 28%, rgba(103, 232, 249, .24), transparent 28%),
+    radial-gradient(ellipse at 22% 88%, rgba(167, 139, 250, .28), transparent 40%),
+    linear-gradient(130deg, #10162c, #242052 54%, #0b2635);
+}
+.art::before, .art::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.art::before {
+  width: 170px;
+  aspect-ratio: 1;
+  right: 9%;
+  top: 12%;
+  background: radial-gradient(circle at 30% 25%, #f5edff, #9c8aff 18%, #5544ad 48%, #1b204a 72%);
+  box-shadow: inset -18px -16px 24px rgba(0,0,0,.48), 0 0 56px rgba(137,117,255,.22);
+}
+.art::after {
+  width: 240px;
+  height: 64px;
+  right: 1%;
+  top: 38%;
+  border: 2px solid rgba(205, 196, 255, .52);
+  transform: rotate(-17deg);
+  box-shadow: 0 0 22px rgba(145, 124, 255, .14);
+}
+.card:nth-child(2) .art {
+  background:
+    radial-gradient(ellipse at 22% 24%, rgba(251, 191, 36, .22), transparent 30%),
+    radial-gradient(ellipse at 80% 90%, rgba(244, 114, 182, .23), transparent 38%),
+    linear-gradient(135deg, #25152f, #44213f 48%, #10152f);
+}
+.card:nth-child(2) .art::before {
+  right: 14%; top: 18%; width: 148px;
+  background: radial-gradient(circle at 32% 26%, #fff1c4, #ffb86b 18%, #d74e8a 48%, #4b2b76 75%);
+  box-shadow: inset -16px -14px 24px rgba(0,0,0,.42), 0 0 54px rgba(244,114,182,.2);
+}
+.card:nth-child(2) .art::after { border-color: rgba(255, 201, 152, .55); transform: rotate(19deg); }
+.cardBody { padding: clamp(16px, 2.4vw, 24px); }
+.card h2 { font-size: clamp(20px, 2.2vw, 25px); letter-spacing: -.035em; }
+.playButton { min-height: 46px; padding-inline: 16px; border-radius: 11px; box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 18%, transparent); }
+.playButton:focus-visible, .externalLink:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .player { transition: none; }
+  .card:hover, .card:focus-within { transform: none; }
+}
