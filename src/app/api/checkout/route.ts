@@ -53,6 +53,15 @@ export async function POST(request: Request) {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) return NextResponse.json({ error: 'Sign in before starting checkout.' }, { status: 401, headers: { 'Cache-Control': 'no-store' } });
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role,status')
+      .eq('id', data.user.id)
+      .maybeSingle();
+    if (profileError || !profile || profile.status !== 'active' ||
+        !['vip', 'moderator', 'admin', 'developer', 'owner'].includes(profile.role)) {
+      return NextResponse.json({ error: 'Wallet purchases are currently limited to active VIP members and above while test checkout is being verified.' }, { status: 403, headers: { 'Cache-Control': 'no-store' } });
+    }
     userId = data.user.id;
   } catch { return unavailable(); }
 
