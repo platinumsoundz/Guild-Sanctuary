@@ -688,3 +688,13 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Guest-safe preview PR #213 remains the next dependency. It is still draft because its route-level guard must be reviewed alongside service/RLS authorization and real sign-in journeys. Guild Arcade PR #214 and creator games PR #215 remain stacked behind it; do not retarget/merge them until the guest-access dependency is reviewed and integrated.
 - Daily Reflection PR #216 remains draft pending authenticated account-isolation and save/read/delete failure-path acceptance. Messaging/comment/Shorts backend runtime checks remain separate release gates.
 - No Supabase writes, migrations, production settings, secrets, payment settings or production deployment were changed in this batch.
+
+
+## Integration and merge reconciliation — 2026-10-29
+
+- **Merged to main:** PR [#218 — reconciled beta candidate](https://github.com/platinumsoundz/Guild-Sanctuary/pull/218), merge commit `645edf23d6507e11935c94e10735835d95513186`. Rebuilt from current main to resolve the original #210 divergence without overwriting the mainline community-comment reliability change.
+- Exact-head checks passed for CI/typecheck/build, screenshot capture, install-banner accessibility contract, dependency-map contract, Daily Reflection contract, community connection toolkit contract, and Cloudflare Worker build. Desktop, mobile and small-mobile screenshot artifacts were reviewed for the compact header, top-left navigation, install banner, notification control and responsive shell.
+- Vercel preview remains blocked by provider build-rate-limit status. No production deployment is claimed; Cloudflare's PR workflow completed successfully with production deployment guarded.
+- The original PR #210 is superseded by #218 and should be closed after branch-stack reconciliation. Guest access #213, Guild Arcade #214 and creator games #215 remain a dependency stack on the old release branch; rebuild the stack on current main before integrating.
+- PR #219 is the conflict-free current-main reconstruction of private Daily Reflection. Its fresh exact-head CI is pending. Keep it gated on live migration-ledger/RLS verification and authenticated two-account save/read/delete/failure-path tests.
+- Moderation PRs #191/#199 remain gated on the absent live `get_moderation_queue()` RPC and independent authorization review. No production migrations or database writes have been performed.
