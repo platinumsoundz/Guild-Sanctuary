@@ -108,7 +108,6 @@ export function Navigation({
   const [pageVisibility, setPageVisibility] = useState<PageVisibilityMap>({});
   useEffect(() => {
     let cancelled = false;
-    if (!currentUser || isGuest) { setPageVisibility({}); return; }
     void fetchPageVisibility().then((value) => { if (!cancelled) setPageVisibility(value); }).catch(() => { if (!cancelled) setPageVisibility({}); });
     return () => { cancelled = true; };
   }, [currentUser?.user.id, isGuest]);
