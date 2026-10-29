@@ -733,3 +733,12 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Still blocked:** #191 moderation queue and #199 role management require a live-schema reconciliation because public.get_moderation_queue() is absent, plus independent review of role hierarchy, self-targeting, concurrency and action authorization. No production SQL/migrations or permission changes have been applied.
 - **Superseded and closed:** #210, #213, #214, #215, #216, #220, #222 and #192. Their relevant work was either rebuilt on current main or superseded by the strengthened #224 contract.
 - **No production deployment, live database write, payment/provider/secret change, or token-spending enablement is claimed by this reconciliation.
+
+
+## Console-style Today launcher batch — 2026-10-29
+
+- **Implemented on current-main feature branch:** replace the minimal three-link Today panel with a console-style launcher for Guild Arcade, Cosmic Arcade, Community and Shorts, plus a separate toolkit for Planner, Discover, Messages, Events and Wallet.
+- Add a context-aware time-of-day greeting, compact home-base identity, clearly grouped destinations, per-space visual accents, and consistent keyboard-focus behaviour.
+- Responsive layout: four launcher columns on wide screens, two on tablets, and stacked touch-friendly cards on narrow phones. Motion is disabled when the member requests reduced motion.
+- Extend the Today contract to cover all launcher destinations, semantic section labels, responsive breakpoints and reduced-motion behaviour. The existing `check:today-dashboard` package script remains the contract entry point.
+- **Release boundary:** this is a feature branch, not a production deployment. Exact-head CI, typecheck/build, and screenshot checks must pass; desktop/tablet/phone interaction review remains required before merge. This batch does not change authentication, database schema, payment settings, role assignments or token spending.
