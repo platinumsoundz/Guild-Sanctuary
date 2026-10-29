@@ -4,6 +4,7 @@ import { strict as assert } from 'node:assert';
 const dashboard = readFileSync(new URL('../src/modules/moderation/ModerationDashboard.tsx', import.meta.url), 'utf8');
 const service = readFileSync(new URL('../src/modules/moderation/service.ts', import.meta.url), 'utf8');
 const admin = readFileSync(new URL('../src/modules/moderation/AdminDashboard.tsx', import.meta.url), 'utf8');
+const messageModerationMigration = readFileSync(new URL('../supabase/migrations/20261029120000_apply_moderation_message_state.sql', import.meta.url), 'utf8');
 
 assert.ok(admin.includes('<ModerationDashboard role={role} />'), 'admin dashboard must pass the authenticated role into moderation controls');
 assert.ok(dashboard.includes("['moderator', 'admin', 'developer', 'owner'].includes(role)"), 'warning capability must be limited to moderator-level roles and above');
