@@ -149,6 +149,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
         setMenuOpen((open) => !open);
       }
       if (!menuOpen) return;
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || (event.target instanceof HTMLElement && event.target.isContentEditable)) return;
       if (event.key === 'ArrowDown' || event.key === 'ArrowRight') { event.preventDefault(); moveMenuFocus(1); }
       if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') { event.preventDefault(); moveMenuFocus(-1); }
       if ((event.key === 'Enter' || event.key === ' ') && !(document.activeElement instanceof HTMLInputElement)) {
