@@ -3,6 +3,7 @@
 import { ResponsiveShell } from '@/components/ResponsiveShell';
 import { Navigation } from '@/components/Navigation';
 import { useEffect, useState } from 'react';
+import { getConnectedGamepad } from '@/lib/controllerInput';
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import type { CSSProperties } from 'react';
 import type { Conversation, PublicProfile } from '@/types/database';
@@ -98,6 +99,39 @@ export function AppWorkspace() {
       }, () => { if (!cancelled) setAccountAccessStatus('error'); });
     return () => { cancelled = true; };
   }, [currentUser?.user.id, isAuthenticated, isGuest, isSessionReady]);
+
+  useEffect(() => {
+    if (!isSessionReady || !isAuthenticated || isGuest || !currentUser) return;
+    const accessEnabled = () => {
+      try { return window.localStorage.getItem('sanctuary-hidden-guild-access') !== 'disabled'; }
+      catch { return true; }
+    };
+    let wasConnected = false;
+    const detectController = () => {
+      const connected = Boolean(getConnectedGamepad());
+      if (connected && !wasConnected && accessEnabled()) {
+        window.localStorage.setItem('sanctuary-open-hidden-guild-entry', '1');
+        setActiveNavigation('guild');
+      }
+      wasConnected = connected;
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'g')) return;
+      if (!accessEnabled()) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
+      event.preventDefault();
+      window.localStorage.setItem('sanctuary-open-hidden-guild-entry', '1');
+      setActiveNavigation('guild');
+    };
+    window.addEventListener('keydown', onKeyDown);
+    const poll = window.setInterval(detectController, 500);
+    detectController();
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.clearInterval(poll);
+    };
+  }, [currentUser, isAuthenticated, isGuest, isSessionReady, setActiveNavigation]);
 
   useEffect(() => {
     if (activeNavigation !== 'profile') {
