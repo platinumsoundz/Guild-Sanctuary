@@ -93,3 +93,12 @@ The 2D repository README describes its browser client as supporting keyboard, to
 The player now includes a touch D-pad plus A/Select and B/Back controls for the Guild system menu, directional focus movement across menu actions, keyboard arrow navigation, gamepad D-pad/stick focus movement, A/confirm and B/back handling, Start/Home menu toggling where exposed, focus-visible styling and a hide/show quick-menu affordance. These controls navigate the Guild UI only. They intentionally do not claim to steer a game inside a cross-origin iframe; the two games' own native touch controls remain responsible for in-game movement and actions.
 
 The Guild library roadmap now explicitly exposes the Guild Token Shop and Spotify as planned, non-functional placeholders. The shop must use the shared Sanctuary wallet and server-authoritative ownership/transaction checks; no token spending is enabled by these UI additions. Spotify remains optional and depends on API access, permissions and playback restrictions.
+
+
+## 2D static-client feasibility findings (source inspection, 2026-10-29)
+
+- The 2D app's browser client is under `public/`; the Node server serves it with `express.static(path.join(__dirname, 'public'))`.
+- The client currently creates its Socket.IO connection with `window.io()` in `public/src/netcode.js`, which means it targets the page's own origin by default.
+- The modular client boot flow requests `/api/client-modules` in `public/src/module-runner.js`; that endpoint is served by the Node server and currently also assumes the page and game server share an origin.
+- Consequently, putting `public/` on a static host is feasible as a client/server separation, but it is **not yet a drop-in deployment**. A tested implementation needs a configurable HTTPS game-server origin used by both Socket.IO and the module manifest request, a strict server-side CORS allowlist for the chosen static origin, Socket.IO CORS configuration, and checks for all remaining absolute API/asset paths.
+- Keep the authoritative server, profile persistence, combat/progression services, current host and rollback path unchanged until the separate static client can connect and pass guest/account, module loading, multiplayer, persistence, mobile touch, audio and iframe tests. The Guild must continue to use only a confirmed client URL; do not set one based on a guess.
