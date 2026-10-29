@@ -9,6 +9,7 @@ import {
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import { NotificationBar } from './NotificationBar';
+import { GuildDiagnosticsPanel } from './GuildDiagnosticsPanel';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
 import styles from './GuildNavigation.module.css';
 
@@ -249,6 +250,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
           <button type="button" onClick={() => choose('home')}><Home size={17} /><span>Resume Guild Home</span><ChevronRight size={15} /></button>
           <button type="button" onClick={onExit}><LogOut size={17} /><span>Exit to Sanctuary</span><ChevronRight size={15} /></button>
         </div>
+        <GuildDiagnosticsPanel />
         <p className={styles.quickFootnote}>Search is limited to available Guild and Sanctuary destinations. Settings apply to this browser; game audio and display behaviour can still depend on the game host.</p>
       </section>
     </>}
