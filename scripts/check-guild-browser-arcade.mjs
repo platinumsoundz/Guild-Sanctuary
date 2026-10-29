@@ -10,7 +10,7 @@ const support = readFileSync('src/modules/support/SupportPanel.tsx', 'utf8');
 assert.match(workspace, /<GuildWorld userId=\{currentUser\?\.user\.id \?\? null\} isAuthenticated=\{isAuthenticated && !isGuest\} \/>/, 'hidden Guild shell is mounted and guest sessions are excluded');
 assert.match(workspace, /activeNavigation === 'guild'/, 'Guild Arcade is reachable from its dedicated route');
 const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
-assert.doesNotMatch(navigation, /items: \['guild', 'guild-roadmap'\]/, 'Guild Arcade and Guild Roadmap are hidden from navigation');
+assert.match(navigation, /items: \['guild', 'guild-roadmap'\]/, 'Guild Arcade and Guild Roadmap are reachable from the primary navigation');
 assert.match(workspace, /ctrlKey && event\.shiftKey/, 'hidden Guild has a keyboard entry path');
 assert.match(workspace, /getConnectedGamepad/, 'controller detection can reveal the hidden Guild entry');
 const settings = readFileSync('src/modules/settings/components/SettingsHub.tsx', 'utf8');
