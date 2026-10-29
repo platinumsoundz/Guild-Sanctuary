@@ -12,7 +12,7 @@ const games: GameEntry[] = [
   {
     id: 'sleeves2d',
     title: 'The 5 Sleeves 2D',
-    description: 'A browser-based multiplayer action RPG. Explore settlements and dangerous roads, fight Rust Wardens, develop your operative, and clear regional towers.',
+    description: 'A browser-based multiplayer action RPG with touch, keyboard and gamepad input documented by the game project. Explore settlements and dangerous roads, fight Rust Wardens, develop your operative, and clear regional towers.',
     genre: 'Multiplayer action RPG',
     url: process.env.NEXT_PUBLIC_5_SLEEVES_2D_URL?.trim() || null,
     badge: 'Online world',
@@ -21,7 +21,7 @@ const games: GameEntry[] = [
   {
     id: 'sleeves3d',
     title: 'The 5 Sleeves 3D',
-    description: 'A third-person 3D game prototype. Practice with Sensei, explore the outpost, and reach the First Tower.',
+    description: 'A third-person 3D prototype with a mobile touch-control layout and gamepad input documented by the game project. Practice with Sensei, explore the outpost, and reach the First Tower.',
     genre: 'Third-person 3D prototype',
     url: 'https://the-5-sleeves-3d.pages.dev/',
     badge: '3D prototype',
@@ -54,13 +54,13 @@ export function GamesHub() {
     <div className={styles.hub}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>THE GUILD · GAME LIBRARY</p>
-        <h2>Your games, one hub</h2>
-        <p>Launch supported browser games inside Sanctuary, expand them to fullscreen, and use the on-screen system menu to return to the library. Connect a controller or use touch and mouse controls.</p>
+        <h2>Your console. Your worlds.</h2>
+        <p>A console-first Guild experience inspired by living-room game launchers: your own games first, fast launch, fullscreen, and a persistent way back. Touch and mouse remain first-class controls; a physical gamepad is optional.</p>
       </header>
 
       <section className={styles.libraryTools} aria-label="Controller status and help">
-        <div><Gamepad2 size={21} /><div><strong>Controller-ready player</strong><p>The player checks for a connected gamepad while open. Home/Guide support depends on the controller and browser; the Guild menu button is always available.</p></div></div>
-        <span className={styles.libraryHint}>Settings access · hidden Guild entry</span>
+        <div><Gamepad2 size={21} /><div><strong>Touch-first and controller-ready</strong><p>The Guild system menu supports touch D-pad navigation, A to select and B to back, plus keyboard and detected gamepad input. Both 5 Sleeves repositories document native in-game touch controls; actual device gameplay still needs a browser/device pass.</p></div></div>
+        <span className={styles.libraryHint}>Hidden entry · shared Sanctuary identity and theme</span>
       </section>
 
       <section className={styles.grid} aria-label="Guild game library">
@@ -91,6 +91,8 @@ export function GamesHub() {
           <article className={styles.futureCard}><span className={styles.futureStatus}>Coming soon</span><h3>Quests and achievements</h3><p>Track milestones and rankings using verified game events, not client-reported scores.</p><button type="button" className={styles.placeholderButton} disabled>Progression · coming soon</button></article>
           <article className={styles.futureCard}><span className={styles.futureStatus}>Security gated</span><h3>Cosmetics and rewards</h3><p>Profile themes and game cosmetics require server-side ownership checks.</p><button type="button" className={styles.placeholderButton} disabled>Locked · checks required</button></article>
           <article className={styles.futureCard}><span className={styles.futureStatus}>Security gated</span><h3>Sanctuary Tokens in games</h3><p>Shared balances and spending remain unavailable until server-authoritative integration and abuse tests pass.</p><button type="button" className={styles.placeholderButton} disabled>Wallet bridge · locked</button></article>
+          <article className={styles.futureCard}><span className={styles.futureStatus}>Catalog planned</span><h3>Guild Token Shop</h3><p>A Guild-specific catalog for gaming themes and digital cosmetics, using the existing Sanctuary wallet and ownership checks. No duplicate balance and no purchases until the secure transaction path is verified.</p><button type="button" className={styles.placeholderButton} disabled>Guild catalog · planned</button></article>
+          <article className={styles.futureCard}><span className={styles.futureStatus}>Integration planned</span><h3>Spotify listening</h3><p>Future account linking and playback controls will require explicit consent, supported API access and licensing-compliant playback. Guild games will continue to work without it.</p><button type="button" className={styles.placeholderButton} disabled>Spotify · planned</button></article>
         </div>
       </section>
 
