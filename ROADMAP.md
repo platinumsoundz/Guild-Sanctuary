@@ -753,3 +753,14 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 ### Batch completion rules
 
 A feature is complete only when its UI, data/service path, permissions, failure states, and regression checks agree. Record separately: merged to `main`, CI/build verified, database migration applied, preview verified, and production domain verified. No one status implies the others. Do not force-merge diverged branches or spend money to bypass hosting limits.
+
+
+## Read-only Supabase parity audit — 2026-10-29
+
+Two connected Supabase projects were inspected read-only: `kchrskkchoyqweowskxv` and `xgpzvmhldyoyrwwebcic`.
+
+- Both projects are active and expose the expected function signatures for `get_short_engagement_stats(requested_short_id uuid)`, `toggle_short_like(requested_short_id uuid)`, `get_report_target_owner(requested_target_type report_target_type, requested_target_id uuid)`, `get_moderation_report_context(requested_target_type report_target_type, requested_target_id uuid)`, `apply_moderation_action(...)`, and `set_member_role(requested_user_id uuid, requested_role text)`.
+- The inspected function ACLs grant execution to `authenticated` and `service_role` (plus the owning `postgres` role); no `PUBLIC` or `anon` execution grant appeared in the returned ACLs.
+- The projects have materially different migration ledgers. Matching function names and signatures are useful parity evidence, but do **not** prove their function bodies, RLS policies, or concurrent role checks behave identically.
+- The reported Shorts schema-cache error is therefore **not yet explained** by a missing function name in either inspected database. Next diagnostics must identify which project the failing deployment actually calls, inspect PostgREST/schema-cache and API logs, compare the exact function definition and grants, and reproduce the call as an authenticated user. Do not apply another migration or reset either project merely to clear the error.
+- The moderation dashboard merge is code integration only. Complete a read-only body/policy review and approved staging authorization tests before claiming the moderation system is release-ready.
