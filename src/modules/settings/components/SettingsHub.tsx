@@ -15,6 +15,7 @@ interface SettingsHubProps {
   socialLinks: SocialLinks;
   onUpdateProfile: (updates: Partial<Pick<Profile, 'privacy' | 'visibility' | 'socialLinks'>>) => void | Promise<void>;
   onDeleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => void;
+  onLaunchGuild: () => void;
 }
 
 const preferenceLabels = {
@@ -59,6 +60,7 @@ export function SettingsHub({
   socialLinks,
   onUpdateProfile,
   onDeleteAccount,
+  onLaunchGuild,
 }: SettingsHubProps) {
   const { settings, isLoading, error, updatePreferences, setError } = useAccountSettings(userId);
   const [linksDraft, setLinksDraft] = useState<SocialLinks>(socialLinks);
@@ -315,11 +317,16 @@ export function SettingsHub({
 
           <section className={styles.panel} aria-labelledby="hidden-guild-title">
             <h2 id="hidden-guild-title">Hidden feature access</h2>
-            <p className={styles.hint}>The Guild is intentionally hidden from Sanctuary navigation. When enabled, press Ctrl + Shift + G on a keyboard, or connect a controller to reveal its entry. This preference is saved on this device.</p>
-            <label className={styles.toggleRow}>
-              <span>Enable hidden Guild access</span>
-              <input type="checkbox" checked={guildAccessEnabled} onChange={(event) => updateGuildAccess(event.currentTarget.checked)} />
-            </label>
+            <p className={styles.hint}>The Guild is intentionally hidden from Sanctuary navigation. Enable access, then use Launch now to enter directly on this device — no controller or physical keyboard needed. This preference is saved on this device.</p>
+            <div className={styles.guildAccessRow}>
+              <label className={styles.toggleRow}>
+                <span>Enable hidden Guild access</span>
+                <input type="checkbox" checked={guildAccessEnabled} onChange={(event) => updateGuildAccess(event.currentTarget.checked)} />
+              </label>
+              <button type="button" className={styles.launchGuildButton} onClick={onLaunchGuild} disabled={!guildAccessEnabled} aria-describedby="hidden-guild-title">
+                Launch now
+              </button>
+            </div>
           </section>
 
           <section className={`${styles.panel} ${styles.dangerPanel}`} aria-labelledby="delete-title">
