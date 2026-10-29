@@ -148,7 +148,7 @@ export function SanctuaryHome({ onNavigate }: { onNavigate: (navigation: Navigat
         <button type="button" onClick={() => onNavigate('feed')}><MessageCircle size={18} /><span><strong>Community</strong><small>Read and share</small></span><ArrowRight size={15} /></button>
         <button type="button" onClick={() => onNavigate('discover')}><Search size={18} /><span><strong>Find people</strong><small>Explore profiles</small></span><ArrowRight size={15} /></button>
         <button type="button" onClick={() => onNavigate('messages')}><MessageSquare size={18} /><span><strong>Messages</strong><small>Open conversations</small></span><ArrowRight size={15} /></button>
-        <button type="button" onClick={() => onNavigate('roadmap')}><Layers3 size={18} /><span><strong>Full product map</strong><small>See all systems</small></span><ArrowRight size={15} /></button>
+        <button type="button" onClick={() => onNavigate('roadmap')}><Layers3 size={18} /><span><strong>Roadmaps</strong><small>Project plans and progress</small></span><ArrowRight size={15} /></button>
       </section>
 
     </main>
