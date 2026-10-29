@@ -12,7 +12,7 @@ The web AdSense loader and ad placements fail closed unless all of the following
 
 The explicit environment setting is platform-neutral and works with Vercel and Cloudflare builds. Configure both public variables only in the production build environment on the host serving the registered site. Leave `NEXT_PUBLIC_ADSENSE_ENABLED` unset/false and `NEXT_PUBLIC_ADSENSE_ENVIRONMENT` unset for previews and local development. Do not set the production environment flag on preview deployments. Next.js inlines `NEXT_PUBLIC_*` values at build time, so changing dashboard variables requires a new build.
 
-The publisher ID can be overridden with `NEXT_PUBLIC_ADSENSE_CLIENT_ID`. The inline feed, feed sidebar, and Shorts placements use these optional slot IDs:
+The publisher ID can be overridden with `NEXT_PUBLIC_ADSENSE_CLIENT_ID`. The root `/ads.txt` route emits the Google seller record only when this variable is explicitly set to a valid `ca-pub-...` value; otherwise it returns 404. The route deliberately does not use the repository's fallback publisher ID, because that ID must not be assumed to belong to the site owner. Confirm the exact ID in AdSense before setting the variable. The inline feed, feed sidebar, and Shorts placements use these optional slot IDs:
 
 - `NEXT_PUBLIC_ADSENSE_SLOT_FEED_INLINE`
 - `NEXT_PUBLIC_ADSENSE_SLOT_FEED_SIDEBAR`
