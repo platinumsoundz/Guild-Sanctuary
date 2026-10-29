@@ -1,10 +1,10 @@
 'use client';
 
-import { ArrowRight, CalendarDays, Compass, MessageCircle, WalletCards } from 'lucide-react';
+import { ArrowRight, CalendarDays, Compass, MessageCircle, WalletCards, type LucideIcon } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import styles from './TodayDashboard.module.css';
 
-const quickLinks: { title: string; description: string; target: NavigationState; icon: typeof CalendarDays }[] = [
+const quickLinks: { title: string; description: string; target: NavigationState; icon: LucideIcon }[] = [
   { title: 'Daily Planner', description: 'Organise tasks, habits, notes and your schedule.', target: 'planner', icon: CalendarDays },
   { title: 'Community', description: 'See what people are sharing and join a conversation.', target: 'feed', icon: MessageCircle },
   { title: 'Wallet', description: 'Check your token balance and purchase history.', target: 'wallet', icon: WalletCards },
