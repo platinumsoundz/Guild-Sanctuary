@@ -245,6 +245,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
           }) : <p className={styles.quickEmpty}>No destinations match “{quickQuery}”. Try another search.</p>}
         </div>
         <div className={styles.quickSettings}>
+          <button type="button" aria-pressed={controlsOpen} onClick={() => setControlsOpen((value) => !value)}><Gamepad2 size={17} /><span>Touch navigation controls</span><span className={controlsOpen ? styles.toggleOn : styles.toggleOff}>{controlsOpen ? 'ON' : 'OFF'}</span></button>
           <button type="button" onClick={() => void toggleFullscreen()}><Monitor size={17} /><span>{isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}</span>{isFullscreen ? <Check size={15} /> : <Maximize2 size={15} />}</button>
           <button type="button" aria-pressed={reducedMotion} onClick={toggleReducedMotion}><SlidersHorizontal size={17} /><span>Reduce Guild motion</span><span className={reducedMotion ? styles.toggleOn : styles.toggleOff}>{reducedMotion ? 'ON' : 'OFF'}</span></button>
           <button type="button" onClick={() => choose('home')}><Home size={17} /><span>Resume Guild Home</span><ChevronRight size={15} /></button>
@@ -281,7 +282,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       <button type="button" className={styles.return} onClick={onExit}><LogOut size={17} /> Exit Guild · Return to Sanctuary</button>
     </nav>
     <div className={styles.touchConsole}>
-      <button type="button" className={styles.touchToggle} aria-expanded={controlsOpen} onClick={() => setControlsOpen((value) => !value)}>{controlsOpen ? <X size={17} /> : <Gamepad2 size={17} />}<span>{controlsOpen ? 'Hide controls' : 'Controls'}</span></button>
+      <button type="button" className={styles.touchToggle} aria-pressed={controlsOpen} aria-expanded={controlsOpen} onClick={() => setControlsOpen((value) => !value)}>{controlsOpen ? <X size={17} /> : <Gamepad2 size={17} />}<span>{controlsOpen ? 'Hide controls' : 'Controls'}</span></button>
       {controlsOpen && <div className={styles.touchPad} aria-label="Guild navigation controls">
         <button type="button" className={styles.padUp} aria-label="Navigate up" onClick={() => moveFocus('up')}>↑</button>
         <button type="button" className={styles.padLeft} aria-label="Navigate previous" onClick={() => moveFocus('left')}>←</button>
