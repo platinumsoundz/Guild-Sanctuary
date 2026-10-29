@@ -10,6 +10,8 @@ for (const target of ['user', 'post', 'short', 'event', 'comment', 'message']) {
   assert.ok(migration.includes(`when '${target}' then`), `target owner is resolved for ${target}`);
 }
 assert.match(migration, /if actor_level <= target_level/, 'equal and higher-ranked targets are blocked');
+assert.match(migration, /new\.action = 'suspend'[\s\S]*actor_role not in \('admin', 'developer', 'owner'\)/, 'moderator-only callers cannot suspend accounts');
+assert.match(migration, /new\.action = 'ban'[\s\S]*actor_role not in \('developer', 'owner'\)/, 'moderator and admin callers cannot ban accounts');
 assert.match(migration, /else 999/, 'unknown target roles fail closed');
 assert.match(migration, /revoke all on function public\.enforce_moderation_target_hierarchy\(\) from public, anon, authenticated/, 'trigger function cannot be called directly by API roles');
 console.log('Moderation hierarchy guard contract checks passed.');
