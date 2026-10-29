@@ -17,7 +17,7 @@ function getDonationMode(): 'test' | 'live' | null {
   const secret = process.env.STRIPE_SECRET_KEY ?? '';
   const signingSecret = process.env.STRIPE_WEBHOOK_SECRET ?? '';
   const testEnabled = process.env.SANCTUARY_STRIPE_TEST_CHECKOUT_ENABLED === 'true'
-    && mode !== 'live' && secret.startsWith('sk_test_');
+    && (mode === 'test' || mode == null) && secret.startsWith('sk_test_');
   const liveEnabled = process.env.SANCTUARY_STRIPE_DONATION_CHECKOUT_ENABLED === 'true'
     && mode === 'live' && secret.startsWith('sk_live_');
   return (testEnabled || liveEnabled) && signingSecret.startsWith('whsec_') &&
