@@ -22,7 +22,9 @@ assert.doesNotMatch(navigation.slice(navigation.indexOf('const mobilePrimaryItem
 assert.match(navigationStyles, /\.mobileBottomNavigation\s*\{[^}]*position:\s*fixed/s, 'mobile tabs remain fixed at the bottom');
 assert.match(navigationStyles, /env\(safe-area-inset-bottom\)/, 'mobile tabs respect device safe areas');
 assert.match(shellStyles, /padding: 0 0 calc\(80px \+ env\(safe-area-inset-bottom\)\)/, 'page content reserves space below fixed mobile tabs');
-assert.match(navigation, /<span className=\{styles\.siteName\}>The Sanctuary<\/span>/, 'desktop header brands the application');
+assert.doesNotMatch(navigation, /<span className=\{styles\.siteName\}>The Sanctuary<\/span>/, 'compact header omits redundant page branding');
+assert.match(navigation, /<NotificationBar compact \/>/, 'compact notification control remains in the top-right header');
+assert.match(navigation, /className=\{styles\.accountButton\}/, 'account and guest access remain available in the compact header');
 assert.match(navigation, /aria-label="Open main navigation"/, 'hamburger navigation is available on desktop and mobile');
 assert.doesNotMatch(navigation, /<nav className=\{styles\.desktopNavigation\}/, 'overflowing desktop navigation strip is removed');
 assert.match(navigationStyles, /\.desktopNavigation\s*\{[^}]*display:\s*none/s, 'desktop navigation strip stays hidden');
