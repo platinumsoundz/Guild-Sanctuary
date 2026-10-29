@@ -32,7 +32,7 @@ import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import { getSupabaseBrowserClient } from '@/services/supabase';
-import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
+import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import styles from './AppWorkspace.module.css';
 
 export function AppWorkspace() {
@@ -73,6 +73,23 @@ export function AppWorkspace() {
   const contentNavigation = activeNavigation === 'guild'
     ? (guildInternalPages.includes(guildPage) ? 'guild' : guildPage)
     : activeNavigation;
+  const currentRole = currentUser?.profile.role ?? 'user';
+  const canUseGuild = currentRole === 'developer' || currentRole === 'owner';
+  const currentPageAllowed = canAccessSanctuaryPage(contentNavigation, currentRole) || (isGuest && contentNavigation === 'games');
+
+  useEffect(() => {
+    if (!isSessionReady) return;
+    if (activeNavigation === 'guild') {
+      if (!canUseGuild) {
+        setGuildPage('home');
+        setActiveNavigation('today');
+      }
+      return;
+    }
+    if (!canAccessSanctuaryPage(activeNavigation, currentRole) && !(isGuest && activeNavigation === 'games')) {
+      setActiveNavigation('today');
+    }
+  }, [activeNavigation, currentRole, canUseGuild, isGuest, isSessionReady, setActiveNavigation]);
 
   useEffect(() => {
     if (!isSessionReady) return;
@@ -107,7 +124,7 @@ export function AppWorkspace() {
   }, [currentUser?.user.id, isAuthenticated, isGuest, isSessionReady]);
 
   useEffect(() => {
-    if (!isSessionReady || !isAuthenticated || isGuest || !currentUser) return;
+    if (!isSessionReady || !isAuthenticated || isGuest || !currentUser || !canUseGuild) return;
     const accessEnabled = () => {
       try { return window.localStorage.getItem('sanctuary-hidden-guild-access') !== 'disabled'; }
       catch { return true; }
@@ -139,7 +156,7 @@ export function AppWorkspace() {
       window.removeEventListener('keydown', onKeyDown);
       window.clearInterval(poll);
     };
-  }, [currentUser, isAuthenticated, isGuest, isSessionReady, setActiveNavigation]);
+  }, [currentUser, isAuthenticated, isGuest, isSessionReady, canUseGuild, setActiveNavigation]);
 
   useEffect(() => {
     if (activeNavigation !== 'guild' || guildPage !== 'home') return;
@@ -210,7 +227,14 @@ export function AppWorkspace() {
     setActiveNavigation(navigation);
   };
 
-  const authenticatedContent = contentNavigation === 'today' ? (
+  const authenticatedContent = !currentPageAllowed ? (
+    <main className={styles.sectionPage} role="status">
+      <p className={styles.sectionEyebrow}>ROLE-RESTRICTED PAGE</p>
+      <h1>This page is not available for your role</h1>
+      <p className={styles.sectionDescription}>Sanctuary keeps newer and restricted pages hidden until your role has access. You can continue using the stable community pages.</p>
+      <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('today')}>Return to Today</button>
+    </main>
+  ) : contentNavigation === 'today' ? (
     <SanctuaryHome onNavigate={openNavigation} />
   ) : isGuest && !['support', 'games', 'roadmap'].includes(contentNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
@@ -310,6 +334,7 @@ export function AppWorkspace() {
         <SettingsHub
           userId={currentUser.user.id}
           email={currentUser.user.email}
+          role={currentUser.profile.role}
           twoFactorEnabled={currentUser.user.twoFactorEnabled}
           privacy={currentUser.profile.privacy}
           visibility={currentUser.profile.visibility}
@@ -346,7 +371,7 @@ export function AppWorkspace() {
   return (
     <MotionConfig reducedMotion="user">
       <ResponsiveShell>
-        {activeNavigation === 'guild' ? (
+        {activeNavigation === 'guild' ? (canUseGuild ? (
           <div className={styles.guildExperience} data-world="guild">
             <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
             <motion.div className={styles.guildWorldContent}>
@@ -392,7 +417,7 @@ export function AppWorkspace() {
               <GuildCompanionHub view={guildPage === 'library' || guildPage === 'music' || guildPage === 'photos' || guildPage === 'tools' ? guildPage : 'all'} hidden={!(['library', 'music', 'photos', 'tools'] as GuildPage[]).includes(guildPage)} />
             </motion.div>
           </div>
-        ) : (
+        ) : authenticatedContent) : (
           <div className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`} data-world="sanctuary" style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}>
         <Navigation
           activeNavigation={activeNavigation}

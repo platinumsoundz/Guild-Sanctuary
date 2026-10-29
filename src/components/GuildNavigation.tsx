@@ -8,7 +8,7 @@ import {
   Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
-import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
+import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import { NotificationBar } from './NotificationBar';
 import { GuildDiagnosticsPanel } from './GuildDiagnosticsPanel';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
@@ -78,14 +78,11 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     }
   }, []);
 
-  const allowed = sanctuaryItems.filter((item) => {
-    if (item.id === 'admin') return ['moderator', 'admin', 'developer', 'owner'].includes(role);
-    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role);
-    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role);
-    return true;
-  });
-  const label = [...guildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Sanctuary';
-  const searchableItems = [...guildItems, ...allowed];
+  const allowed = sanctuaryItems.filter((item) => canAccessSanctuaryPage(item.id, role));
+  const canOpenGuild = role === 'developer' || role === 'owner';
+  const visibleGuildItems = canOpenGuild ? guildItems : [];
+  const label = [...visibleGuildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Sanctuary';
+  const searchableItems = [...visibleGuildItems, ...allowed];
   const quickResults = searchableItems.filter((item) => {
     const needle = quickQuery.trim().toLowerCase();
     return !needle || item.label.toLowerCase().includes(needle) || (item.description ?? '').toLowerCase().includes(needle);
@@ -333,7 +330,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       }
     }}>
       <div className={styles.drawerHead}><div><small>YOUR CONSOLE</small><h2>Navigation</h2></div><button type="button" aria-label="Close navigation" onClick={() => setOpen(false)}><X size={20} /></button></div>
-      <p className={styles.group}>THE GUILD</p>{guildItems.map(render)}
+      <p className={styles.group}>THE GUILD</p>{visibleGuildItems.map(render)}
       <p className={styles.group}>SANCTUARY PAGES</p>{allowed.map(render)}
       <button type="button" className={styles.return} onClick={onExit}><LogOut size={17} /> Exit Guild · Return to Sanctuary</button>
     </nav>
