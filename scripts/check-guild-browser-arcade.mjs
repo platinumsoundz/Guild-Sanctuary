@@ -74,6 +74,13 @@ const consolePlayer = readFileSync('src/components/GuildConsolePlayer.tsx', 'utf
 const gamesHub = readFileSync('src/components/GamesHub.tsx', 'utf8');
 assert.match(gamesHub, /<GuildConsolePlayer title=\{activeGame\.title\} url=\{activeGame\.url\}/, 'selected library games launch in the Guild console player');
 assert.match(gamesHub, /Launch in Guild/, 'the library labels in-hub game launches clearly');
+assert.match(gamesHub, /guild-library-recents-v1/, 'recent game launches use a versioned local preference key');
+assert.match(gamesHub, /guild-library-favourites-v1/, 'favourites use a versioned local preference key');
+assert.match(gamesHub, /Recently played/, 'the library provides a Continue Playing row when recent launches exist');
+assert.match(gamesHub, /Search your games/, 'the library exposes game search');
+assert.match(gamesHub, /Ready to play/, 'the library exposes a launch-readiness filter');
+assert.match(gamesHub, /aria-pressed=\{favourites\.includes\(game\.id\)\}/, 'favourite state is exposed accessibly');
+assert.match(gamesHub, /not synced to your account yet/, 'local preferences are not misrepresented as account sync');
 assert.match(consolePlayer, /requestFullscreen\(\)/, 'console player requests browser fullscreen');
 assert.match(consolePlayer, /Exit to Guild home/, 'console overlay offers a visible exit to the library');
 assert.match(consolePlayer, /pressed\(16\)/, 'console player checks the common gamepad Home button mapping');
