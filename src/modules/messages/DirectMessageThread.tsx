@@ -9,6 +9,7 @@ import { useDirectMessages } from './useDirectMessages';
 import { ReportContentButton } from '@/modules/moderation';
 import styles from './DirectMessageThread.module.css';
 import { MessagePrivacyNotice } from './MessagePrivacyNotice';
+import { CallControls } from './CallControls';
 
 interface DirectMessageThreadProps {
   peer?: PublicProfile;
@@ -72,6 +73,7 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
         </div>
       </header>
       <MessagePrivacyNotice />
+      {conversation?.kind !== 'group' && peerId && <CallControls />}
       <section className={styles.messageList} aria-label={`Conversation: ${title}`} aria-live="polite">
         {isLoading ? <p className={styles.emptyMessage}>Opening conversation...</p> : messages.length === 0 ? (
           <p className={styles.emptyMessage}>This is the beginning of your conversation.</p>
