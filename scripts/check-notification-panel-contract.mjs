@@ -42,3 +42,7 @@ console.log('Header navigation and notification panel contract checks passed.');
 assert.match(notifications, /const activeAccountId = useRef<string \| null>\(null\)/, 'Notification mutations must track the active account synchronously');
 assert.match(notifications, /if \(!isSameSession\(\)\) return/, 'Late read mutations must not update a different account session');
 assert.match(notifications, /if \(activeAccountId\.current !== accountId\) return/, 'Opening a stale notification must not navigate after an account switch');
+assert.match(notifications, /canAccessSanctuaryPage\(destination, currentUser\.profile\.role\)/, 'Notification destinations must respect the current account role');
+assert.match(notifications, /feature unavailable for your current account role\. It has not been marked as read/, 'Restricted notification destinations remain unread and explain why navigation was blocked');
+assert.match(notifications, /if \(!canAccessSanctuaryPage\(destination, currentUser\.profile\.role\)\) \{[\s\S]*?return;[\s\S]*?\}\s*await markRead\(item\)/, 'Role access is checked before a notification is marked read');
+

@@ -840,3 +840,11 @@ Two connected Supabase projects were inspected read-only: `kchrskkchoyqweowskxv`
 - Preserve the lower-privilege guest policy: guests retain only Today, public Cosmic Arcade, Sanctuary Roadmap, and Support entry points.
 - Add navigation and role-page regression contracts to CI.
 - **Status:** code and checks committed on `fix/basic-user-navigation-restrictions-2026-10-29`; exact-head CI/build, branch integration, and live deployment verification remain pending. Client-side route guards improve UX but do not replace server/database authorization for sensitive data or actions.
+
+## Role-aware notification routing — 2026-10-29
+
+- Check the destination page role before marking a community notification as read or navigating to its target.
+- Basic users who receive a notification for a VIP-only Short or Event are told the destination is restricted; the notification stays unread and the current page is preserved.
+- Posts and other destinations continue through the shared Sanctuary page-role allowlist, preventing notification clicks from bypassing navigation visibility.
+- Add a regression contract for access-check ordering, unread preservation, and the restricted-destination message.
+- **Status:** implementation and source-contract check committed on `fix(notification-role-routing-2026-10-29`; exact-head CI/typecheck/build and live preview verification remain pending.
