@@ -21,8 +21,7 @@ import { PersonalPlanner } from '@/modules/personal-planner/PersonalPlanner';
 import { TokenShopPanel, WalletPanel } from '@/modules/economy';
 import { CosmicArcade } from '@/components/CosmicArcade';
 import { GuildWorld } from '@/components/GuildWorld';
-import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
-import { GuildRoadmap } from '@/components/GuildRoadmap';
+import { RoadmapHub } from '@/components/RoadmapHub';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
@@ -235,9 +234,9 @@ export function AppWorkspace() {
       ) : activeNavigation === 'feedback' ? (
         <FeedbackHub />
       ) : activeNavigation === 'roadmap' ? (
-        <SanctuaryRoadmap />
+        <RoadmapHub />
       ) : activeNavigation === 'guild-roadmap' ? (
-        <GuildRoadmap />
+        <RoadmapHub initialView="guild" />
       ) : activeNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
