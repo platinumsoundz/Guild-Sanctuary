@@ -34,3 +34,29 @@ Use a configurable client URL such as `NEXT_PUBLIC_5_SLEEVES_2D_URL` rather than
 
 ## Current implementation scope
 GuildConsolePlayer provides the system overlay and fullscreen controls for iframe-hosted games. Integration into the main library is in progress. This component alone does not mean production is deployed or all games are compatible.
+
+
+## Product architecture: Sanctuary and Guild are distinct worlds
+
+**Sanctuary is the public-facing experience:** a spiritual journey connecting space, reflection, growth and community. **The Guild is a hidden, activated console community:** a gaming-focused world with its own intention, culture and member experience. Do not treat these names as interchangeable and do not present the Guild as merely a visible Sanctuary page.
+
+They are two experience modes built on the same Sanctuary application codebase, infrastructure, identity, shared systems and database. The Guild should reuse the Sanctuary's working foundations so improvements to shared code and services benefit both worlds without duplicating entire systems. Keep the Guild's entry hidden/activated and preserve its distinct interface, language, community purpose and gaming tools. Shared infrastructure must not erase the difference in intent or expose the hidden Guild entry by accident.
+
+### Guild feature requirements and direction
+
+- **Themes:** Guild must use the same theme-selection system as Sanctuary. Apply the selected theme consistently to the Guild shell, game library, system overlay and settings. Do not create a disconnected second theme store or hardcode a theme that ignores the user's selection.
+- **Shared tokens and wallet:** reuse the Sanctuary identity and token balance/ledger, with the same security, authorization and transaction rules. Do not create a parallel Guild currency or client-only token balance.
+- **Sanctuary Token Shop customizations:** Guild should be able to use eligible customizations unlocked or owned through the existing Sanctuary Token Shop wherever compatible, while allowing Guild-specific presentation.
+- **Separate Guild Token Shop:** build a distinct Guild shop/catalog for Guild-oriented digital items and gaming customizations, but connect purchases to the shared token wallet and authoritative transaction/ownership records. Keep shop inventory and product identity separate from the general Sanctuary shop where needed; do not duplicate the wallet or bypass server-side spending checks. Token spending remains gated until migrations, guarded RPCs, grants, idempotency and staging checks pass.
+- **Expanded gaming settings:** grow the Guild settings beyond the basic player overlay: controller detection and mappings, input sensitivity/deadzones where the game supports them, keyboard/touch controls, display/fullscreen, audio and music levels, accessibility, performance/quality preferences, game-specific options, and clear diagnostics. Persist settings to the user's account where appropriate and use local device settings only for device-specific preferences. Never imply a parent-page setting can control a cross-origin game's internals unless an integration actually supports it.
+- **Future Spotify integration:** design a future integration point for account linking, playback controls and permissions, but treat it as planned—not implemented. Respect Spotify authentication, API availability, licensing/playback restrictions, and user consent. Keep the Guild usable without Spotify.
+- **Future Guild systems:** expose planned systems as clearly labelled placeholders only when useful, with no false claim that an unfinished integration is live.
+
+### Implementation rules
+
+1. Prefer shared components, hooks, services, theme tokens, wallet APIs and database tables over Guild-only copies.
+2. Keep Guild-only presentation and features behind the activated Guild experience and appropriate authorization checks.
+3. Use feature boundaries/configuration for different experience intent, not forked versions of shared logic.
+4. Make database/schema changes backward-compatible for Sanctuary and Guild; test both experiences against the same staging data and identity model.
+5. Any wallet/shop write must be server-authoritative, authorized, auditable and idempotent. Never enable production spending solely because the UI exists.
+6. Track each item as planned, in progress, tested or live; do not describe planned features as delivered until verified.
