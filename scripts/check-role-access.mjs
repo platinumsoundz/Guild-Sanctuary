@@ -28,7 +28,7 @@ assert.match(gates, /if \(!\(page in pageMinimumRole\)\) return role === 'develo
 assert.match(nav, /navigationItems\.filter\(\(item\) => canAccessSanctuaryPage\(item\.id, role\)\)/, 'main navigation filters pages by role');
 assert.match(guildNav, /const canOpenGuild = role === 'developer' \|\| role === 'owner'/, 'Guild navigation is restricted to developers and owners');
 assert.match(workspace, /canAccessSanctuaryPage\(activeNavigation, currentRole\)/, 'direct navigation attempts are redirected');
-assert.match(workspace, /activeNavigation === 'guild' && canUseGuild/, 'Guild experience is guarded at the render boundary');
+assert.match(workspace, /activeNavigation === 'guild' \? \(canUseGuild \? \(/, 'Guild experience is guarded at the render boundary');
 assert.match(settings, /\(role === 'developer' \|\| role === 'owner'\) && <section[^>]*aria-labelledby="hidden-guild-title"/, 'settings hide Guild entry controls from other roles');
 assert.match(donationRoute, /sanctuary_purchase: 'community_donation'/, 'donation checkout identifies its account-linked purpose');
 assert.match(webhook, /record_sanctuary_donation/, 'verified donation webhook records entitlements server-side');
