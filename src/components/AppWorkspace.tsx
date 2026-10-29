@@ -21,6 +21,9 @@ import { PersonalPlanner } from '@/modules/personal-planner/PersonalPlanner';
 import { TokenShopPanel, WalletPanel } from '@/modules/economy';
 import { CosmicArcade } from '@/components/CosmicArcade';
 import { GuildWorld } from '@/components/GuildWorld';
+import { GamesHub } from '@/components/GamesHub';
+import { GuildCompanionHub } from '@/components/GuildCompanionHub';
+import { GuildNavigation, type GuildPage } from '@/components/GuildNavigation';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { GuildRoadmap } from '@/components/GuildRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
@@ -62,6 +65,11 @@ export function AppWorkspace() {
   const [accountAccessStatus, setAccountAccessStatus] = useState<'checking' | 'active' | 'suspended' | 'banned' | 'error'>('checking');
   const [accountSuspendedUntil, setAccountSuspendedUntil] = useState<string | null>(null);
   const [accountRestrictionReason, setAccountRestrictionReason] = useState<string | null>(null);
+  const [guildPage, setGuildPage] = useState<GuildPage>('home');
+  const guildInternalPages: GuildPage[] = ['home', 'arcade', 'library', 'music', 'photos', 'tools'];
+  const contentNavigation = activeNavigation === 'guild'
+    ? (guildInternalPages.includes(guildPage) ? 'guild' : guildPage)
+    : activeNavigation;
 
   useEffect(() => {
     if (!isSessionReady) return;
@@ -111,6 +119,7 @@ export function AppWorkspace() {
       const connected = Boolean(getConnectedGamepad());
       if (connected && !wasConnected && accessEnabled()) {
         window.localStorage.setItem('sanctuary-open-hidden-guild-entry', '1');
+        setGuildPage('home');
         setActiveNavigation('guild');
       }
       wasConnected = connected;
@@ -122,7 +131,8 @@ export function AppWorkspace() {
       if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
       event.preventDefault();
       window.localStorage.setItem('sanctuary-open-hidden-guild-entry', '1');
-      setActiveNavigation('guild');
+      setGuildPage('home');
+        setActiveNavigation('guild');
     };
     window.addEventListener('keydown', onKeyDown);
     const poll = window.setInterval(detectController, 500);
@@ -134,10 +144,10 @@ export function AppWorkspace() {
   }, [currentUser, isAuthenticated, isGuest, isSessionReady, setActiveNavigation]);
 
   useEffect(() => {
-    if (activeNavigation !== 'profile') {
+    if (contentNavigation !== 'profile') {
       setProfileThemePreview(null);
     }
-  }, [activeNavigation]);
+  }, [contentNavigation]);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('tip') === 'success') {
@@ -150,7 +160,7 @@ export function AppWorkspace() {
   }, [setActiveNavigation]);
 
   useEffect(() => {
-    if (isGuest || activeNavigation !== 'profile' || !currentUser) {
+    if (isGuest || contentNavigation !== 'profile' || !currentUser) {
       return;
     }
 
@@ -167,7 +177,7 @@ export function AppWorkspace() {
     return () => {
       cancelled = true;
     };
-  }, [activeNavigation, currentUser, isGuest]);
+  }, [contentNavigation, currentUser, isGuest]);
 
   const openMessage = (profile: PublicProfile) => {
     setViewedProfile(null);
@@ -185,9 +195,9 @@ export function AppWorkspace() {
     setActiveNavigation(navigation);
   };
 
-  const authenticatedContent = activeNavigation === 'today' ? (
+  const authenticatedContent = contentNavigation === 'today' ? (
     <SanctuaryHome onNavigate={openNavigation} />
-  ) : isGuest && !['support', 'games', 'roadmap'].includes(activeNavigation) ? (
+  ) : isGuest && !['support', 'games', 'roadmap'].includes(contentNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
       <h1 id="guest-access-title">Explore before you join</h1>
@@ -203,47 +213,47 @@ export function AppWorkspace() {
         Sign in to post, react, comment, message, manage your profile, use the planner, or access wallet and shop features.
       </p>
     </main>
-  ) : activeNavigation === 'notifications' ? (
+  ) : contentNavigation === 'notifications' ? (
     <main className={styles.supportPage}>
       <NotificationBar fullPage />
     </main>
-  ) : activeNavigation === 'support' ? (
+  ) : contentNavigation === 'support' ? (
     <main className={styles.supportPage}>
       <SupportPanel />
     </main>
   ) : isAuthenticated && currentUser ? (
     <>
-      {activeNavigation === 'planner' ? (
+      {contentNavigation === 'planner' ? (
         <PersonalPlanner userId={currentUser.user.id} />
-      ) : activeNavigation === 'wallet' ? (
+      ) : contentNavigation === 'wallet' ? (
         canAccessSanctuaryFeature('wallet', currentUser.profile.role) ? (
           <main className={styles.supportPage}><WalletPanel userId={currentUser.user.id} isGuest={isGuest} /></main>
         ) : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Wallet access is restricted</h1><p className={styles.sectionDescription}>The Wallet is temporarily available to VIP members and above while purchases and spending are being tested. Your account and community access are unchanged.</p></main>
         )
-      ) : activeNavigation === 'shop' ? (
+      ) : contentNavigation === 'shop' ? (
         canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} role={currentUser.profile.role} /> : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Token Shop access is restricted</h1><p className={styles.sectionDescription}>The Token Shop is temporarily available to VIP members and above while its payment and redemption systems are being verified. Token spending remains disabled until testing is complete.</p></main>
         )
-      ) : activeNavigation === 'games' ? (
+      ) : contentNavigation === 'games' ? (
         <CosmicArcade />
-      ) : activeNavigation === 'guild' ? (
+      ) : contentNavigation === 'guild' ? (
         <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
-      ) : activeNavigation === 'admin' ? (
+      ) : contentNavigation === 'admin' ? (
         <AdminDashboard role={currentUser.profile.role} />
-      ) : activeNavigation === 'roadmap' ? (
+      ) : contentNavigation === 'roadmap' ? (
         <SanctuaryRoadmap />
-      ) : activeNavigation === 'guild-roadmap' ? (
+      ) : contentNavigation === 'guild-roadmap' ? (
         <GuildRoadmap />
-      ) : activeNavigation === 'feed' ? (
+      ) : contentNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
           <Feed />
           <AdSlot placement="feed-sidebar" />
         </>
-      ) : activeNavigation === 'events' ? (
+      ) : contentNavigation === 'events' ? (
         <MeetupCalendarPlaceholder />
-      ) : activeNavigation === 'profile' ? (
+      ) : contentNavigation === 'profile' ? (
         <ProfileDashboard
           profile={currentUser.profile}
           posts={profilePosts}
@@ -251,23 +261,23 @@ export function AppWorkspace() {
           onSave={updateProfile}
           onThemeChange={setProfileThemePreview}
         />
-      ) : activeNavigation === 'discover' && viewedProfile ? (
+      ) : contentNavigation === 'discover' && viewedProfile ? (
         <PublicProfilePage
           profile={viewedProfile}
           onBack={() => setViewedProfile(null)}
           onMessage={openMessage}
         />
-      ) : activeNavigation === 'discover' ? (
+      ) : contentNavigation === 'discover' ? (
         <ProfileDiscovery
           currentUserId={currentUser.user.id}
           onMessage={openMessage}
           onView={(profile) => setViewedProfile(profile)}
         />
-      ) : activeNavigation === 'messages' && messagePeer ? (
+      ) : contentNavigation === 'messages' && messagePeer ? (
         <DirectMessageThread peer={messagePeer} onBack={() => setMessagePeer(null)} />
-      ) : activeNavigation === 'messages' && messageConversation ? (
+      ) : contentNavigation === 'messages' && messageConversation ? (
         <DirectMessageThread conversation={messageConversation} onBack={() => setMessageConversation(null)} />
-      ) : activeNavigation === 'messages' ? (
+      ) : contentNavigation === 'messages' ? (
         <MessagesInbox
           currentUserId={currentUser.user.id}
           onDiscoverPeople={() => setActiveNavigation('discover')}
@@ -276,12 +286,12 @@ export function AppWorkspace() {
             setMessageConversation(conversation);
           }}
         />
-      ) : activeNavigation === 'shorts' ? (
+      ) : contentNavigation === 'shorts' ? (
         <>
           <AdSlot placement="shorts" />
           <ShortsFeed />
         </>
-      ) : activeNavigation === 'settings' ? (
+      ) : contentNavigation === 'settings' ? (
         <SettingsHub
           userId={currentUser.user.id}
           email={currentUser.user.email}
@@ -294,7 +304,8 @@ export function AppWorkspace() {
           onLaunchGuild={() => {
             if (isGuest || !isAuthenticated || !currentUser) return;
             try { window.localStorage.setItem('sanctuary-open-hidden-guild-entry', '1'); } catch { /* Direct navigation still works if storage is blocked. */ }
-            setActiveNavigation('guild');
+            setGuildPage('home');
+        setActiveNavigation('guild');
           }}
         />
       ) : (
@@ -320,11 +331,36 @@ export function AppWorkspace() {
   return (
     <MotionConfig reducedMotion="user">
       <ResponsiveShell>
-        <div
-          className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`}
-          data-world="sanctuary"
-          style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}
-        >
+        {activeNavigation === 'guild' ? (
+          <div className={styles.guildExperience} data-world="guild">
+            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={setGuildPage} onExit={() => setActiveNavigation('today')} />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={guildPage} className={styles.guildWorldContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
+                {guildPage === 'home' ? (
+                  <main className={styles.guildLanding} aria-labelledby="guild-home-title">
+                    <p className={styles.sectionEyebrow}>THE GUILD · YOUR CONSOLE</p>
+                    <h1 id="guild-home-title">Your worlds, all in one place.</h1>
+                    <p className={styles.sectionDescription}>A focused home for your games, music, memories and the Sanctuary spaces you already use. Open the menu at the top left to move between them.</p>
+                    <div className={styles.guildDestinationGrid}>
+                      <button type="button" onClick={() => setGuildPage('arcade')}><span>01 · PLAY</span><strong>Arcade</strong><small>Enter Guild worlds and browser games.</small></button>
+                      <button type="button" onClick={() => setGuildPage('library')}><span>02 · COLLECT</span><strong>Game library</strong><small>The 5 Sleeves first, then your saved games.</small></button>
+                      <button type="button" onClick={() => setGuildPage('music')}><span>03 · LISTEN</span><strong>Music player</strong><small>Play audio files selected from this device.</small></button>
+                      <button type="button" onClick={() => setGuildPage('photos')}><span>04 · REMEMBER</span><strong>Photo slideshow</strong><small>Build a private, in-browser slideshow.</small></button>
+                      <button type="button" onClick={() => setGuildPage('tools')}><span>05 · EXPLORE</span><strong>Guild tools</strong><small>Cloud Lab status and gaming destinations.</small></button>
+                      <button type="button" onClick={() => setGuildPage('today')}><span>06 · SANCTUARY</span><strong>All your Sanctuary pages</strong><small>Community, messages, profile, planner, settings and more.</small></button>
+                    </div>
+                  </main>
+                ) : guildPage === 'arcade' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
+                : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /><GuildCompanionHub view="library" /></div>
+                : guildPage === 'music' ? <div className={styles.guildSection}><GuildCompanionHub view="music" /></div>
+                : guildPage === 'photos' ? <div className={styles.guildSection}><GuildCompanionHub view="photos" /></div>
+                : guildPage === 'tools' ? <div className={styles.guildSection}><GuildCompanionHub view="tools" /></div>
+                : authenticatedContent}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`} data-world="sanctuary" style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}>
         <Navigation
           activeNavigation={activeNavigation}
           currentUser={currentUser}
@@ -362,7 +398,8 @@ export function AppWorkspace() {
             ) : authenticatedContent}
           </motion.div>
         </AnimatePresence>
-        </div>
+          </div>
+        )}
       </ResponsiveShell>
     </MotionConfig>
   );
