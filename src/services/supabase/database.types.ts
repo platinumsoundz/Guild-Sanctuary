@@ -197,6 +197,18 @@ export interface Database {
         created_at: string;
         read_at: string | null;
       }>;
+      moderation_user_notifications: Table<{
+        id: string;
+        recipient_id: string;
+        actor_id: string | null;
+        event_type: 'warn' | 'hide' | 'remove' | 'restore' | 'suspend' | 'ban' | 'report_update';
+        target_type: string;
+        target_id: string | null;
+        rationale: string;
+        expires_at: string | null;
+        created_at: string;
+        read_at: string | null;
+      }>;
       conversations: Table<ConversationRow>;
       conversation_members: Table<ConversationMemberRow>;
       direct_conversation_pairs: Table<{
@@ -327,6 +339,10 @@ export interface Database {
         Returns: undefined;
       };
       is_moderator: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_wallet_eligible: {
         Args: Record<string, never>;
         Returns: boolean;
       };
