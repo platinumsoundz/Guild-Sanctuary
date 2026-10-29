@@ -82,3 +82,14 @@ The Guild should feel like **Steam Big Picture Mode**: a controller-friendly con
 3. Add a visible, collapsible virtual D-pad/joystick + A/B console controls for Guild navigation and selection.
 4. For game controls, integrate only with game-side input support and verify actual movement/selection in each game.
 5. Keep the 2D static-client hosting investigation separate from input work; preserve its authoritative multiplayer server and avoid changing the existing deployment until the replacement is tested.
+
+
+## Native game touch support — repository documentation reviewed
+
+The 2D repository README describes its browser client as supporting keyboard, touch and gamepad input. The 3D repository README describes its existing mobile-shooter touch layout (analog movement, right-side camera drag, AIM, SWAP and action buttons) and gamepad mappings. This confirms that game-side touch support is documented in both projects; it does **not** substitute for running either game inside the Guild on actual Android devices. The 3D game notes that touch-button sizing and placement remain deferred by owner request, so that is a concrete follow-up for the device pass. The 2D launch remains disabled until `NEXT_PUBLIC_5_SLEEVES_2D_URL` is configured to a verified client host.
+
+## Console navigation implementation status
+
+The player now includes a touch D-pad plus A/Select and B/Back controls for the Guild system menu, directional focus movement across menu actions, keyboard arrow navigation, gamepad D-pad/stick focus movement, A/confirm and B/back handling, Start/Home menu toggling where exposed, focus-visible styling and a hide/show quick-menu affordance. These controls navigate the Guild UI only. They intentionally do not claim to steer a game inside a cross-origin iframe; the two games' own native touch controls remain responsible for in-game movement and actions.
+
+The Guild library roadmap now explicitly exposes the Guild Token Shop and Spotify as planned, non-functional placeholders. The shop must use the shared Sanctuary wallet and server-authoritative ownership/transaction checks; no token spending is enabled by these UI additions. Spotify remains optional and depends on API access, permissions and playback restrictions.
