@@ -1,13 +1,19 @@
 .settings {
   display: grid;
-  max-width: 900px;
-  gap: 16px;
+  width: min(100%, 1040px);
+  max-width: 1040px;
+  gap: 18px;
   margin: 0 auto;
-  padding: 42px clamp(18px, 5vw, 64px);
+  padding: clamp(22px, 4vw, 44px) clamp(14px, 4vw, 40px) 48px;
 }
 
 .header {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  padding: clamp(18px, 3vw, 30px);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  border-radius: var(--radius-lg, 22px);
+  background: radial-gradient(ellipse at 90% 0%, color-mix(in srgb, var(--accent) 17%, transparent), transparent 48%), linear-gradient(145deg, color-mix(in srgb, var(--surface-raised) 95%, transparent), color-mix(in srgb, var(--surface) 96%, transparent));
+  box-shadow: var(--shadow-card, 0 12px 34px rgb(0 0 0 / 18%));
 }
 
 .eyebrow {
@@ -20,46 +26,55 @@
 .header h1 {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(26px, 4vw, 36px);
-  font-weight: 400;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  text-wrap: balance;
 }
 
 .header > p:last-child,
 .hint,
 .status {
   color: var(--muted);
-  font: 12px/1.6 Arial, sans-serif;
+  font: 13px/1.65 system-ui, sans-serif;
 }
 
 .panel {
   min-width: 0;
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  background: var(--surface-raised);
+  padding: clamp(16px, 2.5vw, 24px);
+  border: 1px solid color-mix(in srgb, var(--accent) 17%, var(--line));
+  border-radius: var(--radius-lg, 22px);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--surface-raised) 94%, transparent), color-mix(in srgb, var(--surface) 98%, transparent));
+  box-shadow: 0 10px 30px rgb(0 0 0 / 12%), inset 0 1px 0 rgb(255 255 255 / 3%);
 }
 
 .panel h2 {
   margin: 0 0 14px;
   color: var(--ink);
   font-size: 18px;
-  font-weight: 400;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .toggleList,
 .linksForm {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .toggleRow {
   display: flex;
-  min-height: 40px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 74%, transparent);
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   color: var(--ink);
-  font: 12px Arial, sans-serif;
+  font: 13px/1.4 system-ui, sans-serif;
 }
 
 .toggleRow input[type='checkbox'],
@@ -75,10 +90,10 @@
   min-height: 36px;
   padding: 7px 9px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 10px;
   background: var(--surface);
   color: var(--ink);
-  font: 12px Arial, sans-serif;
+  font: 13px system-ui, sans-serif;
 }
 
 .field {
@@ -108,29 +123,36 @@
   min-height: 36px;
   padding: 8px 12px;
   border: 1px solid var(--accent);
-  border-radius: 4px;
-  background: var(--accent);
-  color: #fff;
+  border-radius: 11px;
+  background: linear-gradient(120deg, var(--accent), color-mix(in srgb, var(--accent) 72%, #49c6d7));
+  color: var(--accent-contrast, #11102a);
   cursor: pointer;
-  font: 700 11px Arial, sans-serif;
+  font: 750 12px system-ui, sans-serif;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .layoutChoices {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 10px;
   color: var(--ink);
-  font: 12px Arial, sans-serif;
+  font: 13px system-ui, sans-serif;
 }
 
 .layoutChoices label {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
 }
 
 .dangerPanel {
-  border-color: #d8a7a2;
+  border-color: color-mix(in srgb, var(--danger, #d8757b) 45%, var(--line));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--danger, #d8757b) 5%, var(--surface-raised)), var(--surface-raised));
 }
 
 .deleteButton {
@@ -151,14 +173,64 @@
 
 @media (max-width: 560px) {
   .settings {
-    padding: 30px 17px;
+    padding: 22px 12px 36px;
   }
 
   .panel {
     padding: 14px;
+    border-radius: 18px;
+  }
+
+  .toggleRow {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+
+  .toggleRow select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .field input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .primaryButton,
+  .deleteButton {
+    min-height: 44px;
   }
 
   .linksForm {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+
+/* Keyboard and touch refinements for the cosmic settings surface. */
+.toggleRow:focus-within,
+.field:focus-within,
+.layoutChoices label:focus-within {
+  border-color: var(--accent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 36%, transparent);
+  outline-offset: 1px;
+}
+
+.toggleRow select:focus-visible,
+.field input:focus-visible,
+.primaryButton:focus-visible,
+.deleteButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.primaryButton:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton { transition: none; }
 }
