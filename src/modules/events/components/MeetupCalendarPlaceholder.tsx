@@ -20,6 +20,8 @@ export function MeetupCalendarPlaceholder() {
   const [startTime, setStartTime] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [locationAddress, setLocationAddress] = useState('');
+  const [isResolvingLocation, setIsResolvingLocation] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EventView | null>(null);
   const [selectedMapEventId, setSelectedMapEventId] = useState<string | null>(null);
   const [nearbyRadiusKm, setNearbyRadiusKm] = useState(10);
@@ -72,6 +74,7 @@ export function MeetupCalendarPlaceholder() {
     setStartTime('');
     setLatitude('');
     setLongitude('');
+    setLocationAddress('');
     setEditingEvent(null);
   };
 
@@ -80,6 +83,7 @@ export function MeetupCalendarPlaceholder() {
     setFormError(null);
 
     try {
+      if (!editingEvent && (!locationAddress.trim() || !latitude || !longitude)) throw new Error('Search for a venue or address and select a map result before publishing.');
       const startsAt = toIsoDateTime(startDate, startTime);
       if (editingEvent) {
         await editEvent(editingEvent.id, { title, description, startsAt, locationCoords: { latitude: Number(latitude), longitude: Number(longitude) } });
@@ -107,6 +111,38 @@ export function MeetupCalendarPlaceholder() {
     setStartTime(localDateTime.slice(11, 16));
     setLatitude(String(event.locationCoords.latitude));
     setLongitude(String(event.locationCoords.longitude));
+    setLocationAddress('');
+  };
+
+  const resolveLocation = async () => {
+    const query = locationAddress.trim();
+    if (query.length < 3) {
+      setFormError('Enter a venue name or address with at least three characters.');
+      return;
+    }
+    setIsResolvingLocation(true);
+    setFormError(null);
+    try {
+      const response = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=' + encodeURIComponent(query), {
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) throw new Error('The map provider could not search that location. Please try again.');
+      const results: unknown = await response.json();
+      if (!Array.isArray(results) || !results.length) throw new Error('No matching place was found. Try a fuller venue name or address.');
+      const result = results[0] as { lat?: unknown; lon?: unknown; display_name?: unknown };
+      const lat = Number(result.lat);
+      const lon = Number(result.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+        throw new Error('The map provider returned an invalid location.');
+      }
+      setLatitude(String(lat));
+      setLongitude(String(lon));
+      if (typeof result.display_name === 'string') setLocationAddress(result.display_name);
+    } catch (locationError) {
+      setFormError(locationError instanceof Error ? locationError.message : 'Location search failed.');
+    } finally {
+      setIsResolvingLocation(false);
+    }
   };
 
   const handleDelete = async (eventId: string) => {
@@ -150,7 +186,7 @@ export function MeetupCalendarPlaceholder() {
             <span>Description</span>
             <textarea value={description} onChange={(event) => setDescription(event.currentTarget.value)} maxLength={2000} rows={3} />
           </label>
-          <p className={styles.formNote}>Dates use your device’s local timezone. Add the venue coordinates below, then preview the pin on a real map before publishing. A venue name or address is not stored in this version, so the event will show its map pin instead.</p>
+          <p className={styles.formNote}>Dates use your device’s local timezone. Search for a venue or address using OpenStreetMap, then check the map pin before publishing. Coordinates are handled in the background.</p>
           <div className={styles.formRow}>
             <label className={styles.field}>
               <span>Event date (your local time)</span>
@@ -160,15 +196,15 @@ export function MeetupCalendarPlaceholder() {
               <span>Start time (your local time)</span>
               <input type="time" step="60" value={startTime} onChange={(event) => setStartTime(event.currentTarget.value)} required />
             </label>
-            <label className={styles.field}>
-              <span>Latitude</span>
-              <input type="number" min="-90" max="90" step="any" inputMode="decimal" value={latitude} onChange={(event) => setLatitude(event.currentTarget.value)} required />
-            </label>
-            <label className={styles.field}>
-              <span>Longitude</span>
-              <input type="number" min="-180" max="180" step="any" inputMode="decimal" value={longitude} onChange={(event) => setLongitude(event.currentTarget.value)} required />
-            </label>
           </div>
+          <div className={styles.locationSearchRow}>
+            <label className={styles.field}>
+              <span>Venue or address</span>
+              <input value={locationAddress} onChange={(event) => { setLocationAddress(event.currentTarget.value); setLatitude(''); setLongitude(''); }} maxLength={250} placeholder="Search a venue, street, or place…" required={!editingEvent} />
+            </label>
+            <button className={styles.secondaryButton} type="button" onClick={() => void resolveLocation()} disabled={isResolvingLocation}>{isResolvingLocation ? 'Searching map…' : 'Find location'}</button>
+          </div>
+          {editingEvent && !locationAddress && <p className={styles.formNote}>This event already has a saved map pin. Search for a new place only if you want to move it.</p>}
           {coordinatePreview && (
             <div className={styles.coordinatePreview}>
               <MapPin size={17} aria-hidden="true" />
