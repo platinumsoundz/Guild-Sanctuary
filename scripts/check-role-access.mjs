@@ -26,6 +26,8 @@ for (const page of ['games', 'guild-roadmap', 'guild']) {
 assert.match(gates, /if \(role === 'owner'\) return true/, 'owner bypasses page gates');
 assert.match(gates, /if \(!\(page in pageMinimumRole\)\) return role === 'developer'/, 'unregistered/new pages fail closed to developer and owner');
 assert.match(nav, /navigationItems\.filter\(\(item\) => canAccessSanctuaryPage\(item\.id, role\)\)/, 'main navigation filters pages by role');
+assert.match(nav, /guestNavigationPages = new Set<NavigationState>\(\['today', 'games', 'roadmap', 'support'\]\)/, 'guests only see public entry points');
+assert.match(nav, /: currentUser && role\s*\?\s*navigationItems\.filter/, 'missing account state never inherits basic-user navigation');
 assert.match(guildNav, /const canOpenGuild = role === 'developer' \|\| role === 'owner'/, 'Guild navigation is restricted to developers and owners');
 assert.match(workspace, /canAccessSanctuaryPage\(activeNavigation, currentRole\)/, 'direct navigation attempts are redirected');
 assert.match(workspace, /activeNavigation === 'guild' \? \(canUseGuild \? \(/, 'Guild experience is guarded at the render boundary');
