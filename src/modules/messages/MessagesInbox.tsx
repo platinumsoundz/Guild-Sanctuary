@@ -98,6 +98,21 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
     };
   }, [currentUserId, refresh]);
 
+  // Keep the inbox current when a new conversation arrives on another device.
+  // Poll only while this account is active and the tab is visible.
+  useEffect(() => {
+    if (!currentUserId || !sessionReady) return;
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') void refresh();
+    };
+    const interval = window.setInterval(refreshWhenVisible, 30_000);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+    };
+  }, [currentUserId, refresh, sessionReady]);
+
   const search = async (value: string) => {
     setQuery(value);
     const requestId = ++searchRequest.current;
