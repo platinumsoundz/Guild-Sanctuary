@@ -339,8 +339,9 @@ export function AppWorkspace() {
         {activeNavigation === 'guild' ? (
           <div className={styles.guildExperience} data-world="guild">
             <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={setGuildPage} onExit={() => setActiveNavigation('today')} />
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div key={guildPage} className={styles.guildWorldContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
+            <motion.div className={styles.guildWorldContent}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div key={guildPage} className={styles.guildPageContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
                 {guildPage === 'home' ? (
                   <main className={styles.guildLanding} aria-labelledby="guild-home-title">
                     <p className={styles.sectionEyebrow}>THE GUILD · YOUR CONSOLE</p>
@@ -361,9 +362,10 @@ export function AppWorkspace() {
                 : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /></div>
                 : ['music', 'photos', 'tools'].some((page) => page === guildPage) ? null
                 : authenticatedContent}
-                <GuildCompanionHub view={guildPage === 'library' || guildPage === 'music' || guildPage === 'photos' || guildPage === 'tools' ? guildPage : 'all'} hidden={!(['library', 'music', 'photos', 'tools'] as GuildPage[]).includes(guildPage)} />
-              </motion.div>
-            </AnimatePresence>
+                </motion.div>
+              </AnimatePresence>
+              <GuildCompanionHub view={guildPage === 'library' || guildPage === 'music' || guildPage === 'photos' || guildPage === 'tools' ? guildPage : 'all'} hidden={!(['library', 'music', 'photos', 'tools'] as GuildPage[]).includes(guildPage)} />
+            </motion.div>
           </div>
         ) : (
           <div className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`} data-world="sanctuary" style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}>
