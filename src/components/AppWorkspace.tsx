@@ -124,7 +124,7 @@ export function AppWorkspace() {
   }, [currentUser?.user.id, isAuthenticated, isGuest, isSessionReady]);
 
   useEffect(() => {
-    if (!isSessionReady || !isAuthenticated || isGuest || !currentUser) return;
+    if (!isSessionReady || !isAuthenticated || isGuest || !currentUser || !canUseGuild) return;
     const accessEnabled = () => {
       try { return window.localStorage.getItem('sanctuary-hidden-guild-access') !== 'disabled'; }
       catch { return true; }
@@ -156,7 +156,7 @@ export function AppWorkspace() {
       window.removeEventListener('keydown', onKeyDown);
       window.clearInterval(poll);
     };
-  }, [currentUser, isAuthenticated, isGuest, isSessionReady, setActiveNavigation]);
+  }, [currentUser, isAuthenticated, isGuest, isSessionReady, canUseGuild, setActiveNavigation]);
 
   useEffect(() => {
     if (activeNavigation !== 'guild' || guildPage !== 'home') return;
@@ -334,6 +334,7 @@ export function AppWorkspace() {
         <SettingsHub
           userId={currentUser.user.id}
           email={currentUser.user.email}
+          role={currentUser.profile.role}
           twoFactorEnabled={currentUser.user.twoFactorEnabled}
           privacy={currentUser.profile.privacy}
           visibility={currentUser.profile.visibility}
@@ -370,7 +371,7 @@ export function AppWorkspace() {
   return (
     <MotionConfig reducedMotion="user">
       <ResponsiveShell>
-        {activeNavigation === 'guild' ? (
+        {activeNavigation === 'guild' && canUseGuild ? (
           <div className={styles.guildExperience} data-world="guild">
             <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
             <motion.div className={styles.guildWorldContent}>
