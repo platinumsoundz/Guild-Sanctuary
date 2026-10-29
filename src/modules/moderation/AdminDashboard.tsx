@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { ExternalLink, EyeOff, RotateCcw, Search, ShieldCheck, Trash2, UserCog } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
@@ -115,7 +115,7 @@ function DirectContentModeration() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const applyAction = async (event: React.FormEvent<HTMLFormElement>) => {
+  const applyAction = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const id = targetId.trim();
     const reason = rationale.trim();
