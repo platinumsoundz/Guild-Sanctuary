@@ -772,3 +772,10 @@ Two connected Supabase projects were inspected read-only: `kchrskkchoyqweowskxv`
 - Responsive layout: four launcher columns on wide screens, two on tablets, and stacked touch-friendly cards on narrow phones. Motion is disabled when the member requests reduced motion.
 - Extend the existing Today contract to cover all launcher destinations, semantic section labels, responsive breakpoints and reduced-motion behaviour. The existing `check:today-dashboard` package script remains the contract entry point.
 - **Release boundary:** this is a feature branch, not a production deployment. Exact-head CI, typecheck/build, and screenshot checks must pass; desktop/tablet/phone interaction review remains required before merge. This batch does not change authentication, database schema, payment settings, role assignments or token spending.
+
+
+## Notification overlay keyboard polish — 2026-10-29
+
+- Restore keyboard focus to the notification bell when a member closes the compact overlay using its close button, matching the existing Escape-key behaviour. This makes the top-right overlay easier to use with keyboard, switch-access and assistive navigation without changing the page behind it.
+- Extend the notification panel contract to guard focus restoration.
+- **Release status:** isolated feature branch; exact-head CI, typecheck/build and preview verification required. No production deployment or database changes are included.
