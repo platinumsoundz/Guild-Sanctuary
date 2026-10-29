@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Heart, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { ReportContentButton } from '@/modules/moderation';
 import { getLocalPublicProfileById } from '@/modules/auth';
@@ -27,6 +27,8 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingBody, setEditingBody] = useState('');
   const [commentEngagement, setCommentEngagement] = useState<Record<string, { liked: boolean; count: number }>>({});
+  const [pendingCommentLikes, setPendingCommentLikes] = useState<Record<string, boolean>>({});
+  const pendingCommentLikesRef = useRef(new Set<string>());
 
   useEffect(() => {
     setComments([]);
@@ -120,12 +122,18 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
   };
 
   const handleCommentLike = async (commentId: string) => {
+    if (!commentId || pendingCommentLikesRef.current.has(commentId)) return;
+    pendingCommentLikesRef.current.add(commentId);
+    setPendingCommentLikes((current) => ({ ...current, [commentId]: true }));
     try {
       const result = await toggleCommentLike(commentId, userId);
       setCommentEngagement((current) => ({ ...current, [commentId]: result }));
       setError(null);
     } catch (likeError) {
       setError(likeError instanceof Error ? likeError.message : 'Comment reaction could not be saved.');
+    } finally {
+      pendingCommentLikesRef.current.delete(commentId);
+      setPendingCommentLikes((current) => ({ ...current, [commentId]: false }));
     }
   };
 
@@ -172,7 +180,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
                 </div>
               ) : <p className={styles.commentBody}>{comment.body}</p>}
               <div className={styles.commentTools}>
-                <button type="button" aria-pressed={commentEngagement[comment.id]?.liked ?? false} onClick={() => void handleCommentLike(comment.id)} aria-label={`${commentEngagement[comment.id]?.liked ? 'Unlike' : 'Like'} comment`}>
+                <button type="button" disabled={Boolean(pendingCommentLikes[comment.id])} aria-busy={Boolean(pendingCommentLikes[comment.id])} aria-pressed={commentEngagement[comment.id]?.liked ?? false} onClick={() => void handleCommentLike(comment.id)} aria-label={`${commentEngagement[comment.id]?.liked ? 'Unlike' : 'Like'} comment`}>
                   <Heart size={12} fill={commentEngagement[comment.id]?.liked ? 'currentColor' : 'none'} /> Like <span>{commentEngagement[comment.id]?.count ?? 0}</span>
                 </button>
                 {comment.authorId === userId && editingCommentId !== comment.id && <>
