@@ -68,7 +68,7 @@ export default {
 
     const session = event.data.object as Stripe.Checkout.Session
     const metadata = session.metadata
-    if (!metadata || metadata.sanctuary_purchase !== 'token_bundle') {
+    if (!metadata) {
       return Response.json({ received: true })
     }
     if (session.payment_status !== 'paid') {
