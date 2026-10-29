@@ -50,7 +50,13 @@ assert.ok(guild.includes("gameState === 'paused' ? 'Resume' : 'Pause'"), 'player
 assert.doesNotMatch(workspace, /isGuest && activeNavigation === 'guild'/, 'guest sessions cannot open the hidden Guild');
 assert.match(guild, /!worldOpen && \(/, 'creator game lobby is visible before entering the arcade');
 assert.match(guild, /isAuthenticated && worldOpen/, 'original browser arcade stays behind authenticated Guild entry');
-assert.match(guild, /<GamesHub \/>/, 'creator games hub is visible in the public Guild lobby');
+assert.doesNotMatch(guild, /<GamesHub \/>/, 'the dedicated Guild game library is no longer mixed into the arcade trial page');
+const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
+assert.match(workspace, /className=\{styles\.guildExperience\}/, 'Guild opens in a full-screen world shell');
+assert.match(workspace, /<GuildNavigation selectedPage=\{guildPage\}/, 'Guild has its own navigation replacing Sanctuary navigation');
+assert.match(workspace, /GuildCompanionHub view="music"/, 'music has its own Guild page');
+assert.match(workspace, /GuildCompanionHub view="photos"/, 'photo slideshow has its own Guild page');
+assert.match(workspace, /guildPage === 'trials'/, 'original Guild arcade trials have their own page');
 assert.match(guild, /Sign in to Sanctuary to enter the Guild’s original browser arcade/, 'guest lobby explains the account boundary');
 assert.match(guild, /onClick=\{enterGuild\}>Enter Guild Arcade/, 'authenticated members can enter the original arcade from the visible lobby');
 assert.match(workspace, /isAuthenticated && !isGuest/, 'authenticated Guild identity is required for original arcade');
