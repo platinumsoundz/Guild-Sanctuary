@@ -66,6 +66,24 @@ export function SettingsHub({
   const [deletePhrase, setDeletePhrase] = useState('');
   const [deleteCode, setDeleteCode] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [guildAccessEnabled, setGuildAccessEnabled] = useState(true);
+
+  useEffect(() => {
+    try {
+      setGuildAccessEnabled(window.localStorage.getItem('sanctuary-hidden-guild-access') !== 'disabled');
+    } catch {
+      setGuildAccessEnabled(true);
+    }
+  }, []);
+
+  const updateGuildAccess = (enabled: boolean) => {
+    setGuildAccessEnabled(enabled);
+    try {
+      window.localStorage.setItem('sanctuary-hidden-guild-access', enabled ? 'enabled' : 'disabled');
+    } catch {
+      setError('This browser could not save the hidden Guild access preference.');
+    }
+  };
 
   useEffect(() => {
     document.documentElement.dataset.layout = settings.preferences.layout;
@@ -293,6 +311,15 @@ export function SettingsHub({
               <label><input type="radio" name="layout" value="comfortable" checked={settings.preferences.layout === 'comfortable'} onChange={() => void updatePreferences({ layout: 'comfortable' }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Comfortable</label>
               <label><input type="radio" name="layout" value="compact" checked={settings.preferences.layout === 'compact'} onChange={() => void updatePreferences({ layout: 'compact' }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Compact</label>
             </div>
+          </section>
+
+          <section className={styles.panel} aria-labelledby="hidden-guild-title">
+            <h2 id="hidden-guild-title">Hidden feature access</h2>
+            <p className={styles.hint}>The Guild is intentionally hidden from Sanctuary navigation. When enabled, press Ctrl + Shift + G on a keyboard, or connect a controller to reveal its entry. This preference is saved on this device.</p>
+            <label className={styles.toggleRow}>
+              <span>Enable hidden Guild access</span>
+              <input type="checkbox" checked={guildAccessEnabled} onChange={(event) => updateGuildAccess(event.currentTarget.checked)} />
+            </label>
           </section>
 
           <section className={`${styles.panel} ${styles.dangerPanel}`} aria-labelledby="delete-title">
