@@ -832,9 +832,11 @@ Two connected Supabase projects were inspected read-only: `kchrskkchoyqweowskxv`
 - This prevents transformed, clipped, blurred, or stacking-context ancestors in the game shell from trapping fixed-position menus behind the active page. Keep the page visible beneath the scrim and preserve existing close actions, navigation selection, keyboard handling, and touch controls.
 - **Release boundary:** not merged or confirmed live. Exact-head CI, typecheck/build, screenshot checks, and a real phone interaction check are required. No database, role, payment, or production configuration changes.
 
-## Basic-user navigation visibility — 2026-10-29
+## Basic-user navigation and route restrictions — 2026-10-29
 
-- Hide **Wallet**, **Cosmic Arcade**, **Token Shop**, and **Shorts** from the main navigation for basic users.
-- The destinations remain visible to **VIP, moderator, admin, developer, and owner** roles; admin tools retain their existing moderator-and-above gate.
-- Add navigation contract assertions so these destinations cannot accidentally reappear for basic users.
-- **Status:** code and regression assertions committed on `fix/basic-user-navigation-restrictions-2026-10-29`; merge, CI/build checks, route-level authorization review, and live deployment verification remain pending. This is a navigation visibility change, not a claim that the underlying routes are secured.
+- Hide **Wallet**, **Cosmic Arcade**, **Token Shop**, and **Shorts** from basic users in the main navigation.
+- VIP and higher roles retain access to those destinations; moderation tools remain moderator-and-above, while the hidden Guild and Guild roadmap remain developer/owner-only.
+- Use one shared page-role allowlist for navigation and workspace rendering, redirect unauthorized direct navigation to Today, and fail closed for unknown roles/pages.
+- Preserve the lower-privilege guest policy: guests retain only Today, public Cosmic Arcade, Sanctuary Roadmap, and Support entry points.
+- Add navigation and role-page regression contracts to CI.
+- **Status:** code and checks committed on `fix/basic-user-navigation-restrictions-2026-10-29`; exact-head CI/build, branch integration, and live deployment verification remain pending. Client-side route guards improve UX but do not replace server/database authorization for sensitive data or actions.
