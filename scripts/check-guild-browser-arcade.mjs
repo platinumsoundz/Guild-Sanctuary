@@ -146,3 +146,9 @@ assert.match(guildQuickHud, /Controller detected/, 'HUD reports detected control
 assert.match(guildQuickCss, /\.quickPanel/, 'quick menu has a dedicated responsive visual system');
 assert.match(guildQuickCss, /data-guild-reduced-motion/, 'the quick motion toggle reduces Guild interface animation');
 console.log('Guild console quick HUD contracts passed.');
+
+assert.match(workspace, /setGuildAutoLaunchRecent\(Boolean\(guildRecentTitle\)\)/, 'Continue Playing requests a direct launch of the most recent game');
+assert.match(workspace, /<GamesHub autoLaunchRecent=\{guildAutoLaunchRecent\}/, 'Guild home hands Continue Playing intent to the library');
+assert.match(gamesHub, /autoLaunchRecent = false/, 'the game library keeps direct recent launch opt-in');
+assert.match(gamesHub, /if \(autoLaunchRecent && safeRecent\[0\]\)/, 'Continue Playing opens the saved recent game rather than just the library');
+console.log('Guild Continue Playing launch contracts passed.');
