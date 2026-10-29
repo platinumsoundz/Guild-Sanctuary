@@ -27,3 +27,43 @@ export function canAccessSanctuaryFeature(feature: SanctuaryFeature, role: strin
   if (!gate.enabled || !role || !(role in roleRank)) return false;
   return roleRank[role as SanctuaryRole] >= roleRank[gate.minimumRole];
 }
+
+
+/**
+ * Navigation access is intentionally allow-listed. Any newly added page must be
+ * explicitly assigned a minimum role; unknown pages stay developer/owner-only.
+ */
+export type SanctuaryPage =
+  | 'today' | 'feed' | 'discover' | 'messages' | 'profile' | 'planner'
+  | 'support' | 'notifications' | 'roadmap' | 'settings'
+  | 'shorts' | 'events' | 'wallet' | 'shop' | 'admin'
+  | 'games' | 'guild-roadmap' | 'guild';
+
+const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
+  today: 'user',
+  feed: 'user',
+  discover: 'user',
+  messages: 'user',
+  profile: 'user',
+  planner: 'user',
+  support: 'user',
+  notifications: 'user',
+  roadmap: 'user',
+  settings: 'user',
+  shorts: 'vip',
+  events: 'vip',
+  wallet: 'vip',
+  shop: 'vip',
+  admin: 'moderator',
+  games: 'developer',
+  'guild-roadmap': 'developer',
+  guild: 'developer',
+};
+
+export function canAccessSanctuaryPage(page: string, role: string | null | undefined): boolean {
+  if (!role || !(role in roleRank)) return false;
+  if (role === 'owner') return true;
+  if (!(page in pageMinimumRole)) return role === 'developer';
+  const minimumRole = pageMinimumRole[page as SanctuaryPage];
+  return roleRank[role as SanctuaryRole] >= roleRank[minimumRole];
+}
