@@ -1,5 +1,6 @@
 'use client';
 
+import { Gamepad2, Play } from 'lucide-react';
 import { ResponsiveShell } from '@/components/ResponsiveShell';
 import { Navigation } from '@/components/Navigation';
 import { useEffect, useState } from 'react';
