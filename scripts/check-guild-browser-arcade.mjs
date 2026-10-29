@@ -26,6 +26,14 @@ assert.match(guild, /ctrlKey && event\.shiftKey/, 'keyboard accessibility overri
 assert.match(guild, /Orbital Drift/, 'first original browser game is present');
 assert.match(guild, /GuildCometDodge/, 'second playable arcade trial is wired into the Guild');
 assert.match(guild, /worldBigPicture/, 'Guild supports fullscreen Big Picture mode');
+assert.match(guild, /aria-label="Open Guild menu"/, 'Guild topbar must expose its own menu control');
+assert.match(guild, /aria-label="Open quick settings"/, 'Guild topbar must expose quick settings directly');
+assert.match(guild, /className={styles.consolePanel}/, 'Guild menu and quick settings must render as visible overlay panels');
+assert.match(guild, /aria-label="Guild menu"/, 'Guild menu overlay must be labelled');
+assert.match(guild, /aria-label="Guild quick settings"/, 'Quick settings overlay must be labelled');
+assert.match(guild, /setControlsVisible\(\(value\) => !value\)/, 'quick settings must toggle on-screen controls');
+assert.match(css, /\.consolePanelScrim\s*\{[^}]*z-index:\s*10/s, 'Guild quick panels must layer above the active world');
+assert.match(css, /\.consolePanel\s*\{[^}]*z-index:\s*11/s, 'Guild quick panels must sit above their scrim');
 assert.match(guild, /pressed\(9\).*setBigPicture/, 'controller Start button toggles Big Picture mode');
 assert.match(guild, /F6/, 'Guild Big Picture mode has a keyboard accessibility shortcut');
 const comet = readFileSync('src/components/GuildCometDodge.tsx', 'utf8');
