@@ -42,6 +42,7 @@ jobs:
       - run: npm run check:theme
       - run: npm run check:theme-contrast
       - run: npm run check:notifications
+      - run: npm run check:moderation-release-gates
       - run: npm run check:token-spend
       - run: npm run check:cosmic-arcade
       - run: npm run check:sanctuary-home
