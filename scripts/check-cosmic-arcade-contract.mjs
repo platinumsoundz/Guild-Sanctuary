@@ -18,10 +18,15 @@ assert.match(workspace, /activeNavigation === 'games' \? \(\s*<CosmicArcade \/>/
 assert.doesNotMatch(gamesHub, /import \{ CosmicArcade \}/, 'external creator projects do not embed the Sanctuary-built arcade');
 assert.doesNotMatch(arcade, /GamesHub|The 5 Sleeves 2D|The 5 Sleeves 3D|My Roblox World|Minecraft|Platinum Survival/, 'Cosmic Arcade contains no external creator-world links');
 assert.match(workspace, /activeNavigation === 'support' \? \([\s\S]*?<SupportPanel \/>/, 'Support navigation renders the dedicated creator-support page');
-assert.match(supportPanel, /<GamesHub \/>/, 'creator support page retains external creator projects');
+assert.doesNotMatch(supportPanel, /GamesHub|community-projects-title/, 'creator support page stays focused on contributions');
+assert.match(workspace, /isGuest && activeNavigation === 'guild'/, 'guests can access the read-only Guild games lobby');
+assert.match(workspace, /activeNavigation === 'guild' \? \(\s*<GuildWorld/, 'authenticated Guild route mounts the Guild experience');
+const guildWorld = readFileSync('src/components/GuildWorld.tsx', 'utf8');
+assert.match(guildWorld, /<GamesHub \/>/, 'creator games are hosted in the Guild lobby');
+assert.match(guildWorld, /isAuthenticated && worldOpen/, 'the original browser arcade remains authenticated-only');
 assert.doesNotMatch(supportPanel, /<CosmicArcade \/>/, 'creator support page does not embed the separate Cosmic Arcade page');
 assert.match(gamesHub, /The 5 Sleeves 2D/,'creator projects retain The 5 Sleeves 2D');
-assert.match(gamesHub, /Creator projects and community worlds/, 'external game links are clearly labelled as creator projects on the support page');
+assert.match(gamesHub, /Explore these creator projects and community worlds from the Guild/, 'external game links are clearly labelled as Guild creator projects');
 assert.match(gamesHub, /The 5 Sleeves 3D/,'creator projects retain The 5 Sleeves 3D');
 assert.match(gamesHub, /My Roblox World/,'creator projects retain the Roblox experience');
 assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the Bedrock server');
