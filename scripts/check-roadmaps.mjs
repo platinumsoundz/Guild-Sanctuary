@@ -20,8 +20,8 @@ assert.match(guild, /persistent Linux workspace/, 'Guild roadmap explains the Cl
 assert.match(guild, /<details className=\{styles\.moreInfo\}>/, 'Guild cards hide deeper explanations behind More info');
 assert.match(guild, /not a native desktop app/, 'Guild roadmap sets honest native-launch expectations');
 assert.doesNotMatch(guild, /The 5 Sleeves/, 'Guild roadmap does not pull in the separate 5 Sleeves projects');
-assert.match(workspace, /activeNavigation === 'roadmap'[\s\S]*?<SanctuaryRoadmap \/>/, 'Sanctuary roadmap route is wired');
-assert.match(workspace, /activeNavigation === 'guild-roadmap'[\s\S]*?<GuildRoadmap \/>/, 'Guild roadmap route is wired');
+assert.match(workspace, /contentNavigation === 'roadmap'[\s\S]*?<SanctuaryRoadmap \/>/, 'Sanctuary roadmap route is wired');
+assert.match(workspace, /contentNavigation === 'guild-roadmap'[\s\S]*?<GuildRoadmap \/>/, 'Guild roadmap route is wired');
 assert.match(context, /'guild-roadmap'/, 'Guild roadmap is a valid navigation state');
 assert.match(navigation, /id: 'roadmap', label: 'Sanctuary Roadmap'/, 'Sanctuary roadmap has a clear navigation label');
 assert.match(navigation, /id: 'guild-roadmap', label: 'Guild Roadmap'/, 'Guild roadmap has a separate navigation label');
