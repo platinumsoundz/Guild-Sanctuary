@@ -865,3 +865,13 @@ Branch: `fix/community-integration-phase-1b-2026-10-29`
 - This is **repository work only**. The migration has not been applied to any Supabase project, and static contract checks do not prove the connected live schema is repaired. Do not blindly push migrations because migration-history drift is already documented.
 - Next integration scope: verify comment like/edit/delete/report actions across posts and Shorts; verify DM preference save/read and recipient blocking with two real accounts; verify notification links, unread state, and role restrictions across stable and VIP destinations.
 - Release gates remain: run exact-head CI/typecheck/build, inspect the migration against the actual staging schema, apply only through the approved migration process, and perform real-account/browser tests before calling the systems beta-ready.
+
+
+## Comment reaction concurrency hardening — 2026-10-29
+
+Branch: `fix/comment-engagement-concurrency-2026-10-29`
+
+- Added a per-comment in-flight lock to both post comments and Shorts comments so repeated taps cannot send overlapping like/unlike mutations for the same comment.
+- Reaction controls expose a disabled/busy state while the mutation is pending and release the lock in `finally`, including failure paths.
+- Extended `check-community-comment-actions.mjs` to cover both surfaces.
+- This prevents a common rapid-tap race in the UI; database uniqueness/RLS remains the authoritative protection. Exact-head CI and preview checks are required before merge; no production deployment is claimed.
