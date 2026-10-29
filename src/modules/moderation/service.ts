@@ -107,6 +107,10 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
         targetState = data.state;
         targetCreatedAt = data.created_at;
       }
+    } else if (report.target_type === 'message') {
+      // Keep private-message reports in the queue, but do not load message bodies
+      // through the ordinary messages table. A separately audited context endpoint
+      // is required before staff can preview private conversation content.
     }
 
     let targetOwnerUsername: string | null = null;
