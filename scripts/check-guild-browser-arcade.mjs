@@ -83,3 +83,5 @@ const consoleCss = readFileSync('src/components/GuildConsolePlayer.module.css', 
 assert.match(consoleCss, /\.virtualControls/, 'touch navigation control surface has styling');
 assert.match(consoleCss, /touch-action:manipulation/, 'touch controls reduce delayed gesture handling');
 assert.match(consoleCss, /orientation:landscape/, 'console overlay adapts to landscape mobile screens');
+
+assert.match(consolePlayer, /menuOpenRef\.current = menuOpen/, 'gamepad polling reads current menu state without resetting held-button edge detection');
