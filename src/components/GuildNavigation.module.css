@@ -58,83 +58,38 @@
 @media(prefers-reduced-motion:reduce){.quickKeyboard button{transition:none}}
 
 
-/* Phone-first navigation and touch controls: keep controls above the Sanctuary
-   bottom bar, honour device safe areas, and avoid a cramped top toolbar. */
+/* Phone-first navigation and touch controls.
+   Keep fixed overlays outside the blurred sticky header so they anchor to the viewport. */
 @media (max-width: 767px) {
-  .header {
-    z-index: 950;
-  }
-
+  .header { z-index: 80; }
+  .scrim { z-index: 950; }
+  .drawer { z-index: 960; }
   .touchConsole {
     right: max(9px, env(safe-area-inset-right, 0px));
     bottom: calc(76px + env(safe-area-inset-bottom, 0px));
-    z-index: 960;
+    z-index: 940;
   }
-
-  .touchPad {
-    max-width: calc(100vw - 18px);
-    touch-action: manipulation;
-  }
-
-  .touchToggle {
-    box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
-  }
+  .touchPad { max-width: calc(100vw - 18px); touch-action: manipulation; }
+  .touchToggle { box-shadow: 0 8px 24px rgb(0 0 0 / 30%); }
+  .quickScrim { z-index: 970; }
+  .quickPanel { z-index: 980; }
 }
-
 @media (max-width: 420px) {
   .header {
     gap: 6px;
     padding-right: max(7px, env(safe-area-inset-right, 0px));
     padding-left: max(7px, env(safe-area-inset-left, 0px));
   }
-
-  .menu {
-    min-width: 44px;
-    padding-inline: 8px;
-  }
-
-  .brand {
-    min-width: 0;
-  }
-
-  .brand > span:not(.mark) {
-    min-width: 0;
-  }
-
-  .quickButton {
-    width: 40px;
-    min-width: 40px;
-    padding-inline: 0;
-  }
-
-  .exit {
-    min-width: 40px;
-    padding-inline: 8px;
-  }
+  .menu { min-width: 44px; padding-inline: 8px; }
+  .brand { min-width: 0; }
+  .brand > span:not(.mark) { min-width: 0; }
+  .quickButton { width: 40px; min-width: 40px; padding-inline: 0; }
+  .exit { min-width: 40px; padding-inline: 8px; }
 }
-
 @media (max-width: 370px) {
-  .brand > span:not(.mark),
-  .exit span {
-    display: none;
-  }
-
-  .brand .mark {
-    width: 34px;
-    height: 34px;
-  }
-
-  .menu {
-    min-width: 42px;
-    padding-inline: 6px;
-  }
-
-  .menu span {
-    display: none;
-  }
-
-  .notificationSlot :global(button) {
-    width: 36px;
-    min-width: 36px;
-  }
+  .brand > span:not(.mark), .exit span { display: none; }
+  .brand .mark { width: 34px; height: 34px; }
+  .menu { min-width: 42px; padding-inline: 6px; }
+  .menu span { display: none; }
+  .notificationSlot :global(button) { width: 36px; min-width: 36px; }
 }
