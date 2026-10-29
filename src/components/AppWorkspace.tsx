@@ -187,7 +187,7 @@ export function AppWorkspace() {
 
   const authenticatedContent = activeNavigation === 'today' ? (
     <SanctuaryHome onNavigate={openNavigation} />
-  ) : isGuest && !['support', 'games', 'guild', 'roadmap', 'guild-roadmap'].includes(activeNavigation) ? (
+  ) : isGuest && !['support', 'games', 'guild', 'roadmap'].includes(activeNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
       <h1 id="guest-access-title">Explore before you join</h1>
@@ -198,7 +198,6 @@ export function AppWorkspace() {
       <div className="flex flex-wrap gap-3">
         <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('games')}>Explore Cosmic Arcade</button>
         <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('roadmap')}>Sanctuary Roadmap</button>
-        <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('guild-roadmap')}>Guild Roadmap</button>
       </div>
       <p className={styles.sectionDescription}>
         Sign in to post, react, comment, message, manage your profile, use the planner, or access wallet and shop features.
