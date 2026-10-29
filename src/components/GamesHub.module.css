@@ -461,3 +461,40 @@
   .card, .player { transition: none; }
   .card:hover, .card:focus-within { transform: none; }
 }
+
+/* Local library search, filters and Continue Playing row. */
+.libraryControls { display:grid; gap:13px; margin:0 0 24px; }
+.searchBox { display:flex; align-items:center; gap:10px; min-height:54px; padding:0 15px; border:1px solid var(--line); border-radius:13px; background:var(--surface-raised); color:var(--muted); }
+.searchBox:focus-within { outline:3px solid var(--accent); outline-offset:2px; border-color:var(--accent); }
+.searchBox input { width:100%; min-width:0; min-height:50px; border:0; outline:0; background:transparent; color:var(--ink); font:14px Arial,sans-serif; }
+.searchBox input::placeholder { color:var(--muted); opacity:.85; }
+.searchBox button { width:36px; height:36px; border:0; border-radius:9px; background:var(--surface); color:var(--ink); font-size:23px; cursor:pointer; }
+.visuallyHidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.filterRow { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.filterButton, .filterActive { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:42px; padding:9px 13px; border:1px solid var(--line); border-radius:999px; background:var(--surface); color:var(--muted); cursor:pointer; font:700 11px Arial,sans-serif; touch-action:manipulation; }
+.filterActive { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 16%,var(--surface-raised)); color:var(--ink); }
+.filterButton:focus-visible, .filterActive:focus-visible, .favouriteButton:focus-visible, .recentPlay:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+.resultCount { margin-left:auto; color:var(--muted); font:11px Arial,sans-serif; }
+.recentSection { margin:8px 0 26px; }
+.rowHeading { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:13px; }
+.rowHeading .eyebrow { margin-bottom:4px; }
+.rowHeading h2 { display:flex; align-items:center; gap:8px; margin:0; font-size:clamp(18px,2.4vw,24px); }
+.rowHeading > span { color:var(--muted); font-size:10px; }
+.recentRow { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr)); gap:10px; }
+.recentCard { display:flex; align-items:center; gap:12px; min-width:0; padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+.recentOrb { display:grid; flex:0 0 46px; width:46px; height:46px; place-items:center; border-radius:12px; background:color-mix(in srgb,var(--accent) 18%,var(--surface-raised)); color:var(--accent); }
+.recentCopy { display:flex; flex:1; min-width:0; flex-direction:column; gap:4px; }
+.recentCopy strong { overflow:hidden; color:var(--ink); font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
+.recentCopy small { color:var(--muted); font-size:10px; }
+.recentPlay { display:grid; flex:0 0 42px; width:42px; height:42px; place-items:center; border:1px solid var(--accent); border-radius:50%; background:var(--accent); color:var(--surface-raised); cursor:pointer; }
+.recentPlay:disabled { cursor:not-allowed; opacity:.5; }
+.art { position:relative; }
+.artCaption { position:absolute; left:16px; bottom:14px; z-index:1; color:rgba(255,255,255,.85); font:800 9px Arial,sans-serif; letter-spacing:1.3px; text-shadow:0 1px 8px #000; }
+.favouriteButton { position:absolute; top:14px; right:14px; z-index:2; display:grid; width:42px; height:42px; place-items:center; border:1px solid rgba(255,255,255,.26); border-radius:50%; background:rgba(8,12,24,.65); color:#fff; cursor:pointer; backdrop-filter:blur(8px); }
+.favouriteButton[aria-pressed="true"] { color:#ff9cba; border-color:#ff9cba; }
+.emptyState { display:grid; justify-items:center; gap:10px; padding:38px 20px; border:1px dashed var(--line); border-radius:16px; color:var(--accent); text-align:center; }
+.emptyState h3 { margin:0; color:var(--ink); }
+.emptyState p { max-width:440px; margin:0 0 8px; color:var(--muted); font:12px/1.6 Arial,sans-serif; }
+.localDataNote { margin:18px 0 0; color:var(--muted); font:10px/1.6 Arial,sans-serif; }
+@media(max-width:600px) { .filterRow { gap:6px; } .filterButton,.filterActive { min-height:40px; padding-inline:11px; } .resultCount { width:100%; margin:3px 0 0; } .rowHeading { align-items:flex-start; flex-direction:column; } }
+@media(prefers-reduced-motion:reduce) { .recentCard { transition:none; } }
