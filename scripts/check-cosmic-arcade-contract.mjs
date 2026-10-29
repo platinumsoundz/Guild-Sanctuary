@@ -26,7 +26,7 @@ assert.doesNotMatch(guildWorld, /<GamesHub \/>/, 'the featured game library is a
 assert.match(guildWorld, /isAuthenticated && worldOpen/, 'the original browser arcade remains authenticated-only');
 assert.doesNotMatch(supportPanel, /<CosmicArcade \/>/, 'creator support page does not embed the separate Cosmic Arcade page');
 assert.match(gamesHub, /The 5 Sleeves 2D/,'creator projects retain The 5 Sleeves 2D');
-assert.match(gamesHub, /Explore these creator projects and community worlds from the Guild/, 'external game links are clearly labelled as Guild creator projects');
+assert.match(gamesHub, /External platforms remain available from the same library/, 'external game links are clearly labelled as Guild creator projects');
 assert.match(gamesHub, /The 5 Sleeves 3D/,'creator projects retain The 5 Sleeves 3D');
 assert.match(gamesHub, /My Roblox World/,'creator projects retain the Roblox experience');
 assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the Bedrock server');
