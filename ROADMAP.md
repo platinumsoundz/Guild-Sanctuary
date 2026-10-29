@@ -707,3 +707,12 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Added `check:guest-access` contract to CI while preserving current compact-shell and community-comment changes.
 - **Validation required:** fresh exact-head CI, mobile/desktop guest-route browser checks, and service/RLS authorization tests. This UI gate does not replace backend authorization.
 - No migration, production data change, provider setting, secret, billing or production deployment is included.
+
+
+## Guild browser arcade recovery — 2026-10-29
+
+- Rebuilt from the current-main guest-access stack rather than the obsolete release candidate.
+- Adds Guild Arcade navigation, a browser-playable Guild World, companion hub, Comet Dodge mini-game and controller-input helpers.
+- Guest access remains explicitly read-only; Guild World receives authenticated user identity only for non-guest signed-in sessions.
+- Added a focused Guild browser arcade contract to CI. Require exact-head CI and desktop/mobile interaction checks before merging.
+- No production deployment, database migration or token spending enablement is included.
