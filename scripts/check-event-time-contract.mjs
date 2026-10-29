@@ -58,6 +58,8 @@ const eventService = readFileSync(new URL('../src/modules/events/service.ts', im
 assert.ok(component.includes("locationCoords: { latitude: Number(latitude), longitude: Number(longitude) }"), 'editing an event must submit the updated coordinates');
 assert.ok(eventService.includes("validateCoordinates(input.locationCoords);"), 'event updates must validate coordinate bounds');
 assert.ok(eventService.includes("latitude: input.locationCoords.latitude") && eventService.includes("longitude: input.locationCoords.longitude"), 'event updates must persist both coordinate values');
+assert.ok(eventService.includes("location_name: input.locationLabel?.trim() || ''"), 'event creation and edits must persist the venue label alongside the map pin');
+assert.ok(eventService.includes('locationLabel: row.location_name || null'), 'saved venue labels must be restored when events are loaded');
 console.log('Event location editing contract checks passed.');
 
 assert.ok(component.includes('const [includePastEvents, setIncludePastEvents] = useState(false)'), 'past-event browsing must be opt-in by default');
