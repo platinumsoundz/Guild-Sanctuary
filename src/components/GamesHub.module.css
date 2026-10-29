@@ -498,3 +498,12 @@
 .localDataNote { margin:18px 0 0; color:var(--muted); font:10px/1.6 Arial,sans-serif; }
 @media(max-width:600px) { .filterRow { gap:6px; } .filterButton,.filterActive { min-height:40px; padding-inline:11px; } .resultCount { width:100%; margin:3px 0 0; } .rowHeading { align-items:flex-start; flex-direction:column; } }
 @media(prefers-reduced-motion:reduce) { .recentCard { transition:none; } }
+/* Game detail and compatibility panel. */
+.detailsToggle { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:9px 11px; border:1px solid var(--line); border-radius:9px; background:transparent; color:var(--ink); cursor:pointer; font:700 11px Arial,sans-serif; touch-action:manipulation; }
+.detailsToggle:hover, .detailsToggle:focus-visible { border-color:var(--accent); outline-offset:3px; }
+.detailsToggle:focus-visible { outline:3px solid var(--accent); }
+.gameDetails { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; width:100%; margin-top:17px; padding:16px; border:1px solid var(--line); border-radius:13px; background:color-mix(in srgb,var(--surface) 80%,var(--accent) 5%); }
+.gameDetails > div { min-width:0; }
+.gameDetails strong { color:var(--ink); font-size:11px; }
+.gameDetails p { margin:6px 0 0; color:var(--muted); font:11px/1.6 Arial,sans-serif; }
+@media(max-width:600px) { .gameDetails { grid-template-columns:1fr; gap:13px; padding:13px; } .detailsToggle { flex:1 1 auto; } }
