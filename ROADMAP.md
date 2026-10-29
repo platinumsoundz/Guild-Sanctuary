@@ -733,3 +733,23 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - **Still blocked:** #191 moderation queue and #199 role management require a live-schema reconciliation because public.get_moderation_queue() is absent, plus independent review of role hierarchy, self-targeting, concurrency and action authorization. No production SQL/migrations or permission changes have been applied.
 - **Superseded and closed:** #210, #213, #214, #215, #216, #220, #222 and #192. Their relevant work was either rebuilt on current main or superseded by the strengthened #224 contract.
 - **No production deployment, live database write, payment/provider/secret change, or token-spending enablement is claimed by this reconciliation.
+
+
+## Integration batch checkpoint — 2026-10-29
+
+- **Merged PR [#247](https://github.com/platinumsoundz/Guild-Sanctuary/pull/247)** (squash commit `74e20fe553ebd1994286b54883bfa2a6a8c0eb4f`): integrated the role-aware moderation dashboard into current `main`. The branch passed CI, dependency-map contract, visual preview workflow, and Cloudflare workflow on its reviewed head.
+- The moderation dashboard now renders bounded reported-content context and applies role-specific UI gates for warning, suspension, and bans; actions still depend on backend authorization and audit behaviour.
+- **Not yet verified:** live Supabase migration state, function grants, role hierarchy and report-owner RPC compatibility across both connected projects. Do not treat a passing source/build contract as proof that live moderation is safe or enabled.
+- PR [#249](https://github.com/platinumsoundz/Guild-Sanctuary/pull/249) has passed CI, visual preview, dependency-map and Cloudflare workflows on head `5731d30e65eeeab74f5dadf1fae92849f5f42b2e`, but remains a draft. Vercel reported the free daily deployment rate limit; this is not a successful Vercel deployment and no production rollout is claimed.
+
+### Next large integration batch
+
+1. **Mainline UI and console shell:** reconcile the top-left navigation, compact notification overlay, removed oversized black header, PWA install banner, console-style home/HUD and responsive layouts into one tested experience. Keep token shop/admin out of the global top bar; retain access through the navigation.
+2. **Social/community journey:** verify post/comment edit-delete-like-report flows, Shorts engagement RPC and loading/error states, notification read/dismiss behaviour, and direct-message privacy/settings as one end-to-end batch.
+3. **Account and permission journey:** registration/login/session refresh/password recovery, profile access, role display and protected admin/moderation entry points. Never grant/promote live accounts as part of a code-only integration.
+4. **Games and wallet journey:** make the games hub and external game links discoverable, verify the scoped game-wallet session bridge and token shop presentation, and keep spending disabled until receipt verification and backend balance rules are tested.
+5. **Release/branch convergence:** identify unique work in stale or stacked PRs, port only needed changes onto current `main`, close duplicates only after their functionality is accounted for, and keep migration-dependent features behind explicit staging approval.
+
+### Batch completion rules
+
+A feature is complete only when its UI, data/service path, permissions, failure states, and regression checks agree. Record separately: merged to `main`, CI/build verified, database migration applied, preview verified, and production domain verified. No one status implies the others. Do not force-merge diverged branches or spend money to bypass hosting limits.
