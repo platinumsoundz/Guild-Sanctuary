@@ -83,7 +83,7 @@ export function MeetupCalendarPlaceholder() {
     setFormError(null);
 
     try {
-      if (!editingEvent && (!locationAddress.trim() || !latitude || !longitude)) throw new Error('Search for a venue or address and select a map result before publishing.');
+      if ((!editingEvent || locationAddress.trim()) && (!locationAddress.trim() || !latitude || !longitude)) throw new Error('Search for a venue or address and select a map result before publishing or moving an event.');
       const startsAt = toIsoDateTime(startDate, startTime);
       if (editingEvent) {
         await editEvent(editingEvent.id, { title, description, startsAt, locationCoords: { latitude: Number(latitude), longitude: Number(longitude) } });
