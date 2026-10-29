@@ -11,6 +11,7 @@ declare
   actor_role text;
   target_owner_id uuid;
   target_role text;
+  actor_status text;
   actor_level integer;
   target_level integer;
 begin
@@ -19,11 +20,11 @@ begin
   end if;
 
   select lower(p.role), p.status
-    into actor_role, target_role
+    into actor_role, actor_status
     from public.profiles p
     where p.id = caller_id;
 
-  if not found or target_role <> 'active' then
+  if not found or actor_status <> 'active' then
     raise exception 'Active moderator account required' using errcode = '42501';
   end if;
 
@@ -66,6 +67,34 @@ begin
 
   if target_owner_id is null then
     raise exception 'Moderation target is unavailable' using errcode = 'P0002';
+  end if;
+
+  -- Lock actor and target-owner profiles in stable order, then re-read both roles.
+  -- This prevents a concurrent demotion/promotion from racing the hierarchy check.
+  perform p.id
+    from public.profiles p
+    where p.id in (caller_id, target_owner_id)
+    order by p.id
+    for update;
+
+  select lower(p.role), p.status
+    into actor_role, actor_status
+    from public.profiles p
+    where p.id = caller_id;
+
+  if not found or actor_status <> 'active' then
+    raise exception 'Active moderator account required' using errcode = '42501';
+  end if;
+
+  actor_level := case actor_role
+    when 'moderator' then 2
+    when 'admin' then 3
+    when 'developer' then 4
+    when 'owner' then 5
+    else -1
+  end;
+  if actor_level < 2 then
+    raise exception 'Moderator authorization required' using errcode = '42501';
   end if;
 
   select lower(p.role) into target_role
