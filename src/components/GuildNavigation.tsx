@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Home, Gamepad2, Library, Music2, Image as ImageIcon, Settings, Newspaper, Search,
   MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard, Map,
-  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check
+  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import { NotificationBar } from './NotificationBar';
+import { GuildDiagnosticsPanel } from './GuildDiagnosticsPanel';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
 import styles from './GuildNavigation.module.css';
 
@@ -54,6 +55,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   const [controlsOpen, setControlsOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
   const [quickQuery, setQuickQuery] = useState('');
+  const [quickKeyboardOpen, setQuickKeyboardOpen] = useState(false);
   const [controllerPresent, setControllerPresent] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -78,7 +80,14 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     const needle = quickQuery.trim().toLowerCase();
     return !needle || item.label.toLowerCase().includes(needle) || (item.description ?? '').toLowerCase().includes(needle);
   }).slice(0, 8);
-  const choose = (page: GuildPage) => { onSelect(page); setOpen(false); setQuickOpen(false); setQuickQuery(''); };
+  const choose = (page: GuildPage) => { onSelect(page); setOpen(false); setQuickOpen(false); setQuickKeyboardOpen(false); setQuickQuery(''); };
+  const addQuickKey = (key: string) => {
+    if (key === 'Backspace') setQuickQuery((value) => value.slice(0, -1));
+    else if (key === 'Space') setQuickQuery((value) => value + ' ');
+    else if (key === 'Clear') setQuickQuery('');
+    else setQuickQuery((value) => value + key);
+    quickSearchRef.current?.focus();
+  };
 
   const moveFocus = (direction: LogicalDirection) => {
     if (!open) {
@@ -152,7 +161,12 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
 
   useEffect(() => {
     if (quickOpen) window.setTimeout(() => quickSearchRef.current?.focus(), 0);
+    else setQuickKeyboardOpen(false);
   }, [quickOpen]);
+
+  useEffect(() => {
+    if (quickOpen && quickKeyboardOpen) window.setTimeout(() => quickPanelRef.current?.querySelector<HTMLButtonElement>('[data-quick-key]')?.focus(), 0);
+  }, [quickOpen, quickKeyboardOpen]);
 
   const toggleReducedMotion = () => {
     const next = !reducedMotion;
@@ -197,7 +211,31 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       const back = state.pressed(1);
       const now = Date.now();
       if (now - lastActionAt.current > 150) {
-        if (start) { setOpen((value) => !value); lastActionAt.current = now; }
+        if (quickOpen) {
+          if (start || back) {
+            setQuickOpen(false);
+            setQuickQuery('');
+            setQuickKeyboardOpen(false);
+            quickButtonRef.current?.focus();
+            lastActionAt.current = now;
+          } else if (confirm) {
+            const active = document.activeElement;
+            if (active instanceof HTMLButtonElement && quickPanelRef.current?.contains(active)) active.click();
+            else if (active instanceof HTMLInputElement && quickPanelRef.current?.contains(active)) {
+              const target = quickPanelRef.current.querySelector<HTMLButtonElement>('[data-quick-key]') ?? quickPanelRef.current.querySelector<HTMLButtonElement>('.quickResults button');
+              target?.focus();
+            }
+            lastActionAt.current = now;
+          } else if (direction) {
+            const targets = Array.from(quickPanelRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled)') ?? []);
+            if (targets.length) {
+              const current = targets.indexOf(document.activeElement as HTMLElement);
+              const delta = direction === 'up' || direction === 'left' ? -1 : 1;
+              targets[(current < 0 ? 0 : current + delta + targets.length) % targets.length]?.focus();
+            }
+            lastActionAt.current = now;
+          }
+        } else if (start) { setQuickOpen(true); setOpen(false); lastActionAt.current = now; }
         else if (back) { goBack(); lastActionAt.current = now; }
         else if (confirm) { activateFocused(); lastActionAt.current = now; }
         else if (direction) { moveFocus(direction); lastActionAt.current = now; }
@@ -211,7 +249,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       window.clearInterval(timer);
       window.removeEventListener('gamepadconnected', poll);
     };
-  }, [open, selectedPage]);
+  }, [open, selectedPage, quickOpen]);
 
   const render = (item: Item) => {
     const Icon = item.icon;
@@ -237,6 +275,10 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
         <div className={styles.quickHeading}><div><small>THE GUILD · HUD</small><h2 id="guild-quick-title">Quick menu</h2></div><button type="button" aria-label="Close quick menu" onClick={() => { setQuickOpen(false); setQuickQuery(''); quickButtonRef.current?.focus(); }}><X size={18} /></button></div>
         <div className={styles.quickStatus}><span className={controllerPresent ? styles.statusOnline : styles.statusOffline}><i />{controllerPresent ? 'Controller detected' : 'Touch / keyboard ready'}</span><span>{isFullscreen ? 'Fullscreen on' : 'Windowed view'}</span></div>
         <label className={styles.quickSearch}><Search size={17} /><span className={styles.visuallyHidden}>Search Guild destinations</span><input ref={quickSearchRef} type="search" value={quickQuery} onChange={(event) => setQuickQuery(event.target.value)} placeholder="Search Guild destinations…" /></label>
+        <button type="button" className={styles.quickKeyboardToggle} aria-pressed={quickKeyboardOpen} onClick={() => setQuickKeyboardOpen((value) => !value)}><Keyboard size={16} /><span>On-screen keyboard</span><span className={quickKeyboardOpen ? styles.toggleOn : styles.toggleOff}>{quickKeyboardOpen ? 'ON' : 'OFF'}</span></button>
+        {quickKeyboardOpen && <div className={styles.quickKeyboard} role="group" aria-label="On-screen keyboard">
+          {['1','2','3','4','5','6','7','8','9','0','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Z','X','C','V','B','N','M','Backspace','Space','Clear'].map((key) => <button type="button" key={key} data-quick-key={key === '1' ? 'first' : undefined} className={['Backspace','Space','Clear'].includes(key) ? styles.quickKeyboardWide : undefined} aria-label={key === 'Backspace' ? 'Delete last character' : key === 'Space' ? 'Insert space' : key === 'Clear' ? 'Clear search' : key} onClick={() => addQuickKey(key)}>{key === 'Backspace' ? '⌫' : key === 'Space' ? 'Space' : key}</button>)}
+        </div>}
         <div className={styles.quickResults} role="group" aria-label="Guild destinations">
           {quickResults.length ? quickResults.map((item) => {
             const Icon = item.icon;
@@ -244,11 +286,13 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
           }) : <p className={styles.quickEmpty}>No destinations match “{quickQuery}”. Try another search.</p>}
         </div>
         <div className={styles.quickSettings}>
+          <button type="button" aria-pressed={controlsOpen} onClick={() => setControlsOpen((value) => !value)}><Gamepad2 size={17} /><span>Touch navigation controls</span><span className={controlsOpen ? styles.toggleOn : styles.toggleOff}>{controlsOpen ? 'ON' : 'OFF'}</span></button>
           <button type="button" onClick={() => void toggleFullscreen()}><Monitor size={17} /><span>{isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}</span>{isFullscreen ? <Check size={15} /> : <Maximize2 size={15} />}</button>
           <button type="button" aria-pressed={reducedMotion} onClick={toggleReducedMotion}><SlidersHorizontal size={17} /><span>Reduce Guild motion</span><span className={reducedMotion ? styles.toggleOn : styles.toggleOff}>{reducedMotion ? 'ON' : 'OFF'}</span></button>
           <button type="button" onClick={() => choose('home')}><Home size={17} /><span>Resume Guild Home</span><ChevronRight size={15} /></button>
           <button type="button" onClick={onExit}><LogOut size={17} /><span>Exit to Sanctuary</span><ChevronRight size={15} /></button>
         </div>
+        <GuildDiagnosticsPanel />
         <p className={styles.quickFootnote}>Search is limited to available Guild and Sanctuary destinations. Settings apply to this browser; game audio and display behaviour can still depend on the game host.</p>
       </section>
     </>}
@@ -279,7 +323,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       <button type="button" className={styles.return} onClick={onExit}><LogOut size={17} /> Exit Guild · Return to Sanctuary</button>
     </nav>
     <div className={styles.touchConsole}>
-      <button type="button" className={styles.touchToggle} aria-expanded={controlsOpen} onClick={() => setControlsOpen((value) => !value)}>{controlsOpen ? <X size={17} /> : <Gamepad2 size={17} />}<span>{controlsOpen ? 'Hide controls' : 'Controls'}</span></button>
+      <button type="button" className={styles.touchToggle} aria-pressed={controlsOpen} aria-expanded={controlsOpen} onClick={() => setControlsOpen((value) => !value)}>{controlsOpen ? <X size={17} /> : <Gamepad2 size={17} />}<span>{controlsOpen ? 'Hide controls' : 'Controls'}</span></button>
       {controlsOpen && <div className={styles.touchPad} aria-label="Guild navigation controls">
         <button type="button" className={styles.padUp} aria-label="Navigate up" onClick={() => moveFocus('up')}>↑</button>
         <button type="button" className={styles.padLeft} aria-label="Navigate previous" onClick={() => moveFocus('left')}>←</button>

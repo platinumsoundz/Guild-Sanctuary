@@ -53,6 +53,7 @@ jobs:
       - run: npm run check:today-dashboard
       - run: npm run check:roadmaps
       - run: npm run check:guild-browser-arcade
+      - run: npm run check:guild-diagnostics
       - run: npm run check:guest-access
       - run: npm run check:shorts-full-size
       - run: npm run check:short-engagement-rpc
