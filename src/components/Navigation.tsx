@@ -108,14 +108,40 @@ export function Navigation({
   const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || canAccessAdmin);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);
+  const entryMenuRef = useRef<HTMLDivElement>(null);
+  const entryMenuButtonRef = useRef<HTMLButtonElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
+  const closeEntryMenu = useCallback(() => setIsEntryMenuOpen(false), []);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const closeMenuAndRestoreFocus = useCallback(() => {
     closeMenu();
     menuButtonRef.current?.focus();
   }, [closeMenu]);
+
+  useEffect(() => {
+    if (!isEntryMenuOpen) return;
+
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node) || entryMenuRef.current?.contains(target)) return;
+      closeEntryMenu();
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      closeEntryMenu();
+      entryMenuButtonRef.current?.focus();
+    };
+    document.addEventListener('pointerdown', closeOnOutsidePointer);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [closeEntryMenu, isEntryMenuOpen]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -167,20 +193,42 @@ export function Navigation({
             <span className={styles.accountPlaceholder} role="status">Restoring session</span>
           ) : (
             <>
-            {!currentUser && !isGuest && <button className={styles.guestButton} type="button" onClick={onExploreAsGuest}>Explore as Guest</button>}
-            <button
-              className={styles.accountButton}
-              type="button"
-              aria-haspopup="dialog"
-              onClick={() => setIsAuthModalOpen(true)}
-            >
-              {currentUser ? (
-                <>
+            {!currentUser && !isGuest ? (
+              <div className={styles.accountEntry} ref={entryMenuRef}>
+                <button
+                  ref={entryMenuButtonRef}
+                  className={styles.accountButton}
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-expanded={isEntryMenuOpen}
+                  aria-controls="account-entry-menu"
+                  onClick={() => setIsEntryMenuOpen((open) => !open)}
+                >
                   <span className={styles.accountMark} aria-hidden="true"><UserRound size={15} strokeWidth={1.8} /></span>
-                  <span className={styles.accountButtonLabel}>{currentUser.profile.displayName}</span>
-                </>
-              ) : isGuest ? 'Guest · Sign in' : 'Sign in / Register'}
-            </button>
+                  <span className={styles.accountButtonLabel}>Sign in / Guest</span>
+                </button>
+                {isEntryMenuOpen && (
+                  <div id="account-entry-menu" className={styles.accountEntryMenu} role="menu" aria-label="Account options">
+                    <button type="button" role="menuitem" onClick={() => { closeEntryMenu(); setIsAuthModalOpen(true); }}>Sign in / Register</button>
+                    <button type="button" role="menuitem" onClick={() => { closeEntryMenu(); onExploreAsGuest(); }}>Explore as Guest</button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                className={styles.accountButton}
+                type="button"
+                aria-haspopup="dialog"
+                onClick={() => setIsAuthModalOpen(true)}
+              >
+                {currentUser ? (
+                  <>
+                    <span className={styles.accountMark} aria-hidden="true"><UserRound size={15} strokeWidth={1.8} /></span>
+                    <span className={styles.accountButtonLabel}>{currentUser.profile.displayName}</span>
+                  </>
+                ) : 'Guest · Sign in'}
+              </button>
+            )}
             </>
           )}
         </div>
