@@ -203,3 +203,14 @@
     margin-left: 62px;
   }
 }
+/* Discovery list refinements for accessible actions and long profile details. */
+.profileRow { min-width: 0; }
+.profileRow :where(button, a):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.profileActions :where(button, a) { min-height: 40px; touch-action: manipulation; }
+@media (max-width: 420px) {
+  .profileActions { width: calc(100% - 62px); margin-left: 62px; }
+  .profileActions > button { flex: 1 1 auto; }
+}
