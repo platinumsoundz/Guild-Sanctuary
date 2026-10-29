@@ -36,6 +36,7 @@ jobs:
       - run: npm run check:navigation
       - run: npm run check:role-page-access
       - run: npm run check:guild-mobile-navigation
+      - run: npm run check:guild-console-hud
       - run: npm run check:feed-polish
       - run: npm run check:community-toolkit
       - run: npm run test:community-connection
