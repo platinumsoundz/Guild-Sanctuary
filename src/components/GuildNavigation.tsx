@@ -266,7 +266,8 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     </button>;
   };
 
-  return <header className={styles.header}>
+  return <>
+    <header className={styles.header}>
     <button ref={menuButtonRef} type="button" className={styles.menu} aria-label={open ? 'Close Guild navigation' : 'Open Guild navigation'} aria-expanded={open} onClick={() => setOpen((value) => !value)}>
       {open ? <X size={22} /> : <Menu size={22} />}<span>MENU</span>
     </button>
@@ -277,6 +278,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     <div className={styles.notificationSlot}><NotificationBar compact /></div>
     <button ref={quickButtonRef} type="button" className={styles.quickButton} aria-label="Open Guild quick menu" aria-expanded={quickOpen} aria-keyshortcuts="Control+K Meta+K" onClick={() => setQuickOpen((value) => !value)}><SlidersHorizontal size={18} /><span>Quick menu</span><kbd>⌘/Ctrl K</kbd></button>
     <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Sanctuary</span></button>
+    </header>
     {quickOpen && <>
       <button type="button" className={styles.quickScrim} aria-label="Close quick menu" onClick={() => { setQuickOpen(false); setQuickQuery(''); quickButtonRef.current?.focus(); }} />
       <section ref={quickPanelRef} className={styles.quickPanel} role="dialog" aria-modal="true" aria-labelledby="guild-quick-title" onKeyDown={(event) => { if (event.key !== 'Tab') return; const focusable = Array.from(quickPanelRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])') ?? []); if (!focusable.length) return; const first = focusable[0]; const last = focusable[focusable.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } }}>
@@ -341,5 +343,5 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
         <button type="button" className={styles.padB} onClick={goBack}><strong>B</strong><small>Back</small></button>
       </div>}
     </div>
-  </header>;
+  </>;
 }
