@@ -90,7 +90,24 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
   const ensurePeerConnection = useCallback(async (callKind: CallKind, callId: string) => {
     if (pcRef.current) return pcRef.current;
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('Microphone/camera access requires a supported browser and a secure HTTPS connection.');
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callKind === 'video' });
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callKind === 'video' });
+    } catch (cause) {
+      const mediaError = cause as { name?: string };
+      if (mediaError?.name === 'NotAllowedError' || mediaError?.name === 'PermissionDeniedError') {
+        throw new Error('Microphone or camera permission was denied. Allow access in your browser or device settings, then try again.');
+      }
+      if (mediaError?.name === 'NotFoundError' || mediaError?.name === 'DevicesNotFoundError') {
+        throw new Error(callKind === 'video'
+          ? 'A microphone or camera could not be found. Connect or enable a device and try again.'
+          : 'A microphone could not be found. Connect or enable a microphone and try again.');
+      }
+      if (mediaError?.name === 'NotReadableError' || mediaError?.name === 'TrackStartError') {
+        throw new Error('Your microphone or camera is busy in another app. Close other apps using it and try again.');
+      }
+      throw new Error('The microphone or camera could not be started. Check device permissions and try again.');
+    }
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
     localRef.current = stream;
     setLocalStream(stream);
