@@ -5,8 +5,6 @@ import { Expand, Gamepad2, LockKeyhole, Minimize2, Orbit, Play, RotateCcw, Troph
 import styles from './GuildWorld.module.css';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections } from '@/lib/controllerInput';
 import { GuildCometDodge } from './GuildCometDodge';
-import { GuildCompanionHub } from './GuildCompanionHub';
-import { GamesHub } from '@/components/GamesHub';
 
 type GuildWorldProps = {
   userId: string | null;
@@ -252,7 +250,6 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
             ? 'Explore creator projects and community servers, or enter the Guild’s original browser arcade.'
             : 'Browse creator games and community servers. Sign in to Sanctuary to enter the Guild’s original browser arcade.'}</p>
           {isAuthenticated && <button type="button" className={styles.enterPublicGuild} onClick={enterGuild}>Enter Guild Arcade <span aria-hidden="true">↗</span></button>}
-          <GamesHub />
         </main>
       )}
       {isAuthenticated && !worldOpen && (entryOpen || controllerConnected) && (
@@ -299,7 +296,6 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
               </section>
               <div className={styles.sectionHead}><div><p className={styles.eyebrow}>THE ARCADE · 02</p><h2>Comet Dodge</h2></div><span className={styles.localPill}>20-SECOND SURVIVAL</span></div>
               <GuildCometDodge />
-              <GuildCompanionHub />
               <footer className={styles.footer}><span>THE GUILD · ALPHA PROTOTYPE</span><span>Sanctuary identity · isolated game state · no verified rewards</span></footer>
             </div>
           </section>
