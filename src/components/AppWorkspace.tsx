@@ -34,6 +34,7 @@ import { ModerationDashboard } from '@/modules/moderation/ModerationDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
+import { fetchPageVisibility, isPageVisible } from '@/lib/pageVisibility';
 import styles from './AppWorkspace.module.css';
 
 export function AppWorkspace() {
@@ -75,6 +76,18 @@ export function AppWorkspace() {
     ? (guildInternalPages.includes(guildPage) ? 'guild' : guildPage)
     : activeNavigation;
   const currentRole = currentUser?.profile.role?.toLowerCase() ?? null;
+
+  useEffect(() => {
+    if (!isSessionReady || !currentUser || isGuest) return;
+    let cancelled = false;
+    void fetchPageVisibility().then((visibility) => {
+      if (cancelled || isPageVisible(contentNavigation, visibility)) return;
+      // Keep the developer/owner's recovery surface reachable even if its nav item was hidden.
+      if (contentNavigation === 'admin' && ['developer', 'owner'].includes(currentRole ?? '')) return;
+      setActiveNavigation('today');
+    }).catch(() => { /* A missing visibility migration defaults to the existing role gates. */ });
+    return () => { cancelled = true; };
+  }, [contentNavigation, currentRole, currentUser?.user.id, isGuest, isSessionReady, setActiveNavigation]);
 
   useEffect(() => {
     if (!isSessionReady) return;
