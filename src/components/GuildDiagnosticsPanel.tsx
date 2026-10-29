@@ -133,7 +133,7 @@ export function GuildDiagnosticsPanel() {
         <div className={styles.deviceCopy}><strong>Audio output</strong><span>Plays a brief tone only when you request a test.</span></div>
         <button type="button" onClick={() => void playAudioTest()}><AudioLines size={15} /> Test sound</button>
       </div>
-      {audioMessage && <p className={styles.audioMessage} role="status" aria-live="polite>{audioMessage}</p>}
+      {audioMessage && <p className={styles.audioMessage} role="status" aria-live="polite">{audioMessage}</p>}
     </section>
   );
 }
