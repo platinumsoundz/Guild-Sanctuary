@@ -123,7 +123,7 @@ export function AdminDashboard({ role }: { role: string }) {
         </section>
       )}
       {canManageRoles && <RoleManagement />}
-      {canModerate && <ModerationDashboard />}
+      {canModerate && <ModerationDashboard role={role} />}
       <footer className={styles.footer}>Role changes and moderation actions must be validated by the connected Supabase project. If access is denied, confirm that the security migration is applied and your account has been assigned its role.</footer>
     </div>
   );
