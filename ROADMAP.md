@@ -764,3 +764,11 @@ Two connected Supabase projects were inspected read-only: `kchrskkchoyqweowskxv`
 - The projects have materially different migration ledgers. Matching function names and signatures are useful parity evidence, but do **not** prove their function bodies, RLS policies, or concurrent role checks behave identically.
 - The reported Shorts schema-cache error is therefore **not yet explained** by a missing function name in either inspected database. Next diagnostics must identify which project the failing deployment actually calls, inspect PostgREST/schema-cache and API logs, compare the exact function definition and grants, and reproduce the call as an authenticated user. Do not apply another migration or reset either project merely to clear the error.
 - The moderation dashboard merge is code integration only. Complete a read-only body/policy review and approved staging authorization tests before claiming the moderation system is release-ready.
+
+## Console-style Today launcher batch — 2026-10-29
+
+- **Implemented on current-main feature branch:** replace the minimal three-link Today panel with a console-style launcher for Guild Arcade, Cosmic Arcade, Community and Shorts, plus a separate toolkit for Planner, Discover, Messages, Events and Wallet.
+- Add a context-aware time-of-day greeting, compact home-base identity, clearly grouped destinations, per-space visual accents, and consistent keyboard-focus behaviour.
+- Responsive layout: four launcher columns on wide screens, two on tablets, and stacked touch-friendly cards on narrow phones. Motion is disabled when the member requests reduced motion.
+- Extend the existing Today contract to cover all launcher destinations, semantic section labels, responsive breakpoints and reduced-motion behaviour. The existing `check:today-dashboard` package script remains the contract entry point.
+- **Release boundary:** this is a feature branch, not a production deployment. Exact-head CI, typecheck/build, and screenshot checks must pass; desktop/tablet/phone interaction review remains required before merge. This batch does not change authentication, database schema, payment settings, role assignments or token spending.
