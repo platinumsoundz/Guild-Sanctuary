@@ -65,9 +65,11 @@ declare
   recorded public.sanctuary_donations%rowtype;
 begin
   if requested_event_id is null or requested_event_id = ''
+    or requested_event_type is null
     or requested_event_type not in ('checkout.session.completed', 'checkout.session.async_payment_succeeded')
     or requested_session_id is null or requested_session_id = ''
     or requested_user_id is null
+    or requested_amount_total is null
     or requested_amount_total not in (500, 1000, 2500)
     or requested_currency is distinct from 'usd'
     or requested_livemode is null
