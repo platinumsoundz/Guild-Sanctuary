@@ -6,6 +6,7 @@ import { useAppContext } from '@/context/AppContext';
 import { fetchConversationThread, createDirectConversation, sendConversationMessage, subscribeToConversationMessages } from './service';
 
 interface UseDirectMessagesResult {
+  conversationId: string | null;
   messages: Message[];
   isLoading: boolean;
   isSending: boolean;
@@ -172,5 +173,5 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     };
   }, [conversationId, userId]);
 
-  return { messages: visibleMessages, isLoading, isSending, error, send };
+  return { conversationId: messagesThreadKey === threadKey ? conversationId : null, messages: visibleMessages, isLoading, isSending, error, send };
 }
