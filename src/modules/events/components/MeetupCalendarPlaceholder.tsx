@@ -86,13 +86,14 @@ export function MeetupCalendarPlaceholder() {
       if ((!editingEvent || locationAddress.trim()) && (!locationAddress.trim() || !latitude || !longitude)) throw new Error('Search for a venue or address and select a map result before publishing or moving an event.');
       const startsAt = toIsoDateTime(startDate, startTime);
       if (editingEvent) {
-        await editEvent(editingEvent.id, { title, description, startsAt, locationCoords: { latitude: Number(latitude), longitude: Number(longitude) } });
+        await editEvent(editingEvent.id, { title, description, startsAt, locationLabel: locationAddress.trim() || editingEvent.locationLabel || '', locationCoords: { latitude: Number(latitude), longitude: Number(longitude) } });
       } else {
         await addEvent({
           creatorId: userId,
           title,
           description,
           startsAt,
+          locationLabel: locationAddress.trim(),
           locationCoords: { latitude: Number(latitude), longitude: Number(longitude) },
         });
       }
@@ -342,7 +343,7 @@ export function MeetupCalendarPlaceholder() {
                     <span className={styles.locationText}>
                       <MapPin size={13} aria-hidden="true" />
                       {getMapLinks(String(event.locationCoords.latitude), String(event.locationCoords.longitude))
-                        ? 'Map location available · Open the map to view this venue'
+                        ? event.locationLabel || 'Map location available · Open the map to view this venue'
                         : 'Location unavailable · coordinates are missing or invalid'}
                     </span>
                     <span className={styles.attendeeCount}>{event.rsvpCount} going</span>
