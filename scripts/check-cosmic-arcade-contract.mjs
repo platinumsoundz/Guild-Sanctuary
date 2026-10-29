@@ -19,7 +19,7 @@ assert.doesNotMatch(gamesHub, /import \{ CosmicArcade \}/, 'external creator pro
 assert.doesNotMatch(arcade, /GamesHub|The 5 Sleeves 2D|The 5 Sleeves 3D|My Roblox World|Minecraft|Platinum Survival/, 'Cosmic Arcade contains no external creator-world links');
 assert.match(workspace, /activeNavigation === 'support' \? \([\s\S]*?<SupportPanel \/>/, 'Support navigation renders the dedicated creator-support page');
 assert.doesNotMatch(supportPanel, /GamesHub|community-projects-title/, 'creator support page stays focused on contributions');
-assert.match(workspace, /isGuest && activeNavigation === 'guild'/, 'guests can access the read-only Guild games lobby');
+assert.doesNotMatch(workspace, /isGuest && activeNavigation === 'guild'/, 'guest sessions cannot enter the hidden Guild route');
 assert.match(workspace, /activeNavigation === 'guild' \? \(\s*<GuildWorld/, 'authenticated Guild route mounts the Guild experience');
 const guildWorld = readFileSync('src/components/GuildWorld.tsx', 'utf8');
 assert.match(guildWorld, /<GamesHub \/>/, 'creator games are hosted in the Guild lobby');
