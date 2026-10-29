@@ -545,3 +545,155 @@
   .saveButton:hover,
   .showcaseItem:hover { transform: none; }
 }
+
+
+/* A more spacious, reflective Sanctuary profile home. */
+.pageIntro {
+  max-width: 58ch;
+  margin: 11px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.75;
+}
+.journeyPanel {
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+  padding: clamp(18px, 3vw, 30px);
+  border: 1px solid color-mix(in srgb, var(--profile-color) 24%, var(--line));
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 0% 0%, color-mix(in srgb, var(--profile-color) 9%, transparent), transparent 48%),
+    var(--surface-raised);
+  box-shadow: 0 14px 40px color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.journeyHeading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.journeyHeading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(22px, 2.5vw, 29px);
+  font-weight: 450;
+  letter-spacing: -.035em;
+}
+.journeyHeading > div:first-child > p:last-child {
+  max-width: 58ch;
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.completion {
+  display: grid;
+  flex: 0 0 142px;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+}
+.completionValue {
+  color: var(--profile-color);
+  font-size: 26px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.completionLabel {
+  color: var(--muted);
+  font-size: 10px;
+}
+.progressTrack {
+  display: block;
+  height: 5px;
+  margin-top: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+.progressTrack > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--profile-color);
+  transition: width 220ms ease;
+}
+.journeyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+.journeyCard {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 19px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+}
+.journeySymbol {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--profile-color) 30%, var(--line));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--profile-color) 8%, var(--surface));
+  color: var(--profile-color);
+  font: 23px Georgia, serif;
+}
+.journeyCard h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+.journeyCard p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.journeyLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: auto;
+  padding: 8px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--profile-color);
+  cursor: pointer;
+  font: 700 11px/1.4 Arial, sans-serif;
+  text-align: left;
+}
+.journeyLink:hover { text-decoration: underline; text-underline-offset: 3px; }
+.journeyLink:focus-visible {
+  outline: 2px solid var(--profile-color);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+@media (max-width: 760px) {
+  .journeyHeading { align-items: flex-start; flex-direction: column; gap: 15px; }
+  .completion { width: 100%; flex-basis: auto; grid-template-columns: auto 1fr; align-items: center; column-gap: 10px; }
+  .completionValue { grid-row: span 2; }
+  .progressTrack { grid-column: 1 / -1; }
+  .journeyGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .pageIntro { font-size: 13px; }
+  .journeyPanel { gap: 16px; padding: 16px; border-radius: 16px; }
+  .journeyGrid { grid-template-columns: minmax(0, 1fr); }
+  .journeyCard { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .progressTrack > span { transition: none; }
+}

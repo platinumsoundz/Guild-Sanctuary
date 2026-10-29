@@ -21,11 +21,11 @@ import { PersonalPlanner } from '@/modules/personal-planner/PersonalPlanner';
 import { TokenShopPanel, WalletPanel } from '@/modules/economy';
 import { CosmicArcade } from '@/components/CosmicArcade';
 import { GuildWorld } from '@/components/GuildWorld';
-import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
-import { GuildRoadmap } from '@/components/GuildRoadmap';
+import { RoadmapHub } from '@/components/RoadmapHub';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
+import { FeedbackHub } from '@/components/FeedbackHub';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
@@ -192,12 +192,12 @@ export function AppWorkspace() {
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
       <h1 id="guest-access-title">Explore before you join</h1>
       <p className={styles.sectionDescription}>
-        Guest mode is read-only. You can explore the Cosmic Arcade, review the Sanctuary roadmap,
+        Guest mode is read-only. You can explore the Cosmic Arcade, review the project roadmaps,
         and learn about the community without creating an account.
       </p>
       <div className="flex flex-wrap gap-3">
         <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('games')}>Explore Cosmic Arcade</button>
-        <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('roadmap')}>Sanctuary Roadmap</button>
+        <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('roadmap')}>Roadmaps</button>
       </div>
       <p className={styles.sectionDescription}>
         Sign in to post, react, comment, message, manage your profile, use the planner, or access wallet and shop features.
@@ -231,10 +231,12 @@ export function AppWorkspace() {
         <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
       ) : activeNavigation === 'admin' ? (
         <AdminDashboard role={currentUser.profile.role} />
+      ) : activeNavigation === 'feedback' ? (
+        <FeedbackHub />
       ) : activeNavigation === 'roadmap' ? (
-        <SanctuaryRoadmap />
+        <RoadmapHub key={activeNavigation} />
       ) : activeNavigation === 'guild-roadmap' ? (
-        <GuildRoadmap />
+        <RoadmapHub key={activeNavigation} initialView="guild" />
       ) : activeNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />

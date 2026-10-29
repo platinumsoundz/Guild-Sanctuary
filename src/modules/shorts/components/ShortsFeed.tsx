@@ -32,6 +32,7 @@ export function ShortsFeed() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoFileName, setVideoFileName] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const recordingPreviewRef = useRef<HTMLVideoElement>(null);
@@ -331,7 +332,11 @@ export function ShortsFeed() {
         <span>Scroll or swipe to explore</span>
       </header>
       {canEngage ? (
-        <form className={styles.videoComposer} onSubmit={(event) => void handlePublishVideo(event)}>
+        <section className={styles.composerSection} aria-label="Create a Short">
+          <button className={styles.recordShortButton} type="button" aria-expanded={isComposerOpen} onClick={() => setIsComposerOpen((open) => !open)}>
+            {isComposerOpen ? 'Close recorder' : 'Record short'}
+          </button>
+          {isComposerOpen && <form className={styles.videoComposer} onSubmit={(event) => void handlePublishVideo(event)}>
           <label>
             <span>Video caption</span>
             <input value={captionDraft} onChange={(event) => setCaptionDraft(event.currentTarget.value)} maxLength={500} placeholder="Add a caption…" />
@@ -347,7 +352,8 @@ export function ShortsFeed() {
           {isRecording && <video ref={recordingPreviewRef} className={styles.videoDraftPreview} autoPlay muted playsInline />}
           {videoDraft && !isRecording && <video className={styles.videoDraftPreview} src={videoDraft} controls muted playsInline />}
           <button type="submit" disabled={!videoDraft}>Publish short</button>
-        </form>
+        </form>}
+        </section>
       ) : (
         <p className={styles.empty} role="status">Sign in with your Sanctuary account to publish, like, or comment on Shorts.</p>
       )}

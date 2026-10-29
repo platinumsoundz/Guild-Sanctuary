@@ -17,7 +17,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
         </div>
         <div className={styles.profileDetails}>
-          <p className={styles.eyebrow}>COMMUNITY PROFILE</p>
+          <p className={styles.eyebrow}>{'privacy' in profile ? 'YOUR SPACE' : 'COMMUNITY MEMBER'}</p>
           <h1>{profile.displayName}</h1>
           <p className={styles.username}>@{profile.username}</p>
           {profile.statusMessage && <p className={styles.statusMessage}>{profile.statusMessage}</p>}

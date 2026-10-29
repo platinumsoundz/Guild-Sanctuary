@@ -158,6 +158,7 @@ export interface Event {
   title: string;
   description: string;
   locationCoords: Coordinates;
+  locationLabel?: string | null;
   startsAt: string;
   endsAt: string | null;
   createdAt: string;

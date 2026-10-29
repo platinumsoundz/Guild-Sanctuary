@@ -24,6 +24,17 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const profileSignals = [
+    Boolean(profile.avatarUrl),
+    Boolean(profile.bannerUrl),
+    Boolean(profile.bio?.trim()),
+    Boolean(profile.statusMessage?.trim()),
+    Boolean(profile.belief?.trim()),
+    Boolean(profile.location?.trim()),
+    Object.values(profile.socialLinks ?? {}).some(Boolean),
+  ];
+  const profileCompletion = Math.round((profileSignals.filter(Boolean).length / profileSignals.length) * 100);
+
   useEffect(() => setDraft(profile), [profile]);
 
   const updateDraft = (changes: Partial<Profile>) => {
@@ -91,8 +102,9 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
       <header className={styles.pageHeader}>
         <div>
           <p className={styles.eyebrow}>YOUR SANCTUARY PROFILE</p>
-          <span className="cosmic-badge">Your space, your style</span>
-          <h1>Your profile</h1>
+          <span className="cosmic-badge">A space to be, reflect, and grow</span>
+          <h1>Your space</h1>
+          <p className={styles.pageIntro}>A gentle place to share your story, what grounds you, and the person you are becoming.</p>
         </div>
         <div className={styles.profileActions}>
           {saved && !isEditing && <span role="status">Profile saved</span>}
@@ -112,6 +124,43 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
           </button>
         </div>
       </header>
+
+      <ProfileCard profile={draft} />
+
+      <section className={styles.journeyPanel} aria-labelledby="journey-heading">
+        <div className={styles.journeyHeading}>
+          <div>
+            <p className={styles.eyebrow}>YOUR PERSONAL JOURNEY</p>
+            <h2 id="journey-heading">A little more of you</h2>
+            <p>There is no perfect profile. Add only what feels true and comfortable to share.</p>
+          </div>
+          <div className={styles.completion} aria-label={`Profile details ${profileCompletion}% complete`}>
+            <span className={styles.completionValue}>{profileCompletion}%</span>
+            <span className={styles.completionLabel}>profile details</span>
+            <span className={styles.progressTrack} aria-hidden="true"><span style={{ width: `${profileCompletion}%` }} /></span>
+          </div>
+        </div>
+        <div className={styles.journeyGrid}>
+          <article className={styles.journeyCard}>
+            <span className={styles.journeySymbol} aria-hidden="true">✧</span>
+            <h3>Your story</h3>
+            <p>{profile.bio?.trim() || 'Your story is yours to tell, in your own words and in your own time.'}</p>
+            {!profile.bio?.trim() && <button type="button" className={styles.journeyLink} onClick={() => setIsEditing(true)}>Write your introduction <span aria-hidden="true">↗</span></button>}
+          </article>
+          <article className={styles.journeyCard}>
+            <span className={styles.journeySymbol} aria-hidden="true">☼</span>
+            <h3>What grounds you</h3>
+            <p>{profile.belief?.trim() || 'Share a belief, value, philosophy, or simple reminder that helps you find your centre.'}</p>
+            {!profile.belief?.trim() && <button type="button" className={styles.journeyLink} onClick={() => setIsEditing(true)}>Add what grounds you <span aria-hidden="true">↗</span></button>}
+          </article>
+          <article className={styles.journeyCard}>
+            <span className={styles.journeySymbol} aria-hidden="true">☾</span>
+            <h3>Where you are today</h3>
+            <p>{profile.statusMessage?.trim() || 'Every season is different. Leave a short intention or note for the people who visit your space.'}</p>
+            {!profile.statusMessage?.trim() && <button type="button" className={styles.journeyLink} onClick={() => setIsEditing(true)}>Set a status <span aria-hidden="true">↗</span></button>}
+          </article>
+        </div>
+      </section>
 
       <section className={styles.showcase} aria-labelledby="showcase-heading">
         <div className={styles.sectionHeading}>
@@ -138,8 +187,6 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
           </div>
         )}
       </section>
-
-      <ProfileCard profile={draft} />
 
       <SelfDiscoveryCentre />
 

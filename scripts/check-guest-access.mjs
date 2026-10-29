@@ -12,7 +12,7 @@ assert.doesNotMatch(workspace, /isGuest && activeNavigation === 'guild'/, 'guest
 assert.match(context, /setActiveNavigation\('today'\)/, 'Guest sessions start on the public welcome page');
 assert.match(workspace, /Explore before you join/, 'Restricted guest routes explain the guest-mode boundary');
 assert.match(workspace, /Explore Cosmic Arcade/, 'Guest mode offers the public Cosmic Arcade');
-assert.match(workspace, /Sanctuary Roadmap/, 'Guest mode offers the Sanctuary roadmap');
+assert.match(workspace, /Roadmaps/, 'Guest mode offers the Sanctuary roadmap');
 assert.doesNotMatch(workspace, /review the Sanctuary and Guild roadmaps|onClick=\{\(\) => setActiveNavigation\('guild-roadmap'\)\}/, 'guest mode has no Guild Roadmap entry point');
 assert.match(workspace, /if \(isGuest \|\| activeNavigation !== 'profile' \|\| !currentUser\)/,
   'Guest sessions must not trigger account-profile post loading');

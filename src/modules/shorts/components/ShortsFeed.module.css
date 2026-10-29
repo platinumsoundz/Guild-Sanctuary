@@ -290,3 +290,9 @@
 .commentTools > button, .commentEdit > button { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0; border: 0; background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; }
 .commentEdit { display: grid; gap: 6px; margin: 6px 0; }
 .commentEdit textarea { width: 100%; min-height: 56px; padding: 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); }
+
+.composerSection { width: min(100%, 780px); margin: 0 auto 16px; }
+.recordShortButton { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; border: 1px solid var(--accent); border-radius: 7px; background: var(--accent); color: #fff; cursor: pointer; font: 700 12px Arial, sans-serif; }
+.recordShortButton:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.composerSection .videoComposer { margin: 10px 0 0; }
+@media (max-width: 560px) { .composerSection { padding: 0 7px; } .recordShortButton { width: 100%; } }

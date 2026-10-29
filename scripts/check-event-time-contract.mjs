@@ -7,7 +7,11 @@ const styles = readFileSync(new URL('../src/modules/events/components/MeetupCale
 assert.ok(component.includes('Event date (your local time)'), 'event date input must disclose local-time interpretation');
 assert.ok(component.includes('Start time (your local time)'), 'event time input must disclose local-time interpretation');
 assert.ok(component.includes('Dates use your device’s local timezone'), 'event form must explain local input timezone');
-assert.ok(component.includes('preview the pin on a real map'), 'event form must explain how to verify a location pin');
+assert.ok(component.includes('check the map pin before publishing'), 'event form must explain how to verify a location pin');
+assert.ok(component.includes('Venue or address') && component.includes('nominatim.openstreetmap.org'), 'event creation must search a map provider instead of asking users for coordinates');
+assert.ok(!component.includes('<span>Latitude</span>') && !component.includes('<span>Longitude</span>'), 'raw coordinate inputs must stay hidden from members');
+assert.ok(!component.includes('latitude.toFixed(3)') && !component.includes('longitude.toFixed(3)'), 'event cards must not display raw coordinates');
+assert.ok(component.includes('Map location available · Open the map to view this venue'), 'event cards must point members to the map provider instead of exposing coordinates');
 assert.ok(component.includes('<iframe') && component.includes('OpenStreetMap'), 'event discovery must render a real map');
 assert.ok(component.includes('aria-label="Choose an event map pin"'), 'event map pins must have an accessible selector');
 assert.ok(component.includes('aria-pressed={selectedMapEvent?.id === event.id}'), 'map pin selection state must be exposed to assistive technology');
@@ -54,6 +58,8 @@ const eventService = readFileSync(new URL('../src/modules/events/service.ts', im
 assert.ok(component.includes("locationCoords: { latitude: Number(latitude), longitude: Number(longitude) }"), 'editing an event must submit the updated coordinates');
 assert.ok(eventService.includes("validateCoordinates(input.locationCoords);"), 'event updates must validate coordinate bounds');
 assert.ok(eventService.includes("latitude: input.locationCoords.latitude") && eventService.includes("longitude: input.locationCoords.longitude"), 'event updates must persist both coordinate values');
+assert.ok(eventService.includes("location_name: input.locationLabel?.trim() || ''"), 'event creation and edits must persist the venue label alongside the map pin');
+assert.ok(eventService.includes('locationLabel: row.location_name || null'), 'saved venue labels must be restored when events are loaded');
 console.log('Event location editing contract checks passed.');
 
 assert.ok(component.includes('const [includePastEvents, setIncludePastEvents] = useState(false)'), 'past-event browsing must be opt-in by default');

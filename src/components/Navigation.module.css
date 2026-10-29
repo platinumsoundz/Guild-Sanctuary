@@ -549,3 +549,16 @@
     transition: none;
   }
 }
+
+.accountArea { position: relative; }
+.accountMenu { position: absolute; z-index: 1100; top: calc(100% + 8px); right: 0; display: grid; width: min(330px, calc(100vw - 24px)); gap: 5px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); color: var(--ink); box-shadow: 0 14px 42px rgb(0 0 0 / 22%); }
+.accountMenuIdentity { display: grid; gap: 3px; padding: 4px 5px 10px; border-bottom: 1px solid var(--line); }
+.accountMenuIdentity strong { font-size: 15px; }
+.accountMenuIdentity span, .accountMenuStats small { color: var(--muted); font: 11px Arial, sans-serif; }
+.accountMenuStats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px 5px; }
+.accountMenuStats > span { display: grid; gap: 5px; min-width: 0; }
+.accountMenuStats strong { overflow-wrap: anywhere; font-size: 12px; text-transform: capitalize; }
+.accountMenu > button { display: flex; align-items: center; gap: 9px; min-height: 42px; padding: 8px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; font: 12px Arial, sans-serif; }
+.accountMenu > button:hover, .accountMenu > button:focus-visible { background: var(--surface); outline-color: var(--accent); }
+.navIconWrap { position: relative; display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; }
+.navBadge { position: absolute; top: -7px; right: -10px; display: inline-flex; min-width: 17px; height: 17px; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid var(--surface-raised); border-radius: 999px; background: #d9363e; color: #fff; font: 700 9px/1 Arial, sans-serif; box-shadow: 0 0 0 1px rgb(0 0 0 / 8%); }
