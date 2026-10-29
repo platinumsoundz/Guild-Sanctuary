@@ -32,7 +32,7 @@ export function CallControls({ conversationId, userId, peerUserId }: CallControl
     <section className={styles.callControls} aria-label="Audio and video calling">
       <div className={styles.callActions}>
         <button type="button" disabled={!conversationId || !peerUserId || !call.signallingReady || active} onClick={() => void call.startCall('audio')} title="Start a peer-to-peer audio call"><span aria-hidden="true">☎</span> Audio call</button>
-        <button type="button" disabled={!conversationId || !peerUserId || active} onClick={() => void call.startCall('video')} title="Start a peer-to-peer video call"><span aria-hidden="true">▣</span> Video call</button>
+        <button type="button" disabled={!conversationId || !peerUserId || !call.signallingReady || active} onClick={() => void call.startCall('video')} title="Start a peer-to-peer video call"><span aria-hidden="true">▣</span> Video call</button>
       </div>
       <p role="status">{statusLabel[call.status]}</p>
       {!conversationId && <p>Calls require a saved conversation between connected Sanctuary accounts.</p>}{conversationId && !call.signallingReady && <p>Connecting to private call signalling…</p>}
