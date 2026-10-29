@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ExternalLink, Search, ShieldCheck, UserCog } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
-import { ModerationDashboard } from './ModerationDashboard';
+import { fetchPageVisibility, isPageVisible, MANAGEABLE_PAGE_VISIBILITY, savePageVisibility, type PageVisibilityMap, type ManagedPageKey } from '@/lib/pageVisibility';
 import styles from './AdminDashboard.module.css';
 
 type SanctuaryRole = 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner';
@@ -105,25 +105,61 @@ function RoleManagement() {
   );
 }
 
+function PageVisibilityPanel() {
+  const [visibility, setVisibility] = useState<PageVisibilityMap>({});
+  const [loading, setLoading] = useState(true);
+  const [savingKey, setSavingKey] = useState<ManagedPageKey | null>(null);
+  const [message, setMessage] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    void fetchPageVisibility().then((result) => {
+      if (!cancelled) setVisibility(result);
+    }).catch((error) => {
+      if (!cancelled) setMessage(error instanceof Error ? error.message : 'Page visibility settings could not be loaded.');
+    }).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+  const update = async (key: ManagedPageKey, visible: boolean) => {
+    setSavingKey(key);
+    setMessage('');
+    try {
+      await savePageVisibility(key, visible);
+      setVisibility((current) => ({ ...current, [key]: visible }));
+      setMessage(`${MANAGEABLE_PAGE_VISIBILITY.find((page) => page.key === key)?.label ?? key} is now ${visible ? 'visible' : 'hidden'} for all members.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'The setting could not be saved. Check that the page-visibility migration is deployed.');
+    } finally {
+      setSavingKey(null);
+    }
+  };
+  return <section className={styles.rolePanel} aria-labelledby="page-visibility-title">
+    <div className={styles.sectionHeading}><ShieldCheck size={21} aria-hidden="true" /><div>
+      <h2 id="page-visibility-title">Page & system visibility</h2>
+      <p>Developer and Owner controls. Changes are global and affect navigation for every account; access roles still apply even when a page is shown.</p>
+    </div></div>
+    {loading ? <p role="status">Loading page visibility…</p> : <div className={styles.memberList}>
+      {MANAGEABLE_PAGE_VISIBILITY.map((page) => <label key={page.key} className={styles.memberRow}>
+        <span><strong>{page.label}</strong><small>{page.key === 'admin' ? 'Always available to staff for recovery' : isPageVisible(page.key, visibility) ? 'Shown in navigation' : 'Hidden from navigation'}</small></span>
+        <input type="checkbox" checked={isPageVisible(page.key, visibility)} disabled={savingKey !== null || page.key === 'admin'} onChange={(event) => void update(page.key, event.currentTarget.checked)} aria-label={`Show ${page.label}`} />
+      </label>)}
+    </div>}
+    {message && <p className={styles.message} role="status">{message}</p>}
+  </section>;
+}
+
 export function AdminDashboard({ role }: { role: string }) {
   const canManageRoles = ['admin', 'developer', 'owner'].includes(role);
-  const canModerate = ['moderator', 'admin', 'developer', 'owner'].includes(role);
+  const canManageVisibility = ['developer', 'owner'].includes(role);
 
   return (
     <div className={styles.dashboard}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>SANCTUARY CONTROL CENTRE</p>
-        <h1><ShieldCheck size={27} aria-hidden="true" /> Admin & Moderation</h1>
-        <p>Manage reports and member permissions with server-enforced access checks.</p>
+        <h1><UserCog size={27} aria-hidden="true" /> Admin</h1>
+        <p>Manage member permissions and, for Developers and the Owner, global page and system visibility.</p>
       </header>
-      {!canModerate && (
-        <section className={styles.notice} role="status" aria-label="Admin access requirements">
-          <strong>This account does not have moderation access.</strong>
-          <p>Admin and moderation permissions are assigned by an authorized owner. They cannot be claimed from this screen. During initial setup, the first owner must be assigned out of band after the target Sanctuary account is verified.</p>
-        </section>
-      )}
-      {canManageRoles && <RoleManagement />}
-      {canModerate && <ModerationDashboard role={role} />}
+      {canManageRoles ? <RoleManagement /> : <section className={styles.notice} role="status"><strong>Member permission controls are restricted.</strong><p>Admin, Developer or Owner access is required. Moderation work is available separately in the Moderation page.</p></section>}
+      {canManageVisibility && <PageVisibilityPanel />}
       <footer className={styles.footer}>Role changes and moderation actions must be validated by the connected Supabase project. If access is denied, confirm that the security migration is applied and your account has been assigned its role.</footer>
     </div>
   );

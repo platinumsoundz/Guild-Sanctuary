@@ -4,8 +4,10 @@ import { strict as assert } from 'node:assert';
 const dashboard = readFileSync(new URL('../src/modules/moderation/ModerationDashboard.tsx', import.meta.url), 'utf8');
 const service = readFileSync(new URL('../src/modules/moderation/service.ts', import.meta.url), 'utf8');
 const admin = readFileSync(new URL('../src/modules/moderation/AdminDashboard.tsx', import.meta.url), 'utf8');
+const workspace = readFileSync(new URL('../src/components/AppWorkspace.tsx', import.meta.url), 'utf8');
 
-assert.ok(admin.includes('<ModerationDashboard role={role} />'), 'admin dashboard must pass the authenticated role into moderation controls');
+assert.ok(!admin.includes('<ModerationDashboard'), 'Admin must remain separate from the moderation queue');
+assert.ok(workspace.includes('<ModerationDashboard role={currentUser.profile.role} />'), 'workspace must pass the authenticated role to the standalone Moderation page');
 assert.ok(dashboard.includes("['moderator', 'admin', 'developer', 'owner'].includes(role)"), 'warning capability must be limited to moderator-level roles and above');
 assert.ok(dashboard.includes("['admin', 'developer', 'owner'].includes(role)"), 'suspension capability must be limited to admin-level roles and above');
 assert.ok(dashboard.includes("['developer', 'owner'].includes(role)"), 'ban capability must be limited to developer/owner roles');

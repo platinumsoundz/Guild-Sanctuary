@@ -33,7 +33,7 @@ export type SanctuaryPage =
   | 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover'
   | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile'
   | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications'
-  | 'admin' | 'planner';
+  | 'admin' | 'moderation' | 'planner';
 
 const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
   today: 'user',
@@ -43,7 +43,7 @@ const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
   messages: 'user',
   discover: 'user',
   games: 'vip',
-  guild: 'developer',
+  guild: 'user',
   roadmap: 'user',
   'guild-roadmap': 'developer',
   profile: 'user',
@@ -52,7 +52,8 @@ const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
   support: 'user',
   settings: 'user',
   notifications: 'user',
-  admin: 'moderator',
+  admin: 'admin',
+  moderation: 'moderator',
   planner: 'user',
 };
 

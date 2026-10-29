@@ -8,7 +8,8 @@ import {
   Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
-import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
+import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
+import { fetchPageVisibility, isPageVisible, type PageVisibilityMap } from '@/lib/pageVisibility';
 import { NotificationBar } from './NotificationBar';
 import { GuildDiagnosticsPanel } from './GuildDiagnosticsPanel';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
@@ -42,7 +43,8 @@ const sanctuaryItems: Item[] = [
   { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
   { id: 'settings', label: 'Settings', icon: Settings },
-  { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
+  { id: 'admin', label: 'Admin', icon: ShieldCheck },
+  { id: 'moderation', label: 'Moderation', icon: ShieldCheck },
 ];
 const noDirections = { up: false, down: false, left: false, right: false };
 
@@ -53,6 +55,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   onExit: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
+  const [pageVisibility, setPageVisibility] = useState<PageVisibilityMap>({});
   const [open, setOpen] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
@@ -78,11 +81,17 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     }
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    void fetchPageVisibility().then((value) => { if (!cancelled) setPageVisibility(value); }).catch(() => { if (!cancelled) setPageVisibility({}); });
+    return () => { cancelled = true; };
+  }, []);
+
   const allowed = sanctuaryItems.filter((item) => {
-    if (item.id === 'admin') return ['moderator', 'admin', 'developer', 'owner'].includes(role);
-    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role);
-    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role);
-    return true;
+    if (!canAccessSanctuaryPage(item.id, role)) return false;
+    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role) && isPageVisible(item.id, pageVisibility);
+    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role) && isPageVisible(item.id, pageVisibility);
+    return isPageVisible(item.id, pageVisibility);
   });
   const label = [...guildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Sanctuary';
   const searchableItems = [...guildItems, ...allowed];
