@@ -5,6 +5,13 @@ export type ReportTarget = ContentReportRow['target_type'];
 
 export interface ModerationQueueItem extends ContentReportRow {
   targetOwnerId: string | null;
+  targetOwnerUsername: string | null;
+  targetOwnerDisplayName: string | null;
+  targetContent: string | null;
+  targetTitle: string | null;
+  targetMediaUrl: string | null;
+  targetState: string | null;
+  targetCreatedAt: string | null;
 }
 
 export async function submitContentReport(input: {
@@ -44,6 +51,10 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
     throw new Error('This account is not authorized to use moderation tools.');
   }
 
+  // Use the existing RLS-protected report table instead of relying on a queue RPC
+  // that is not present in both live schemas. Target ownership is resolved by the
+  // existing moderator-only RPC. Message bodies are intentionally not fetched here:
+  // private message preview needs its own audited, role-gated context endpoint.
   const { data: reports, error } = await client
     .from('content_reports')
     .select('*')
@@ -52,13 +63,74 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
     .limit(100);
   if (error) throw new Error(`Moderation reports could not be loaded: ${error.message}`);
 
-  return Promise.all(reports.map(async (report) => {
+  return Promise.all((reports ?? []).map(async (report) => {
     const { data: targetOwnerId, error: ownerError } = await client.rpc('get_report_target_owner', {
       requested_target_type: report.target_type,
       requested_target_id: report.target_id,
     });
-    if (ownerError) throw new Error(`Report context could not be loaded: ${ownerError.message}`);
-    return { ...report, targetOwnerId };
+    if (ownerError) throw new Error(`Report ownership could not be verified: ${ownerError.message}`);
+
+    let targetContent: string | null = null;
+    let targetTitle: string | null = null;
+    let targetMediaUrl: string | null = null;
+    let targetState: string | null = null;
+    let targetCreatedAt: string | null = null;
+
+    if (report.target_type === 'post') {
+      const { data } = await client.from('posts').select('content,media_url,state,created_at').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        targetContent = data.content?.slice(0, 600) ?? null;
+        targetMediaUrl = data.media_url && (data.media_url.startsWith('https://') || data.media_url.startsWith('http://')) ? data.media_url : null;
+        targetState = data.state;
+        targetCreatedAt = data.created_at;
+      }
+    } else if (report.target_type === 'short') {
+      const { data } = await client.from('short_videos').select('caption,video_url,state,created_at').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        targetContent = data.caption?.slice(0, 600) ?? null;
+        targetMediaUrl = data.video_url && (data.video_url.startsWith('https://') || data.video_url.startsWith('http://')) ? data.video_url : null;
+        targetState = data.state;
+        targetCreatedAt = data.created_at;
+      }
+    } else if (report.target_type === 'event') {
+      const { data } = await client.from('events').select('title,description,state,created_at').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        targetTitle = data.title?.slice(0, 160) ?? null;
+        targetContent = data.description?.slice(0, 600) ?? null;
+        targetState = data.state;
+        targetCreatedAt = data.created_at;
+      }
+    } else if (report.target_type === 'comment') {
+      const { data } = await client.from('social_comments').select('body,state,created_at').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        targetContent = data.body?.slice(0, 600) ?? null;
+        targetState = data.state;
+        targetCreatedAt = data.created_at;
+      }
+    }
+
+    let targetOwnerUsername: string | null = null;
+    let targetOwnerDisplayName: string | null = null;
+    if (targetOwnerId) {
+      const { data: owner } = await client.from('public_profiles')
+        .select('username,display_name')
+        .eq('id', targetOwnerId)
+        .maybeSingle();
+      targetOwnerUsername = owner?.username ?? null;
+      targetOwnerDisplayName = owner?.display_name ?? null;
+    }
+
+    return {
+      ...report,
+      targetOwnerId: targetOwnerId ?? null,
+      targetOwnerUsername,
+      targetOwnerDisplayName,
+      targetContent,
+      targetTitle,
+      targetMediaUrl,
+      targetState,
+      targetCreatedAt,
+    };
   }));
 }
 
