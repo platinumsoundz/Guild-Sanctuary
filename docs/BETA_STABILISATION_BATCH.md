@@ -94,3 +94,14 @@ A controlled beta can start when all P0 gates pass, the production candidate is 
 - **Moderation dashboard:** PR #227 remains open and stale/non-mergeable against its old base. It uses the RLS-protected `content_reports` table and `get_report_target_owner` RPC rather than calling `get_moderation_queue()`; however, live RPC/table permissions and action behaviour still need verification before enabling the dashboard as release-ready.
 - **Wallet:** PR #230 remains unmerged and security-sensitive. Token spending remains revoked for `public`, `anon`, and `authenticated` until ledger/idempotency/ownership tests pass.
 - **Deployment:** latest main status is still blocked by Vercel's free-tier daily deployment quota. Cloudflare app workflow success and a Ready PR preview do not prove that production Vercel and Cloudflare serve the same main commit.
+
+
+## Stripe checkout readiness update — 2026-10-29
+
+- The dedicated Stripe account `The sanctuary` remains test-mode only. Confirmed active one-time GBP prices: 100 tokens £1.00, 600 tokens £5.00, 1,200 tokens £10.00. No live products or charges were created.
+- The current Next.js checkout route is opt-in and test-key-only; its webhook verifies the raw-body signature, rejects live events and unpaid sessions, validates the configured price/amount, then calls the service-role-only idempotent fulfillment RPC.
+- Corrected the branch Preview `SANCTUARY_SITE_URL` and the existing Stripe test webhook URL to the verified branch alias. The signing secret is a sensitive Preview variable and remains masked.
+- **Still blocked:** the Vercel Ready deployment predates the environment-variable correction. Vercel's deployment-rate limit prevents a fresh deployment right now, so a complete Checkout → signed webhook → exactly-once wallet credit has not yet been proven. Re-run the documented test-card, cancellation, duplicate-event and invalid-event matrix after redeployment.
+- Read-only checks against both connected Supabase projects confirm `record_token_bundle_purchase` is executable by `service_role` only and `spend_tokens` is not executable by `anon` or `authenticated`. Do not lift the spending lock until isolated authenticated transaction tests pass for balance, ownership, insufficient funds, idempotency replay/collision and concurrent requests.
+- Added `check:stripe-test-checkout` to the CI contract suite. It is static regression protection, not a substitute for an actual test-mode round-trip.
+- **Live launch remains gated:** refund/dispute reversals, policy/terms review, payment reconciliation, and final production configuration are not complete. No live-mode payments are enabled by this work.
