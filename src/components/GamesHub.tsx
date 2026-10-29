@@ -41,6 +41,7 @@ export function GamesHub() {
   const [recentLaunches, setRecentLaunches] = useState<LaunchRecord[]>([]);
   const [favourites, setFavourites] = useState<GameId[]>([]);
   const [libraryReady, setLibraryReady] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState<GameId | null>(null);
 
   useEffect(() => {
     try {
@@ -134,7 +135,14 @@ export function GamesHub() {
               <div className={styles.cardActions}>
                 <button type="button" className={styles.playButton} onClick={() => { rememberLaunch(game); setActiveGame(game); }} disabled={!game.url} aria-label={!game.url ? 'The 5 Sleeves 2D launch is waiting for its verified host URL' : `Launch ${game.title} inside The Guild`}><Play size={16} /> {game.url ? 'Launch in Guild' : 'Host URL needed'}</button>
                 {game.url && <a href={game.url} target="_blank" rel="noopener noreferrer" className={styles.externalLink}>Open separately <ExternalLink size={14} /></a>}
+                <button type="button" className={styles.detailsToggle} aria-expanded={detailsOpen === game.id} aria-controls={`details-${game.id}`} onClick={() => setDetailsOpen((current) => current === game.id ? null : game.id)}>{detailsOpen === game.id ? 'Hide details' : 'Game details'}</button>
               </div>
+              {detailsOpen === game.id && <section id={`details-${game.id}`} className={styles.gameDetails} aria-label={`${game.title} details`}>
+                <div><strong>Launch method</strong><p>{game.url ? 'Guild embedded player with an external-browser fallback.' : 'Waiting for a verified host URL; no address is guessed.'}</p></div>
+                <div><strong>Input support</strong><p>Touch, keyboard and gamepad support are described by the game project. Confirm actual input on your browser and device; controller behaviour can vary.</p></div>
+                <div><strong>Compatibility</strong><p>Embedding can be blocked by the game host’s security headers or browser policy. Use Open separately if the embedded view does not load.</p></div>
+                <div><strong>Progress and saves</strong><p>Guild does not currently report verified achievements or cloud saves for this title. Use the game’s own save/account features where available.</p></div>
+              </section>}
               {!game.url && <p className={styles.hint}>The verified 2D client URL is not configured in this build. Follow the 3D static-hosting pattern where possible; the hub will not guess a production address.</p>}
             </div>
           </article>
