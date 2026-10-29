@@ -55,6 +55,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   const [controlsOpen, setControlsOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
   const [quickQuery, setQuickQuery] = useState('');
+  const [quickKeyboardOpen, setQuickKeyboardOpen] = useState(false);
   const [controllerPresent, setControllerPresent] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -79,7 +80,14 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     const needle = quickQuery.trim().toLowerCase();
     return !needle || item.label.toLowerCase().includes(needle) || (item.description ?? '').toLowerCase().includes(needle);
   }).slice(0, 8);
-  const choose = (page: GuildPage) => { onSelect(page); setOpen(false); setQuickOpen(false); setQuickQuery(''); };
+  const choose = (page: GuildPage) => { onSelect(page); setOpen(false); setQuickOpen(false); setQuickKeyboardOpen(false); setQuickQuery(''); };
+  const addQuickKey = (key: string) => {
+    if (key === 'Backspace') setQuickQuery((value) => value.slice(0, -1));
+    else if (key === 'Space') setQuickQuery((value) => value + ' ');
+    else if (key === 'Clear') setQuickQuery('');
+    else setQuickQuery((value) => value + key);
+    quickSearchRef.current?.focus();
+  };
 
   const moveFocus = (direction: LogicalDirection) => {
     if (!open) {
@@ -153,7 +161,12 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
 
   useEffect(() => {
     if (quickOpen) window.setTimeout(() => quickSearchRef.current?.focus(), 0);
+    else setQuickKeyboardOpen(false);
   }, [quickOpen]);
+
+  useEffect(() => {
+    if (quickOpen && quickKeyboardOpen) window.setTimeout(() => quickPanelRef.current?.querySelector<HTMLButtonElement>('[data-quick-key]')?.focus(), 0);
+  }, [quickOpen, quickKeyboardOpen]);
 
   const toggleReducedMotion = () => {
     const next = !reducedMotion;
@@ -198,7 +211,31 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       const back = state.pressed(1);
       const now = Date.now();
       if (now - lastActionAt.current > 150) {
-        if (start) { setOpen((value) => !value); lastActionAt.current = now; }
+        if (quickOpen) {
+          if (start || back) {
+            setQuickOpen(false);
+            setQuickQuery('');
+            setQuickKeyboardOpen(false);
+            quickButtonRef.current?.focus();
+            lastActionAt.current = now;
+          } else if (confirm) {
+            const active = document.activeElement;
+            if (active instanceof HTMLButtonElement && quickPanelRef.current?.contains(active)) active.click();
+            else if (active instanceof HTMLInputElement && quickPanelRef.current?.contains(active)) {
+              const target = quickPanelRef.current.querySelector<HTMLButtonElement>('[data-quick-key]') ?? quickPanelRef.current.querySelector<HTMLButtonElement>('.quickResults button');
+              target?.focus();
+            }
+            lastActionAt.current = now;
+          } else if (direction) {
+            const targets = Array.from(quickPanelRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled)') ?? []);
+            if (targets.length) {
+              const current = targets.indexOf(document.activeElement as HTMLElement);
+              const delta = direction === 'up' || direction === 'left' ? -1 : 1;
+              targets[(current < 0 ? 0 : current + delta + targets.length) % targets.length]?.focus();
+            }
+            lastActionAt.current = now;
+          }
+        } else if (start) { setQuickOpen(true); setOpen(false); lastActionAt.current = now; }
         else if (back) { goBack(); lastActionAt.current = now; }
         else if (confirm) { activateFocused(); lastActionAt.current = now; }
         else if (direction) { moveFocus(direction); lastActionAt.current = now; }
@@ -212,7 +249,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       window.clearInterval(timer);
       window.removeEventListener('gamepadconnected', poll);
     };
-  }, [open, selectedPage]);
+  }, [open, selectedPage, quickOpen]);
 
   const render = (item: Item) => {
     const Icon = item.icon;
@@ -238,6 +275,10 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
         <div className={styles.quickHeading}><div><small>THE GUILD · HUD</small><h2 id="guild-quick-title">Quick menu</h2></div><button type="button" aria-label="Close quick menu" onClick={() => { setQuickOpen(false); setQuickQuery(''); quickButtonRef.current?.focus(); }}><X size={18} /></button></div>
         <div className={styles.quickStatus}><span className={controllerPresent ? styles.statusOnline : styles.statusOffline}><i />{controllerPresent ? 'Controller detected' : 'Touch / keyboard ready'}</span><span>{isFullscreen ? 'Fullscreen on' : 'Windowed view'}</span></div>
         <label className={styles.quickSearch}><Search size={17} /><span className={styles.visuallyHidden}>Search Guild destinations</span><input ref={quickSearchRef} type="search" value={quickQuery} onChange={(event) => setQuickQuery(event.target.value)} placeholder="Search Guild destinations…" /></label>
+        <button type="button" className={styles.quickKeyboardToggle} aria-pressed={quickKeyboardOpen} onClick={() => setQuickKeyboardOpen((value) => !value)}><Keyboard size={16} /><span>On-screen keyboard</span><span className={quickKeyboardOpen ? styles.toggleOn : styles.toggleOff}>{quickKeyboardOpen ? 'ON' : 'OFF'}</span></button>
+        {quickKeyboardOpen && <div className={styles.quickKeyboard} role="group" aria-label="On-screen keyboard">
+          {['1','2','3','4','5','6','7','8','9','0','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Z','X','C','V','B','N','M','Backspace','Space','Clear'].map((key) => <button type="button" key={key} data-quick-key={key === '1' ? 'first' : undefined} className={['Backspace','Space','Clear'].includes(key) ? styles.quickKeyboardWide : undefined} aria-label={key === 'Backspace' ? 'Delete last character' : key === 'Space' ? 'Insert space' : key === 'Clear' ? 'Clear search' : key} onClick={() => addQuickKey(key)}>{key === 'Backspace' ? '⌫' : key === 'Space' ? 'Space' : key}</button>)}
+        </div>}
         <div className={styles.quickResults} role="group" aria-label="Guild destinations">
           {quickResults.length ? quickResults.map((item) => {
             const Icon = item.icon;
