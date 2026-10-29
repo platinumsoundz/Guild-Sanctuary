@@ -5,6 +5,11 @@ export type ReportTarget = ContentReportRow['target_type'];
 
 export interface ModerationQueueItem extends ContentReportRow {
   targetOwnerId: string | null;
+  targetOwnerName: string | null;
+  targetOwnerUsername: string | null;
+  targetPreview: string;
+  targetCreatedAt: string | null;
+  targetState: string | null;
 }
 
 export async function submitContentReport(input: {
@@ -26,6 +31,75 @@ export async function submitContentReport(input: {
     requested_details: details || null,
   });
   if (error) throw new Error(`Report could not be submitted: ${error.message}`);
+}
+
+async function loadTargetContext(report: ContentReportRow) {
+  const client = getSupabaseBrowserClient();
+  let ownerId: string | null = null;
+  let preview = 'Content preview unavailable. Check the target directly before taking action.';
+  let targetCreatedAt: string | null = null;
+  let targetState: string | null = null;
+
+  const { data: owner, error: ownerError } = await client.rpc('get_report_target_owner', {
+    requested_target_type: report.target_type,
+    requested_target_id: report.target_id,
+  });
+  if (ownerError) throw new Error(`Report context could not be loaded: ${ownerError.message}`);
+  ownerId = owner;
+
+  try {
+    if (report.target_type === 'post') {
+      const { data } = await client.from('posts').select('content,media_url,created_at,state').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        preview = [data.content, data.media_url ? '[Includes attached media]' : ''].filter(Boolean).join(' ');
+        targetCreatedAt = data.created_at;
+        targetState = data.state;
+      }
+    } else if (report.target_type === 'short') {
+      const { data } = await client.from('short_videos').select('caption,created_at,state').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        preview = data.caption || '[Short video with no caption]';
+        targetCreatedAt = data.created_at;
+        targetState = data.state;
+      }
+    } else if (report.target_type === 'event') {
+      const { data } = await client.from('events').select('title,description,starts_at,state').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        preview = [data.title, data.description].filter(Boolean).join(' — ');
+        targetCreatedAt = data.starts_at;
+        targetState = data.state;
+      }
+    } else if (report.target_type === 'comment') {
+      const { data } = await client.from('social_comments').select('body,created_at,state').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        preview = data.body;
+        targetCreatedAt = data.created_at;
+        targetState = data.state;
+      }
+    } else if (report.target_type === 'message') {
+      const { data } = await client.from('messages').select('body,sent_at,state').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        preview = data.body;
+        targetCreatedAt = data.sent_at;
+        targetState = data.state;
+      }
+    }
+  } catch {
+    // Keep the report visible with a clear fallback if row-level access blocks a preview.
+  }
+
+  let targetOwnerName: string | null = null;
+  let targetOwnerUsername: string | null = null;
+  if (ownerId) {
+    const { data: profile } = await client.from('profiles')
+      .select('display_name,username')
+      .eq('id', ownerId)
+      .maybeSingle();
+    targetOwnerName = profile?.display_name ?? null;
+    targetOwnerUsername = profile?.username ?? null;
+  }
+
+  return { targetOwnerId: ownerId, targetOwnerName, targetOwnerUsername, targetPreview: preview, targetCreatedAt, targetState };
 }
 
 export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
@@ -52,14 +126,10 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
     .limit(100);
   if (error) throw new Error(`Moderation reports could not be loaded: ${error.message}`);
 
-  return Promise.all(reports.map(async (report) => {
-    const { data: targetOwnerId, error: ownerError } = await client.rpc('get_report_target_owner', {
-      requested_target_type: report.target_type,
-      requested_target_id: report.target_id,
-    });
-    if (ownerError) throw new Error(`Report context could not be loaded: ${ownerError.message}`);
-    return { ...report, targetOwnerId };
-  }));
+  return Promise.all(reports.map(async (report) => ({
+    ...report,
+    ...await loadTargetContext(report),
+  })));
 }
 
 export async function takeModerationAction(input: {
