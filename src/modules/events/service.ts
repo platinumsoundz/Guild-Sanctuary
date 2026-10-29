@@ -11,6 +11,7 @@ export interface CreateEventInput {
   title: string;
   description: string;
   locationCoords: Coordinates;
+  locationLabel?: string | null;
   startsAt: string;
   endsAt?: string | null;
 }
@@ -36,6 +37,7 @@ function toEvent(row: EventRow): Event {
     title: row.title,
     description: row.description,
     locationCoords: { latitude: row.latitude, longitude: row.longitude },
+    locationLabel: row.location_name || null,
     startsAt: row.starts_at,
     endsAt: row.ends_at,
     createdAt: row.created_at,
@@ -147,6 +149,7 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
         creator_id: userId,
         title: input.title.trim(),
         description: input.description.trim(),
+        location_name: input.locationLabel?.trim() || '',
         latitude: input.locationCoords.latitude,
         longitude: input.locationCoords.longitude,
         starts_at: new Date(input.startsAt).toISOString(),
@@ -165,6 +168,7 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
     title: input.title.trim(),
     description: input.description.trim(),
     locationCoords: input.locationCoords,
+    locationLabel: input.locationLabel?.trim() || null,
     startsAt: new Date(input.startsAt).toISOString(),
     endsAt: input.endsAt ? new Date(input.endsAt).toISOString() : null,
     createdAt: new Date().toISOString(),
@@ -173,7 +177,7 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
   return event;
 }
 
-export async function updateEvent(eventId: string, creatorId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt' | 'locationCoords'>): Promise<Event> {
+export async function updateEvent(eventId: string, creatorId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt' | 'locationCoords' | 'locationLabel'>): Promise<Event> {
   validateEvent(input.title, input.description, input.startsAt);
   validateCoordinates(input.locationCoords);
   if (isSupabaseCommunityStorageConfigured()) {
@@ -183,6 +187,7 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
       .update({
         title: input.title.trim(),
         description: input.description.trim(),
+        location_name: input.locationLabel?.trim() || '',
         latitude: input.locationCoords.latitude,
         longitude: input.locationCoords.longitude,
         starts_at: new Date(input.startsAt).toISOString(),
@@ -204,6 +209,7 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
   event.title = input.title.trim();
   event.description = input.description.trim();
   event.locationCoords = input.locationCoords;
+  event.locationLabel = input.locationLabel?.trim() || null;
   event.startsAt = new Date(input.startsAt).toISOString();
   return event;
 }
