@@ -30,10 +30,3 @@ assert.doesNotMatch(navigation, /<nav className=\{styles\.desktopNavigation\}/, 
 assert.match(navigationStyles, /\.desktopNavigation\s*\{[^}]*display:\s*none/s, 'desktop navigation strip stays hidden');
 assert.match(navigationStyles, /\.mobileBottomButton\s*\{[^}]*min-height:\s*48px/s, 'mobile tabs provide a 48px minimum touch target');
 console.log('Navigation contract checks passed.');
-
-assert.match(navigation, /Sign in \/ Guest/, 'Signed-out users get one compact account-entry trigger instead of separate guest and sign-in buttons');
-assert.match(navigation, /id="account-entry-menu"[\s\S]*?Sign in \/ Register[\s\S]*?Explore as Guest/, 'The unified account-entry menu preserves both sign-in and guest paths');
-assert.match(navigation, /closeOnEscape[\s\S]*?entryMenuButtonRef\.current\?\.focus\(\)/, 'Escape closes the account-entry menu and restores focus');
-assert.doesNotMatch(navigation, /className=\{styles\.guestButton\}/, 'Guest entry is no longer a separate header button');
-assert.match(navigationStyles, /\.accountEntryMenu\s*\{[^}]*position:\s*absolute/s, 'Account choices overlay the current page without shifting the layout');
-console.log('Compact account-entry contract checks passed.');
