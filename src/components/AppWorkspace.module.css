@@ -209,3 +209,5 @@
 @media(max-width:850px){.guildDestinationGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.guildWorldContent{min-height:calc(100dvh - 66px);padding:16px 12px calc(24px + env(safe-area-inset-bottom))}.guildLanding h1{font-size:clamp(32px,10vw,48px)}.guildLanding>.sectionDescription{font-size:14px}.guildDestinationGrid{grid-template-columns:1fr;gap:10px;margin-top:20px}.guildDestinationGrid button{min-height:120px;padding:17px;gap:9px}.guildDestinationGrid button strong{font-size:19px}}
 @media(prefers-reduced-motion:reduce){.guildDestinationGrid button{transition:none}}
+
+.guildPageContent{width:100%;min-width:0;}
