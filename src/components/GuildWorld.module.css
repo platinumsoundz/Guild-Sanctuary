@@ -6,3 +6,27 @@
 .publicGuild{width:min(100%,1440px);margin:0 auto;padding:clamp(16px,4vw,42px);color:var(--ink)}.publicGuild>h1{margin:0;font-size:clamp(30px,5vw,48px);letter-spacing:-.045em}.publicGuildIntro{max-width:720px;color:var(--muted);font-size:14px;line-height:1.7}.publicGuild :global(.hub){width:100%;padding:18px 0}.publicGuild :global(.hub > .header){display:none}.publicGuild :global(.hub .futureSection){margin-top:24px}@media(max-width:600px){.publicGuild{padding:14px}.publicGuild :global(.hub){padding:12px 0}}
 
 .enterPublicGuild{display:inline-flex;align-items:center;gap:8px;min-height:42px;margin:10px 0 6px;padding:10px 15px;border:1px solid var(--line);border-radius:10px;background:var(--accent);color:var(--surface-raised);font-weight:700;cursor:pointer}.enterPublicGuild:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+
+/* Top-level Guild menu and quick settings overlays. These sit above the active game page. */
+.consoleAction{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 11px;border:1px solid rgba(195,176,255,.24);border-radius:11px;background:rgba(255,255,255,.055);color:#f7f4ff;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer;touch-action:manipulation}
+.consoleAction:hover,.consoleAction[aria-expanded="true"]{border-color:rgba(189,164,255,.7);background:rgba(126,98,255,.18)}
+.consoleAction:focus-visible,.consolePanel button:focus-visible{outline:3px solid #bda4ff;outline-offset:3px}
+.consolePanelScrim{position:fixed;inset:0;z-index:10;border:0;background:rgba(2,3,15,.48);backdrop-filter:blur(3px);cursor:default}
+.consolePanel{position:fixed;z-index:11;top:calc(78px + env(safe-area-inset-top));right:clamp(10px,2vw,24px);display:flex;flex-direction:column;gap:7px;width:min(390px,calc(100vw - 20px));max-height:calc(100dvh - 100px);padding:16px;overflow-y:auto;border:1px solid rgba(189,164,255,.38);border-radius:18px;background:rgba(12,13,32,.98);color:#f7f4ff;box-shadow:0 24px 80px rgba(0,0,0,.58)}
+.consolePanelHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:3px 2px 10px}
+.consolePanelHead small{display:block;color:#ba9cff;font-size:9px;font-weight:900;letter-spacing:.15em}
+.consolePanelHead h2{margin:4px 0 0;font-size:22px;letter-spacing:-.035em}
+.consolePanelHead>button{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(195,176,255,.22);border-radius:11px;background:rgba(255,255,255,.05);color:inherit;cursor:pointer}
+.consolePanel>button:not(.consolePanelHead button){display:flex;align-items:center;gap:11px;width:100%;min-height:56px;padding:10px 11px;border:1px solid rgba(195,176,255,.13);border-radius:12px;background:rgba(255,255,255,.035);color:inherit;text-align:left;cursor:pointer;touch-action:manipulation}
+.consolePanel>button:not(.consolePanelHead button):hover{border-color:rgba(189,164,255,.45);background:rgba(126,98,255,.12)}
+.consolePanel>button>span:first-of-type{display:grid;gap:4px;flex:1;min-width:0}
+.consolePanel>button strong{font-size:12px}
+.consolePanel>button small{color:#bcb9d8;font-size:10px;line-height:1.35}
+.settingOn,.settingOff{padding:4px 7px;border-radius:7px;font-size:9px;font-weight:900}
+.settingOn{background:rgba(117,228,194,.14);color:#8ce9c9}
+.settingOff{background:rgba(255,255,255,.07);color:#bcb9d8}
+.reducedMotion *{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+@media(max-width:760px){.topbar{align-items:flex-start;flex-wrap:wrap}.topActions{flex-wrap:wrap;justify-content:flex-end;gap:7px}.consoleAction{min-height:40px;padding:0 9px}.consolePanel{top:calc(118px + env(safe-area-inset-top));right:8px;width:calc(100vw - 16px);max-height:calc(100dvh - 140px);padding:13px}}
+@media(max-width:480px){.topActions{width:100%;justify-content:flex-start}.connected{margin-right:auto}.consoleAction{font-size:10px}.consolePanel{top:calc(142px + env(safe-area-inset-top));max-height:calc(100dvh - 160px)}}
+@media(prefers-reduced-motion:reduce){.consolePanelScrim,.consolePanel,.consoleAction{transition:none!important;scroll-behavior:auto!important}}

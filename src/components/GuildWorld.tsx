@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Expand, Gamepad2, LockKeyhole, Minimize2, Orbit, Play, RotateCcw, Trophy, X } from 'lucide-react';
+import { Check, Expand, Gamepad2, LockKeyhole, Menu, Minimize2, Monitor, Orbit, Play, RotateCcw, Settings2, SlidersHorizontal, Trophy, X } from 'lucide-react';
 import styles from './GuildWorld.module.css';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections } from '@/lib/controllerInput';
 import { GuildCometDodge } from './GuildCometDodge';
@@ -31,6 +31,11 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   const [entryOpen, setEntryOpen] = useState(false);
   const [worldOpen, setWorldOpen] = useState(false);
   const [bigPicture, setBigPicture] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [quickSettingsOpen, setQuickSettingsOpen] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [gameState, setGameState] = useState<GameState>('ready');
   const [score, setScore] = useState(0);
   const [seconds, setSeconds] = useState(START_SECONDS);
@@ -71,6 +76,8 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   const closeWorld = useCallback(() => {
     setWorldOpen(false);
     setBigPicture(false);
+    setMenuOpen(false);
+    setQuickSettingsOpen(false);
     setEntryOpen(false);
     setGameState('ready');
     setNotice('');
@@ -264,11 +271,17 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
         </aside>
       )}
       {isAuthenticated && worldOpen && (
-        <div className={`${styles.backdrop} ${bigPicture ? styles.backdropBigPicture : ""}`} role="dialog" aria-modal="true" aria-labelledby="guild-title">
+        <div className={`${styles.backdrop} ${bigPicture ? styles.backdropBigPicture : ""} ${reducedMotion ? styles.reducedMotion : ""}`} role="dialog" aria-modal="true" aria-labelledby="guild-title">
           <section ref={dialogRef} className={`${styles.world} ${bigPicture ? styles.worldBigPicture : ""}`}>
             <header className={styles.topbar}>
               <div className={styles.brand}><span className={styles.brandMark}><Orbit size={20} /></span><span><small>THE SANCTUARY · HIDDEN WORLD</small><strong id="guild-title">The Guild</strong></span></div>
-              <div className={styles.topActions}><span className={styles.connected}><Gamepad2 size={14} /> {controllerConnected ? 'Controller connected' : 'Keyboard / touch'}</span><button type="button" className={styles.bigPictureButton} onClick={() => setBigPicture((value) => !value)}>{bigPicture ? <Minimize2 size={16} /> : <Expand size={16} />}{bigPicture ? 'Windowed' : 'Big Picture'}</button><button ref={closeButtonRef} type="button" className={styles.closeButton} onClick={closeWorld}><X size={18} /> Exit Guild</button></div>
+              <div className={styles.topActions}>
+                <span className={styles.connected}><Gamepad2 size={14} /> {controllerConnected ? 'Controller connected' : 'Keyboard / touch'}</span>
+                <button type="button" className={styles.consoleAction} aria-label="Open Guild menu" aria-expanded={menuOpen} onClick={() => { setMenuOpen((value) => !value); setQuickSettingsOpen(false); }}><Menu size={17} /><span>Menu</span></button>
+                <button type="button" className={styles.consoleAction} aria-label="Open quick settings" aria-expanded={quickSettingsOpen} onClick={() => { setQuickSettingsOpen((value) => !value); setMenuOpen(false); }}><SlidersHorizontal size={17} /><span>Quick settings</span></button>
+                <button type="button" className={styles.bigPictureButton} onClick={() => setBigPicture((value) => !value)}>{bigPicture ? <Minimize2 size={16} /> : <Expand size={16} />}{bigPicture ? 'Windowed' : 'Big Picture'}</button>
+                <button ref={closeButtonRef} type="button" className={styles.closeButton} onClick={closeWorld}><X size={18} /> Exit Guild</button>
+              </div>
             </header>
             <div className={styles.content}>
               <div className={styles.hero}>
@@ -291,9 +304,24 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
                   <div className={styles.playerShip} style={{ left: `${ship.x}%`, top: `${ship.y}%` }} aria-label="Your ship">✧</div>
                   {gameState !== 'playing' && <div className={styles.gameOverlay}><strong>{gameState === 'paused' ? 'Hold your orbit' : gameState === 'won' ? 'Orbit stabilised' : gameState === 'lost' ? 'Try another orbit' : 'Your trial awaits'}</strong><span>{gameState === 'paused' ? 'Your timer is paused. Resume when you are ready.' : gameState === 'won' ? 'You collected every fragment.' : gameState === 'lost' ? `You collected ${score} of ${TARGET}. The stars are patient.` : 'Collect 12 fragments before time runs out.'}</span>{gameState === 'paused' ? <button type="button" onClick={() => setGameState('playing')}><Play size={14} fill="currentColor" /> Resume trial</button> : <button type="button" onClick={startGame}><RotateCcw size={14} /> {gameState === 'ready' ? 'Begin trial' : 'Try again'}</button>}</div>}
                 </div>
-                <div className={styles.gameControls}><span><kbd>← ↑ ↓ →</kbd> or <kbd>W A S D</kbd> move</span><span><kbd>A / ✕</kbd> on controller · <kbd>Esc / B</kbd> exit</span><div className={styles.touchControls}><button type="button" aria-label="Move up" onClick={() => moveShip(0, -5)}>↑</button><div><button type="button" aria-label="Move left" onClick={() => moveShip(-5, 0)}>←</button><button type="button" aria-label="Move down" onClick={() => moveShip(0, 5)}>↓</button><button type="button" aria-label="Move right" onClick={() => moveShip(5, 0)}>→</button></div></div></div>
+                <div className={styles.gameControls}><span><kbd>← ↑ ↓ →</kbd> or <kbd>W A S D</kbd> move</span><span><kbd>A / ✕</kbd> on controller · <kbd>Esc / B</kbd> exit</span>{controlsVisible && <div className={styles.touchControls}><button type="button" aria-label="Move up" onClick={() => moveShip(0, -5)}>↑</button><div><button type="button" aria-label="Move left" onClick={() => moveShip(-5, 0)}>←</button><button type="button" aria-label="Move down" onClick={() => moveShip(0, 5)}>↓</button><button type="button" aria-label="Move right" onClick={() => moveShip(5, 0)}>→</button></div></div>}</div>
                 {notice && <p className={styles.notice} role="status">{notice}</p>}
               </section>
+              {(menuOpen || quickSettingsOpen) && <button type="button" className={styles.consolePanelScrim} aria-label={menuOpen ? "Close Guild menu" : "Close quick settings"} onClick={() => { setMenuOpen(false); setQuickSettingsOpen(false); }} />}
+              {menuOpen && <section className={styles.consolePanel} role="dialog" aria-modal="false" aria-label="Guild menu">
+                <div className={styles.consolePanelHead}><div><small>THE GUILD</small><h2>Menu</h2></div><button type="button" aria-label="Close Guild menu" onClick={() => setMenuOpen(false)}><X size={18} /></button></div>
+                <button type="button" onClick={() => { dialogRef.current?.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' }); setMenuOpen(false); }}><Orbit size={17} /><span><strong>Guild Home</strong><small>Return to the top of your Guild hub</small></span></button>
+                <button type="button" onClick={() => { startGame(); setMenuOpen(false); }}><Play size={17} /><span><strong>Restart Orbital Drift</strong><small>Start the first trial again</small></span></button>
+                {(gameState === 'playing' || gameState === 'paused') && <button type="button" onClick={() => { togglePause(); setMenuOpen(false); }}><Gamepad2 size={17} /><span><strong>{gameState === 'paused' ? 'Resume trial' : 'Pause trial'}</strong><small>Keep your current run</small></span></button>}
+                <button type="button" onClick={closeWorld}><X size={17} /><span><strong>Exit Guild</strong><small>Return to Sanctuary</small></span></button>
+              </section>}
+              {quickSettingsOpen && <section className={styles.consolePanel} role="dialog" aria-modal="false" aria-label="Guild quick settings">
+                <div className={styles.consolePanelHead}><div><small>THE GUILD · HUD</small><h2>Quick settings</h2></div><button type="button" aria-label="Close quick settings" onClick={() => setQuickSettingsOpen(false)}><X size={18} /></button></div>
+                <button type="button" aria-pressed={controlsVisible} onClick={() => setControlsVisible((value) => !value)}><Gamepad2 size={17} /><span><strong>Touch controls</strong><small>{controlsVisible ? 'On-screen movement controls are visible' : 'On-screen movement controls are hidden'}</small></span><span className={controlsVisible ? styles.settingOn : styles.settingOff}>{controlsVisible ? 'ON' : 'OFF'}</span></button>
+                <button type="button" aria-pressed={reducedMotion} onClick={() => setReducedMotion((value) => !value)}><SlidersHorizontal size={17} /><span><strong>Reduce motion</strong><small>Reduce menu and page transitions</small></span><span className={reducedMotion ? styles.settingOn : styles.settingOff}>{reducedMotion ? 'ON' : 'OFF'}</span></button>
+                <button type="button" onClick={async () => { try { if (document.fullscreenElement) { await document.exitFullscreen(); setIsFullscreen(false); } else { await document.documentElement.requestFullscreen(); setIsFullscreen(true); } } catch { setNotice('Fullscreen is not available in this browser.'); } }}><Monitor size={17} /><span><strong>{isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}</strong><small>Change the console viewing mode</small></span>{isFullscreen ? <Check size={16} /> : <Expand size={16} />}</button>
+                <button type="button" onClick={() => { setQuickSettingsOpen(false); setBigPicture((value) => !value); }}><Settings2 size={17} /><span><strong>{bigPicture ? 'Windowed layout' : 'Big Picture layout'}</strong><small>Switch the Guild display layout</small></span>{bigPicture ? <Minimize2 size={16} /> : <Expand size={16} />}</button>
+              </section>}
               <div className={styles.sectionHead}><div><p className={styles.eyebrow}>THE ARCADE · 02</p><h2>Comet Dodge</h2></div><span className={styles.localPill}>20-SECOND SURVIVAL</span></div>
               <GuildCometDodge />
               <footer className={styles.footer}><span>THE GUILD · ALPHA PROTOTYPE</span><span>Sanctuary identity · isolated game state · no verified rewards</span></footer>
