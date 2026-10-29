@@ -22,11 +22,11 @@ assert.match(afterHeader, /className=\{styles\.scrim\}/, 'navigation scrim must 
 assert.match(afterHeader, /className=\{styles\.drawer\}/, 'navigation drawer must render outside the sticky header');
 assert.match(navigation, /matchMedia\('\(max-width: 560px\)'\)/, 'touch controls must be discoverable by default on narrow screens');
 assert.match(navigation, /setControlsOpen\(true\)/, 'narrow-screen initialization must open the touch controls');
-assert.match(navigation, /aria-label="Hide touch controls"/, 'visible touch controls must have a hide action');
-assert.match(navigation, /aria-label="Show touch controls"/, 'hidden touch controls must have a show action');
-assert.match(navigation, /aria-label="Move up"|aria-label="Up"/, 'D-pad up control must be accessible');
-assert.match(navigation, /aria-label="Select"|small>SELECT</, 'A/Select control must be identifiable');
-assert.match(navigation, /aria-label="Back"|small>BACK</, 'B/Back control must be identifiable');
+assert.match(navigation, /controlsOpen \? 'Hide controls' : 'Controls'/, 'visible touch controls must have a hide action');
+assert.match(navigation, /controlsOpen \? 'Hide controls' : 'Controls'/, 'hidden touch controls must have a show action');
+assert.match(navigation, /aria-label="Navigate up"/, 'D-pad up control must be accessible');
+assert.match(navigation, /<small>Select<\\/small>/, 'A/Select control must be identifiable');
+assert.match(navigation, /<small>Back<\\/small>/, 'B/Back control must be identifiable');
 
 assert.match(styles, /@media\s*\(max-width:\s*767px\)/, 'phone/tablet overlay layout rules must exist');
 assert.match(styles, /@media\s*\(max-width:\s*420px\)/, 'compact phone toolbar rules must exist');
