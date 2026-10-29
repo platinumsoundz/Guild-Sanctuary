@@ -22,6 +22,8 @@ assert.match(hook, /setRemoteDescription/);
 assert.match(hook, /candidate/);
 assert.match(hook, /private: true/);
 assert.match(hook, /isValidSignal/);
+assert.match(hook, /Microphone or camera permission was denied/);
+assert.match(hook, /A microphone could not be found/);
 assert.match(hook, /MAX_PENDING_CANDIDATES/);
 assert.match(hook, /MAX_SEEN_CALL_IDS/);
 assert.match(hook, /seenCallIds\.current\.includes/);
