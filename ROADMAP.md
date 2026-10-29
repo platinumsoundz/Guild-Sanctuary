@@ -1,6 +1,6 @@
 # The Sanctuary — Roadmap
 
-Last updated: 2026-10-28
+Last updated: 2026-10-29
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
@@ -782,3 +782,10 @@ Two connected Supabase projects were inspected read-only: `kchrskkchoyqweowskxv`
 - **Release status:** PR #254 is open; changes are not merged or confirmed live. Vercel reported the free daily deployment limit. Exact-head CI/build and physical Android verification remain required. Check 320px, 360px, 390px and 430px widths, including drawer, Quick Menu, notifications, bottom navigation and touch controls.
 
 - Added `scripts/check-guild-mobile-navigation.mjs` and `npm run check:guild-mobile-navigation` to guard overlay placement, narrow-phone defaults, D-pad/A/B affordances, safe-area offsets and z-index ordering. This is a static regression contract, not a substitute for visual viewport or Android testing.
+
+
+## Guild menu viewport overlay fix — 2026-10-29
+
+- **Fix branch:** `fix/guild-menu-viewport-portal-2026-10-29`. Move the Guild navigation drawer, its scrim, Quick Menu panel/scrim, and touch controls into viewport-level React portals attached to `document.body` after client mount.
+- This prevents transformed, clipped, blurred, or stacking-context ancestors in the game shell from trapping fixed-position menus behind the active page. Keep the page visible beneath the scrim and preserve existing close actions, navigation selection, keyboard handling, and touch controls.
+- **Release boundary:** not merged or confirmed live. Exact-head CI, typecheck/build, screenshot checks, and a real phone interaction check are required. No database, role, payment, or production configuration changes.
