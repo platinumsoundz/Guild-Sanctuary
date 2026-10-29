@@ -20,4 +20,18 @@ const like = service.slice(likeStart, likeEnd);
 assert.match(like, /rpc\('toggle_short_like',\s*\{\s*requested_short_id:\s*shortId,?\s*\}\)/s, 'Like mutations must use the same exact argument name');
 assert.match(like, /await requireCommunityStorageUser\(userId\)/, 'Like mutations must retain authenticated-user validation');
 
+
+const migration = readFileSync('supabase/migrations/20261026233000_repair_short_engagement_rpc.sql', 'utf8');
+const types = readFileSync('src/services/supabase/database.types.ts', 'utf8');
+assert.match(migration, /function public\.get_short_engagement_stats\(requested_short_id uuid\)/, 'The migration must expose the exact read RPC signature');
+assert.match(migration, /function public\.toggle_short_like\(requested_short_id uuid\)/, 'The migration must expose the exact like RPC signature');
+assert.ok(migration.includes('public.is_active_user()'), 'Both RPCs must retain active-account checks');
+assert.ok(migration.includes("public.social_target_is_visible('short'::public.report_target_type, requested_short_id)"), 'Read RPC must enforce visible-target access');
+assert.ok(migration.includes('for update;'), 'Like mutations must serialize on the target row');
+assert.ok(migration.includes('revoke all on function public.get_short_engagement_stats(uuid) from public, anon;'), 'Read RPC must revoke public/anonymous execution');
+assert.ok(migration.includes('revoke all on function public.toggle_short_like(uuid) from public, anon;'), 'Like RPC must revoke public/anonymous execution');
+assert.ok(migration.includes('grant execute on function public.get_short_engagement_stats(uuid) to authenticated;'), 'Read RPC execution is limited to authenticated users');
+assert.ok(migration.includes('grant execute on function public.toggle_short_like(uuid) to authenticated;'), 'Like RPC execution is limited to authenticated users');
+assert.ok(types.includes('get_short_engagement_stats') && types.includes('toggle_short_like'), 'Generated types must include both RPCs');
+
 console.log('Short engagement RPC contract checks passed.');
