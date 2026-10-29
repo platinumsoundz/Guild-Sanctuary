@@ -134,3 +134,15 @@ assert.match(settingsCss, /\.guildAccessRow/, 'Guild preference and launch actio
 assert.match(settingsCss, /@media \(max-width: 520px\)/, 'Guild launch action becomes a full-width mobile target');
 assert.match(workspace, /onLaunchGuild=\{\(\) =>/, 'workspace wires settings launch directly into Guild navigation');
 assert.match(workspace, /setActiveNavigation\('guild'\)/, 'launch now navigates directly to the Guild route');
+
+const guildQuickHud = readFileSync('src/components/GuildNavigation.tsx', 'utf8');
+const guildQuickCss = readFileSync('src/components/GuildNavigation.module.css', 'utf8');
+assert.match(guildQuickHud, /aria-label="Open Guild quick menu"/, 'the console HUD has a dedicated quick-menu entry');
+assert.match(guildQuickHud, /aria-modal="true"/, 'quick menu exposes a modal dialog boundary');
+assert.match(guildQuickHud, /Search Guild destinations/, 'quick menu searches Guild and Sanctuary destinations');
+assert.match(guildQuickHud, /guild-reduced-motion-v1/, 'reduced-motion preference persists locally');
+assert.match(guildQuickHud, /document\.documentElement\.requestFullscreen\(\)/, 'HUD can request fullscreen from a direct user action');
+assert.match(guildQuickHud, /Controller detected/, 'HUD reports detected controller state without claiming unsupported connection');
+assert.match(guildQuickCss, /\.quickPanel/, 'quick menu has a dedicated responsive visual system');
+assert.match(guildQuickCss, /data-guild-reduced-motion/, 'the quick motion toggle reduces Guild interface animation');
+console.log('Guild console quick HUD contracts passed.');
