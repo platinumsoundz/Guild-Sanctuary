@@ -34,16 +34,18 @@ Use Sanctuary accounts and existing conversations to discover and authenticate t
 
 1. **Implemented in this batch:** audio/video entry points, incoming accept/decline, outgoing invitations, WebRTC offer/answer/ICE negotiation, mute/camera controls, teardown, and membership-scoped private-channel RLS.
 2. **Remaining before beta:** review/apply the migration in staging, deliver invitations when the recipient is not currently viewing the thread, add TURN fallback, and verify channel authorization behavior against the live Supabase project.
-3. **Hardening:** server-verified sender identity, duplicate/replay protection, invitation timeout, missed-call handling and cleanup.
+3. **Hardening (partially implemented):** client-side signal shape/size validation, bounded pending ICE candidate queue, bounded duplicate-call-ID cache, invitation timeout and cleanup are present. Server-verified sender identity, server-side rate limiting, persistent missed-call handling, and cross-page incoming-call delivery remain outstanding.
 4. **WebRTC client:** permission checks, offer/answer/ICE, mute/camera toggles, device selection where supported, responsive call surface, reconnect and teardown.
-5. **Tests:** state-machine unit tests, RLS denial tests, invitation expiry, two-account/two-device audio test, video test, permission denial, disconnect/reconnect, mobile background/foreground and account-switch isolation.
+5. **Tests:** contract checks now assert signal validation, replay filtering, and bounded candidate buffering. Still required: state-machine unit tests, RLS allow/deny tests, invitation expiry, two-account/two-device audio and video tests, permission denial, disconnect/reconnect, mobile background/foreground, and account-switch isolation.
 6. **Release gate:** only enable controls after exact-commit CI, staging schema/RLS review, and real two-account/two-device tests pass.
 
 ## Acceptance criteria
 
 - Existing direct messages remain usable and unchanged.
 - Call actions are visible only in direct conversations, not group chats.
-- Actions are disabled until the authenticated private signalling channel subscribes successfully.
+- Actions are disabled until the authenticated private signalling channel subscribes successfully (both audio and video controls).
+- Client rejects malformed/oversized signalling payloads, ignores duplicate invite IDs within a bounded recent window, and caps ICE candidates buffered before remote description.
+- Incoming call invitation is currently scoped to the open conversation; this is not a full app-wide ringing/notification experience.
 - Migration remains unapplied to production until staging SQL/RLS review is complete.
 - UI does not claim independently audited E2EE; it describes standard WebRTC and current limitations.
 - Automated checks validate the call lifecycle primitives and documented authorization requirements.
