@@ -78,7 +78,7 @@ export function AppWorkspace() {
   const currentRole = currentUser?.profile.role?.toLowerCase() ?? null;
 
   useEffect(() => {
-    if (!isSessionReady || !currentUser || isGuest) return;
+    if (!isSessionReady) return;
     let cancelled = false;
     void fetchPageVisibility().then((visibility) => {
       if (cancelled || isPageVisible(contentNavigation, visibility)) return;
