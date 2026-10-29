@@ -8,7 +8,7 @@ import {
   Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
-import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
+import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import { NotificationBar } from './NotificationBar';
 import { GuildDiagnosticsPanel } from './GuildDiagnosticsPanel';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
