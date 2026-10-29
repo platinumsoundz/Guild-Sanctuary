@@ -7,7 +7,7 @@ import styles from './GuildNavigation.module.css';
 export type GuildPage = 'home' | 'arcade' | 'trials' | 'library' | 'music' | 'photos' | 'tools' | NavigationState;
 type Item = { id: GuildPage; label: string; icon: typeof Home; description?: string };
 const guildItems: Item[] = [
- {id:'home',label:'Guild Home',icon:Home},{id:'arcade',label:'Game Library',icon:Gamepad2,description:'Launch The 5 Sleeves and browser games'},
+ {id:'home',label:'Guild Home',icon:Home},{id:'arcade',label:'Featured Games',icon:Gamepad2,description:'Launch The 5 Sleeves and browser games'},
  {id:'trials',label:'Guild Trials',icon:Gamepad2,description:'Original Guild arcade games'},
  {id:'library',label:'Game Library',icon:Library,description:'The 5 Sleeves and saved games'},
  {id:'music',label:'Music Player',icon:Music2,description:'Audio selected from this device'},
