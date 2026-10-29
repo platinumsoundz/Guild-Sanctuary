@@ -12,11 +12,20 @@ const CONTRIBUTIONS = {
 } as const;
 type ContributionId = keyof typeof CONTRIBUTIONS;
 
+function getDonationMode(): 'test' | 'live' | null {
+  const mode = process.env.SANCTUARY_STRIPE_DONATION_MODE;
+  const secret = process.env.STRIPE_SECRET_KEY ?? '';
+  const signingSecret = process.env.STRIPE_WEBHOOK_SECRET ?? '';
+  const testEnabled = process.env.SANCTUARY_STRIPE_TEST_CHECKOUT_ENABLED === 'true'
+    && mode !== 'live' && secret.startsWith('sk_test_');
+  const liveEnabled = process.env.SANCTUARY_STRIPE_DONATION_CHECKOUT_ENABLED === 'true'
+    && mode === 'live' && secret.startsWith('sk_live_');
+  return (testEnabled || liveEnabled) && signingSecret.startsWith('whsec_') &&
+    Boolean(process.env.SANCTUARY_SITE_URL) ? (liveEnabled ? 'live' : 'test') : null;
+}
+
 function isCheckoutConfigured() {
-  return process.env.SANCTUARY_STRIPE_TEST_CHECKOUT_ENABLED === 'true'
-    && Boolean(process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_'))
-    && Boolean(process.env.STRIPE_WEBHOOK_SECRET?.startsWith('whsec_'))
-    && Boolean(process.env.SANCTUARY_SITE_URL);
+  return getDonationMode() !== null;
 }
 
 function response(status: number, body: Record<string, string | boolean | null>) {
@@ -34,7 +43,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!isCheckoutConfigured()) {
+  const donationMode = getDonationMode();
+  if (!donationMode) {
     return response(503, { error: 'Account-linked community contributions are not configured. No payment has been taken.' });
   }
 
