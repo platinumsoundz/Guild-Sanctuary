@@ -14,27 +14,6 @@ export interface ModerationQueueItem extends ContentReportRow {
   targetCreatedAt: string | null;
 }
 
-type ModerationQueueRecord = {
-  report_id: string;
-  reporter_id: string;
-  target_type: ReportTarget;
-  target_id: string;
-  reason: string;
-  details: string | null;
-  report_status: ContentReportRow['status'];
-  reviewed_by: string | null;
-  reviewed_at: string | null;
-  reported_at: string;
-  target_owner_id: string | null;
-  target_owner_username: string | null;
-  target_owner_display_name: string | null;
-  target_content: string | null;
-  target_title: string | null;
-  target_media_url: string | null;
-  target_state: string | null;
-  target_created_at: string | null;
-};
-
 export async function submitContentReport(input: {
   targetType: ReportTarget;
   targetId: string;
@@ -72,30 +51,86 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
     throw new Error('This account is not authorized to use moderation tools.');
   }
 
-  // The SECURITY DEFINER RPC returns the reported target body through one role-gated
-  // path, including hidden content that ordinary feed queries intentionally cannot read.
-  const { data, error } = await client.rpc('get_moderation_queue');
+  // Use the existing RLS-protected report table instead of relying on a queue RPC
+  // that is not present in both live schemas. Target ownership is resolved by the
+  // existing moderator-only RPC. Message bodies are intentionally not fetched here:
+  // private message preview needs its own audited, role-gated context endpoint.
+  const { data: reports, error } = await client
+    .from('content_reports')
+    .select('*')
+    .in('status', ['open', 'reviewing'])
+    .order('created_at', { ascending: true })
+    .limit(100);
   if (error) throw new Error(`Moderation reports could not be loaded: ${error.message}`);
 
-  return ((data ?? []) as unknown as ModerationQueueRecord[]).map((row) => ({
-    id: row.report_id,
-    reporter_id: row.reporter_id,
-    target_type: row.target_type,
-    target_id: row.target_id,
-    reason: row.reason,
-    details: row.details,
-    status: row.report_status,
-    reviewed_by: row.reviewed_by,
-    reviewed_at: row.reviewed_at,
-    created_at: row.reported_at,
-    targetOwnerId: row.target_owner_id,
-    targetOwnerUsername: row.target_owner_username,
-    targetOwnerDisplayName: row.target_owner_display_name,
-    targetContent: row.target_content,
-    targetTitle: row.target_title,
-    targetMediaUrl: row.target_media_url,
-    targetState: row.target_state,
-    targetCreatedAt: row.target_created_at,
+  return Promise.all((reports ?? []).map(async (report) => {
+    const { data: targetOwnerId, error: ownerError } = await client.rpc('get_report_target_owner', {
+      requested_target_type: report.target_type,
+      requested_target_id: report.target_id,
+    });
+    if (ownerError) throw new Error(`Report ownership could not be verified: ${ownerError.message}`);
+
+    let targetContent: string | null = null;
+    let targetTitle: string | null = null;
+    let targetMediaUrl: string | null = null;
+    let targetState: string | null = null;
+    let targetCreatedAt: string | null = null;
+
+    if (report.target_type === 'post') {
+      const { data } = await client.from('posts').select('content,media_url,state,created_at').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        targetContent = data.content?.slice(0, 600) ?? null;
+        targetMediaUrl = data.media_url && /^https?:\\/\\//i.test(data.media_url) ? data.media_url : null;
+        targetState = data.state;
+        targetCreatedAt = data.created_at;
+      }
+    } else if (report.target_type === 'short') {
+      const { data } = await client.from('short_videos').select('caption,video_url,state,created_at').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        targetContent = data.caption?.slice(0, 600) ?? null;
+        targetMediaUrl = /^https?:\\/\\//i.test(data.video_url) ? data.video_url : null;
+        targetState = data.state;
+        targetCreatedAt = data.created_at;
+      }
+    } else if (report.target_type === 'event') {
+      const { data } = await client.from('events').select('title,description,state,created_at').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        targetTitle = data.title?.slice(0, 160) ?? null;
+        targetContent = data.description?.slice(0, 600) ?? null;
+        targetState = data.state;
+        targetCreatedAt = data.created_at;
+      }
+    } else if (report.target_type === 'comment') {
+      const { data } = await client.from('social_comments').select('body,state,created_at').eq('id', report.target_id).maybeSingle();
+      if (data) {
+        targetContent = data.body?.slice(0, 600) ?? null;
+        targetState = data.state;
+        targetCreatedAt = data.created_at;
+      }
+    }
+
+    let targetOwnerUsername: string | null = null;
+    let targetOwnerDisplayName: string | null = null;
+    if (targetOwnerId) {
+      const { data: owner } = await client.from('public_profiles')
+        .select('username,display_name')
+        .eq('id', targetOwnerId)
+        .maybeSingle();
+      targetOwnerUsername = owner?.username ?? null;
+      targetOwnerDisplayName = owner?.display_name ?? null;
+    }
+
+    return {
+      ...report,
+      targetOwnerId: targetOwnerId ?? null,
+      targetOwnerUsername,
+      targetOwnerDisplayName,
+      targetContent,
+      targetTitle,
+      targetMediaUrl,
+      targetState,
+      targetCreatedAt,
+    };
   }));
 }
 
