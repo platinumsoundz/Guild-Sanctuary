@@ -24,3 +24,7 @@
 @media (prefers-reduced-motion: reduce) {
   .menu, .exit, .drawerHead button, .return { transition: none; }
 }
+
+/* Keep the shared Sanctuary notification popover reachable from every Guild page. */
+.notificationSlot { position:relative; z-index:125; display:flex; align-items:center; flex:0 0 auto; }
+.notificationSlot :global(button):focus-visible { outline:3px solid var(--accent,#8fd6ff); outline-offset:3px; }
