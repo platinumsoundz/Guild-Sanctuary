@@ -23,8 +23,8 @@ assert.match(like, /await requireCommunityStorageUser\(userId\)/, 'Like mutation
 
 const migration = readFileSync('supabase/migrations/20261026233000_repair_short_engagement_rpc.sql', 'utf8');
 const types = readFileSync('src/services/supabase/database.types.ts', 'utf8');
-assert.match(migration, /function public\\.get_short_engagement_stats\\(requested_short_id uuid\\)/, 'The migration must expose the exact read RPC signature');
-assert.match(migration, /function public\\.toggle_short_like\\(requested_short_id uuid\\)/, 'The migration must expose the exact like RPC signature');
+assert.match(migration, /function public\.get_short_engagement_stats\(requested_short_id uuid\)/, 'The migration must expose the exact read RPC signature');
+assert.match(migration, /function public\.toggle_short_like\(requested_short_id uuid\)/, 'The migration must expose the exact like RPC signature');
 assert.ok(migration.includes('public.is_active_user()'), 'Both RPCs must retain active-account checks');
 assert.ok(migration.includes("public.social_target_is_visible('short'::public.report_target_type, requested_short_id)"), 'Read RPC must enforce visible-target access');
 assert.ok(migration.includes('for update;'), 'Like mutations must serialize on the target row');
