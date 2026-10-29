@@ -9,6 +9,7 @@ import styles from './SettingsHub.module.css';
 interface SettingsHubProps {
   userId: string;
   email: string;
+  role: Profile['role'];
   twoFactorEnabled: boolean;
   privacy: ProfilePrivacy;
   visibility: Profile['visibility'];
@@ -54,6 +55,7 @@ const linkLabels: { key: keyof SocialLinks; label: string; host: string }[] = [
 export function SettingsHub({
   userId,
   email,
+  role,
   twoFactorEnabled,
   privacy,
   visibility,
@@ -315,7 +317,7 @@ export function SettingsHub({
             </div>
           </section>
 
-          <section className={styles.panel} aria-labelledby="hidden-guild-title">
+          {(role === 'developer' || role === 'owner') && <section className={styles.panel} aria-labelledby="hidden-guild-title">
             <h2 id="hidden-guild-title">Hidden feature access</h2>
             <p className={styles.hint}>The Guild is intentionally hidden from Sanctuary navigation. Enable access, then use Launch now to enter directly on this device — no controller or physical keyboard needed. This preference is saved on this device.</p>
             <div className={styles.guildAccessRow}>
@@ -327,7 +329,7 @@ export function SettingsHub({
                 Launch now
               </button>
             </div>
-          </section>
+          </section>}
 
           <section className={`${styles.panel} ${styles.dangerPanel}`} aria-labelledby="delete-title">
             <h2 id="delete-title">Delete account</h2>
