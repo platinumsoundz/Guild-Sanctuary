@@ -5,8 +5,6 @@ import { Expand, Gamepad2, LockKeyhole, Minimize2, Orbit, Play, RotateCcw, Troph
 import styles from './GuildWorld.module.css';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections } from '@/lib/controllerInput';
 import { GuildCometDodge } from './GuildCometDodge';
-import { GuildCompanionHub } from './GuildCompanionHub';
-import { GamesHub } from '@/components/GamesHub';
 
 type GuildWorldProps = {
   userId: string | null;
@@ -150,6 +148,14 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     setBest(readBest());
+    try {
+      if (window.localStorage.getItem('sanctuary-open-hidden-guild-entry') === '1') {
+        window.localStorage.removeItem('sanctuary-open-hidden-guild-entry');
+        setEntryOpen(true);
+      }
+    } catch {
+      // Hidden entry can still be opened with a connected controller.
+    }
     let frame = 0;
     let active = true;
     const poll = (time: number) => {
@@ -241,10 +247,9 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
           <p className={styles.eyebrow}>THE GUILD · COMMUNITY WORLDS</p>
           <h1 id="public-guild-title">Your next world awaits.</h1>
           <p className={styles.publicGuildIntro}>{isAuthenticated
-            ? 'Explore creator projects and community servers, or enter the Guild’s original browser arcade.'
-            : 'Browse creator games and community servers. Sign in to Sanctuary to enter the Guild’s original browser arcade.'}</p>
+            ? 'Play the Guild’s original arcade trials here. The 5 Sleeves and your saved games have their own Game Library page.'
+            : 'The Guild’s original arcade trials are available after sign-in. The 5 Sleeves and saved games have their own Game Library page.'}</p>
           {isAuthenticated && <button type="button" className={styles.enterPublicGuild} onClick={enterGuild}>Enter Guild Arcade <span aria-hidden="true">↗</span></button>}
-          <GamesHub />
         </main>
       )}
       {isAuthenticated && !worldOpen && (entryOpen || controllerConnected) && (
@@ -291,7 +296,6 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
               </section>
               <div className={styles.sectionHead}><div><p className={styles.eyebrow}>THE ARCADE · 02</p><h2>Comet Dodge</h2></div><span className={styles.localPill}>20-SECOND SURVIVAL</span></div>
               <GuildCometDodge />
-              <GuildCompanionHub />
               <footer className={styles.footer}><span>THE GUILD · ALPHA PROTOTYPE</span><span>Sanctuary identity · isolated game state · no verified rewards</span></footer>
             </div>
           </section>
