@@ -118,6 +118,7 @@ export function Navigation({
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [pendingModerationCount, setPendingModerationCount] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -125,23 +126,26 @@ export function Navigation({
     let cancelled = false;
     if (!currentUser || isGuest || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       setUnreadCount(0);
+      setUnreadMessageCount(0);
       setPendingModerationCount(0);
       setTokenBalance(null);
       return;
     }
     const client = getSupabaseBrowserClient();
     const refreshBadges = async () => {
-      const [social, moderation, reports] = await Promise.all([
+      const [social, moderation, messages, reports] = await Promise.all([
         client.from('notifications').select('id', { count: 'exact', head: true }).eq('recipient_id', currentUser.user.id).is('read_at', null),
         client.from('moderation_user_notifications').select('id', { count: 'exact', head: true }).eq('recipient_id', currentUser.user.id).is('read_at', null),
+        client.from('messages').select('id', { count: 'exact', head: true }).neq('sender_id', currentUser.user.id).is('read_at', null),
         canAccessAdmin ? client.from('content_reports').select('id', { count: 'exact', head: true }).in('status', ['open', 'reviewing']) : Promise.resolve({ count: 0, error: null }),
       ]);
       if (cancelled) return;
       setUnreadCount((social.count ?? 0) + (moderation.count ?? 0));
+      setUnreadMessageCount(messages.count ?? 0);
       setPendingModerationCount(reports.count ?? 0);
     };
     void refreshBadges().catch(() => {
-      if (!cancelled) { setUnreadCount(0); setPendingModerationCount(0); }
+      if (!cancelled) { setUnreadCount(0); setUnreadMessageCount(0); setPendingModerationCount(0); }
     });
     const interval = window.setInterval(() => { void refreshBadges().catch(() => undefined); }, 30000);
     return () => { cancelled = true; window.clearInterval(interval); };
@@ -296,7 +300,7 @@ export function Navigation({
                                 >
                                   <span className={styles.navIconWrap}>
                                     <item.icon size={19} strokeWidth={1.8} aria-hidden="true" />
-                                    {((item.id === 'notifications' && unreadCount > 0) || (item.id === 'messages' && unreadCount > 0) || (item.id === 'admin' && pendingModerationCount > 0)) && <span className={styles.navBadge} aria-label={item.id === 'admin' ? pendingModerationCount + ' unresolved reports' : unreadCount + ' unread notifications'}>{item.id === 'admin' ? (pendingModerationCount > 99 ? '99+' : pendingModerationCount) : (unreadCount > 99 ? '99+' : unreadCount)}</span>}
+                                    {((item.id === 'notifications' && unreadCount > 0) || (item.id === 'messages' && unreadMessageCount > 0) || (item.id === 'admin' && pendingModerationCount > 0)) && <span className={styles.navBadge} aria-label={item.id === 'admin' ? pendingModerationCount + ' unresolved reports' : item.id === 'messages' ? unreadMessageCount + ' unread messages' : unreadCount + ' unread notifications'}>{item.id === 'admin' ? (pendingModerationCount > 99 ? '99+' : pendingModerationCount) : item.id === 'messages' ? (unreadMessageCount > 99 ? '99+' : unreadMessageCount) : (unreadCount > 99 ? '99+' : unreadCount)}</span>}
                                   </span>
                                   <span>{item.label}</span>
                                 </button>
@@ -324,7 +328,10 @@ export function Navigation({
               aria-current={activeNavigation === item.id ? 'page' : undefined}
               onClick={() => onNavigate(item.id)}
             >
-              <item.icon size={20} strokeWidth={1.8} aria-hidden="true" />
+              <span className={styles.navIconWrap}>
+                <item.icon size={20} strokeWidth={1.8} aria-hidden="true" />
+                {((item.id === 'messages' && unreadMessageCount > 0) || (item.id === 'notifications' && unreadCount > 0)) && <span className={styles.navBadge} aria-label={item.id === 'messages' ? unreadMessageCount + ' unread messages' : unreadCount + ' unread notifications'}>{item.id === 'messages' ? (unreadMessageCount > 99 ? '99+' : unreadMessageCount) : (unreadCount > 99 ? '99+' : unreadCount)}</span>}
+              </span>
               <span>{item.label}</span>
             </button>
           ))}
