@@ -57,6 +57,13 @@ assert.match(workspace, /guildRecentTitle/, 'Guild home reads the browser-local 
 assert.match(workspace, /guildFeatured/, 'Guild home has a featured console destination');
 assert.match(workspace, /guildContinue/, 'Guild home has a Continue Playing surface');
 assert.match(workspace, /Return to Sanctuary/, 'Guild home has an explicit Sanctuary return destination');
+const guildHomeCss = readFileSync('src/components/AppWorkspace.module.css', 'utf8');
+assert.match(guildHomeCss, /\.guildFeatured/, 'Guild home has a dedicated featured-world hero');
+assert.match(guildHomeCss, /\.guildContinue/, 'Continue Playing has a dedicated dashboard surface');
+assert.match(guildHomeCss, /prefers-reduced-motion:reduce/, 'Guild dashboard respects reduced-motion preferences');
+const guildRoadmap = readFileSync('GUILD_ROADMAP.md', 'utf8');
+assert.match(guildRoadmap, /Sanctuary has its own roadmap/, 'Guild roadmap explicitly stays separate from the Sanctuary roadmap');
+assert.match(guildRoadmap, /The 5 Sleeves game repositories retain their own game-development roadmaps/, 'Guild roadmap preserves the separate game-project roadmaps');
 assert.match(workspace, /guildPage === 'music'/, 'music has its own Guild page');
 assert.match(workspace, /guildPage === 'photos'/, 'photo slideshow has its own Guild page');
 assert.match(workspace, /guildPage === 'trials'/, 'original Guild arcade trials have their own page');
