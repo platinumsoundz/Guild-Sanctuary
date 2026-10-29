@@ -67,3 +67,11 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - The Guild console remains part of the Sanctuary codebase and keeps its internal route/state, but `Guild Arcade` and `Guild Roadmap` must not appear in Sanctuary's ordinary navigation selector or navigation groups.
 - Access is intended through the dedicated/hidden Guild entry point, not a visible page-selector item. Do not remove the Guild route or Guild's own internal navigation when hiding these selector entries.
 - Messaging audit: the active inbox/thread still uses the in-memory `service.ts`; the Supabase adapter is optional and gated, and audio/video calling is not present in the current module tree. Treat durable messaging and calls as unfinished, not live features.
+
+
+## Top menu and quick-settings recovery — 2026-10-29
+
+- **Reported regression:** the Guild menu and quick settings were not appearing after the navigation was moved to the top of the console.
+- Restore explicit **Menu** and **Quick settings** controls in the active Guild world top bar, with page-preserving overlay panels for Guild Home, trial restart/pause, Exit to Sanctuary, touch controls, reduced motion, fullscreen and Big Picture layout.
+- Raise the Guild navigation drawer and Quick Menu/scrim layers above the Sanctuary shell at desktop and mobile widths; add regression assertions for the controls, overlay panels and stacking order.
+- **Status:** implementation is on `fix/guild-top-menu-quick-settings-2026-10-29`; exact-head CI, responsive interaction tests and merge are still required. No production deployment is claimed.
