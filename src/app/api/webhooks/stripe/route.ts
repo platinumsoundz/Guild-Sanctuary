@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
   let event: Stripe.Event;
   try {
-    const stripe = new Stripe(secret);
+    const stripe = new Stripe(secret!);
     event = stripe.webhooks.constructEvent(await request.text(), signature, webhookSecret);
   } catch { return response(400, { error: 'Invalid Stripe webhook signature.' }); }
 
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
   if (!Object.hasOwn(BUNDLES, bundleId)) return response(400, { error: 'Unknown bundle.' });
   const bundle = BUNDLES[bundleId as BundleId];
   try {
-    const stripe = new Stripe(secret);
+    const stripe = new Stripe(secret!);
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 2 });
     if (lineItems.data.length !== 1) return response(400, { error: 'Unexpected checkout line items.' });
     const line = lineItems.data[0];
