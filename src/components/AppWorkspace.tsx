@@ -66,7 +66,7 @@ export function AppWorkspace() {
   const [accountSuspendedUntil, setAccountSuspendedUntil] = useState<string | null>(null);
   const [accountRestrictionReason, setAccountRestrictionReason] = useState<string | null>(null);
   const [guildPage, setGuildPage] = useState<GuildPage>('home');
-  const guildInternalPages: GuildPage[] = ['home', 'arcade', 'library', 'music', 'photos', 'tools'];
+  const guildInternalPages: GuildPage[] = ['home', 'arcade', 'trials', 'library', 'music', 'photos', 'tools'];
   const contentNavigation = activeNavigation === 'guild'
     ? (guildInternalPages.includes(guildPage) ? 'guild' : guildPage)
     : activeNavigation;
@@ -183,10 +183,12 @@ export function AppWorkspace() {
     setViewedProfile(null);
     setMessageConversation(null);
     setMessagePeer(profile);
-    setActiveNavigation('messages');
+    if (activeNavigation === 'guild') setGuildPage('messages');
+    else setActiveNavigation('messages');
   };
 
   const openNavigation = (navigation: NavigationState) => {
+    if (activeNavigation === 'guild') { setGuildPage(navigation); setViewedProfile(null); return; }
     setViewedProfile(null);
     if (navigation === 'messages') {
       setMessagePeer(null);
@@ -280,7 +282,7 @@ export function AppWorkspace() {
       ) : contentNavigation === 'messages' ? (
         <MessagesInbox
           currentUserId={currentUser.user.id}
-          onDiscoverPeople={() => setActiveNavigation('discover')}
+          onDiscoverPeople={() => openNavigation('discover')}
           onOpenConversation={(conversation) => {
             setMessagePeer(null);
             setMessageConversation(conversation);
@@ -342,16 +344,18 @@ export function AppWorkspace() {
                     <h1 id="guild-home-title">Your worlds, all in one place.</h1>
                     <p className={styles.sectionDescription}>A focused home for your games, music, memories and the Sanctuary spaces you already use. Open the menu at the top left to move between them.</p>
                     <div className={styles.guildDestinationGrid}>
-                      <button type="button" onClick={() => setGuildPage('arcade')}><span>01 · PLAY</span><strong>Arcade</strong><small>Enter Guild worlds and browser games.</small></button>
-                      <button type="button" onClick={() => setGuildPage('library')}><span>02 · COLLECT</span><strong>Game library</strong><small>The 5 Sleeves first, then your saved games.</small></button>
-                      <button type="button" onClick={() => setGuildPage('music')}><span>03 · LISTEN</span><strong>Music player</strong><small>Play audio files selected from this device.</small></button>
-                      <button type="button" onClick={() => setGuildPage('photos')}><span>04 · REMEMBER</span><strong>Photo slideshow</strong><small>Build a private, in-browser slideshow.</small></button>
-                      <button type="button" onClick={() => setGuildPage('tools')}><span>05 · EXPLORE</span><strong>Guild tools</strong><small>Cloud Lab status and gaming destinations.</small></button>
-                      <button type="button" onClick={() => setGuildPage('today')}><span>06 · SANCTUARY</span><strong>All your Sanctuary pages</strong><small>Community, messages, profile, planner, settings and more.</small></button>
+                      <button type="button" onClick={() => setGuildPage('arcade')}><span>01 · PLAY</span><strong>Game Library</strong><small>Launch The 5 Sleeves and browser games.</small></button>
+                      <button type="button" onClick={() => setGuildPage('trials')}><span>02 · PLAY</span><strong>Guild Trials</strong><small>Play the original Orbital Drift and Comet Dodge arcade games.</button>
+                      <button type="button" onClick={() => setGuildPage('library')}><span>03 · COLLECT</span><strong>Game library</strong><small>The 5 Sleeves first, then your saved games.</small></button>
+                      <button type="button" onClick={() => setGuildPage('music')}><span>04 · LISTEN</span><strong>Music player</strong><small>Play audio files selected from this device.</small></button>
+                      <button type="button" onClick={() => setGuildPage('photos')}><span>05 · REMEMBER</span><strong>Photo slideshow</strong><small>Build a private, in-browser slideshow.</small></button>
+                      <button type="button" onClick={() => setGuildPage('tools')}><span>06 · EXPLORE</span><strong>Guild tools</strong><small>Cloud Lab status and gaming destinations.</small></button>
+                      <button type="button" onClick={() => setGuildPage('today')}><span>07 · SANCTUARY</span><strong>All your Sanctuary pages</strong><small>Community, messages, profile, planner, settings and more.</small></button>
                     </div>
                   </main>
-                ) : guildPage === 'arcade' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
-                : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /><GuildCompanionHub view="library" /></div>
+                ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub /></div>
+                : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
+                : guildPage === 'library' ? <div className={styles.guildSection}><GuildCompanionHub view="library" /></div>
                 : guildPage === 'music' ? <div className={styles.guildSection}><GuildCompanionHub view="music" /></div>
                 : guildPage === 'photos' ? <div className={styles.guildSection}><GuildCompanionHub view="photos" /></div>
                 : guildPage === 'tools' ? <div className={styles.guildSection}><GuildCompanionHub view="tools" /></div>
