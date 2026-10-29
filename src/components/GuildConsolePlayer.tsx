@@ -1,16 +1,18 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, AudioLines, Check, Gamepad2, Maximize2, Minimize2, Settings2, Volume2, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, AudioLines, Check, Gamepad2, Maximize2, Minimize2, Settings2, Volume2, X } from 'lucide-react';
 import styles from './GuildConsolePlayer.module.css';
 
 type Props = { title: string; url: string; onExit: () => void };
-const HOME_BUTTON_CANDIDATES = [16];
-const BUTTON_LABELS = ['A / Cross', 'B / Circle', 'X / Square', 'Y / Triangle'];
+const EDGE_BUTTONS = [0, 1, 12, 13, 14, 15, 16, 9];
+const BUTTON_LABELS = ['A / Cross · Select', 'B / Circle · Back', 'D-pad / stick · Navigate'];
 
 export function GuildConsolePlayer({ title, url, onExit }: Props) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
   const previousButtons = useRef<boolean[]>([]);
+  const previousDirections = useRef({ x: 0, y: 0 });
   const controllerConnectedRef = useRef(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -19,6 +21,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
   const [volume, setVolume] = useState(70);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [notice, setNotice] = useState('');
+  const [controlsVisible, setControlsVisible] = useState(true);
 
   const exitFullscreen = useCallback(async () => {
     try { if (document.fullscreenElement) await document.exitFullscreen(); }
@@ -42,15 +45,45 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
     } catch { setNotice('Fullscreen is not available in this browser or must be started from a direct tap.'); }
   }, []);
 
+  const menuTargets = useCallback(() => {
+    if (!menuRef.current) return [] as HTMLElement[];
+    return Array.from(menuRef.current.querySelectorAll<HTMLElement>('[data-guild-action]:not(:disabled)'));
+  }, []);
+  const moveMenuFocus = useCallback((direction: -1 | 1) => {
+    const targets = menuTargets();
+    if (!targets.length) return;
+    const current = targets.indexOf(document.activeElement as HTMLElement);
+    const next = current < 0 ? 0 : (current + direction + targets.length) % targets.length;
+    targets[next]?.focus();
+  }, [menuTargets]);
+  const activateFocused = useCallback(() => {
+    const active = document.activeElement as HTMLElement | null;
+    if (active && menuRef.current?.contains(active) && active.matches('[data-guild-action]:not(:disabled)')) active.click();
+    else menuTargets()[0]?.click();
+  }, [menuTargets]);
+  const goBack = useCallback(() => {
+    if (settingsOpen) { setSettingsOpen(false); return; }
+    if (menuOpen) { setMenuOpen(false); return; }
+    setMenuOpen(true);
+  }, [menuOpen, settingsOpen]);
+
   useEffect(() => {
     const sync = () => setIsFullscreen(document.fullscreenElement === stageRef.current);
     document.addEventListener('fullscreenchange', sync);
     return () => document.removeEventListener('fullscreenchange', sync);
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const timer = window.requestAnimationFrame(() => menuTargets()[0]?.focus());
+    return () => window.cancelAnimationFrame(timer);
+  }, [menuOpen, settingsOpen, menuTargets]);
+
   useEffect(() => {
     let active = true;
     let frame = 0;
-    const poll = () => {
+    let lastMoveAt = 0;
+    const poll = (now: number) => {
       if (!active) return;
       let pads: (Gamepad | null)[] = [];
       try { if (typeof navigator.getGamepads === 'function') pads = Array.from(navigator.getGamepads()); } catch { pads = []; }
@@ -61,13 +94,29 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       }
       if (pad) {
         const buttons = pad.buttons.map((button) => button.pressed || button.value > 0.65);
-        if (HOME_BUTTON_CANDIDATES.some((index) => Boolean(buttons[index] && !previousButtons.current[index]))) setMenuOpen((open) => !open);
+        const pressed = (index: number) => Boolean(buttons[index] && !previousButtons.current[index]);
+        if (pressed(16) || pressed(9)) setMenuOpen((open) => !open);
+        if (menuOpen) {
+          if (pressed(0)) activateFocused();
+          if (pressed(1)) goBack();
+          const x = (buttons[15] ? 1 : 0) - (buttons[14] ? 1 : 0) || (Math.abs(pad.axes[0] ?? 0) > 0.55 ? Math.sign(pad.axes[0]) : 0);
+          const y = (buttons[13] ? 1 : 0) - (buttons[12] ? 1 : 0) || (Math.abs(pad.axes[1] ?? 0) > 0.55 ? Math.sign(pad.axes[1]) : 0);
+          if (now - lastMoveAt > 180 && (x !== previousDirections.current.x || y !== previousDirections.current.y) && (x !== 0 || y !== 0)) {
+            if (y !== 0) moveMenuFocus(y as -1 | 1);
+            else if (x !== 0) moveMenuFocus(x as -1 | 1);
+            lastMoveAt = now;
+          }
+          previousDirections.current = { x, y };
+        }
         previousButtons.current = buttons;
-      } else previousButtons.current = [];
+      } else {
+        previousButtons.current = [];
+        previousDirections.current = { x: 0, y: 0 };
+      }
       frame = window.requestAnimationFrame(poll);
     };
     const connected = () => { controllerConnectedRef.current = true; setControllerConnected(true); };
-    const disconnected = () => { controllerConnectedRef.current = false; setControllerConnected(false); };
+    const disconnected = () => { controllerConnectedRef.current = false; setControllerConnected(false); previousButtons.current = []; };
     window.addEventListener('gamepadconnected', connected);
     window.addEventListener('gamepaddisconnected', disconnected);
     frame = window.requestAnimationFrame(poll);
@@ -77,12 +126,12 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       window.removeEventListener('gamepadconnected', connected);
       window.removeEventListener('gamepaddisconnected', disconnected);
     };
-  }, []);
+  }, [activateFocused, goBack, menuOpen, moveMenuFocus]);
+
   useEffect(() => {
     const applyAudioSettings = () => {
       const media = Array.from(document.querySelectorAll<HTMLMediaElement>('[data-guild-audio]'));
       media.forEach((item) => { item.muted = !musicEnabled; item.volume = volume / 100; });
-      setNotice(media.length ? '' : '');
     };
     applyAudioSettings();
     const observer = new MutationObserver(applyAudioSettings);
@@ -92,15 +141,25 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !document.fullscreenElement) setMenuOpen((open) => !open);
+      if (event.key === 'Escape' || event.key === 'Backspace') {
+        if (menuOpen) { event.preventDefault(); goBack(); }
+        else if (event.key === 'Escape' && !document.fullscreenElement) setMenuOpen(true);
+      }
       if ((event.key === 'Home' || (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'g')) && !event.repeat) {
         event.preventDefault();
         setMenuOpen((open) => !open);
       }
+      if (!menuOpen) return;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowRight') { event.preventDefault(); moveMenuFocus(1); }
+      if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') { event.preventDefault(); moveMenuFocus(-1); }
+      if ((event.key === 'Enter' || event.key === ' ') && !(document.activeElement instanceof HTMLInputElement)) {
+        const active = document.activeElement as HTMLElement | null;
+        if (active && menuRef.current?.contains(active) && active.matches('[data-guild-action]')) return;
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [goBack, menuOpen, moveMenuFocus]);
 
   return (
     <div className={styles.stage} ref={stageRef} aria-label={`${title} game player`}>
@@ -108,7 +167,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
         <button type="button" onClick={() => setMenuOpen(true)} className={styles.menuButton} aria-label="Open Guild system menu"><Gamepad2 size={18} /><span>The Guild</span></button>
         <div className={styles.gameTitle}>{title}</div>
         <div className={styles.actions}>
-          <span className={styles.controllerState} aria-live="polite">{controllerConnected ? 'Controller connected' : 'Controller not detected'}</span>
+          <span className={styles.controllerState} aria-live="polite">{controllerConnected ? 'Controller connected' : 'Touch / keyboard ready'}</span>
           <button type="button" className={styles.iconButton} onClick={() => void toggleFullscreen()} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>{isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button>
           <button type="button" className={styles.iconButton} onClick={() => void returnHome()} aria-label="Exit game to Guild home"><X size={18} /></button>
         </div>
@@ -116,25 +175,39 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       <div className={styles.gameFrame}>
         <iframe src={url} title={title} allow="fullscreen; gamepad; pointer-lock; autoplay" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen" />
       </div>
+      <div className={styles.touchToolbar}>
+        <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open console controls"><Gamepad2 size={17} /> Console controls</button>
+        <button type="button" onClick={() => setControlsVisible((visible) => !visible)} aria-expanded={controlsVisible}>{controlsVisible ? 'Hide touch controls' : 'Show touch controls'}</button>
+      </div>
       {notice && <p className={styles.notice} role="status">{notice}</p>}
       {menuOpen && <div className={styles.scrim} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setMenuOpen(false); }}>
-        <section className={styles.systemMenu} role="dialog" aria-modal="true" aria-labelledby="guild-menu-title">
-          <header className={styles.menuHeader}><div><p className={styles.eyebrow}>SYSTEM MENU</p><h2 id="guild-menu-title">The Guild</h2></div><button type="button" className={styles.iconButton} onClick={() => setMenuOpen(false)} aria-label="Resume game"><X size={18} /></button></header>
-          <p className={styles.menuSubhead}>Your game stays open behind this menu.</p>
-          <button type="button" className={styles.menuAction} onClick={() => { setMenuOpen(false); setSettingsOpen(false); }}><Gamepad2 size={19} /><span><strong>Resume game</strong><small>Return to {title}</small></span></button>
-          <button type="button" className={styles.menuAction} onClick={() => setSettingsOpen((open) => !open)}><Settings2 size={19} /><span><strong>Game and controller settings</strong><small>Input, sound and display options</small></span></button>
+        <section className={styles.systemMenu} ref={menuRef} role="dialog" aria-modal="true" aria-labelledby="guild-menu-title" onKeyDown={(event) => { if (event.key === 'Escape' || event.key === 'Backspace') { event.preventDefault(); goBack(); } }}>
+          <header className={styles.menuHeader}><div><p className={styles.eyebrow}>SYSTEM MENU</p><h2 id="guild-menu-title">The Guild</h2></div><button type="button" className={styles.iconButton} data-guild-action onClick={() => setMenuOpen(false)} aria-label="Resume game"><X size={18} /></button></header>
+          <p className={styles.menuSubhead}>Your game stays open behind this menu. Use touch, keyboard or controller to navigate.</p>
+          <button type="button" data-guild-action className={styles.menuAction} onClick={() => { setMenuOpen(false); setSettingsOpen(false); }}><Gamepad2 size={19} /><span><strong>Resume game</strong><small>Return to {title}</small></span></button>
+          <button type="button" data-guild-action className={styles.menuAction} onClick={() => setSettingsOpen((open) => !open)}><Settings2 size={19} /><span><strong>Game and controller settings</strong><small>Input, sound and display options</small></span></button>
           {settingsOpen && <div className={styles.settingsPanel}>
             <label className={styles.settingRow}><span><Volume2 size={17} /> Guild music enabled</span><input type="checkbox" checked={musicEnabled} onChange={(event) => setMusicEnabled(event.target.checked)} /></label>
             <label className={styles.settingRow}><span>Guild music volume <strong>{volume}%</strong></span><input type="range" min="0" max="100" value={volume} onChange={(event) => setVolume(Number(event.target.value))} /></label>
-            <div className={styles.controllerDiagnostic}><AudioLines size={17} /><div><strong>{controllerConnected ? 'Controller detected' : 'No controller exposed to this page'}</strong><p>Home/Guide is available only when the browser exposes that button to the Gamepad API. Button labels vary by controller and browser.</p></div></div>
+            <div className={styles.controllerDiagnostic}><AudioLines size={17} /><div><strong>{controllerConnected ? 'Controller detected' : 'No controller exposed to this page'}</strong><p>Directional controls navigate this menu. A confirms, B backs out, and Home/Guide or Start opens and closes the menu where exposed.</p></div></div>
             <div className={styles.buttonLegend}>{BUTTON_LABELS.map((label) => <span key={label}>{label}</span>)}</div>
-            <p className={styles.finePrint}>These controls affect Sanctuary media marked as Guild-managed audio. They cannot mute audio produced inside this cross-origin game iframe; a Guild soundtrack is not yet connected.</p>
+            <p className={styles.finePrint}>Audio controls affect Sanctuary media explicitly marked as Guild-managed audio. They cannot control sound inside this cross-origin game iframe.</p>
           </div>}
-          <button type="button" className={styles.menuAction} onClick={() => void toggleFullscreen()}><Maximize2 size={19} /><span><strong>{isFullscreen ? 'Exit fullscreen' : 'Display fullscreen'}</strong><small>Expand or restore the game view</small></span></button>
-          <button type="button" className={styles.exitAction} onClick={() => void returnHome()}><ArrowLeft size={19} /><span><strong>Exit to Guild home</strong><small>Close this game session</small></span></button>
-          <footer className={styles.menuFooter}><Check size={15} /> Controller Home/Guide support varies by browser. The on-screen menu is always available.</footer>
+          <button type="button" data-guild-action className={styles.menuAction} onClick={() => void toggleFullscreen()}><Maximize2 size={19} /><span><strong>{isFullscreen ? 'Exit fullscreen' : 'Display fullscreen'}</strong><small>Expand or restore the game view</small></span></button>
+          <button type="button" data-guild-action className={styles.exitAction} onClick={() => void returnHome()}><ArrowLeft size={19} /><span><strong>Exit to Guild home</strong><small>Close this game session</small></span></button>
+          <div className={styles.virtualControls} aria-label="Virtual console navigation controls">
+            <div className={styles.dpad} aria-label="Directional navigation">
+              <button type="button" onClick={() => moveMenuFocus(-1)} aria-label="Navigate up"><ArrowUp size={20} /></button>
+              <button type="button" onClick={() => moveMenuFocus(-1)} aria-label="Navigate left"><ArrowLeft size={20} /></button>
+              <button type="button" onClick={() => moveMenuFocus(1)} aria-label="Navigate right"><ArrowRight size={20} /></button>
+              <button type="button" onClick={() => moveMenuFocus(1)} aria-label="Navigate down"><ArrowDown size={20} /></button>
+            </div>
+            <div className={styles.abButtons}><button type="button" onClick={activateFocused} aria-label="A button, select or confirm"><strong>A</strong><small>Select</small></button><button type="button" onClick={goBack} aria-label="B button, back or cancel"><strong>B</strong><small>Back</small></button></div>
+          </div>
+          <footer className={styles.menuFooter}><Check size={15} /> Touch controls operate this Guild menu. The games retain their own native touch controls; iframe limitations prevent this overlay from injecting gameplay input.</footer>
         </section>
       </div>}
+      {!menuOpen && controlsVisible && <button type="button" className={styles.quickMenu} onClick={() => setMenuOpen(true)} aria-label="Open Guild menu"><Gamepad2 size={20} /><span>MENU</span></button>}
     </div>
   );
 }
