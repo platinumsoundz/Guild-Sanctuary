@@ -11,7 +11,7 @@ const checkout = readFileSync('src/app/api/checkout/route.ts', 'utf8');
 for (const marker of ['REPORTED CONTENT', 'report.targetPreview', 'report.targetOwnerName', 'Hide content', 'Remove content', 'Ban member', 'Action rationale']) {
   assert.ok(moderation.includes(marker), `Moderation dashboard missing: ${marker}`);
 }
-for (const marker of ['get_report_target_owner', 'targetPreview', 'apply_moderation_action']) {
+for (const marker of ['get_moderation_report_context', 'targetPreview', 'apply_moderation_action']) {
   assert.ok(service.includes(marker), `Moderation service missing: ${marker}`);
 }
 for (const marker of ['This account is banned', 'Account suspended', 'Wallet access is restricted', 'Token Shop access is restricted']) {
