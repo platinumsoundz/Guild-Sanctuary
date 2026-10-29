@@ -48,9 +48,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'shorts', label: 'Shorts', icon: Clapperboard },
   { id: 'games', label: 'Cosmic Arcade', icon: Gamepad2 },
-  { id: 'guild', label: 'Guild Arcade', icon: Gamepad2 },
   { id: 'roadmap', label: 'Sanctuary Roadmap', icon: Map },
-  { id: 'guild-roadmap', label: 'Guild Roadmap', icon: Gamepad2 },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
@@ -62,7 +60,6 @@ const navigationGroups: { label: string; items: NavigationState[] }[] = [
   { label: 'Connect', items: ['discover', 'messages', 'events', 'shorts'] },
   { label: 'Your space', items: ['profile', 'planner', 'wallet'] },
   { label: 'Explore', items: ['games', 'support', 'shop'] },
-  { label: 'Guild', items: ['guild', 'guild-roadmap'] },
   { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'settings'] },
   { label: 'Stewardship', items: ['admin'] },
 ];
