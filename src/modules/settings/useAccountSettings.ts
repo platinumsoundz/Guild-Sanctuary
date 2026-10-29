@@ -57,10 +57,25 @@ export function useAccountSettings(userId: string) {
       setError('Saved on this device only. Account settings are still not syncing, so this appearance choice will not follow you to other devices yet.');
       return saved;
     }
-    const saved = await saveAccountPreferences(userId, preferences);
-    setSettings(saved);
-    setError(null);
-    return saved;
+    try {
+      const saved = await saveAccountPreferences(userId, preferences);
+      saveLocalAppearancePreferences(userId, { theme: saved.preferences.theme, layout: saved.preferences.layout });
+      setSettings(saved);
+      setError(null);
+      return saved;
+    } catch (saveError) {
+      const keys = Object.keys(updates);
+      if (keys.length > 0 && keys.every((key) => key === 'theme' || key === 'layout')) {
+        saveLocalAppearancePreferences(userId, { theme: preferences.theme, layout: preferences.layout });
+        const localSaved = { userId, preferences, updatedAt: new Date().toISOString() };
+        setSettings(localSaved);
+        setLocalAppearanceOnly(true);
+        const detail = saveError instanceof Error ? saveError.message : 'The account settings service is unavailable.';
+        setError('Account sync failed (' + detail + '). Appearance was saved on this device only; privacy and account preferences still require a working connection.');
+        return localSaved;
+      }
+      throw saveError;
+    }
   }, [isLoading, loadedUserId, settings.preferences, settings.userId, userId]);
 
   const visibleSettings = settings.userId === userId ? settings : {
