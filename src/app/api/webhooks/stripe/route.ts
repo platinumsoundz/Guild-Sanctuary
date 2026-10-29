@@ -19,10 +19,14 @@ function response(status: number, body: Record<string, string>) {
 export async function POST(request: Request) {
   const secret = process.env.STRIPE_SECRET_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (process.env.SANCTUARY_STRIPE_TEST_CHECKOUT_ENABLED !== 'true' ||
-      !secret?.startsWith('sk_test_') || !webhookSecret?.startsWith('whsec_') ||
+  const testModeEnabled = process.env.SANCTUARY_STRIPE_TEST_CHECKOUT_ENABLED === 'true'
+    && Boolean(secret?.startsWith('sk_test_'));
+  const liveDonationEnabled = process.env.SANCTUARY_STRIPE_DONATION_CHECKOUT_ENABLED === 'true'
+    && process.env.SANCTUARY_STRIPE_DONATION_MODE === 'live'
+    && Boolean(secret?.startsWith('sk_live_'));
+  if ((!testModeEnabled && !liveDonationEnabled) || !webhookSecret?.startsWith('whsec_') ||
       !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) {
-    return response(503, { error: 'Stripe test webhook is not configured.' });
+    return response(503, { error: 'Stripe checkout webhook is not configured for an enabled mode.' });
   }
   const signature = request.headers.get('stripe-signature');
   if (!signature) return response(400, { error: 'Missing Stripe signature.' });
@@ -33,12 +37,16 @@ export async function POST(request: Request) {
     event = stripe.webhooks.constructEvent(await request.text(), signature, webhookSecret);
   } catch { return response(400, { error: 'Invalid Stripe webhook signature.' }); }
 
-  if (event.livemode) return response(400, { error: 'Live-mode events are not accepted.' });
+  if (event.livemode && !liveDonationEnabled) return response(400, { error: 'Live-mode events are not enabled.' });
+  if (!event.livemode && !testModeEnabled) return response(400, { error: 'Test-mode events are not enabled.' });
   if (!['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)) {
     return response(200, { received: 'true' });
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
+  if (event.livemode && session.metadata?.sanctuary_purchase !== 'community_donation') {
+    return response(400, { error: 'Live-mode fulfillment is enabled only for account-linked community donations.' });
+  }
   if (session.mode === 'payment' && session.payment_status !== 'paid') {
     // Completed but unpaid sessions are not fulfillment events; acknowledge without granting entitlements.
     return response(200, { received: 'true' });
