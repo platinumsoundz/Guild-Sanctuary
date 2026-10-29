@@ -25,7 +25,7 @@ const MAX_SEEN_CALL_IDS = 64;
 function isValidSignal(value: unknown): value is Signal {
   if (!value || typeof value !== 'object') return false;
   const signal = value as Record<string, unknown>;
-  if (typeof signal.callId !== 'string' || !/^[0-9a-f-]{36}$/i.test(signal.callId)) return false;
+  if (typeof signal.callId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(signal.callId)) return false;
   if (typeof signal.from !== 'string' || typeof signal.to !== 'string' || signal.from === signal.to) return false;
   if (!['invite', 'accept', 'decline', 'hangup', 'offer', 'answer', 'candidate'].includes(String(signal.type))) return false;
   if (signal.type === 'invite' && signal.kind !== 'audio' && signal.kind !== 'video') return false;
@@ -36,8 +36,7 @@ function isValidSignal(value: unknown): value is Signal {
   }
   if (signal.type === 'candidate') {
     const candidate = signal.candidate as Record<string, unknown> | null;
-    if (!candidate || (candidate.candidate != null &&
-        (typeof candidate.candidate !== 'string' || candidate.candidate.length > 4_096))) return false;
+    if (!candidate || typeof candidate.candidate !== 'string' || candidate.candidate.length > 4_096) return false;
   }
   return true;
 }
