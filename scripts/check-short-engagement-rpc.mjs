@@ -21,7 +21,7 @@ assert.match(like, /rpc\('toggle_short_like',\s*\{\s*requested_short_id:\s*short
 assert.match(like, /await requireCommunityStorageUser\(userId\)/, 'Like mutations must retain authenticated-user validation');
 
 
-const migration = readFileSync('supabase/migrations/20261026233000_repair_short_engagement_rpc.sql', 'utf8');
+const migration = readFileSync('supabase/migrations/20261029100000_integrate_short_engagement_and_dm_preferences.sql', 'utf8');
 const types = readFileSync('src/services/supabase/database.types.ts', 'utf8');
 assert.match(migration, /function public\.get_short_engagement_stats\(requested_short_id uuid\)/, 'The migration must expose the exact read RPC signature');
 assert.match(migration, /function public\.toggle_short_like\(requested_short_id uuid\)/, 'The migration must expose the exact like RPC signature');
@@ -33,5 +33,8 @@ assert.ok(migration.includes('revoke all on function public.toggle_short_like(uu
 assert.ok(migration.includes('grant execute on function public.get_short_engagement_stats(uuid) to authenticated;'), 'Read RPC execution is limited to authenticated users');
 assert.ok(migration.includes('grant execute on function public.toggle_short_like(uuid) to authenticated;'), 'Like RPC execution is limited to authenticated users');
 assert.ok(types.includes('get_short_engagement_stats') && types.includes('toggle_short_like'), 'Generated types must include both RPCs');
+assert.match(migration, /notify pgrst, 'reload schema';/i, 'The integration migration must explicitly refresh the PostgREST schema cache');
+assert.match(migration, /drop trigger if exists sync_profile_message_preference on public\.account_settings/i, 'The DM preference sync trigger must be recreated idempotently');
+assert.match(migration, /after insert or update of preferences on public\.account_settings/i, 'The DM preference sync must run when saved account preferences change');
 
 console.log('Short engagement RPC contract checks passed.');
