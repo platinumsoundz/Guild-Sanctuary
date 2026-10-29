@@ -45,6 +45,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'planner', label: 'Daily Planner', icon: CalendarCheck },
   { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
   { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
+  { id: 'feedback', label: 'Feedback', icon: MessageSquare },
   { id: 'events', label: 'Events', icon: CalendarDays },
   { id: 'discover', label: 'Discover', icon: Search },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
@@ -65,7 +66,7 @@ const navigationGroups: { label: string; items: NavigationState[] }[] = [
   { label: 'Connect', items: ['discover', 'messages', 'events', 'shorts'] },
   { label: 'Your space', items: ['profile', 'planner', 'wallet'] },
   { label: 'Explore', items: ['games', 'support', 'shop'] },
-  { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'settings'] },
+  { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'feedback', 'settings'] },
   { label: 'Stewardship', items: ['admin'] },
 ];
 
@@ -120,6 +121,7 @@ export function Navigation({
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [pendingModerationCount, setPendingModerationCount] = useState(0);
+  const [pendingFeedbackCount, setPendingFeedbackCount] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -128,24 +130,28 @@ export function Navigation({
       setUnreadCount(0);
       setUnreadMessageCount(0);
       setPendingModerationCount(0);
+      setPendingFeedbackCount(0);
       setTokenBalance(null);
       return;
     }
     const client = getSupabaseBrowserClient();
     const refreshBadges = async () => {
-      const [social, moderation, messages, reports] = await Promise.all([
+      const canReviewFeedback = Boolean(currentUser && ['admin', 'developer', 'owner'].includes(currentUser.profile.role));
+      const [social, moderation, messages, reports, feedback] = await Promise.all([
         client.from('notifications').select('id', { count: 'exact', head: true }).eq('recipient_id', currentUser.user.id).is('read_at', null),
         client.from('moderation_user_notifications').select('id', { count: 'exact', head: true }).eq('recipient_id', currentUser.user.id).is('read_at', null),
         client.from('messages').select('id', { count: 'exact', head: true }).neq('sender_id', currentUser.user.id).is('read_at', null),
         canAccessAdmin ? client.from('content_reports').select('id', { count: 'exact', head: true }).in('status', ['open', 'reviewing']) : Promise.resolve({ count: 0, error: null }),
+        canReviewFeedback ? client.from('platform_feedback').select('id', { count: 'exact', head: true }).in('status', ['new', 'in_review']) : Promise.resolve({ count: 0, error: null }),
       ]);
       if (cancelled) return;
       setUnreadCount((social.count ?? 0) + (moderation.count ?? 0));
       setUnreadMessageCount(messages.count ?? 0);
       setPendingModerationCount(reports.count ?? 0);
+      setPendingFeedbackCount(feedback.count ?? 0);
     };
     void refreshBadges().catch(() => {
-      if (!cancelled) { setUnreadCount(0); setUnreadMessageCount(0); setPendingModerationCount(0); }
+      if (!cancelled) { setUnreadCount(0); setUnreadMessageCount(0); setPendingModerationCount(0); setPendingFeedbackCount(0); }
     });
     const interval = window.setInterval(() => { void refreshBadges().catch(() => undefined); }, 30000);
     return () => { cancelled = true; window.clearInterval(interval); };
@@ -300,7 +306,7 @@ export function Navigation({
                                 >
                                   <span className={styles.navIconWrap}>
                                     <item.icon size={19} strokeWidth={1.8} aria-hidden="true" />
-                                    {((item.id === 'notifications' && unreadCount > 0) || (item.id === 'messages' && unreadMessageCount > 0) || (item.id === 'admin' && pendingModerationCount > 0)) && <span className={styles.navBadge} aria-label={item.id === 'admin' ? pendingModerationCount + ' unresolved reports' : item.id === 'messages' ? unreadMessageCount + ' unread messages' : unreadCount + ' unread notifications'}>{item.id === 'admin' ? (pendingModerationCount > 99 ? '99+' : pendingModerationCount) : item.id === 'messages' ? (unreadMessageCount > 99 ? '99+' : unreadMessageCount) : (unreadCount > 99 ? '99+' : unreadCount)}</span>}
+                                    {((item.id === 'notifications' && unreadCount > 0) || (item.id === 'messages' && unreadMessageCount > 0) || (item.id === 'admin' && pendingModerationCount > 0) || (item.id === 'feedback' && pendingFeedbackCount > 0)) && <span className={styles.navBadge} aria-label={item.id === 'admin' ? pendingModerationCount + ' unresolved reports' : item.id === 'feedback' ? pendingFeedbackCount + ' new feedback items' : item.id === 'messages' ? unreadMessageCount + ' unread messages' : unreadCount + ' unread notifications'}>{item.id === 'admin' ? (pendingModerationCount > 99 ? '99+' : pendingModerationCount) : item.id === 'feedback' ? (pendingFeedbackCount > 99 ? '99+' : pendingFeedbackCount) : item.id === 'messages' ? (unreadMessageCount > 99 ? '99+' : unreadMessageCount) : (unreadCount > 99 ? '99+' : unreadCount)}</span>}
                                   </span>
                                   <span>{item.label}</span>
                                 </button>
