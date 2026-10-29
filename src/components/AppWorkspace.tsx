@@ -19,6 +19,7 @@ import { SettingsHub } from '@/modules/settings';
 import { PersonalPlanner } from '@/modules/personal-planner/PersonalPlanner';
 import { TokenShopPanel, WalletPanel } from '@/modules/economy';
 import { CosmicArcade } from '@/components/CosmicArcade';
+import { GuildWorld } from '@/components/GuildWorld';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { GuildRoadmap } from '@/components/GuildRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
@@ -147,6 +148,8 @@ export function AppWorkspace() {
         <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} />
       ) : activeNavigation === 'games' ? (
         <CosmicArcade />
+      ) : activeNavigation === 'guild' ? (
+        <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
       ) : activeNavigation === 'admin' ? (
         <AdminDashboard role={currentUser.profile.role} />
       ) : activeNavigation === 'roadmap' ? (
