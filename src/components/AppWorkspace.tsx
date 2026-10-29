@@ -59,6 +59,7 @@ export function AppWorkspace() {
   const [profileThemePreview, setProfileThemePreview] = useState<string | null>(null);
   const [accountAccessStatus, setAccountAccessStatus] = useState<'checking' | 'active' | 'suspended' | 'banned' | 'error'>('checking');
   const [accountSuspendedUntil, setAccountSuspendedUntil] = useState<string | null>(null);
+  const [accountRestrictionReason, setAccountRestrictionReason] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isSessionReady) return;
@@ -71,13 +72,28 @@ export function AppWorkspace() {
     let cancelled = false;
     setAccountAccessStatus('checking');
     getSupabaseBrowserClient().from('profiles').select('status,suspended_until').eq('id', currentUser.user.id).maybeSingle()
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (cancelled) return;
         if (error || !data) { setAccountAccessStatus('error'); return; }
         setAccountSuspendedUntil(data.suspended_until);
-        if (data.status === 'banned') setAccountAccessStatus('banned');
-        else if (data.status === 'suspended' && (!data.suspended_until || new Date(data.suspended_until).getTime() > Date.now())) setAccountAccessStatus('suspended');
-        else setAccountAccessStatus('active');
+        const blocked = data.status === 'banned' ||
+          (data.status === 'suspended' && (!data.suspended_until || new Date(data.suspended_until).getTime() > Date.now()));
+        if (blocked) {
+          const { data: notice } = await getSupabaseBrowserClient().from('moderation_user_notifications')
+            .select('rationale,expires_at,event_type')
+            .eq('recipient_id', currentUser.user.id)
+            .in('event_type', ['ban', 'suspend'])
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (cancelled) return;
+          setAccountRestrictionReason(notice?.rationale ?? null);
+          setAccountSuspendedUntil(notice?.expires_at ?? data.suspended_until);
+          setAccountAccessStatus(data.status === 'banned' ? 'banned' : 'suspended');
+        } else {
+          setAccountRestrictionReason(null);
+          setAccountAccessStatus('active');
+        }
       })
       .catch(() => { if (!cancelled) setAccountAccessStatus('error'); });
     return () => { cancelled = true; };
@@ -304,9 +320,9 @@ export function AppWorkspace() {
             ) : accountAccessStatus === 'error' ? (
               <main className={styles.sectionPage} role="alert"><h1>Account status unavailable</h1><p className={styles.sectionDescription}>We could not verify your account status. Protected features are paused until your account can be checked. Please refresh and try again.</p><button type="button" onClick={() => window.location.reload()}>Retry verification</button></main>
             ) : accountAccessStatus === 'banned' && activeNavigation !== 'support' ? (
-              <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>ACCOUNT RESTRICTED</p><h1>This account is banned</h1><p className={styles.sectionDescription}>Access to Sanctuary is disabled because of a moderation decision. If you believe this is a mistake, contact support and include your account email. Do not create another account to bypass this restriction.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
+              <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>ACCOUNT RESTRICTED</p><h1>This account is banned</h1><p className={styles.sectionDescription}>Access to Sanctuary is disabled because of a moderation decision. {accountRestrictionReason ? 'Reason: ' + accountRestrictionReason + ' ' : ''}If you believe this is a mistake, contact support and include your account email. Do not create another account to bypass this restriction.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
             ) : accountAccessStatus === 'suspended' && activeNavigation !== 'support' ? (
-              <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>TEMPORARY ACCOUNT RESTRICTION</p><h1>Account suspended</h1><p className={styles.sectionDescription}>Your access is temporarily limited following a moderation decision{accountSuspendedUntil ? ' until ' + new Date(accountSuspendedUntil).toLocaleString() : ''}. If you believe this is a mistake, contact support.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
+              <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>TEMPORARY ACCOUNT RESTRICTION</p><h1>Account suspended</h1><p className={styles.sectionDescription}>Your access is temporarily limited following a moderation decision{accountRestrictionReason ? ': ' + accountRestrictionReason : ''}{accountSuspendedUntil ? ' until ' + new Date(accountSuspendedUntil).toLocaleString() : ''}. If you believe this is a mistake, contact support.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
             ) : authenticatedContent}
           </motion.div>
         </AnimatePresence>
