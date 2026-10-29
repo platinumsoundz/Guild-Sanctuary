@@ -99,10 +99,21 @@ export function Navigation({
   onSetTwoFactorEnabled,
   onLogout,
 }: NavigationProps) {
+  const role = currentUser?.profile.role?.toLowerCase() ?? 'guest';
   const canAccessAdmin = Boolean(
-    currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role),
+    currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(role),
   );
-  const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || canAccessAdmin);
+  // Basic users must not see unfinished/privileged destinations in the navigation.
+  // VIP and staff roles may see them; guests are handled by their separate route policy.
+  const canAccessMemberExtras = Boolean(
+    currentUser && ['vip', 'moderator', 'admin', 'developer', 'owner'].includes(role),
+  );
+  const restrictedNavigationIds: NavigationState[] = ['wallet', 'games', 'shop', 'shorts'];
+  const visibleNavigationItems = navigationItems.filter((item) => {
+    if (item.id === 'admin') return canAccessAdmin;
+    if (restrictedNavigationIds.includes(item.id)) return canAccessMemberExtras;
+    return true;
+  });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);
