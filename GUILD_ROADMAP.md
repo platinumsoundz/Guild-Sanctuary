@@ -9,7 +9,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ## Priority order
 
 ### P0 — HUD and visual quality first
-- [ ] **Persistent quick-access HUD:** open over the current Guild page or game without resetting it. Include Resume, Guild Home, controller status, fullscreen/display guidance, Guild-managed audio, notifications and Exit to Sanctuary.
+- [ ] **Persistent quick-access HUD:** the shared notifications panel is now available from the Guild shell and preserves the current page while open. Finish the remaining cross-page HUD actions and real-device focus/return checks: Resume, Guild Home, controller status, fullscreen/display guidance, Guild-managed audio and Exit to Sanctuary.
 - [ ] **Input consistency:** make Menu/Guide, A/Select, B/Back, Escape, touch D-pad and keyboard alternatives consistent. Restore focus on close, support visible focus rings and reduced motion, and handle controller disconnect/reconnect.
 - [x] **Home dashboard foundation:** the Guild home now has a dominant featured destination, a Continue Playing surface based on local launch history, and quick-access cards for Games, Trials, Collection, Music, Photos, Tools and Sanctuary. Original custom game art and deeper dashboard data remain future polish.
 - [ ] **Original game artwork:** create distinct, canon-consistent artwork for The 5 Sleeves 2D and The 5 Sleeves 3D; remove generic placeholder tiles as art assets become available.
