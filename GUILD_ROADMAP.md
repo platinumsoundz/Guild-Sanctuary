@@ -75,3 +75,12 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - Restore explicit **Menu** and **Quick settings** controls in the active Guild world top bar, with page-preserving overlay panels for Guild Home, trial restart/pause, Exit to Sanctuary, touch controls, reduced motion, fullscreen and Big Picture layout.
 - Raise the Guild navigation drawer and Quick Menu/scrim layers above the Sanctuary shell at desktop and mobile widths; add regression assertions for the controls, overlay panels and stacking order.
 - **Status:** implementation is on `fix/guild-top-menu-quick-settings-2026-10-29`; exact-head CI, responsive interaction tests and merge are still required. No production deployment is claimed.
+
+
+## Console HUD polish batch — 2026-10-29
+
+- Refined the Guild modal shell and HUD hierarchy, strengthened focus-visible treatment for Big Picture and game actions, and tuned wide-screen and featured-trial surfaces.
+- Added dedicated breakpoints for narrow phones and short landscape screens, safe-area-aware header spacing, and reduced-motion overrides for animated fragments and hover transitions.
+- Kept local-only progress disclosures, controller status, touch controls, and Big Picture actions intact. This pass does not invent achievements, cloud saves, audio output, or platform account integration.
+- Added `check:guild-console-hud` to CI to guard dialog semantics, controller status, touch controls, responsive breakpoints, focus states, and roadmap status.
+- **Not a device-QA pass:** desktop/TV, Android portrait/landscape, real controller navigation, screen-reader behavior, and focus restoration still require hands-on verification.
