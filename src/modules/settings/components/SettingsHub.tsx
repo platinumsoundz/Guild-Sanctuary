@@ -15,6 +15,7 @@ interface SettingsHubProps {
   socialLinks: SocialLinks;
   onUpdateProfile: (updates: Partial<Pick<Profile, 'privacy' | 'visibility' | 'socialLinks'>>) => void | Promise<void>;
   onDeleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => void;
+  onLaunchGuild: () => void;
 }
 
 const preferenceLabels = {
@@ -59,6 +60,7 @@ export function SettingsHub({
   socialLinks,
   onUpdateProfile,
   onDeleteAccount,
+  onLaunchGuild,
 }: SettingsHubProps) {
   const { settings, isLoading, error, updatePreferences, setError } = useAccountSettings(userId);
   const [linksDraft, setLinksDraft] = useState<SocialLinks>(socialLinks);
@@ -66,6 +68,24 @@ export function SettingsHub({
   const [deletePhrase, setDeletePhrase] = useState('');
   const [deleteCode, setDeleteCode] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [guildAccessEnabled, setGuildAccessEnabled] = useState(true);
+
+  useEffect(() => {
+    try {
+      setGuildAccessEnabled(window.localStorage.getItem('sanctuary-hidden-guild-access') !== 'disabled');
+    } catch {
+      setGuildAccessEnabled(true);
+    }
+  }, []);
+
+  const updateGuildAccess = (enabled: boolean) => {
+    setGuildAccessEnabled(enabled);
+    try {
+      window.localStorage.setItem('sanctuary-hidden-guild-access', enabled ? 'enabled' : 'disabled');
+    } catch {
+      setError('This browser could not save the hidden Guild access preference.');
+    }
+  };
 
   useEffect(() => {
     document.documentElement.dataset.layout = settings.preferences.layout;
@@ -292,6 +312,20 @@ export function SettingsHub({
             <div className={styles.layoutChoices}>
               <label><input type="radio" name="layout" value="comfortable" checked={settings.preferences.layout === 'comfortable'} onChange={() => void updatePreferences({ layout: 'comfortable' }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Comfortable</label>
               <label><input type="radio" name="layout" value="compact" checked={settings.preferences.layout === 'compact'} onChange={() => void updatePreferences({ layout: 'compact' }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The layout could not be saved.'))} /> Compact</label>
+            </div>
+          </section>
+
+          <section className={styles.panel} aria-labelledby="hidden-guild-title">
+            <h2 id="hidden-guild-title">Hidden feature access</h2>
+            <p className={styles.hint}>The Guild is intentionally hidden from Sanctuary navigation. Enable access, then use Launch now to enter directly on this device — no controller or physical keyboard needed. This preference is saved on this device.</p>
+            <div className={styles.guildAccessRow}>
+              <label className={styles.toggleRow}>
+                <span>Enable hidden Guild access</span>
+                <input type="checkbox" checked={guildAccessEnabled} onChange={(event) => updateGuildAccess(event.currentTarget.checked)} />
+              </label>
+              <button type="button" className={styles.launchGuildButton} onClick={onLaunchGuild} disabled={!guildAccessEnabled} aria-describedby="hidden-guild-title">
+                Launch now
+              </button>
             </div>
           </section>
 
