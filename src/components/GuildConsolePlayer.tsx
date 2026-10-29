@@ -11,6 +11,7 @@ const BUTTON_LABELS = ['A / Cross', 'B / Circle', 'X / Square', 'Y / Triangle'];
 export function GuildConsolePlayer({ title, url, onExit }: Props) {
   const stageRef = useRef<HTMLDivElement>(null);
   const previousButtons = useRef<boolean[]>([]);
+  const controllerConnectedRef = useRef(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -54,7 +55,10 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       let pads: (Gamepad | null)[] = [];
       try { if (typeof navigator.getGamepads === 'function') pads = Array.from(navigator.getGamepads()); } catch { pads = []; }
       const pad = pads.find((candidate) => candidate?.connected) ?? null;
-      setControllerConnected(Boolean(pad));
+      if (controllerConnectedRef.current !== Boolean(pad)) {
+        controllerConnectedRef.current = Boolean(pad);
+        setControllerConnected(Boolean(pad));
+      }
       if (pad) {
         const buttons = pad.buttons.map((button) => button.pressed || button.value > 0.65);
         if (HOME_BUTTON_CANDIDATES.some((index) => Boolean(buttons[index] && !previousButtons.current[index]))) setMenuOpen((open) => !open);
@@ -62,8 +66,8 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       } else previousButtons.current = [];
       frame = window.requestAnimationFrame(poll);
     };
-    const connected = () => setControllerConnected(true);
-    const disconnected = () => setControllerConnected(false);
+    const connected = () => { controllerConnectedRef.current = true; setControllerConnected(true); };
+    const disconnected = () => { controllerConnectedRef.current = false; setControllerConnected(false); };
     window.addEventListener('gamepadconnected', connected);
     window.addEventListener('gamepaddisconnected', disconnected);
     frame = window.requestAnimationFrame(poll);
@@ -74,6 +78,18 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       window.removeEventListener('gamepaddisconnected', disconnected);
     };
   }, []);
+  useEffect(() => {
+    const applyAudioSettings = () => {
+      const media = Array.from(document.querySelectorAll<HTMLMediaElement>('[data-guild-audio]'));
+      media.forEach((item) => { item.muted = !musicEnabled; item.volume = volume / 100; });
+      setNotice(media.length ? '' : '');
+    };
+    applyAudioSettings();
+    const observer = new MutationObserver(applyAudioSettings);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [musicEnabled, volume]);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !document.fullscreenElement) setMenuOpen((open) => !open);
@@ -112,7 +128,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
             <label className={styles.settingRow}><span>Guild music volume <strong>{volume}%</strong></span><input type="range" min="0" max="100" value={volume} onChange={(event) => setVolume(Number(event.target.value))} /></label>
             <div className={styles.controllerDiagnostic}><AudioLines size={17} /><div><strong>{controllerConnected ? 'Controller detected' : 'No controller exposed to this page'}</strong><p>Home/Guide is available only when the browser exposes that button to the Gamepad API. Button labels vary by controller and browser.</p></div></div>
             <div className={styles.buttonLegend}>{BUTTON_LABELS.map((label) => <span key={label}>{label}</span>)}</div>
-            <p className={styles.finePrint}>Music controls apply to Guild-managed audio. They cannot directly mute audio produced inside a cross-origin game iframe.</p>
+            <p className={styles.finePrint}>These controls affect Sanctuary media marked as Guild-managed audio. They cannot mute audio produced inside this cross-origin game iframe; a Guild soundtrack is not yet connected.</p>
           </div>}
           <button type="button" className={styles.menuAction} onClick={() => void toggleFullscreen()}><Maximize2 size={19} /><span><strong>{isFullscreen ? 'Exit fullscreen' : 'Display fullscreen'}</strong><small>Expand or restore the game view</small></span></button>
           <button type="button" className={styles.exitAction} onClick={() => void returnHome()}><ArrowLeft size={19} /><span><strong>Exit to Guild home</strong><small>Close this game session</small></span></button>
