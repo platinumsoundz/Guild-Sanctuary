@@ -38,4 +38,4 @@ Live donations are deliberately off unless explicitly configured with:
 
 The API webhook accepts live-mode events only for account-linked donations when the live donation flag is enabled. Token bundle checkout remains test-only in the Next.js webhook. The Supabase Edge Function also validates event mode against its configured `STRIPE_TOKEN_MODE`.
 
-Before enabling live contributions, run the migration in staging and test each role, successful/declined checkout, duplicate webhook delivery, signature rejection, invalid amount/currency, account mismatch, and preservation of elevated roles. No live checkout flag or production database policy was changed by this PR.
+**Do not enable live contributions yet.** Refund/dispute reversal and entitlement revocation are not implemented. Before enabling live contributions, add a policy for refunds/disputes, run the migration in staging, and test each role, successful/declined checkout, duplicate webhook delivery, signature rejection, invalid amount/currency, account mismatch, and preservation of elevated roles. No live checkout flag or production database policy was changed by this PR.
