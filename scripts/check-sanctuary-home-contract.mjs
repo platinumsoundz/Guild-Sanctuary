@@ -7,7 +7,7 @@ const context = readFileSync('src/context/AppContext.tsx', 'utf8');
 const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
 const css = readFileSync('src/components/SanctuaryHome.module.css', 'utf8');
 
-assert.match(workspace, /activeNavigation === 'today'[\s\S]*?<SanctuaryHome onNavigate=\{openNavigation\} \/>/, 'Today route renders the Sanctuary home');
+assert.match(workspace, /activeNavigation === 'today'[\s\S]*?<TodayDashboard onNavigate=\{openNavigation\} \/>/, 'Today route renders the concise Today dashboard');
 assert.match(context, /NavigationState = 'today'/, 'Today is a supported navigation state');
 assert.match(context, /useState<NavigationState>\('today'\)/, 'Today is the initial destination');
 assert.match(navigation, /id: 'today', label: 'Today'/, 'Today is reachable in navigation');

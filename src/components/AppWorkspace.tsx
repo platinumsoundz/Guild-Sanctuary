@@ -22,7 +22,7 @@ import { CosmicArcade } from '@/components/CosmicArcade';
 import { GuildWorld } from '@/components/GuildWorld';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { GuildRoadmap } from '@/components/GuildRoadmap';
-import { SanctuaryHome } from '@/components/SanctuaryHome';
+import { TodayDashboard } from '@/components/TodayDashboard';
 import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
@@ -110,7 +110,7 @@ export function AppWorkspace() {
   };
 
   const authenticatedContent = activeNavigation === 'today' ? (
-    <SanctuaryHome onNavigate={openNavigation} />
+    <TodayDashboard onNavigate={openNavigation} />
   ) : isGuest && !['support', 'games', 'guild', 'roadmap', 'guild-roadmap'].includes(activeNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
