@@ -303,9 +303,9 @@ export function AppWorkspace() {
               <main className={styles.sessionLoading} role="status">Verifying your account access…</main>
             ) : accountAccessStatus === 'error' ? (
               <main className={styles.sectionPage} role="alert"><h1>Account status unavailable</h1><p className={styles.sectionDescription}>We could not verify your account status. Protected features are paused until your account can be checked. Please refresh and try again.</p><button type="button" onClick={() => window.location.reload()}>Retry verification</button></main>
-            ) : accountAccessStatus === 'banned' ? (
+            ) : accountAccessStatus === 'banned' && activeNavigation !== 'support' ? (
               <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>ACCOUNT RESTRICTED</p><h1>This account is banned</h1><p className={styles.sectionDescription}>Access to Sanctuary is disabled because of a moderation decision. If you believe this is a mistake, contact support and include your account email. Do not create another account to bypass this restriction.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
-            ) : accountAccessStatus === 'suspended' ? (
+            ) : accountAccessStatus === 'suspended' && activeNavigation !== 'support' ? (
               <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>TEMPORARY ACCOUNT RESTRICTION</p><h1>Account suspended</h1><p className={styles.sectionDescription}>Your access is temporarily limited following a moderation decision{accountSuspendedUntil ? ' until ' + new Date(accountSuspendedUntil).toLocaleString() : ''}. If you believe this is a mistake, contact support.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
             ) : authenticatedContent}
           </motion.div>
