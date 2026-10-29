@@ -4,6 +4,12 @@ Last updated: 2026-10-29
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
+## Focused accessibility task — compact notification overlay
+
+- **Task completion target: 100% of the code-and-contract scope.** When the compact notifications panel is closed with its close button, keyboard focus returns to the notification bell, consistent with the existing Escape-key behaviour.
+- Added the focus restoration to `NotificationBar.tsx` and a dedicated regression assertion to `check-notification-panel-contract.mjs` on branch `fix/sanctuary-notification-focus-mainline-2026-10-29`.
+- **Not yet verified or released:** exact-head CI, preview interaction and merge are still pending. Do not count this as production-complete until those gates pass.
+
 ## Beta readiness dashboard — Sanctuary only
 
 > **Estimated beta readiness: 55%**  
