@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
+import { NotificationBar } from './NotificationBar';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
 import styles from './GuildNavigation.module.css';
 
@@ -153,6 +154,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       <span className={styles.mark}><Gamepad2 size={21} /></span><span><small>CONSOLE MODE</small><strong>THE GUILD</strong></span>
     </button>
     <div className={styles.current} aria-live="polite">{label}</div>
+    <div className={styles.notificationSlot}><NotificationBar compact /></div>
     <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Sanctuary</span></button>
     {open && <button type="button" className={styles.scrim} aria-label="Close navigation" onClick={() => setOpen(false)} />}
     <nav className={styles.drawer} data-open={open} aria-label="Guild and Sanctuary pages" aria-hidden={!open}>
