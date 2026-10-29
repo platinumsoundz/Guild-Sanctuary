@@ -6,3 +6,125 @@
 .publicGuild{width:min(100%,1440px);margin:0 auto;padding:clamp(16px,4vw,42px);color:var(--ink)}.publicGuild>h1{margin:0;font-size:clamp(30px,5vw,48px);letter-spacing:-.045em}.publicGuildIntro{max-width:720px;color:var(--muted);font-size:14px;line-height:1.7}.publicGuild :global(.hub){width:100%;padding:18px 0}.publicGuild :global(.hub > .header){display:none}.publicGuild :global(.hub .futureSection){margin-top:24px}@media(max-width:600px){.publicGuild{padding:14px}.publicGuild :global(.hub){padding:12px 0}}
 
 .enterPublicGuild{display:inline-flex;align-items:center;gap:8px;min-height:42px;margin:10px 0 6px;padding:10px 15px;border:1px solid var(--line);border-radius:10px;background:var(--accent);color:var(--surface-raised);font-weight:700;cursor:pointer}.enterPublicGuild:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+
+/* Console HUD polish batch: improve hierarchy, controller focus, and wide/mobile framing. */
+.topbar {
+  min-height: 76px;
+  padding-top: max(14px, env(safe-area-inset-top));
+  border-bottom-color: rgba(185, 174, 255, .2);
+}
+.topActions { flex-wrap: wrap; justify-content: flex-end; }
+.bigPictureButton {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid rgba(195, 176, 255, .24);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .055);
+  color: #e8e4ff;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.bigPictureButton:hover { border-color: rgba(195, 176, 255, .62); background: rgba(130, 102, 255, .14); }
+.bigPictureButton:focus-visible, .closeButton:focus-visible, .playButton:focus-visible,
+.enterButton:focus-visible, .pauseButton:focus-visible, .dismiss:focus-visible {
+  outline: 3px solid #c7b5ff;
+  outline-offset: 3px;
+}
+.hero { isolation: isolate; }
+.hero::after {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image: linear-gradient(90deg, rgba(8, 9, 29, .14), transparent 70%);
+  pointer-events: none;
+  content: '';
+}
+.heroText { z-index: 1; }
+.planet { z-index: 1; }
+.sectionHead { margin-top: clamp(24px, 3vw, 34px); }
+.gameGrid { align-items: stretch; }
+.gameCard, .progressCard, .gamePanel { box-shadow: 0 12px 32px rgba(0, 0, 0, .12); }
+.gameCard { min-height: 220px; }
+.gameArt { min-height: 220px; }
+.gameDetails { padding: clamp(16px, 2vw, 24px); }
+.playButton, .gameOverlay button, .enterButton, .closeButton, .pauseButton {
+  min-height: 42px;
+  touch-action: manipulation;
+  transition: transform 140ms ease, border-color 140ms ease, filter 140ms ease;
+}
+.playButton:hover, .gameOverlay button:hover, .enterButton:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.playfield { touch-action: manipulation; }
+.fragment { pointer-events: none; }
+.playerShip { pointer-events: none; }
+.gameStatus { align-items: center; flex-wrap: wrap; }
+.gameControls { flex-wrap: wrap; }
+.footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 18px; }
+@media (min-width: 1280px) {
+  .world { width: min(1440px, calc(100vw - 56px)); }
+  .content { padding: clamp(28px, 3vw, 44px); }
+  .hero { min-height: 260px; }
+  .gameGrid { grid-template-columns: minmax(0, 1.8fr) minmax(250px, .72fr); }
+  .gameCard { grid-template-columns: minmax(220px, .8fr) minmax(0, 1.2fr); }
+  .playfield { height: min(42vh, 440px); }
+}
+@media (max-width: 760px) {
+  .topbar { align-items: flex-start; padding: max(12px, env(safe-area-inset-top)) 12px 12px; }
+  .brand strong { font-size: 17px; }
+  .topActions { gap: 7px; }
+  .connected { width: 100%; justify-content: flex-end; }
+  .bigPictureButton, .closeButton { min-height: 42px; padding-inline: 10px; }
+  .hero { align-items: flex-start; min-height: 0; }
+  .planet { width: clamp(86px, 20vw, 140px); margin-top: 16px; }
+  .gameGrid { grid-template-columns: 1fr; }
+  .progressCard { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: center; }
+  .progressIcon { grid-row: span 2; margin: 0; }
+  .progressCard .eyebrow, .progressCard > strong, .progressCard > p, .progressCard .progressLine, .progressCard > small { grid-column: 2; }
+}
+@media (max-width: 520px) {
+  .backdrop { padding: 0; align-items: stretch; }
+  .world { width: 100%; max-height: 100dvh; min-height: 100dvh; border-radius: 0; border-inline: 0; }
+  .topbar { position: sticky; gap: 8px; }
+  .brand { min-width: 0; }
+  .brandMark { width: 36px; height: 36px; }
+  .brand small { font-size: 8px; letter-spacing: .08em; }
+  .brand strong { font-size: 15px; }
+  .topActions { max-width: 56%; }
+  .connected { font-size: 9px; }
+  .bigPictureButton { font-size: 10px; }
+  .closeButton { font-size: 10px; }
+  .hero { gap: 10px; padding: 19px; }
+  .hero h1 { font-size: clamp(32px, 10vw, 46px); }
+  .heroText > p:not(.eyebrow) { font-size: 12px; }
+  .planet { width: 76px; flex: 0 0 76px; }
+  .heroMeta { display: grid; gap: 8px; }
+  .gameCard { grid-template-columns: 1fr; }
+  .gameArt { min-height: 130px; }
+  .gameDetails h3 { font-size: 21px; }
+  .gameControls { align-items: flex-start; }
+  .gameControls > span { flex-wrap: wrap; }
+  .touchControls { width: 100%; justify-content: center; }
+  .progressCard { grid-template-columns: 1fr; }
+  .progressIcon, .progressCard .eyebrow, .progressCard > strong, .progressCard > p, .progressCard .progressLine, .progressCard > small { grid-column: 1; }
+  .progressIcon { margin-bottom: 12px; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .backdrop { place-items: start center; }
+  .world { max-height: 100dvh; border-radius: 12px; }
+  .topbar { min-height: 56px; padding-block: 8px; }
+  .brandMark { width: 34px; height: 34px; }
+  .hero { min-height: 160px; padding: 18px 24px; }
+  .planet { width: 110px; }
+  .playfield { height: 210px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .playButton, .gameOverlay button, .enterButton, .closeButton, .pauseButton, .bigPictureButton { transition: none; }
+  .playButton:hover, .gameOverlay button:hover, .enterButton:hover { transform: none; }
+  .fragment { animation: none; }
+}
