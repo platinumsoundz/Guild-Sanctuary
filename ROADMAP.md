@@ -728,8 +728,8 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 ## Roadmap status reconciliation — 2026-10-29 (current main)
 
 - **Merged to main:** #218 compact responsive shell/release-candidate reconciliation; #221 guest-safe read-only route boundary; #223 Guild browser arcade; #225 creator-game lobby relocation; #224 strengthened Shorts RPC migration security contract. These are repository merges, not confirmation of production deployment.
-- **Open, owner decision required:** #220 Daily Reflection account-backed persistence. Automated CI and screenshot capture passed; do not merge until the owner approves the local-to-account-backed transition and two-account isolation plus save/read/update/delete failure-path checks are completed.
+- **Open, owner decision required:** #226 Daily Reflection account-backed persistence (clean reconstruction; exact-head CI and screenshots are running). Do not merge until the owner approves the local-to-account-backed transition and two-account isolation plus save/read/update/delete failure-path checks are completed.
 - **Open, fresh CI running/required:** creator-game/Guild interactions are still subject to real desktop/mobile browser QA. Vercel preview is still subject to provider rate limiting; Cloudflare PR workflows are guarded against production deployment.
 - **Still blocked:** #191 moderation queue and #199 role management require a live-schema reconciliation because public.get_moderation_queue() is absent, plus independent review of role hierarchy, self-targeting, concurrency and action authorization. No production SQL/migrations or permission changes have been applied.
-- **Superseded and closed:** #210, #213, #214, #215, #216, #222 and #192. Their relevant work was either rebuilt on current main or superseded by the strengthened #224 contract.
+- **Superseded and closed:** #210, #213, #214, #215, #216, #220, #222 and #192. Their relevant work was either rebuilt on current main or superseded by the strengthened #224 contract.
 - **No production deployment, live database write, payment/provider/secret change, or token-spending enablement is claimed by this reconciliation.
