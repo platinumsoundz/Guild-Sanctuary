@@ -875,3 +875,14 @@ Branch: `fix/comment-engagement-concurrency-2026-10-29`
 - Reaction controls expose a disabled/busy state while the mutation is pending and release the lock in `finally`, including failure paths.
 - Extended `check-community-comment-actions.mjs` to cover both surfaces.
 - This prevents a common rapid-tap race in the UI; database uniqueness/RLS remains the authoritative protection. Exact-head CI and preview checks are required before merge; no production deployment is claimed.
+
+
+## Private-message report authorization hardening — 2026-10-29
+
+Branch: `fix/private-message-report-access-2026-10-29`
+
+- Found a security gap in the SECURITY DEFINER `submit_content_report` RPC: message targets were checked only for UUID existence, not whether the reporter belonged to the conversation.
+- Added an additive repair migration that allows reporting a message only when the signed-in active user is an active member of that conversation and the message is visible. If the messaging schema or membership helper is absent, the RPC fails closed.
+- Tightened report-reason validation and retained report rate limiting, idempotent upsert behaviour, authenticated-only execution grants, and explicit PostgREST schema reload.
+- Extended the messaging persistence contract to guard the membership check and fail-closed behaviour.
+- **Not yet deployed:** this migration must be reviewed and applied through the approved staging process. Validate both a conversation member and a non-member using separate test accounts before production.
