@@ -188,11 +188,14 @@ export function AppWorkspace() {
   };
 
   const openNavigation = (navigation: NavigationState) => {
-    if (activeNavigation === 'guild') { setGuildPage(navigation); setViewedProfile(null); return; }
     setViewedProfile(null);
     if (navigation === 'messages') {
       setMessagePeer(null);
       setMessageConversation(null);
+    }
+    if (activeNavigation === 'guild') {
+      setGuildPage(navigation);
+      return;
     }
     setActiveNavigation(navigation);
   };
@@ -356,9 +359,9 @@ export function AppWorkspace() {
                 ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub /></div>
                 : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
                 : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /></div>
-                : ['music', 'photos', 'tools'].includes(guildPage) ? null
+                : ['music', 'photos', 'tools'].some((page) => page === guildPage) ? null
                 : authenticatedContent}
-                <GuildCompanionHub view={guildPage === 'library' || guildPage === 'music' || guildPage === 'photos' || guildPage === 'tools' ? guildPage : 'all'} hidden={!['library', 'music', 'photos', 'tools'].includes(guildPage)} />
+                <GuildCompanionHub view={guildPage === 'library' || guildPage === 'music' || guildPage === 'photos' || guildPage === 'tools' ? guildPage : 'all'} hidden={!(['library', 'music', 'photos', 'tools'] as GuildPage[]).includes(guildPage)} />
               </motion.div>
             </AnimatePresence>
           </div>
