@@ -36,10 +36,10 @@ assert.match(styles, /\.scrim\s*\{[^}]*z-index:\s*950/s, 'navigation scrim must 
 assert.match(styles, /\.drawer\s*\{[^}]*z-index:\s*960/s, 'navigation drawer must sit above its scrim');
 assert.match(styles, /\.quickScrim\s*\{[^}]*z-index:\s*970/s, 'Quick Menu scrim must layer above the navigation drawer');
 assert.match(styles, /\.quickPanel\s*\{[^}]*z-index:\s*980/s, 'Quick Menu panel must sit above its scrim');
-assert.match(styles, /\.scrim\s*\{\s*z-index:\s*10000\s*\}/, 'Guild drawer scrim must stay above the active page at desktop widths');
-assert.match(styles, /\.drawer\s*\{\s*z-index:\s*10001\s*\}/, 'Guild navigation drawer must stay above its scrim at desktop widths');
-assert.match(styles, /\.quickScrim\s*\{\s*z-index:\s*10002\s*\}/, 'Quick Menu scrim must stay above the Guild drawer at desktop widths');
-assert.match(styles, /\.quickPanel\s*\{\s*z-index:\s*10003\s*\}/, 'Quick Menu panel must stay above the scrim at desktop widths');
+assert.match(styles, /\.scrim\s*\{\s*z-index:\s*10000\s*;?\s*\}/, 'Guild drawer scrim must stay above the active page at desktop widths');
+assert.match(styles, /\.drawer\s*\{\s*z-index:\s*10001\s*;?\s*\}/, 'Guild navigation drawer must stay above its scrim at desktop widths');
+assert.match(styles, /\.quickScrim\s*\{\s*z-index:\s*10002\s*;?\s*\}/, 'Quick Menu scrim must stay above the Guild drawer at desktop widths');
+assert.match(styles, /\.quickPanel\s*\{\s*z-index:\s*10003\s*;?\s*\}/, 'Quick Menu panel must stay above the scrim at desktop widths');
 assert.equal(packageJson.scripts['check:guild-mobile-navigation'], 'node scripts/check-guild-mobile-navigation.mjs', 'mobile navigation contract must be available as an npm script');
 
 console.log('Guild mobile navigation contract checks passed.');

@@ -7,8 +7,8 @@ Status reconciliation: this update corrects stale theme/notification labels from
 ## Focused accessibility task — compact notification overlay
 
 - **Task completion target: 100% of the code-and-contract scope.** When the compact notifications panel is closed with its close button, keyboard focus returns to the notification bell, consistent with the existing Escape-key behaviour.
-- Added the focus restoration to `NotificationBar.tsx` and a dedicated regression assertion to `check-notification-panel-contract.mjs` on branch `fix/sanctuary-notification-focus-mainline-2026-10-29`.
-- **Not yet verified or released:** exact-head CI, preview interaction and merge are still pending. Do not count this as production-complete until those gates pass.
+- Added the focus restoration to `NotificationBar.tsx` and a dedicated regression assertion to `check-notification-panel-contract.mjs`; merged in PR [#263](https://github.com/platinumsoundz/Guild-Sanctuary/pull/263) on 2026-10-29.
+- **Still not release-verified:** the merge was made at the owner's request without waiting for pending checks. Preview interaction, keyboard/mobile QA, and production deployment remain unconfirmed.
 
 ## Beta readiness dashboard — Sanctuary only
 
@@ -854,3 +854,14 @@ Two connected Supabase projects were inspected read-only: `kchrskkchoyqweowskxv`
 - Posts and other destinations continue through the shared Sanctuary page-role allowlist, preventing notification clicks from bypassing navigation visibility.
 - Add a regression contract for access-check ordering, unread preservation, and the restricted-destination message.
 - **Status:** implementation and source-contract check committed on `fix(notification-role-routing-2026-10-29`; exact-head CI/typecheck/build and live preview verification remain pending.
+
+
+## Community integration batch — 2026-10-29
+
+Branch: `fix/community-integration-phase-1b-2026-10-29`
+
+- Added an idempotent integration migration, `20261029100000_integrate_short_engagement_and_dm_preferences.sql`, which reasserts the authenticated Shorts engagement/read and like RPCs, refreshes PostgREST's schema cache with `notify pgrst, 'reload schema'`, and creates the idempotent trigger that keeps saved direct-message/profile-discovery preferences aligned with profile privacy fields.
+- Expanded the Shorts RPC and messaging contract scripts to assert the schema-cache refresh and preference trigger are present.
+- This is **repository work only**. The migration has not been applied to any Supabase project, and static contract checks do not prove the connected live schema is repaired. Do not blindly push migrations because migration-history drift is already documented.
+- Next integration scope: verify comment like/edit/delete/report actions across posts and Shorts; verify DM preference save/read and recipient blocking with two real accounts; verify notification links, unread state, and role restrictions across stable and VIP destinations.
+- Release gates remain: run exact-head CI/typecheck/build, inspect the migration against the actual staging schema, apply only through the approved migration process, and perform real-account/browser tests before calling the systems beta-ready.
