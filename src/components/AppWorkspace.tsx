@@ -234,9 +234,9 @@ export function AppWorkspace() {
       ) : activeNavigation === 'feedback' ? (
         <FeedbackHub />
       ) : activeNavigation === 'roadmap' ? (
-        <RoadmapHub />
+        <RoadmapHub key={activeNavigation} />
       ) : activeNavigation === 'guild-roadmap' ? (
-        <RoadmapHub initialView="guild" />
+        <RoadmapHub key={activeNavigation} initialView="guild" />
       ) : activeNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
