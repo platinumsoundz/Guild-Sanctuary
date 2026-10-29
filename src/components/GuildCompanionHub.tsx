@@ -37,7 +37,7 @@ const services = [
 
 export type GuildCompanionView = 'all' | 'library' | 'music' | 'photos' | 'tools';
 
-export function GuildCompanionHub({ view = 'all' }: { view?: GuildCompanionView }) {
+export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: GuildCompanionView; hidden?: boolean }) {
   const [games, setGames] = useState<LocalGame[]>([]);
   const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [storageWarning, setStorageWarning] = useState(false);
@@ -360,7 +360,7 @@ export function GuildCompanionHub({ view = 'all' }: { view?: GuildCompanionView 
   };
 
   return (
-    <section className={styles.hub} aria-label="Guild companion features">
+    <section className={hidden ? styles.hiddenHub : styles.hub} aria-label="Guild companion features" aria-hidden={hidden}>
       <div className={styles.heading}>
         <div><p className={styles.eyebrow}>THE GUILD · PERSONAL SPACE</p><h2>{view === 'library' ? 'Game library' : view === 'music' ? 'Music player' : view === 'photos' ? 'Photo slideshow' : view === 'tools' ? 'Guild tools' : 'Library & lounges'}</h2><p>{view === 'music' ? 'Play audio you choose from this device. Files stay local to this browser session.' : view === 'photos' ? 'Create a private slideshow from photos selected on this device.' : view === 'library' ? 'Keep a personal catalogue alongside the featured Guild games. Account sync still depends on the staged database migration.' : 'Your game catalogue and personal media are separated into their own Guild pages. Personal media stays on your device by default.'}</p></div>
         <span className={styles.privacy}><ShieldCheck size={15} /> Local cache + account sync</span>
