@@ -23,6 +23,7 @@
     "check:daily-reflection": "node scripts/check-daily-reflection-contract.mjs",
     "check:navigation": "node scripts/check-navigation-contract.mjs",
     "check:role-page-access": "node scripts/check-role-page-access.mjs",
+    "check:admin-visibility": "node scripts/check-admin-visibility-contract.mjs",
     "check:feed-polish": "node scripts/check-feed-polish-contract.mjs",
     "check:community-toolkit": "node scripts/check-community-connection-toolkit.mjs",
     "test:community-connection": "node --experimental-strip-types scripts/test-community-connection.mjs",
