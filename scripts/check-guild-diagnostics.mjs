@@ -7,6 +7,8 @@ const navigation = readFileSync('src/components/GuildNavigation.tsx', 'utf8');
 
 assert.match(navigation, /import \{ GuildDiagnosticsPanel \} from '\.\/GuildDiagnosticsPanel'/, 'Quick Menu imports the diagnostics panel');
 assert.match(navigation, /<GuildDiagnosticsPanel \/>/, 'diagnostics panel is visible inside the page-preserving Quick Menu');
+assert.match(navigation, /Touch navigation controls/, 'Quick Menu exposes touch-control visibility settings');
+assert.match(navigation, /aria-pressed=\{controlsOpen\}/, 'touch-control visibility is exposed as an accessible toggle');
 assert.match(panel, /getConnectedGamepad\(\)/, 'controller status uses the shared safe controller abstraction');
 assert.match(panel, /gamepadconnected/, 'controller connect events refresh diagnostics');
 assert.match(panel, /gamepaddisconnected/, 'controller disconnect events refresh diagnostics');
