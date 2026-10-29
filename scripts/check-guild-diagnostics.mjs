@@ -4,11 +4,18 @@ import { readFileSync } from 'node:fs';
 const panel = readFileSync('src/components/GuildDiagnosticsPanel.tsx', 'utf8');
 const styles = readFileSync('src/components/GuildDiagnosticsPanel.module.css', 'utf8');
 const navigation = readFileSync('src/components/GuildNavigation.tsx', 'utf8');
+const navigationStyles = readFileSync('src/components/GuildNavigation.module.css', 'utf8');
 
 assert.match(navigation, /import \{ GuildDiagnosticsPanel \} from '\.\/GuildDiagnosticsPanel'/, 'Quick Menu imports the diagnostics panel');
 assert.match(navigation, /<GuildDiagnosticsPanel \/>/, 'diagnostics panel is visible inside the page-preserving Quick Menu');
 assert.match(navigation, /Touch navigation controls/, 'Quick Menu exposes touch-control visibility settings');
 assert.match(navigation, /aria-pressed=\{controlsOpen\}/, 'touch-control visibility is exposed as an accessible toggle');
+assert.match(navigation, /On-screen keyboard/, 'Quick Menu offers an on-screen keyboard for controller-first search');
+assert.match(navigation, /data-quick-key/, 'on-screen keyboard keys can receive focus and controller activation');
+assert.match(navigation, /if \(quickOpen\)/, 'gamepad handling has a Quick Menu-specific navigation path');
+assert.match(navigation, /setQuickOpen\(true\); setOpen\(false\)/, 'controller Start opens the Quick Menu rather than the unrelated navigation drawer');
+assert.match(navigationStyles, /\.quickKeyboard\{/, 'on-screen keyboard has a dedicated responsive layout');
+assert.match(navigationStyles, /@media\(max-width:420px\)/, 'on-screen keyboard adapts to narrow mobile screens');
 assert.match(panel, /getConnectedGamepad\(\)/, 'controller status uses the shared safe controller abstraction');
 assert.match(panel, /gamepadconnected/, 'controller connect events refresh diagnostics');
 assert.match(panel, /gamepaddisconnected/, 'controller disconnect events refresh diagnostics');
