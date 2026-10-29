@@ -85,3 +85,14 @@ assert.match(consoleCss, /touch-action:manipulation/, 'touch controls reduce del
 assert.match(consoleCss, /orientation:landscape/, 'console overlay adapts to landscape mobile screens');
 
 assert.match(consolePlayer, /menuOpenRef\.current = menuOpen/, 'gamepad polling reads current menu state without resetting held-button edge detection');
+
+const settingsHub = readFileSync('src/modules/settings/components/SettingsHub.tsx', 'utf8');
+const settingsCss = readFileSync('src/modules/settings/components/SettingsHub.module.css', 'utf8');
+assert.match(settingsHub, /Enable hidden Guild access/, 'settings keeps the hidden Guild access preference');
+assert.match(settingsHub, /Launch now/, 'settings exposes a direct Launch now action beside the preference');
+assert.match(settingsHub, /disabled=\{!guildAccessEnabled\}/, 'launch is disabled while hidden Guild access is switched off');
+assert.match(settingsHub, /onLaunchGuild/, 'launch action delegates navigation to the authenticated workspace');
+assert.match(settingsCss, /\.guildAccessRow/, 'Guild preference and launch action use a responsive shared row');
+assert.match(settingsCss, /@media \(max-width: 520px\)/, 'Guild launch action becomes a full-width mobile target');
+assert.match(workspace, /onLaunchGuild=\{\(\) =>/, 'workspace wires settings launch directly into Guild navigation');
+assert.match(workspace, /setActiveNavigation\('guild'\)/, 'launch now navigates directly to the Guild route');
