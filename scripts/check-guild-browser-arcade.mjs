@@ -57,7 +57,7 @@ assert.match(workspace, /guildPage === 'music'/, 'music has its own Guild page')
 assert.match(workspace, /guildPage === 'photos'/, 'photo slideshow has its own Guild page');
 assert.match(workspace, /guildPage === 'trials'/, 'original Guild arcade trials have their own page');
 assert.match(workspace, /<GuildCompanionHub view=\{guildPage === 'library'/, 'media state remains mounted while Guild pages change');
-assert.match(guild, /Sign in to Sanctuary to enter the Guild’s original browser arcade/, 'guest lobby explains the account boundary');
+assert.match(guild, /The Guild’s original arcade trials are available after sign-in/, 'guest lobby explains the account boundary');
 assert.match(guild, /onClick=\{enterGuild\}>Enter Guild Arcade/, 'authenticated members can enter the original arcade from the visible lobby');
 assert.match(workspace, /isAuthenticated && !isGuest/, 'authenticated Guild identity is required for original arcade');
 console.log('Guild browser Arcade contract checks passed.');
