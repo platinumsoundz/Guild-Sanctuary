@@ -84,3 +84,11 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - Kept local-only progress disclosures, controller status, touch controls, and Big Picture actions intact. This pass does not invent achievements, cloud saves, audio output, or platform account integration.
 - Added `check:guild-console-hud` to CI to guard dialog semantics, controller status, touch controls, responsive breakpoints, focus states, and roadmap status.
 - **Not a device-QA pass:** desktop/TV, Android portrait/landscape, real controller navigation, screen-reader behavior, and focus restoration still require hands-on verification.
+
+
+## Guild overlays and Settings launch — 2026-10-29
+
+- Raised the portaled Guild navigation drawer, scrim, Quick Menu panel and quick-menu scrim above Sanctuary shell layers at all widths. Both panels remain rendered through `createPortal(..., document.body)` to avoid transformed/stacking-context parents.
+- Quick Menu and the left navigation now use global page-visibility settings for their Sanctuary destinations while preserving role gates.
+- Fixed the access policy so an authenticated basic user can launch The Guild from Settings. Developer/Owner restrictions continue to apply to Guild Roadmap and the separate page-visibility administration controls.
+- Validation contract now checks portal rendering and top-priority stacking order. Still requires preview interaction checks on Android portrait/landscape and desktop, including click/touch and Escape-close behaviour.
