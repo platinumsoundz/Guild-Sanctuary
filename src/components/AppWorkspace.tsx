@@ -75,7 +75,7 @@ export function AppWorkspace() {
     : activeNavigation;
   const currentRole = currentUser?.profile.role ?? 'user';
   const canUseGuild = currentRole === 'developer' || currentRole === 'owner';
-  const currentPageAllowed = canAccessSanctuaryPage(contentNavigation, currentRole);
+  const currentPageAllowed = canAccessSanctuaryPage(contentNavigation, currentRole) || (isGuest && contentNavigation === 'games');
 
   useEffect(() => {
     if (!isSessionReady) return;
@@ -86,10 +86,10 @@ export function AppWorkspace() {
       }
       return;
     }
-    if (!canAccessSanctuaryPage(activeNavigation, currentRole)) {
+    if (!canAccessSanctuaryPage(activeNavigation, currentRole) && !(isGuest && activeNavigation === 'games')) {
       setActiveNavigation('today');
     }
-  }, [activeNavigation, currentRole, canUseGuild, isSessionReady, setActiveNavigation]);
+  }, [activeNavigation, currentRole, canUseGuild, isGuest, isSessionReady, setActiveNavigation]);
 
   useEffect(() => {
     if (!isSessionReady) return;
