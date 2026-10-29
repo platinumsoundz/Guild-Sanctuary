@@ -13,6 +13,7 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  ShieldAlert,
   UserRound,
   Wallet,
   ShoppingBag,
@@ -25,6 +26,7 @@ import {
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
+import { fetchPageVisibility, isPageVisible, type PageVisibilityMap } from '@/lib/pageVisibility';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
 import styles from './Navigation.module.css';
 import { NotificationBar } from '@/components/NotificationBar';
@@ -42,7 +44,8 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'feed', label: 'Community', icon: Newspaper },
   { id: 'planner', label: 'Daily Planner', icon: CalendarCheck },
   { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
-  { id: 'admin', label: 'Admin & Moderation', icon: ShieldCheck },
+  { id: 'admin', label: 'Admin', icon: ShieldCheck },
+  { id: 'moderation', label: 'Moderation', icon: ShieldAlert },
   { id: 'events', label: 'Events', icon: CalendarDays },
   { id: 'discover', label: 'Discover', icon: Search },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
@@ -62,7 +65,7 @@ const navigationGroups: { label: string; items: NavigationState[] }[] = [
   { label: 'Your space', items: ['profile', 'planner', 'wallet'] },
   { label: 'Explore', items: ['games', 'support', 'shop'] },
   { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'settings'] },
-  { label: 'Stewardship', items: ['admin'] },
+  { label: 'Stewardship', items: ['admin', 'moderation'] },
 ];
 
 interface NavigationProps {
@@ -102,9 +105,17 @@ export function Navigation({
 }: NavigationProps) {
   const role = currentUser?.profile.role?.toLowerCase() ?? 'user';
   const guestNavigationPages = new Set<NavigationState>(['today', 'games', 'roadmap', 'support']);
-  const visibleNavigationItems = isGuest
+  const [pageVisibility, setPageVisibility] = useState<PageVisibilityMap>({});
+  useEffect(() => {
+    let cancelled = false;
+    if (!currentUser || isGuest) { setPageVisibility({}); return; }
+    void fetchPageVisibility().then((value) => { if (!cancelled) setPageVisibility(value); }).catch(() => { if (!cancelled) setPageVisibility({}); });
+    return () => { cancelled = true; };
+  }, [currentUser?.user.id, isGuest]);
+  const visibleNavigationItems = (isGuest
     ? navigationItems.filter((item) => guestNavigationPages.has(item.id))
-    : navigationItems.filter((item) => canAccessSanctuaryPage(item.id, currentUser ? role : 'user'));
+    : navigationItems.filter((item) => canAccessSanctuaryPage(item.id, currentUser ? role : 'user')))
+    .filter((item) => isPageVisible(item.id, pageVisibility));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);
