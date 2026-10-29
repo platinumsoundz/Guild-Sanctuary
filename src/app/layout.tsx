@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0b2b20',
+  themeColor: '#080b1b',
   colorScheme: 'light dark',
 }
 
@@ -24,12 +24,14 @@ const themeBootstrap = `
 (() => {
   try {
     const saved = window.localStorage.getItem('sanctuary-theme');
-    const preference = saved === 'system' || saved === 'light' || saved === 'dark' || saved === 'dusk' || saved === 'stone' || saved === 'ocean' ? saved : 'system';
+    const preference = saved === 'system' || saved === 'light' || saved === 'dark' || saved === 'dusk' || saved === 'stone' || saved === 'ocean' ? saved : 'dark';
     const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
     document.documentElement.dataset.theme = theme;
+    document.documentElement.dataset.layout = 'comfortable';
     document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
   } catch {
     document.documentElement.dataset.theme = 'dark';
+    document.documentElement.dataset.layout = 'comfortable';
     document.documentElement.classList.add('dark');
   }
 })();
