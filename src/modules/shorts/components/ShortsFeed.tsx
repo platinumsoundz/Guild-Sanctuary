@@ -27,6 +27,8 @@ export function ShortsFeed() {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingBody, setEditingBody] = useState('');
   const [commentEngagement, setCommentEngagement] = useState<Record<string, { liked: boolean; count: number }>>({});
+  const [pendingCommentLikes, setPendingCommentLikes] = useState<Record<string, boolean>>({});
+  const pendingCommentLikesRef = useRef(new Set<string>());
   const [captionDraft, setCaptionDraft] = useState('');
   const [videoDraft, setVideoDraft] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -137,13 +139,18 @@ export function ShortsFeed() {
   };
 
   const handleCommentLike = async (commentId: string) => {
-    if (!canEngage) return;
+    if (!canEngage || !commentId || pendingCommentLikesRef.current.has(commentId)) return;
+    pendingCommentLikesRef.current.add(commentId);
+    setPendingCommentLikes((current) => ({ ...current, [commentId]: true }));
     try {
       const result = await toggleCommentLike(commentId, viewerId);
       setCommentEngagement((current) => ({ ...current, [commentId]: result }));
       setError(null);
     } catch (likeError) {
       setError(likeError instanceof Error ? likeError.message : 'Comment reaction could not be saved.');
+    } finally {
+      pendingCommentLikesRef.current.delete(commentId);
+      setPendingCommentLikes((current) => ({ ...current, [commentId]: false }));
     }
   };
 
@@ -396,7 +403,7 @@ export function ShortsFeed() {
                           </div>
                         ) : <p>{comment.body}</p>}
                         <div className={styles.commentTools}>
-                          <button type="button" aria-pressed={commentEngagement[comment.id]?.liked ?? false} onClick={() => void handleCommentLike(comment.id)} aria-label={`${commentEngagement[comment.id]?.liked ? 'Unlike' : 'Like'} comment`}>
+                          <button type="button" disabled={Boolean(pendingCommentLikes[comment.id])} aria-busy={Boolean(pendingCommentLikes[comment.id])} aria-pressed={commentEngagement[comment.id]?.liked ?? false} onClick={() => void handleCommentLike(comment.id)} aria-label={`${commentEngagement[comment.id]?.liked ? 'Unlike' : 'Like'} comment`}>
                             <Heart size={12} fill={commentEngagement[comment.id]?.liked ? 'currentColor' : 'none'} /> Like <span>{commentEngagement[comment.id]?.count ?? 0}</span>
                           </button>
                           {comment.authorId === viewerId && editingCommentId !== comment.id && <>
