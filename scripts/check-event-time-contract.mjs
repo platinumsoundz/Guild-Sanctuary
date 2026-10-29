@@ -7,7 +7,9 @@ const styles = readFileSync(new URL('../src/modules/events/components/MeetupCale
 assert.ok(component.includes('Event date (your local time)'), 'event date input must disclose local-time interpretation');
 assert.ok(component.includes('Start time (your local time)'), 'event time input must disclose local-time interpretation');
 assert.ok(component.includes('Dates use your device’s local timezone'), 'event form must explain local input timezone');
-assert.ok(component.includes('preview the pin on a real map'), 'event form must explain how to verify a location pin');
+assert.ok(component.includes('check the map pin before publishing'), 'event form must explain how to verify a location pin');
+assert.ok(component.includes('Venue or address') && component.includes('nominatim.openstreetmap.org'), 'event creation must search a map provider instead of asking users for coordinates');
+assert.ok(!component.includes('<span>Latitude</span>') && !component.includes('<span>Longitude</span>'), 'raw coordinate inputs must stay hidden from members');
 assert.ok(component.includes('<iframe') && component.includes('OpenStreetMap'), 'event discovery must render a real map');
 assert.ok(component.includes('aria-label="Choose an event map pin"'), 'event map pins must have an accessible selector');
 assert.ok(component.includes('aria-pressed={selectedMapEvent?.id === event.id}'), 'map pin selection state must be exposed to assistive technology');
