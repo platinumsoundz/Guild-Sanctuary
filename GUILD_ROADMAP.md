@@ -60,3 +60,10 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - Local music/photos are browser-session media and are not uploaded by default.
 - Native installed-game scanning, Spotify, account-linked achievements and Cloud Lab compute are not claimed as implemented.
 - Vercel preview deployment was previously blocked by the free-plan daily deployment API limit. Verify current deployment status before claiming the changes are live.
+
+
+## Hidden console entry policy — 2026-10-29
+
+- The Guild console remains part of the Sanctuary codebase and keeps its internal route/state, but `Guild Arcade` and `Guild Roadmap` must not appear in Sanctuary's ordinary navigation selector or navigation groups.
+- Access is intended through the dedicated/hidden Guild entry point, not a visible page-selector item. Do not remove the Guild route or Guild's own internal navigation when hiding these selector entries.
+- Messaging audit: the active inbox/thread still uses the in-memory `service.ts`; the Supabase adapter is optional and gated, and audio/video calling is not present in the current module tree. Treat durable messaging and calls as unfinished, not live features.
