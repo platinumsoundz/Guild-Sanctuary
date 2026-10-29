@@ -119,13 +119,13 @@ export function GamesHub() {
       </section>
       {recentGames.length > 0 && filter !== "favourites" && !query.trim() && <section className={styles.recentSection} aria-labelledby="guild-recent-heading">
         <div className={styles.rowHeading}><div><p className={styles.eyebrow}>PICK UP WHERE YOU LEFT OFF</p><h2 id="guild-recent-heading"><Clock3 size={19} /> Recently played</h2></div><span>Saved on this device</span></div>
-        <div className={styles.recentRow}>{recentGames.map((game) => <article className={styles.recentCard} key={game.id}><div className={styles.recentOrb}><Gamepad2 size={22} /></div><div className={styles.recentCopy}><strong>{game.title}</strong><small>{game.url ? "Ready to launch" : "Host URL needed"}</small></div><button type="button" className={styles.recentPlay} disabled={!game.url} onClick={() => { rememberLaunch(game); setActiveGame(game); }} aria-label="Continue playing game"><Play size={15} /></button></article>)}</div>
+        <div className={styles.recentRow}>{recentGames.map((game) => <article className={styles.recentCard} key={game.id}><div className={styles.recentOrb}><Gamepad2 size={22} /></div><div className={styles.recentCopy}><strong>{game.title}</strong><small>{game.url ? "Ready to launch" : "Host URL needed"}</small></div><button type="button" className={styles.recentPlay} disabled={!game.url} onClick={() => { rememberLaunch(game); setActiveGame(game); }} aria-label={`Continue playing ${game.title}`}><Play size={15} /></button></article>)}</div>
       </section>}
 
       <section className={styles.grid} aria-label="Guild game library">
         {filteredGames.map((game) => (
           <article className={styles.card} key={game.id}>
-            <div className={styles.art} aria-hidden="true"><Gamepad2 size={44} strokeWidth={1.2} /><span className={styles.artCaption}>{game.url ? "READY TO PLAY" : "SETUP REQUIRED"}</span><button type="button" className={styles.favouriteButton} aria-pressed={favourites.includes(game.id)} aria-label="Toggle favourite" onClick={() => toggleFavourite(game.id)}><Heart size={18} fill={favourites.includes(game.id) ? "currentColor" : "none"} /></button></div>
+            <div className={styles.art}><Gamepad2 size={44} strokeWidth={1.2} aria-hidden="true" /><span className={styles.artCaption}>{game.url ? "READY TO PLAY" : "SETUP REQUIRED"}</span><button type="button" className={styles.favouriteButton} aria-pressed={favourites.includes(game.id)} aria-label={favourites.includes(game.id) ? `Remove ${game.title} from favourites` : `Add ${game.title} to favourites`} onClick={() => toggleFavourite(game.id)}><Heart size={18} fill={favourites.includes(game.id) ? "currentColor" : "none"} /></button></div>
             <div className={styles.cardBody}>
               <span className={styles.gameBadge}>{game.badge}</span>
               <h2>{game.title}</h2>
