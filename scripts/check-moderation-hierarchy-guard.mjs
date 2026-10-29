@@ -10,6 +10,8 @@ for (const target of ['user', 'post', 'short', 'event', 'comment', 'message']) {
   assert.ok(migration.includes(`when '${target}' then`), `target owner is resolved for ${target}`);
 }
 assert.match(migration, /if actor_level <= target_level/, 'equal and higher-ranked targets are blocked');
+assert.match(migration, /order by p\.id[\s\S]*?for update/, 'actor and target roles are locked in deterministic order before final authorization');
+assert.match(migration, /select lower\(p\.role\), p\.status[\s\S]*?where p\.id = caller_id/, 'actor role and status are re-read after locking');
 assert.match(migration, /new\.action = 'suspend'[\s\S]*actor_role not in \('admin', 'developer', 'owner'\)/, 'moderator-only callers cannot suspend accounts');
 assert.match(migration, /new\.action = 'ban'[\s\S]*actor_role not in \('developer', 'owner'\)/, 'moderator and admin callers cannot ban accounts');
 assert.match(migration, /else 999/, 'unknown target roles fail closed');
