@@ -47,7 +47,7 @@ assert.ok(guild.includes('closeButtonRef.current?.focus'), 'dialog moves focus t
 assert.ok(guild.includes('if (entryOpen || controllerConnected) enterButtonRef.current?.focus'), 'revealed entry receives keyboard focus');
 assert.ok(guild.includes("type GameState = 'ready' | 'playing' | 'paused' | 'won' | 'lost'"), 'trial supports an explicit paused state');
 assert.ok(guild.includes("gameState === 'paused' ? 'Resume' : 'Pause'"), 'player can pause and resume from the game HUD');
-assert.match(workspace, /isGuest && activeNavigation === 'guild'/, 'guests get a read-only Guild lobby');
+assert.doesNotMatch(workspace, /isGuest && activeNavigation === 'guild'/, 'guest sessions cannot open the hidden Guild');
 assert.match(guild, /!worldOpen && \(/, 'creator game lobby is visible before entering the arcade');
 assert.match(guild, /isAuthenticated && worldOpen/, 'original browser arcade stays behind authenticated Guild entry');
 assert.match(guild, /<GamesHub \/>/, 'creator games hub is visible in the public Guild lobby');
