@@ -13,6 +13,7 @@ const encryptionPlan = read('../docs/design/END_TO_END_ENCRYPTION_READINESS.md')
 
 const migration = read('../supabase/migrations/20261027001557_restore_secure_persistent_messaging.sql');
 const dmPreferenceFix = read('../supabase/migrations/20261027002103_fix_direct_message_preference_source.sql');
+const integrationFix = read('../supabase/migrations/20261029100000_integrate_short_engagement_and_dm_preferences.sql');
 const databaseTypes = read('../src/services/supabase/database.types.ts');
 
 const checks = [
@@ -66,6 +67,8 @@ checks.push(
   ['authenticated clients cannot directly mutate conversation membership or history', /revoke all on table public\.conversations, public\.conversation_members, public\.direct_conversation_pairs, public\.messages from public, anon, authenticated/.test(migration) && !/grant (update|delete|insert) on table public\.conversations/.test(migration) && !/grant (update|delete|insert) on table public\.conversation_members/.test(migration) && !/grant (update|delete|insert) on table public\.direct_conversation_pairs/.test(migration)],
   ['conversation reads and message reads fail closed for non-members', /using \(public\.is_active_conversation_member\(id\)\)/.test(migration) && /using \(public\.is_active_conversation_member\(conversation_id\) and state = 'visible'\)/.test(migration)],
   ['conversation creation validates recipient status and direct-message preferences', /p\.status = 'active'/.test(migration) && /p\.allow_direct_messages/.test(migration) && /s\.preferences->>'allowDirectMessages'/.test(dmPreferenceFix)],
+  ['saved DM and profile-discovery settings update the profile privacy fields through a database trigger', /create trigger sync_profile_message_preference/i.test(integrationFix) && /after insert or update of preferences on public\.account_settings/i.test(integrationFix) && /allow_direct_messages = allow_dms/i.test(integrationFix) && /allow_profile_discovery = allow_discovery/i.test(integrationFix)],
+  ['integration migration refreshes PostgREST after recreating the Shorts RPCs', /create or replace function public\.get_short_engagement_stats\(requested_short_id uuid\)/i.test(integrationFix) && /notify pgrst, 'reload schema';/i.test(integrationFix)],
 );
 
 checks.push(
