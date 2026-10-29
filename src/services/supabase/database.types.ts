@@ -99,6 +99,12 @@ export interface Database {
         updated_at: string;
       }>;
       profiles: Table<ProfileRow>;
+      platform_page_visibility: Table<{
+        page_key: string;
+        is_visible: boolean;
+        updated_by: string | null;
+        updated_at: string;
+      }>;
       community_tips: Table<{
         stripe_event_id: string;
         checkout_session_id: string;
