@@ -68,6 +68,14 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   const lastActionAt = useRef(0);
   const wasOpen = useRef(false);
 
+  // On narrow phones, show the touch navigation controls by default so they
+  // are discoverable without requiring a trip through the Quick Menu.
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 560px)').matches) {
+      setControlsOpen(true);
+    }
+  }, []);
+
   const allowed = sanctuaryItems.filter((item) => {
     if (item.id === 'admin') return ['moderator', 'admin', 'developer', 'owner'].includes(role);
     if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role);
