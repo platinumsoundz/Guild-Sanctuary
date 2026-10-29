@@ -93,3 +93,19 @@
   .menu span { display: none; }
   .notificationSlot :global(button) { width: 36px; min-width: 36px; }
 }
+
+
+/* The Guild drawer and Quick Menu must stay above Sanctuary's shell at every width. */
+.scrim { z-index: 10000; }
+.drawer { z-index: 10001; }
+.quickScrim { z-index: 10002; }
+.quickPanel { z-index: 10003; }
+.touchConsole { z-index: 9999; }
+@media (max-width: 767px) {
+  .header { z-index: 9998; }
+  .scrim { z-index: 10000; }
+  .drawer { z-index: 10001; }
+  .touchConsole { z-index: 9999; }
+  .quickScrim { z-index: 10002; }
+  .quickPanel { z-index: 10003; }
+}
