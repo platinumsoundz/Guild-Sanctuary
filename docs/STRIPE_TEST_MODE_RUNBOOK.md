@@ -1,6 +1,6 @@
 # Sanctuary Stripe test-mode checkout runbook
 
-Status: implementation proposal on a feature branch. It must pass CI and receive review before deployment. No live-mode payment acceptance is enabled by this work.
+Status: **test-mode configuration prepared; end-to-end validation pending.** Test products/prices and a test webhook exist in the dedicated Stripe account. Preview-only environment variables are configured on the isolated checkout branch. The existing Ready preview predates the latest environment-variable correction, and Vercel's deployment quota currently prevents a fresh deployment. No live-mode payment acceptance is enabled.
 
 ## Existing bundle contract
 
@@ -29,17 +29,21 @@ Set these in the chosen Vercel **Preview** deployment first. Never paste secret 
 
 Created in the Stripe account **The sanctuary** in test mode only. Each is active, one-time, GBP, and the expected amount. These IDs are configured as Preview-only Vercel variables for this feature branch; never reuse them in live mode:\n\n- 100 tokens (£1.00): `price_1UV9ymDMX3xKbajdDIBvvWwt`\n- 600 tokens (£5.00): `price_1UV9yqDMX3xKbajdwpZ61mvL`\n- 1,200 tokens (£10.00): `price_1UV9ysDMX3xKbajdFMp6PUk0`
 
-## Configure test webhook
+## Current Preview wiring
 
-After this code is deployed to a current Preview URL (Vercel deployment is currently blocked by the account's daily deployment quota), create a Stripe test-mode webhook endpoint at:
-
-`https://<the-exact-preview-host>/api/webhooks/stripe`
-
-Subscribe to:
+The dedicated Stripe test endpoint is enabled for exactly:
 - `checkout.session.completed`
 - `checkout.session.async_payment_succeeded`
 
-Copy the endpoint's signing secret into `STRIPE_WEBHOOK_SECRET` for that Preview deployment. Do not point a live-mode webhook at this endpoint.
+Its URL has been corrected to the verified branch alias:
+
+`https://guild-sanctuary-git-build-stripe-test-ch-7f25ac-platinum-soundz.vercel.app/api/webhooks/stripe`
+
+The Preview-only `SANCTUARY_SITE_URL` variable was corrected to the matching origin. The endpoint's signing secret is stored as a sensitive Vercel Preview variable; its value is intentionally masked in connector output and must never be copied into logs or source control.
+
+**Redeploy gate:** the current Ready Vercel deployment was created before these environment variables were corrected. Vercel is reporting its deployment-rate limit, so the checkout journey cannot be honestly marked end-to-end verified until a new deployment consumes the current Preview configuration. After the quota resets, redeploy this branch, verify the exact alias, then run the owner acceptance test below. Do not switch on production variables or live Stripe mode.
+
+The Next.js app route (`POST /api/checkout`) and `POST /api/webhooks/stripe` are the canonical browser checkout path. The alternative Supabase Edge Function checkout/webhook pair is not deployed in either connected Supabase project; do not enable a second fulfillment path.
 
 ## Owner acceptance test
 
