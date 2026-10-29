@@ -7,6 +7,7 @@ const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
 const notifications = readFileSync('src/components/NotificationBar.tsx', 'utf8');
 const migration = readFileSync('supabase/migrations/20261029100000_role_gated_wallet_and_moderation_notifications.sql', 'utf8');
 const checkout = readFileSync('src/app/api/checkout/route.ts', 'utf8');
+const gates = readFileSync('src/lib/sanctuaryFeatureGates.ts', 'utf8');
 
 for (const marker of ['REPORTED CONTENT', 'report.targetPreview', 'report.targetOwnerName', 'Hide content', 'Remove content', 'Ban member', 'Action rationale']) {
   assert.ok(moderation.includes(marker), `Moderation dashboard missing: ${marker}`);
@@ -22,4 +23,6 @@ assert.ok(notifications.includes('moderationCopy'), 'Notification panel must exp
 assert.ok(migration.includes('public.is_wallet_eligible()'), 'Wallet access must be gated in the database');
 assert.ok(migration.includes('after insert on public.moderation_actions'), 'Moderation actions must create user notices');
 assert.ok(checkout.includes('Wallet purchases are currently limited to active VIP members'), 'Checkout must enforce VIP eligibility server-side');
+assert.ok(gates.includes("tokenSpending: { enabled: false"), 'Token spending must remain locked until testing is complete');
+assert.ok(gates.includes("minimumRole: 'vip'"), 'Wallet and shop access must use a role gate');
 console.log('Moderation context, outcome notifications, account status screens, and wallet role gates verified.');
