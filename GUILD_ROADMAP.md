@@ -9,7 +9,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ## Priority order
 
 ### P0 — HUD and visual quality first
-- [ ] **Persistent quick-access HUD:** the shared notifications panel is now available from the Guild shell and preserves the current page while open. Finish the remaining cross-page HUD actions and real-device focus/return checks: Resume, Guild Home, controller status, fullscreen/display guidance, Guild-managed audio and Exit to Sanctuary.
+- [ ] **Persistent quick-access HUD:** the shared notifications panel and a page-preserving Quick Menu are available from the Guild shell. The Quick Menu searches destinations, reports controller detection, toggles fullscreen and a locally persisted reduced-motion preference, and offers Guild Home / Exit to Sanctuary. Finish real-device focus/return checks and add controller/audio diagnostics.
 - [ ] **Input consistency:** make Menu/Guide, A/Select, B/Back, Escape, touch D-pad and keyboard alternatives consistent. Restore focus on close, support visible focus rings and reduced motion, and handle controller disconnect/reconnect.
 - [x] **Home dashboard foundation:** the Guild home now has a dominant featured destination, a Continue Playing surface based on local launch history, and quick-access cards for Games, Trials, Collection, Music, Photos, Tools and Sanctuary. Original custom game art and deeper dashboard data remain future polish.
 - [ ] **Original game artwork:** create distinct, canon-consistent artwork for The 5 Sleeves 2D and The 5 Sleeves 3D; remove generic placeholder tiles as art assets become available.
@@ -53,7 +53,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - Draft PR #231 contains the Guild console player/system menu foundation.
 - Draft PR #233 stacks on #231 and adds the full Guild-owned navigation shell and separate Guild destinations.
 - Draft PR #234 adds the visual polish pass and roadmap contract fix.
-- The current HUD/library batch adds browser-local recent launches, favourites, search, launch-readiness filters, empty states and source-level contract assertions. Preferences are not account-synced.
+- The current HUD/library batch adds browser-local recent launches, favourites, search, launch-readiness filters, empty states, a searchable cross-destination Quick Menu, fullscreen toggle, local reduced-motion preference and source-level contract assertions. Preferences are not account-synced.
 - The Guild shell and player have controller/touch support in source, but manual device QA is still required.
 - The 5 Sleeves 2D URL must remain configurable until a host is verified; do not guess it.
 - The 5 Sleeves 3D URL currently configured in source is https://the-5-sleeves-3d.pages.dev/.
