@@ -24,6 +24,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
+import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
 import styles from './Navigation.module.css';
 import { NotificationBar } from '@/components/NotificationBar';
@@ -99,21 +100,11 @@ export function Navigation({
   onSetTwoFactorEnabled,
   onLogout,
 }: NavigationProps) {
-  const role = currentUser?.profile.role?.toLowerCase() ?? 'guest';
-  const canAccessAdmin = Boolean(
-    currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(role),
-  );
-  // Basic users must not see unfinished/privileged destinations in the navigation.
-  // VIP and staff roles may see them; guests are handled by their separate route policy.
-  const canAccessMemberExtras = Boolean(
-    currentUser && ['vip', 'moderator', 'admin', 'developer', 'owner'].includes(role),
-  );
-  const restrictedNavigationIds: NavigationState[] = ['wallet', 'games', 'shop', 'shorts'];
-  const visibleNavigationItems = navigationItems.filter((item) => {
-    if (item.id === 'admin') return canAccessAdmin;
-    if (restrictedNavigationIds.includes(item.id)) return canAccessMemberExtras;
-    return true;
-  });
+  const role = currentUser?.profile.role?.toLowerCase() ?? 'user';
+  const guestNavigationPages = new Set<NavigationState>(['today', 'games', 'roadmap', 'support']);
+  const visibleNavigationItems = isGuest
+    ? navigationItems.filter((item) => guestNavigationPages.has(item.id))
+    : navigationItems.filter((item) => canAccessSanctuaryPage(item.id, currentUser ? role : 'user'));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);
