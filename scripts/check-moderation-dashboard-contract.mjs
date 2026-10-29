@@ -19,6 +19,7 @@ assert.ok(service.includes(".rpc('get_report_target_owner'"), 'target ownership 
 assert.doesNotMatch(service, /get_moderation_queue/, 'dashboard must not depend on the missing queue RPC');
 assert.ok(service.includes("report.target_type === 'comment'"), 'reported comment context must be supported');
 assert.ok(service.includes("report.target_type === 'message'"), 'private message reports must remain in the queue without fetching private message bodies');
+assert.doesNotMatch(service, /\.from\('messages'\)/, 'private message report bodies must not be fetched through ordinary table queries');
 assert.ok(service.includes("data.media_url.startsWith('https://')") && service.includes("data.media_url.startsWith('http://')") && service.includes("data.video_url.startsWith('https://')") && service.includes("data.video_url.startsWith('http://')"), 'media links must be restricted to HTTP(S) URLs');
 assert.ok(service.includes(".rpc('apply_moderation_action'"), 'moderation actions must go through the backend action RPC');
 assert.ok(service.includes('requested_rationale: rationale'), 'action rationale must be sent to the backend audit path');
