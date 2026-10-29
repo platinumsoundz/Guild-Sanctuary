@@ -1,6 +1,6 @@
 # Sanctuary/Guild peer-to-peer calling foundation
 
-**Status:** planning and UI entry points only. Audio/video calling is not implemented or enabled.  
+**Status:** initial WebRTC and private signalling implementation added on a feature branch; not production-ready until migration is reviewed/applied and two-account/two-device tests pass.  
 **Owner:** product owner; engineering implementation requires independent security review.  
 **Scope:** one-to-one audio first, then video, initiated from an existing direct conversation.  
 **Non-scope for this foundation:** group calls, call recording, call history, persistent call logs, production database changes, and claiming end-to-end encryption.
@@ -33,8 +33,8 @@ Use Sanctuary accounts and existing conversations to discover and authenticate t
 ## Implementation order
 
 1. **UI foundation (this change):** show clearly disabled audio/video entry points in direct messages; no false claim that calling works.
-2. **Signalling contract and migration:** model call invitations and ephemeral signalling with participant-scoped authorization and expiry; independently review SQL/RLS before applying anywhere.
-3. **Call state machine:** authenticated invite/accept/decline/end, duplicate/replay protection, timeout and cleanup.
+2. **Remaining before beta:** review/apply the migration in staging, deliver invitations when the recipient is not currently viewing the thread, add TURN fallback, and verify channel authorization behavior against the live Supabase project.
+3. **Hardening:** server-verified sender identity, duplicate/replay protection, invitation timeout, missed-call handling and cleanup.
 4. **WebRTC client:** permission checks, offer/answer/ICE, mute/camera toggles, device selection where supported, responsive call surface, reconnect and teardown.
 5. **Tests:** state-machine unit tests, RLS denial tests, invitation expiry, two-account/two-device audio test, video test, permission denial, disconnect/reconnect, mobile background/foreground and account-switch isolation.
 6. **Release gate:** only enable controls after exact-commit CI, staging schema/RLS review, and real two-account/two-device tests pass.
