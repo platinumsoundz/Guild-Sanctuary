@@ -655,3 +655,7 @@
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
+
+.locationSearchRow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; }
+.locationSearchRow .secondaryButton { min-height: 40px; }
+@media (max-width: 640px) { .locationSearchRow { grid-template-columns: 1fr; } .locationSearchRow .secondaryButton { width: 100%; min-height: 44px; } }
