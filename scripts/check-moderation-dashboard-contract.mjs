@@ -14,7 +14,12 @@ assert.ok(dashboard.includes('minLength={3}'), 'rationale input must communicate
 assert.ok(dashboard.includes('targetContent?.trim()'), 'queue must render reported content returned by the backend');
 assert.ok(dashboard.includes('report.details'), 'queue must render reporter details when supplied');
 assert.ok(dashboard.includes('role="alert"'), 'backend failures must be visible to assistive technology');
-assert.ok(service.includes("client.rpc('get_moderation_queue')"), 'reported content must come through the dedicated role-gated backend RPC');
+assert.ok(service.includes(".from('content_reports')"), 'moderation queue must use the existing RLS-protected report table');
+assert.ok(service.includes(".rpc('get_report_target_owner'"), 'target ownership must be resolved by the existing moderator-only RPC');
+assert.doesNotMatch(service, /get_moderation_queue/, 'dashboard must not depend on the missing queue RPC');
+assert.ok(service.includes("report.target_type === 'comment'"), 'reported comment context must be supported');
+assert.ok(service.includes("report.target_type === 'message'"), 'private message reports must remain in the queue without fetching private message bodies');
+assert.ok(service.includes("/^https?:\\\\/\\\\//i.test"), 'media links must be restricted to HTTP(S) URLs');
 assert.ok(service.includes(".rpc('apply_moderation_action'"), 'moderation actions must go through the backend action RPC');
 assert.ok(service.includes('requested_rationale: rationale'), 'action rationale must be sent to the backend audit path');
 assert.ok(service.includes('client.auth.getUser()'), 'queue access must verify an authenticated account');
