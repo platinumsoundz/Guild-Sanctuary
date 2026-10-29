@@ -139,8 +139,8 @@ function PageVisibilityPanel() {
     </div></div>
     {loading ? <p role="status">Loading page visibility…</p> : <div className={styles.memberList}>
       {MANAGEABLE_PAGE_VISIBILITY.map((page) => <label key={page.key} className={styles.memberRow}>
-        <span><strong>{page.label}</strong><small>{isPageVisible(page.key, visibility) ? 'Shown in navigation' : 'Hidden from navigation'}</small></span>
-        <input type="checkbox" checked={isPageVisible(page.key, visibility)} disabled={savingKey !== null} onChange={(event) => void update(page.key, event.currentTarget.checked)} aria-label={`Show ${page.label}`} />
+        <span><strong>{page.label}</strong><small>{page.key === 'admin' ? 'Always available to staff for recovery' : isPageVisible(page.key, visibility) ? 'Shown in navigation' : 'Hidden from navigation'}</small></span>
+        <input type="checkbox" checked={isPageVisible(page.key, visibility)} disabled={savingKey !== null || page.key === 'admin'} onChange={(event) => void update(page.key, event.currentTarget.checked)} aria-label={`Show ${page.label}`} />
       </label>)}
     </div>}
     {message && <p className={styles.message} role="status">{message}</p>}
