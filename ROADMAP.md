@@ -698,3 +698,10 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - The original PR #210 is superseded by #218 and should be closed after branch-stack reconciliation. Guest access #213, Guild Arcade #214 and creator games #215 remain a dependency stack on the old release branch; rebuild the stack on current main before integrating.
 - PR #219 is the conflict-free current-main reconstruction of private Daily Reflection. Its fresh exact-head CI is pending. Keep it gated on live migration-ledger/RLS verification and authenticated two-account save/read/delete/failure-path tests.
 - Moderation PRs #191/#199 remain gated on the absent live `get_moderation_queue()` RPC and independent authorization review. No production migrations or database writes have been performed.
+
+
+## Private Daily Reflection client restoration — 2026-10-28
+
+- **Implemented on `feat/private-daily-reflection-client-restore-2026-10-28`; Daily Reflection contract, CI/typecheck/build and Cloudflare Worker build passed; deployment skipped for PR:** restore the account-backed reflection client and compact mood controls; legacy browser data can only be imported after an explicit confirmation.
+- Read-only inspection of the active Guild-Sanctuary database confirmed the `daily_reflections` table, owner-only RLS policies for all CRUD operations, and a unique `(user_id, reflection_date)` index. This batch does not add or apply migrations.
+- Remaining gates: exact-head contract/typecheck/build, authenticated browser testing, and cross-account isolation. No production deployment or auth/payment/provider changes.
