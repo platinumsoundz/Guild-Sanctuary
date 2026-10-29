@@ -51,7 +51,7 @@ export function GamesHub() {
       <header className={styles.header}>
         <p className={styles.eyebrow}>CREATOR PROJECTS</p>
         <h2>Creator projects and community worlds</h2>
-        <p>These independent projects are collected here on Support the creator. Cosmic Arcade is a separate Sanctuary games page; its built-in mini-games do not include these external links.</p>
+        <p>Explore these creator projects and community worlds from the Guild. Cosmic Arcade remains a separate Sanctuary-built arcade with its own original mini-games.</p>
       </header>
 
       {selectedGame ? (

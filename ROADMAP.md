@@ -716,3 +716,11 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - Guest route restrictions already present on main remain intact; Guild World receives authenticated user identity only for signed-in non-guest sessions.
 - A focused Guild browser arcade contract is wired into CI. Require exact-head CI and desktop/mobile interaction checks before merge.
 - No production deployment, database migration or token spending enablement is included.
+
+
+## Creator games moved into the Guild — 2026-10-28
+
+- **Rebuilt on current mainline; exact-head CI and screenshot checks required:** Move the creator-project and community-world hub (The 5 Sleeves 2D, The 5 Sleeves 3D, Roblox, and Platinum Survival Java/Bedrock) out of the Support the creator page and into the Guild experience.
+- The Support page now remains focused on voluntary contributions and checkout notices. The existing Cosmic Arcade mini-games remain a separate Sanctuary-built games area.
+- Add a static contract requiring the games hub to render in the Guild and not in Support. This does not change game hosting URLs, game saves, account linking, or token integration.
+- **Release status:** run Guild/guest contracts, typecheck and production build on the exact head; interactive browser/device QA remains required. No production deployment is claimed.
