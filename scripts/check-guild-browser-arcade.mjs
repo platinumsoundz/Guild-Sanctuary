@@ -55,3 +55,15 @@ assert.match(guild, /Sign in to Sanctuary to enter the Guild’s original browse
 assert.match(guild, /onClick=\{enterGuild\}>Enter Guild Arcade/, 'authenticated members can enter the original arcade from the visible lobby');
 assert.match(workspace, /isAuthenticated && !isGuest/, 'authenticated Guild identity is required for original arcade');
 console.log('Guild browser Arcade contract checks passed.');
+
+const consolePlayer = readFileSync('src/components/GuildConsolePlayer.tsx', 'utf8');
+const gamesHub = readFileSync('src/components/GamesHub.tsx', 'utf8');
+assert.match(gamesHub, /<GuildConsolePlayer title=\{activeGame\.title\} url=\{activeGame\.url\}/, 'selected library games launch in the Guild console player');
+assert.match(gamesHub, /Launch in Guild/, 'the library labels in-hub game launches clearly');
+assert.match(consolePlayer, /requestFullscreen\(\)/, 'console player requests browser fullscreen');
+assert.match(consolePlayer, /Exit to Guild home/, 'console overlay offers a visible exit to the library');
+assert.match(consolePlayer, /HOME_BUTTON_CANDIDATES = \[16\]/, 'console player checks the common gamepad Home button mapping');
+assert.match(consolePlayer, /setMenuOpen\(\(open\) => !open\)/, 'controller Home/Guide opens or closes the system overlay');
+assert.match(consolePlayer, /Game and controller settings/, 'system overlay exposes controller and game settings');
+assert.match(consolePlayer, /data-guild-audio/, 'audio controls are scoped to explicitly Guild-managed media');
+assert.match(consolePlayer, /cannot mute audio produced inside this cross-origin game iframe/, 'cross-origin iframe audio limits are communicated honestly');
