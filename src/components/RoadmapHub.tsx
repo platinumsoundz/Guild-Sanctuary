@@ -11,7 +11,7 @@ type RoadmapKind = 'sanctuary' | 'guild';
 export function RoadmapHub({ initialView = 'sanctuary' }: { initialView?: RoadmapKind }) {
   const [view, setView] = useState<RoadmapKind>(initialView);
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>ONE PLACE FOR PROJECT DIRECTION</p>
         <h1>Roadmaps</h1>
@@ -24,6 +24,6 @@ export function RoadmapHub({ initialView = 'sanctuary' }: { initialView?: Roadma
       <section role="tabpanel" aria-label={view === 'sanctuary' ? 'Sanctuary roadmap' : 'Guild and games roadmap'}>
         {view === 'sanctuary' ? <SanctuaryRoadmap /> : <GuildRoadmap />}
       </section>
-    </main>
+    </div>
   );
 }
