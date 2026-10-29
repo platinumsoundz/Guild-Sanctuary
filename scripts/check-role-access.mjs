@@ -18,21 +18,21 @@ for (const page of ['today', 'feed', 'discover', 'messages', 'profile', 'planner
 for (const page of ['shorts', 'events', 'wallet', 'shop']) {
   assert.match(gates, new RegExp('^\\s*' + page + ": 'vip',$", 'm'), page + ' must require VIP');
 }
-assert.match(gates, /^\\s*admin: 'moderator',$/m, 'moderation pages must require moderator or above');
+assert.match(gates, /^\s*admin: 'moderator',$/m, 'moderation pages must require moderator or above');
 for (const page of ['games', 'guild-roadmap', 'guild']) {
   assert.match(gates, new RegExp('^\\s*[\\'"]?' + page + "[\\'"]?: 'developer,$", 'm'), page + ' must require developer or owner');
 }
-assert.match(gates, /if \\(role === 'owner'\\) return true/, 'owner bypasses page gates');
-assert.match(gates, /if \\(!\\(page in pageMinimumRole\\)\\) return role === 'developer'/, 'unregistered/new pages fail closed to developer and owner');
-assert.match(nav, /navigationItems\\.filter\\(\\(item\\) => canAccessSanctuaryPage\\(item\\.id, role\\)\\)/, 'main navigation filters pages by role');
-assert.match(guildNav, /const canOpenGuild = role === 'developer' \\|\\| role === 'owner'/, 'Guild navigation is restricted to developers and owners');
-assert.match(workspace, /canAccessSanctuaryPage\\(activeNavigation, currentRole\\)/, 'direct navigation attempts are redirected');
+assert.match(gates, /if \(role === 'owner'\) return true/, 'owner bypasses page gates');
+assert.match(gates, /if \(!\(page in pageMinimumRole\)\) return role === 'developer'/, 'unregistered/new pages fail closed to developer and owner');
+assert.match(nav, /navigationItems\.filter\(\(item\) => canAccessSanctuaryPage\(item\.id, role\)\)/, 'main navigation filters pages by role');
+assert.match(guildNav, /const canOpenGuild = role === 'developer' \|\| role === 'owner'/, 'Guild navigation is restricted to developers and owners');
+assert.match(workspace, /canAccessSanctuaryPage\(activeNavigation, currentRole\)/, 'direct navigation attempts are redirected');
 assert.match(workspace, /activeNavigation === 'guild' && canUseGuild/, 'Guild experience is guarded at the render boundary');
-assert.match(settings, /\\(role === 'developer' \\|\\| role === 'owner'\\) && <section[^>]*aria-labelledby="hidden-guild-title"/, 'settings hide Guild entry controls from other roles');
+assert.match(settings, /\(role === 'developer' \|\| role === 'owner'\) && <section[^>]*aria-labelledby="hidden-guild-title"/, 'settings hide Guild entry controls from other roles');
 assert.match(donationRoute, /sanctuary_purchase: 'community_donation'/, 'donation checkout identifies its account-linked purpose');
 assert.match(webhook, /record_sanctuary_donation/, 'verified donation webhook records entitlements server-side');
 assert.match(edgeWebhook, /record_sanctuary_donation/, 'Supabase Edge webhook also supports donation fulfillment');
-assert.match(webhook, /session\\.client_reference_id !== userId/, 'donation account identity is verified');
+assert.match(webhook, /session\.client_reference_id !== userId/, 'donation account identity is verified');
 assert.match(migration, /grant_vip_after_token_purchase/, 'verified token purchases grant VIP to basic users');
 assert.match(migration, /record_sanctuary_donation/, 'donation fulfillment is idempotently recorded');
 assert.match(migration, /role = 'vip'.*role = 'user'/s, 'paid entitlement never demotes higher roles');
