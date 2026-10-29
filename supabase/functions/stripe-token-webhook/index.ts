@@ -68,11 +68,43 @@ export default {
 
     const session = event.data.object as Stripe.Checkout.Session
     const metadata = session.metadata
-    if (!metadata || metadata.sanctuary_purchase !== 'token_bundle') {
+    if (!metadata) {
       return Response.json({ received: true })
     }
     if (session.payment_status !== 'paid') {
       return Response.json({ received: true, pending: true })
+    }
+
+    if (metadata.sanctuary_purchase === 'community_donation') {
+      const userId = metadata.sanctuary_user_id
+      const amount = Number(metadata.sanctuary_donation_amount)
+      if (
+        session.mode !== 'payment'
+        || !userId
+        || !isUuid(userId)
+        || session.client_reference_id !== userId
+        || session.currency !== 'usd'
+        || session.amount_total !== amount
+        || ![500, 1000, 2500].includes(amount)
+      ) {
+        return Response.json({ error: 'Paid Checkout Session does not match a configured Sanctuary donation.' }, { status: 400 })
+      }
+
+      const { error } = await ctx.supabaseAdmin.rpc('record_sanctuary_donation', {
+        requested_event_id: event.id,
+        requested_event_type: event.type,
+        requested_session_id: session.id,
+        requested_user_id: userId,
+        requested_amount_total: amount,
+        requested_currency: session.currency,
+        requested_livemode: event.livemode,
+      })
+      if (error) return Response.json({ error: 'Donation could not be recorded.' }, { status: 500 })
+      return Response.json({ received: true })
+    }
+
+    if (metadata.sanctuary_purchase !== 'token_bundle') {
+      return Response.json({ received: true })
     }
 
     const userId = metadata.user_id
