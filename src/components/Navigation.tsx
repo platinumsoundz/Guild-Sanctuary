@@ -100,8 +100,14 @@ export function Navigation({
   onSetTwoFactorEnabled,
   onLogout,
 }: NavigationProps) {
-  const role = currentUser?.profile.role ?? 'user';
-  const visibleNavigationItems = navigationItems.filter((item) => canAccessSanctuaryPage(item.id, role));
+  const role = currentUser?.profile.role;
+  // Guests get only public entry points; a missing account must never inherit basic-user navigation.
+  const guestNavigationPages = new Set<NavigationState>(['today', 'games', 'roadmap', 'support']);
+  const visibleNavigationItems = isGuest
+    ? navigationItems.filter((item) => guestNavigationPages.has(item.id))
+    : currentUser && role
+      ? navigationItems.filter((item) => canAccessSanctuaryPage(item.id, role))
+      : [];
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);
