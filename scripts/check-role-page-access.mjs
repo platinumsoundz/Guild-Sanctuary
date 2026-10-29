@@ -20,8 +20,8 @@ assert.match(workspace, /canAccessSanctuaryPage\(contentNavigation, currentRole\
 assert.match(workspace, /if \(!currentUser \|\| !canAccessSanctuaryPage\(contentNavigation, currentRole\)\)/, 'unauthorized direct navigation returns to Today');
 assert.match(workspace, /RESTRICTED DESTINATION/, 'unauthorized destinations show a clear access message instead of their content');
 assert.match(nav, /navigationItems\.filter\(\(item\) => canAccessSanctuaryPage\(item\.id, currentUser \? role : 'user'\)\)/, 'navigation and workspace share the same role allowlist');
-assert.match(gates, /^\\s*guild: 'user',$/m, 'basic users can launch The Guild from Settings');
-assert.match(gates, /^\\s*admin: 'admin',$/m, 'admin page is reserved for admin and higher');
-assert.match(gates, /^\\s*moderation: 'moderator',$/m, 'moderation page is separate and reserved for moderators and higher');
+assert.match(gates, /^\s*guild: 'user',$/m, 'basic users can launch The Guild from Settings');
+assert.match(gates, /^\s*admin: 'admin',$/m, 'admin page is reserved for admin and higher');
+assert.match(gates, /^\s*moderation: 'moderator',$/m, 'moderation page is separate and reserved for moderators and higher');
 
 console.log('Role page access contract passed: basic/VIP/staff page gates, direct-navigation guard and fail-closed unknown pages/roles.');
