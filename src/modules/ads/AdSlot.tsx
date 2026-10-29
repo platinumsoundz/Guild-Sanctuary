@@ -33,7 +33,7 @@ export function AdSlot({ placement }: AdSlotProps) {
   const configured =
     adsEnabled &&
     isValidAdsenseClientId(publisherId) &&
-    Boolean(slotId && /^\\d+$/.test(slotId));
+    Boolean(slotId && /^\d+$/.test(slotId));
 
   useEffect(() => {
     if (!configured || !adRef.current || adRef.current.dataset.adRequested === 'true') return;
