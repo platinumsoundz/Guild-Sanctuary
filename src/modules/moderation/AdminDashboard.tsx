@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ExternalLink, Search, ShieldCheck, UserCog } from 'lucide-react';
+import { ExternalLink, EyeOff, RotateCcw, Search, ShieldCheck, Trash2, UserCog } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import { ModerationDashboard } from './ModerationDashboard';
@@ -106,6 +106,66 @@ function RoleManagement() {
   );
 }
 
+function DirectContentModeration() {
+  const [targetType, setTargetType] = useState<'post' | 'short' | 'event' | 'comment'>('post');
+  const [targetId, setTargetId] = useState('');
+  const [rationale, setRationale] = useState('');
+  const [action, setAction] = useState<'hide' | 'remove' | 'restore'>('hide');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const applyAction = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const id = targetId.trim();
+    const reason = rationale.trim();
+    if (!id || reason.length < 3) {
+      setError('Enter the content ID and a rationale of at least three characters.');
+      return;
+    }
+    if (action !== 'hide' && !window.confirm(action === 'remove' ? 'Remove this content from public view? This action will be audited.' : 'Restore this content to public view? This action will be audited.')) return;
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const { error: rpcError } = await getSupabaseBrowserClient().rpc('apply_moderation_action', {
+        requested_report_id: null,
+        requested_target_type: targetType,
+        requested_target_id: id,
+        requested_action: action,
+        requested_rationale: reason,
+        requested_expires_at: null,
+      });
+      if (rpcError) throw new Error(rpcError.message);
+      setMessage('Action recorded. The content state was updated and the audit trail was written.');
+      setTargetId('');
+      setRationale('');
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : 'The content action was rejected. Check the ID, your role, and the deployed moderation migration.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className={styles.rolePanel} aria-labelledby="direct-content-moderation-title">
+      <div className={styles.sectionHeading}>
+        <EyeOff size={21} aria-hidden="true" />
+        <div><h2 id="direct-content-moderation-title">Moderate content by ID</h2><p>Use this when a post or clip needs action but has not been reported. Server-side role checks and the audit log still apply.</p></div>
+      </div>
+      <form className={styles.directModerationForm} onSubmit={(event) => void applyAction(event)}>
+        <label>Content type<select value={targetType} onChange={(event) => setTargetType(event.currentTarget.value as typeof targetType)}><option value="post">Post</option><option value="short">Short video</option><option value="event">Event</option><option value="comment">Comment</option></select></label>
+        <label>Content ID<input value={targetId} onChange={(event) => setTargetId(event.currentTarget.value)} required placeholder="Paste the content UUID" /></label>
+        <label>Action<select value={action} onChange={(event) => setAction(event.currentTarget.value as typeof action)}><option value="hide">Hide from public view</option><option value="remove">Remove from public view</option><option value="restore">Restore to public view</option></select></label>
+        <label className={styles.directRationale}>Reason for the audit log<textarea value={rationale} onChange={(event) => setRationale(event.currentTarget.value)} minLength={3} maxLength={1000} rows={2} required placeholder="Explain the policy reason…" /></label>
+        <button type="submit" disabled={busy || !targetId.trim() || rationale.trim().length < 3}>{busy ? 'Applying…' : action === 'hide' ? 'Hide content' : action === 'remove' ? <><Trash2 size={15} /> Remove content</> : <><RotateCcw size={15} /> Restore content</>}</button>
+      </form>
+      {error && <p className={styles.message} role="alert">{error}</p>}
+      {message && <p className={styles.message} role="status">{message}</p>}
+    </section>
+  );
+}
+
 export function AdminDashboard({ role }: { role: string }) {
   const canManageRoles = canAccessSanctuaryFeature('memberRoleManagement', role);
   const canModerate = canAccessSanctuaryFeature('moderation', role);
@@ -124,7 +184,7 @@ export function AdminDashboard({ role }: { role: string }) {
         </section>
       )}
       {canManageRoles && <RoleManagement />}
-      {canModerate && <ModerationDashboard />}
+      {canModerate && <><ModerationDashboard /><DirectContentModeration /></>}
       <footer className={styles.footer}>Role changes and moderation actions must be validated by the connected Supabase project. If access is denied, confirm that the security migration is applied and your account has been assigned its role.</footer>
     </div>
   );
