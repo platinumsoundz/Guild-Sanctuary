@@ -187,12 +187,12 @@ export function AppWorkspace() {
 
   const authenticatedContent = activeNavigation === 'today' ? (
     <SanctuaryHome onNavigate={openNavigation} />
-  ) : isGuest && !['support', 'games', 'guild', 'roadmap'].includes(activeNavigation) ? (
+  ) : isGuest && !['support', 'games', 'roadmap'].includes(activeNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
       <h1 id="guest-access-title">Explore before you join</h1>
       <p className={styles.sectionDescription}>
-        Guest mode is read-only. You can explore the Cosmic Arcade, review the Sanctuary and Guild roadmaps,
+        Guest mode is read-only. You can explore the Cosmic Arcade, review the Sanctuary roadmap,
         and learn about the community without creating an account.
       </p>
       <div className="flex flex-wrap gap-3">
@@ -211,8 +211,6 @@ export function AppWorkspace() {
     <main className={styles.supportPage}>
       <SupportPanel />
     </main>
-  ) : isGuest && activeNavigation === 'guild' ? (
-    <GuildWorld userId={null} isAuthenticated={false} />
   ) : isAuthenticated && currentUser ? (
     <>
       {activeNavigation === 'planner' ? (
