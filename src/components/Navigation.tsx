@@ -28,6 +28,8 @@ import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modul
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import styles from './Navigation.module.css';
 import { NotificationBar } from '@/components/NotificationBar';
+import { getSupabaseBrowserClient } from '@/services/supabase';
+import { fetchWallet } from '@/modules/economy/service';
 
 const mobilePrimaryItems: { id: NavigationState; label: string; icon: LucideIcon }[] = [
   { id: 'today', label: 'Today', icon: Sun },
@@ -113,8 +115,49 @@ export function Navigation({
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [tokenBalance, setTokenBalance] = useState<number | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingModerationCount, setPendingModerationCount] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (!currentUser || isGuest || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setUnreadCount(0);
+      setPendingModerationCount(0);
+      setTokenBalance(null);
+      return;
+    }
+    const client = getSupabaseBrowserClient();
+    const refreshBadges = async () => {
+      const [social, moderation, reports] = await Promise.all([
+        client.from('notifications').select('id', { count: 'exact', head: true }).eq('recipient_id', currentUser.user.id).is('read_at', null),
+        client.from('moderation_user_notifications').select('id', { count: 'exact', head: true }).eq('recipient_id', currentUser.user.id).is('read_at', null),
+        canAccessAdmin ? client.from('content_reports').select('id', { count: 'exact', head: true }).in('status', ['open', 'reviewing']) : Promise.resolve({ count: 0, error: null }),
+      ]);
+      if (cancelled) return;
+      setUnreadCount((social.count ?? 0) + (moderation.count ?? 0));
+      setPendingModerationCount(reports.count ?? 0);
+    };
+    void refreshBadges().catch(() => {
+      if (!cancelled) { setUnreadCount(0); setPendingModerationCount(0); }
+    });
+    const interval = window.setInterval(() => { void refreshBadges().catch(() => undefined); }, 30000);
+    return () => { cancelled = true; window.clearInterval(interval); };
+  }, [currentUser?.user.id, isGuest, canAccessAdmin]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!isAccountMenuOpen || !currentUser || isGuest || !canAccessSanctuaryFeature('wallet', currentUser.profile.role)) return;
+    void fetchWallet(currentUser.user.id).then((snapshot) => {
+      if (!cancelled) setTokenBalance(snapshot.balanceTokens);
+    }).catch(() => {
+      if (!cancelled) setTokenBalance(null);
+    });
+    return () => { cancelled = true; };
+  }, [isAccountMenuOpen, currentUser?.user.id, currentUser?.profile.role, isGuest]);
+
   const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const closeMenuAndRestoreFocus = useCallback(() => {
@@ -176,8 +219,9 @@ export function Navigation({
             <button
               className={styles.accountButton}
               type="button"
-              aria-haspopup="dialog"
-              onClick={() => setIsAuthModalOpen(true)}
+              aria-haspopup={currentUser ? 'menu' : 'dialog'}
+              aria-expanded={currentUser ? isAccountMenuOpen : isAuthModalOpen}
+              onClick={() => currentUser ? setIsAccountMenuOpen((open) => !open) : setIsAuthModalOpen(true)}
             >
               {currentUser ? (
                 <>
@@ -250,7 +294,10 @@ export function Navigation({
                                     closeMenuAndRestoreFocus();
                                   }}
                                 >
-                                  <item.icon size={19} strokeWidth={1.8} aria-hidden="true" />
+                                  <span className={styles.navIconWrap}>
+                                    <item.icon size={19} strokeWidth={1.8} aria-hidden="true" />
+                                    {((item.id === 'notifications' && unreadCount > 0) || (item.id === 'messages' && unreadCount > 0) || (item.id === 'admin' && pendingModerationCount > 0)) && <span className={styles.navBadge} aria-label={item.id === 'admin' ? pendingModerationCount + ' unresolved reports' : unreadCount + ' unread notifications'}>{item.id === 'admin' ? (pendingModerationCount > 99 ? '99+' : pendingModerationCount) : (unreadCount > 99 ? '99+' : unreadCount)}</span>}
+                                  </span>
                                   <span>{item.label}</span>
                                 </button>
                               ))}
@@ -282,6 +329,22 @@ export function Navigation({
             </button>
           ))}
         </nav>
+      )}
+      {isAccountMenuOpen && currentUser && !isGuest && (
+        <section className={styles.accountMenu} role="menu" aria-label="Account quick menu">
+          <div className={styles.accountMenuIdentity}>
+            <strong>{currentUser.profile.displayName}</strong>
+            <span>@{currentUser.profile.username}</span>
+          </div>
+          <div className={styles.accountMenuStats}>
+            <span><small>Permission role</small><strong>{currentUser.profile.role}</strong></span>
+            <span><small>Token balance</small><strong>{canAccessSanctuaryFeature('wallet', currentUser.profile.role) ? (tokenBalance === null ? 'Loading / unavailable' : tokenBalance.toLocaleString()) : 'Wallet access restricted'}</strong></span>
+          </div>
+          <button type="button" role="menuitem" onClick={() => { setIsAccountMenuOpen(false); onNavigate('profile'); }}><UserRound size={16} /> My profile</button>
+          <button type="button" role="menuitem" onClick={() => { setIsAccountMenuOpen(false); onNavigate('settings'); }}><Settings size={16} /> Profile & account settings</button>
+          {canAccessSanctuaryFeature('wallet', currentUser.profile.role) && <button type="button" role="menuitem" onClick={() => { setIsAccountMenuOpen(false); onNavigate('wallet'); }}><Wallet size={16} /> Open wallet</button>}
+          <button type="button" role="menuitem" onClick={() => { setIsAccountMenuOpen(false); onLogout(); }}><X size={16} /> Sign out</button>
+        </section>
       )}
       {isAuthModalOpen && (
         <AuthenticationModal
