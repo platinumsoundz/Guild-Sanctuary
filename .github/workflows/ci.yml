@@ -38,6 +38,7 @@ jobs:
       - run: npm run check:community-toolkit
       - run: npm run test:community-connection
       - run: npm run check:comment-actions
+      - run: npm run check:moderation-hierarchy
       - run: npm run check:event-time
       - run: npm run check:personal-planner
       - run: npm run check:personal-habits
