@@ -26,6 +26,7 @@ import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
+import { getSupabaseBrowserClient } from '@/services/supabase';
 import styles from './AppWorkspace.module.css';
 
 export function AppWorkspace() {
@@ -56,6 +57,29 @@ export function AppWorkspace() {
   const [profilePosts, setProfilePosts] = useState<import('@/types/database').Post[]>([]);
   const [isProfilePostsLoading, setIsProfilePostsLoading] = useState(false);
   const [profileThemePreview, setProfileThemePreview] = useState<string | null>(null);
+  const [accountAccessStatus, setAccountAccessStatus] = useState<'checking' | 'active' | 'suspended' | 'banned' | 'error'>('checking');
+  const [accountSuspendedUntil, setAccountSuspendedUntil] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isSessionReady) return;
+    if (!isAuthenticated || isGuest || !currentUser) {
+      setAccountAccessStatus('active');
+      setAccountSuspendedUntil(null);
+      return;
+    }
+    let cancelled = false;
+    setAccountAccessStatus('checking');
+    getSupabaseBrowserClient().from('profiles').select('status,suspended_until').eq('id', currentUser.user.id).maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data) { setAccountAccessStatus('error'); return; }
+        setAccountSuspendedUntil(data.suspended_until);
+        if (data.status === 'banned') setAccountAccessStatus('banned');
+        else if (data.status === 'suspended' && (!data.suspended_until || new Date(data.suspended_until).getTime() > Date.now())) setAccountAccessStatus('suspended');
+        else setAccountAccessStatus('active');
+      });
+    return () => { cancelled = true; };
+  }, [currentUser?.user.id, isAuthenticated, isGuest, isSessionReady]);
 
   useEffect(() => {
     if (activeNavigation !== 'profile') {
@@ -143,11 +167,15 @@ export function AppWorkspace() {
       {activeNavigation === 'planner' ? (
         <PersonalPlanner userId={currentUser.user.id} />
       ) : activeNavigation === 'wallet' ? (
-        <main className={styles.supportPage}>
-          <WalletPanel userId={currentUser.user.id} isGuest={isGuest} />
-        </main>
+        ['vip', 'moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role) ? (
+          <main className={styles.supportPage}><WalletPanel userId={currentUser.user.id} isGuest={isGuest} /></main>
+        ) : (
+          <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Wallet access is restricted</h1><p className={styles.sectionDescription}>The Wallet is temporarily available to VIP members and above while purchases and spending are being tested. Your account and community access are unchanged.</p></main>
+        )
       ) : activeNavigation === 'shop' ? (
-        <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} />
+        ['vip', 'moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} /> : (
+          <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Token Shop access is restricted</h1><p className={styles.sectionDescription}>The Token Shop is temporarily available to VIP members and above while its payment and redemption systems are being verified. Token spending remains disabled until testing is complete.</p></main>
+        )
       ) : activeNavigation === 'games' ? (
         <CosmicArcade />
       ) : activeNavigation === 'guild' ? (
@@ -269,11 +297,15 @@ export function AppWorkspace() {
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           >
-            {isSessionReady ? authenticatedContent : (
-              <main className={styles.sessionLoading} role="status">
-                Restoring your session...
-              </main>
-            )}
+            {!isSessionReady || accountAccessStatus === 'checking' ? (
+              <main className={styles.sessionLoading} role="status">Verifying your account access…</main>
+            ) : accountAccessStatus === 'error' ? (
+              <main className={styles.sectionPage} role="alert"><h1>Account status unavailable</h1><p className={styles.sectionDescription}>We could not verify your account status. Protected features are paused until your account can be checked. Please refresh and try again.</p><button type="button" onClick={() => setAccountAccessStatus('checking')}>Retry verification</button></main>
+            ) : accountAccessStatus === 'banned' ? (
+              <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>ACCOUNT RESTRICTED</p><h1>This account is banned</h1><p className={styles.sectionDescription}>Access to Sanctuary is disabled because of a moderation decision. If you believe this is a mistake, contact support and include your account email. Do not create another account to bypass this restriction.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
+            ) : accountAccessStatus === 'suspended' ? (
+              <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>TEMPORARY ACCOUNT RESTRICTION</p><h1>Account suspended</h1><p className={styles.sectionDescription}>Your access is temporarily limited following a moderation decision{accountSuspendedUntil ? ' until ' + new Date(accountSuspendedUntil).toLocaleString() : ''}. If you believe this is a mistake, contact support.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
+            ) : authenticatedContent}
           </motion.div>
         </AnimatePresence>
         </div>
