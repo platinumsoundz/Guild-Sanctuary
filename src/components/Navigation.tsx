@@ -24,6 +24,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
+import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
 import styles from './Navigation.module.css';
 import { NotificationBar } from '@/components/NotificationBar';
@@ -99,10 +100,11 @@ export function Navigation({
   onSetTwoFactorEnabled,
   onLogout,
 }: NavigationProps) {
-  const canAccessAdmin = Boolean(
-    currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role),
-  );
-  const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || canAccessAdmin);
+  const role = currentUser?.profile.role?.toLowerCase() ?? 'user';
+  const guestNavigationPages = new Set<NavigationState>(['today', 'games', 'roadmap', 'support']);
+  const visibleNavigationItems = isGuest
+    ? navigationItems.filter((item) => guestNavigationPages.has(item.id))
+    : navigationItems.filter((item) => canAccessSanctuaryPage(item.id, currentUser ? role : 'user'));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);

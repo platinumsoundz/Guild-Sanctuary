@@ -32,7 +32,7 @@ import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import { getSupabaseBrowserClient } from '@/services/supabase';
-import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
+import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import styles from './AppWorkspace.module.css';
 
 export function AppWorkspace() {
@@ -73,6 +73,20 @@ export function AppWorkspace() {
   const contentNavigation = activeNavigation === 'guild'
     ? (guildInternalPages.includes(guildPage) ? 'guild' : guildPage)
     : activeNavigation;
+  const currentRole = currentUser?.profile.role?.toLowerCase() ?? null;
+
+  useEffect(() => {
+    if (!isSessionReady) return;
+    if (isGuest) {
+      if (!['today', 'support', 'games', 'roadmap'].includes(contentNavigation)) {
+        setActiveNavigation('today');
+      }
+      return;
+    }
+    if (!currentUser || !canAccessSanctuaryPage(contentNavigation, currentRole)) {
+      if (activeNavigation !== 'today') setActiveNavigation('today');
+    }
+  }, [activeNavigation, contentNavigation, currentRole, currentUser, isGuest, isSessionReady, setActiveNavigation]);
 
   useEffect(() => {
     if (!isSessionReady) return;
@@ -210,7 +224,14 @@ export function AppWorkspace() {
     setActiveNavigation(navigation);
   };
 
-  const authenticatedContent = contentNavigation === 'today' ? (
+  const authenticatedContent = !isGuest && currentUser && !canAccessSanctuaryPage(contentNavigation, currentRole) ? (
+    <main className={styles.sectionPage} role="status">
+      <p className={styles.sectionEyebrow}>RESTRICTED DESTINATION</p>
+      <h1>This page is not available for your account</h1>
+      <p className={styles.sectionDescription}>Your current account role does not include access to this area. You have been returned to Today; contact support if you believe your role is incorrect.</p>
+      <button type="button" onClick={() => setActiveNavigation('today')}>Return to Today</button>
+    </main>
+  ) : contentNavigation === 'today' ? (
     <SanctuaryHome onNavigate={openNavigation} />
   ) : isGuest && !['support', 'games', 'roadmap'].includes(contentNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">

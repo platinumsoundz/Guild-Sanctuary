@@ -34,3 +34,8 @@ console.log('Navigation contract checks passed.');
 assert.doesNotMatch(navigation.slice(navigation.indexOf('const navigationItems'), navigation.indexOf('const navigationGroups')), /id: 'guild'|id: 'guild-roadmap'|Guild Arcade|Guild Roadmap/, 'hidden Guild console and its roadmap are not exposed in the Sanctuary page selector');
 assert.doesNotMatch(navigation.slice(navigation.indexOf('const navigationGroups'), navigation.indexOf('interface NavigationProps')), /label: 'Guild'|items: \['guild'|guild-roadmap/, 'Sanctuary selector has no Guild navigation group');
 console.log('Hidden Guild selector contract passed.');
+
+assert.match(navigation, /canAccessSanctuaryPage/, 'navigation uses the shared role allowlist');
+assert.match(navigation, /navigationItems\.filter\(\(item\) => canAccessSanctuaryPage\(item\.id, currentUser \? role : 'user'\)\)/, 'basic navigation is filtered by the page role allowlist');
+assert.match(navigation, /guestNavigationPages = new Set<NavigationState>\(\['today', 'games', 'roadmap', 'support'\]\)/, 'guest mode keeps only its explicit public destinations');
+
