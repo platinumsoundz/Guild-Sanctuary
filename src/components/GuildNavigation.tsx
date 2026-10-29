@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Home, Gamepad2, Library, Music2, Image as ImageIcon, Settings, Newspaper, Search,
   MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard, Map,
@@ -51,6 +52,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   onSelect: (page: GuildPage) => void;
   onExit: () => void;
 }) {
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
@@ -67,6 +69,14 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   const previousDirections = useRef(noDirections);
   const lastActionAt = useRef(0);
   const wasOpen = useRef(false);
+
+  // On narrow phones, show the touch navigation controls by default so they
+  // are discoverable without requiring a trip through the Quick Menu.
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 560px)').matches) {
+      setControlsOpen(true);
+    }
+  }, []);
 
   const allowed = sanctuaryItems.filter((item) => {
     if (item.id === 'admin') return ['moderator', 'admin', 'developer', 'owner'].includes(role);
@@ -117,6 +127,8 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     if (open) setOpen(false);
     else if (selectedPage !== 'home') choose('home');
   };
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     try {
@@ -258,7 +270,8 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     </button>;
   };
 
-  return <header className={styles.header}>
+  return <>
+    <header className={styles.header}>
     <button ref={menuButtonRef} type="button" className={styles.menu} aria-label={open ? 'Close Guild navigation' : 'Open Guild navigation'} aria-expanded={open} onClick={() => setOpen((value) => !value)}>
       {open ? <X size={22} /> : <Menu size={22} />}<span>MENU</span>
     </button>
@@ -269,7 +282,8 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     <div className={styles.notificationSlot}><NotificationBar compact /></div>
     <button ref={quickButtonRef} type="button" className={styles.quickButton} aria-label="Open Guild quick menu" aria-expanded={quickOpen} aria-keyshortcuts="Control+K Meta+K" onClick={() => setQuickOpen((value) => !value)}><SlidersHorizontal size={18} /><span>Quick menu</span><kbd>⌘/Ctrl K</kbd></button>
     <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Sanctuary</span></button>
-    {quickOpen && <>
+    </header>
+    {mounted && quickOpen && createPortal(<>
       <button type="button" className={styles.quickScrim} aria-label="Close quick menu" onClick={() => { setQuickOpen(false); setQuickQuery(''); quickButtonRef.current?.focus(); }} />
       <section ref={quickPanelRef} className={styles.quickPanel} role="dialog" aria-modal="true" aria-labelledby="guild-quick-title" onKeyDown={(event) => { if (event.key !== 'Tab') return; const focusable = Array.from(quickPanelRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])') ?? []); if (!focusable.length) return; const first = focusable[0]; const last = focusable[focusable.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } }}>
         <div className={styles.quickHeading}><div><small>THE GUILD · HUD</small><h2 id="guild-quick-title">Quick menu</h2></div><button type="button" aria-label="Close quick menu" onClick={() => { setQuickOpen(false); setQuickQuery(''); quickButtonRef.current?.focus(); }}><X size={18} /></button></div>
@@ -295,7 +309,8 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
         <GuildDiagnosticsPanel />
         <p className={styles.quickFootnote}>Search is limited to available Guild and Sanctuary destinations. Settings apply to this browser; game audio and display behaviour can still depend on the game host.</p>
       </section>
-    </>}
+    </>, document.body)}
+    {mounted && createPortal(<>
     {open && <button type="button" className={styles.scrim} aria-label="Close navigation" onClick={() => setOpen(false)} />}
     <nav className={styles.drawer} data-open={open} aria-label="Guild and Sanctuary pages" aria-hidden={!open} inert={!open} onKeyDown={(event) => {
       if (event.key === 'Escape') {
@@ -322,7 +337,8 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       <p className={styles.group}>SANCTUARY PAGES</p>{allowed.map(render)}
       <button type="button" className={styles.return} onClick={onExit}><LogOut size={17} /> Exit Guild · Return to Sanctuary</button>
     </nav>
-    <div className={styles.touchConsole}>
+    </>, document.body)}
+    {mounted && createPortal(<div className={styles.touchConsole}>
       <button type="button" className={styles.touchToggle} aria-pressed={controlsOpen} aria-expanded={controlsOpen} onClick={() => setControlsOpen((value) => !value)}>{controlsOpen ? <X size={17} /> : <Gamepad2 size={17} />}<span>{controlsOpen ? 'Hide controls' : 'Controls'}</span></button>
       {controlsOpen && <div className={styles.touchPad} aria-label="Guild navigation controls">
         <button type="button" className={styles.padUp} aria-label="Navigate up" onClick={() => moveFocus('up')}>↑</button>
@@ -332,6 +348,6 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
         <button type="button" className={styles.padA} onClick={activateFocused}><strong>A</strong><small>Select</small></button>
         <button type="button" className={styles.padB} onClick={goBack}><strong>B</strong><small>Back</small></button>
       </div>}
-    </div>
-  </header>;
+    </div>, document.body)}
+  </>;
 }

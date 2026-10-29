@@ -40,7 +40,8 @@
     "check:guest-access": "node scripts/check-guest-access.mjs",
     "check:guild-browser-arcade": "node scripts/check-guild-browser-arcade.mjs",
     "check:guild-diagnostics": "node scripts/check-guild-diagnostics.mjs",
-    "check:today-dashboard": "node scripts/check-today-dashboard-contract.mjs"
+    "check:today-dashboard": "node scripts/check-today-dashboard-contract.mjs",
+    "check:guild-mobile-navigation": "node scripts/check-guild-mobile-navigation.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
