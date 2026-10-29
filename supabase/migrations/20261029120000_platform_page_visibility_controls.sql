@@ -11,12 +11,10 @@ create table if not exists public.platform_page_visibility (
 alter table public.platform_page_visibility enable row level security;
 
 drop policy if exists "active members can read page visibility" on public.platform_page_visibility;
-create policy "active members can read page visibility"
-  on public.platform_page_visibility for select to authenticated
-  using (exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.status = 'active'
-  ));
+drop policy if exists "public can read page visibility" on public.platform_page_visibility;
+create policy "public can read page visibility"
+  on public.platform_page_visibility for select to anon, authenticated
+  using (true);
 
 drop policy if exists "developers and owners manage page visibility" on public.platform_page_visibility;
 create policy "developers and owners manage page visibility"
@@ -34,7 +32,7 @@ create policy "developers and owners manage page visibility"
       and p.role in ('developer', 'owner')
   ));
 
-grant select on public.platform_page_visibility to authenticated;
+grant select on public.platform_page_visibility to anon, authenticated;
 grant insert, update, delete on public.platform_page_visibility to authenticated;
 
 commit;
