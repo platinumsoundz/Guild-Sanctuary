@@ -17,6 +17,7 @@ assert.match(notifications, /compact\?: boolean/, 'NotificationBar must support 
 assert.match(notifications, /Open full notifications/, 'Compact panel must link to the full notifications page');
 assert.match(notifications, /setActiveNavigation\('notifications'\)/, 'Full notifications action must navigate to the notifications page');
 assert.match(notifications, /aria-label="Close notifications"/, 'The notification panel must have a close control');
+assert.match(notifications, /aria-label="Close notifications" onClick=\{\(\) => \{ setIsOpen\(false\); if \(compact\) bellButtonRef\.current\?\.focus\(\); \}\}/, 'Closing the compact overlay with its close button must return focus to the trigger');
 assert.match(notificationStyles, /\.compact \.panel\s*\{[^}]*position:\s*absolute/s, 'Compact panel must overlay rather than replace the current page');
 assert.match(notificationStyles, /\.compact \.panel\s*\{[^}]*right:\s*0/s, 'Compact panel must be anchored to the header control');
 assert.match(notifications, /useRef<HTMLButtonElement>\(null\)/, 'Notification trigger must be available for focus restoration');
