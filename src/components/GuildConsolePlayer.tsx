@@ -185,18 +185,18 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       </div>
       <div className={styles.touchToolbar}>
         <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open console controls"><Gamepad2 size={17} /> Console controls</button>
-        <button type="button" onClick={() => setControlsVisible((visible) => !visible)} aria-expanded={controlsVisible}>{controlsVisible ? 'Hide touch controls' : 'Show touch controls'}</button>
+        <button type="button" onClick={() => setControlsVisible((visible) => !visible)} aria-expanded={controlsVisible}>{controlsVisible ? 'Hide floating menu' : 'Show floating menu'}</button>
       </div>
       {notice && <p className={styles.notice} role="status">{notice}</p>}
       {menuOpen && <div className={styles.scrim} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setMenuOpen(false); }}>
         <section className={styles.systemMenu} ref={menuRef} role="dialog" aria-modal="true" aria-labelledby="guild-menu-title" onKeyDown={(event) => { if (event.key === 'Escape' || event.key === 'Backspace') { event.preventDefault(); goBack(); } }}>
-          <header className={styles.menuHeader}><div><p className={styles.eyebrow}>SYSTEM MENU</p><h2 id="guild-menu-title">The Guild</h2></div><button type="button" className={styles.iconButton} data-guild-action onClick={() => setMenuOpen(false)} aria-label="Resume game"><X size={18} /></button></header>
+          <header className={styles.menuHeader}><div><p className={styles.eyebrow}>SYSTEM MENU</p><h2 id="guild-menu-title">The Guild</h2></div><button type="button" className={styles.iconButton} onClick={() => setMenuOpen(false)} aria-label="Resume game"><X size={18} /></button></header>
           <p className={styles.menuSubhead}>Your game stays open behind this menu. Use touch, keyboard or controller to navigate.</p>
           <button type="button" data-guild-action className={styles.menuAction} onClick={() => { setMenuOpen(false); setSettingsOpen(false); }}><Gamepad2 size={19} /><span><strong>Resume game</strong><small>Return to {title}</small></span></button>
           <button type="button" data-guild-action className={styles.menuAction} onClick={() => setSettingsOpen((open) => !open)}><Settings2 size={19} /><span><strong>Game and controller settings</strong><small>Input, sound and display options</small></span></button>
           {settingsOpen && <div className={styles.settingsPanel}>
-            <label className={styles.settingRow}><span><Volume2 size={17} /> Guild music enabled</span><input type="checkbox" checked={musicEnabled} onChange={(event) => setMusicEnabled(event.target.checked)} /></label>
-            <label className={styles.settingRow}><span>Guild music volume <strong>{volume}%</strong></span><input type="range" min="0" max="100" value={volume} onChange={(event) => setVolume(Number(event.target.value))} /></label>
+            <label className={styles.settingRow}><span><Volume2 size={17} /> Guild music enabled</span><input data-guild-action type="checkbox" checked={musicEnabled} onChange={(event) => setMusicEnabled(event.target.checked)} /></label>
+            <label className={styles.settingRow}><span>Guild music volume <strong>{volume}%</strong></span><input data-guild-action type="range" min="0" max="100" value={volume} onChange={(event) => setVolume(Number(event.target.value))} /></label>
             <div className={styles.controllerDiagnostic}><AudioLines size={17} /><div><strong>{controllerConnected ? 'Controller detected' : 'No controller exposed to this page'}</strong><p>Directional controls navigate this menu. A confirms, B backs out, and Home/Guide or Start opens and closes the menu where exposed.</p></div></div>
             <div className={styles.buttonLegend}>{BUTTON_LABELS.map((label) => <span key={label}>{label}</span>)}</div>
             <p className={styles.finePrint}>Audio controls affect Sanctuary media explicitly marked as Guild-managed audio. They cannot control sound inside this cross-origin game iframe.</p>
