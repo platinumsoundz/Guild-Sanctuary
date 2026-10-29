@@ -82,7 +82,7 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
                   <span className={styles.statePill}>{report.targetState ?? 'Unavailable'}</span>
                 </div>
                 {report.targetTitle && <h2>{report.targetTitle}</h2>}
-                <p className={styles.contentBody}>{report.targetContent?.trim() || 'The original content is unavailable (it may have been deleted). The report and audit record are retained for review.'}</p>
+                <p className={styles.contentBody}>{report.targetContent?.trim() || 'A preview is unavailable here or the original content may no longer be accessible. The report and audit record are retained for review.'}</p>
                 {report.targetMediaUrl && (
                   <p className={styles.mediaLink}>
                     <a href={report.targetMediaUrl} target="_blank" rel="noreferrer">Open attached media</a>
