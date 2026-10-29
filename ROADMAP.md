@@ -4,6 +4,48 @@ Last updated: 2026-10-29
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
+## Beta readiness dashboard — Sanctuary only
+
+> **Estimated beta readiness: 55%**  
+> Planning estimate based on the current roadmap and known verification gaps — not a live telemetry measurement. Percentages describe each Sanctuary workstream's overall readiness, including integration and testing, not just how much code exists. **The Guild is a separate co-existing project and is not included here.**
+
+| Sanctuary workstream | Progress | Snapshot |
+| --- | ---: | --- |
+| Core pages and navigation | **75%** | Today, main destinations and responsive navigation are in code; browser/device verification remains |
+| Community, posts and member discovery | **65%** | Core experiences are progressing; end-to-end edit, delete, like, report and discovery checks remain |
+| Authentication and account management | **60%** | Account flows exist; password recovery, session edge cases and real-user verification remain |
+| Daily Planner and Reflection | **65%** | Planner experience is in progress; account-backed private reflection needs migration/RLS review and isolation tests |
+| Notifications and messaging | **55%** | Main surfaces exist; notification actions and DM preference behaviour need end-to-end checks |
+| Moderation and member permissions | **50%** | Role-aware moderation UI is merged; live database grants, hierarchy and RPC behaviour need security testing |
+| Sanctuary theme and responsive UI | **75%** | Theme foundation and visual polish are in code; visual accessibility and device QA remain |
+| Cosmic Arcade mini-games | **60%** | Several playable client-side prototypes exist; gameplay QA, persistence and accessibility checks remain |
+| Supabase integration and data security | **50%** | Important functions exist across inspected projects, but migration drift and the deployed database target must be reconciled |
+| Wallet, tokens and payment safeguards | **40%** | Design and prototypes only; server-authoritative economy, ledger and approved staging tests are still required; spending stays disabled |
+| Deployment and production verification | **35%** | Cloudflare deploy is guarded; Vercel preview has hit a provider rate limit; live SHA and production smoke tests are unconfirmed |
+| Beta acceptance testing | **35%** | Automated checks cover selected contracts/builds; full browser, mobile, accessibility and real-user journeys remain |
+
+### At-a-glance progress
+
+| Readiness area | Progress bar |
+| --- | --- |
+| Pages, navigation and visual foundation | `███████░░░ 75%` |
+| Community and daily-use features | `██████░░░░ 65%` |
+| Accounts, notifications and messaging | `██████░░░░ 57%` |
+| Security, moderation and backend integration | `█████░░░░░ 50%` |
+| Arcade and token economy | `█████░░░░░ 50%` |
+| Release verification and beta QA | `████░░░░░░ 35%` |
+
+**How to read this:** a feature can be present in the repository and still be short of beta-ready if its database migration, permissions, deployed version or real-user behaviour has not been verified. Treat these figures as directional planning estimates and update them only when new evidence supports a change.
+
+### Recommended order to reach beta
+
+1. **Close the account and community journeys:** verify sign-in, session refresh, password recovery, post/comment actions, Shorts reactions/reports, notifications and DM preferences with real test accounts.
+2. **Resolve backend certainty and permissions:** identify the Supabase project used by the live app, reconcile migration histories, investigate the Shorts engagement schema-cache error, and test role hierarchy/RLS in approved staging.
+3. **Finish private reflection safely:** approve the storage transition, then test save/read/update/delete, account isolation and failure handling before merging or applying its migration.
+4. **Complete release checks:** confirm the deployed commit on each host, resolve the Vercel rate-limit blocker, and run responsive, keyboard/accessibility and production smoke tests.
+5. **Keep spending locked until safe:** do not enable token purchases or deductions until server-side ownership, balance checks, idempotency, immutable ledger and staging tests are verified.
+
+
 ## Integration batch checkpoint — 2026-10-28
 
 The following focused PRs have been merged into `main` as a single integration batch:
