@@ -282,3 +282,11 @@
     z-index: 1200;
   }
 }
+.moderationRationale {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--muted, #657267);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}

@@ -3,6 +3,7 @@
 import { ResponsiveShell } from '@/components/ResponsiveShell';
 import { Navigation } from '@/components/Navigation';
 import { useEffect, useState } from 'react';
+import { getConnectedGamepad } from '@/lib/controllerInput';
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import type { CSSProperties } from 'react';
 import type { Conversation, PublicProfile } from '@/types/database';
@@ -26,6 +27,8 @@ import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
+import { getSupabaseBrowserClient } from '@/services/supabase';
+import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import styles from './AppWorkspace.module.css';
 
 export function AppWorkspace() {
@@ -56,6 +59,79 @@ export function AppWorkspace() {
   const [profilePosts, setProfilePosts] = useState<import('@/types/database').Post[]>([]);
   const [isProfilePostsLoading, setIsProfilePostsLoading] = useState(false);
   const [profileThemePreview, setProfileThemePreview] = useState<string | null>(null);
+  const [accountAccessStatus, setAccountAccessStatus] = useState<'checking' | 'active' | 'suspended' | 'banned' | 'error'>('checking');
+  const [accountSuspendedUntil, setAccountSuspendedUntil] = useState<string | null>(null);
+  const [accountRestrictionReason, setAccountRestrictionReason] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isSessionReady) return;
+    if (!isAuthenticated || isGuest || !currentUser ||
+        !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setAccountAccessStatus('active');
+      setAccountSuspendedUntil(null);
+      return;
+    }
+    let cancelled = false;
+    setAccountAccessStatus('checking');
+    getSupabaseBrowserClient().from('profiles').select('status,suspended_until').eq('id', currentUser.user.id).maybeSingle()
+      .then(async ({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data) { setAccountAccessStatus('error'); return; }
+        setAccountSuspendedUntil(data.suspended_until);
+        const blocked = data.status === 'banned' ||
+          (data.status === 'suspended' && (!data.suspended_until || new Date(data.suspended_until).getTime() > Date.now()));
+        if (blocked) {
+          const { data: notice } = await getSupabaseBrowserClient().from('moderation_user_notifications')
+            .select('rationale,expires_at,event_type')
+            .eq('recipient_id', currentUser.user.id)
+            .in('event_type', ['ban', 'suspend'])
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (cancelled) return;
+          setAccountRestrictionReason(notice?.rationale ?? null);
+          setAccountSuspendedUntil(notice?.expires_at ?? data.suspended_until);
+          setAccountAccessStatus(data.status === 'banned' ? 'banned' : 'suspended');
+        } else {
+          setAccountRestrictionReason(null);
+          setAccountAccessStatus('active');
+        }
+      }, () => { if (!cancelled) setAccountAccessStatus('error'); });
+    return () => { cancelled = true; };
+  }, [currentUser?.user.id, isAuthenticated, isGuest, isSessionReady]);
+
+  useEffect(() => {
+    if (!isSessionReady || !isAuthenticated || isGuest || !currentUser) return;
+    const accessEnabled = () => {
+      try { return window.localStorage.getItem('sanctuary-hidden-guild-access') !== 'disabled'; }
+      catch { return true; }
+    };
+    let wasConnected = false;
+    const detectController = () => {
+      const connected = Boolean(getConnectedGamepad());
+      if (connected && !wasConnected && accessEnabled()) {
+        window.localStorage.setItem('sanctuary-open-hidden-guild-entry', '1');
+        setActiveNavigation('guild');
+      }
+      wasConnected = connected;
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'g')) return;
+      if (!accessEnabled()) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
+      event.preventDefault();
+      window.localStorage.setItem('sanctuary-open-hidden-guild-entry', '1');
+      setActiveNavigation('guild');
+    };
+    window.addEventListener('keydown', onKeyDown);
+    const poll = window.setInterval(detectController, 500);
+    detectController();
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.clearInterval(poll);
+    };
+  }, [currentUser, isAuthenticated, isGuest, isSessionReady, setActiveNavigation]);
 
   useEffect(() => {
     if (activeNavigation !== 'profile') {
@@ -111,18 +187,17 @@ export function AppWorkspace() {
 
   const authenticatedContent = activeNavigation === 'today' ? (
     <SanctuaryHome onNavigate={openNavigation} />
-  ) : isGuest && !['support', 'games', 'guild', 'roadmap', 'guild-roadmap'].includes(activeNavigation) ? (
+  ) : isGuest && !['support', 'games', 'roadmap'].includes(activeNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
       <h1 id="guest-access-title">Explore before you join</h1>
       <p className={styles.sectionDescription}>
-        Guest mode is read-only. You can explore the Cosmic Arcade, review the Sanctuary and Guild roadmaps,
+        Guest mode is read-only. You can explore the Cosmic Arcade, review the Sanctuary roadmap,
         and learn about the community without creating an account.
       </p>
       <div className="flex flex-wrap gap-3">
         <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('games')}>Explore Cosmic Arcade</button>
         <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('roadmap')}>Sanctuary Roadmap</button>
-        <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('guild-roadmap')}>Guild Roadmap</button>
       </div>
       <p className={styles.sectionDescription}>
         Sign in to post, react, comment, message, manage your profile, use the planner, or access wallet and shop features.
@@ -136,18 +211,20 @@ export function AppWorkspace() {
     <main className={styles.supportPage}>
       <SupportPanel />
     </main>
-  ) : isGuest && activeNavigation === 'guild' ? (
-    <GuildWorld userId={null} isAuthenticated={false} />
   ) : isAuthenticated && currentUser ? (
     <>
       {activeNavigation === 'planner' ? (
         <PersonalPlanner userId={currentUser.user.id} />
       ) : activeNavigation === 'wallet' ? (
-        <main className={styles.supportPage}>
-          <WalletPanel userId={currentUser.user.id} isGuest={isGuest} />
-        </main>
+        canAccessSanctuaryFeature('wallet', currentUser.profile.role) ? (
+          <main className={styles.supportPage}><WalletPanel userId={currentUser.user.id} isGuest={isGuest} /></main>
+        ) : (
+          <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Wallet access is restricted</h1><p className={styles.sectionDescription}>The Wallet is temporarily available to VIP members and above while purchases and spending are being tested. Your account and community access are unchanged.</p></main>
+        )
       ) : activeNavigation === 'shop' ? (
-        <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} />
+        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} role={currentUser.profile.role} /> : (
+          <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Token Shop access is restricted</h1><p className={styles.sectionDescription}>The Token Shop is temporarily available to VIP members and above while its payment and redemption systems are being verified. Token spending remains disabled until testing is complete.</p></main>
+        )
       ) : activeNavigation === 'games' ? (
         <CosmicArcade />
       ) : activeNavigation === 'guild' ? (
@@ -269,11 +346,15 @@ export function AppWorkspace() {
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           >
-            {isSessionReady ? authenticatedContent : (
-              <main className={styles.sessionLoading} role="status">
-                Restoring your session...
-              </main>
-            )}
+            {!isSessionReady || accountAccessStatus === 'checking' ? (
+              <main className={styles.sessionLoading} role="status">Verifying your account access…</main>
+            ) : accountAccessStatus === 'error' ? (
+              <main className={styles.sectionPage} role="alert"><h1>Account status unavailable</h1><p className={styles.sectionDescription}>We could not verify your account status. Protected features are paused until your account can be checked. Please refresh and try again.</p><button type="button" onClick={() => window.location.reload()}>Retry verification</button></main>
+            ) : accountAccessStatus === 'banned' && activeNavigation !== 'support' ? (
+              <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>ACCOUNT RESTRICTED</p><h1>This account is banned</h1><p className={styles.sectionDescription}>Access to Sanctuary is disabled because of a moderation decision. {accountRestrictionReason ? 'Reason: ' + accountRestrictionReason + ' ' : ''}If you believe this is a mistake, contact support and include your account email. Do not create another account to bypass this restriction.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
+            ) : accountAccessStatus === 'suspended' && activeNavigation !== 'support' ? (
+              <main className={styles.sectionPage} role="alert"><p className={styles.sectionEyebrow}>TEMPORARY ACCOUNT RESTRICTION</p><h1>Account suspended</h1><p className={styles.sectionDescription}>Your access is temporarily limited following a moderation decision{accountRestrictionReason ? ': ' + accountRestrictionReason : ''}{accountSuspendedUntil ? ' until ' + new Date(accountSuspendedUntil).toLocaleString() : ''}. If you believe this is a mistake, contact support.</p><button type="button" onClick={() => setActiveNavigation('support')}>Contact support</button></main>
+            ) : authenticatedContent}
           </motion.div>
         </AnimatePresence>
         </div>

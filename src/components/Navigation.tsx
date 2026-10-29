@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
+import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import styles from './Navigation.module.css';
 import { NotificationBar } from '@/components/NotificationBar';
 
@@ -62,7 +63,6 @@ const navigationGroups: { label: string; items: NavigationState[] }[] = [
   { label: 'Connect', items: ['discover', 'messages', 'events', 'shorts'] },
   { label: 'Your space', items: ['profile', 'planner', 'wallet'] },
   { label: 'Explore', items: ['games', 'support', 'shop'] },
-  { label: 'Guild', items: ['guild', 'guild-roadmap'] },
   { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'settings'] },
   { label: 'Stewardship', items: ['admin'] },
 ];
@@ -105,7 +105,12 @@ export function Navigation({
   const canAccessAdmin = Boolean(
     currentUser && ['moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role),
   );
-  const visibleNavigationItems = navigationItems.filter((item) => item.id !== 'admin' || canAccessAdmin);
+  const visibleNavigationItems = navigationItems.filter((item) => {
+    if (item.id === 'admin') return canAccessAdmin;
+    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', currentUser?.profile.role);
+    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', currentUser?.profile.role);
+    return true;
+  });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);

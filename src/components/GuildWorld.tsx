@@ -150,6 +150,14 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     setBest(readBest());
+    try {
+      if (window.localStorage.getItem('sanctuary-open-hidden-guild-entry') === '1') {
+        window.localStorage.removeItem('sanctuary-open-hidden-guild-entry');
+        setEntryOpen(true);
+      }
+    } catch {
+      // Hidden entry can still be opened with a connected controller.
+    }
     let frame = 0;
     let active = true;
     const poll = (time: number) => {

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ExternalLink, Search, ShieldCheck, UserCog } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
+import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import { ModerationDashboard } from './ModerationDashboard';
 import styles from './AdminDashboard.module.css';
 
@@ -106,8 +107,8 @@ function RoleManagement() {
 }
 
 export function AdminDashboard({ role }: { role: string }) {
-  const canManageRoles = ['admin', 'developer', 'owner'].includes(role);
-  const canModerate = ['moderator', 'admin', 'developer', 'owner'].includes(role);
+  const canManageRoles = canAccessSanctuaryFeature('memberRoleManagement', role);
+  const canModerate = canAccessSanctuaryFeature('moderation', role);
 
   return (
     <div className={styles.dashboard}>

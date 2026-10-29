@@ -1,27 +1,43 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Bell, CheckCheck, Heart, MessageCircle, X } from 'lucide-react';
+import { Bell, CheckCheck, Heart, MessageCircle, ShieldAlert, X } from 'lucide-react';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import styles from './NotificationBar.module.css';
 
 type NotificationItem = {
   id: string;
-  actor_id: string;
-  notification_type: 'like' | 'comment';
-  target_type: 'post' | 'short' | 'event';
-  target_id: string;
+  kind: 'social' | 'moderation';
+  actor_id: string | null;
+  notification_type: 'like' | 'comment' | 'warn' | 'hide' | 'remove' | 'restore' | 'suspend' | 'ban' | 'report_update';
+  target_type: string;
+  target_id: string | null;
   created_at: string;
   read_at: string | null;
   actorName: string;
   username: string;
+  rationale?: string;
+  expires_at?: string | null;
 };
 
-const destinationFor: Record<NotificationItem['target_type'], NavigationState> = {
-  post: 'feed',
-  short: 'shorts',
-  event: 'events',
+const destinationFor = (item: NotificationItem): NavigationState => {
+  if (item.kind === 'moderation' && ['warn', 'suspend', 'ban'].includes(item.notification_type)) return 'support';
+  if (item.target_type === 'short') return 'shorts';
+  if (item.target_type === 'event') return 'events';
+  if (item.target_type === 'message') return 'messages';
+  if (item.target_type === 'user') return 'support';
+  return 'feed';
+};
+
+const moderationCopy: Record<string, string> = {
+  warn: 'You received a moderation warning.',
+  hide: 'Your content was hidden by moderation.',
+  remove: 'Your content was removed by moderation.',
+  restore: 'Your content was restored by moderation.',
+  suspend: 'Your account was temporarily suspended.',
+  ban: 'Your account was banned.',
+  report_update: 'The moderation team reviewed your report.',
 };
 
 export function NotificationBar({ fullPage = false, compact = false }: { fullPage?: boolean; compact?: boolean }) {
@@ -63,18 +79,33 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
         return;
       }
 
-      const { data, error: queryError } = await client
-        .from('notifications')
-        .select('id,actor_id,notification_type,target_type,target_id,created_at,read_at')
-        .eq('recipient_id', currentUser.user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (queryError) throw queryError;
-
+      const [{ data: socialData, error: socialError }, { data: moderationData, error: moderationError }] = await Promise.all([
+        client.from('notifications')
+          .select('id,actor_id,notification_type,target_type,target_id,created_at,read_at')
+          .eq('recipient_id', currentUser.user.id)
+          .order('created_at', { ascending: false })
+          .limit(20),
+        client.from('moderation_user_notifications')
+          .select('id,actor_id,event_type,target_type,target_id,rationale,expires_at,created_at,read_at')
+          .eq('recipient_id', currentUser.user.id)
+          .order('created_at', { ascending: false })
+          .limit(20),
+      ]);
+      if (socialError) throw socialError;
+      if (moderationError) throw moderationError;
       if (!isCurrentRequest()) return;
 
-      const actorIds = [...new Set((data ?? []).map((item) => item.actor_id))];
+      const normalized: NotificationItem[] = [
+        ...(socialData ?? []).map((item) => ({ ...item, kind: 'social' as const, actorName: '', username: '' })),
+        ...(moderationData ?? []).map((item) => ({
+          id: item.id, kind: 'moderation' as const, actor_id: item.actor_id,
+          notification_type: item.event_type, target_type: item.target_type, target_id: item.target_id,
+          created_at: item.created_at, read_at: item.read_at, rationale: item.rationale, expires_at: item.expires_at,
+          actorName: '', username: '',
+        })),
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 20);
+
+      const actorIds = [...new Set(normalized.map((item) => item.actor_id).filter((id): id is string => Boolean(id)))];
       const actorNames = new Map<string, { displayName: string; username: string }>();
       if (actorIds.length) {
         const { data: actors, error: actorsError } = await client
@@ -92,11 +123,11 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
       }
 
       if (!isCurrentRequest()) return;
-      setItems((data ?? []).map((item) => {
-        const actor = actorNames.get(item.actor_id);
+      setItems(normalized.map((item) => {
+        const actor = item.actor_id ? actorNames.get(item.actor_id) : undefined;
         return {
           ...item,
-          actorName: actor?.displayName ?? 'A community member',
+          actorName: actor?.displayName ?? (item.kind === 'moderation' ? 'Sanctuary moderation team' : 'A community member'),
           username: actor?.username ?? '',
         };
       }));
@@ -179,11 +210,9 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
     try {
       const client = getSupabaseBrowserClient();
       const readAt = new Date().toISOString();
-      const { error: updateError } = await client
-        .from('notifications')
-        .update({ read_at: readAt })
-        .eq('id', item.id)
-        .eq('recipient_id', accountId);
+      const { error: updateError } = item.kind === 'moderation'
+        ? await client.from('moderation_user_notifications').update({ read_at: readAt }).eq('id', item.id).eq('recipient_id', accountId)
+        : await client.from('notifications').update({ read_at: readAt }).eq('id', item.id).eq('recipient_id', accountId);
       if (updateError) throw updateError;
       if (!isSameSession()) return;
       setItems((previous) => previous.map((entry) => entry.id === item.id ? { ...entry, read_at: readAt } : entry));
@@ -199,12 +228,12 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
     try {
       const client = getSupabaseBrowserClient();
       const readAt = new Date().toISOString();
-      const { error: updateError } = await client
-        .from('notifications')
-        .update({ read_at: readAt })
-        .eq('recipient_id', accountId)
-        .is('read_at', null);
-      if (updateError) throw updateError;
+      const [socialUpdate, moderationUpdate] = await Promise.all([
+        client.from('notifications').update({ read_at: readAt }).eq('recipient_id', accountId).is('read_at', null),
+        client.from('moderation_user_notifications').update({ read_at: readAt }).eq('recipient_id', accountId).is('read_at', null),
+      ]);
+      if (socialUpdate.error) throw socialUpdate.error;
+      if (moderationUpdate.error) throw moderationUpdate.error;
       if (!isSameSession()) return;
       setItems((previous) => previous.map((item) => ({ ...item, read_at: item.read_at ?? readAt })));
       setError(null);
@@ -219,7 +248,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
     await markRead(item);
     if (activeAccountId.current !== accountId) return;
     setIsOpen(false);
-    setActiveNavigation(destinationFor[item.target_type]);
+    setActiveNavigation(destinationFor(item));
   };
 
 
@@ -255,7 +284,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
           <header className={styles.panelHeader}>
             <div>
               <h2>Notifications</h2>
-              <p>Likes and comments on your community posts.</p>
+              <p>Community activity, reports and moderation updates.</p>
             </div>
             <div className={styles.panelActions}>
               {isConnected && unreadCount > 0 && (
@@ -283,7 +312,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
           ) : !isConnected ? (
             <p className={styles.emptyState}>Sign in with your connected Sanctuary account to enable notifications.</p>
           ) : items.length === 0 ? (
-            <p className={styles.emptyState}>You're all caught up. New likes and comments will appear here.</p>
+            <p className={styles.emptyState}>You're all caught up. New activity and moderation updates will appear here.</p>
           ) : (
             <ul className={styles.list}>
               {items.map((item) => (
@@ -294,10 +323,12 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
                     onClick={() => void openNotification(item)}
                   >
                     <span className={styles.itemIcon} aria-hidden="true">
-                      {item.notification_type === 'like' ? <Heart size={17} /> : <MessageCircle size={17} />}
+                      {item.kind === 'moderation' ? <ShieldAlert size={17} /> : item.notification_type === 'like' ? <Heart size={17} /> : <MessageCircle size={17} />}
                     </span>
                     <span className={styles.itemCopy}>
-                      <span><strong>{item.actorName}</strong> {item.notification_type === 'like' ? 'liked your' : 'commented on your'} {item.target_type === 'short' ? 'Short' : item.target_type}.</span>
+                      <span><strong>{item.actorName}</strong> {item.kind === 'moderation' ? moderationCopy[item.notification_type] ?? 'There is a moderation update for your account.' : item.notification_type === 'like' ? 'liked your' : 'commented on your'}{item.kind === 'social' ? ` ${item.target_type === 'short' ? 'Short' : item.target_type}.` : ''}</span>
+                      {item.kind === 'moderation' && item.rationale && <span className={styles.moderationRationale}>Reason: {item.rationale}</span>}
+                      {item.kind === 'moderation' && item.expires_at && <span className={styles.moderationRationale}>Restriction ends: {new Date(item.expires_at).toLocaleString()}</span>}
                       <time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</time>
                     </span>
                     {!item.read_at && <span className={styles.unreadDot} aria-label="Unread" />}

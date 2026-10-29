@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { LockKeyhole, ShoppingBag, Sparkles } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
+import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import { isSupabaseWalletConfigured } from './service';
 import styles from './TokenShopPanel.module.css';
 
@@ -21,12 +22,12 @@ type ShopItem = {
 interface TokenShopPanelProps {
   userId: string;
   isGuest: boolean;
+  role: string;
 }
 
-// Keep redemption disabled until owner-approved migration and staging ledger tests pass.
-const SPENDING_ENABLED = false;
-
-export function TokenShopPanel({ userId, isGuest }: TokenShopPanelProps) {
+// Central release gate keeps redemption disabled until owner-approved staging tests pass.
+export function TokenShopPanel({ userId, isGuest, role }: TokenShopPanelProps) {
+  const spendingEnabled = canAccessSanctuaryFeature('tokenSpending', role);
   const [items, setItems] = useState<ShopItem[]>([]);
   const [ownedItems, setOwnedItems] = useState<Set<string>>(new Set());
   const [balance, setBalance] = useState<number | null>(null);
@@ -87,7 +88,7 @@ export function TokenShopPanel({ userId, isGuest }: TokenShopPanelProps) {
   }, [loadShop]);
 
   const purchaseItem = async (item: ShopItem) => {
-    if (!SPENDING_ENABLED || isGuest || !hasSupabaseAccount || purchasingItemId || ownedItems.has(item.item_id)) return;
+    if (!spendingEnabled || isGuest || !hasSupabaseAccount || purchasingItemId || ownedItems.has(item.item_id)) return;
 
     setPurchasingItemId(item.item_id);
     setError(null);
@@ -184,11 +185,11 @@ export function TokenShopPanel({ userId, isGuest }: TokenShopPanelProps) {
                     <strong>{item.price_tokens.toLocaleString('en-GB')} tokens</strong>
                     <button
                       type="button"
-                      disabled={!SPENDING_ENABLED || !hasSupabaseAccount || owned || purchasingItemId !== null}
+                      disabled={!spendingEnabled || !hasSupabaseAccount || owned || purchasingItemId !== null}
                       onClick={() => void purchaseItem(item)}
                       className={styles.buyButton}
                     >
-                      {owned ? 'Owned' : !SPENDING_ENABLED ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}
+                      {owned ? 'Owned' : !spendingEnabled ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}
                     </button>
                   </div>
                   {owned && <p className={styles.ownedNote}>Already in your account collection.</p>}

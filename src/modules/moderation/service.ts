@@ -5,6 +5,11 @@ export type ReportTarget = ContentReportRow['target_type'];
 
 export interface ModerationQueueItem extends ContentReportRow {
   targetOwnerId: string | null;
+  targetOwnerName: string | null;
+  targetOwnerUsername: string | null;
+  targetPreview: string;
+  targetCreatedAt: string | null;
+  targetState: string | null;
 }
 
 export async function submitContentReport(input: {
@@ -26,6 +31,23 @@ export async function submitContentReport(input: {
     requested_details: details || null,
   });
   if (error) throw new Error(`Report could not be submitted: ${error.message}`);
+}
+
+async function loadTargetContext(report: ContentReportRow) {
+  const { data, error } = await getSupabaseBrowserClient().rpc('get_moderation_report_context', {
+    requested_target_type: report.target_type,
+    requested_target_id: report.target_id,
+  });
+  if (error) throw new Error(`Report context could not be loaded: ${error.message}`);
+  const context = data?.[0];
+  return {
+    targetOwnerId: context?.owner_id ?? null,
+    targetOwnerName: context?.owner_name ?? null,
+    targetOwnerUsername: context?.owner_username ?? null,
+    targetPreview: context?.preview ?? 'Content preview unavailable. Check the target directly before taking action.',
+    targetCreatedAt: context?.content_created_at ?? null,
+    targetState: context?.content_state ?? null,
+  };
 }
 
 export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
@@ -52,14 +74,10 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
     .limit(100);
   if (error) throw new Error(`Moderation reports could not be loaded: ${error.message}`);
 
-  return Promise.all(reports.map(async (report) => {
-    const { data: targetOwnerId, error: ownerError } = await client.rpc('get_report_target_owner', {
-      requested_target_type: report.target_type,
-      requested_target_id: report.target_id,
-    });
-    if (ownerError) throw new Error(`Report context could not be loaded: ${ownerError.message}`);
-    return { ...report, targetOwnerId };
-  }));
+  return Promise.all(reports.map(async (report) => ({
+    ...report,
+    ...await loadTargetContext(report),
+  })));
 }
 
 export async function takeModerationAction(input: {
