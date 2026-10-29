@@ -92,16 +92,11 @@ export function AppWorkspace() {
         const blocked = data.status === 'banned' ||
           (data.status === 'suspended' && (!data.suspended_until || new Date(data.suspended_until).getTime() > Date.now()));
         if (blocked) {
-          const { data: notice } = await getSupabaseBrowserClient().from('moderation_user_notifications')
-            .select('rationale,expires_at,event_type')
-            .eq('recipient_id', currentUser.user.id)
-            .in('event_type', ['ban', 'suspend'])
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
           if (cancelled) return;
-          setAccountRestrictionReason(notice?.rationale ?? null);
-          setAccountSuspendedUntil(notice?.expires_at ?? data.suspended_until);
+          // Restriction state comes from the typed profiles contract.
+          // Notice detail is omitted until the live notification schema/policy is verified.
+          setAccountRestrictionReason(null);
+          setAccountSuspendedUntil(data.suspended_until);
           setAccountAccessStatus(data.status === 'banned' ? 'banned' : 'suspended');
         } else {
           setAccountRestrictionReason(null);
@@ -252,7 +247,7 @@ export function AppWorkspace() {
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Wallet access is restricted</h1><p className={styles.sectionDescription}>The Wallet is temporarily available to VIP members and above while purchases and spending are being tested. Your account and community access are unchanged.</p></main>
         )
       ) : contentNavigation === 'shop' ? (
-        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} role={currentUser.profile.role} /> : (
+        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} /> : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Token Shop access is restricted</h1><p className={styles.sectionDescription}>The Token Shop is temporarily available to VIP members and above while its payment and redemption systems are being verified. Token spending remains disabled until testing is complete.</p></main>
         )
       ) : contentNavigation === 'games' ? (
