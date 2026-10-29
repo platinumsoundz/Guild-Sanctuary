@@ -507,3 +507,11 @@
 .gameDetails strong { color:var(--ink); font-size:11px; }
 .gameDetails p { margin:6px 0 0; color:var(--muted); font:11px/1.6 Arial,sans-serif; }
 @media(max-width:600px) { .gameDetails { grid-template-columns:1fr; gap:13px; padding:13px; } .detailsToggle { flex:1 1 auto; } }
+
+/* Recent-play privacy controls. */
+.recentActions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:10px; }
+.recentActions > span { color:var(--muted); font-size:10px; }
+.clearHistory { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:38px; padding:8px 11px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--muted); cursor:pointer; font:700 10px Arial,sans-serif; touch-action:manipulation; }
+.clearHistory:hover { border-color:var(--accent); color:var(--ink); }
+.clearHistory:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+@media(max-width:600px) { .recentActions { justify-content:flex-start; } }
