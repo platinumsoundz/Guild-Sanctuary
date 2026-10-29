@@ -112,7 +112,7 @@ export function MeetupCalendarPlaceholder() {
     setStartTime(localDateTime.slice(11, 16));
     setLatitude(String(event.locationCoords.latitude));
     setLongitude(String(event.locationCoords.longitude));
-    setLocationAddress('');
+    setLocationAddress(event.locationLabel ?? '');
   };
 
   const resolveLocation = async () => {
