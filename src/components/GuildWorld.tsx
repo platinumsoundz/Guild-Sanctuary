@@ -6,6 +6,7 @@ import styles from './GuildWorld.module.css';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections } from '@/lib/controllerInput';
 import { GuildCometDodge } from './GuildCometDodge';
 import { GuildCompanionHub } from './GuildCompanionHub';
+import { GamesHub } from '@/components/GamesHub';
 
 type GuildWorldProps = {
   userId: string | null;
@@ -235,8 +236,19 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
 
   return (
     <>
-      {!worldOpen && (entryOpen || controllerConnected) && (
-        <aside className={styles.entry} aria-label="Hidden Guild entry">
+      {!worldOpen && (
+        <main className={styles.publicGuild} aria-labelledby="public-guild-title">
+          <p className={styles.eyebrow}>THE GUILD · COMMUNITY WORLDS</p>
+          <h1 id="public-guild-title">Your next world awaits.</h1>
+          <p className={styles.publicGuildIntro}>{isAuthenticated
+            ? 'Explore creator projects and community servers, or enter the Guild’s original browser arcade.'
+            : 'Browse creator games and community servers. Sign in to Sanctuary to enter the Guild’s original browser arcade.'}</p>
+          {isAuthenticated && <button type="button" className={styles.enterPublicGuild} onClick={enterGuild}>Enter Guild Arcade <span aria-hidden="true">↗</span></button>}
+          <GamesHub />
+        </main>
+      )}
+      {isAuthenticated && !worldOpen && (entryOpen || controllerConnected) && (
+        <aside className={styles.entry} aria-label="Guild entry">
           <div className={styles.entryIcon}><Gamepad2 size={19} aria-hidden="true" /></div>
           <div className={styles.entryCopy}>
             <strong>{controllerConnected ? 'Controller detected' : 'Accessibility entry'}</strong>
@@ -246,7 +258,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
           {!controllerConnected && <button type="button" className={styles.dismiss} aria-label="Close Guild entry" onClick={() => setEntryOpen(false)}><X size={16} /></button>}
         </aside>
       )}
-      {worldOpen && (
+      {isAuthenticated && worldOpen && (
         <div className={`${styles.backdrop} ${bigPicture ? styles.backdropBigPicture : ""}`} role="dialog" aria-modal="true" aria-labelledby="guild-title">
           <section ref={dialogRef} className={`${styles.world} ${bigPicture ? styles.worldBigPicture : ""}`}>
             <header className={styles.topbar}>
