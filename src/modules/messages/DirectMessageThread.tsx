@@ -19,7 +19,7 @@ interface DirectMessageThreadProps {
 
 export function DirectMessageThread({ peer, conversation, onBack }: DirectMessageThreadProps) {
   const { currentUser } = useAppContext();
-  const { messages, isLoading, isSending, error, send } = useDirectMessages(peer?.userId ?? null, conversation?.id ?? null);
+  const { conversationId: activeConversationId, messages, isLoading, isSending, error, send } = useDirectMessages(peer?.userId ?? null, conversation?.id ?? null);
   const [draft, setDraft] = useState('');
   const [senderProfiles, setSenderProfiles] = useState<Record<string, PublicProfile>>({});
   const peerId = peer?.userId ?? conversation?.participantIds.find((participantId) => participantId !== currentUser?.user.id);
@@ -73,7 +73,7 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
         </div>
       </header>
       <MessagePrivacyNotice />
-      {conversation?.kind !== 'group' && peerId && <CallControls />}
+      {conversation?.kind !== 'group' && peerId && <CallControls conversationId={activeConversationId} userId={currentUser?.user.id ?? null} peerUserId={peerId} />}
       <section className={styles.messageList} aria-label={`Conversation: ${title}`} aria-live="polite">
         {isLoading ? <p className={styles.emptyMessage}>Opening conversation...</p> : messages.length === 0 ? (
           <p className={styles.emptyMessage}>This is the beginning of your conversation.</p>
