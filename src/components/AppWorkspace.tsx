@@ -1,5 +1,6 @@
 'use client';
 
+import { Gamepad2, Play } from 'lucide-react';
 import { ResponsiveShell } from '@/components/ResponsiveShell';
 import { Navigation } from '@/components/Navigation';
 import { useEffect, useState } from 'react';
@@ -66,6 +67,8 @@ export function AppWorkspace() {
   const [accountSuspendedUntil, setAccountSuspendedUntil] = useState<string | null>(null);
   const [accountRestrictionReason, setAccountRestrictionReason] = useState<string | null>(null);
   const [guildPage, setGuildPage] = useState<GuildPage>('home');
+  const [guildRecentTitle, setGuildRecentTitle] = useState<string | null>(null);
+  const [guildAutoLaunchRecent, setGuildAutoLaunchRecent] = useState(false);
   const guildInternalPages: GuildPage[] = ['home', 'arcade', 'trials', 'library', 'music', 'photos', 'tools'];
   const contentNavigation = activeNavigation === 'guild'
     ? (guildInternalPages.includes(guildPage) ? 'guild' : guildPage)
@@ -89,12 +92,16 @@ export function AppWorkspace() {
         const blocked = data.status === 'banned' ||
           (data.status === 'suspended' && (!data.suspended_until || new Date(data.suspended_until).getTime() > Date.now()));
         if (blocked) {
+          const { data: notice } = await getSupabaseBrowserClient().from('moderation_user_notifications')
+            .select('rationale,expires_at,event_type')
+            .eq('recipient_id', currentUser.user.id)
+            .in('event_type', ['ban', 'suspend'])
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
           if (cancelled) return;
-          // Read the account restriction state from the typed profiles contract.
-          // Moderation notice details are intentionally omitted until the live
-          // notification table and its policy are verified in both environments.
-          setAccountRestrictionReason(null);
-          setAccountSuspendedUntil(data.suspended_until);
+          setAccountRestrictionReason(notice?.rationale ?? null);
+          setAccountSuspendedUntil(notice?.expires_at ?? data.suspended_until);
           setAccountAccessStatus(data.status === 'banned' ? 'banned' : 'suspended');
         } else {
           setAccountRestrictionReason(null);
@@ -138,6 +145,18 @@ export function AppWorkspace() {
       window.clearInterval(poll);
     };
   }, [currentUser, isAuthenticated, isGuest, isSessionReady, setActiveNavigation]);
+
+  useEffect(() => {
+    if (activeNavigation !== 'guild' || guildPage !== 'home') return;
+    try {
+      const raw = window.localStorage.getItem('guild-library-recents-v1');
+      const recent = raw ? JSON.parse(raw) as Array<{ id?: string }> : [];
+      const first = Array.isArray(recent) ? recent[0]?.id : null;
+      setGuildRecentTitle(first === 'sleeves2d' ? 'The 5 Sleeves 2D' : first === 'sleeves3d' ? 'The 5 Sleeves 3D' : null);
+    } catch {
+      setGuildRecentTitle(null);
+    }
+  }, [activeNavigation, guildPage]);
 
   useEffect(() => {
     if (contentNavigation !== 'profile') {
@@ -233,7 +252,7 @@ export function AppWorkspace() {
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Wallet access is restricted</h1><p className={styles.sectionDescription}>The Wallet is temporarily available to VIP members and above while purchases and spending are being tested. Your account and community access are unchanged.</p></main>
         )
       ) : contentNavigation === 'shop' ? (
-        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest}  /> : (
+        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} role={currentUser.profile.role} /> : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Token Shop access is restricted</h1><p className={styles.sectionDescription}>The Token Shop is temporarily available to VIP members and above while its payment and redemption systems are being verified. Token spending remains disabled until testing is complete.</p></main>
         )
       ) : contentNavigation === 'games' ? (
@@ -334,26 +353,41 @@ export function AppWorkspace() {
       <ResponsiveShell>
         {activeNavigation === 'guild' ? (
           <div className={styles.guildExperience} data-world="guild">
-            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={setGuildPage} onExit={() => setActiveNavigation('today')} />
+            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
             <motion.div className={styles.guildWorldContent}>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={guildPage} className={styles.guildPageContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
                 {guildPage === 'home' ? (
                   <main className={styles.guildLanding} aria-labelledby="guild-home-title">
-                    <p className={styles.sectionEyebrow}>THE GUILD · YOUR CONSOLE</p>
-                    <h1 id="guild-home-title">Your worlds, all in one place.</h1>
-                    <p className={styles.sectionDescription}>A focused home for your games, music, memories and the Sanctuary spaces you already use. Open the menu at the top left to move between them.</p>
+                    <section className={styles.guildFeatured} aria-labelledby="guild-home-title">
+                      <div className={styles.guildFeaturedCopy}>
+                        <p className={styles.sectionEyebrow}>THE GUILD · YOUR CONSOLE</p>
+                        <span className={styles.guildLiveLabel}><i /> YOUR GAMING SPACE</span>
+                        <h1 id="guild-home-title">Your worlds.<br /><em>One home.</em></h1>
+                        <p>A console-first home for your games, collection, music and memories — with Sanctuary always within reach.</p>
+                        <div className={styles.guildHeroActions}>
+                          <button type="button" className={styles.guildPrimaryAction} onClick={() => setGuildPage('arcade')}><Gamepad2 size={18} /> Open game library</button>
+                          <button type="button" className={styles.guildSecondaryAction} onClick={() => setGuildPage('trials')}>Play Guild Trials <span aria-hidden="true">↗</span></button>
+                        </div>
+                      </div>
+                      <div className={styles.guildFeaturedArt} aria-hidden="true"><div className={styles.guildOrbitRing} /><div className={styles.guildOrbitPlanet} /><span className={styles.guildOrbitMoon} /></div>
+                    </section>
+                    <section className={styles.guildContinue} aria-label="Continue playing">
+                      <div><p className={styles.sectionEyebrow}>PICK UP WHERE YOU LEFT OFF</p><h2>{guildRecentTitle ?? 'Your next adventure starts here'}</h2><p>{guildRecentTitle ? 'Your last launch is saved on this device. Open the library to continue.' : 'Launch a game and your recent activity will appear here on this device.'}</p></div>
+                      <button type="button" onClick={() => { setGuildAutoLaunchRecent(Boolean(guildRecentTitle)); setGuildPage('arcade'); }}><Play size={16} /> {guildRecentTitle ? 'Continue playing' : 'Explore games'}</button>
+                    </section>
+                    <div className={styles.guildHomeSectionHead}><div><p className={styles.sectionEyebrow}>QUICK ACCESS</p><h2>Jump back in</h2></div><span>Touch · keyboard · controller</span></div>
                     <div className={styles.guildDestinationGrid}>
-                      <button type="button" onClick={() => setGuildPage('arcade')}><span>01 · PLAY</span><strong>Game Library</strong><small>Launch The 5 Sleeves and browser games.</small></button>
+                      <button type="button" className={styles.guildDestinationFeatured} onClick={() => setGuildPage('arcade')}><span>01 · PLAY</span><strong>Featured Games</strong><small>Open the game library, launch worlds and review compatibility.</small><b>Open library <span aria-hidden="true">↗</span></b></button>
                       <button type="button" onClick={() => setGuildPage('trials')}><span>02 · PLAY</span><strong>Guild Trials</strong><small>Play the original Orbital Drift and Comet Dodge arcade games.</small></button>
-                      <button type="button" onClick={() => setGuildPage('library')}><span>03 · COLLECT</span><strong>My Game Collection</strong><small>Save and organize your personal game catalogue.</small></button>
+                      <button type="button" onClick={() => setGuildPage('library')}><span>03 · COLLECT</span><strong>My Game Collection</strong><small>Save and organise your personal game catalogue.</small></button>
                       <button type="button" onClick={() => setGuildPage('music')}><span>04 · LISTEN</span><strong>Music Player</strong><small>Play audio files selected from this device.</small></button>
                       <button type="button" onClick={() => setGuildPage('photos')}><span>05 · REMEMBER</span><strong>Photo Slideshow</strong><small>Build a private, in-browser slideshow.</small></button>
-                      <button type="button" onClick={() => setGuildPage('tools')}><span>06 · EXPLORE</span><strong>Guild Tools</strong><small>Cloud Lab status and gaming destinations.</small></button>
-                      <button type="button" onClick={() => setGuildPage('today')}><span>07 · SANCTUARY</span><strong>All Sanctuary Pages</strong><small>Community, messages, profile, planner, settings and more.</small></button>
+                      <button type="button" onClick={() => setGuildPage('tools')}><span>06 · EXPLORE</span><strong>Guild Tools</strong><small>Review gaming destinations and Cloud Lab status.</small></button>
+                      <button type="button" onClick={() => setGuildPage('today')}><span>07 · SANCTUARY</span><strong>Return to Sanctuary</strong><small>Community, messages, profile, planner and settings.</small></button>
                     </div>
                   </main>
-                ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub /></div>
+                ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub autoLaunchRecent={guildAutoLaunchRecent} /></div>
                 : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
                 : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /></div>
                 : ['music', 'photos', 'tools'].some((page) => page === guildPage) ? null
