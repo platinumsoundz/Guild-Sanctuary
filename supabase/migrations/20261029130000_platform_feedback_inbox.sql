@@ -22,6 +22,7 @@ with check (
     select 1 from public.profiles p
     where p.id = auth.uid() and p.status = 'active'
   )
+  and status = 'new'
 );
 
 drop policy if exists "Members read own feedback and staff read inbox" on public.platform_feedback;
