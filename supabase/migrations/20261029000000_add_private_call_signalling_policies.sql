@@ -28,6 +28,7 @@ with check (
   and case
     when realtime.topic() ~ '^sanctuary-call:[0-9a-fA-F-]{36}$'
     then public.is_active_conversation_member(split_part(realtime.topic(), ':', 2)::uuid)
+      and exists (select 1 from public.conversations c where c.id = split_part(realtime.topic(), ':', 2)::uuid and c.kind = 'direct')
     else false
   end
 );
