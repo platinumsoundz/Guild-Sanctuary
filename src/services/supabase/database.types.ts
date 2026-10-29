@@ -86,6 +86,25 @@ export interface Database {
   public: {
     Tables: {
       profiles: Table<ProfileRow>;
+      platform_feedback: Table<{
+        id: string;
+        submitter_id: string;
+        category: 'idea' | 'bug' | 'confusing' | 'accessibility' | 'other';
+        title: string;
+        details: string;
+        page_url: string | null;
+        status: 'new' | 'in_review' | 'resolved' | 'closed';
+        created_at: string;
+      }, {
+        id?: string;
+        submitter_id: string;
+        category: 'idea' | 'bug' | 'confusing' | 'accessibility' | 'other';
+        title: string;
+        details: string;
+        page_url?: string | null;
+        status?: 'new' | 'in_review' | 'resolved' | 'closed';
+        created_at?: string;
+      }>;
       community_tips: Table<{
         stripe_event_id: string;
         checkout_session_id: string;
