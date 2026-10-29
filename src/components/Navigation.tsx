@@ -140,7 +140,7 @@ export function Navigation({
       const [social, moderation, messages, reports, feedback] = await Promise.all([
         client.from('notifications').select('id', { count: 'exact', head: true }).eq('recipient_id', currentUser.user.id).is('read_at', null),
         client.from('moderation_user_notifications').select('id', { count: 'exact', head: true }).eq('recipient_id', currentUser.user.id).is('read_at', null),
-        client.from('messages').select('id', { count: 'exact', head: true }).neq('sender_id', currentUser.user.id).is('read_at', null),
+        client.from('messages').select('id', { count: 'exact', head: true }).neq('sender_id', currentUser.user.id).eq('state', 'visible').is('read_at', null),
         canAccessAdmin ? client.from('content_reports').select('id', { count: 'exact', head: true }).in('status', ['open', 'reviewing']) : Promise.resolve({ count: 0, error: null }),
         canReviewFeedback ? client.from('platform_feedback').select('id', { count: 'exact', head: true }).in('status', ['new', 'in_review']) : Promise.resolve({ count: 0, error: null }),
       ]);
@@ -155,7 +155,7 @@ export function Navigation({
     });
     const interval = window.setInterval(() => { void refreshBadges().catch(() => undefined); }, 30000);
     return () => { cancelled = true; window.clearInterval(interval); };
-  }, [currentUser?.user.id, isGuest, canAccessAdmin]);
+  }, [currentUser?.user.id, currentUser?.profile.role, isGuest, canAccessAdmin]);
 
   useEffect(() => {
     let cancelled = false;
