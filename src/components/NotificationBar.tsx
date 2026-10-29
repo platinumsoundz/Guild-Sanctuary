@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Bell, CheckCheck, Heart, MessageCircle, X } from 'lucide-react';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { getSupabaseBrowserClient } from '@/services/supabase';
+import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import styles from './NotificationBar.module.css';
 
 type NotificationItem = {
@@ -215,11 +216,16 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
 
   const openNotification = async (item: NotificationItem) => {
     const accountId = activeAccountId.current;
-    if (!accountId) return;
+    if (!accountId || !currentUser) return;
+    const destination = destinationFor[item.target_type];
+    if (!canAccessSanctuaryPage(destination, currentUser.profile.role)) {
+      setError('This notification links to a feature unavailable for your current account role. It has not been marked as read.');
+      return;
+    }
     await markRead(item);
     if (activeAccountId.current !== accountId) return;
     setIsOpen(false);
-    setActiveNavigation(destinationFor[item.target_type]);
+    setActiveNavigation(destination);
   };
 
 
