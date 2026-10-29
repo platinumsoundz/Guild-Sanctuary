@@ -19,6 +19,25 @@ interface PeerCallOptions {
 }
 
 const ICE_SERVERS: RTCIceServer[] = [{ urls: 'stun:stun.l.google.com:19302' }];
+const MAX_PENDING_CANDIDATES = 128;
+const MAX_SEEN_CALL_IDS = 64;
+
+function isValidSignal(value: unknown): value is Signal {
+  if (!value || typeof value !== 'object') return false;
+  const signal = value as Partial<Signal>;
+  if (typeof signal.callId !== 'string' || !/^[0-9a-f-]{36}$/i.test(signal.callId)) return false;
+  if (typeof signal.from !== 'string' || typeof signal.to !== 'string' || signal.from === signal.to) return false;
+  if (!['invite', 'accept', 'decline', 'hangup', 'offer', 'answer', 'candidate'].includes(String(signal.type))) return false;
+  if (signal.type === 'invite' && signal.kind !== 'audio' && signal.kind !== 'video') return false;
+  if ((signal.type === 'offer' || signal.type === 'answer') &&
+      (!signal.description || typeof signal.description !== 'object' ||
+       !['offer', 'answer'].includes(String(signal.description.type)) ||
+       typeof signal.description.sdp !== 'string' || signal.description.sdp.length > 100_000)) return false;
+  if (signal.type === 'candidate' &&
+      (!signal.candidate || typeof signal.candidate !== 'object' ||
+       (signal.candidate.candidate != null && (typeof signal.candidate.candidate !== 'string' || signal.candidate.candidate.length > 4_096)))) return false;
+  return true;
+}
 
 export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOptions) {
   const [status, setStatus] = useState<CallStatus>('idle');
@@ -36,6 +55,7 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
   const remoteRef = useRef<MediaStream | null>(null);
   const activeCallId = useRef<string | null>(null);
   const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
+  const seenCallIds = useRef<string[]>([]);
   const statusRef = useRef<CallStatus>(status);
   const kindRef = useRef<CallKind>(kind);
   statusRef.current = status;
@@ -77,7 +97,8 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
     setRemoteStream(remote);
     stream.getTracks().forEach((track) => pc.addTrack(track, stream));
     pc.ontrack = (event) => {
-      event.streams[0]?.getTracks().forEach((track) => {
+      const incomingTracks = event.streams[0]?.getTracks() ?? [event.track];
+      incomingTracks.forEach((track) => {
         if (!remote.getTracks().some((existing) => existing.id === track.id)) remote.addTrack(track);
       });
       setRemoteStream(new MediaStream(remote.getTracks()));
@@ -107,9 +128,11 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
     });
     channelRef.current = channel;
     channel.on('broadcast', { event: 'signal' }, ({ payload }: { payload: Signal }) => {
-      if (cancelled || !payload || payload.to !== userId || payload.from !== peerUserId) return;
+      if (cancelled || !isValidSignal(payload) || payload.to !== userId || payload.from !== peerUserId) return;
       if (payload.type === 'invite') {
+        if (seenCallIds.current.includes(payload.callId)) return;
         if (statusRef.current === 'connected' || statusRef.current === 'calling' || statusRef.current === 'connecting' || statusRef.current === 'ringing') return;
+        seenCallIds.current = [...seenCallIds.current, payload.callId].slice(-MAX_SEEN_CALL_IDS);
         activeCallId.current = payload.callId;
         kindRef.current = payload.kind;
         setKind(payload.kind);
@@ -154,7 +177,7 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
             for (const candidate of pendingCandidates.current.splice(0)) await pcRef.current.addIceCandidate(candidate);
           } else if (payload.type === 'candidate') {
             if (pcRef.current?.remoteDescription) await pcRef.current.addIceCandidate(payload.candidate);
-            else pendingCandidates.current.push(payload.candidate);
+            else if (pendingCandidates.current.length < MAX_PENDING_CANDIDATES) pendingCandidates.current.push(payload.candidate);
           }
         } catch (cause) {
           setError(cause instanceof Error ? cause.message : 'Call connection negotiation failed.');
