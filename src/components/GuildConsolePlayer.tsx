@@ -65,6 +65,14 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
     if (menuOpen) { setMenuOpen(false); return; }
     setMenuOpen(true);
   }, [menuOpen, settingsOpen]);
+  const menuOpenRef = useRef(menuOpen);
+  const activateFocusedRef = useRef(activateFocused);
+  const goBackRef = useRef(goBack);
+  const moveMenuFocusRef = useRef(moveMenuFocus);
+  menuOpenRef.current = menuOpen;
+  activateFocusedRef.current = activateFocused;
+  goBackRef.current = goBack;
+  moveMenuFocusRef.current = moveMenuFocus;
 
   useEffect(() => {
     const sync = () => setIsFullscreen(document.fullscreenElement === stageRef.current);
@@ -95,14 +103,14 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
         const buttons = pad.buttons.map((button) => button.pressed || button.value > 0.65);
         const pressed = (index: number) => Boolean(buttons[index] && !previousButtons.current[index]);
         if (pressed(16) || pressed(9)) setMenuOpen((open) => !open);
-        if (menuOpen) {
-          if (pressed(0)) activateFocused();
-          if (pressed(1)) goBack();
+        if (menuOpenRef.current) {
+          if (pressed(0)) activateFocusedRef.current();
+          if (pressed(1)) goBackRef.current();
           const x = (buttons[15] ? 1 : 0) - (buttons[14] ? 1 : 0) || (Math.abs(pad.axes[0] ?? 0) > 0.55 ? Math.sign(pad.axes[0]) : 0);
           const y = (buttons[13] ? 1 : 0) - (buttons[12] ? 1 : 0) || (Math.abs(pad.axes[1] ?? 0) > 0.55 ? Math.sign(pad.axes[1]) : 0);
           if (now - lastMoveAt > 180 && (x !== previousDirections.current.x || y !== previousDirections.current.y) && (x !== 0 || y !== 0)) {
-            if (y !== 0) moveMenuFocus(y as -1 | 1);
-            else if (x !== 0) moveMenuFocus(x as -1 | 1);
+            if (y !== 0) moveMenuFocusRef.current(y as -1 | 1);
+            else if (x !== 0) moveMenuFocusRef.current(x as -1 | 1);
             lastMoveAt = now;
           }
           previousDirections.current = { x, y };
@@ -125,7 +133,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       window.removeEventListener('gamepadconnected', connected);
       window.removeEventListener('gamepaddisconnected', disconnected);
     };
-  }, [activateFocused, goBack, menuOpen, moveMenuFocus]);
+  }, []);
 
   useEffect(() => {
     const applyAudioSettings = () => {
