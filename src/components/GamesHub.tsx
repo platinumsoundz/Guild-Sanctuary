@@ -33,7 +33,7 @@ const games: GameEntry[] = [
   },
 ];
 
-export function GamesHub() {
+export function GamesHub({ autoLaunchRecent = false }: { autoLaunchRecent?: boolean }) {
   const [activeGame, setActiveGame] = useState<GameEntry | null>(null);
   const [copiedServer, setCopiedServer] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -49,7 +49,14 @@ export function GamesHub() {
       const favouriteValue = window.localStorage.getItem(FAVOURITES_KEY);
       if (recentValue) {
         const parsed = JSON.parse(recentValue) as LaunchRecord[];
-        if (Array.isArray(parsed)) setRecentLaunches(parsed.filter((item) => item && games.some((game) => game.id === item.id) && Number.isFinite(item.at)).slice(0, 8));
+        if (Array.isArray(parsed)) {
+          const safeRecent = parsed.filter((item) => item && games.some((game) => game.id === item.id) && Number.isFinite(item.at)).slice(0, 8);
+          setRecentLaunches(safeRecent);
+          if (autoLaunchRecent && safeRecent[0]) {
+            const recentGame = games.find((game) => game.id === safeRecent[0].id);
+            if (recentGame?.url) setActiveGame(recentGame);
+          }
+        }
       }
       if (favouriteValue) {
         const parsed = JSON.parse(favouriteValue) as GameId[];
@@ -57,7 +64,7 @@ export function GamesHub() {
       }
     } catch { /* Preferences are optional; malformed local data must not block the library. */ }
     finally { setLibraryReady(true); }
-  }, []);
+  }, [autoLaunchRecent]);
 
   const rememberLaunch = (game: GameEntry) => {
     const next = [{ id: game.id, at: Date.now() }, ...recentLaunches.filter((item) => item.id !== game.id)].slice(0, 8);
