@@ -17,8 +17,8 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - [ ] **Accessibility and polish:** contrast, readable text, loading/error/empty states, focus management, reduced-motion behaviour and keyboard-only checks.
 
 ### P1 — Core console behaviour
-- [ ] **Recent games / Continue Playing:** persist launch history and favourites, with clear empty states. Do not promise exact session restore unless a game supports it.
-- [ ] **Unified search:** search Guild pages and saved game catalogue; add controller-friendly on-screen keyboard and platform filters.
+- [x] **Local recent games / Continue Playing foundation:** launch history and favourites now persist in this browser, with search, ready-to-play/favourites filters and empty states. Account sync and exact gameplay session restore remain unimplemented.
+- [ ] **Unified search:** game-library search is implemented locally; next add Guild-page search, a controller-friendly on-screen keyboard and platform filters.
 - [ ] **Game detail views:** controls, supported input, launch method, compatibility notes, verified progress and a clear return-to-library route.
 - [ ] **Console settings:** controller diagnostics, touch-control visibility, UI scale, reduced motion, fullscreen guidance, audio preferences and privacy controls.
 - [ ] **Reliable launch and return:** verify The 5 Sleeves 2D and The 5 Sleeves 3D on Android and desktop, including iframe restrictions, multiplayer, sign-in, audio, fullscreen and navigation back to Guild.
@@ -52,6 +52,8 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ## Current implementation context (2026-10-29)
 - Draft PR #231 contains the Guild console player/system menu foundation.
 - Draft PR #233 stacks on #231 and adds the full Guild-owned navigation shell and separate Guild destinations.
+- Draft PR #234 adds the visual polish pass and roadmap contract fix.
+- The current HUD/library batch adds browser-local recent launches, favourites, search, launch-readiness filters, empty states and source-level contract assertions. Preferences are not account-synced.
 - The Guild shell and player have controller/touch support in source, but manual device QA is still required.
 - The 5 Sleeves 2D URL must remain configurable until a host is verified; do not guess it.
 - The 5 Sleeves 3D URL currently configured in source is https://the-5-sleeves-3d.pages.dev/.
