@@ -56,5 +56,7 @@ export async function savePageVisibility(pageKey: ManagedPageKey, isVisible: boo
 }
 
 export function isPageVisible(pageKey: string, visibility: PageVisibilityMap): boolean {
+  // Preserve an always-available recovery surface for staff if a visibility rule is misconfigured.
+  if (pageKey === 'admin') return true;
   return visibility[pageKey as ManagedPageKey] !== false;
 }
