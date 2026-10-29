@@ -4,10 +4,11 @@ import { Home, Gamepad2, Library, Music2, Image as ImageIcon, Settings, Newspape
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import styles from './GuildNavigation.module.css';
-export type GuildPage = 'home' | 'arcade' | 'library' | 'music' | 'photos' | 'tools' | NavigationState;
+export type GuildPage = 'home' | 'arcade' | 'trials' | 'library' | 'music' | 'photos' | 'tools' | NavigationState;
 type Item = { id: GuildPage; label: string; icon: typeof Home; description?: string };
 const guildItems: Item[] = [
- {id:'home',label:'Guild Home',icon:Home},{id:'arcade',label:'Arcade',icon:Gamepad2,description:'Play Guild worlds'},
+ {id:'home',label:'Guild Home',icon:Home},{id:'arcade',label:'Game Library',icon:Gamepad2,description:'Launch The 5 Sleeves and browser games'},
+ {id:'trials',label:'Guild Trials',icon:Gamepad2,description:'Original Guild arcade games'},
  {id:'library',label:'Game Library',icon:Library,description:'The 5 Sleeves and saved games'},
  {id:'music',label:'Music Player',icon:Music2,description:'Audio selected from this device'},
  {id:'photos',label:'Photo Slideshow',icon:ImageIcon,description:'Private local gallery'},
