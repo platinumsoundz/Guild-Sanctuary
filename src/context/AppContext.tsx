@@ -36,7 +36,7 @@ import type { Database } from '@/services/supabase/database.types';
 import { normalizeSocialLinks } from '@/lib/socialLinks';
 import { fetchAccountSettings } from '@/modules/settings/service';
 
-export type NavigationState = 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'planner';
+export type NavigationState = 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'roadmap' | 'guild-roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'planner';
 
 export type UserSession = AuthSession;
 
@@ -113,10 +113,11 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     void fetchAccountSettings(currentUser.user.id).then(({ preferences }) => {
       if (cancelled) return;
       const preference = preferences.theme;
+      document.documentElement.dataset.layout = preferences.layout;
       const applyTheme = () => {
         const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
         document.documentElement.dataset.theme = theme;
-        document.documentElement.classList.toggle('dark', theme !== 'light');
+        document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
       };
       applyTheme();
       try {
@@ -140,18 +141,27 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
 
   useEffect(() => {
     if (!isSessionReady || (currentUser && !isGuest) || typeof window === 'undefined') return;
-    let preference = 'system';
+    let preference = 'dark';
     try {
-      preference = window.localStorage.getItem('sanctuary-theme') ?? 'system';
+      preference = window.localStorage.getItem('sanctuary-theme') ?? 'dark';
     } catch {
       // System preference is the fallback when device storage is unavailable.
     }
-    if (preference !== 'system') return;
+    if (preference !== 'system') {
+      if (preference === 'dark' || preference === 'dusk' || preference === 'ocean' || preference === 'stone' || preference === 'light') {
+        document.documentElement.dataset.theme = preference;
+        document.documentElement.classList.toggle('dark', preference === 'dark' || preference === 'dusk' || preference === 'ocean');
+      } else {
+        document.documentElement.dataset.theme = 'dark';
+        document.documentElement.classList.add('dark');
+      }
+      return;
+    }
     const media = window.matchMedia('(prefers-color-scheme: light)');
     const applySystemTheme = () => {
       const theme = media.matches ? 'light' : 'dark';
       document.documentElement.dataset.theme = theme;
-      document.documentElement.classList.toggle('dark', theme !== 'light');
+      document.documentElement.classList.toggle('dark', theme === 'dark');
     };
     applySystemTheme();
     media.addEventListener('change', applySystemTheme);

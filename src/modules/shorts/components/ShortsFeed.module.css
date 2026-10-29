@@ -104,6 +104,10 @@
 
 .feed {
   display: grid;
+  /* Every clip gets its own full-height scroll-snap row. Without fixed implicit
+     row sizing, CSS Grid can shrink multiple clips to share the feed height. */
+  grid-auto-rows: 100%;
+  align-content: start;
   height: min(calc(100svh - 230px), 760px);
   min-height: 360px;
   justify-items: center;
@@ -117,7 +121,7 @@
 .clip {
   position: relative;
   width: min(100%, 430px);
-  min-height: 0;
+  min-height: 100%;
   height: 100%;
   overflow: hidden;
   border: 1px solid var(--line);

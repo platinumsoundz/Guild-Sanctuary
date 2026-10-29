@@ -71,3 +71,5 @@
   cursor: not-allowed;
 }
 .placeholderAction:disabled { color: var(--muted); opacity: 1; }
+
+.releaseSummary{margin:22px 0 30px;padding:clamp(18px,3vw,26px);border:1px solid var(--line);border-radius:12px;background:var(--surface)}.releaseSummary h2{margin:0;font-size:clamp(19px,3vw,25px);font-weight:650}.releaseSummary p,.releaseSummary li{color:var(--muted);font:13px/1.8 Arial,sans-serif}.releaseSummary ul{padding-left:20px;margin-bottom:0}.moreInfo{margin-top:13px;border-top:1px solid var(--line);padding-top:10px}.moreInfo summary{color:var(--accent);cursor:pointer;font:700 11px Arial,sans-serif;list-style-position:inside}.moreInfo summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.moreInfo p{margin:10px 0 0;color:var(--muted);font:12px/1.75 Arial,sans-serif}.card h3{margin:13px 0 7px;font-size:15px;font-weight:650}.card>p{margin:0;color:var(--muted);font:12px/1.7 Arial,sans-serif}

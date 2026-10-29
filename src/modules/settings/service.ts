@@ -11,7 +11,7 @@ export const defaultAccountPreferences: AccountPreferences = {
   emailNotifications: true,
   personalizedFeed: true,
   layout: 'comfortable',
-  theme: 'system',
+  theme: 'dark',
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -49,7 +49,7 @@ function normalizePreferences(value: unknown): AccountPreferences {
     emailNotifications: typeof record.emailNotifications === 'boolean' ? record.emailNotifications : true,
     personalizedFeed: typeof record.personalizedFeed === 'boolean' ? record.personalizedFeed : true,
     layout: record.layout === 'compact' ? 'compact' : 'comfortable',
-    theme: record.theme === 'system' || record.theme === 'light' || record.theme === 'dark' || record.theme === 'dusk' || record.theme === 'stone' || record.theme === 'ocean' ? record.theme : 'system',
+    theme: record.theme === 'system' || record.theme === 'light' || record.theme === 'dark' || record.theme === 'dusk' || record.theme === 'stone' || record.theme === 'ocean' ? record.theme : 'dark',
   };
 }
 

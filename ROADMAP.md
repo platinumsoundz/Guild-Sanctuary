@@ -644,12 +644,47 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - No database migration, production deployment, account, payment, or provider settings changed.
 
 
-## Integration update — 2026-10-29
+## Front-end navigation clarity (2026-10-28)
 
-- **Merged to `main`:** [PR #217 — community comment reliability](https://github.com/platinumsoundz/Guild-Sanctuary/pull/217), merge commit `f968b4f0feba6ac1ac3b73c13ddea09180c3c85a`. The change adds visible comment-loading state, distinguishes empty results from failed/uncompleted loads, trims empty posts and blocks duplicate submissions while pending.
-- **Verification scope:** exact-head CI, typecheck, production build and Cloudflare Worker build passed before merge. This confirms build/contract quality, not authenticated end-to-end browser behavior or a production deployment. The Cloudflare deployment workflow is deliberately manual.
-- **Beta candidate:** PR #210 is updated with the compact-header change and a matching navigation contract. The latest head needs a fresh, visible workflow result; earlier checks are not evidence for the new head. The PR currently reports a mergeability conflict against `main`, so resolve that before considering merge.
-- **Next dependency chain:** keep guest-read-only PR #213, Guild Arcade #214 and creator-games #215 in order. Their static contracts and builds pass on recorded heads, but route-level UI gating still needs service/RLS checks and authenticated/guest browser journeys before merge.
-- **Daily Reflection #216:** schema/RLS/index review supports the existing account-scoped design; two-account browser isolation and save/read/delete failure paths remain open.
-- **Moderation #191/#199:** do not merge until the missing queue RPC is reconciled against the live migration ledger and action authorization receives independent review and staging tests.
-- **No production deployment, live database writes, migration application, provider-secret changes, or payment changes were performed in this batch.
+- **In code on branch `feat/sanctuary-frontend-polish-2026-10-28`:** the main navigation drawer groups destinations by member intent: Start here, Connect, Your space, Explore, Sanctuary tools, and Stewardship. The admin group remains hidden unless the existing role gate allows access.
+- The existing top-left navigation trigger, persistent page underneath the compact notification panel, unread indicator, Escape/outside-click dismissal, and “Open full notifications” path are preserved.
+- This is a front-end-only change based on current `main`; no backend schema, moderation workflow, deployment configuration, or live service was changed.
+- Automated/browser/device QA has not been run for this branch. Check keyboard navigation, mobile drawer scrolling, active destination highlighting, and role-gated Stewardship visibility during normal front-end QA.
+
+
+## Responsive front-end refinement (2026-10-28)
+
+- Improved small-screen home hero and quick-action layouts, including narrow-device typography, full-width primary actions and touch-friendly spacing.
+- Added consistent keyboard focus visibility and reduced-motion handling to home interactions.
+- Refined feed spacing for compact viewports and devices with bottom safe-area insets.
+- Improved profile editor field stacking and save-action sizing on narrow screens, with visible focus treatment for form controls.
+- **Scope:** presentation-only CSS; no admin/moderation, backend integration, data contract, or deployment changes.
+- **Verification status:** changes are committed to the front-end feature branch. Browser/device visual QA and automated checks have not been run in this session.
+
+
+## Cross-surface mobile and accessibility pass (2026-10-28)
+
+- Added keyboard-focus treatments and touch-friendly controls to compact notifications, the shared workspace, community feed composer/posts, profile discovery, public profiles, and self-discovery.
+- Tightened narrow-screen feed attachment layouts and public-profile action wrapping; constrained notification popover width on small viewports.
+- Reinforced responsive shell safe-area padding and media sizing.
+- **Scope:** CSS/presentation only; no API contracts, backend, moderation logic, database, or provider configuration changed.
+- **Verification:** source edits are committed to the feature branch. Automated checks and browser/device visual QA have not been run here.
+
+
+## Cosmic mobile front-end polish — 2026-10-28
+
+- **Implemented on feature branch:** Establish a midnight-indigo / violet cosmic default for the dark theme, with restrained nebula lighting, semantic theme tokens, refined borders and card surfaces.
+- **Implemented on feature branch:** Improve mobile navigation glass styling, active-item affordance, sticky header treatment, touch target sizing, full-width shell spacing, and safe-area handling for devices with display cut-outs.
+- **Implemented on feature branch:** Tighten shared page typography and responsive spacing, preserve content above fixed bottom navigation, and respect reduced-motion preferences.
+- **Validation outstanding:** Run the theme and theme-contrast contract scripts, TypeScript check, production build, and visual QA at narrow phone widths and desktop widths. Verify light/ocean/dusk/stone themes, keyboard navigation, screen-reader names, and iOS/Android safe areas before merge/release.
+- This pass is CSS-focused and intentionally avoids changing auth, persistence, database schemas, or service integrations.
+
+
+## Release-candidate integration batch update — 2026-10-28
+
+- **Merged into the release-candidate branch only:** PR [#212 — keep Shorts videos full size](https://github.com/platinumsoundz/Guild-Sanctuary/pull/212), squash commit `49260ef65e06aaced2f0a487edfeb1c49505d345`.
+- The change gives each Shorts clip its own full-height grid row, preserves vertical scroll snapping, and adds a CI contract against the layout regression.
+- **Not merged to `main`; not deployed to production.** GitHub reported all exact-head PR checks passing before merge. Vercel preview remained rate-limited and Cloudflare skipped deployment on the PR event, so this is not live-device acceptance evidence.
+- Guest-safe preview PR #213 remains the next dependency. It is still draft because its route-level guard must be reviewed alongside service/RLS authorization and real sign-in journeys. Guild Arcade PR #214 and creator games PR #215 remain stacked behind it; do not retarget/merge them until the guest-access dependency is reviewed and integrated.
+- Daily Reflection PR #216 remains draft pending authenticated account-isolation and save/read/delete failure-path acceptance. Messaging/comment/Shorts backend runtime checks remain separate release gates.
+- No Supabase writes, migrations, production settings, secrets, payment settings or production deployment were changed in this batch.

@@ -577,3 +577,22 @@
     display: none;
   }
 }
+/* Feed controls: comfortable tap targets, stable media sizing and visible focus. */
+.composer :where(button, input, textarea, select),
+.post :where(button, a) { touch-action: manipulation; }
+.composer :where(button, input, textarea, select):focus-visible,
+.post :where(button, a):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.post img,
+.post video,
+.post audio { max-width: 100%; }
+@media (max-width: 380px) {
+  .composer { padding: 11px; }
+  .attachmentControls { grid-template-columns: minmax(0, 1fr); }
+  .uploadButton { grid-column: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .composer *, .post * { scroll-behavior: auto; }
+}

@@ -27,6 +27,15 @@ Wallet UI and backend foundation are in the repository, but this is **not deploy
 - The Supabase migration has not been applied to the user's project. Functions are not deployed. No Stripe Price IDs, keys, or webhook secret were provided or configured.
 - The earlier GitHub `validate` workflow was reported passing for commit `b08d405622bc32207050824e8af8c80719d867aa`; this predates the latest Shorts/PWA code. The current edits have not been typechecked, built, browser-tested, or deployed. The prior workspace had no shell/command tool and no `node_modules`; do not claim current checks passed.
 
+## Front-end work checkpoint — 2026-10-28
+
+- Latest mainline was refreshed from commit `0b05cdbd2216d329491167d8c20a4e6f6b7c3f3e` before starting front-end work.
+- Current branch: `feat/sanctuary-frontend-polish-2026-10-28`.
+- `src/components/Navigation.tsx` now groups the drawer into Start here, Connect, Your space, Explore, Sanctuary tools, and Stewardship. Role-gated admin visibility is preserved; no moderation/backend wiring was changed.
+- `src/components/Navigation.module.css` adds grouped section headings, spacing and refined navigation touch styling.
+- Existing compact notification panel, full notifications destination, top-left drawer trigger, and mobile bottom tabs are retained.
+- The changes are committed to the feature branch through the repository editor, but no browser QA, merge, or deployment is claimed. Continue front-end-first; avoid touching admin/moderation backend integration while the other agent owns it. Use this branch as the current UI working context.
+
 ## Latest changes and exact status
 
 - Shorts: `supabase/migrations/20261013000000_short_engagement_stats.sql` adds server-side `get_short_engagement_stats` and `toggle_short_like`. `src/modules/shorts/service.ts`, `ShortsFeed.tsx`, and generated DB types use those RPCs for aggregate likes/counts. Comment reads/posts still use Supabase browser queries and depend on the existing social schema/RLS plus `20261011000000_repair_social_engagement_insert_policies.sql`. Guest engagement controls are disabled. The migrations are not confirmed applied; no staging like/comment check has run.
@@ -221,3 +230,18 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 
 ### Owner-only provider handoff
 Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment setup; Cloudflare/Vercel account settings, secrets, domains and provider configuration remain owner tasks. No provider account settings or secrets were edited as part of this cleanup.
+
+
+### Front-end responsive polish checkpoint — 2026-10-28
+- Active front-end branch: `feat/sanctuary-frontend-polish-2026-10-28`; draft PR #190: https://github.com/platinumsoundz/Guild-Sanctuary/pull/190
+- Added responsive home hero/quick-action layouts, keyboard focus visibility, reduced-motion handling, safe-area-aware feed spacing, and narrow-screen profile form refinements.
+- Updated `src/components/SanctuaryHome.module.css`, `src/modules/feeds/components/Feed.module.css`, and `src/modules/profiles/components/ProfileDashboard.module.css`.
+- This is presentation-only work. Admin/moderation and backend integration remain assigned to the separate backend agent.
+- Browser/device QA and automated checks remain outstanding; do not describe this branch as tested, merged, or deployed.
+
+
+### Cross-surface UI refinement checkpoint — 2026-10-28
+- Extended the frontend-only branch with touch-target, keyboard-focus, small-screen wrapping, media sizing, and notification popover refinements.
+- Files touched in this batch: `src/components/AppWorkspace.module.css`, `src/components/ResponsiveShell.module.css`, `src/components/NotificationBar.module.css`, `src/modules/feeds/components/FeedContent.module.css`, `src/modules/profiles/components/ProfileDiscovery.module.css`, `src/modules/profiles/components/PublicProfilePage.module.css`, and `src/modules/self-discovery/components/SelfDiscoveryCentre.module.css`.
+- Backend/admin/moderation integrations remain out of scope for this frontend branch.
+- Automated checks and browser/device QA remain outstanding; do not describe this as tested, merged, or deployed.

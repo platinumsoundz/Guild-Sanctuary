@@ -167,3 +167,55 @@
     transition: none;
   }
 }
+
+/* Safe-area and accessible interaction defaults for the responsive app shell. */
+@media (max-width: 640px) {
+  .workspace { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+}
+.installButton,
+.hideInstallButton { touch-action: manipulation; }
+@media (prefers-reduced-motion: reduce) {
+  .workspace * { scroll-behavior: auto; }
+}
+
+
+/* Cosmic mobile frame: use the full device width and honour display cut-outs. */
+@media (max-width: 700px) {
+  .workspace {
+    padding: 0 0 max(12px, env(safe-area-inset-bottom));
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .viewport {
+    width: 100%;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .installBanner {
+    width: calc(100% - 20px);
+    margin-top: max(8px, env(safe-area-inset-top));
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    box-shadow: 0 8px 28px rgb(0 0 0 / 18%);
+    backdrop-filter: blur(16px);
+  }
+
+  .installActions {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (min-width: 701px) {
+  .viewport {
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-radius: 22px;
+    box-shadow: 0 24px 80px rgb(0 0 0 / 20%);
+  }
+}
