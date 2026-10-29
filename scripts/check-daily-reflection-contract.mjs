@@ -16,6 +16,7 @@ const checks = [
   ['guest mode remains read-only', /if \(isGuest\)[\s\S]*?Sign in to save private diary entries/.test(component)],
   ['legacy browser entries are read only for an explicit, confirmed import', /localStorage\.getItem\(/.test(component) && /const importBrowserReflections = async/.test(component) && /This uploads private mood and reflection text/.test(component) && !component.includes('localStorage.setItem(') && !component.includes('localStorage.removeItem(')],
   ['existing account entries are not overwritten during import', /ignoreDuplicates: true/.test(component) && /existingDates = new Set\(entries\.map\(\(entry\) => entry\.date\)\)/.test(component)],
+  ['legacy import accepts valid ISO dates rather than escaped literal d characters', component.includes('/^\\d{4}-\\d{2}-\\d{2}$/')],
   ['failed loads block editing rather than showing an empty diary as valid', /const sessionReady = loadedKey === key && !loadError/.test(component) && /if \(!sessionReady\)/.test(component)],
   ['the database types include every column used by the reflection component', /daily_reflections: Table<[\s\S]*?reflection_date: string;[\s\S]*?intention: string;[\s\S]*?content: string;[\s\S]*?mood: string \| null;[\s\S]*?updated_at: string;/.test(types)],
   ['the UI states private account storage and public-feed separation', /Private to your account/.test(component) && /public feed/.test(component)],
