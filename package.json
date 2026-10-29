@@ -39,6 +39,7 @@
     "check:shorts-full-size": "node scripts/check-shorts-full-size.mjs",
     "check:guest-access": "node scripts/check-guest-access.mjs",
     "check:guild-browser-arcade": "node scripts/check-guild-browser-arcade.mjs",
+    "check:guild-diagnostics": "node scripts/check-guild-diagnostics.mjs",
     "check:today-dashboard": "node scripts/check-today-dashboard-contract.mjs"
   },
   "dependencies": {
