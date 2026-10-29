@@ -67,3 +67,12 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - The Guild console remains part of the Sanctuary codebase and keeps its internal route/state, but `Guild Arcade` and `Guild Roadmap` must not appear in Sanctuary's ordinary navigation selector or navigation groups.
 - Access is intended through the dedicated/hidden Guild entry point, not a visible page-selector item. Do not remove the Guild route or Guild's own internal navigation when hiding these selector entries.
 - Messaging audit: the active inbox/thread still uses the in-memory `service.ts`; the Supabase adapter is optional and gated, and audio/video calling is not present in the current module tree. Treat durable messaging and calls as unfinished, not live features.
+
+
+## Console HUD polish batch — 2026-10-29
+
+- **Implemented in branch; automated verification pending:** refined the Guild modal shell and HUD hierarchy, added stronger focus-visible treatment for Big Picture and game actions, tuned wide-screen layout, and adjusted the featured trial/progress surfaces for clarity.
+- Added dedicated breakpoints for narrow phones and short landscape screens, safe-area-aware header spacing, and a reduced-motion override for animated fragments and hover transitions.
+- Kept the existing local-only progress disclosure, controller status, touch controls, and Big Picture action. This pass does not invent achievements, cloud saves, audio output, or platform account integration.
+- Added `check:guild-console-hud` to the repository CI contract suite to guard the dialog semantics, controller status, touch controls, responsive breakpoints, focus states and roadmap status.
+- **Not a device-QA pass:** desktop/TV, Android portrait and landscape, real controller navigation, screen-reader behavior, and focus restoration still need hands-on verification. CI success will validate source contracts/build only, not physical device behavior.
