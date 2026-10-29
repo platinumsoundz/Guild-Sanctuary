@@ -17,7 +17,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - [ ] **Accessibility and polish:** contrast, readable text, loading/error/empty states, focus management, reduced-motion behaviour and keyboard-only checks.
 
 ### P1 — Core console behaviour
-- [x] **Local recent games / Continue Playing foundation:** launch history and favourites now persist in this browser, with search, ready-to-play/favourites filters and empty states. Account sync and exact gameplay session restore remain unimplemented.
+- [x] **Local recent games / Continue Playing foundation:** launch history and favourites persist in this browser, with search, ready-to-play/favourites filters, empty states and a direct launch of the most recently played configured game from the home dashboard. Account sync and exact gameplay session restore remain unimplemented.
 - [ ] **Unified search:** game-library search is implemented locally; next add Guild-page search, a controller-friendly on-screen keyboard and platform filters.
 - [ ] **Game detail views:** controls, supported input, launch method, compatibility notes, verified progress and a clear return-to-library route.
 - [ ] **Console settings:** controller diagnostics, touch-control visibility, UI scale, reduced motion, fullscreen guidance, audio preferences and privacy controls.
