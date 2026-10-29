@@ -3,6 +3,8 @@ import { getSupabaseBrowserClient } from '@/services/supabase';
 import { isSupabaseCommunityStorageConfigured } from '@/services/supabase/communityMedia';
 
 const storagePrefix = 'guild-sanctuary:settings:v1:';
+const appearanceStoragePrefix = 'sanctuary:appearance:v1:';
+type AppearancePreferences = Pick<AccountPreferences, 'theme' | 'layout'>;
 
 export const defaultAccountPreferences: AccountPreferences = {
   allowProfileDiscovery: true,
@@ -29,6 +31,31 @@ function getStorage(): Storage {
   }
 }
 
+
+export function fetchLocalAppearancePreferences(userId: string): AppearancePreferences {
+  const defaults: AppearancePreferences = { theme: defaultAccountPreferences.theme, layout: defaultAccountPreferences.layout };
+  if (!userId || typeof window === 'undefined') return defaults;
+  try {
+    const raw = getStorage().getItem(appearanceStoragePrefix + userId);
+    if (!raw) return defaults;
+    const value: unknown = JSON.parse(raw);
+    if (!isRecord(value)) return defaults;
+    return {
+      theme: value.theme === 'system' || value.theme === 'light' || value.theme === 'dark' || value.theme === 'dusk' || value.theme === 'stone' || value.theme === 'ocean' ? value.theme : defaults.theme,
+      layout: value.layout === 'compact' ? 'compact' : value.layout === 'comfortable' ? 'comfortable' : defaults.layout,
+    };
+  } catch { return defaults; }
+}
+
+export function saveLocalAppearancePreferences(userId: string, preferences: AppearancePreferences): void {
+  if (!userId) throw new Error('Sign in before changing appearance settings.');
+  if (!['system', 'light', 'dark', 'dusk', 'stone', 'ocean'].includes(preferences.theme)) throw new Error('Choose a supported Sanctuary theme.');
+  if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') throw new Error('Choose a supported layout arrangement.');
+  try {
+    getStorage().setItem(appearanceStoragePrefix + userId, JSON.stringify(preferences));
+    getStorage().setItem('sanctuary-theme', preferences.theme);
+  } catch { throw new Error('Appearance could not be saved on this device. Check your browser storage settings.'); }
+}
 
 async function hasMatchingSupabaseUser(userId: string): Promise<boolean> {
   const { data, error } = await getSupabaseBrowserClient().auth.getUser();
