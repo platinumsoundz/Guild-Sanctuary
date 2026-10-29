@@ -310,6 +310,20 @@ export interface Database {
         };
         Returns: string | null;
       };
+      get_moderation_report_context: {
+        Args: {
+          requested_target_type: 'post' | 'short' | 'event' | 'message' | 'comment';
+          requested_target_id: string;
+        };
+        Returns: {
+          owner_id: string | null;
+          owner_name: string | null;
+          owner_username: string | null;
+          preview: string;
+          content_created_at: string | null;
+          content_state: string;
+        }[];
+      };
       get_short_engagement_stats: {
         Args: { requested_short_id: string };
         Returns: {
