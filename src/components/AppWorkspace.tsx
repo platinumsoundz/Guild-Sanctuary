@@ -291,6 +291,11 @@ export function AppWorkspace() {
           socialLinks={currentUser.profile.socialLinks}
           onUpdateProfile={updateProfile}
           onDeleteAccount={deleteAccount}
+          onLaunchGuild={() => {
+            if (isGuest || !isAuthenticated || !currentUser) return;
+            try { window.localStorage.setItem('sanctuary-open-hidden-guild-entry', '1'); } catch { /* Direct navigation still works if storage is blocked. */ }
+            setActiveNavigation('guild');
+          }}
         />
       ) : (
         <main className={styles.sectionPage}>
