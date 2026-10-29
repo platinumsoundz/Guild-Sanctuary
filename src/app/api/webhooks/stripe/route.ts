@@ -40,9 +40,41 @@ export async function POST(request: Request) {
 
   const session = event.data.object as Stripe.Checkout.Session;
   if (session.mode === 'payment' && session.payment_status !== 'paid') {
-    // Completed but unpaid sessions are not fulfillment events; acknowledge without granting tokens.
+    // Completed but unpaid sessions are not fulfillment events; acknowledge without granting entitlements.
     return response(200, { received: 'true' });
   }
+
+  if (session.metadata?.sanctuary_purchase === 'community_donation') {
+    const userId = session.metadata.sanctuary_user_id;
+    const amount = Number(session.metadata.sanctuary_donation_amount);
+    const validUserId = typeof userId === 'string' &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId);
+    if (session.mode !== 'payment' || session.payment_status !== 'paid' || !session.id ||
+        !validUserId || session.client_reference_id !== userId ||
+        session.currency !== 'usd' || session.amount_total !== amount ||
+        ![500, 1000, 2500].includes(amount)) {
+      return response(400, { error: 'Donation session did not meet fulfillment requirements.' });
+    }
+    try {
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { error } = await supabase.rpc('record_sanctuary_donation', {
+        requested_event_id: event.id,
+        requested_event_type: event.type,
+        requested_session_id: session.id,
+        requested_user_id: userId,
+        requested_amount_total: amount,
+        requested_currency: session.currency,
+        requested_livemode: event.livemode,
+      });
+      if (error) return response(500, { error: 'Donation could not be recorded; webhook should retry.' });
+      return response(200, { received: 'true' });
+    } catch {
+      return response(500, { error: 'Donation processing failed; webhook should retry.' });
+    }
+  }
+
   if (session.mode !== 'payment' || session.payment_status !== 'paid' || !session.id ||
       session.currency !== 'gbp' || session.amount_total === null ||
       !session.metadata?.sanctuary_order_id || !session.metadata?.sanctuary_user_id ||
