@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Check, Clock3, Copy, ExternalLink, Gamepad2, Heart, Play, Search, ShieldCheck, Sparkles } from 'lucide-react';
+import { Check, Clock3, Copy, ExternalLink, Gamepad2, Heart, Play, Search, ShieldCheck, Sparkles, Trash2 } from 'lucide-react';
 import { GuildConsolePlayer } from './GuildConsolePlayer';
 import styles from './GamesHub.module.css';
 
@@ -72,6 +72,11 @@ export function GamesHub({ autoLaunchRecent = false }: { autoLaunchRecent?: bool
     try { window.localStorage.setItem(RECENTS_KEY, JSON.stringify(next)); } catch { /* Launching remains available when storage is blocked. */ }
   };
 
+  const clearRecentLaunches = () => {
+    setRecentLaunches([]);
+    try { window.localStorage.removeItem(RECENTS_KEY); } catch { /* Clearing this view still works for the current session. */ }
+  };
+
   const toggleFavourite = (id: GameId) => {
     const next = favourites.includes(id) ? favourites.filter((item) => item !== id) : [...favourites, id];
     setFavourites(next);
@@ -126,7 +131,7 @@ export function GamesHub({ autoLaunchRecent = false }: { autoLaunchRecent?: bool
         </div>
       </section>
       {recentGames.length > 0 && filter !== "favourites" && !query.trim() && <section className={styles.recentSection} aria-labelledby="guild-recent-heading">
-        <div className={styles.rowHeading}><div><p className={styles.eyebrow}>PICK UP WHERE YOU LEFT OFF</p><h2 id="guild-recent-heading"><Clock3 size={19} /> Recently played</h2></div><span>Saved on this device</span></div>
+        <div className={styles.rowHeading}><div><p className={styles.eyebrow}>PICK UP WHERE YOU LEFT OFF</p><h2 id="guild-recent-heading"><Clock3 size={19} /> Recently played</h2></div><div className={styles.recentActions}><span>Saved on this device</span><button type="button" className={styles.clearHistory} onClick={clearRecentLaunches}><Trash2 size={14} /> Clear history</button></div></div>
         <div className={styles.recentRow}>{recentGames.map((game) => <article className={styles.recentCard} key={game.id}><div className={styles.recentOrb}><Gamepad2 size={22} /></div><div className={styles.recentCopy}><strong>{game.title}</strong><small>{game.url ? "Ready to launch" : "Host URL needed"}</small></div><button type="button" className={styles.recentPlay} disabled={!game.url} onClick={() => { rememberLaunch(game); setActiveGame(game); }} aria-label={`Continue playing ${game.title}`}><Play size={15} /></button></article>)}</div>
       </section>}
 
