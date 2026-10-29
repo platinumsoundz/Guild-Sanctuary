@@ -39,7 +39,7 @@ async function loadTargetContext(report: ContentReportRow) {
     requested_target_id: report.target_id,
   });
   if (error) throw new Error(`Report context could not be loaded: ${error.message}`);
-  const context = Array.isArray(data) ? data[0] : data;
+  const context = data?.[0];
   return {
     targetOwnerId: context?.owner_id ?? null,
     targetOwnerName: context?.owner_name ?? null,
