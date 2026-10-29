@@ -698,3 +698,12 @@ Supabase schema/migrations/RLS/owner bootstrap; Stripe and Lemon Squeezy payment
 - The original PR #210 is superseded by #218 and should be closed after branch-stack reconciliation. Guest access #213, Guild Arcade #214 and creator games #215 remain a dependency stack on the old release branch; rebuild the stack on current main before integrating.
 - PR #219 is the conflict-free current-main reconstruction of private Daily Reflection. Its fresh exact-head CI is pending. Keep it gated on live migration-ledger/RLS verification and authenticated two-account save/read/delete/failure-path tests.
 - Moderation PRs #191/#199 remain gated on the absent live `get_moderation_queue()` RPC and independent authorization review. No production migrations or database writes have been performed.
+
+
+## Guest-mode safety and preview access — 2026-10-28
+
+- **Rebuilt against current `main` on 2026-10-29:** guest sessions start on the public Today page; public read-only routes are limited to support, Cosmic Arcade and the two roadmaps; account-only routes show a sign-in explainer.
+- Guest profile-post loading is skipped so the synthetic guest identity is not passed into the author-post service.
+- Added `check:guest-access` contract to CI while preserving current compact-shell and community-comment changes.
+- **Validation required:** fresh exact-head CI, mobile/desktop guest-route browser checks, and service/RLS authorization tests. This UI gate does not replace backend authorization.
+- No migration, production data change, provider setting, secret, billing or production deployment is included.
