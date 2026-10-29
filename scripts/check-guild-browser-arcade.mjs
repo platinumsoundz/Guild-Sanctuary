@@ -57,6 +57,14 @@ assert.match(workspace, /guildPage === 'music'/, 'music has its own Guild page')
 assert.match(workspace, /guildPage === 'photos'/, 'photo slideshow has its own Guild page');
 assert.match(workspace, /guildPage === 'trials'/, 'original Guild arcade trials have their own page');
 assert.match(workspace, /<GuildCompanionHub view=\{guildPage === 'library'/, 'media state remains mounted while Guild pages change');
+const guildNavigation = readFileSync('src/components/GuildNavigation.tsx', 'utf8');
+assert.match(guildNavigation, /SANCTUARY PAGES/, 'the Guild drawer exposes Sanctuary destinations');
+assert.match(guildNavigation, /readGamepadDirections/, 'physical controller directions operate the Guild navigation');
+assert.match(guildNavigation, /activateFocused/, 'A/Select activates the focused Guild navigation item');
+assert.match(guildNavigation, /goBack/, 'B/Back closes the drawer or returns to Guild Home');
+assert.match(guildNavigation, /Navigate up/, 'touch D-pad controls operate the Guild navigation');
+assert.match(guildNavigation, /padA/, 'touchscreen A/Select is available');
+assert.match(guildNavigation, /padB/, 'touchscreen B/Back is available');
 assert.match(guild, /The Guild’s original arcade trials are available after sign-in/, 'guest lobby explains the account boundary');
 assert.match(guild, /onClick=\{enterGuild\}>Enter Guild Arcade/, 'authenticated members can enter the original arcade from the visible lobby');
 assert.match(workspace, /isAuthenticated && !isGuest/, 'authenticated Guild identity is required for original arcade');
