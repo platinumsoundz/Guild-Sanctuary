@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Home, Gamepad2, Library, Music2, Image as ImageIcon, Settings, Newspaper, Search,
   MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard, Map,
-  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut
+  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
+import { NotificationBar } from './NotificationBar';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
 import styles from './GuildNavigation.module.css';
 
@@ -51,6 +52,14 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
 }) {
   const [open, setOpen] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [quickQuery, setQuickQuery] = useState('');
+  const [controllerPresent, setControllerPresent] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const quickButtonRef = useRef<HTMLButtonElement>(null);
+  const quickSearchRef = useRef<HTMLInputElement>(null);
+  const quickPanelRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const previousButtons = useRef<boolean[]>([]);
   const previousDirections = useRef(noDirections);
@@ -64,7 +73,12 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     return true;
   });
   const label = [...guildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Sanctuary';
-  const choose = (page: GuildPage) => { onSelect(page); setOpen(false); };
+  const searchableItems = [...guildItems, ...allowed];
+  const quickResults = searchableItems.filter((item) => {
+    const needle = quickQuery.trim().toLowerCase();
+    return !needle || item.label.toLowerCase().includes(needle) || (item.description ?? '').toLowerCase().includes(needle);
+  }).slice(0, 8);
+  const choose = (page: GuildPage) => { onSelect(page); setOpen(false); setQuickOpen(false); setQuickQuery(''); };
 
   const moveFocus = (direction: LogicalDirection) => {
     if (!open) {
@@ -93,6 +107,67 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   const goBack = () => {
     if (open) setOpen(false);
     else if (selectedPage !== 'home') choose('home');
+  };
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('guild-reduced-motion-v1');
+      const enabled = stored === 'true';
+      setReducedMotion(enabled);
+      document.documentElement.dataset.guildReducedMotion = String(enabled);
+    } catch { /* Accessibility defaults still follow the operating system. */ }
+    const syncFullscreen = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    const syncController = () => setControllerPresent(Boolean(getConnectedGamepad()));
+    syncFullscreen();
+    syncController();
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    window.addEventListener('gamepadconnected', syncController);
+    window.addEventListener('gamepaddisconnected', syncController);
+    const poll = window.setInterval(syncController, 1000);
+    return () => {
+      document.removeEventListener('fullscreenchange', syncFullscreen);
+      window.removeEventListener('gamepadconnected', syncController);
+      window.removeEventListener('gamepaddisconnected', syncController);
+      window.clearInterval(poll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onQuickKeys = (event: KeyboardEvent) => {
+      const target = event.target;
+      const typing = target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' && !typing) {
+        event.preventDefault();
+        setQuickOpen((value) => !value);
+      } else if (event.key === 'Escape' && quickOpen) {
+        event.preventDefault();
+        setQuickOpen(false);
+        setQuickQuery('');
+        quickButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', onQuickKeys);
+    return () => window.removeEventListener('keydown', onQuickKeys);
+  }, [quickOpen]);
+
+  useEffect(() => {
+    if (quickOpen) window.setTimeout(() => quickSearchRef.current?.focus(), 0);
+  }, [quickOpen]);
+
+  const toggleReducedMotion = () => {
+    const next = !reducedMotion;
+    setReducedMotion(next);
+    document.documentElement.dataset.guildReducedMotion = String(next);
+    try { window.localStorage.setItem('guild-reduced-motion-v1', String(next)); } catch { /* Session toggle remains active. */ }
+  };
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch {
+      // Browser permissions can require fullscreen to be initiated by a direct user action.
+    }
   };
 
   useEffect(() => {
@@ -153,9 +228,51 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       <span className={styles.mark}><Gamepad2 size={21} /></span><span><small>CONSOLE MODE</small><strong>THE GUILD</strong></span>
     </button>
     <div className={styles.current} aria-live="polite">{label}</div>
+    <div className={styles.notificationSlot}><NotificationBar compact /></div>
+    <button ref={quickButtonRef} type="button" className={styles.quickButton} aria-label="Open Guild quick menu" aria-expanded={quickOpen} aria-keyshortcuts="Control+K Meta+K" onClick={() => setQuickOpen((value) => !value)}><SlidersHorizontal size={18} /><span>Quick menu</span><kbd>⌘/Ctrl K</kbd></button>
     <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Sanctuary</span></button>
+    {quickOpen && <>
+      <button type="button" className={styles.quickScrim} aria-label="Close quick menu" onClick={() => { setQuickOpen(false); setQuickQuery(''); quickButtonRef.current?.focus(); }} />
+      <section ref={quickPanelRef} className={styles.quickPanel} role="dialog" aria-modal="true" aria-labelledby="guild-quick-title" onKeyDown={(event) => { if (event.key !== 'Tab') return; const focusable = Array.from(quickPanelRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])') ?? []); if (!focusable.length) return; const first = focusable[0]; const last = focusable[focusable.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } }}>
+        <div className={styles.quickHeading}><div><small>THE GUILD · HUD</small><h2 id="guild-quick-title">Quick menu</h2></div><button type="button" aria-label="Close quick menu" onClick={() => { setQuickOpen(false); setQuickQuery(''); quickButtonRef.current?.focus(); }}><X size={18} /></button></div>
+        <div className={styles.quickStatus}><span className={controllerPresent ? styles.statusOnline : styles.statusOffline}><i />{controllerPresent ? 'Controller detected' : 'Touch / keyboard ready'}</span><span>{isFullscreen ? 'Fullscreen on' : 'Windowed view'}</span></div>
+        <label className={styles.quickSearch}><Search size={17} /><span className={styles.visuallyHidden}>Search Guild destinations</span><input ref={quickSearchRef} type="search" value={quickQuery} onChange={(event) => setQuickQuery(event.target.value)} placeholder="Search Guild destinations…" /></label>
+        <div className={styles.quickResults} role="group" aria-label="Guild destinations">
+          {quickResults.length ? quickResults.map((item) => {
+            const Icon = item.icon;
+            return <button type="button" key={item.id} onClick={() => choose(item.id)}><Icon size={17} /><span><strong>{item.label}</strong>{item.description && <small>{item.description}</small>}</span><ChevronRight size={15} /></button>;
+          }) : <p className={styles.quickEmpty}>No destinations match “{quickQuery}”. Try another search.</p>}
+        </div>
+        <div className={styles.quickSettings}>
+          <button type="button" onClick={() => void toggleFullscreen()}><Monitor size={17} /><span>{isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}</span>{isFullscreen ? <Check size={15} /> : <Maximize2 size={15} />}</button>
+          <button type="button" aria-pressed={reducedMotion} onClick={toggleReducedMotion}><SlidersHorizontal size={17} /><span>Reduce Guild motion</span><span className={reducedMotion ? styles.toggleOn : styles.toggleOff}>{reducedMotion ? 'ON' : 'OFF'}</span></button>
+          <button type="button" onClick={() => choose('home')}><Home size={17} /><span>Resume Guild Home</span><ChevronRight size={15} /></button>
+          <button type="button" onClick={onExit}><LogOut size={17} /><span>Exit to Sanctuary</span><ChevronRight size={15} /></button>
+        </div>
+        <p className={styles.quickFootnote}>Search is limited to available Guild and Sanctuary destinations. Settings apply to this browser; game audio and display behaviour can still depend on the game host.</p>
+      </section>
+    </>}
     {open && <button type="button" className={styles.scrim} aria-label="Close navigation" onClick={() => setOpen(false)} />}
-    <nav className={styles.drawer} data-open={open} aria-label="Guild and Sanctuary pages" aria-hidden={!open}>
+    <nav className={styles.drawer} data-open={open} aria-label="Guild and Sanctuary pages" aria-hidden={!open} inert={!open} onKeyDown={(event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled), a[href], input:not(:disabled), [tabindex]:not([tabindex="-1"])'));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }}>
       <div className={styles.drawerHead}><div><small>YOUR CONSOLE</small><h2>Navigation</h2></div><button type="button" aria-label="Close navigation" onClick={() => setOpen(false)}><X size={20} /></button></div>
       <p className={styles.group}>THE GUILD</p>{guildItems.map(render)}
       <p className={styles.group}>SANCTUARY PAGES</p>{allowed.map(render)}
