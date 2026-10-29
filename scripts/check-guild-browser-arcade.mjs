@@ -53,6 +53,10 @@ assert.match(guild, /isAuthenticated && worldOpen/, 'original browser arcade sta
 assert.doesNotMatch(guild, /<GamesHub \/>/, 'the dedicated Guild game library is no longer mixed into the arcade trial page');
 assert.match(workspace, /className=\{styles\.guildExperience\}/, 'Guild opens in a full-screen world shell');
 assert.match(workspace, /<GuildNavigation selectedPage=\{guildPage\}/, 'Guild has its own navigation replacing Sanctuary navigation');
+assert.match(workspace, /guildRecentTitle/, 'Guild home reads the browser-local recent game');
+assert.match(workspace, /guildFeatured/, 'Guild home has a featured console destination');
+assert.match(workspace, /guildContinue/, 'Guild home has a Continue Playing surface');
+assert.match(workspace, /Return to Sanctuary/, 'Guild home has an explicit Sanctuary return destination');
 assert.match(workspace, /guildPage === 'music'/, 'music has its own Guild page');
 assert.match(workspace, /guildPage === 'photos'/, 'photo slideshow has its own Guild page');
 assert.match(workspace, /guildPage === 'trials'/, 'original Guild arcade trials have their own page');
