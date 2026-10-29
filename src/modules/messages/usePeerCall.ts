@@ -179,6 +179,15 @@ export function usePeerCall({ conversationId, userId, peerUserId }: PeerCallOpti
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, userId, peerUserId]);
 
+  useEffect(() => {
+    if (status !== 'calling' && status !== 'ringing') return;
+    const timeout = window.setTimeout(() => {
+      cleanup('ended');
+      setError(status === 'calling' ? 'No answer. Try again when the other person is available.' : 'The incoming call expired.');
+    }, 45_000);
+    return () => window.clearTimeout(timeout);
+  }, [cleanup, status]);
+
   const startCall = useCallback(async (callKind: CallKind) => {
     if (!signallingReady) { setError('Call signalling is not ready yet. Keep this conversation open and try again in a moment.'); return; }
     if (!conversationId || !userId || !peerUserId) {
