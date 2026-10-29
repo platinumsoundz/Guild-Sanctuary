@@ -269,7 +269,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
                   <CheckCheck size={15} aria-hidden="true" /> Mark all read
                 </button>
               )}
-              <button type="button" className={styles.closeButton} aria-label="Close notifications" onClick={() => setIsOpen(false)}>
+              <button type="button" className={styles.closeButton} aria-label="Close notifications" onClick={() => { setIsOpen(false); if (compact) bellButtonRef.current?.focus(); }}>
                 <X size={18} aria-hidden="true" />
               </button>
             </div>
