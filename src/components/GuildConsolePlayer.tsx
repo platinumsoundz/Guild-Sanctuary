@@ -5,7 +5,6 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, AudioLines, Check, Gamepad2,
 import styles from './GuildConsolePlayer.module.css';
 
 type Props = { title: string; url: string; onExit: () => void };
-const EDGE_BUTTONS = [0, 1, 12, 13, 14, 15, 16, 9];
 const BUTTON_LABELS = ['A / Cross · Select', 'B / Circle · Back', 'D-pad / stick · Navigate'];
 
 export function GuildConsolePlayer({ title, url, onExit }: Props) {
