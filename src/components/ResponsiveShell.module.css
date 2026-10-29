@@ -219,3 +219,8 @@
     box-shadow: 0 24px 80px rgb(0 0 0 / 20%);
   }
 }
+
+
+.workspace:has(:global([data-world="guild"])){padding:0;min-height:100dvh}
+.stage:has(:global([data-world="guild"])){min-height:100dvh;margin:0}
+.viewport:has(:global([data-world="guild"])){min-height:100dvh;overflow:visible}
