@@ -62,7 +62,8 @@ export function AppWorkspace() {
 
   useEffect(() => {
     if (!isSessionReady) return;
-    if (!isAuthenticated || isGuest || !currentUser) {
+    if (!isAuthenticated || isGuest || !currentUser ||
+        !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       setAccountAccessStatus('active');
       setAccountSuspendedUntil(null);
       return;
@@ -77,7 +78,8 @@ export function AppWorkspace() {
         if (data.status === 'banned') setAccountAccessStatus('banned');
         else if (data.status === 'suspended' && (!data.suspended_until || new Date(data.suspended_until).getTime() > Date.now())) setAccountAccessStatus('suspended');
         else setAccountAccessStatus('active');
-      });
+      })
+      .catch(() => { if (!cancelled) setAccountAccessStatus('error'); });
     return () => { cancelled = true; };
   }, [currentUser?.user.id, isAuthenticated, isGuest, isSessionReady]);
 
