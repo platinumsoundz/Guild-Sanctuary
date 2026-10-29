@@ -122,7 +122,21 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     }
   };
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  // Realtime is the fast path; periodic refresh repairs missed events after mobile
+  // sleep, network changes, or a dropped channel without requiring a manual reload.
+  useEffect(() => {
+    void refresh();
+    if (typeof window === 'undefined' || !conversationId) return;
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') void refresh();
+    };
+    const interval = window.setInterval(refreshWhenVisible, 15_000);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+    };
+  }, [conversationId, refresh]);
 
   useEffect(() => {
     if (!conversationId || !userId || activeConversationId.current !== conversationId) return;
