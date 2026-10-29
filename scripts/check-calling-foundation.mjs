@@ -28,5 +28,5 @@ assert.match(migration, /public\.is_active_conversation_member/);
 assert.match(migration, /c\.kind = 'direct'/);
 assert.match(plan, /database\/channel authorization tied to the authenticated conversation membership/);
 assert.match(plan, /two-account\/two-device tests pass/);
-assert.match(plan, /Do not record calls or create a durable call history by default/);
+assert.match(plan, /Do not record calls or create call history by default/);
 console.log('Calling contract passed: UI, WebRTC lifecycle, and private-channel authorization migration present.');
