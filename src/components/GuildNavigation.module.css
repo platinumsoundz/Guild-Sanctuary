@@ -95,17 +95,16 @@
 }
 
 
-/* The Guild drawer and Quick Menu must stay above Sanctuary's shell at every width. */
-.scrim { z-index: 10000; }
-.drawer { z-index: 10001; }
-.quickScrim { z-index: 10002; }
-.quickPanel { z-index: 10003; }
-.touchConsole { z-index: 9999; }
+/* Portal overlays intentionally outrank all Sanctuary shell layers and sticky headers. */
+.scrim { position: fixed; inset: 0; z-index: 2147483644; }
+.drawer { position: fixed; z-index: 2147483645; }
+.quickScrim { position: fixed; inset: 0; z-index: 2147483646; }
+.quickPanel { position: fixed; z-index: 2147483647; }
+.touchConsole { z-index: 2147483643; }
 @media (max-width: 767px) {
-  .header { z-index: 9998; }
-  .scrim { z-index: 10000; }
-  .drawer { z-index: 10001; }
-  .touchConsole { z-index: 9999; }
-  .quickScrim { z-index: 10002; }
-  .quickPanel { z-index: 10003; }
+  .scrim { z-index: 2147483644; }
+  .drawer { z-index: 2147483645; }
+  .touchConsole { z-index: 2147483643; }
+  .quickScrim { z-index: 2147483646; }
+  .quickPanel { z-index: 2147483647; }
 }
