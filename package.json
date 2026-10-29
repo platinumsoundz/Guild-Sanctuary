@@ -41,7 +41,8 @@
     "check:guild-browser-arcade": "node scripts/check-guild-browser-arcade.mjs",
     "check:guild-diagnostics": "node scripts/check-guild-diagnostics.mjs",
     "check:today-dashboard": "node scripts/check-today-dashboard-contract.mjs",
-    "check:guild-mobile-navigation": "node scripts/check-guild-mobile-navigation.mjs"
+    "check:guild-mobile-navigation": "node scripts/check-guild-mobile-navigation.mjs",
+    "check:guild-console-hud": "node scripts/check-guild-console-hud.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
