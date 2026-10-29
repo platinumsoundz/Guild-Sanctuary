@@ -780,3 +780,5 @@ Two connected Supabase projects were inspected read-only: `kchrskkchoyqweowskxv`
 - Keep the Guild navigation drawer and Quick Menu above the Sanctuary mobile bottom bar; place the D-pad plus A/Select and B/Back controls above the bottom navigation while respecting safe-area insets.
 - Show touch navigation controls by default on narrow phone layouts, with the existing Hide controls toggle retained. Compress the toolbar at widths below 420px and hide nonessential text below 370px to prevent horizontal crowding.
 - **Release status:** PR #254 is open; changes are not merged or confirmed live. Vercel reported the free daily deployment limit. Exact-head CI/build and physical Android verification remain required. Check 320px, 360px, 390px and 430px widths, including drawer, Quick Menu, notifications, bottom navigation and touch controls.
+
+- Added `scripts/check-guild-mobile-navigation.mjs` and `npm run check:guild-mobile-navigation` to guard overlay placement, narrow-phone defaults, D-pad/A/B affordances, safe-area offsets and z-index ordering. This is a static regression contract, not a substitute for visual viewport or Android testing.
