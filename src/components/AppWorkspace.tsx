@@ -94,8 +94,7 @@ export function AppWorkspace() {
           setAccountRestrictionReason(null);
           setAccountAccessStatus('active');
         }
-      })
-      .catch(() => { if (!cancelled) setAccountAccessStatus('error'); });
+      }, () => { if (!cancelled) setAccountAccessStatus('error'); });
     return () => { cancelled = true; };
   }, [currentUser?.user.id, isAuthenticated, isGuest, isSessionReady]);
 
