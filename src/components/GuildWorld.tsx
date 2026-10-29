@@ -247,8 +247,8 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
           <p className={styles.eyebrow}>THE GUILD · COMMUNITY WORLDS</p>
           <h1 id="public-guild-title">Your next world awaits.</h1>
           <p className={styles.publicGuildIntro}>{isAuthenticated
-            ? 'Explore creator projects and community servers, or enter the Guild’s original browser arcade.'
-            : 'Browse creator games and community servers. Sign in to Sanctuary to enter the Guild’s original browser arcade.'}</p>
+            ? 'Play the Guild’s original arcade trials here. The 5 Sleeves and your saved games have their own Game Library page.'
+            : 'The Guild’s original arcade trials are available after sign-in. The 5 Sleeves and saved games have their own Game Library page.'}</p>
           {isAuthenticated && <button type="button" className={styles.enterPublicGuild} onClick={enterGuild}>Enter Guild Arcade <span aria-hidden="true">↗</span></button>}
         </main>
       )}
