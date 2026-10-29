@@ -27,6 +27,7 @@ import { NotificationBar } from '@/components/NotificationBar';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
 import { getSupabaseBrowserClient } from '@/services/supabase';
+import { canAccessSanctuaryFeature } from '@/lib/sanctuaryFeatureGates';
 import styles from './AppWorkspace.module.css';
 
 export function AppWorkspace() {
@@ -184,13 +185,13 @@ export function AppWorkspace() {
       {activeNavigation === 'planner' ? (
         <PersonalPlanner userId={currentUser.user.id} />
       ) : activeNavigation === 'wallet' ? (
-        ['vip', 'moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role) ? (
+        canAccessSanctuaryFeature('wallet', currentUser.profile.role) ? (
           <main className={styles.supportPage}><WalletPanel userId={currentUser.user.id} isGuest={isGuest} /></main>
         ) : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Wallet access is restricted</h1><p className={styles.sectionDescription}>The Wallet is temporarily available to VIP members and above while purchases and spending are being tested. Your account and community access are unchanged.</p></main>
         )
       ) : activeNavigation === 'shop' ? (
-        ['vip', 'moderator', 'admin', 'developer', 'owner'].includes(currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} /> : (
+        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} /> : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Token Shop access is restricted</h1><p className={styles.sectionDescription}>The Token Shop is temporarily available to VIP members and above while its payment and redemption systems are being verified. Token spending remains disabled until testing is complete.</p></main>
         )
       ) : activeNavigation === 'games' ? (
