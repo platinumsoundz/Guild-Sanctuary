@@ -168,10 +168,10 @@ export function PersonalPlanner({ userId, worldType = 'sanctuary' }: { userId: s
         <span>This first version saves to this browser's local storage, scoped to your account ID. It is not synced across devices. Anyone with access to this browser profile may be able to access it. Export anything you want to keep before clearing browser data.</span>
       </div>
       <section className={styles.reflectionSection} aria-label="Daily reflection">
-        <DailyReflection userId={userId} isGuest={false} />
+        <DailyReflection userId={userId} isGuest={false} worldType={worldType} />
       </section>
       <section className={styles.reflectionSection} aria-label="Self-discovery questionnaire">
-        <SelfDiscoveryCentre key={userId} />
+        <SelfDiscoveryCentre key={userId} worldType={worldType} />
       </section>
       {storageWarning && <p className={styles.warning} role="alert">Browser storage is unavailable or full. Changes may not survive a refresh; export or copy important notes before leaving.</p>}
       <label className={styles.dateLabel}>Day
