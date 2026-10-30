@@ -28,7 +28,6 @@ export function canAccessSanctuaryFeature(feature: SanctuaryFeature, role: strin
   return roleRank[role as SanctuaryRole] >= roleRank[gate.minimumRole];
 }
 
-
 export type SanctuaryPage =
   | 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover'
   | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile'
@@ -36,26 +35,28 @@ export type SanctuaryPage =
   | 'admin' | 'moderation' | 'planner' | 'feedback';
 
 const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
+  // Stable member experience.
   today: 'user',
   feed: 'user',
+  discover: 'user',
+  messages: 'user',
+  profile: 'user',
+  planner: 'user',
+  support: 'user',
+  notifications: 'user',
+  settings: 'user',
+  feedback: 'user',
+  // Preview and stewardship areas remain out of the basic-user navigation.
   events: 'vip',
   shorts: 'vip',
-  messages: 'user',
-  discover: 'user',
   games: 'vip',
-  guild: 'user',
-  roadmap: 'user',
+  guild: 'developer',
+  roadmap: 'developer',
   'guild-roadmap': 'developer',
-  profile: 'user',
   wallet: 'vip',
   shop: 'vip',
-  support: 'user',
-  settings: 'user',
-  notifications: 'user',
   admin: 'admin',
   moderation: 'moderator',
-  planner: 'user',
-  feedback: 'user',
 };
 
 /** Fail closed for unknown pages and roles; navigation visibility is not the security boundary. */
