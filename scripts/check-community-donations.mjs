@@ -2,32 +2,27 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
-const route = read('../src/app/api/community-tips/route.ts');
+const checkout = read('../src/app/api/community-tips/route.ts');
+const webhook = read('../src/app/api/stripe/webhook/route.ts');
 const panel = read('../src/modules/support/SupportPanel.tsx');
-const env = read('../.env.example');
-const readme = read('../README.md');
 
-assert.ok(route.includes("process.env.COMMUNITY_TIPS_ENABLED !== 'true'"),
-  'external contributions must require the explicit host-independent flag');
-assert.ok(!route.includes('VERCEL_ENV'),
-  'external contributions must not be restricted to Vercel deployments');
-assert.ok(route.includes("url.protocol !== 'https:'"),
-  'contribution destination must use HTTPS');
-assert.ok(route.includes("'buy.stripe.com', 'donate.stripe.com'"),
-  'standard and donation-specific Stripe Payment Link hosts are supported');
-assert.ok(route.includes('stripeTipsEnabled: false'),
-  'account-linked checkout must remain disabled in the external-link flow');
-assert.ok(route.includes('lemonSqueezyCheckoutUrl: null'),
-  'unconfigured digital-goods checkout must remain hidden');
-assert.ok(panel.includes('Voluntary contributions do not purchase tokens or grant account perks'),
-  'external donations must not imply paid account entitlements');
-assert.ok(env.includes('COMMUNITY_TIPS_ENABLED=false'),
-  'the example configuration must default to disabled');
-assert.ok(env.includes('STRIPE_DONATION_URL='),
-  'the example configuration must document the destination');
-assert.ok(readme.includes('Vercel or Cloudflare'),
-  'documentation must explain cross-host support');
-assert.ok(readme.includes('buy.stripe.com') && readme.includes('donate.stripe.com'),
-  'documentation must allow both Stripe link hosts');
+const checks = [
+  ['checkout is explicitly test-mode only', checkout.includes("secretKey.startsWith('sk_test_')") && checkout.includes("SANCTUARY_STRIPE_TEST_CHECKOUT_ENABLED === 'true'")],
+  ['checkout requires a signed-in active Sanctuary account', checkout.includes('supabase.auth.getUser()') && checkout.includes("from('profiles').select('status')") && checkout.includes("profile.status !== 'active'")],
+  ['checkout binds Stripe metadata and client reference to the authenticated user', checkout.includes('client_reference_id: user.id') && checkout.includes('user_id: user.id')],
+  ['checkout uses a server-side GBP amount allowlist', checkout.includes('donationAmounts') && checkout.includes("currency: 'gbp'") && checkout.includes('unit_amount: amount')],
+  ['checkout restricts requests to the configured site origin', checkout.includes("request.headers.get('origin') !== config.origin")],
+  ['webhook verifies Stripe signatures over the raw body', webhook.includes("request.headers.get('stripe-signature')") && webhook.includes('constructEvent(rawBody, signature, webhookSecret)')],
+  ['webhook rejects live-mode events on the test endpoint', webhook.includes('if (event.livemode)')],
+  ['webhook grants entitlements only after paid Checkout Sessions', webhook.includes("session.payment_status !== 'paid'") && webhook.includes('record_stripe_payment_entitlement')],
+  ['webhook supports both authenticated donations and token bundle purchases', webhook.includes("purchaseType === 'community_donation'") && webhook.includes("purchaseType === 'token_bundle'")],
+  ['webhook handles refunds through the private server-side RPC', webhook.includes("event.type === 'charge.refunded'") && webhook.includes('revoke_refunded_stripe_entitlement')],
+  ['support UI shows GBP contribution choices and test-mode disclosure', panel.includes('£1') && panel.includes('£5') && panel.includes('TEST MODE')],
+  ['support UI explains VIP is granted only after verified payment and not age verification', panel.includes('grants permanent VIP after Stripe verifies payment') && panel.includes('Payment does not verify age')],
+];
 
-console.log('Community donations contract passed: explicit host-independent flag, HTTPS Stripe allowlist, and no account entitlements.');
+for (const [label, passed] of checks) {
+  console.log(`${passed ? 'PASS' : 'FAIL'} ${label}`);
+  assert.ok(passed, label);
+}
+console.log(`Stripe test checkout contract checks passed: ${checks.length}. Static checks do not replace a real Stripe test payment and webhook replay.`);
