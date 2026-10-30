@@ -49,7 +49,7 @@ export function WalletPanel({ userId, isGuest, worldType = 'sanctuary' }: Wallet
         <div>
           <p className={styles.eyebrow}>{worldType === 'guild' ? 'THE GUILD WALLET' : 'THE SANCTUARY WALLET'}</p>
           <h1>Tokens</h1>
-          <p className={styles.intro}>Your balance and available token bundles.</p>
+          <p className={styles.intro}>Your balance, available token bundles and complete account token activity.</p>
         </div>
         <div className={styles.balanceCard} aria-live="polite">
           <span>Available balance</span>
@@ -121,9 +121,9 @@ export function WalletPanel({ userId, isGuest, worldType = 'sanctuary' }: Wallet
           <ul className={styles.historyList}>
             {snapshot.ledger.map((entry) => (
               <li className={styles.historyRow} key={entry.id}>
-                <span>Bundle purchase</span>
-                <span>+{entry.tokensDelta.toLocaleString('en-GB')} tokens</span>
-                <span>{gbp.format(entry.amountMinor / 100)}</span>
+                <span>{entry.description}</span>
+                <span className={entry.tokensDelta < 0 ? styles.negativeDelta : styles.positiveDelta}>{entry.tokensDelta > 0 ? '+' : ''}{entry.tokensDelta.toLocaleString('en-GB')} tokens</span>
+                <span>{entry.amountMinor === null ? '—' : gbp.format(entry.amountMinor / 100)}</span>
                 <time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleDateString('en-GB')}</time>
               </li>
             ))}
@@ -131,7 +131,7 @@ export function WalletPanel({ userId, isGuest, worldType = 'sanctuary' }: Wallet
         ) : isLoading ? (
           <p className={styles.disclaimer}>Loading transaction history…</p>
         ) : (
-          <p className={styles.disclaimer}>Token purchases will appear here after Stripe confirms payment.</p>
+          <p className={styles.disclaimer}>Purchases, cosmetic unlocks and eligible beta bonuses will appear here as the server records them.</p>
         )}
       </section>
     </main>
