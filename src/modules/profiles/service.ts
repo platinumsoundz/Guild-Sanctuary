@@ -90,6 +90,7 @@ export async function searchPublicProfiles(query: string): Promise<PublicProfile
   }
 
   const rows = [...new Map([...usernameResults.data, ...displayNameResults.data].map((row) => [row.id, row])).values()] as PublicProfileRow[];
+  if (rows.length === 0) return [];
   const cosmeticsResult = await client.from('public_profile_cosmetics').select('*').in('id', rows.map((row) => row.id));
   if (cosmeticsResult.error) throw new Error(`Public profile cosmetics could not be loaded: ${cosmeticsResult.error.message}`);
   const cosmetics = new Map((cosmeticsResult.data ?? []).map((row) => [row.id, row]));
