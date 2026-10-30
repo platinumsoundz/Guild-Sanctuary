@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Heart, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { ReportContentButton } from '@/modules/moderation';
 import { getLocalPublicProfileById } from '@/modules/auth';
-import type { SocialComment } from '@/types/database';
+import type { SocialComment, WorldType } from '@/types/database';
 import { addPostComment, deletePostComment, fetchPostComments, getPostEngagement, togglePostLike, updatePostComment } from '../service';
 import { getCommentEngagement, toggleCommentLike } from '../commentEngagement';
 import styles from './PostEngagement.module.css';
@@ -12,9 +12,10 @@ import styles from './PostEngagement.module.css';
 interface PostEngagementProps {
   postId: string;
   userId: string;
+  worldType?: WorldType;
 }
 
-export function PostEngagement({ postId, userId }: PostEngagementProps) {
+export function PostEngagement({ postId, userId, worldType = 'sanctuary' }: PostEngagementProps) {
   const [stats, setStats] = useState({ liked: false, likesCount: 0, commentsCount: 0 });
   const [comments, setComments] = useState<SocialComment[]>([]);
   const [commentAuthors, setCommentAuthors] = useState<Record<string, string>>({});
@@ -40,7 +41,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
     setError(null);
     setEditingCommentId(null);
     setEditingBody('');
-  }, [postId, userId]);
+  }, [postId, userId, worldType]);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,7 +100,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
 
   const saveCommentEdit = async (commentId: string) => {
     try {
-      const updated = await updatePostComment(commentId, userId, editingBody);
+      const updated = await updatePostComment(commentId, userId, editingBody, worldType);
       setComments((current) => current.map((comment) => comment.id === commentId ? updated : comment));
       setEditingCommentId(null);
       setEditingBody('');
@@ -112,7 +113,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
   const removeComment = async (commentId: string) => {
     if (!window.confirm('Delete your comment? This cannot be undone.')) return;
     try {
-      await deletePostComment(commentId, userId);
+      await deletePostComment(commentId, userId, worldType);
       setComments((current) => current.filter((comment) => comment.id !== commentId));
       setStats((current) => ({ ...current, commentsCount: Math.max(0, current.commentsCount - 1) }));
       setError(null);
