@@ -79,6 +79,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   useEffect(() => {
     activeUserId.current = currentUserId;
     setSessionUserId(currentUserId);
+    setConversationsWorldType(worldType);
     inboxRequest.current += 1;
     searchRequest.current += 1;
     groupRequest.current += 1;
@@ -98,7 +99,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
       searchRequest.current += 1;
       groupRequest.current += 1;
     };
-  }, [currentUserId, refresh]);
+  }, [currentUserId, worldType, refresh]);
 
   // Keep the inbox current when a new conversation arrives on another device.
   // Poll only while this account is active and the tab is visible.
