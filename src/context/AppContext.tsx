@@ -35,6 +35,7 @@ import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { Database } from '@/services/supabase/database.types';
 import { normalizeSocialLinks } from '@/lib/socialLinks';
 import { fetchAccountSettings } from '@/modules/settings/service';
+import { applyTheme, resolveTheme, isThemePreference } from '@/lib/themes';
 
 export type NavigationState = 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'moderation' | 'planner' | 'feedback';
 
@@ -115,9 +116,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       const preference = preferences.theme;
       document.documentElement.dataset.layout = preferences.layout;
       const applyTheme = () => {
-        const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
-        document.documentElement.dataset.theme = theme;
-        document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
+        applyTheme(resolveTheme(preference, window.matchMedia('(prefers-color-scheme: light)').matches));
       };
       applyTheme();
       try {
@@ -148,20 +147,17 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       // System preference is the fallback when device storage is unavailable.
     }
     if (preference !== 'system') {
-      if (preference === 'dark' || preference === 'dusk' || preference === 'ocean' || preference === 'stone' || preference === 'light') {
-        document.documentElement.dataset.theme = preference;
-        document.documentElement.classList.toggle('dark', preference === 'dark' || preference === 'dusk' || preference === 'ocean');
+      if (isThemePreference(preference) && preference !== 'system') {
+        applyTheme(preference);
       } else {
-        document.documentElement.dataset.theme = 'dark';
-        document.documentElement.classList.add('dark');
+        applyTheme('dark');
       }
       return;
     }
     const media = window.matchMedia('(prefers-color-scheme: light)');
     const applySystemTheme = () => {
       const theme = media.matches ? 'light' : 'dark';
-      document.documentElement.dataset.theme = theme;
-      document.documentElement.classList.toggle('dark', theme === 'dark');
+      applyTheme(theme);
     };
     applySystemTheme();
     media.addEventListener('change', applySystemTheme);
