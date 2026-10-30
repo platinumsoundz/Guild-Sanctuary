@@ -44,8 +44,9 @@ export function WalletPanel({ userId, isGuest, worldType = 'sanctuary' }: Wallet
         if (authError || authData.user?.id !== userId) return;
         const { data, error: bonusError } = await client
           .from('token_signup_bonus_awards')
-          .select('user_id')
+          .select('user_id,granted_at')
           .eq('user_id', userId)
+          .not('granted_at', 'is', null)
           .maybeSingle();
         if (!cancelled && !bonusError) setHasFoundingBonus(Boolean(data));
       } catch {
