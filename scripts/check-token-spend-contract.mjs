@@ -13,7 +13,7 @@ const checks = [
   ['shop shows insufficient-balance shortfall without client-side spending', /shortfall/.test(shop) && /You need/.test(shop)],
   ['redemption is explicitly disabled until owner-approved staging', /const SPENDING_ENABLED = false/.test(shop)],
   ['purchase handler fails closed while spending is disabled', /if \(!SPENDING_ENABLED \|\| isGuest \|\| !hasSupabaseAccount \|\| purchasingItemId \|\| ownedItems\.has\(item\.item_id\)\) return;/.test(shop)],
-  ['purchase button is disabled while spending is locked', /disabled=\{!SPENDING_ENABLED \|\| !hasSupabaseAccount \|\| owned \|\| purchasingItemId !== null\}/.test(shop)],
+  ['purchase button is disabled while spending is locked', /disabled=\{!SPENDING_ENABLED \|\| !hasSupabaseAccount \|\| owned \|\| purchasingItemId !== null \|\| equippingItemId !== null\}/.test(shop)],
   ['locked purchase control communicates that redemption is unavailable', /!SPENDING_ENABLED \? 'Coming soon' : purchasing \? 'Unlocking…' : 'Unlock item'/.test(shop)],
   ['RPC request stays server-authoritative and carries an idempotency key', /client\.rpc\('spend_tokens'/.test(shop) && /requested_item_id:\s*item\.item_id/.test(shop) && /requested_idempotency_key:\s*crypto\.randomUUID\(\)/.test(shop)],
   ['shop verifies the authenticated user matches the active app account', /client\.auth\.getUser\(\)/.test(shop) && /authData\.user\?\.id !== userId/.test(shop)],
