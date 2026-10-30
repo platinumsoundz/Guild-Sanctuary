@@ -1014,7 +1014,7 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 ## Token shop — permanent cosmetic collection — 2026-10-30
 
 - Establish a first-party cosmetic catalogue using permanent account-bound entitlements. No user listings, trading, transfers, cash-out or competitive gameplay advantages.
-- Keep Cosmic dark and Cosmic light free. Premium themes (Dusk, Stone, Ocean, Nebula, Aurora, Celestial and Eclipse) unlock once and remain owned permanently; active selection is separate from ownership and applies across Sanctuary and Guild.
+- Keep Cosmic dark and Cosmic light free. Four new premium themes (Nebula, Aurora, Celestial and Eclipse) unlock once and remain owned permanently; existing Dusk, Stone and Ocean palettes remain available to avoid removing previously selectable options. Active selection is separate from ownership and applies across Sanctuary and Guild.
 - Add premium profile frames, portrait effects, identity badges and profile banners. Catalogue pricing is in tokens and is seeded idempotently by `20261030100000_token_cosmetics_and_premium_themes.sql`.
 - Premium palette IDs remain part of the central theme catalogue and use semantic CSS tokens. Do not create theme-specific page or component forks.
 - **Release gate:** shop items can be browsed, but token redemption remains disabled and the `spend_tokens` RPC remains revoked. The migration is not applied to production by this code change. Owner review, isolated staging migrations, authenticated spend/equip tests, balance/idempotency/ledger checks, theme entitlement bypass tests and security-advisor review are required before unlocking.
