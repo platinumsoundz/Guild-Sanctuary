@@ -2,3 +2,20 @@
 .levelBar,.scoreboard{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.levelBar span,.scoreboard p{color:var(--muted);font-size:.9rem;flex:1 1 180px}.levelBar button,.scoreboard button{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--surface-raised);color:var(--text)}.scoreboard{display:block}.scoreboard label{display:block;margin:8px 0 4px}.scoreboard input{max-width:260px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface-raised);color:var(--text);margin-right:8px}.scoreboard ol{padding-left:24px}.scoreboard li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)}.scoreboard li span{overflow-wrap:anywhere}.scoreboard button:disabled{opacity:.6;cursor:default}
 .runStats{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--muted);font-size:12px}.runStats strong{color:var(--ink)}.levelBar select{max-width:160px;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}.levelBar label{font-size:12px;font-weight:700;color:var(--muted)}.scoreboard input{max-width:320px}
 .runStats{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--muted);font-size:12px}.runStats strong{color:var(--ink)}.levelBar select{max-width:160px;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}.levelBar label{font-size:12px;font-weight:700;color:var(--muted)}
+
+/* Cosmic Arcade catalogue overhaul */
+.catalogHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:22px 0 12px}
+.catalogHeading h3{margin:0;font-size:clamp(18px,2.5vw,23px)}
+.catalogHeading p:not(.eyebrow){margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+.catalogCount{flex:none;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--accent);font-size:11px;font-weight:800}
+.gameCatalog{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:0 0 18px}
+.gameCard,.gameCardActive{display:flex;min-width:0;min-height:126px;flex-direction:column;align-items:flex-start;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-raised);color:var(--ink);text-align:left;cursor:pointer;transition:border-color .16s ease,background .16s ease,transform .16s ease}
+.gameCard:hover,.gameCardActive:hover{transform:translateY(-2px);border-color:var(--accent)}
+.gameCardActive{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,var(--surface-raised));box-shadow:inset 0 0 0 1px var(--accent)}
+.gameCardNumber{color:var(--accent);font-size:10px;font-weight:800;letter-spacing:1px}
+.gameCard strong{font-size:13px;line-height:1.3;overflow-wrap:anywhere}
+.gameCard small,.gameCardActive small{color:var(--muted);font-size:10px}
+.gameCardAction{margin-top:auto;color:var(--accent);font-size:10px;font-weight:750}
+.gameCard:focus-visible,.gameCardActive:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:760px){.gameCatalog{grid-template-columns:repeat(2,minmax(0,1fr))}.gameCard,.gameCardActive{min-height:112px}}
+@media(max-width:360px){.gameCatalog{gap:6px}.gameCard,.gameCardActive{padding:9px;min-height:105px}}
