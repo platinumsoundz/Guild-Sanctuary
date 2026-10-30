@@ -107,7 +107,7 @@ jobs:
             echo "- Mobile: 390 × 844"
             echo "- Small mobile: 360 × 800"
             echo
-            echo "Download the `sanctuary-visual-preview` artifact from this run's **Artifacts** section to inspect the PNG files."
+            echo "Download the sanctuary-visual-preview artifact from this run's Artifacts section to inspect the PNG files."
             echo
             echo "These screenshots are a visual aid, not a full accessibility, interaction, or cross-browser test."
           } >> "$GITHUB_STEP_SUMMARY"
