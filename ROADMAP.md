@@ -977,3 +977,12 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - Added a CI contract check for world-scoped writes, reads, notification triggers, moderation queues and conversation creation.
 - **Database migration applied:** `20261030025452_restore_guild_community_scope.sql` is applied to the confirmed `Guild-Sanctuary` Supabase project (`xgpzvmhldyoyrwwebcic`). Read-only SQL verified the new `notifications.world_type` and `content_reports.world_type` columns, the report world-sync trigger, scoped conversation RPC and notification trigger functions. Existing posts, conversations, notifications and reports remain tagged `sanctuary`; no production posts were created or modified by verification.
 - **Still required:** live end-to-end verification with test posts and separate reactions/comments/notifications/reports in each world, then confirm the merged build is live on Cloudflare/Vercel. The second Supabase project remains untouched.
+
+
+## Cosmic daylight theme — 2026-10-30
+
+- **PR #297:** `feat/cosmic-light-theme-2026-10-30` introduces a light counterpart to the cosmic dark default, using lavender-tinted backgrounds, white/lilac surfaces, the same purple accent identity, and lighter theme-specific nebula ambience across desktop and mobile.
+- Updated the Appearance option label and extended the theme contract to guard the palette and atmosphere.
+- Calculated primary text contrast pairs exceed WCAG AA 4.5:1 for normal text. This is a token-level check, not a substitute for full-page visual/accessibility testing.
+- **Not merged / not visually verified:** the reported Vercel check failed due to a build-rate-limit response. Run the theme contract, contrast contract, typecheck and production build on the exact PR head when CI capacity is available, then review key pages at desktop and narrow-phone widths.
+- **Theme-system follow-up:** centralize shared theme tokens once (the global stylesheet currently repeats the root/default palette and has layered body background declarations), use semantic tokens for remaining hard-coded feature colours, and add automated screenshots for each theme across representative Sanctuary and Guild pages. Keep theme identity independent from layout density and world-specific Guild styling.
