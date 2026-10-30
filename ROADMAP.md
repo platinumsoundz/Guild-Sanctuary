@@ -7,6 +7,16 @@ Last updated: 2026-10-30
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
 
+
+## Phase 1 close-friends beta handoff — 2026-10-30
+
+- **Implementation handoff recorded:** guest/basic/VIP/staff route and navigation boundaries are merged in PR #306. Vercel was confirmed READY on the approved application commit `49948b4af9fd9a108f9b7a00808527dca88c912b`.
+- The owner has confirmed their current tests are behaving as intended and has requested that remaining user-journey/device acceptance testing be left to them. Track that handoff in [issue #308](https://github.com/platinumsoundz/Guild-Sanctuary/issues/308).
+- No Supabase staging branch was created and no compute cost was incurred. No production schema migration or Auth configuration change was made in this handoff.
+- Read-only production audit found the 16 authenticated SECURITY DEFINER warnings have explicit role/auth checks in the inspected moderation, role, report and messaging paths, with an empty pinned `search_path`. Preserve their current grants unless a function-specific dependency review supports a change. Deny-by-default RLS remains on wallet/payment entitlement tables.
+- **Still not claimed complete:** migration-ledger reconciliation, leaked-password protection configuration, and Cloudflare production parity. Keep checkout, token spending and ads disabled. Do not blindly push migrations or merge stale security/payment branches.
+- Phase 1 implementation is handed over; the owner controls final acceptance and the decision to invite close friends.
+
 ## Shared design foundation and independent Guild — 2026-10-30
 
 The Guild and the Sanctuary share approved UI foundations and feature mechanics, but remain separate environments. This update is being developed on `fix/guild-independent-navigation-settings-feedback-2026-10-30`; it is not considered live until CI, merge and deployment are verified.
