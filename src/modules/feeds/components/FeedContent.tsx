@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import type { PostMediaType, PublicProfile } from '@/types/database';
+import type { PostMediaType, PublicProfile, WorldType } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { fetchPublicProfileById } from '@/modules/profiles';
 import { useFeed } from '@/modules/feeds';
@@ -25,9 +25,9 @@ function formatPostTime(value: string): string {
 const PLACEHOLDER_HEADING = 'A little room to begin';
 const PLACEHOLDER_MESSAGE = 'Thoughts and reflections from your community will find a home here.';
 
-export function FeedContent() {
+export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType }) {
   const { currentUser, isGuest } = useAppContext();
-  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(isGuest ? null : currentUser?.user.id ?? null);
+  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(isGuest ? null : currentUser?.user.id ?? null, worldType);
   const [draft, setDraft] = useState('');
   const [attachmentUrl, setAttachmentUrl] = useState('');
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
@@ -313,7 +313,7 @@ export function FeedContent() {
                     Your browser does not support video playback.
                   </video>
                 )}
-                {currentUser && !isGuest && <PostEngagement postId={post.id} userId={currentUser.user.id} />}
+                {currentUser && !isGuest && <PostEngagement postId={post.id} userId={currentUser.user.id} worldType={worldType} />}
                 {currentUser && !isGuest && (
                   <details className={styles.postOverflow}>
                     <summary aria-label="More post actions">More</summary>
