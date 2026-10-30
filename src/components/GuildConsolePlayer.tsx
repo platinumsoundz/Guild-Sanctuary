@@ -4,10 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, AudioLines, Check, Gamepad2, Maximize2, Minimize2, Settings2, Volume2, X } from 'lucide-react';
 import styles from './GuildConsolePlayer.module.css';
 
-type Props = { title: string; url: string; onExit: () => void };
+type Props = { title: string; gameId: 'sleeves2d' | 'sleeves3d'; url: string; onExit: () => void };
 const BUTTON_LABELS = ['A / Cross · Select', 'B / Circle · Back', 'D-pad / stick · Navigate'];
 
-export function GuildConsolePlayer({ title, url, onExit }: Props) {
+export function GuildConsolePlayer({ title, gameId, url, onExit }: Props) {
   const stageRef = useRef<HTMLDivElement>(null);
   const gameFrameRef = useRef<HTMLIFrameElement>(null);
   const [gameBridgeReady, setGameBridgeReady] = useState(false);
@@ -68,7 +68,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
     const onGameMessage = (event: MessageEvent) => {
       if (event.origin !== gameOrigin || event.source !== gameFrameRef.current?.contentWindow) return;
       const message = event.data;
-      if (!message || message.channel !== 'guild.5-sleeves' || message.version !== 1 || message.game !== 'the-5-sleeves-3d') return;
+      if (!message || message.channel !== 'guild.5-sleeves' || message.version !== 1 || message.game !== (gameId === 'sleeves2d' ? 'the-5-sleeves-2d' : 'the-5-sleeves-3d')) return;
       if (message.type === 'ready') {
         setGameBridgeReady(true);
         setGameBridgeStatus('Guild link ready');
@@ -79,7 +79,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
     };
     window.addEventListener('message', onGameMessage);
     return () => window.removeEventListener('message', onGameMessage);
-  }, [url]);
+  }, [gameId, url]);
 
   const sendGameCommand = useCallback((command: 'pause' | 'resume') => {
     if (!gameBridgeReady) return;
@@ -93,7 +93,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       command,
       requestId
     }, gameOrigin);
-  }, [gameBridgeReady, url]);
+  }, [gameBridgeReady, gameId, url]);
 
   useEffect(() => {
     sendGameCommand(menuOpen ? 'pause' : 'resume');
