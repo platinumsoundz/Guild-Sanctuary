@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ExternalLink, Search, ShieldCheck, UserCog } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
-import { fetchPageVisibility, isPageVisible, MANAGEABLE_PAGE_VISIBILITY, savePageVisibility, type PageVisibilityMap, type ManagedPageKey } from '@/lib/pageVisibility';
+import { fetchPageVisibility, isPageVisible, MANAGEABLE_PAGE_VISIBILITY, PAGE_VISIBILITY_ROLES, savePageVisibility, type PageVisibilityMap, type ManagedPageKey, type PageVisibilityRole } from '@/lib/pageVisibility';
 import styles from './AdminDashboard.module.css';
 
 type SanctuaryRole = 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner';
@@ -109,6 +109,7 @@ function PageVisibilityPanel() {
   const [visibility, setVisibility] = useState<PageVisibilityMap>({});
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<ManagedPageKey | null>(null);
+  const [selectedRole, setSelectedRole] = useState<PageVisibilityRole>('user');
   const [message, setMessage] = useState('');
   useEffect(() => {
     let cancelled = false;
@@ -123,9 +124,9 @@ function PageVisibilityPanel() {
     setSavingKey(key);
     setMessage('');
     try {
-      await savePageVisibility(key, visible);
+      await savePageVisibility(key, selectedRole, visible);
       setVisibility((current) => ({ ...current, [key]: visible }));
-      setMessage(`${MANAGEABLE_PAGE_VISIBILITY.find((page) => page.key === key)?.label ?? key} is now ${visible ? 'visible' : 'hidden'} for all members.`);
+      setMessage(`${MANAGEABLE_PAGE_VISIBILITY.find((page) => page.key === key)?.label ?? key} is now ${visible ? 'visible' : 'hidden'} for ${PAGE_VISIBILITY_ROLES.find((item) => item.value === selectedRole)?.label ?? selectedRole}.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'The setting could not be saved. Check that the page-visibility migration is deployed.');
     } finally {
@@ -135,12 +136,19 @@ function PageVisibilityPanel() {
   return <section className={styles.rolePanel} aria-labelledby="page-visibility-title">
     <div className={styles.sectionHeading}><ShieldCheck size={21} aria-hidden="true" /><div>
       <h2 id="page-visibility-title">Page & system visibility</h2>
-      <p>Developer and Owner controls. Changes are global and affect navigation for every account; access roles still apply even when a page is shown.</p>
+      <p>Choose a permission role, then control the pages and systems visible to that role. Role permissions still apply when a page is shown.</p>
     </div></div>
+    <div className={styles.roleEditor}>
+      <label htmlFor="visibility-role-select">Permission role to configure</label>
+      <select id="visibility-role-select" value={selectedRole} onChange={(event) => setSelectedRole(event.target.value as PageVisibilityRole)} disabled={savingKey !== null}>
+        {PAGE_VISIBILITY_ROLES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+      </select>
+      <p>Only this role’s navigation is affected. Other roles keep their own setting or the existing default.</p>
+    </div>
     {loading ? <p role="status">Loading page visibility…</p> : <div className={styles.memberList}>
       {MANAGEABLE_PAGE_VISIBILITY.map((page) => <label key={page.key} className={styles.memberRow}>
         <span><strong>{page.label}</strong><small>{page.key === 'admin' ? 'Always available to staff for recovery' : isPageVisible(page.key, visibility) ? 'Shown in navigation' : 'Hidden from navigation'}</small></span>
-        <input type="checkbox" checked={isPageVisible(page.key, visibility)} disabled={savingKey !== null || page.key === 'admin'} onChange={(event) => void update(page.key, event.currentTarget.checked)} aria-label={`Show ${page.label}`} />
+        <input type="checkbox" checked={isPageVisible(page.key, visibility, selectedRole)} disabled={savingKey !== null || page.key === 'admin'} onChange={(event) => void update(page.key, event.currentTarget.checked)} aria-label={`Show ${page.label}`} />
       </label>)}
     </div>}
     {message && <p className={styles.message} role="status">{message}</p>}
