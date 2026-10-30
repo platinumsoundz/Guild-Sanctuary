@@ -22,41 +22,58 @@ export const MANAGEABLE_PAGE_VISIBILITY = [
   { key: 'moderation', label: 'Moderation' },
 ] as const;
 
+export const PAGE_VISIBILITY_ROLES = [
+  { value: 'guest', label: 'Guest' },
+  { value: 'user', label: 'Basic User' },
+  { value: 'vip', label: 'VIP' },
+  { value: 'moderator', label: 'Moderator' },
+  { value: 'admin', label: 'Admin' },
+  { value: 'developer', label: 'Developer' },
+  { value: 'owner', label: 'Owner' },
+] as const;
+
+export type PageVisibilityRole = typeof PAGE_VISIBILITY_ROLES[number]['value'];
 export type ManagedPageKey = typeof MANAGEABLE_PAGE_VISIBILITY[number]['key'];
-export type PageVisibilityMap = Partial<Record<ManagedPageKey, boolean>>;
+export type PageVisibilityMap = Partial<Record<ManagedPageKey, Partial<Record<PageVisibilityRole | 'all', boolean>>>>;
 
 export async function fetchPageVisibility(): Promise<PageVisibilityMap> {
   const client = getSupabaseBrowserClient();
-  const { data, error } = await client.from('platform_page_visibility').select('page_key,is_visible');
+  const { data, error } = await client.from('platform_page_visibility').select('page_key,role_key,is_visible');
   if (error) {
     // A missing migration must not make core navigation disappear.
-    if (/platform_page_visibility|schema cache|does not exist/i.test(error.message)) return {};
+    if (/platform_page_visibility|schema cache|does not exist|role_key/i.test(error.message)) return {};
     throw error;
   }
   const visibility: PageVisibilityMap = {};
   for (const row of data ?? []) {
-    if (MANAGEABLE_PAGE_VISIBILITY.some((page) => page.key === row.page_key)) {
-      visibility[row.page_key as ManagedPageKey] = row.is_visible;
+    if (MANAGEABLE_PAGE_VISIBILITY.some((page) => page.key === row.page_key)
+      && (row.role_key === 'all' || PAGE_VISIBILITY_ROLES.some((role) => role.value === row.role_key))) {
+      const pageKey = row.page_key as ManagedPageKey;
+      const roleKey = row.role_key as PageVisibilityRole | 'all';
+      visibility[pageKey] = { ...(visibility[pageKey] ?? {}), [roleKey]: row.is_visible };
     }
   }
   return visibility;
 }
 
-export async function savePageVisibility(pageKey: ManagedPageKey, isVisible: boolean): Promise<void> {
+export async function savePageVisibility(pageKey: ManagedPageKey, role: PageVisibilityRole, isVisible: boolean): Promise<void> {
   const client = getSupabaseBrowserClient();
   const { data: authData, error: authError } = await client.auth.getUser();
   if (authError || !authData.user) throw new Error('Sign in with a developer or owner account.');
   const { error } = await client.from('platform_page_visibility').upsert({
     page_key: pageKey,
+    role_key: role,
     is_visible: isVisible,
     updated_by: authData.user.id,
     updated_at: new Date().toISOString(),
-  }, { onConflict: 'page_key' });
+  }, { onConflict: 'page_key,role_key' });
   if (error) throw new Error(error.message);
 }
 
-export function isPageVisible(pageKey: string, visibility: PageVisibilityMap): boolean {
+export function isPageVisible(pageKey: string, visibility: PageVisibilityMap, role: string = 'user'): boolean {
   // Preserve an always-available recovery surface for staff if a visibility rule is misconfigured.
   if (pageKey === 'admin') return true;
-  return visibility[pageKey as ManagedPageKey] !== false;
+  const page = visibility[pageKey as ManagedPageKey];
+  const roleKey = PAGE_VISIBILITY_ROLES.some((item) => item.value === role) ? role as PageVisibilityRole : 'guest';
+  return page?.[roleKey] ?? page?.all ?? true;
 }
