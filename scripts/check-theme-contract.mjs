@@ -22,7 +22,7 @@ assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'th
 assert.ok(layout.includes("saved === 'stone' || saved === 'ocean' || saved === 'midnight' || saved === 'forest' || saved === 'rose' || saved === 'lavender' || saved === 'ember' || saved === 'mint'"), 'pre-render bootstrap must accept new palettes');
 assert.ok(layout.includes("? saved : 'dark'"), 'fresh visits must default to the cosmic dark palette');
 assert.ok(layout.includes("classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean' || theme === 'midnight' || theme === 'forest' || theme === 'rose' || theme === 'ember')"), 'Tailwind dark variants must follow selected theme');
-assert.ok(settings.includes("classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean')"), 'live theme changes must update Tailwind dark variants');
+assert.ok(settings.includes("classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean' || theme === 'midnight' || theme === 'forest' || theme === 'rose' || theme === 'ember')"), 'live theme changes must update Tailwind dark variants');
 assert.ok(settings.includes("window.matchMedia('(prefers-color-scheme: light)')"), 'system preference must follow OS colour scheme');
 assert.ok(appContext.includes('fetchAccountSettings(currentUser.user.id)'), 'signed-in accounts must load saved theme on session restore');
 assert.ok(appContext.includes('document.documentElement.dataset.layout = preferences.layout'), 'saved account layout must apply across the app at session restore');
