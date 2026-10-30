@@ -104,7 +104,7 @@ export function SettingsHub({
     const applyTheme = () => {
       const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
       document.documentElement.dataset.theme = theme;
-      document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
+      document.documentElement.classList.toggle('dark', ['dark', 'dusk', 'ocean', 'aurora', 'ember', 'forest', 'rose', 'violet', 'midnight'].includes(theme));
     };
     applyTheme();
     try {
