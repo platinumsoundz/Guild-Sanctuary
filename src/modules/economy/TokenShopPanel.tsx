@@ -154,7 +154,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
         <div>
           <p className={styles.eyebrow}>{worldType === 'guild' ? 'THE GUILD COLLECTION' : 'THE SANCTUARY COLLECTION'}</p>
           <h1>Token Shop</h1>
-          <p>Unlock first-party cosmetics and premium themes with tokens. Items are account-bound and cannot be traded or cashed out.</p>
+          <p>Unlock first-party cosmetics and premium themes with tokens. Items cost just 20–50 tokens (20p–50p at the standard rate of 100 tokens per £1), are account-bound and cannot be traded or cashed out.</p>
         </div>
         <div className={styles.balance}>
           <span>Wallet balance</span>
