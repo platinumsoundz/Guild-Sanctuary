@@ -15,7 +15,7 @@ const shellCss = read('../src/components/ResponsiveShell.module.css');
 assert.ok(settings.includes('value="system"'), 'missing system preference option in Settings');
 for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean']) {
   assert.ok(css.includes(`:root[data-theme="${theme}"]`), `missing ${theme} palette`);
-  assert.ok(settings.includes(`value="${theme}"`), `missing ${theme} option in Settings`);
+  assert.ok(themeRegistry.includes(`id: '${theme}'`), `missing ${theme} in the central theme catalogue`);
 }
 assert.ok(css.includes('--bg: #f5f3ff;') && css.includes('--surface-raised: #f0edff;'), 'light theme must use the cosmic lavender daylight surfaces');
 assert.ok(css.includes('--accent: #5b3dbb;') && css.includes('--accent-contrast: #ffffff;'), 'light theme must retain the cosmic purple accent with readable contrast');
