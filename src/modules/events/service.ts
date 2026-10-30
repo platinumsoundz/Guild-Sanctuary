@@ -1,7 +1,7 @@
 'use client';
 
 import type { Coordinates } from '@/types';
-import type { Event, EventRsvp, EventRsvpStatus, SocialComment, SocialLike } from '@/types/database';
+import type { Event, EventRsvp, EventRsvpStatus, SocialComment, SocialLike, WorldType } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { Database } from '@/services/supabase/database.types';
 import { isSupabaseCommunityStorageConfigured, requireCommunityStorageUser } from '@/services/supabase/communityMedia';
@@ -13,6 +13,7 @@ export interface CreateEventInput {
   locationCoords: Coordinates;
   startsAt: string;
   endsAt?: string | null;
+  worldType?: WorldType;
 }
 
 export interface EventView extends Event {
@@ -32,6 +33,7 @@ type EventRow = Database['public']['Tables']['events']['Row'];
 function toEvent(row: EventRow): Event {
   return {
     id: row.id,
+    worldType: row.world_type,
     creatorId: row.creator_id,
     title: row.title,
     description: row.description,
@@ -86,12 +88,13 @@ function findEvent(eventId: string): Event | undefined {
   return events.find((event) => event.id === eventId);
 }
 
-export async function fetchEvents(userId: string): Promise<EventView[]> {
+export async function fetchEvents(userId: string, worldType: WorldType = 'sanctuary'): Promise<EventView[]> {
   if (isSupabaseCommunityStorageConfigured()) {
     const client = getSupabaseBrowserClient();
     const { data: rows, error } = await client
       .from('events')
       .select('*')
+      .eq('world_type', worldType)
       .eq('state', 'visible')
       .order('starts_at', { ascending: true });
     if (error) throw new Error(`Events could not be loaded: ${error.message}`);
@@ -123,6 +126,7 @@ export async function fetchEvents(userId: string): Promise<EventView[]> {
   }
   await delay();
   return events
+    .filter((event) => (event.worldType ?? 'sanctuary') === worldType)
     .slice()
     .sort((first, second) => first.startsAt.localeCompare(second.startsAt))
     .map((event) => ({
@@ -145,6 +149,7 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
       .from('events')
       .insert({
         creator_id: userId,
+        world_type: input.worldType ?? 'sanctuary',
         title: input.title.trim(),
         description: input.description.trim(),
         latitude: input.locationCoords.latitude,
@@ -161,6 +166,7 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
   await delay();
   const event: Event = {
     id: `event-local-${nextEventId++}`,
+    worldType: input.worldType ?? 'sanctuary',
     creatorId: input.creatorId,
     title: input.title.trim(),
     description: input.description.trim(),
@@ -173,7 +179,7 @@ export async function createEvent(input: CreateEventInput): Promise<Event> {
   return event;
 }
 
-export async function updateEvent(eventId: string, creatorId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt' | 'locationCoords'>): Promise<Event> {
+export async function updateEvent(eventId: string, creatorId: string, input: Pick<CreateEventInput, 'title' | 'description' | 'startsAt' | 'locationCoords'>, worldType: WorldType = 'sanctuary'): Promise<Event> {
   validateEvent(input.title, input.description, input.startsAt);
   validateCoordinates(input.locationCoords);
   if (isSupabaseCommunityStorageConfigured()) {
@@ -189,6 +195,8 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
       })
       .eq('id', eventId)
       .eq('creator_id', creatorId)
+      .eq('world_type', worldType)
+      .eq('world_type', worldType)
       .select('*')
       .maybeSingle();
     if (error) throw new Error(`Event could not be updated: ${error.message}`);
@@ -197,6 +205,7 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
   }
   await delay();
   const event = findEvent(eventId);
+  if (event && (event.worldType ?? 'sanctuary') !== worldType) throw new Error('This event is unavailable in the current community.');
   if (!event || event.creatorId !== creatorId) {
     throw new Error('This event could not be updated.');
   }
@@ -208,7 +217,7 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
   return event;
 }
 
-export async function deleteEvent(eventId: string, creatorId: string): Promise<void> {
+export async function deleteEvent(eventId: string, creatorId: string, worldType: WorldType = 'sanctuary'): Promise<void> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(creatorId);
     const { data, error } = await getSupabaseBrowserClient()
@@ -223,7 +232,7 @@ export async function deleteEvent(eventId: string, creatorId: string): Promise<v
     return;
   }
   await delay();
-  const index = events.findIndex((event) => event.id === eventId && event.creatorId === creatorId);
+  const index = events.findIndex((event) => event.id === eventId && event.creatorId === creatorId && (event.worldType ?? 'sanctuary') === worldType);
   if (index < 0) {
     throw new Error('This event could not be deleted.');
   }
@@ -234,7 +243,7 @@ export async function deleteEvent(eventId: string, creatorId: string): Promise<v
   }
 }
 
-export async function setEventRsvp(eventId: string, userId: string, status: 'going' | 'interested' | 'cancelled'): Promise<EventRsvp> {
+export async function setEventRsvp(eventId: string, userId: string, status: 'going' | 'interested' | 'cancelled', worldType: WorldType = 'sanctuary'): Promise<EventRsvp> {
   if (!userId) throw new Error('Sign in before responding to an event.');
   if (isSupabaseCommunityStorageConfigured()) {
     const currentUserId = await requireCommunityStorageUser(userId);
@@ -271,10 +280,12 @@ export async function setEventRsvp(eventId: string, userId: string, status: 'goi
   return rsvp;
 }
 
-export async function getEventEngagement(eventId: string, userId: string) {
+export async function getEventEngagement(eventId: string, userId: string, worldType: WorldType = 'sanctuary') {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
     const client = getSupabaseBrowserClient();
+    const { data: scopedEvent } = await client.from('events').select('id').eq('id', eventId).eq('world_type', worldType).maybeSingle();
+    if (!scopedEvent) throw new Error('This event is unavailable in the current community.');
     const [like, likesCount, commentsCount] = await Promise.all([
       client.from('social_likes').select('id').eq('target_type', 'event').eq('target_id', eventId).eq('user_id', userId).maybeSingle(),
       client.from('social_likes').select('id', { count: 'exact', head: true }).eq('target_type', 'event').eq('target_id', eventId),
@@ -295,10 +306,12 @@ export async function getEventEngagement(eventId: string, userId: string) {
   };
 }
 
-export async function toggleEventLike(eventId: string, userId: string): Promise<{ liked: boolean; count: number }> {
+export async function toggleEventLike(eventId: string, userId: string, worldType: WorldType = 'sanctuary'): Promise<{ liked: boolean; count: number }> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
     const client = getSupabaseBrowserClient();
+    const { data: scopedEvent } = await client.from('events').select('id').eq('id', eventId).eq('world_type', worldType).maybeSingle();
+    if (!scopedEvent) throw new Error('This event is unavailable in the current community.');
     const { data: existing, error: existingError } = await client
       .from('social_likes')
       .select('id')
@@ -326,9 +339,11 @@ export async function toggleEventLike(eventId: string, userId: string): Promise<
   return { liked: existingIndex < 0, count: likes.filter((like) => like.targetId === eventId).length };
 }
 
-export async function fetchEventComments(eventId: string): Promise<SocialComment[]> {
+export async function fetchEventComments(eventId: string, worldType: WorldType = 'sanctuary'): Promise<SocialComment[]> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser();
+    const { data: scopedEvent } = await getSupabaseBrowserClient().from('events').select('id').eq('id', eventId).eq('world_type', worldType).maybeSingle();
+    if (!scopedEvent) throw new Error('This event is unavailable in the current community.');
     const { data, error } = await getSupabaseBrowserClient()
       .from('social_comments')
       .select('*')
@@ -351,13 +366,15 @@ export async function fetchEventComments(eventId: string): Promise<SocialComment
   return comments.filter((comment) => comment.targetId === eventId).map((comment) => ({ ...comment }));
 }
 
-export async function addEventComment(eventId: string, authorId: string, body: string): Promise<SocialComment> {
+export async function addEventComment(eventId: string, authorId: string, body: string, worldType: WorldType = 'sanctuary'): Promise<SocialComment> {
   const normalizedBody = body.trim();
   if (!authorId || normalizedBody.length < 1 || normalizedBody.length > 1000) {
     throw new Error('Comments must contain 1 to 1,000 characters.');
   }
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(authorId);
+    const { data: scopedEvent } = await getSupabaseBrowserClient().from('events').select('id').eq('id', eventId).eq('world_type', worldType).maybeSingle();
+    if (!scopedEvent) throw new Error('This event is unavailable in the current community.');
     const { data, error } = await getSupabaseBrowserClient()
       .from('social_comments')
       .insert({ target_type: 'event', target_id: eventId, author_id: authorId, body: normalizedBody })
