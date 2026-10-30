@@ -30,7 +30,7 @@ import { GuildRoadmap } from '@/components/GuildRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { GuildHomeDashboard } from '@/components/GuildHomeDashboard';
 import { NotificationBar } from '@/components/NotificationBar';
-import { FeedbackPage } from '@/components/FeedbackCenter';
+import { FeedbackInboxPage, FeedbackPage } from '@/components/FeedbackCenter';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { ModerationDashboard } from '@/modules/moderation/ModerationDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
@@ -83,7 +83,7 @@ export function AppWorkspace() {
     if (!isSessionReady) return;
     let cancelled = false;
     void fetchPageVisibility().then((visibility) => {
-      if (cancelled || contentNavigation === 'feedback' || isPageVisible(contentNavigation, visibility, isGuest ? 'guest' : currentRole ?? 'user')) return;
+      if (cancelled || (contentNavigation === 'feedback' || contentNavigation === 'feedback-inbox') || isPageVisible(contentNavigation, visibility, isGuest ? 'guest' : currentRole ?? 'user')) return;
       // Keep the developer/owner's recovery surface reachable even if its nav item was hidden.
       if (contentNavigation === 'admin' && ['developer', 'owner'].includes(currentRole ?? '')) return;
       setActiveNavigation('today');
@@ -254,7 +254,9 @@ export function AppWorkspace() {
       </p>
     </main>
   ) : contentNavigation === 'feedback' ? (
-    <FeedbackPage role={isGuest ? 'guest' : currentRole ?? 'user'} isGuest={isGuest} worldType={worldType} />
+    <FeedbackPage isGuest={isGuest} worldType={worldType} />
+  ) : contentNavigation === 'feedback-inbox' ? (
+    <FeedbackInboxPage role={currentRole ?? 'user'} worldType={worldType} />
   ) : contentNavigation === 'notifications' ? (
     <main className={styles.supportPage}>
       <NotificationBar fullPage worldType={worldType} onNavigate={openNavigation} />
@@ -292,7 +294,7 @@ export function AppWorkspace() {
       ) : contentNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
-          <Feed worldType={worldType} onNavigate={openNavigation} />
+          <Feed worldType={worldType} onNavigate={setActiveNavigation} />
           <AdSlot placement="feed-sidebar" />
         </>
       ) : contentNavigation === 'events' ? (
@@ -381,7 +383,7 @@ export function AppWorkspace() {
       <ResponsiveShell>
         {activeNavigation === 'guild' ? (
           <div className={styles.guildExperience} data-world="guild">
-            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} userId={!isGuest ? currentUser?.user.id ?? null : null} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
+            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} userId={currentUser?.user.id ?? null} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
             <motion.div className={styles.guildWorldContent}>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={guildPage} className={styles.guildPageContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
@@ -401,7 +403,6 @@ export function AppWorkspace() {
           <div className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`} data-world="sanctuary" style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}>
         <Navigation
           activeNavigation={activeNavigation}
-          worldType={worldType}
           currentUser={currentUser}
           isGuest={isGuest}
           onExploreAsGuest={loginAsGuest}

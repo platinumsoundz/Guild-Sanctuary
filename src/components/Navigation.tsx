@@ -26,8 +26,6 @@ import {
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
-import type { WorldType } from '@/types/database';
-import { fetchNavigationBadgeCounts } from '@/lib/navigationBadges';
 import { fetchPageVisibility, isPageVisible, type PageVisibilityMap } from '@/lib/pageVisibility';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
 import styles from './Navigation.module.css';
@@ -59,6 +57,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
   { id: 'feedback', label: 'Feedback', icon: MessageSquare },
+  { id: 'feedback-inbox', label: 'Feedback inbox', icon: ShieldCheck },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -67,13 +66,12 @@ const navigationGroups: { label: string; items: NavigationState[] }[] = [
   { label: 'Connect', items: ['discover', 'messages', 'events', 'shorts'] },
   { label: 'Your space', items: ['profile', 'planner', 'wallet'] },
   { label: 'Explore', items: ['games', 'support', 'shop'] },
-  { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'feedback', 'settings'] },
+  { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'feedback', 'feedback-inbox', 'settings'] },
   { label: 'Stewardship', items: ['admin', 'moderation'] },
 ];
 
 interface NavigationProps {
   activeNavigation: NavigationState;
-  worldType: WorldType;
   currentUser: AuthSession | null;
   isGuest: boolean;
   onExploreAsGuest: () => void;
@@ -92,7 +90,6 @@ interface NavigationProps {
 
 export function Navigation({
   activeNavigation,
-  worldType,
   currentUser,
   isGuest,
   onExploreAsGuest,
@@ -111,33 +108,6 @@ export function Navigation({
   const role = currentUser?.profile.role?.toLowerCase() ?? 'user';
   const guestNavigationPages = new Set<NavigationState>(['today', 'games', 'roadmap', 'support', 'feedback']);
   const [pageVisibility, setPageVisibility] = useState<PageVisibilityMap>({});
-  const [pageBadges, setPageBadges] = useState<Partial<Record<NavigationState, number>>>({});
-
-  useEffect(() => {
-    if (!currentUser || isGuest || !isSessionReady) {
-      setPageBadges({});
-      return;
-    }
-    let cancelled = false;
-    const refreshBadges = async () => {
-      const next = await fetchNavigationBadgeCounts(
-        currentUser.user.id,
-        currentUser.profile.role,
-        worldType,
-      );
-      if (!cancelled) setPageBadges(next);
-    };
-    void refreshBadges();
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void refreshBadges();
-    }, 30_000);
-    window.addEventListener('focus', refreshBadges);
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-      window.removeEventListener('focus', refreshBadges);
-    };
-  }, [currentUser?.user.id, currentUser?.profile.role, isGuest, isSessionReady, worldType]);
   useEffect(() => {
     let cancelled = false;
     void fetchPageVisibility().then((value) => { if (!cancelled) setPageVisibility(value); }).catch(() => { if (!cancelled) setPageVisibility({}); });
@@ -145,8 +115,10 @@ export function Navigation({
   }, [currentUser?.user.id, isGuest]);
   const visibleNavigationItems = (isGuest
     ? navigationItems.filter((item) => guestNavigationPages.has(item.id))
-    : navigationItems.filter((item) => canAccessSanctuaryPage(item.id, currentUser ? role : 'user')))
-    .filter((item) => item.id === 'feedback' || isPageVisible(item.id, pageVisibility, isGuest ? 'guest' : role));
+    : navigationItems.filter((item) => item.id === 'feedback-inbox'
+      ? ['developer', 'owner'].includes(role)
+      : canAccessSanctuaryPage(item.id, currentUser ? role : 'user')))
+    .filter((item) => item.id === 'feedback' || item.id === 'feedback-inbox' || isPageVisible(item.id, pageVisibility, isGuest ? 'guest' : role));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);
@@ -154,7 +126,6 @@ export function Navigation({
   const entryMenuButtonRef = useRef<HTMLButtonElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const badgeFor = (id: NavigationState) => pageBadges[id] ? <span className={styles.navigationBadge} aria-label={pageBadges[id] + ' new items'}>{pageBadges[id]! > 99 ? '99+' : pageBadges[id]}</span> : null;
   const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
   const closeEntryMenu = useCallback(() => setIsEntryMenuOpen(false), []);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
@@ -337,7 +308,6 @@ export function Navigation({
                                 >
                                   <item.icon size={19} strokeWidth={1.8} aria-hidden="true" />
                                   <span>{item.label}</span>
-                                  {badgeFor(item.id)}
                                 </button>
                               ))}
                             </div>
@@ -365,7 +335,6 @@ export function Navigation({
             >
               <item.icon size={20} strokeWidth={1.8} aria-hidden="true" />
               <span>{item.label}</span>
-              {badgeFor(item.id)}
             </button>
           ))}
         </nav>
