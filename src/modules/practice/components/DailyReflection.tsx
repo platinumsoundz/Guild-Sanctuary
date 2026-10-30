@@ -116,7 +116,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
       const saved = fromRow(data);
       if (!saved) throw new Error('The saved reflection did not contain a supported mood.');
       setEntries((current) => [saved, ...current.filter((entry) => entry.date !== today)].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 90));
-      setStatus('Your reflection is saved to your Sanctuary account and will be available when you sign in on another device.');
+      setStatus('Your reflection is saved to your account and will be available when you sign in on another device.');
     } catch {
       setStatus('Your reflection could not be saved to the database. Nothing has been saved locally; please try again.');
     } finally {
@@ -125,7 +125,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
   };
   const clearHistory = async () => {
     if (!databaseReady || busy || !sessionReady) return;
-    if (!window.confirm('Delete all Sanctuary reflections saved to your account? This cannot be undone.')) return;
+    if (!window.confirm('Delete all reflections saved to your account? This cannot be undone.')) return;
     setBusy(true);
     try {
       const ownerId = await verifyReflectionOwner(userId);
@@ -144,7 +144,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
     if (!databaseReady || busy || !sessionReady) return;
     let localEntries: LegacyReflectionEntry[];
     try {
-      const raw = window.localStorage.getItem(`sanctuary-daily-reflection:v1:${encodeURIComponent(userId)}`);
+      const raw = window.localStorage.getItem(`${worldType}-daily-reflection:v1:${encodeURIComponent(userId)}`);
       if (!raw) { setStatus('No browser-saved reflections were found for this account.'); return; }
       const parsed: unknown = JSON.parse(raw);
       if (!Array.isArray(parsed)) throw new Error('Saved reflection data is not a list.');
@@ -166,7 +166,7 @@ export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
       return;
     }
     const confirmed = window.confirm(
-      `Import ${importable.length} browser-saved reflection(s) into your Sanctuary account? This uploads private mood and reflection text to the account database. Existing account entries are kept, and the browser copies will not be deleted.`,
+      `Import ${importable.length} browser-saved reflection(s) into your account? This uploads private mood and reflection text to the account database. Existing account entries are kept, and the browser copies will not be deleted.`,
     );
     if (!confirmed) return;
     setBusy(true);
