@@ -292,7 +292,7 @@ export function AppWorkspace() {
       ) : contentNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
-          <Feed worldType={worldType} />
+          <Feed worldType={worldType} onNavigate={openNavigation} />
           <AdSlot placement="feed-sidebar" />
         </>
       ) : contentNavigation === 'events' ? (
@@ -381,7 +381,7 @@ export function AppWorkspace() {
       <ResponsiveShell>
         {activeNavigation === 'guild' ? (
           <div className={styles.guildExperience} data-world="guild">
-            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
+            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} userId={!isGuest ? currentUser?.user.id ?? null : null} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
             <motion.div className={styles.guildWorldContent}>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={guildPage} className={styles.guildPageContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
@@ -401,6 +401,7 @@ export function AppWorkspace() {
           <div className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`} data-world="sanctuary" style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}>
         <Navigation
           activeNavigation={activeNavigation}
+          worldType={worldType}
           currentUser={currentUser}
           isGuest={isGuest}
           onExploreAsGuest={loginAsGuest}

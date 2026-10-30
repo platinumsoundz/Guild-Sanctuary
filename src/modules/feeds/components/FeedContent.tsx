@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { PostMediaType, PublicProfile, WorldType } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { fetchPublicProfileById } from '@/modules/profiles';
@@ -46,6 +46,22 @@ export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
+  const [feedFilter, setFeedFilter] = useState<'all' | 'media' | 'mine'>('all');
+  const [feedSort, setFeedSort] = useState<'newest' | 'oldest'>('newest');
+  const [feedQuery, setFeedQuery] = useState('');
+
+  const visiblePosts = useMemo(() => {
+    const needle = feedQuery.trim().toLocaleLowerCase();
+    return posts.filter((post) => {
+      if (feedFilter === 'media' && !post.mediaUrl) return false;
+      if (feedFilter === 'mine' && post.authorId !== currentUser?.user.id) return false;
+      if (!needle) return true;
+      const author = authors[post.authorId];
+      return `${post.content} ${post.storyTag ?? ''} ${author?.displayName ?? ''} ${author?.username ?? ''}`.toLocaleLowerCase().includes(needle);
+    }).sort((a, b) => feedSort === 'newest'
+      ? Date.parse(b.createdAt) - Date.parse(a.createdAt)
+      : Date.parse(a.createdAt) - Date.parse(b.createdAt));
+  }, [authors, currentUser?.user.id, feedFilter, feedQuery, feedSort, posts]);
 
   useEffect(() => {
     let cancelled = false;
@@ -165,7 +181,7 @@ export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType
 
   return (
     <section className={styles.content} data-world={worldType} aria-live="polite" aria-labelledby="feed-heading">
-      {currentUser && !isGuest && <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
+      {currentUser && !isGuest && <form id="community-composer" className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
         {postMode === 'open' ? <label className={styles.composerLabel} htmlFor="post-content">{worldType === 'guild' ? 'Share with the Guild' : 'Share with Sanctuary'}</label> : <p className={styles.composerLabel}>{worldType === 'guild' ? 'Share with the Guild' : 'Share with Sanctuary'}</p>}
         <div className={styles.connectionToolkit} role="group" aria-labelledby="connection-toolkit-heading">
           <p className={styles.toolkitHeading} id="connection-toolkit-heading">A little structure can help people connect</p>
@@ -267,6 +283,24 @@ export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType
         </div>
         <span className={styles.sortLabel}>LATEST</span>
       </div>
+      <div className={styles.feedTools} aria-label="Filter community posts">
+        <div className={styles.feedFilters} role="group" aria-label="Post type">
+          <button type="button" aria-pressed={feedFilter === 'all'} className={feedFilter === 'all' ? styles.activeFeedFilter : styles.feedFilter} onClick={() => setFeedFilter('all')}>All posts</button>
+          <button type="button" aria-pressed={feedFilter === 'media'} className={feedFilter === 'media' ? styles.activeFeedFilter : styles.feedFilter} onClick={() => setFeedFilter('media')}>Media</button>
+          {currentUser && !isGuest && <button type="button" aria-pressed={feedFilter === 'mine'} className={feedFilter === 'mine' ? styles.activeFeedFilter : styles.feedFilter} onClick={() => setFeedFilter('mine')}>My posts</button>}
+        </div>
+        <label className={styles.feedSearch}>
+          <span className="sr-only">Search community posts</span>
+          <input type="search" value={feedQuery} onChange={(event) => setFeedQuery(event.currentTarget.value)} placeholder="Search posts, tags or members" />
+        </label>
+        <label className={styles.feedSort}>
+          <span className="sr-only">Sort posts</span>
+          <select value={feedSort} onChange={(event) => setFeedSort(event.currentTarget.value as 'newest' | 'oldest')}>
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+        </label>
+      </div>
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isLoading && <p className={styles.feedStatus}>Loading your feed...</p>}
       {!isLoading && posts.length === 0 && (
@@ -279,9 +313,15 @@ export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType
           <span className={styles.sanctuaryLabel}>{worldType === 'guild' ? 'THE GUILD' : 'SANCTUARY'}</span>
         </div>
       )}
-      {!isLoading && posts.length > 0 && (
+      {!isLoading && posts.length > 0 && visiblePosts.length === 0 && (
+        <div className={styles.emptyState}>
+          <p>No posts match these filters. Try another search or switch back to all posts.</p>
+          <button className={styles.textButton} type="button" onClick={() => { setFeedFilter('all'); setFeedQuery(''); }}>Clear filters</button>
+        </div>
+      )}
+      {!isLoading && visiblePosts.length > 0 && (
         <div className={styles.postList}>
-          {posts.map((post) => (
+          {visiblePosts.map((post) => (
             <article className={styles.post} key={post.id}>
               <div className={styles.postAvatar} aria-hidden="true">
                 {authors[post.authorId]?.avatarUrl ? <img src={authors[post.authorId].avatarUrl ?? undefined} alt="" /> : (authors[post.authorId]?.displayName ?? (post.authorId === currentUser?.user.id ? currentUser.profile.displayName : 'Community member')).slice(0, 1).toUpperCase()}

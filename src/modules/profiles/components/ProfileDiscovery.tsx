@@ -151,6 +151,24 @@ export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }
         <p className={styles.privacyNote}>Only public profiles, visible posts and visible events appear here. Private reflections are never included.</p>
       </header>
 
+      <section className={styles.discoverHighlights} aria-label="Explore Sanctuary">
+        <button type="button" className={styles.highlightCard} onClick={() => resetTab('people')}>
+          <span className={styles.highlightIcon}><Users size={18} aria-hidden="true" /></span>
+          <span><strong>Meet the community</strong><small>Find public member profiles and shared interests</small></span>
+          <span className={styles.highlightArrow} aria-hidden="true">↗</span>
+        </button>
+        <button type="button" className={styles.highlightCard} onClick={() => resetTab('posts')}>
+          <span className={styles.highlightIcon}><FileText size={18} aria-hidden="true" /></span>
+          <span><strong>Explore conversations</strong><small>Discover ideas, reflections and questions</small></span>
+          <span className={styles.highlightArrow} aria-hidden="true">↗</span>
+        </button>
+        <button type="button" className={styles.highlightCard} onClick={() => resetTab('events')}>
+          <span className={styles.highlightIcon}><CalendarDays size={18} aria-hidden="true" /></span>
+          <span><strong>Find gatherings</strong><small>See upcoming public community events</small></span>
+          <span className={styles.highlightArrow} aria-hidden="true">↗</span>
+        </button>
+      </section>
+
       <div className={styles.tabs} role="tablist" aria-label="Discover">
         <button type="button" role="tab" id="discover-people-tab" aria-controls="discover-panel" aria-selected={activeTab === 'people'}
           className={activeTab === 'people' ? styles.activeTab : styles.tab} onClick={() => resetTab('people')}>

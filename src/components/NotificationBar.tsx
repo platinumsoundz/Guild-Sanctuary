@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Bell, CheckCheck, Heart, MessageCircle, X } from 'lucide-react';
+import { Bell, CheckCheck, Heart, MessageCircle, Trash2, X } from 'lucide-react';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import type { WorldType } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
@@ -219,6 +219,33 @@ export function NotificationBar({ fullPage = false, compact = false, worldType =
     }
   };
 
+  const deleteNotification = async (item: NotificationItem) => {
+    const accountId = activeAccountId.current;
+    if (!accountId || !currentUser) return;
+    try {
+      const { error: deleteError } = await getSupabaseBrowserClient().from('notifications').delete().eq('id', item.id).eq('recipient_id', accountId).eq('world_type', worldType);
+      if (deleteError) throw deleteError;
+      if (activeAccountId.current !== accountId) return;
+      setItems((previous) => previous.filter((entry) => entry.id !== item.id));
+      setError(null);
+    } catch {
+      if (activeAccountId.current === accountId) setError('This notification could not be deleted.');
+    }
+  };
+
+  const clearNotifications = async () => {
+    const accountId = activeAccountId.current;
+    if (!accountId || !currentUser || items.length === 0) return;
+    try {
+      const { error: deleteError } = await getSupabaseBrowserClient().from('notifications').delete().eq('recipient_id', accountId).eq('world_type', worldType);
+      if (deleteError) throw deleteError;
+      if (activeAccountId.current !== accountId) return;
+      setItems([]);
+      setError(null);
+    } catch {
+      if (activeAccountId.current === accountId) setError('Notifications could not be cleared. Please try again.');
+    }
+  };
   const openNotification = async (item: NotificationItem) => {
     const accountId = activeAccountId.current;
     if (!accountId || !currentUser) return;
@@ -275,6 +302,7 @@ export function NotificationBar({ fullPage = false, compact = false, worldType =
                   <CheckCheck size={15} aria-hidden="true" /> Mark all read
                 </button>
               )}
+              {isConnected && items.length > 0 && <button type="button" className={styles.clearButton} onClick={() => void clearNotifications()}><Trash2 size={14} aria-hidden="true" /> Clear all</button>}
               <button type="button" className={styles.closeButton} aria-label="Close notifications" onClick={() => { setIsOpen(false); if (compact) bellButtonRef.current?.focus(); }}>
                 <X size={18} aria-hidden="true" />
               </button>
@@ -300,20 +328,19 @@ export function NotificationBar({ fullPage = false, compact = false, worldType =
             <ul className={styles.list}>
               {items.map((item) => (
                 <li key={item.id}>
-                  <button
-                    type="button"
-                    className={`${styles.item} ${item.read_at ? '' : styles.unread}`}
-                    onClick={() => void openNotification(item)}
-                  >
-                    <span className={styles.itemIcon} aria-hidden="true">
-                      {item.notification_type === 'like' ? <Heart size={17} /> : <MessageCircle size={17} />}
-                    </span>
-                    <span className={styles.itemCopy}>
-                      <span><strong>{item.actorName}</strong> {item.notification_type === 'like' ? 'liked your' : 'commented on your'} {item.target_type === 'short' ? 'Short' : item.target_type}.</span>
-                      <time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</time>
-                    </span>
-                    {!item.read_at && <span className={styles.unreadDot} aria-label="Unread" />}
-                  </button>
+                  <div className={`${styles.itemRow} ${item.read_at ? '' : styles.unread}`}>
+                    <button type="button" className={styles.item} onClick={() => void openNotification(item)}>
+                      <span className={styles.itemIcon} aria-hidden="true">
+                        {item.notification_type === 'like' ? <Heart size={17} /> : <MessageCircle size={17} />}
+                      </span>
+                      <span className={styles.itemCopy}>
+                        <span><strong>{item.actorName}</strong> {item.notification_type === 'like' ? 'liked your' : 'commented on your'} {item.target_type === 'short' ? 'Short' : item.target_type}.</span>
+                        <time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</time>
+                      </span>
+                      {!item.read_at && <span className={styles.unreadDot} aria-label="Unread" />}
+                    </button>
+                    <button type="button" className={styles.deleteItemButton} aria-label="Delete notification" title="Delete notification" onClick={() => void deleteNotification(item)}><Trash2 size={15} aria-hidden="true" /></button>
+                  </div>
                 </li>
               ))}
             </ul>

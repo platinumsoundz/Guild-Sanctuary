@@ -291,3 +291,48 @@
   --muted: #94a3b8;
   --accent: #7c9cff;
 }
+
+
+/* Notification management actions */
+.clearButton {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font: 11px Arial, sans-serif;
+}
+.clearButton:hover, .deleteItemButton:hover, .clearButton:focus-visible, .deleteItemButton:focus-visible {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.itemRow {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  padding-right: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.itemRow .item { flex: 1; min-width: 0; }
+.itemRow.unread { background: color-mix(in srgb, var(--accent) 8%, var(--surface-raised)); }
+.itemRow .item:hover { background: transparent; }
+.deleteItemButton {
+  display: grid;
+  width: 34px;
+  flex: 0 0 34px;
+  align-self: center;
+  height: 34px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.deleteItemButton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

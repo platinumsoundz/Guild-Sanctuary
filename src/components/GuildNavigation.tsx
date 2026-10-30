@@ -12,6 +12,7 @@ import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctua
 import { NotificationBar } from './NotificationBar';
 import { GuildDiagnosticsPanel } from './GuildDiagnosticsPanel';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
+import { fetchNavigationBadgeCounts, type NavigationBadgeCounts } from '@/lib/navigationBadges';
 import styles from './GuildNavigation.module.css';
 
 export type GuildPage = 'home' | 'arcade' | 'trials' | 'library' | 'music' | 'photos' | 'tools' | NavigationState;
@@ -45,13 +46,15 @@ const guildCommunityItems: Item[] = [
 ];
 const noDirections = { up: false, down: false, left: false, right: false };
 
-export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
+export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }: {
   selectedPage: GuildPage;
   role: string;
+  userId: string | null;
   onSelect: (page: GuildPage) => void;
   onExit: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
+  const [pageBadges, setPageBadges] = useState<NavigationBadgeCounts>({});
   const [open, setOpen] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
@@ -68,6 +71,25 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   const previousDirections = useRef(noDirections);
   const lastActionAt = useRef(0);
   const wasOpen = useRef(false);
+
+  useEffect(() => {
+    if (!userId) { setPageBadges({}); return; }
+    let cancelled = false;
+    const refresh = async () => {
+      const counts = await fetchNavigationBadgeCounts(userId, role, 'guild');
+      if (!cancelled) setPageBadges(counts);
+    };
+    void refresh();
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void refresh();
+    }, 30_000);
+    window.addEventListener('focus', refresh);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refresh);
+    };
+  }, [role, userId]);
 
   // On narrow phones, show the touch navigation controls by default so they
   // are discoverable without requiring a trip through the Quick Menu.
@@ -287,7 +309,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   const render = (item: Item) => {
     const Icon = item.icon;
     return <button type="button" key={item.id} className={styles.item} data-active={selectedPage === item.id} data-guild-nav-item="true" onClick={() => choose(item.id)}>
-      <Icon size={19} /><span><strong>{item.label}</strong>{item.description && <small>{item.description}</small>}</span><ChevronRight size={16} />
+      <Icon size={19} /><span><strong>{item.label}</strong>{item.description && <small>{item.description}</small>}</span>{pageBadges[item.id as NavigationState] ? <span className={styles.navigationBadge} aria-label={pageBadges[item.id as NavigationState] + ' pending items'}>{pageBadges[item.id as NavigationState]! > 99 ? '99+' : pageBadges[item.id as NavigationState]}</span> : null}<ChevronRight size={16} />
     </button>;
   };
 

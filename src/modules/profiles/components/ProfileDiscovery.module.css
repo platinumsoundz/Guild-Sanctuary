@@ -491,3 +491,54 @@
 @media (max-width: 700px) {
   .discoverPostGrid { grid-template-columns: 1fr; }
 }
+
+
+/* Discover hub highlights */
+.discoverHighlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 24px 0 4px;
+}
+.highlightCard {
+  display: flex;
+  min-width: 0;
+  min-height: 104px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--surface-raised) 88%, transparent), color-mix(in srgb, var(--surface) 92%, transparent));
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, transform .18s ease, background .18s ease;
+}
+.highlightCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-raised));
+}
+.highlightCard:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.highlightIcon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.highlightCard > span:nth-child(2) { display: grid; min-width: 0; gap: 5px; }
+.highlightCard strong { font-size: 12px; font-weight: 700; }
+.highlightCard small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.highlightArrow { margin-left: auto; align-self: flex-start; color: var(--muted); font-size: 16px; }
+@media (max-width: 760px) {
+  .discoverHighlights { grid-template-columns: 1fr; gap: 8px; }
+  .highlightCard { min-height: 76px; padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .highlightCard { transition: none; }
+}
