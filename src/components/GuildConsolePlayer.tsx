@@ -11,6 +11,9 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
   const stageRef = useRef<HTMLDivElement>(null);
   const gameFrameRef = useRef<HTMLIFrameElement>(null);
   const [gameBridgeReady, setGameBridgeReady] = useState(false);
+  const [gameBridgeStatus, setGameBridgeStatus] = useState('Connecting to game…');
+  const bridgeRequestSequence = useRef(0);
+  const latestBridgeRequest = useRef('');
   const menuRef = useRef<HTMLElement>(null);
   const previousButtons = useRef<boolean[]>([]);
   const previousDirections = useRef({ x: 0, y: 0 });
@@ -66,7 +69,13 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       if (event.origin !== gameOrigin || event.source !== gameFrameRef.current?.contentWindow) return;
       const message = event.data;
       if (!message || message.channel !== 'guild.5-sleeves' || message.version !== 1 || message.game !== 'the-5-sleeves-3d') return;
-      if (message.type === 'ready') setGameBridgeReady(true);
+      if (message.type === 'ready') {
+        setGameBridgeReady(true);
+        setGameBridgeStatus('Guild link ready');
+      }
+      if (message.type === 'ack' && message.requestId === latestBridgeRequest.current) {
+        setGameBridgeStatus(message.command === 'pause' ? 'Game paused' : 'Guild link ready');
+      }
     };
     window.addEventListener('message', onGameMessage);
     return () => window.removeEventListener('message', onGameMessage);
@@ -76,10 +85,13 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
     if (!gameBridgeReady) return;
     let gameOrigin = '';
     try { gameOrigin = new URL(url).origin; } catch { return; }
+    const requestId = `guild-${++bridgeRequestSequence.current}`;
+    latestBridgeRequest.current = requestId;
     gameFrameRef.current?.contentWindow?.postMessage({
       channel: 'guild.5-sleeves',
       version: 1,
-      command: menuOpen ? 'pause' : 'resume'
+      command: menuOpen ? 'pause' : 'resume',
+      requestId
     }, gameOrigin);
   }, [gameBridgeReady, menuOpen, url]);
 
@@ -220,7 +232,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
         <button type="button" onClick={() => setMenuOpen(true)} className={styles.menuButton} aria-label="Open Guild system menu"><Gamepad2 size={18} /><span>The Guild</span></button>
         <div className={styles.gameTitle}>{title}</div>
         <div className={styles.actions}>
-          <span className={styles.controllerState} aria-live="polite">{controllerConnected ? 'Controller connected' : 'Touch / keyboard ready'}{gameBridgeReady ? ' · Guild link ready' : ''}</span>
+          <span className={styles.controllerState} aria-live="polite">{controllerConnected ? 'Controller connected' : 'Touch / keyboard ready'}{gameBridgeReady ? ` · ${gameBridgeStatus}` : ''}</span>
           <button type="button" className={styles.iconButton} onClick={() => void toggleFullscreen()} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>{isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button>
           <button type="button" className={styles.iconButton} onClick={() => void returnHome()} aria-label="Exit game and return to Guild home"><X size={18} /></button>
         </div>
