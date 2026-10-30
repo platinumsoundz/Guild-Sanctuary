@@ -315,6 +315,7 @@ export function AppWorkspace() {
       ) : contentNavigation === 'discover' ? (
         <ProfileDiscovery
           currentUserId={currentUser.user.id}
+          worldType={worldType}
           onMessage={openMessage}
           onView={(profile) => setViewedProfile(profile)}
         />
