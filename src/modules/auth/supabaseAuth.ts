@@ -60,6 +60,13 @@ function toProfile(row: Awaited<ReturnType<typeof getProfileRow>>): Profile {
     },
     socialLinks: { ...emptyLinks, ...socialLinks },
     visibility: row.visibility,
+    equippedFrame: row.equipped_frame ?? null,
+    equippedEffect: row.equipped_effect ?? null,
+    equippedBadge: row.equipped_badge ?? null,
+    equippedBanner: row.equipped_banner ?? null,
+    equippedBorder: row.equipped_border ?? null,
+    equippedProfileTheme: row.equipped_profile_theme ?? null,
+    equippedPalette: row.equipped_palette ?? null,
     role: row.role,
   };
 }
