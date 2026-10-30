@@ -275,4 +275,76 @@ $$;
 revoke all on function public.spend_tokens(text,uuid) from public,anon,authenticated,service_role;
 revoke all on function public.equip_profile_cosmetic(text) from public,anon,authenticated,service_role;
 revoke all on function public.clear_profile_cosmetic(text) from public,anon,authenticated,service_role;
+
+-- Public cosmetic projection is separate from the private profile row. It exposes
+-- only already-public profiles and cosmetic identifiers, never wallet or ledger data.
+create table if not exists private.public_profile_cosmetic_projection (
+  id uuid primary key,
+  equipped_frame text,
+  equipped_effect text,
+  equipped_badge text,
+  equipped_banner text,
+  equipped_border text,
+  equipped_profile_theme text,
+  equipped_palette text
+);
+alter table private.public_profile_cosmetic_projection enable row level security;
+revoke all on private.public_profile_cosmetic_projection from public,anon,authenticated;
+grant select on private.public_profile_cosmetic_projection to anon,authenticated;
+drop policy if exists "public cosmetic projection readable" on private.public_profile_cosmetic_projection;
+create policy "public cosmetic projection readable" on private.public_profile_cosmetic_projection
+for select to anon,authenticated using (true);
+
+create or replace function private.sync_public_profile_cosmetic_projection()
+returns trigger language plpgsql security definer set search_path=''
+as $
+begin
+  if tg_op='DELETE' then
+    delete from private.public_profile_cosmetic_projection where id=old.id;
+    return old;
+  end if;
+  if new.visibility='public' and new.allow_profile_discovery and
+    (new.status='active' or (new.status='suspended' and new.suspended_until is not null and new.suspended_until<=pg_catalog.now())) then
+    insert into private.public_profile_cosmetic_projection(
+      id,equipped_frame,equipped_effect,equipped_badge,equipped_banner,
+      equipped_border,equipped_profile_theme,equipped_palette
+    ) values (
+      new.id,new.equipped_frame,new.equipped_effect,new.equipped_badge,new.equipped_banner,
+      new.equipped_border,new.equipped_profile_theme,new.equipped_palette
+    ) on conflict(id) do update set
+      equipped_frame=excluded.equipped_frame,equipped_effect=excluded.equipped_effect,
+      equipped_badge=excluded.equipped_badge,equipped_banner=excluded.equipped_banner,
+      equipped_border=excluded.equipped_border,equipped_profile_theme=excluded.equipped_profile_theme,
+      equipped_palette=excluded.equipped_palette;
+  else
+    delete from private.public_profile_cosmetic_projection where id=new.id;
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists sync_public_profile_cosmetic_projection on public.profiles;
+create trigger sync_public_profile_cosmetic_projection after insert or update or delete on public.profiles
+for each row execute function private.sync_public_profile_cosmetic_projection();
+insert into private.public_profile_cosmetic_projection(
+  id,equipped_frame,equipped_effect,equipped_badge,equipped_banner,
+  equipped_border,equipped_profile_theme,equipped_palette
+)
+select p.id,p.equipped_frame,p.equipped_effect,p.equipped_badge,p.equipped_banner,
+  p.equipped_border,p.equipped_profile_theme,p.equipped_palette
+from public.profiles p
+where p.visibility='public' and p.allow_profile_discovery
+  and (p.status='active' or (p.status='suspended' and p.suspended_until is not null and p.suspended_until<=pg_catalog.now()))
+on conflict(id) do update set
+  equipped_frame=excluded.equipped_frame,equipped_effect=excluded.equipped_effect,
+  equipped_badge=excluded.equipped_badge,equipped_banner=excluded.equipped_banner,
+  equipped_border=excluded.equipped_border,equipped_profile_theme=excluded.equipped_profile_theme,
+  equipped_palette=excluded.equipped_palette;
+
+create or replace view public.public_profile_cosmetics
+with (security_barrier=true,security_invoker=true) as
+select id,equipped_frame,equipped_effect,equipped_badge,equipped_banner,
+  equipped_border,equipped_profile_theme,equipped_palette
+from private.public_profile_cosmetic_projection;
+grant select on public.public_profile_cosmetics to anon,authenticated;
+
 commit;
