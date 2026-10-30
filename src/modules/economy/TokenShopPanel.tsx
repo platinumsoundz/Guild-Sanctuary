@@ -28,7 +28,7 @@ interface TokenShopPanelProps {
 
 // Keep redemption disabled until owner-approved migration and staging ledger tests pass.
 const SPENDING_ENABLED = false;
-const EQUIPPING_ENABLED = false;
+const EQUIPPING_ENABLED = process.env.NEXT_PUBLIC_SANCTUARY_COSMETIC_EQUIP_ENABLED === 'true';
 
 export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: TokenShopPanelProps) {
   const [items, setItems] = useState<ShopItem[]>([]);
@@ -37,6 +37,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
   const [equippedSlots, setEquippedSlots] = useState<Record<string, string | null>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [purchasingItemId, setPurchasingItemId] = useState<string | null>(null);
+  const [equippingItemId, setEquippingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -137,6 +138,54 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
     return () => { cancelled = true; };
   }, [loadShop]);
 
+  const equipItem = async (item: ShopItem) => {
+    if (!EQUIPPING_ENABLED || !hasSupabaseAccount || !ownedItems.has(item.item_id) || equippingItemId) return;
+    setEquippingItemId(item.item_id);
+    setError(null);
+    setNotice(null);
+    try {
+      const client = getSupabaseBrowserClient();
+      const { data: authData, error: authError } = await client.auth.getUser();
+      if (authError || authData.user?.id !== userId) throw new Error('Sign in again before changing profile cosmetics.');
+      const { error: equipError } = await client.rpc('equip_profile_cosmetic', { requested_item_id: item.item_id });
+      if (equipError) throw new Error(equipError.message.includes('review') ? equipError.message : 'This cosmetic could not be equipped. Refresh your collection and try again.');
+      setEquippedSlots((previous) => ({ ...previous, [item.kind]: item.item_id }));
+      setNotice(`${item.name} is now equipped on your profile.`);
+      await loadShop();
+    } catch (equipError) {
+      setError(equipError instanceof Error ? equipError.message : 'This cosmetic could not be equipped.');
+    } finally {
+      setEquippingItemId(null);
+    }
+  };
+
+  const unequipItem = async (item: ShopItem) => {
+    if (!EQUIPPING_ENABLED || !hasSupabaseAccount || equippingItemId) return;
+    const slots: Record<string, 'frame' | 'effect' | 'badge' | 'banner' | 'border' | 'profile_theme' | 'palette'> = {
+      profile_frame: 'frame', profile_effect: 'effect', profile_badge: 'badge', profile_banner: 'banner',
+      profile_border: 'border', profile_theme: 'profile_theme', colour_palette: 'palette',
+    };
+    const slot = slots[item.kind];
+    if (!slot) return;
+    setEquippingItemId(item.item_id);
+    setError(null);
+    setNotice(null);
+    try {
+      const client = getSupabaseBrowserClient();
+      const { data: authData, error: authError } = await client.auth.getUser();
+      if (authError || authData.user?.id !== userId) throw new Error('Sign in again before changing profile cosmetics.');
+      const { error: clearError } = await client.rpc('clear_profile_cosmetic', { requested_slot: slot });
+      if (clearError) throw new Error('This cosmetic could not be removed. Refresh your collection and try again.');
+      setEquippedSlots((previous) => ({ ...previous, [item.kind]: null }));
+      setNotice(`${item.name} has been removed from your profile.`);
+      await loadShop();
+    } catch (clearError) {
+      setError(clearError instanceof Error ? clearError.message : 'This cosmetic could not be removed.');
+    } finally {
+      setEquippingItemId(null);
+    }
+  };
+
   const purchaseItem = async (item: ShopItem) => {
     if (!SPENDING_ENABLED || isGuest || !hasSupabaseAccount || purchasingItemId || ownedItems.has(item.item_id)) return;
 
@@ -231,7 +280,15 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
                 {item.kind === 'accent_customization' ? (
                   <p className={styles.accentAvailable}>Picker available in your profile editor</p>
                 ) : (
-                  <button type="button" className={styles.equipButton} disabled={!EQUIPPING_ENABLED || equipped} title="Cosmetic equipment is locked until the staging migration and permissions are approved">{equipped ? 'Currently active' : 'Equip after staging'}</button>
+                  <button
+                    type="button"
+                    className={styles.equipButton}
+                    disabled={!EQUIPPING_ENABLED || !hasSupabaseAccount || equippingItemId !== null}
+                    onClick={() => void (equipped ? unequipItem(item) : equipItem(item))}
+                    title={!EQUIPPING_ENABLED ? 'Enable cosmetic equipment after staging verification.' : 'Change this cosmetic on your profile.'}
+                  >
+                    {equippingItemId === item.item_id ? (equipped ? 'Removing…' : 'Equipping…') : equipped ? 'Unequip' : 'Equip'}
+                  </button>
                 )}
               </article>;
             })}
