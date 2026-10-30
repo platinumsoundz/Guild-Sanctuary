@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
+import { getSupabaseBrowserClient } from '@/services/supabase';
 import { fetchPageVisibility, isPageVisible, type PageVisibilityMap } from '@/lib/pageVisibility';
 import { AuthenticationModal, type AuthSession, type SignUpInput } from '@/modules/auth';
 import styles from './Navigation.module.css';
@@ -107,6 +108,77 @@ export function Navigation({
   const role = currentUser?.profile.role?.toLowerCase() ?? 'user';
   const guestNavigationPages = new Set<NavigationState>(['today', 'games', 'roadmap', 'support', 'feedback']);
   const [pageVisibility, setPageVisibility] = useState<PageVisibilityMap>({});
+  const [pageBadges, setPageBadges] = useState<Partial<Record<NavigationState, number>>>({});
+  const worldType = activeNavigation === 'guild' ? 'guild' : 'sanctuary';
+
+  useEffect(() => {
+    if (!currentUser || isGuest || !isSessionReady) {
+      setPageBadges({});
+      return;
+    }
+    let cancelled = false;
+    const refreshBadges = async () => {
+      try {
+        const client = getSupabaseBrowserClient();
+        const role = currentUser.profile.role.toLowerCase();
+        const canReviewReports = ['moderator', 'admin', 'developer', 'owner'].includes(role);
+        const canReviewFeedback = ['developer', 'owner'].includes(role);
+        const next: Partial<Record<NavigationState, number>> = {};
+
+        if (canReviewReports) {
+          const { count, error } = await client.from('content_reports').select('id', { count: 'exact', head: true })
+            .in('status', ['open', 'reviewing']).eq('world_type', worldType);
+          if (error) throw error;
+          next.moderation = count ?? 0;
+        }
+
+        if (canReviewFeedback) {
+          let feedbackQuery = client.from('sanctuary_feedback').select('id', { count: 'exact', head: true })
+            .in('status', ['open', 'in_review']);
+          feedbackQuery = worldType === 'guild'
+            ? feedbackQuery.ilike('page_url', '%environment=guild%')
+            : feedbackQuery.or('page_url.is.null,page_url.not.ilike.%environment=guild%');
+          const { count, error } = await feedbackQuery;
+          if (error) throw error;
+          next.feedback = count ?? 0;
+          next.admin = count ?? 0;
+        }
+
+        if (process.env.NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES === 'true') {
+          const { data: memberships, error: membershipError } = await client.from('conversation_members')
+            .select('conversation_id').eq('user_id', currentUser.user.id).is('left_at', null);
+          if (membershipError) throw membershipError;
+          const conversationIds = (memberships ?? []).map((item) => item.conversation_id);
+          if (conversationIds.length) {
+            const { data: conversations, error: conversationError } = await client.from('conversations')
+              .select('id').in('id', conversationIds).eq('world_type', worldType);
+            if (conversationError) throw conversationError;
+            const scopedIds = (conversations ?? []).map((item) => item.id);
+            if (scopedIds.length) {
+              const { count, error } = await client.from('messages').select('id', { count: 'exact', head: true })
+                .in('conversation_id', scopedIds).neq('sender_id', currentUser.user.id).is('read_at', null).eq('state', 'visible');
+              if (error) throw error;
+              next.messages = count ?? 0;
+            }
+          }
+        }
+
+        if (!cancelled) setPageBadges(next);
+      } catch {
+        // A badge is supplemental UI: keep navigation usable if a count query is unavailable.
+      }
+    };
+    void refreshBadges();
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void refreshBadges();
+    }, 30_000);
+    window.addEventListener('focus', refreshBadges);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refreshBadges);
+    };
+  }, [currentUser?.user.id, currentUser?.profile.role, isGuest, isSessionReady, worldType]);
   useEffect(() => {
     let cancelled = false;
     void fetchPageVisibility().then((value) => { if (!cancelled) setPageVisibility(value); }).catch(() => { if (!cancelled) setPageVisibility({}); });
@@ -123,6 +195,7 @@ export function Navigation({
   const entryMenuButtonRef = useRef<HTMLButtonElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const badgeFor = (id: NavigationState) => pageBadges[id] ? <span className={styles.navigationBadge} aria-label={pageBadges[id] + ' new items'}>{pageBadges[id]! > 99 ? '99+' : pageBadges[id]}</span> : null;
   const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
   const closeEntryMenu = useCallback(() => setIsEntryMenuOpen(false), []);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
@@ -305,6 +378,7 @@ export function Navigation({
                                 >
                                   <item.icon size={19} strokeWidth={1.8} aria-hidden="true" />
                                   <span>{item.label}</span>
+                                  {badgeFor(item.id)}
                                 </button>
                               ))}
                             </div>
@@ -332,6 +406,7 @@ export function Navigation({
             >
               <item.icon size={20} strokeWidth={1.8} aria-hidden="true" />
               <span>{item.label}</span>
+              {badgeFor(item.id)}
             </button>
           ))}
         </nav>
