@@ -47,6 +47,7 @@ assert.match(settings, /environment === 'guild' \? 'GUILD SETTINGS'/, 'Settings 
 assert.match(settings, /guild-touch-controls-v1/, 'Guild touch-control preference is stored independently');
 assert.match(settings, /guild-reduced-motion-v1/, 'Guild reduced-motion preference is stored independently');
 assert.match(admin, /if \(worldType === 'guild'\)[\s\S]*?<ModerationDashboard role=\{role\} worldType="guild" \/>/, 'Guild administration only renders Guild-scoped moderation');
+assert.match(read('src/modules/moderation/ModerationDashboard.tsx'), /worldType !== 'guild' && \['moderator', 'admin', 'developer', 'owner'\]/, 'Guild moderation does not expose global account sanctions');
 assert.match(feedback, /environment=\$\{worldType\}/, 'Feedback submissions record their environment');
 assert.match(feedback, /query\.ilike\('page_url', '%environment=guild%'\)/, 'Guild feedback inbox filters to Guild submissions');
 
