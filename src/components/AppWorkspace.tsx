@@ -292,7 +292,7 @@ export function AppWorkspace() {
       ) : contentNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
-          <Feed worldType={worldType} />
+          <Feed worldType={worldType} onNavigate={openNavigation} />
           <AdSlot placement="feed-sidebar" />
         </>
       ) : contentNavigation === 'events' ? (
