@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { Profile, PublicProfile } from '@/types/database';
 import styles from './Profiles.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
@@ -9,7 +10,7 @@ interface ProfileCardProps {
 export function ProfileCard({ profile }: ProfileCardProps) {
   const badgeGlyph = profile.equippedBadge === 'profile_badge_sparkle' ? '✨' : profile.equippedBadge === 'profile_badge_moon' ? '🌙' : profile.equippedBadge === 'profile_badge_flame' ? '🔥' : profile.equippedBadge === 'profile_badge_leaf' ? '🌿' : null;
   return (
-    <article className={styles.profileCard} data-border={profile.equippedBorder ?? ''} data-profile-theme={profile.equippedProfileTheme ?? ''} data-palette={profile.equippedPalette ?? ''} data-custom-accent={profile.customAccentColor ?? ''} style={{ borderColor: profile.customAccentColor ?? profile.themeColor, ['--profile-accent' as string]: profile.customAccentColor ?? profile.themeColor }}>
+    <article className={styles.profileCard} data-border={profile.equippedBorder ?? ''} data-profile-theme={profile.equippedProfileTheme ?? ''} data-palette={profile.equippedPalette ?? ''} data-custom-accent={profile.customAccentColor ?? ''} style={{ borderColor: profile.customAccentColor ?? profile.themeColor, '--profile-accent': profile.customAccentColor ?? profile.themeColor } as CSSProperties}>
       {profile.bannerUrl ? <img className={styles.banner} src={profile.bannerUrl} alt="" /> : (
         <div className={styles.bannerFallback} style={{ backgroundColor: `${profile.themeColor}20` }} />
       )}
