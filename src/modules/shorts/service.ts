@@ -130,7 +130,6 @@ export async function deleteShortVideo(shortId: string, authorId: string, worldT
       .eq('id', shortId)
       .eq('author_id', authorId)
       .eq('world_type', worldType)
-      .eq('world_type', worldType)
       .select('video_url')
       .maybeSingle();
     if (error) throw new Error(`Short video could not be deleted: ${error.message}`);
@@ -159,6 +158,7 @@ export async function updateShortVideo(shortId: string, authorId: string, captio
       .update({ caption: normalizedCaption })
       .eq('id', shortId)
       .eq('author_id', authorId)
+      .eq('world_type', worldType)
       .select('*')
       .maybeSingle();
     if (error) throw new Error(`Short video could not be updated: ${error.message}`);
@@ -184,6 +184,8 @@ export async function updateShortVideo(shortId: string, authorId: string, captio
 export async function toggleShortLike(shortId: string, userId: string, worldType: WorldType = 'sanctuary'): Promise<{ liked: boolean; count: number }> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
+    const { data: scopedShort } = await getSupabaseBrowserClient().from('short_videos').select('id').eq('id', shortId).eq('world_type', worldType).maybeSingle();
+    if (!scopedShort) throw new Error('This short is unavailable in the current community.');
     const { data, error } = await getSupabaseBrowserClient().rpc('toggle_short_like', {
       requested_short_id: shortId,
     });
@@ -192,7 +194,7 @@ export async function toggleShortLike(shortId: string, userId: string, worldType
     if (!stats) throw new Error('This short video is unavailable for reactions.');
     return { liked: stats.liked, count: stats.likes_count };
   }
-  if (!userId || !findShort(shortId)) {
+  if (!userId || !findShort(shortId) || (findShort(shortId)?.worldType ?? 'sanctuary') !== worldType) {
     throw new Error('This short video is unavailable.');
   }
   await delay();
