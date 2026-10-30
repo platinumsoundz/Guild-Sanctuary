@@ -9,7 +9,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ## Priority order
 
 ### P0 — HUD and visual quality first
-- [ ] **Persistent quick-access HUD:** the shared notifications panel and a page-preserving Quick Menu are available from the Guild shell. The Quick Menu searches destinations, reports controller detection, toggles fullscreen and a locally persisted reduced-motion preference, and offers Guild Home / Exit to Sanctuary. Finish real-device focus/return checks and add controller/audio diagnostics.
+- [ ] **Persistent quick-access HUD:** the shared notifications panel and a page-preserving Quick Menu are available from the Guild shell. The Quick Menu searches destinations, reports controller detection, toggles fullscreen and a locally persisted reduced-motion preference, and offers Home / Exit to Sanctuary. Finish real-device focus/return checks and add controller/audio diagnostics.
 - [ ] **Input consistency:** make Menu/Guide, A/Select, B/Back, Escape, touch D-pad and keyboard alternatives consistent. Restore focus on close, support visible focus rings and reduced motion, and handle controller disconnect/reconnect.
 - [x] **Home dashboard foundation:** the Guild home now has a dominant featured destination, a Continue Playing surface based on local launch history, and quick-access cards for Games, Trials, Collection, Music, Photos and Tools. Original custom game art and deeper dashboard data remain future polish.
 - [ ] **Original game artwork:** create distinct, canon-consistent artwork for The 5 Sleeves 2D and The 5 Sleeves 3D; remove generic placeholder tiles as art assets become available.
@@ -72,7 +72,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ## Top menu and quick-settings recovery — 2026-10-29
 
 - **Reported regression:** the Guild menu and quick settings were not appearing after the navigation was moved to the top of the console.
-- Restore explicit **Menu** and **Quick settings** controls in the active Guild world top bar, with page-preserving overlay panels for Guild Home, trial restart/pause, Exit to Sanctuary, touch controls, reduced motion, fullscreen and Big Picture layout.
+- Restore explicit **Menu** and **Quick settings** controls in the active Guild world top bar, with page-preserving overlay panels for Home, trial restart/pause, Exit to Sanctuary, touch controls, reduced motion, fullscreen and Big Picture layout.
 - Raise the Guild navigation drawer and Quick Menu/scrim layers above parent-app shell layers at desktop and mobile widths; add regression assertions for the controls, overlay panels and stacking order.
 - **Status:** implementation is on `fix/guild-top-menu-quick-settings-2026-10-29`; exact-head CI, responsive interaction tests and merge are still required. No production deployment is claimed.
 
@@ -88,7 +88,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 
 ## Guild overlays and Settings launch — 2026-10-29
 
-- Raised the portaled Guild navigation drawer, scrim, Quick Menu panel and quick-menu scrim above Sanctuary shell layers at all widths. Both panels remain rendered through `createPortal(..., document.body)` to avoid transformed/stacking-context parents.
+- Raised the portaled Guild navigation drawer, scrim, Quick Menu panel and quick-menu scrim above parent-app shell layers at all widths. Both panels remain rendered through `createPortal(..., document.body)` to avoid transformed/stacking-context parents.
 - Guild navigation must use Guild-specific visibility rules and must not inherit global page-visibility preferences from the companion environment.
 - Fixed the access policy so an authenticated basic user can launch The Guild from Settings. Developer/Owner restrictions continue to apply to Guild Roadmap and the separate page-visibility administration controls.
 - Validation contract now checks portal rendering and top-priority stacking order. Still requires preview interaction checks on Android portrait/landscape and desktop, including click/touch and Escape-close behaviour.
@@ -96,7 +96,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ## P1 — Independent Guild community
 
 - [x] Reuse the shared feed, Shorts, events, messaging, notifications, profile-posts and moderation mechanics inside the Guild shell, with Guild console styling and Guild-native labels.
-- [x] Keep content separate using the shared database's `world_type`: Each environment's content remains isolated by `world_type` (`sanctuary` versus `guild`). Do not copy or duplicate the social tables.
+- [x] Keep content separate using the shared database's `world_type`: Each environment's content remains isolated by the database `world_type` value. Do not copy or duplicate the social tables. Do not copy or duplicate the social tables.
 - [x] Scope feed reads/writes, Shorts, events/RSVPs, conversation lists and threads, notifications, report queues and profile-post retrieval to the active world.
 - [x] Keep comments and reactions attached to their target content so engagement follows the target's world. Notifications and reports inherit world identity from their target.
 - [x] Preserve existing non-Guild data by default; the scoped database migration is applied and schema/functions/triggers are verified.
@@ -106,7 +106,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ## Guild independence and shared design foundation — 2026-10-30
 
 ### User-facing separation
-- Guild is a separate environment, not a "Sanctuary pages" subsection. Use the native labels **Home, Community, Discover, Messages, Events, Shorts, Planner, Profile, Notifications, Settings, Feedback, Admin, Moderation and Roadmap** without adding "Guild" to every page name.
+- Guild is a separate environment, not a subsection of the companion environment. Use the native labels **Home, Community, Discover, Messages, Events, Shorts, Planner, Profile, Notifications, Settings, Feedback, Admin, Moderation and Roadmap** without adding "Guild" to every page name.
 - Do not show companion-platform branding, roadmap links, settings controls, or page-visibility settings inside Guild. The explicit **Exit to Sanctuary** control is the only cross-environment navigation reference.
 - Guild has its own home dashboard and its own settings page. Shared account preferences may be reused, but console controls (touch navigation and reduced motion) belong to Guild.
 - Admin and moderation inside Guild must operate on Guild-world content only. Do not expose account-wide role management or global page visibility from Guild administration.
