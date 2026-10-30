@@ -13,7 +13,7 @@ assert.match(discover, /worldType: WorldType/, 'Discover requires an explicit wo
 assert.match(discover, /fetchEvents\(currentUserId \|\| '', worldType\)/, 'Gathering discovery passes the active world to the event service');
 assert.match(discover, /fetchFeed\(worldType\)/, 'Community post discovery passes the active world to the feed service');
 assert.match(discover, /fetchPublicProfileById\(authorId\)/, 'Post author labels resolve only through public profile lookup');
-assert.match(discover, /\.slice\(0, 100\)/, 'Post author lookup workload is capped for predictable discovery performance');
+assert.match(discover, /\.slice\(0, 30\)/, 'Post author lookup workload is capped to the number of visible cards');
 assert.match(discover, /fetchEvents\(currentUserId \|\| '', worldType\)[\s\S]*?setEvents/, 'Gatherings are loaded through the scoped service');
 assert.match(events, /\.eq\('world_type', worldType\)/, 'Event service filters database rows by world');
 assert.match(discover, /searchPublicProfiles\(normalizedQuery\)/, 'People search uses the public-profile search service');
