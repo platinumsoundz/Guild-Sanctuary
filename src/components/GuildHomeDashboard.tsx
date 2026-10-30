@@ -15,10 +15,10 @@ const RECENTS_KEY = 'guild-library-recents-v1';
 const FAVOURITES_KEY = 'guild-library-favourites-v1';
 const games: { id: GameId; title: string; subtitle: string; art: string; target: GuildPage }[] = [
   { id: 'sleeves3d', title: 'The 5 Sleeves 3D', subtitle: 'Third-person adventure', art: 'three-d', target: 'arcade' },
-  { id: 'sleeves2d', title: 'The 5 Sleeves 2D', subtitle: 'Multiplayer action RPG', art: 'two-d', target: 'arcade' as NavigationState },
+  { id: 'sleeves2d', title: 'The 5 Sleeves 2D', subtitle: 'Multiplayer action RPG', art: 'two-d', target: 'arcade' },
 ];
 
-const destinations: { title: string; description: string; target: NavigationState; icon: typeof UsersRound }[] = [
+const destinations: { title: string; description: string; target: GuildPage; icon: typeof UsersRound }[] = [
   { title: 'Community', description: 'Posts and conversations', target: 'feed', icon: UsersRound },
   { title: 'Messages', description: 'Your private chats', target: 'messages', icon: MessageCircle },
   { title: 'Discover', description: 'People and new worlds', target: 'discover', icon: Compass },
@@ -85,22 +85,22 @@ export function GuildHomeDashboard({ onNavigate, onContinuePlaying, role = 'user
         <aside className={styles.sidePanel}>
           <div className={styles.sidePanelHead}><span className={styles.kicker}>QUICK RESUME</span><span className={styles.smallStatus}>LOCAL HISTORY</span></div>
           {loaded && recentGames.length ? recentGames.slice(0, 2).map((game) => (
-            <button type="button" key={game.id} className={styles.resumeItem} onClick={() => game.id === recentGames[0]?.id && onContinuePlaying ? onContinuePlaying() : onNavigate('library' as NavigationState)}>
+            <button type="button" key={game.id} className={styles.resumeItem} onClick={() => game.id === recentGames[0]?.id && onContinuePlaying ? onContinuePlaying() : onNavigate('library')}>
               <span className={styles.miniArt} data-art={game.art}><Gamepad2 size={22} /></span><span className={styles.resumeCopy}><strong>{game.title}</strong><small>{game.subtitle}</small></span><Play size={15} />
             </button>
           )) : <div className={styles.emptyResume}><Gamepad2 size={25} /><strong>Your next adventure starts here</strong><span>Launch a game and it will appear here for quick access.</span></div>}
-          <button type="button" className={styles.libraryLink} onClick={() => onNavigate('library' as NavigationState)}>VIEW GAME COLLECTION <ArrowRight size={14} /></button>
+          <button type="button" className={styles.libraryLink} onClick={() => onNavigate('library')}>VIEW GAME COLLECTION <ArrowRight size={14} /></button>
         </aside>
       </section>
 
       <section className={styles.railSection} aria-labelledby="games-heading">
-        <div className={styles.sectionHeading}><div><span className={styles.kicker}>YOUR COLLECTION</span><h2 id="games-heading">Jump back in</h2></div><button type="button" onClick={() => onNavigate('library' as NavigationState)}>ALL GAMES <ArrowRight size={14} /></button></div>
+        <div className={styles.sectionHeading}><div><span className={styles.kicker}>YOUR COLLECTION</span><h2 id="games-heading">Jump back in</h2></div><button type="button" onClick={() => onNavigate('library')}>ALL GAMES <ArrowRight size={14} /></button></div>
         <div className={styles.gameRail}>
           {games.map((game) => <article className={styles.gameCard} key={game.id}>
             <button type="button" className={styles.gameArt} data-art={game.art} onClick={() => onNavigate(game.target)} aria-label={`Open ${game.title}`}><span className={styles.artNumber}>{game.id === 'sleeves3d' ? '03' : '02'}</span><Gamepad2 size={42} strokeWidth={1.1} /><span className={styles.artPlay}><Play size={15} fill="currentColor" /></span></button>
             <div className={styles.gameMeta}><div><strong>{game.title}</strong><small>{game.subtitle}</small></div><button type="button" className={styles.favouriteButton} aria-label={favourites.includes(game.id) ? `Remove ${game.title} from favourites` : `Add ${game.title} to favourites`} aria-pressed={favourites.includes(game.id)} onClick={() => toggleFavourite(game.id)}><Heart size={17} fill={favourites.includes(game.id) ? 'currentColor' : 'none'} /></button></div>
           </article>)}
-          <button type="button" className={styles.addGameCard} onClick={() => onNavigate('library' as NavigationState)}><span><Search size={23} /></span><strong>Explore library</strong><small>Find more games and links</small></button>
+          <button type="button" className={styles.addGameCard} onClick={() => onNavigate('library')}><span><Search size={23} /></span><strong>Explore library</strong><small>Find more games and links</small></button>
         </div>
       </section>
 
