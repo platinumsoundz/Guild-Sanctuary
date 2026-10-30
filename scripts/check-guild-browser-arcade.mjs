@@ -65,7 +65,7 @@ assert.match(workspace, /className=\{styles\.guildExperience\}/, 'Guild opens in
 assert.match(workspace, /<GuildNavigation selectedPage=\{guildPage\}/, 'Guild has its own navigation replacing Sanctuary navigation');
 const guildHomeDashboard = readFileSync('src/components/GuildHomeDashboard.tsx', 'utf8');
 assert.match(guildHomeDashboard, /guild-library-recents-v1/, 'Guild home reads the browser-local recent game');
-assert.match(guildHomeDashboard, /FEATURED DESTINATION/, 'Guild home has a featured console destination');
+assert.match(guildHomeDashboard, /FEATURED IN YOUR LIBRARY/, 'Guild home has a featured console destination');
 assert.match(guildHomeDashboard, /CONTINUE PLAYING/, 'Guild home has a Continue Playing surface');
 assert.match(readFileSync('src/components/GuildNavigation.tsx', 'utf8'), /Exit to Sanctuary/, 'Guild shell retains an explicit exit control');
 const guildHomeCss = readFileSync('src/components/AppWorkspace.module.css', 'utf8');
