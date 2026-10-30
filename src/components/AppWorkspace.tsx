@@ -28,6 +28,7 @@ import { GuildNavigation, type GuildPage } from '@/components/GuildNavigation';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { GuildRoadmap } from '@/components/GuildRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
+import { GuildHomeDashboard } from '@/components/GuildHomeDashboard';
 import { NotificationBar } from '@/components/NotificationBar';
 import { FeedbackPage } from '@/components/FeedbackCenter';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
@@ -248,7 +249,7 @@ export function AppWorkspace() {
       <button type="button" onClick={() => setActiveNavigation('today')}>Return to Today</button>
     </main>
   ) : contentNavigation === 'today' ? (
-    <SanctuaryHome onNavigate={openNavigation} />
+    {activeNavigation === 'guild' ? <GuildHomeDashboard onNavigate={(page) => setGuildPage(page as GuildPage)} /> : <SanctuaryHome onNavigate={openNavigation} />}
   ) : isGuest && !['support', 'games', 'roadmap', 'feedback'].includes(contentNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
@@ -266,7 +267,7 @@ export function AppWorkspace() {
       </p>
     </main>
   ) : contentNavigation === 'feedback' ? (
-    <FeedbackPage role={isGuest ? 'guest' : currentRole ?? 'user'} isGuest={isGuest} />
+    <FeedbackPage role={isGuest ? 'guest' : currentRole ?? 'user'} isGuest={isGuest} worldType={worldType} />
   ) : contentNavigation === 'notifications' ? (
     <main className={styles.supportPage}>
       <NotificationBar fullPage worldType={worldType} onNavigate={openNavigation} />
@@ -294,7 +295,7 @@ export function AppWorkspace() {
       ) : contentNavigation === 'guild' ? (
         <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
       ) : contentNavigation === 'admin' ? (
-        <AdminDashboard role={currentUser.profile.role} />
+        <AdminDashboard role={currentUser.profile.role} worldType={worldType} />
       ) : contentNavigation === 'moderation' ? (
         <ModerationDashboard role={currentUser.profile.role} worldType={worldType} />
       ) : contentNavigation === 'roadmap' ? (
@@ -352,6 +353,7 @@ export function AppWorkspace() {
         <SettingsHub
           userId={currentUser.user.id}
           email={currentUser.user.email}
+          environment={worldType}
           twoFactorEnabled={currentUser.user.twoFactorEnabled}
           privacy={currentUser.profile.privacy}
           visibility={currentUser.profile.visibility}
