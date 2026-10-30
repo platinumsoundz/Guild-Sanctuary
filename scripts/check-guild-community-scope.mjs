@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
-const migration = read('../supabase/migrations/20261030150000_restore_guild_community_scope.sql');
+const migration = read('../supabase/migrations/20261030025452_restore_guild_community_scope.sql');
 const app = read('../src/components/AppWorkspace.tsx');
 const posts = read('../src/modules/feeds/service.ts');
 const feedHook = read('../src/modules/feeds/useFeed.ts');
