@@ -64,7 +64,7 @@ function parseData(value: unknown): PlannerData {
       typeof task.createdAt === 'string'),
   ).map((task) => ({
     ...task,
-    priority: task.priority === 'high' || task.priority === 'low' ? task.priority : 'normal',
+    priority: (task.priority === 'high' || task.priority === 'low' ? task.priority : 'normal') as PlannerPriority,
     category: task.category && task.category in CATEGORY_LABELS ? task.category : 'personal',
     dueTime: typeof task.dueTime === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(task.dueTime) ? task.dueTime : undefined,
   }));
