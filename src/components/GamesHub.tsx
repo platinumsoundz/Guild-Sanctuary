@@ -27,7 +27,14 @@ const games: GameEntry[] = [
     title: 'The 5 Sleeves 3D',
     description: 'A third-person 3D prototype with a mobile touch-control layout and gamepad input documented by the game project. Practice with Sensei, explore the outpost, and reach the First Tower.',
     genre: 'Third-person 3D prototype',
-    url: 'https://the-5-sleeves-3d.pages.dev/',
+    url: (() => {
+      const configured = process.env.NEXT_PUBLIC_5_SLEEVES_3D_URL?.trim();
+      if (!configured) return 'https://the-5-sleeves-3d.pages.dev/';
+      try {
+        const parsed = new URL(configured);
+        return parsed.protocol === 'https:' && !parsed.username && !parsed.password ? parsed.toString() : 'https://the-5-sleeves-3d.pages.dev/';
+      } catch { return 'https://the-5-sleeves-3d.pages.dev/'; }
+    })(),
     badge: '3D prototype',
     embed: 'verify',
   },
