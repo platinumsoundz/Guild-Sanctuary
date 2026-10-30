@@ -67,6 +67,7 @@ function toProfile(row: Awaited<ReturnType<typeof getProfileRow>>): Profile {
     equippedBorder: row.equipped_border ?? null,
     equippedProfileTheme: row.equipped_profile_theme ?? null,
     equippedPalette: row.equipped_palette ?? null,
+    customAccentColor: row.custom_accent_color ?? null,
     role: row.role,
   };
 }
