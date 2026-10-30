@@ -333,6 +333,7 @@ export function SettingsHub({
                     const enabled = event.currentTarget.checked;
                     setGuildReducedMotion(enabled);
                     document.documentElement.dataset.guildReducedMotion = String(enabled);
+                    window.dispatchEvent(new CustomEvent('guild-reduced-motion-change', { detail: enabled }));
                     try { window.localStorage.setItem('guild-reduced-motion-v1', String(enabled)); } catch { setError('This browser could not save the reduced-motion preference.'); }
                   }} />
                 </label>
@@ -341,6 +342,7 @@ export function SettingsHub({
                   <input type="checkbox" checked={guildTouchControls} onChange={(event) => {
                     const enabled = event.currentTarget.checked;
                     setGuildTouchControls(enabled);
+                    window.dispatchEvent(new CustomEvent('guild-touch-controls-change', { detail: enabled }));
                     try { window.localStorage.setItem('guild-touch-controls-v1', String(enabled)); } catch { setError('This browser could not save the touch-controls preference.'); }
                   }} />
                 </label>
