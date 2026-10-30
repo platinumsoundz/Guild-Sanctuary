@@ -54,6 +54,7 @@ jobs:
       - run: npm run check:theme-contrast
       - run: npm run check:notifications
       - run: npm run check:token-spend
+      - run: npm run check:token-economy
       - run: npm run check:stripe-test-checkout
       - run: npm run check:stripe-token-fulfillment
       - run: npm run check:adsense
