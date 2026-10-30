@@ -25,6 +25,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
   const [videos, setVideos] = useState<ShortVideo[]>([]);
   const [creatorProfiles, setCreatorProfiles] = useState<Record<string, PublicProfile>>({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [autoPlayEnabled, setAutoPlayEnabled] = useState(true);
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
   const [editingCaption, setEditingCaption] = useState('');
   const [engagement, setEngagement] = useState<Record<string, ShortState>>({});
@@ -47,6 +48,14 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recordingStreamRef = useRef<MediaStream | null>(null);
   const recordingChunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncMotionPreference = () => setAutoPlayEnabled(!preference.matches);
+    syncMotionPreference();
+    preference.addEventListener('change', syncMotionPreference);
+    return () => preference.removeEventListener('change', syncMotionPreference);
+  }, []);
 
   useEffect(() => () => {
     recorderRef.current?.stop();
@@ -112,9 +121,11 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
       entries.forEach((entry) => {
         if (!(entry.target instanceof HTMLVideoElement)) return;
         if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
-          void entry.target.play().catch(() => {
-            setError('A clip could not autoplay. Use its playback controls to start it.');
-          });
+          if (autoPlayEnabled) {
+            void entry.target.play().catch(() => {
+              setError('A clip could not autoplay. Use its playback controls to start it.');
+            });
+          }
         } else {
           entry.target.pause();
         }
@@ -126,7 +137,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
       observer.disconnect();
       feed.querySelectorAll('video').forEach((video) => video.pause());
     };
-  }, [videos, searchTerm]);
+  }, [videos, searchTerm, autoPlayEnabled]);
 
   const handleLike = async (videoId: string) => {
     if (!canEngage) {
@@ -422,6 +433,14 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
           <span>Find a Short</span>
           <input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.currentTarget.value)} placeholder="Search captions and creators…" />
         </label>
+        <button
+          type="button"
+          className={styles.playbackPreference}
+          aria-pressed={autoPlayEnabled}
+          onClick={() => setAutoPlayEnabled((enabled) => !enabled)}
+        >
+          Autoplay {autoPlayEnabled ? 'on' : 'off'}
+        </button>
         <span>{videos.filter((video) => {
           const query = searchTerm.trim().toLocaleLowerCase();
           const profile = creatorProfiles[video.authorId];
