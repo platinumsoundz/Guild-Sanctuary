@@ -1018,3 +1018,12 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - Add premium profile frames, portrait effects, identity badges and profile banners. Catalogue pricing is in tokens and is seeded idempotently by `20261030100000_token_cosmetics_and_premium_themes.sql`.
 - Premium palette IDs remain part of the central theme catalogue and use semantic CSS tokens. Do not create theme-specific page or component forks.
 - **Release gate:** shop items can be browsed, but token redemption remains disabled and the `spend_tokens` RPC remains revoked. The migration is not applied to production by this code change. Owner review, isolated staging migrations, authenticated spend/equip tests, balance/idempotency/ledger checks, theme entitlement bypass tests and security-advisor review are required before unlocking.
+
+
+## Token economy update — affordable cosmetics and founding members — 2026-10-30
+
+- Reprice all 32 cosmetic catalogue items to 20–50 tokens (20p–50p at the standard 100 tokens = £1 rate); themes and top-tier cosmetics are capped at 50 tokens.
+- Replace the old proposed 1,000-token first-100 beta offer with 500 tokens total for the first 100 eligible verified accounts.
+- Existing accounts among the first 100 retain their original 100-token welcome balance and receive a one-time +400 top-up; future eligible signups receive +500.
+- A database-locked allocation pool, unique account award and unique rank prevent duplicate or over-cap awards. The award path runs only from trusted database triggers after email verification/profile creation.
+- Both migrations are repository-only and **NOT APPLIED**. Supabase account counts, balances, and the eventual first-100 allocation must be confirmed in isolated staging before any production application. Token redemption remains disabled.
