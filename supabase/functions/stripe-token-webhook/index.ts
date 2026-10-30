@@ -122,8 +122,8 @@ export default {
       return Response.json({ received: true, pending: true })
     }
 
-    const userId = metadata.user_id
-    const bundleId = metadata.bundle_id
+    const userId = metadata.user_id ?? metadata.sanctuary_user_id
+    const bundleId = metadata.bundle_id ?? metadata.sanctuary_bundle_id
     const paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id
     if (
       session.mode !== 'payment'
