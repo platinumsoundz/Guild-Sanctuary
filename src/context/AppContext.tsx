@@ -35,7 +35,7 @@ import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { Database } from '@/services/supabase/database.types';
 import { normalizeSocialLinks } from '@/lib/socialLinks';
 import { fetchAccountSettings } from '@/modules/settings/service';
-import { applyTheme, resolveTheme, isThemePreference } from '@/lib/themes';
+import { applyTheme as setActiveTheme, resolveTheme, isThemePreference } from '@/lib/themes';
 
 export type NavigationState = 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'moderation' | 'planner' | 'feedback';
 
@@ -116,7 +116,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
       const preference = preferences.theme;
       document.documentElement.dataset.layout = preferences.layout;
       const applyTheme = () => {
-        applyTheme(resolveTheme(preference, window.matchMedia('(prefers-color-scheme: light)').matches));
+        setActiveTheme(resolveTheme(preference, window.matchMedia('(prefers-color-scheme: light)').matches));
       };
       applyTheme();
       try {
@@ -148,16 +148,16 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     }
     if (preference !== 'system') {
       if (isThemePreference(preference) && preference !== 'system') {
-        applyTheme(preference);
+        setActiveTheme(preference);
       } else {
-        applyTheme('dark');
+        setActiveTheme('dark');
       }
       return;
     }
     const media = window.matchMedia('(prefers-color-scheme: light)');
     const applySystemTheme = () => {
       const theme = media.matches ? 'light' : 'dark';
-      applyTheme(theme);
+      setActiveTheme(theme);
     };
     applySystemTheme();
     media.addEventListener('change', applySystemTheme);
