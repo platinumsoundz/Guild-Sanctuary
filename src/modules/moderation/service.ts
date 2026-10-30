@@ -64,11 +64,14 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
   if (error) throw new Error(`Moderation reports could not be loaded: ${error.message}`);
 
   return Promise.all((reports ?? []).map(async (report) => {
-    const { data: targetOwnerId, error: ownerError } = await client.rpc('get_report_target_owner', {
+    const { data: resolvedOwnerId, error: ownerError } = await client.rpc('get_report_target_owner', {
       requested_target_type: report.target_type,
       requested_target_id: report.target_id,
     });
-    if (ownerError) throw new Error(`Report ownership could not be verified: ${ownerError.message}`);
+    // A single stale/deleted target or an RPC issue should not take down the
+    // entire queue. Content actions remain server-validated; account actions
+    // stay disabled until the target owner can be verified.
+    const targetOwnerId = ownerError ? null : resolvedOwnerId;
 
     let targetContent: string | null = null;
     let targetTitle: string | null = null;
