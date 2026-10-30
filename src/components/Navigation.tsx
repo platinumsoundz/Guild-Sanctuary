@@ -106,7 +106,7 @@ export function Navigation({
   onLogout,
 }: NavigationProps) {
   const role = currentUser?.profile.role?.toLowerCase() ?? 'user';
-  const guestNavigationPages = new Set<NavigationState>(['today', 'games', 'roadmap', 'support', 'feedback']);
+  const guestNavigationPages = new Set<NavigationState>(['today', 'feed', 'discover', 'roadmap', 'support', 'feedback']);
   const [pageVisibility, setPageVisibility] = useState<PageVisibilityMap>({});
   useEffect(() => {
     let cancelled = false;

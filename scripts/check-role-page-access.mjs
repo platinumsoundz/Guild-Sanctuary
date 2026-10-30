@@ -6,7 +6,7 @@ const gates = read('../src/lib/sanctuaryFeatureGates.ts');
 const workspace = read('../src/components/AppWorkspace.tsx');
 const nav = read('../src/components/Navigation.tsx');
 
-for (const page of ['wallet', 'shop', 'games', 'shorts']) {
+for (const page of ['wallet', 'shop', 'games', 'shorts', 'events']) {
   assert.match(gates, new RegExp('^\\s*' + page + ": 'vip',$", 'm'),
     page + ' must be hidden from basic users and require VIP or above');
 }
@@ -14,8 +14,8 @@ for (const page of ['today', 'feed', 'messages', 'discover', 'profile', 'planner
   assert.match(gates, new RegExp('^\\s*' + page + ": 'user',$", 'm'),
     page + ' must remain available to basic users');
 }
-assert.match(gates, /if \(!role \|\| !\(role in roleRank\)\) return false/, 'unknown roles fail closed');
-assert.match(gates, /if \(!\(page in pageMinimumRole\)\) return false/, 'unknown pages fail closed');
+assert.match(gates, /Object\.prototype\.hasOwnProperty\.call\(roleRank, role\)/, 'unknown roles fail closed without inherited-property access');
+assert.match(gates, /Object\.prototype\.hasOwnProperty\.call\(pageMinimumRole, page\)/, 'unknown pages fail closed even for owner');
 assert.match(workspace, /canAccessSanctuaryPage\(contentNavigation, currentRole\)/, 'workspace guards direct navigation by role');
 assert.match(workspace, /if \(!currentUser \|\| !canAccessSanctuaryPage\(contentNavigation, currentRole\)\)/, 'unauthorized direct navigation returns to Today');
 assert.match(workspace, /RESTRICTED DESTINATION/, 'unauthorized destinations show a clear access message instead of their content');

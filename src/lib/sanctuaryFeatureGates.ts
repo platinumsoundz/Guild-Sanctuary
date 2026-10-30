@@ -24,10 +24,9 @@ export const SANCTUARY_FEATURE_GATES: Record<SanctuaryFeature, {
 
 export function canAccessSanctuaryFeature(feature: SanctuaryFeature, role: string | null | undefined): boolean {
   const gate = SANCTUARY_FEATURE_GATES[feature];
-  if (!gate.enabled || !role || !(role in roleRank)) return false;
+  if (!gate.enabled || !role || !Object.prototype.hasOwnProperty.call(roleRank, role)) return false;
   return roleRank[role as SanctuaryRole] >= roleRank[gate.minimumRole];
 }
-
 
 export type SanctuaryPage =
   | 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover'
@@ -36,32 +35,33 @@ export type SanctuaryPage =
   | 'admin' | 'moderation' | 'planner' | 'feedback';
 
 const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
+  // Stable member experience.
   today: 'user',
   feed: 'user',
+  discover: 'user',
+  messages: 'user',
+  profile: 'user',
+  planner: 'user',
+  support: 'user',
+  notifications: 'user',
+  settings: 'user',
+  feedback: 'user',
+  // Preview and stewardship areas remain out of the basic-user navigation.
   events: 'vip',
   shorts: 'vip',
-  messages: 'user',
-  discover: 'user',
   games: 'vip',
   guild: 'user',
   roadmap: 'user',
   'guild-roadmap': 'developer',
-  profile: 'user',
   wallet: 'vip',
   shop: 'vip',
-  support: 'user',
-  settings: 'user',
-  notifications: 'user',
   admin: 'admin',
   moderation: 'moderator',
-  planner: 'user',
-  feedback: 'user',
 };
 
 /** Fail closed for unknown pages and roles; navigation visibility is not the security boundary. */
 export function canAccessSanctuaryPage(page: string, role: string | null | undefined): boolean {
-  if (!role || !(role in roleRank)) return false;
-  if (role === 'owner') return true;
-  if (!(page in pageMinimumRole)) return false;
+  if (!role || !Object.prototype.hasOwnProperty.call(roleRank, role)) return false;
+  if (!Object.prototype.hasOwnProperty.call(pageMinimumRole, page)) return false;
   return roleRank[role as SanctuaryRole] >= roleRank[pageMinimumRole[page as SanctuaryPage]];
 }
