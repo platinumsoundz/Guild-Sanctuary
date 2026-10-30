@@ -151,6 +151,8 @@ export interface Database {
         checkout_session_id: string;
         livemode: boolean;
         created_at: string;
+        grant_position: number | null;
+        verified_at: string | null;
       }>;
       token_spend_catalog: Table<{
         item_id: string; name: string; description: string; price_tokens: number; kind: string; enabled: boolean;
