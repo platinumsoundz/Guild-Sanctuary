@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Message } from '@/types/database';
+import type { Message, WorldType } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { fetchConversationThread, createDirectConversation, sendConversationMessage, subscribeToConversationMessages } from './service';
 
@@ -13,7 +13,7 @@ interface UseDirectMessagesResult {
   send: (body: string) => Promise<boolean>;
 }
 
-export function useDirectMessages(peerUserId: string | null, selectedConversationId: string | null = null): UseDirectMessagesResult {
+export function useDirectMessages(peerUserId: string | null, selectedConversationId: string | null = null, worldType: WorldType = 'sanctuary'): UseDirectMessagesResult {
   const { currentUser } = useAppContext();
   const userId = currentUser?.user.id ?? '';
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
   const [error, setError] = useState<string | null>(null);
   // Hide the previous thread during the render where account or selection changes,
   // before effects have a chance to clear the underlying state.
-  const threadKey = `${userId}:${selectedConversationId ?? `peer:${peerUserId ?? ''}`}`;
+  const threadKey = `${worldType}:${userId}:${selectedConversationId ?? `peer:${peerUserId ?? ''}`}`;
   const [messagesThreadKey, setMessagesThreadKey] = useState(threadKey);
   const visibleMessages = messagesThreadKey === threadKey ? messages : [];
   const threadRequest = useRef(0);
@@ -41,9 +41,9 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     setError(null);
 
     const openThread = selectedConversationId
-      ? fetchConversationThread(selectedConversationId, userId)
+      ? fetchConversationThread(selectedConversationId, userId, worldType)
       : peerUserId
-        ? createDirectConversation(userId, peerUserId)
+        ? createDirectConversation(userId, peerUserId, worldType)
         : Promise.reject(new Error('Choose a conversation to open.'));
     openThread.then((thread) => {
       if (!cancelled && requestId === threadRequest.current) {
@@ -64,14 +64,14 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
       cancelled = true;
       if (threadRequest.current === requestId) threadRequest.current += 1;
     };
-  }, [peerUserId, selectedConversationId, threadKey, userId]);
+  }, [peerUserId, selectedConversationId, threadKey, userId, worldType]);
 
   const refresh = useCallback(async () => {
     const requestedConversationId = conversationId;
     const requestedThread = threadRequest.current;
     if (!requestedConversationId || !userId) return;
     try {
-      const thread = await fetchConversationThread(requestedConversationId, userId);
+      const thread = await fetchConversationThread(requestedConversationId, userId, worldType);
       if (
         activeConversationId.current === requestedConversationId &&
         threadRequest.current === requestedThread &&
@@ -100,7 +100,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
     setIsSending(true);
     setError(null);
     try {
-      const message = await sendConversationMessage(sendingConversationId, userId, body);
+      const message = await sendConversationMessage(sendingConversationId, userId, body, worldType);
       if (
         activeConversationId.current === sendingConversationId &&
         threadRequest.current === sendingThread
