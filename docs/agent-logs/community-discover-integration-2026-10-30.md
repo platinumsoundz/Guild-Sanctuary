@@ -119,3 +119,5 @@ This batch delivers world-scoped event discovery, not the full relationship/inte
 - Author labels are resolved through the existing public-profile lookup only; missing/unavailable public profiles use a generic community label. Private self-discovery, daily reflections, journals and vault content are not queried.
 - Added responsive post cards, author avatars where public, local timestamps, story-tag labels and attachment-type indicators.
 - Extended `check:discover-scope` to assert that both feed and event discovery receive the active world and that author labels use public profile lookup.
+
+- Bounded the post-discovery author-profile enrichment to the 100 newest visible posts before resolving public author profiles, while showing at most 30 cards. This prevents an unbounded burst of profile lookups on a busy feed; the contract test now guards the cap.
