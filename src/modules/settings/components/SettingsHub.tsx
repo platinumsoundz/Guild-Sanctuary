@@ -5,7 +5,8 @@ import type { Profile, ProfilePrivacy, SocialLinks, WorldType } from '@/types/da
 import { isSupabaseAuthConfigured } from '@/modules/auth';
 import { useAccountSettings } from '../useAccountSettings';
 import styles from './SettingsHub.module.css';
-import { applyTheme as setActiveTheme, resolveTheme, THEME_PREFERENCE_OPTIONS, isThemePreference } from '@/lib/themes';
+import { applyTheme as setActiveTheme, resolveTheme, THEME_PREFERENCE_OPTIONS, THEME_CATALOGUE, isThemePreference } from '@/lib/themes';
+import { getSupabaseBrowserClient } from '@/services/supabase';
 
 interface SettingsHubProps {
   userId: string;
@@ -74,6 +75,34 @@ export function SettingsHub({
   const [guildAccessEnabled, setGuildAccessEnabled] = useState(true);
   const [guildReducedMotion, setGuildReducedMotion] = useState(false);
   const [guildTouchControls, setGuildTouchControls] = useState(false);
+  const [ownedThemeIds, setOwnedThemeIds] = useState<Set<string>>(new Set(['dark', 'light']));
+  const [themeEntitlementsLoaded, setThemeEntitlementsLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadThemeEntitlements = async () => {
+      try {
+        if (!isSupabaseAuthConfigured()) {
+          if (!cancelled) setOwnedThemeIds(new Set(['dark', 'light']));
+          return;
+        }
+        const { data: authData, error: authError } = await getSupabaseBrowserClient().auth.getUser();
+        if (authError || authData.user?.id !== userId) throw new Error('Account session could not be verified.');
+        const { data, error: entitlementError } = await getSupabaseBrowserClient()
+          .from('token_entitlements').select('item_id').eq('user_id', userId);
+        if (entitlementError) throw entitlementError;
+        const owned = new Set(['dark', 'light']);
+        for (const row of data ?? []) if (row.item_id.startsWith('theme_')) owned.add(row.item_id.slice(6));
+        if (!cancelled) setOwnedThemeIds(owned);
+      } catch {
+        if (!cancelled) setOwnedThemeIds(new Set(['dark', 'light']));
+      } finally {
+        if (!cancelled) setThemeEntitlementsLoaded(true);
+      }
+    };
+    void loadThemeEntitlements();
+    return () => { cancelled = true; };
+  }, [userId]);
 
   useEffect(() => {
     try {
@@ -302,10 +331,14 @@ export function SettingsHub({
                 if (!isThemePreference(theme)) return;
                 void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));
               }}>
-                {THEME_PREFERENCE_OPTIONS.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+                {THEME_PREFERENCE_OPTIONS.map((option) => {
+                  const definition = THEME_CATALOGUE.find((theme) => theme.id === option.id);
+                  const locked = Boolean(definition?.requiresEntitlement && !ownedThemeIds.has(option.id));
+                  return <option key={option.id} value={option.id} disabled={locked || !themeEntitlementsLoaded && Boolean(definition?.requiresEntitlement)}>{option.label}{locked ? ' · Shop' : ''}</option>;
+                })}
               </select>
             </label>
-            <p className={styles.hint}>Your theme is applied across the application pages and shared navigation, and saved to your account. Profile accent colours remain separate. Token-unlockable themes can be added to this catalogue later; purchases are not enabled here.</p>
+            <p className={styles.hint}>Cosmic dark and Cosmic light are free. Premium palettes unlock permanently from the Token Shop, then can be selected here and used across Sanctuary and Guild. Changing your active theme never removes ownership.</p>
           </section>
 
           <section className={styles.panel} aria-labelledby="layout-title">
