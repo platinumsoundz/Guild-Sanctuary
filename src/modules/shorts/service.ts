@@ -238,8 +238,9 @@ export async function fetchShortComments(shortId: string, worldType: WorldType =
       createdAt: comment.created_at,
     }));
   }
-  if (!findShort(shortId)) {
-    throw new Error('Comments for this short video are unavailable.');
+  const localShort = findShort(shortId);
+  if (!localShort || (localShort.worldType ?? 'sanctuary') !== worldType) {
+    throw new Error('Comments for this short video are unavailable in the current community.');
   }
   await delay();
   return comments.filter((comment) => comment.targetId === shortId).map((comment) => ({ ...comment }));
@@ -269,7 +270,8 @@ export async function addShortComment(shortId: string, authorId: string, body: s
       createdAt: data.created_at,
     };
   }
-  if (!findShort(shortId)) throw new Error('Comments for this short video are unavailable.');
+  const localShort = findShort(shortId);
+  if (!localShort || (localShort.worldType ?? 'sanctuary') !== worldType) throw new Error('Comments for this short video are unavailable in the current community.');
   await delay();
   const comment: SocialComment = {
     id: `short-comment-${nextId++}`,
@@ -286,7 +288,9 @@ export async function addShortComment(shortId: string, authorId: string, body: s
 export async function getShortEngagement(shortId: string, userId: string, worldType: WorldType = 'sanctuary') {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
-    const { data, error } = await getSupabaseBrowserClient().rpc('get_short_engagement_stats', {
+    const { data: scopedShort } = await getSupabaseBrowserClient().from('short_videos').select('id').eq('id', shortId).eq('world_type', worldType).maybeSingle();
+    if (!scopedShort) throw new Error('This short is unavailable in the current community.');
+    const { data, error } = await getSupabaseBrowserClient().rpc('get_short_engagement_stats',
       requested_short_id: shortId,
     });
     if (error) throw new Error(`Short video reactions could not be loaded: ${error.message}`);
@@ -298,6 +302,8 @@ export async function getShortEngagement(shortId: string, userId: string, worldT
       commentsCount: stats.comments_count,
     };
   }
+  const localShort = findShort(shortId);
+  if (!localShort || (localShort.worldType ?? 'sanctuary') !== worldType) throw new Error('This short is unavailable in the current community.');
   return {
     liked: likes.some((like) => like.targetId === shortId && like.userId === userId),
     likesCount: likes.filter((like) => like.targetId === shortId).length,
@@ -322,7 +328,8 @@ export async function updateShortComment(commentId: string, authorId: string, bo
     return { id: data.id, targetType: 'short', targetId: data.target_id, authorId: data.author_id, body: data.body, createdAt: data.created_at };
   }
   const comment = comments.find((item) => item.id === commentId && item.authorId === authorId && item.targetType === 'short');
-  if (!comment) throw new Error('You can only edit your own comment.');
+  const localShort = comment ? findShort(comment.targetId) : undefined;
+  if (!comment || !localShort || (localShort.worldType ?? 'sanctuary') !== worldType) throw new Error('You can only edit your own comment in this community.');
   await delay();
   comment.body = normalizedBody;
   return { ...comment };
@@ -339,7 +346,8 @@ export async function deleteShortComment(commentId: string, authorId: string, wo
     return;
   }
   const index = comments.findIndex((item) => item.id === commentId && item.authorId === authorId && item.targetType === 'short');
-  if (index < 0) throw new Error('You can only delete your own comment.');
+  const localShort = index >= 0 ? findShort(comments[index].targetId) : undefined;
+  if (index < 0 || !localShort || (localShort.worldType ?? 'sanctuary') !== worldType) throw new Error('You can only delete your own comment in this community.');
   await delay();
   comments.splice(index, 1);
 }
