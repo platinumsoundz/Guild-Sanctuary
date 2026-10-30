@@ -34,19 +34,19 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f5f7f2;
+  --bg: #f4f3fa;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --ink: #203528;
-  --muted: #647268;
-  --line: #dce5dc;
-  --accent: #315a3d;
+  --ink: #29243b;
+  --muted: #625d73;
+  --line: #dedbea;
+  --accent: #57458d;
   --accent-contrast: #ffffff;
-  --accent-soft: rgb(49 90 61 / 9%);
-  --danger: #b42318;
-  --success: #247347;
-  --warning: #8b5b00;
-  --shadow-card: 0 8px 28px rgb(32 53 40 / 7%);
+  --accent-soft: rgb(87 69 141 / 10%);
+  --danger: #a92e3b;
+  --success: #236b49;
+  --warning: #805600;
+  --shadow-card: 0 8px 28px rgb(41 36 59 / 8%);
 }
 
 :root[data-theme="dark"] {
