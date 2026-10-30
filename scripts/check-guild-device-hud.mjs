@@ -17,6 +17,7 @@ assert.ok(navigation.includes('window.setInterval(() => { void measureGuildPing(
 assert.ok(navigation.includes('requestAnimationFrame(measureFrameRate)'), 'HUD should estimate frame rate from animation frames');
 assert.ok(navigation.includes('document.visibilityState === \'visible\''), 'HUD sampling should account for page visibility');
 assert.ok(navigation.includes('deviceStatus.rtt'), 'HUD should render the measured Guild ping');
+assert.ok(navigation.includes('>PING</span>'), 'HUD should label the latency metric clearly as ping');
 assert.ok(navigation.includes('deviceStatus.fps'), 'HUD should render the approximate interface FPS');
 assert.ok(styles.includes('.deviceHud'), 'console HUD should have dedicated styling');
 assert.ok(styles.includes('@media(max-width:560px)'), 'console HUD should adapt to narrow mobile screens');
