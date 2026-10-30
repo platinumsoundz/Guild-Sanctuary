@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from './SupportPanel.module.css';
+import type { WorldType } from '@/types/database';
 
 const tipOptions = [
   { id: 'tip_5_usd', amount: '$5' },
@@ -28,7 +29,7 @@ function isSupportOptions(value: unknown): value is SupportOptions {
     .every((link) => link === null || typeof link === 'string');
 }
 
-export function SupportPanel() {
+export function SupportPanel({ worldType = 'sanctuary' }: { worldType?: WorldType }) {
   const [options, setOptions] = useState<SupportOptions>({
     stripeDonationUrl: null,
     stripeTipsEnabled: false,
@@ -99,7 +100,7 @@ export function SupportPanel() {
       <p className={styles.eyebrow}>CREATOR-SUPPORTED</p>
       <h1 id="support-title">Support the creator</h1>
       <p className={styles.intro}>
-        Contributions help support the creator and the continued development of The Sanctuary. Every core community feature stays available without paying.
+        Contributions help support the creator and the continued development of {worldType === 'guild' ? 'the Guild' : 'the Sanctuary'}. Every core community feature stays available without paying.
       </p>
 
       {notice && <p className={styles.notice} role="status">{notice}</p>}
