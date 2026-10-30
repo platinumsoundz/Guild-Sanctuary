@@ -7,6 +7,7 @@ import { CelestialCrossword } from './CelestialCrossword';
 import { ArcadeClassics } from './ArcadeClassics';
 import { BookOpen, CreditCard, Gem, LockKeyhole, MoonStar, Puzzle, RotateCcw, Sparkles, Star } from 'lucide-react';
 import styles from './CosmicArcade.module.css';
+import { ArcadeFullscreenToggle } from './ArcadeFullscreenToggle';
 
 type ArcadeGame = 'wordsearch' | 'crossword' | 'solitaire' | 'mahjong' | 'snake' | 'classics';
 type Cell = { row: number; col: number };
@@ -137,10 +138,10 @@ export function CosmicArcade() {
       </div>
 
       {selectedGame === 'classics' ? <ArcadeClassics /> : selectedGame === 'crossword' ? <CelestialCrossword /> : selectedGame === 'snake' ? <CosmicSnake /> : selectedGame === 'solitaire' ? <LunarSolitaire /> : selectedGame === 'wordsearch' ? (
-        <div className={styles.playArea}>
+        <div className={styles.playArea} data-arcade-fullscreen>
           <div className={styles.playHeader}>
             <div><p className={styles.eyebrow}>MINDFUL PUZZLE</p><h2>Starseed Word Search</h2><p>Choose a word's first letter, then its last letter in a straight line. Horizontal, vertical and diagonal words all count.</p></div>
-            <button className={styles.resetButton} type="button" onClick={resetWordSearch}><RotateCcw size={15} /> Reset</button>
+            <div className={styles.gameHeaderActions}><ArcadeFullscreenToggle /><button className={styles.resetButton} type="button" onClick={resetWordSearch}><RotateCcw size={15} /> Reset</button></div>
           </div>
           <div className={styles.puzzleLayout}>
             <div className={styles.letterGrid} aria-label="Word search letter grid">
