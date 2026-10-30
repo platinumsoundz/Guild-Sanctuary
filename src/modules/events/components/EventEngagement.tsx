@@ -2,16 +2,17 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { Heart, MessageCircle } from 'lucide-react';
-import type { SocialComment } from '@/types/database';
+import type { SocialComment, WorldType } from '@/types/database';
 import { addEventComment, fetchEventComments, getEventEngagement, toggleEventLike } from '../service';
 import styles from './EventEngagement.module.css';
 
 interface EventEngagementProps {
   eventId: string;
   userId: string;
+  worldType?: WorldType;
 }
 
-export function EventEngagement({ eventId, userId }: EventEngagementProps) {
+export function EventEngagement({ eventId, userId, worldType = 'sanctuary' }: EventEngagementProps) {
   const [stats, setStats] = useState({ liked: false, likesCount: 0, commentsCount: 0 });
   const [comments, setComments] = useState<SocialComment[]>([]);
   const [draft, setDraft] = useState('');
@@ -20,20 +21,20 @@ export function EventEngagement({ eventId, userId }: EventEngagementProps) {
 
   useEffect(() => {
     let cancelled = false;
-    getEventEngagement(eventId, userId).then((value) => {
+    getEventEngagement(eventId, userId, worldType).then((value) => {
       if (!cancelled) setStats(value);
     }).catch((loadError) => {
       if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Event reactions could not be loaded.');
     });
     return () => { cancelled = true; };
-  }, [eventId, userId]);
+  }, [eventId, userId, worldType]);
 
   const toggleComments = async () => {
     const next = !isOpen;
     setIsOpen(next);
     if (next && comments.length === 0) {
       try {
-        setComments(await fetchEventComments(eventId));
+        setComments(await fetchEventComments(eventId, worldType));
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Comments could not be loaded.');
       }
@@ -42,7 +43,7 @@ export function EventEngagement({ eventId, userId }: EventEngagementProps) {
 
   const handleLike = async () => {
     try {
-      const result = await toggleEventLike(eventId, userId);
+      const result = await toggleEventLike(eventId, userId, worldType);
       setStats((current) => ({ ...current, liked: result.liked, likesCount: result.count }));
       setError(null);
     } catch (likeError) {
@@ -53,7 +54,7 @@ export function EventEngagement({ eventId, userId }: EventEngagementProps) {
   const handleComment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const comment = await addEventComment(eventId, userId, draft);
+      const comment = await addEventComment(eventId, userId, draft, worldType);
       setComments((current) => [...current, comment]);
       setStats((current) => ({ ...current, commentsCount: current.commentsCount + 1 }));
       setDraft('');
