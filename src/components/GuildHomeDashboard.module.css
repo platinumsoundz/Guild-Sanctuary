@@ -16,3 +16,38 @@
 /* The primary play posture is a phone held sideways: keep the game hero and resume rail in one viewport. */
 @media(orientation:landscape) and (max-height:600px){.page{width:100%;max-width:none;padding:10px 16px;gap:13px}.welcomeBar{min-height:42px}.welcomeBar h1{margin:2px 0;font-size:clamp(18px,3.1vw,27px)}.welcomeBar p{font-size:10px}.statusCluster button{width:36px;height:36px}.hero{grid-template-columns:minmax(0,1.8fr) minmax(210px,.7fr);gap:9px}.heroArtwork{min-height:clamp(190px,40vh,260px);padding:17px 22px;border-radius:16px}.heroContent h2{font-size:clamp(28px,5vh,43px)}.heroContent p{font-size:10px}.heroActions{margin-top:12px}.playButton,.outlineButton{min-height:38px}.heroOrnament{right:6%;bottom:10%;width:95px;height:95px}.heroOrnament svg{width:70px}.sidePanel{padding:12px;border-radius:16px;gap:7px}.emptyResume{min-height:70px}.resumeItem{padding:6px}.miniArt{flex-basis:38px;height:38px}.railSection,.communitySection{margin-top:0}.sectionHeading{margin-bottom:7px}.sectionHeading h2{font-size:17px}.gameRail{grid-auto-columns:minmax(155px,20vw);gap:8px}.gameArt{height:clamp(78px,17vh,112px);border-radius:12px}.gameMeta{padding:6px 1px}.gameMeta strong{font-size:9px}.gameMeta small{font-size:8px}.addGameCard{min-height:clamp(78px,17vh,112px);padding:10px}.communitySection{display:none}.footer{padding:7px 10px;font-size:9px}}
 @media(prefers-reduced-motion:reduce){.page button{transition:none}.page button:active{transform:none}}
+
+/* Shared interaction tokens for the console home. */
+.page {
+  --console-focus: 0 0 0 3px color-mix(in srgb,var(--accent) 78%,transparent);
+  --console-card-radius: 16px;
+}
+.page :where(button):focus-visible {
+  outline: var(--console-focus);
+  outline-offset: 3px;
+  position: relative;
+  z-index: 2;
+}
+.page :where(button) { touch-action: manipulation; }
+.gameArt,.destination,.resumeItem,.addGameCard,.heroArtwork { scroll-margin-inline: 12px; }
+.gameArt,.destination,.resumeItem,.addGameCard,.statusCluster button,.favouriteButton {
+  transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+@media (hover:hover) and (pointer:fine) {
+  .gameCard:hover .gameArt,.destination:hover,.resumeItem:hover,.addGameCard:hover {
+    border-color: color-mix(in srgb,var(--accent) 62%,var(--line));
+    box-shadow: 0 10px 28px color-mix(in srgb,var(--accent) 12%,transparent);
+    transform: translateY(-2px);
+  }
+}
+@media (orientation:landscape) and (max-height:600px) {
+  .page { padding: 10px 14px; gap: 15px; }
+  .welcomeBar h1 { font-size: clamp(19px,2.8vw,28px); }
+  .heroArtwork { min-height: clamp(205px,42vh,275px); }
+  .gameRail { grid-auto-columns: minmax(180px, 24vw); }
+  .destinationRail { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .gameArt,.destination,.resumeItem,.addGameCard,.statusCluster button,.favouriteButton { transition:none; }
+  .gameCard:hover .gameArt,.destination:hover,.resumeItem:hover,.addGameCard:hover { transform:none; }
+}
