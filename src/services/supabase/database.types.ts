@@ -153,6 +153,7 @@ export interface Database {
         created_at: string;
         grant_position: number | null;
         verified_at: string | null;
+        stripe_payment_intent_id: string | null;
       }>;
       token_spend_catalog: Table<{
         item_id: string; name: string; description: string; price_tokens: number; kind: string; enabled: boolean;
@@ -441,6 +442,7 @@ export interface Database {
           requested_amount_total: number;
           requested_currency: string;
           requested_livemode: boolean;
+          requested_payment_intent_id: string;
         };
         Returns: number;
       };
