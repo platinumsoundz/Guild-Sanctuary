@@ -87,7 +87,7 @@ $function$;
 
 drop trigger if exists content_reports_sync_world_type on public.content_reports;
 create trigger content_reports_sync_world_type
-before insert or update of target_type, target_id, world_type on public.content_reports
+before insert or update on public.content_reports
 for each row execute function public.sync_content_report_world_type();
 
 create or replace function public.notify_social_like()
