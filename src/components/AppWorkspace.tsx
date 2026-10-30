@@ -249,7 +249,7 @@ export function AppWorkspace() {
       <button type="button" onClick={() => setActiveNavigation('today')}>Return to Today</button>
     </main>
   ) : contentNavigation === 'today' ? (
-    {activeNavigation === 'guild' ? <GuildHomeDashboard onNavigate={(page) => setGuildPage(page as GuildPage)} /> : <SanctuaryHome onNavigate={openNavigation} />}
+    activeNavigation === 'guild' ? <GuildHomeDashboard onNavigate={(page) => setGuildPage(page as GuildPage)} /> : <SanctuaryHome onNavigate={openNavigation} />
   ) : isGuest && !['support', 'games', 'roadmap', 'feedback'].includes(contentNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
