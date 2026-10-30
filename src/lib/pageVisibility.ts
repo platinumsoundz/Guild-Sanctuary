@@ -71,8 +71,8 @@ export async function savePageVisibility(pageKey: ManagedPageKey, role: PageVisi
 }
 
 export function isPageVisible(pageKey: string, visibility: PageVisibilityMap, role: string = 'user'): boolean {
-  // Preserve an always-available recovery surface for staff if a visibility rule is misconfigured.
-  if (pageKey === 'admin') return true;
+  // Feedback is an always-available public destination for members and guests.
+  if (pageKey === 'admin' || pageKey === 'feedback') return true;
   const page = visibility[pageKey as ManagedPageKey];
   const roleKey = PAGE_VISIBILITY_ROLES.some((item) => item.value === role) ? role as PageVisibilityRole : 'guest';
   return page?.[roleKey] ?? page?.all ?? true;
