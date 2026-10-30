@@ -208,7 +208,6 @@ export async function updatePost(postId: string, authorId: string, content: stri
       .eq('id', postId)
       .eq('author_id', authorId)
       .eq('world_type', worldType)
-      .eq('world_type', worldType)
       .select('*')
       .maybeSingle();
     if (error) throw new Error(`Post could not be updated: ${error.message}`);
@@ -247,6 +246,7 @@ export async function deletePost(postId: string, authorId: string, worldType: Wo
       .delete()
       .eq('id', postId)
       .eq('author_id', authorId)
+      .eq('world_type', worldType)
       .select('media_url')
       .maybeSingle();
     if (error) throw new Error(`Post could not be deleted: ${error.message}`);
