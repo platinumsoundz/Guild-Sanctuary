@@ -225,7 +225,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
               const slot = item.kind;
               const equipped = equippedSlots[slot] === item.item_id;
               return <article className={styles.inventoryItem} key={item.item_id}>
-                <div className={styles.inventoryArt} data-effect={item.effect_key ?? ""} aria-hidden="true">{item.asset_url?.startsWith('/') ? <img src={item.asset_url} alt="" /> : item.asset_text ?? <Sparkles size={22} />}</div>
+                <div className={styles.inventoryArt} data-effect={item.effect_key ?? ""} aria-hidden="true">{item.asset_url?.startsWith('/') && !item.asset_url.startsWith('//') ? <img src={item.asset_url} alt="" /> : item.asset_text ?? <Sparkles size={22} />}</div>
                 <div className={styles.inventoryCopy}><strong>{item.name}</strong><span>{item.kind.replaceAll('_', ' ')}</span></div>
                 {equipped ? <span className={styles.equippedBadge}>Equipped</span> : <span className={styles.ownedBadge}><Check size={12} /> Owned</span>}
                 {item.kind === 'accent_customization' ? (
