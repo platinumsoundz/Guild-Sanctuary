@@ -106,9 +106,15 @@ end;
 $$;
 
 revoke all on function public.spend_tokens(text,uuid) from public,anon,authenticated,service_role;
-commit;
+
+-- The enabled catalogue contains only public cosmetic descriptions and prices.
+drop policy if exists "public reads enabled token shop catalog" on public.token_spend_catalog;
+create policy "public reads enabled token shop catalog"
+  on public.token_spend_catalog for select to anon using (enabled);
+grant select on public.token_spend_catalog to anon;
 
 -- Remove legacy placeholder banner paths; the catalogue renders first-party art/text,
+-- so a missing static asset can never create a broken image in the shop. the catalogue renders first-party art/text,
 -- so a missing static asset can never create a broken image in the shop.
 update public.token_spend_catalog
 set asset_url = null,
@@ -119,3 +125,5 @@ set asset_url = null,
       else asset_text
     end
 where item_id in ('profile_banner_aurora','profile_banner_ember','profile_banner_tide');
+
+commit;
