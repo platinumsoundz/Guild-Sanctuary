@@ -38,3 +38,13 @@
 @media (prefers-reduced-motion: reduce) {
   .feed * { scroll-behavior: auto; }
 }
+
+
+/* The Guild keeps the familiar feed mechanics, but presents them as part of its console UI. */
+.feed[data-world="guild"] {
+  border-radius: 20px;
+  padding: clamp(12px, 2vw, 24px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--guild-surface, #111827) 96%, white), var(--guild-surface, #111827));
+  color: var(--guild-text, #f3f4f6);
+  border: 1px solid color-mix(in srgb, var(--guild-accent, #7c9cff) 24%, transparent);
+}
