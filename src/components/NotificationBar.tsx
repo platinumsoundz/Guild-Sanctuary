@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Bell, CheckCheck, Heart, MessageCircle, X } from 'lucide-react';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
+import type { WorldType } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import styles from './NotificationBar.module.css';
@@ -15,6 +16,7 @@ type NotificationItem = {
   target_id: string;
   created_at: string;
   read_at: string | null;
+  world_type: WorldType;
   actorName: string;
   username: string;
 };
@@ -25,7 +27,7 @@ const destinationFor: Record<NotificationItem['target_type'], NavigationState> =
   event: 'events',
 };
 
-export function NotificationBar({ fullPage = false, compact = false }: { fullPage?: boolean; compact?: boolean }) {
+export function NotificationBar({ fullPage = false, compact = false, worldType = 'sanctuary', onNavigate }: { fullPage?: boolean; compact?: boolean; worldType?: WorldType; onNavigate?: (destination: NavigationState) => void }) {
   const { currentUser, isGuest, setActiveNavigation } = useAppContext();
   const [isOpen, setIsOpen] = useState(fullPage);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -66,8 +68,9 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
 
       const { data, error: queryError } = await client
         .from('notifications')
-        .select('id,actor_id,notification_type,target_type,target_id,created_at,read_at')
+        .select('id,actor_id,notification_type,target_type,target_id,created_at,read_at,world_type')
         .eq('recipient_id', currentUser.user.id)
+        .eq('world_type', worldType)
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -111,7 +114,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
     } finally {
       if (isCurrentRequest()) setIsLoading(false);
     }
-  }, [currentUser, isGuest]);
+  }, [currentUser, isGuest, worldType]);
 
   // Never leave the previous account's private notifications visible while a
   // new session is being resolved, and invalidate any requests still in flight.
@@ -121,7 +124,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
     setIsConnected(false);
     setIsLoading(false);
     setError(null);
-  }, [currentUser?.user.id, isGuest]);
+  }, [currentUser?.user.id, isGuest, worldType]);
 
   useEffect(() => {
     void loadNotifications();
@@ -184,7 +187,8 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
         .from('notifications')
         .update({ read_at: readAt })
         .eq('id', item.id)
-        .eq('recipient_id', accountId);
+        .eq('recipient_id', accountId)
+        .eq('world_type', worldType);
       if (updateError) throw updateError;
       if (!isSameSession()) return;
       setItems((previous) => previous.map((entry) => entry.id === item.id ? { ...entry, read_at: readAt } : entry));
@@ -204,6 +208,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
         .from('notifications')
         .update({ read_at: readAt })
         .eq('recipient_id', accountId)
+        .eq('world_type', worldType)
         .is('read_at', null);
       if (updateError) throw updateError;
       if (!isSameSession()) return;
@@ -225,7 +230,8 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
     await markRead(item);
     if (activeAccountId.current !== accountId) return;
     setIsOpen(false);
-    setActiveNavigation(destination);
+    if (onNavigate) onNavigate(destination);
+    else setActiveNavigation(destination);
   };
 
 
@@ -312,7 +318,7 @@ export function NotificationBar({ fullPage = false, compact = false }: { fullPag
               ))}
             </ul>
           )}
-          {compact && <footer className={styles.panelFooter}><button type="button" onClick={() => { setIsOpen(false); setActiveNavigation('notifications'); }}>Open full notifications <span aria-hidden="true">→</span></button></footer>}
+          {compact && <footer className={styles.panelFooter}><button type="button" onClick={() => { setIsOpen(false); if (onNavigate) onNavigate('notifications'); else setActiveNavigation('notifications'); }}>Open full notifications <span aria-hidden="true">→</span></button></footer>}
         </section>
       )}
     </aside>
