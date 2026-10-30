@@ -515,3 +515,35 @@
 .clearHistory:hover { border-color:var(--accent); color:var(--ink); }
 .clearHistory:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
 @media(max-width:600px) { .recentActions { justify-content:flex-start; } }
+
+/* Guild Console 2.0: landscape is the primary Android game-library posture. */
+@media (orientation:landscape) and (max-height:600px) {
+  .hub { width:100%; max-width:none; padding:12px 16px; }
+  .header { max-width:none; margin-bottom:13px; }
+  .header h2 { font-size:clamp(22px,3.4vw,32px); }
+  .header > p:last-child { max-width:90ch; margin-top:6px; font-size:11px; line-height:1.5; }
+  .libraryTools { margin-bottom:12px; padding:10px 13px; }
+  .libraryTools p { font-size:10px; line-height:1.45; }
+  .libraryControls { grid-template-columns:minmax(180px,1fr) auto; align-items:center; gap:9px 14px; margin-bottom:14px; }
+  .filterRow { justify-content:flex-end; }
+  .grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .art { min-height:clamp(115px,24vh,170px); }
+  .cardBody { padding:13px 15px; }
+  .card h2 { margin-top:8px; font-size:17px; }
+  .description { min-height:0; margin-top:7px; font-size:10px; line-height:1.45; }
+  .cardActions { gap:8px; margin-top:10px; padding-top:10px; }
+  .playButton,.externalLink,.detailsToggle { min-height:40px; }
+  .futureSection { margin-top:17px; }
+  .futureGrid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+  .futureCard { padding:12px; }
+  .futureCard p { margin:6px 0 9px; font-size:10px; }
+  .frameWrap,.frame { min-height:0; height:calc(100dvh - 145px); aspect-ratio:auto; }
+  .recentSection { margin:5px 0 14px; }
+  .recentRow { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:760px) and (orientation:landscape) {
+  .libraryTools { align-items:center; flex-direction:row; }
+  .libraryHint { padding-left:0; }
+  .futureGrid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion:reduce) { .card:hover { transform:none; } }
