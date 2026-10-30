@@ -86,6 +86,13 @@ export interface Profile {
   privacy: ProfilePrivacy;
   socialLinks: SocialLinks;
   visibility: ProfileVisibility;
+  equippedFrame?: string | null;
+  equippedEffect?: string | null;
+  equippedBadge?: string | null;
+  equippedBanner?: string | null;
+  equippedBorder?: string | null;
+  equippedProfileTheme?: string | null;
+  equippedPalette?: string | null;
   role: string;
 }
 
@@ -105,6 +112,13 @@ export interface PublicProfile {
   belief: string | null;
   socialLinks: SocialLinks;
   allowDirectMessages: boolean;
+  equippedFrame?: string | null;
+  equippedEffect?: string | null;
+  equippedBadge?: string | null;
+  equippedBanner?: string | null;
+  equippedBorder?: string | null;
+  equippedProfileTheme?: string | null;
+  equippedPalette?: string | null;
   role: string;
 }
 
