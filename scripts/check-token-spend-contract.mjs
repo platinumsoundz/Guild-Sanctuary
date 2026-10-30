@@ -8,6 +8,9 @@ const migration = readFileSync(
 );
 
 const checks = [
+  ['shop exposes live catalogue search', /Search the collection/.test(shop) && /const visibleItems = useMemo/.test(shop)],
+  ['shop exposes category filters and owned-only view', /categoryFilters/.test(shop) && /ownedOnly/.test(shop) && /aria-pressed/.test(shop)],
+  ['shop shows insufficient-balance shortfall without client-side spending', /shortfall/.test(shop) && /You need/.test(shop)],
   ['redemption is explicitly disabled until owner-approved staging', /const SPENDING_ENABLED = false/.test(shop)],
   ['purchase handler fails closed while spending is disabled', /if \(!SPENDING_ENABLED \|\| isGuest \|\| !hasSupabaseAccount \|\| purchasingItemId \|\| ownedItems\.has\(item\.item_id\)\) return;/.test(shop)],
   ['purchase button is disabled while spending is locked', /disabled=\{!SPENDING_ENABLED \|\| !hasSupabaseAccount \|\| owned \|\| purchasingItemId !== null\}/.test(shop)],
