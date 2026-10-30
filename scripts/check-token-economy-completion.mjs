@@ -25,7 +25,7 @@ const checks = [
   ['custom accent picker requires entitlement and a fixed accessible palette', /unlock_custom_accent_picker/.test(migration) && /Choose an accessible colour/.test(migration)],
   ['shop displays an owned collection and equipped state', /Your collection/.test(shop) && /Equipped/.test(shop) && /EQUIPPING_ENABLED = false/.test(shop)],
   ['guests can browse enabled catalog items without accessing account balances', /if \(isGuest\)/.test(shop) && /setBalance\(null\)/.test(shop) && /anonymous users read enabled token spend catalog/.test(migration)],
-  ['wallet combines purchase, spend, bonus and reviewed adjustment ledgers', /token_ledger/.test(wallet) && /token_spend_ledger/.test(wallet) && /token_bonus_ledger/.test(wallet) && /token_adjustment_ledger/.test(wallet)],
+  ['wallet combines purchase, spend, bonus and reviewed adjustment ledgers', /token_ledger/.test(wallet) && /token_spend_ledger/.test(wallet) && /signup_bonus/.test(wallet) && /token_adjustment_ledger/.test(wallet)],
   ['wallet renders positive and negative activity descriptions', /entry\.description/.test(walletPanel) && /entry\.tokensDelta < 0/.test(walletPanel)],
   ['public profiles load cosmetic projection', /public_profile_cosmetics/.test(profileService)],
   ['profile card renders equipped frames, badges, borders and themes', /equippedFrame/.test(profileCard) && /equippedBadge/.test(profileCard) && /equippedBorder/.test(profileCard) && /equippedProfileTheme/.test(profileCard)],
