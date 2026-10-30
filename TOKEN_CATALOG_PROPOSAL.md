@@ -1,6 +1,6 @@
 # Beta token shop proposal — for product approval
 
-**Status:** the product owner approved the listed cosmetics and token prices for isolated Stripe test-mode staging only. No grant, shop, redemption, or refund workflow is implemented or enabled. These are not approved for production/live sales.
+**Status:** the product owner approved the listed cosmetics and token prices for isolated staging tests only. Implementation is in draft PR #296 and its forward-only database migration is NOT APPLIED. Redemption and live sales remain disabled; production prices/terms are not approved.
 
 ## Owner-confirmed beta direction
 
