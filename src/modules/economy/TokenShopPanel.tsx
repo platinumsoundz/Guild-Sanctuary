@@ -154,11 +154,11 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
         <div>
           <p className={styles.eyebrow}>{worldType === 'guild' ? 'THE GUILD COLLECTION' : 'THE SANCTUARY COLLECTION'}</p>
           <h1>Token Shop</h1>
-          <p>Unlock first-party profile cosmetics with tokens. Items are account-bound and cannot be traded or cashed out.</p>
+          <p>Unlock first-party cosmetics and premium themes with tokens. Items are account-bound and cannot be traded or cashed out.</p>
         </div>
         <div className={styles.balance}>
           <span>Wallet balance</span>
-          <strong>{balance === null ? '—' : `${balance.toLocaleString('en-GB')} tokens`}</strong>
+          <strong>{balance === null ? (isGuest ? 'Sign in for balance' : '—') : `${balance.toLocaleString('en-GB')} tokens`}</strong>
         </div>
       </header>
 
@@ -207,7 +207,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
                       onClick={() => void purchaseItem(item)}
                       className={styles.buyButton}
                     >
-                      {owned ? 'Owned' : !SPENDING_ENABLED ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}
+                      {owned ? 'Owned' : !hasSupabaseAccount ? 'Sign in to unlock' : !SPENDING_ENABLED ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}
                     </button>
                   </div>
                   {owned && <p className={styles.ownedNote}>Already in your account collection.</p>}
