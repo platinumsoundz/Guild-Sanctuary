@@ -170,3 +170,14 @@
     font-size: 19px;
   }
 }
+/* Account-owned cosmetics are rendered from the privacy-safe profile projection. */
+.profileCard[data-border="border_aurora_line"] { border: 2px solid #66d6d0 !important; box-shadow: 0 0 0 2px rgb(102 214 208 / 12%); }
+.profileCard[data-border="border_gilded_laurel"] { border: 2px solid #c9a65a !important; box-shadow: 0 0 0 2px rgb(201 166 90 / 14%); }
+.profileCard[data-profile-theme="theme_tidal_glass"] { background: linear-gradient(145deg, var(--surface-raised), color-mix(in srgb, #62c8d2 12%, var(--surface-raised))); }
+.profileCard[data-profile-theme="theme_twilight_garden"] { background: linear-gradient(145deg, var(--surface-raised), color-mix(in srgb, #8b70bd 15%, var(--surface-raised))); }
+.avatar[data-frame="frame_moonlit_halo"] { border: 3px solid #a9a2f5 !important; box-shadow: 0 0 0 3px rgb(169 162 245 / 18%), 0 0 18px rgb(169 162 245 / 32%); }
+.avatar[data-frame="frame_wildflower_wreath"] { border: 3px solid #7caf7a !important; box-shadow: 0 0 0 3px rgb(124 175 122 / 18%); }
+.avatar[data-effect="profile_effect_sparkle"] { box-shadow: 0 0 16px rgb(202 170 255 / 35%); }
+.avatar[data-effect="profile_effect_glow"] { box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 42%, transparent); }
+.cosmeticBadge { display: inline-grid; width: 22px; height: 22px; place-items: center; vertical-align: middle; font-size: 16px; }
+.cosmeticCaption { width: fit-content; margin: 8px 0 0; color: var(--accent); font: 700 9px Arial, sans-serif; letter-spacing: .3px; }
