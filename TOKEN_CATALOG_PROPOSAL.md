@@ -1,41 +1,34 @@
-# Beta token shop proposal — for product approval
+# Token shop and founding-member reward — current product direction
 
-**Status:** the product owner approved the listed cosmetics and token prices for isolated Stripe test-mode staging only. No grant, shop, redemption, or refund workflow is implemented or enabled. These are not approved for production/live sales.
+**Status:** repository proposal and migrations only. Nothing has been applied to a remote Supabase database. Token redemption remains disabled.
 
-## Owner-confirmed beta direction
+## Pricing
 
-- Test with a small friend group first, then open the beta publicly.
-- Token checkout must use Stripe **test mode in isolated staging only**. Do not expose live payment or donation URLs in previews, and do not enable production charges.
-- The first 100 **verified new accounts after the beta opens** should receive a one-time 1,000-token bonus. This must be fulfilled server-side and atomically; no signup bonus exists in code yet.
-- The first shop should sell only Sanctuary-provided cosmetics. No user listings, transfers, trading, or cash-out.
-- Product-owner policy direction for planning: free beta tokens have no cash value and are non-refundable. Token purchases and external donations are intended to be non-refundable by default except a report/chargeback sent for manual review. For token-purchase cases, pause further spending during review; decide case by case on a full/partial refund and whether to reverse remaining tokens or revoke the item. Do not create an automatic negative balance. Donations are not associated with wallets/items and are not reconciled by the app. This is not final legal language or an implemented workflow.
+The standard token bundle rate is 100 tokens for £1. The cosmetic catalogue has been repriced to an affordable 20–50 token range (20p–50p at that standard rate). All 32 items are listed in [SHOP_CATALOGUE.md](src/modules/economy/SHOP_CATALOGUE.md).
 
-## Starter cosmetic catalog (illustrative)
+- Premium themes: 50 tokens each.
+- Everyday profile effects and badges: 20 tokens.
+- Frames and banners: 30–50 tokens.
+- No cosmetic item exceeds 50 tokens.
 
-Proposed initial categories are frames, borders, profile themes/skins, and colour palettes. All items are cosmetic only, account-bound, non-transferable, and would be permanent unlocks unless stated otherwise. Items/prices are approved for staging tests only; production prices and terms are not approved.
+## First-100 thank-you reward
 
-| Category | Draft item | Proposed price | Draft effect / rule |
-| --- | --- | ---: | --- |
-| Frame | Moonlit Halo | 250 tokens | Permanent profile-frame unlock; one frame active at a time |
-| Frame | Wildflower Wreath | 400 tokens | Permanent profile-frame unlock; one frame active at a time |
-| Border | Aurora Line | 200 tokens | Permanent profile-card border; visual only |
-| Border | Gilded Laurel | 350 tokens | Permanent profile-card border; visual only |
-| Profile theme | Tidal Glass | 400 tokens | Permanent profile-card colour/background theme |
-| Profile theme | Twilight Garden | 600 tokens | Permanent profile-card colour/background theme |
-| Colour palette | Sanctuary Colour Pack | 150 tokens | Unlock a curated set of accessible accent colours |
-| Colour customization | Custom Accent Picker | 500 tokens | Unlock user-selected accent colours, subject to contrast/accessibility limits |
+The previous 1,000-token proposal is superseded.
 
-“Custom” here means configuring a first-party profile appearance; it does not include user-uploaded shop assets or a user-to-user marketplace. Confirm the catalog, visual effects, prices, permanence, and whether palette changes are free after unlock before implementation.
+- The first 100 eligible, verified, active, distinct accounts receive 500 tokens total each.
+- Existing accounts among the first 100 already have the original 100-token welcome balance; the new migration adds 400 tokens to bring their original welcome allocation to 500.
+- Eligible signups after the programme opens receive 500 tokens.
+- A private database allocation pool serializes awards; each account and rank can be awarded only once. Awards are created only by trusted database triggers after email verification and profile creation.
+- Maximum total first-100 allocation is 50,000 tokens, counting the original 100-token welcome amounts for existing accounts.
 
-## Implementation and release gates
+## Security and release gates
 
-- The current wallet migration supports positive purchase credits only; it has no bonus-grant, cosmetic-inventory, spend, refund, or reversal records. Do not write wallet balances from the browser.
-- Any first-100 bonus needs a verified-account check, a concurrency-safe global limit, one grant per account, and an auditable server-side ledger entry.
-- Each shop purchase must validate a server-owned item ID and price, check the authenticated user's balance, deduct tokens and grant the entitlement atomically, and be idempotent.
-- A report or chargeback must pause spending for review. Implement the approved case-by-case refund/reversal workflow and test spent-token cases before enabling redemption.
-- Run the purchase and webhook flow using test-mode Stripe prices in isolated staging only. Keep live checkout disabled until migrations, Edge Functions, RLS, end-to-end tests, and approved/legal-reviewed terms are complete.
-- The existing shareable Stripe Payment Link must not be used for wallet purchases; it cannot safely attribute fulfillment to an account. External donations remain unassociated with accounts and are not reconciled by the app.
+- The bonus migration creates an auditable account award record and a server-side balance update in one transaction. No client-side amount, rank, or account ID can be supplied to the grant function.
+- No paid checkout, redemption, game spending, transfers, trading, or cash-out is enabled by this change.
+- Both the repricing and bonus migrations are code-only and **NOT APPLIED**.
+- Before any production migration, owner-reviewed isolated staging must confirm the existing account count and original balances, test the first-100 cap under concurrent verification, confirm one grant per account, verify the wallet/award ledger, and test RLS/privileges.
+- Do not call the bonus live or promise a specific user's eligibility until the migration has been applied and the resulting award is visible in that user's wallet.
 
-## Still awaiting approval
+## Ownership boundary
 
-The catalog and prices are approved for isolated staging tests. Confirm any changes before implementation; production terms/prices still require approval and legal review. No item is purchasable until the necessary schema, server-side transaction, support review process, and staging tests exist.
+The project owner performs remote Supabase operations, migration application, secrets, payment configuration, and production release. Contributors prepare repository changes and test contracts only.
