@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Post, WorldType } from '@/types/database';
 import { createPost, deletePost, fetchFeed, updatePost, type CreatePostInput } from './service';
 
@@ -17,21 +17,26 @@ export function useFeed(authorId: string | null, worldType: WorldType = 'sanctua
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const requestGeneration = useRef(0);
 
   const refresh = useCallback(async () => {
+    const requestId = ++requestGeneration.current;
     setIsLoading(true);
     setError(null);
     try {
-      setPosts(await fetchFeed(worldType));
+      const nextPosts = await fetchFeed(worldType);
+      if (requestId !== requestGeneration.current) return;
+      setPosts(nextPosts);
     } catch {
-      setError('The feed could not be loaded.');
+      if (requestId === requestGeneration.current) setError('The feed could not be loaded.');
     } finally {
-      setIsLoading(false);
+      if (requestId === requestGeneration.current) setIsLoading(false);
     }
   }, [worldType]);
 
   useEffect(() => {
     void refresh();
+    return () => { requestGeneration.current += 1; };
   }, [refresh]);
 
   const publishPost = async (input: Pick<CreatePostInput, 'content' | 'mediaUrl' | 'mediaType' | 'mediaFile' | 'storyTag'>) => {
