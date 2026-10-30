@@ -106,3 +106,17 @@ Illustrative pricing in mockups is not a final price list. Do not publish prices
 - [ ] Live checkout (explicitly disabled; separate approval required).
 
 **Guardrails:** no merge, production deployment, Supabase migration/branch, paid plan change, live checkout or token-spending activation is implied by this roadmap. A green build is not device QA or purchase certification.
+
+
+## Phase 1.1 — Embedded game lifecycle bridge (30 October 2026)
+
+A small, versioned `guild.5-sleeves` postMessage contract is being added in the separate The 5 Sleeves 3D repository (draft PR #11) and connected by the Guild console player in this branch.
+
+- The game announces `ready` to the exact embedding origin derived from `document.referrer`; standalone play without an embedding parent remains unchanged.
+- The Guild accepts messages only when both `event.origin` matches the configured game URL origin and `event.source` is the active iframe window.
+- The Guild sends only versioned `pause` and `resume` lifecycle commands to the exact game origin; no wildcard target origin is used.
+- The game accepts commands only from its actual parent window and the exact parent origin, then acknowledges the command.
+- Pausing clears held game input and preserves the pre-existing pause state so opening the Guild menu does not accidentally resume a title, story or in-game menu.
+- The bridge does not expose account identity, save data, Supabase credentials, Guild Token balance, purchases or DLC entitlements.
+
+**Dependency:** merge and deploy the game-side bridge PR before expecting the Guild's `Guild link ready` indicator and pause/resume behaviour to activate in a hosted preview. Until then, the existing iframe player and Guild overlay continue to work independently. This is not account linking or cloud-save integration.
