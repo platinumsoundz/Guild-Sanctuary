@@ -65,7 +65,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
       if (cancelled) return;
       const stats = await Promise.all(items.map(async (item) => [
         item.id,
-        await getShortEngagement(item.id, viewerId),
+        await getShortEngagement(item.id, viewerId, worldType),
       ] as const));
       if (cancelled) return;
       setVideos(items);
@@ -74,7 +74,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
       if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Short videos could not be loaded.');
     });
     return () => { cancelled = true; };
-  }, [viewerId]);
+  }, [viewerId, worldType]);
 
   useEffect(() => {
     const feed = feedRef.current;
@@ -106,7 +106,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
       return;
     }
     try {
-      const result = await toggleShortLike(videoId, viewerId);
+      const result = await toggleShortLike(videoId, viewerId, worldType);
       setEngagement((current) => ({
         ...current,
         [videoId]: { ...current[videoId], liked: result.liked, likesCount: result.count },
@@ -126,7 +126,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
     setOpenCommentsId(nextId);
     if (nextId && !commentsByVideo[nextId]) {
       try {
-        const items = await fetchShortComments(nextId);
+        const items = await fetchShortComments(nextId, worldType);
         setCommentsByVideo((current) => ({ ...current, [nextId]: items }));
         const engagement = await Promise.all(items.map(async (comment) => [
           comment.id,
@@ -162,7 +162,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
       return;
     }
     try {
-      const comment = await addShortComment(videoId, viewerId, draft);
+      const comment = await addShortComment(videoId, viewerId, draft, worldType);
       setCommentsByVideo((current) => ({ ...current, [videoId]: [...(current[videoId] ?? []), comment] }));
       setCommentEngagement((current) => ({ ...current, [comment.id]: { liked: false, count: 0 } }));
       setEngagement((current) => ({ ...current, [videoId]: { ...current[videoId], commentsCount: (current[videoId]?.commentsCount ?? 0) + 1 } }));
@@ -176,7 +176,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
 
   const saveShortCommentEdit = async (videoId: string, commentId: string) => {
     try {
-      const updated = await updateShortComment(commentId, viewerId, editingBody);
+      const updated = await updateShortComment(commentId, viewerId, editingBody, worldType);
       setCommentsByVideo((current) => ({
         ...current,
         [videoId]: (current[videoId] ?? []).map((comment) => comment.id === commentId ? updated : comment),
