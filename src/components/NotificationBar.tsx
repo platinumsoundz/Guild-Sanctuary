@@ -236,7 +236,7 @@ export function NotificationBar({ fullPage = false, compact = false, worldType =
 
 
   return (
-    <aside className={`${styles.bar} ${fullPage ? styles.fullPage : ''} ${compact ? styles.compact : ''}`} aria-label="Notifications">
+    <aside className={`${styles.bar} ${fullPage ? styles.fullPage : ''} ${compact ? styles.compact : ''}`} aria-label={worldType === 'guild' ? "Guild notifications" : "Notifications"} data-world={worldType}>
       <div className={styles.inner}>
         {!fullPage && !compact && <span className={styles.label}>COMMUNITY ACTIVITY</span>}
         <div className={styles.actions}>
