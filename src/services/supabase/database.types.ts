@@ -1,5 +1,5 @@
 // Legacy database column retained during the Sanctuary migration.
-type SanctuaryScope = 'sanctuary';
+type SanctuaryScope = 'sanctuary' | 'guild';
 
 type Table<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row;
@@ -78,6 +78,7 @@ export type ContentReportRow = {
   reviewed_by: string | null;
   reviewed_at: string | null;
   created_at: string;
+  world_type: SanctuaryScope;
 }
 
 export type ModerationAction = 'warn' | 'hide' | 'remove' | 'restore' | 'suspend' | 'ban';
@@ -216,6 +217,7 @@ export interface Database {
         target_id: string;
         created_at: string;
         read_at: string | null;
+        world_type: SanctuaryScope;
       }>;
       conversations: Table<ConversationRow>;
       conversation_members: Table<ConversationMemberRow>;
@@ -274,6 +276,15 @@ export interface Database {
       };
     };
     Functions: {
+      create_scoped_conversation: {
+        Args: {
+          requested_kind: 'direct' | 'group';
+          requested_world: SanctuaryScope;
+          requested_member_ids: string[];
+          requested_name?: string | null;
+        };
+        Returns: string;
+      };
       create_sanctuary_conversation: {
         Args: {
           requested_kind: 'direct' | 'group';

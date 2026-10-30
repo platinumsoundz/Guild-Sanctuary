@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import type { PublicProfile } from '@/types/database';
-import type { Conversation } from '@/types/database';
+import type { Conversation, PublicProfile, WorldType } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { fetchPublicProfileById } from '@/modules/profiles';
 import { useDirectMessages } from './useDirectMessages';
@@ -14,11 +13,12 @@ interface DirectMessageThreadProps {
   peer?: PublicProfile;
   conversation?: Conversation;
   onBack: () => void;
+  worldType?: WorldType;
 }
 
-export function DirectMessageThread({ peer, conversation, onBack }: DirectMessageThreadProps) {
+export function DirectMessageThread({ peer, conversation, onBack, worldType = 'sanctuary' }: DirectMessageThreadProps) {
   const { currentUser } = useAppContext();
-  const { messages, isLoading, isSending, error, send } = useDirectMessages(peer?.userId ?? null, conversation?.id ?? null);
+  const { messages, isLoading, isSending, error, send } = useDirectMessages(peer?.userId ?? null, conversation?.id ?? null, worldType);
   const [draft, setDraft] = useState('');
   const [senderProfiles, setSenderProfiles] = useState<Record<string, PublicProfile>>({});
   const peerId = peer?.userId ?? conversation?.participantIds.find((participantId) => participantId !== currentUser?.user.id);
@@ -60,9 +60,9 @@ export function DirectMessageThread({ peer, conversation, onBack }: DirectMessag
   };
 
   return (
-    <main className={styles.thread}>
+    <main className={styles.thread} data-world={worldType}>
       <header className={styles.threadHeader}>
-        <button className={styles.backButton} type="button" onClick={onBack}>Conversations</button>
+        <button className={styles.backButton} type="button" onClick={onBack}>{worldType === 'guild' ? 'Guild conversations' : 'Conversations'}</button>
         <div className={styles.peer}>
           <div className={styles.avatar} aria-hidden="true">{resolvedPeer?.avatarUrl ? <img src={resolvedPeer.avatarUrl} alt="" /> : title.slice(0, 1).toUpperCase()}</div>
           <div>

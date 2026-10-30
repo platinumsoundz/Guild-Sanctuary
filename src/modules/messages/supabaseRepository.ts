@@ -1,4 +1,4 @@
-import type { Conversation, Message } from '@/types/database';
+import type { Conversation, Message, WorldType } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { ConversationRow, MessageRow } from '@/services/supabase/database.types';
 
@@ -10,6 +10,7 @@ export interface PersistentConversationThread {
 function toConversation(row: ConversationRow, participantIds: string[]): Conversation {
   return {
     id: row.id,
+    worldType: row.world_type,
     kind: row.kind,
     participantIds,
     name: row.name,
@@ -51,6 +52,7 @@ export async function createPersistentConversation(
   kind: Conversation['kind'],
   participantIds: string[],
   name: string | null,
+  worldType: WorldType = 'sanctuary',
 ): Promise<Conversation> {
   const client = getSupabaseBrowserClient();
   const { data: authData, error: authError } = await client.auth.getUser();
@@ -58,8 +60,9 @@ export async function createPersistentConversation(
   if (!authData.user) throw new Error('Sign in with a Supabase account before starting a conversation.');
 
   const uniqueIds = [...new Set([authData.user.id, ...participantIds])];
-  const { data: conversationId, error } = await client.rpc('create_sanctuary_conversation', {
+  const { data: conversationId, error } = await client.rpc('create_scoped_conversation', {
     requested_kind: kind,
+    requested_world: worldType,
     requested_member_ids: uniqueIds,
     requested_name: name,
   });
@@ -69,13 +72,14 @@ export async function createPersistentConversation(
     .from('conversations')
     .select('*')
     .eq('id', conversationId)
+    .eq('world_type', worldType)
     .single();
   if (conversationError) throw new Error(`Conversation could not be loaded: ${conversationError.message}`);
   const memberMap = await getMembers([row.id]);
   return toConversation(row, memberMap.get(row.id) ?? []);
 }
 
-export async function fetchPersistentConversations(userId: string): Promise<Conversation[]> {
+export async function fetchPersistentConversations(userId: string, worldType: WorldType = 'sanctuary'): Promise<Conversation[]> {
   const client = getSupabaseBrowserClient();
   const { data: memberships, error: membershipError } = await client
     .from('conversation_members')
@@ -90,6 +94,7 @@ export async function fetchPersistentConversations(userId: string): Promise<Conv
     .from('conversations')
     .select('*')
     .in('id', conversationIds)
+    .eq('world_type', worldType)
     .order('updated_at', { ascending: false });
   if (error) throw new Error(`Conversations could not be loaded: ${error.message}`);
 
@@ -99,12 +104,14 @@ export async function fetchPersistentConversations(userId: string): Promise<Conv
 
 export async function fetchPersistentThread(
   conversationId: string,
+  worldType: WorldType = 'sanctuary',
 ): Promise<PersistentConversationThread> {
   const client = getSupabaseBrowserClient();
   const { data: row, error } = await client
     .from('conversations')
     .select('*')
     .eq('id', conversationId)
+    .eq('world_type', worldType)
     .single();
   if (error) throw new Error(`Conversation could not be opened: ${error.message}`);
 
@@ -125,7 +132,7 @@ export async function fetchPersistentThread(
   };
 }
 
-export async function sendPersistentMessage(conversationId: string, body: string): Promise<Message> {
+export async function sendPersistentMessage(conversationId: string, body: string, worldType: WorldType = 'sanctuary'): Promise<Message> {
   const normalizedBody = body.trim();
   if (normalizedBody.length < 1 || normalizedBody.length > 2000) {
     throw new Error('Messages must contain 1 to 2,000 characters.');
@@ -134,6 +141,8 @@ export async function sendPersistentMessage(conversationId: string, body: string
   const { data: authData, error: authError } = await client.auth.getUser();
   if (authError) throw new Error(`Authentication could not be verified: ${authError.message}`);
   if (!authData.user) throw new Error('Sign in with a Supabase account before sending messages.');
+  const { data: scopedConversation, error: scopeError } = await client.from('conversations').select('id').eq('id', conversationId).eq('world_type', worldType).maybeSingle();
+  if (scopeError || !scopedConversation) throw new Error('This conversation is unavailable in the current community.');
 
   const { data, error } = await client
     .from('messages')

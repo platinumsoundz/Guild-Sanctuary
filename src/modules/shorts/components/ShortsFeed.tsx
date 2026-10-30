@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Heart, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import type { WorldType } from '@/types/database';
 import { ReportContentButton } from '@/modules/moderation';
 import type { ShortVideo, SocialComment } from '@/types/database';
 import { addShortComment, createShortVideo, deleteShortComment, deleteShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike, updateShortComment } from '../service';
@@ -15,7 +16,7 @@ interface ShortState {
   commentsCount: number;
 }
 
-export function ShortsFeed() {
+export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType }) {
   const { currentUser, isGuest } = useAppContext();
   const viewerId = currentUser?.user.id ?? '';
   const canEngage = Boolean(viewerId) && !isGuest;
@@ -60,11 +61,15 @@ export function ShortsFeed() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchShortVideos().then(async (items) => {
+    setVideos([]);
+    setEngagement({});
+    setCommentsByVideo({});
+    setCommentEngagement({});
+    fetchShortVideos(worldType).then(async (items) => {
       if (cancelled) return;
       const stats = await Promise.all(items.map(async (item) => [
         item.id,
-        await getShortEngagement(item.id, viewerId),
+        await getShortEngagement(item.id, viewerId, worldType),
       ] as const));
       if (cancelled) return;
       setVideos(items);
@@ -73,7 +78,7 @@ export function ShortsFeed() {
       if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Short videos could not be loaded.');
     });
     return () => { cancelled = true; };
-  }, [viewerId]);
+  }, [viewerId, worldType]);
 
   useEffect(() => {
     const feed = feedRef.current;
@@ -105,7 +110,7 @@ export function ShortsFeed() {
       return;
     }
     try {
-      const result = await toggleShortLike(videoId, viewerId);
+      const result = await toggleShortLike(videoId, viewerId, worldType);
       setEngagement((current) => ({
         ...current,
         [videoId]: { ...current[videoId], liked: result.liked, likesCount: result.count },
@@ -125,7 +130,7 @@ export function ShortsFeed() {
     setOpenCommentsId(nextId);
     if (nextId && !commentsByVideo[nextId]) {
       try {
-        const items = await fetchShortComments(nextId);
+        const items = await fetchShortComments(nextId, worldType);
         setCommentsByVideo((current) => ({ ...current, [nextId]: items }));
         const engagement = await Promise.all(items.map(async (comment) => [
           comment.id,
@@ -161,7 +166,7 @@ export function ShortsFeed() {
       return;
     }
     try {
-      const comment = await addShortComment(videoId, viewerId, draft);
+      const comment = await addShortComment(videoId, viewerId, draft, worldType);
       setCommentsByVideo((current) => ({ ...current, [videoId]: [...(current[videoId] ?? []), comment] }));
       setCommentEngagement((current) => ({ ...current, [comment.id]: { liked: false, count: 0 } }));
       setEngagement((current) => ({ ...current, [videoId]: { ...current[videoId], commentsCount: (current[videoId]?.commentsCount ?? 0) + 1 } }));
@@ -175,7 +180,7 @@ export function ShortsFeed() {
 
   const saveShortCommentEdit = async (videoId: string, commentId: string) => {
     try {
-      const updated = await updateShortComment(commentId, viewerId, editingBody);
+      const updated = await updateShortComment(commentId, viewerId, editingBody, worldType);
       setCommentsByVideo((current) => ({
         ...current,
         [videoId]: (current[videoId] ?? []).map((comment) => comment.id === commentId ? updated : comment),
@@ -191,7 +196,7 @@ export function ShortsFeed() {
   const removeShortComment = async (videoId: string, commentId: string) => {
     if (!window.confirm('Delete your comment? This cannot be undone.')) return;
     try {
-      await deleteShortComment(commentId, viewerId);
+      await deleteShortComment(commentId, viewerId, worldType);
       setCommentsByVideo((current) => ({
         ...current,
         [videoId]: (current[videoId] ?? []).filter((comment) => comment.id !== commentId),
@@ -291,6 +296,7 @@ export function ShortsFeed() {
     try {
       const video = await createShortVideo({
         authorId: viewerId,
+        worldType,
         videoFile,
         caption: captionDraft,
       });
@@ -313,7 +319,7 @@ export function ShortsFeed() {
     }
     if (!window.confirm('Delete this video and its uploaded media? This cannot be undone.')) return;
     try {
-      await deleteShortVideo(videoId, viewerId);
+      await deleteShortVideo(videoId, viewerId, worldType);
       setVideos((current) => current.filter((video) => video.id !== videoId));
       setEngagement((current) => {
         const next = { ...current };
@@ -332,9 +338,9 @@ export function ShortsFeed() {
   };
 
   return (
-    <main className={styles.page} aria-label="Short-form video feed">
+    <main className={styles.page} data-world={worldType} aria-label={worldType === 'guild' ? "Guild short-form video feed" : "Short-form video feed"}>
       <header className={styles.header}>
-        <div><p>COMMUNITY CLIPS</p><h1>Shorts</h1></div>
+        <div><p>{worldType === 'guild' ? 'THE GUILD · COMMUNITY CLIPS' : 'COMMUNITY CLIPS'}</p><h1>{worldType === 'guild' ? 'Guild Shorts' : 'Shorts'}</h1></div>
         <span>Scroll or swipe to explore</span>
       </header>
       {canEngage ? (

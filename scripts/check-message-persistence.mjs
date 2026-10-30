@@ -34,10 +34,10 @@ const checks = [
   ['persistent mode is opt-in and verifies the authenticated user ID', /isPersistentMessagingEnabled/.test(service) && /NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES === 'true'/.test(service) && /data\.user\.id !== userId/.test(service)],
   ['identity mismatches fail closed instead of falling back to demo storage', /active Sanctuary session does not match the signed-in account/.test(service)],
   ['demo mode never claims it checked a recipient live DM setting', /local demo profile has direct messages turned off/.test(service) && !/This member is not accepting direct messages/.test(service)],
-  ['direct conversation creation routes through the authenticated RPC', /createPersistentConversation\('direct', \[peerUserId\], null\)/.test(service)],
-  ['group creation routes through the authenticated RPC', /createPersistentConversation\('group', participantIds, normalizedName\)/.test(service)],
-  ['persistent inbox listing reads memberships from Supabase', /fetchPersistentConversations\(userId\)/.test(service)],
-  ['persistent thread reads and sends use the repository', /fetchPersistentThread\(conversationId\)/.test(service) && /sendPersistentMessage\(conversationId, normalizedBody\)/.test(service)],
+  ['direct conversation creation routes through the authenticated RPC', /createPersistentConversation\('direct', \[peerUserId\], null, worldType\)/.test(service)],
+  ['group creation routes through the authenticated RPC', /createPersistentConversation\('group', participantIds, normalizedName, worldType\)/.test(service)],
+  ['persistent inbox listing reads memberships from Supabase', /fetchPersistentConversations\(userId, worldType\)/.test(service)],
+  ['persistent thread reads and sends use the repository', /fetchPersistentThread\(conversationId, worldType\)/.test(service) && /sendPersistentMessage\(conversationId, normalizedBody, worldType\)/.test(service)],
   ['message writes derive sender identity from the authenticated Supabase user', /auth\.getUser\(\)/.test(repository) && /sender_id: authData\.user\.id/.test(repository)],
   ['message history is limited to visible rows and bounded in size', /\.eq\('state', 'visible'\)/.test(repository) && /\.limit\(500\)/.test(repository)],
   ['realtime subscriptions are connected to the active message hook', /subscribeToPersistentMessages/.test(service) && /subscribeToConversationMessages/.test(hook)],
@@ -55,8 +55,8 @@ const checks = [
 
 checks.push(
   ['persistent conversation RPC exists in generated database types', /create_sanctuary_conversation:\s*\{/.test(databaseTypes)],
-  ['persistent conversation RPC arguments stay aligned with repository calls', /requested_kind:\s*kind/.test(repository) && /requested_member_ids:\s*uniqueIds/.test(repository) && /requested_name:\s*name/.test(repository) && /requested_kind:\s*'direct' \| 'group'/.test(databaseTypes) && /requested_member_ids:\s*string\[\]/.test(databaseTypes) && /requested_name\?:\s*string \| null/.test(databaseTypes)],
-  ['repository uses the typed RPC name rather than the lower-level migration function name', /rpc\('create_sanctuary_conversation'/.test(repository) && !/rpc\('create_conversation'/.test(repository)],
+  ['persistent conversation RPC arguments stay aligned with repository calls', /requested_kind:\s*kind/.test(repository) && /requested_world:\s*worldType/.test(repository) && /requested_member_ids:\s*uniqueIds/.test(repository) && /requested_name:\s*name/.test(repository) && /requested_kind:\s*'direct' \| 'group'/.test(databaseTypes) && /requested_member_ids:\s*string\[\]/.test(databaseTypes) && /requested_name\?:\s*string \| null/.test(databaseTypes)],
+  ['repository uses the scoped RPC rather than the lower-level migration function name', /rpc\('create_scoped_conversation'/.test(repository) && !/rpc\('create_conversation'/.test(repository)],
 );
 
 checks.push(
@@ -76,9 +76,9 @@ checks.push(
 );
 
 checks.push(
-  ['message thread state is synchronously hidden when the account or selected thread changes', /const threadKey = `\$\{userId\}:\$\{selectedConversationId \?\? `peer:\$\{peerUserId \?\? ''\}`\}`/.test(hook) && /const visibleMessages = messagesThreadKey === threadKey \? messages : \[\]/.test(hook)],
+  ['message thread state is synchronously hidden when the account or selected thread changes', /const threadKey = `\$\{worldType\}:\$\{userId\}:\$\{selectedConversationId \?\? `peer:\$\{peerUserId \?\? ''\}`\}`/.test(hook) && /const visibleMessages = messagesThreadKey === threadKey \? messages : \[\]/.test(hook)],
   ['message sending is blocked while the rendered thread key is stale', /messagesThreadKey !== threadKey \|\| !sendingConversationId/.test(hook)],
-  ['inbox hides prior-account conversations synchronously until the new session reset runs', /const sessionReady = sessionUserId === currentUserId/.test(inbox) && /const visibleConversations = sessionReady \? conversations : \[\]/.test(inbox) && /!sessionReady \|\| isLoading/.test(inbox)],
+  ['inbox hides prior-account conversations synchronously until the new session reset runs', /const sessionReady = sessionUserId === currentUserId/.test(inbox) && /const visibleConversations = sessionReady && conversationsWorldType === worldType \? conversations : \[\]/.test(inbox) && /!sessionReady \|\| isLoading/.test(inbox)],
   ['inbox hides prior-account member selections and search results during account transitions', /const visibleSelectedMembers = sessionReady \? selectedMembers : \[\]/.test(inbox) && /sessionReady && results\.length > 0/.test(inbox) && /if \(!sessionReady \|\| isCreatingGroup/.test(inbox)],
 );
 

@@ -596,3 +596,9 @@
 @media (prefers-reduced-motion: reduce) {
   .composer *, .post * { scroll-behavior: auto; }
 }
+
+
+/* Guild community cards use the console palette while reusing the same feed components. */
+.content[data-world="guild"] article {
+  border-color: color-mix(in srgb, var(--guild-accent, #7c9cff) 28%, transparent);
+}

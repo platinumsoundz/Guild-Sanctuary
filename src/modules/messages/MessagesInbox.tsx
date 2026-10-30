@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import type { Conversation, PublicProfile } from '@/types/database';
+import type { Conversation, PublicProfile, WorldType } from '@/types/database';
 import { fetchPublicProfileById, searchPublicProfiles } from '@/modules/profiles';
 import { createGroupConversation, fetchUserConversations } from './service';
 import styles from './MessagesInbox.module.css';
@@ -11,10 +11,12 @@ interface MessagesInboxProps {
   currentUserId: string;
   onDiscoverPeople: () => void;
   onOpenConversation: (conversation: Conversation) => void;
+  worldType?: WorldType;
 }
 
-export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversation }: MessagesInboxProps) {
+export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversation, worldType = 'sanctuary' }: MessagesInboxProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversationsWorldType, setConversationsWorldType] = useState(worldType);
   const [participantProfiles, setParticipantProfiles] = useState<Record<string, PublicProfile>>({});
   const [sessionUserId, setSessionUserId] = useState(currentUserId);
   const [query, setQuery] = useState('');
@@ -30,7 +32,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   const groupRequest = useRef(0);
   const activeUserId = useRef(currentUserId);
   const sessionReady = sessionUserId === currentUserId;
-  const visibleConversations = sessionReady ? conversations : [];
+  const visibleConversations = sessionReady && conversationsWorldType === worldType ? conversations : [];
   const visibleSelectedMembers = sessionReady ? selectedMembers : [];
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
     const requestId = ++inboxRequest.current;
     const requestedUserId = currentUserId;
     try {
-      const nextConversations = await fetchUserConversations(requestedUserId);
+      const nextConversations = await fetchUserConversations(requestedUserId, worldType);
       if (requestId !== inboxRequest.current || activeUserId.current !== requestedUserId) return;
       setConversations(nextConversations);
       setError(null);
@@ -72,11 +74,12 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
         setIsLoading(false);
       }
     }
-  }, [currentUserId]);
+  }, [currentUserId, worldType]);
 
   useEffect(() => {
     activeUserId.current = currentUserId;
     setSessionUserId(currentUserId);
+    setConversationsWorldType(worldType);
     inboxRequest.current += 1;
     searchRequest.current += 1;
     groupRequest.current += 1;
@@ -96,7 +99,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
       searchRequest.current += 1;
       groupRequest.current += 1;
     };
-  }, [currentUserId, refresh]);
+  }, [currentUserId, worldType, refresh]);
 
   // Keep the inbox current when a new conversation arrives on another device.
   // Poll only while this account is active and the tab is visible.
@@ -156,7 +159,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
     setIsCreatingGroup(true);
     setError(null);
     try {
-      const conversation = await createGroupConversation(requestedUserId, requestedMembers, requestedName);
+      const conversation = await createGroupConversation(requestedUserId, requestedMembers, requestedName, worldType);
       if (requestId !== groupRequest.current || activeUserId.current !== requestedUserId) return;
       setGroupName('');
       setSelectedMembers([]);
@@ -176,9 +179,9 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   };
 
   return (
-    <main className={styles.inbox}>
+    <main className={styles.inbox} data-world={worldType}>
       <p className={styles.eyebrow}>PRIVATE MESSAGES</p>
-      <h1>Messages</h1>
+      <h1>{worldType === 'guild' ? 'Guild messages' : 'Messages'}</h1>
       <p className={styles.description}>Choose a one-to-one conversation or start a group chat.</p>
       <MessagePrivacyNotice />
       <section className={styles.groups} aria-labelledby="direct-title">

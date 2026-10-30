@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { getConnectedGamepad } from '@/lib/controllerInput';
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import type { CSSProperties } from 'react';
-import type { Conversation, PublicProfile } from '@/types/database';
+import type { Conversation, PublicProfile, WorldType } from '@/types/database';
 import { useAppContext, type NavigationState } from '@/context/AppContext';
 import { AuthenticationGateway } from '@/modules/auth';
 import { Feed } from '@/modules/feeds';
@@ -76,6 +76,7 @@ export function AppWorkspace() {
     ? (guildInternalPages.includes(guildPage) ? 'guild' : guildPage)
     : activeNavigation;
   const currentRole = currentUser?.profile.role?.toLowerCase() ?? null;
+  const worldType: WorldType = activeNavigation === 'guild' ? 'guild' : 'sanctuary';
 
   useEffect(() => {
     if (!isSessionReady) return;
@@ -204,7 +205,7 @@ export function AppWorkspace() {
 
     let cancelled = false;
     setIsProfilePostsLoading(true);
-    fetchPostsByAuthor(currentUser.user.id)
+    fetchPostsByAuthor(currentUser.user.id, worldType)
       .then((posts) => {
         if (!cancelled) setProfilePosts(posts);
       })
@@ -215,7 +216,7 @@ export function AppWorkspace() {
     return () => {
       cancelled = true;
     };
-  }, [contentNavigation, currentUser, isGuest]);
+  }, [contentNavigation, currentUser, isGuest, worldType]);
 
   const openMessage = (profile: PublicProfile) => {
     setViewedProfile(null);
@@ -265,7 +266,7 @@ export function AppWorkspace() {
     </main>
   ) : contentNavigation === 'notifications' ? (
     <main className={styles.supportPage}>
-      <NotificationBar fullPage />
+      <NotificationBar fullPage worldType={worldType} onNavigate={openNavigation} />
     </main>
   ) : contentNavigation === 'support' ? (
     <main className={styles.supportPage}>
@@ -292,7 +293,7 @@ export function AppWorkspace() {
       ) : contentNavigation === 'admin' ? (
         <AdminDashboard role={currentUser.profile.role} />
       ) : contentNavigation === 'moderation' ? (
-        <ModerationDashboard role={currentUser.profile.role} />
+        <ModerationDashboard role={currentUser.profile.role} worldType={worldType} />
       ) : contentNavigation === 'roadmap' ? (
         <SanctuaryRoadmap />
       ) : contentNavigation === 'guild-roadmap' ? (
@@ -300,11 +301,11 @@ export function AppWorkspace() {
       ) : contentNavigation === 'feed' ? (
         <>
           <AdSlot placement="feed-inline" />
-          <Feed />
+          <Feed worldType={worldType} />
           <AdSlot placement="feed-sidebar" />
         </>
       ) : contentNavigation === 'events' ? (
-        <MeetupCalendarPlaceholder />
+        <MeetupCalendarPlaceholder worldType={worldType} />
       ) : contentNavigation === 'profile' ? (
         <ProfileDashboard
           profile={currentUser.profile}
@@ -326,12 +327,13 @@ export function AppWorkspace() {
           onView={(profile) => setViewedProfile(profile)}
         />
       ) : contentNavigation === 'messages' && messagePeer ? (
-        <DirectMessageThread peer={messagePeer} onBack={() => setMessagePeer(null)} />
+        <DirectMessageThread peer={messagePeer} worldType={worldType} onBack={() => setMessagePeer(null)} />
       ) : contentNavigation === 'messages' && messageConversation ? (
         <DirectMessageThread conversation={messageConversation} onBack={() => setMessageConversation(null)} />
       ) : contentNavigation === 'messages' ? (
         <MessagesInbox
           currentUserId={currentUser.user.id}
+          worldType={worldType}
           onDiscoverPeople={() => openNavigation('discover')}
           onOpenConversation={(conversation) => {
             setMessagePeer(null);
@@ -341,7 +343,7 @@ export function AppWorkspace() {
       ) : contentNavigation === 'shorts' ? (
         <>
           <AdSlot placement="shorts" />
-          <ShortsFeed />
+          <ShortsFeed worldType={worldType} />
         </>
       ) : contentNavigation === 'settings' ? (
         <SettingsHub

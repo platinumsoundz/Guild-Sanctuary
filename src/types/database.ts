@@ -6,6 +6,7 @@ export type UserPermission = 'feed:read' | 'post:create' | 'event:rsvp' | 'messa
 export type ProfileVisibility = 'public' | 'private';
 export type EventRsvpStatus = 'going' | 'interested' | 'cancelled';
 export type PostMediaType = 'image' | 'audio' | 'video';
+export type WorldType = 'sanctuary' | 'guild';
 export type ConversationKind = 'direct' | 'group';
 export type EngagementTargetType = 'post' | 'event' | 'short' | 'comment';
 export type AccountLayout = 'comfortable' | 'compact';
@@ -109,6 +110,7 @@ export interface PublicProfile {
 
 export interface Post {
   id: string;
+  worldType?: WorldType;
   authorId: string;
   content: string;
   mediaUrl: string | null;
@@ -146,6 +148,7 @@ export interface SocialComment {
 
 export interface ShortVideo {
   id: string;
+  worldType?: WorldType;
   authorId: string;
   videoUrl: string;
   caption: string;
@@ -154,6 +157,7 @@ export interface ShortVideo {
 
 export interface Event {
   id: string;
+  worldType?: WorldType;
   creatorId: string;
   title: string;
   description: string;
@@ -183,6 +187,7 @@ export interface Message {
 
 export interface Conversation {
   id: string;
+  worldType?: WorldType;
   kind: ConversationKind;
   participantIds: string[];
   name: string | null;

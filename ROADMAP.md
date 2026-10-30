@@ -916,3 +916,13 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - Applied the migration to the confirmed `Guild-Sanctuary` Supabase project (`xgpzvmhldyoyrwwebcic`) on 2026-10-30. Read-only SQL verified the `role_key` column, composite `(page_key, role_key)` primary key, Developer/Owner role gate and comment-action branch. The table currently has zero rules, so existing pages remain visible by default until a role-specific switch is changed. The separate Supabase project remains untouched.
 - The moderation queue no longer fails entirely when one report's owner lookup fails. Account actions remain disabled until the target owner is verified, and moderation actions are serialized in the UI to prevent overlapping submissions.
 - Contract checks, TypeScript typecheck and Next.js build passed on the merged feature branch. **Still outstanding:** confirm the latest main-branch Cloudflare deployment, then exercise the live UI with an authenticated Developer/Owner account and verify that hiding a test post changes its database state and removes it from the public feed. No production post was modified as part of this work.
+
+## Independent Sanctuary and Guild communities — 2026-10-30
+
+- Restore the existing `world_type` boundary across posts, Shorts, events, persistent conversations, notifications and moderation reports. Both environments continue to use the same accounts, database and social mechanics.
+- Sanctuary content remains tagged `sanctuary`; new Guild content is explicitly tagged `guild`. Existing content and notifications are retained in Sanctuary by default.
+- Shared pages receive the active world from the shell. Feed, Shorts, events, inbox/thread, notifications and moderation queue reads/actions filter by that world; profile-post retrieval is scoped to the active world too.
+- Social likes/comments remain attached to globally unique target IDs, so they follow the content they belong to instead of creating duplicated engagement tables.
+- Guild navigation uses Guild-specific labels and console styling while reusing the shared feature components. Notification destinations stay inside The Guild when opened from the Guild shell.
+- Added a CI contract check for world-scoped writes, reads, notification triggers, moderation queues and conversation creation.
+- **Verification:** contract checks, TypeScript typecheck/build and end-to-end checks must pass before merge. Apply `20261030150000_restore_guild_community_scope.sql` only to the confirmed `Guild-Sanctuary` Supabase project, then test one Sanctuary post and one Guild post with separate reactions/comments/notifications and verify neither appears in the other feed.

@@ -1,4 +1,4 @@
-import type { Post, PostMediaType, SocialComment, SocialLike } from '@/types/database';
+import type { Post, PostMediaType, SocialComment, SocialLike, WorldType } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import {
   createCommunityMediaUrls,
@@ -15,12 +15,14 @@ export interface CreatePostInput {
   mediaType?: PostMediaType | null;
   mediaFile?: File | null;
   storyTag?: string | null;
+  worldType?: WorldType;
 }
 
-// Single unified post store (no world scoping)
+// Shared post store, explicitly partitioned by community world
 const posts: Post[] = [
   {
     id: 'post-demo-1',
+    worldType: 'sanctuary',
     authorId: 'community-member',
     content: 'A quiet moment can change the shape of a whole day.',
     mediaUrl: null,
@@ -56,17 +58,19 @@ function validateAttachment(
   }
 }
 
-export async function fetchFeed(): Promise<Post[]> {
+export async function fetchFeed(worldType: WorldType = 'sanctuary'): Promise<Post[]> {
   if (isSupabaseCommunityStorageConfigured()) {
     const { data, error } = await getSupabaseBrowserClient()
       .from('posts')
       .select('*')
       .eq('state', 'visible')
+      .eq('world_type', worldType)
       .order('created_at', { ascending: false });
     if (error) throw new Error(`The feed could not be loaded: ${error.message}`);
     const urls = await createCommunityMediaUrls(data.flatMap((row) => row.media_url ? [row.media_url] : []));
     return data.map((row) => ({
       id: row.id,
+      worldType: row.world_type,
       authorId: row.author_id,
       content: row.content,
       mediaUrl: row.media_url ? (urls.get(row.media_url) ?? null) : null,
@@ -77,21 +81,23 @@ export async function fetchFeed(): Promise<Post[]> {
     }));
   }
   await delay();
-  return posts.slice().sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+  return posts.filter((post) => (post.worldType ?? 'sanctuary') === worldType).slice().sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }
 
-export async function fetchPostsByAuthor(authorId: string): Promise<Post[]> {
+export async function fetchPostsByAuthor(authorId: string, worldType: WorldType = 'sanctuary'): Promise<Post[]> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser();
     const { data, error } = await getSupabaseBrowserClient()
       .from('posts')
       .select('*')
       .eq('author_id', authorId)
+      .eq('world_type', worldType)
       .order('created_at', { ascending: false });
     if (error) throw new Error(`Your posts could not be loaded: ${error.message}`);
     const urls = await createCommunityMediaUrls(data.flatMap((row) => row.media_url ? [row.media_url] : []));
     return data.map((row) => ({
       id: row.id,
+      worldType: row.world_type,
       authorId: row.author_id,
       content: row.content,
       mediaUrl: row.media_url ? (urls.get(row.media_url) ?? null) : null,
@@ -102,7 +108,7 @@ export async function fetchPostsByAuthor(authorId: string): Promise<Post[]> {
     }));
   }
   await delay();
-  return posts.filter((post) => post.authorId === authorId).sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+  return posts.filter((post) => post.authorId === authorId && (post.worldType ?? 'sanctuary') === worldType).sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }
 
 export async function createPost(input: CreatePostInput): Promise<Post> {
@@ -137,6 +143,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
       .from('posts')
       .insert({
         author_id: userId,
+        world_type: input.worldType ?? 'sanctuary',
         content,
         media_url: mediaPath,
         media_type: input.mediaFile ? input.mediaType ?? null : null,
@@ -159,6 +166,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     }
     return {
       id: data.id,
+      worldType: data.world_type,
       authorId: data.author_id,
       content: data.content,
       mediaUrl,
@@ -173,6 +181,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
   const timestamp = new Date().toISOString();
   const post: Post = {
     id: `post-local-${nextPostId++}`,
+    worldType: input.worldType ?? 'sanctuary',
     authorId: input.authorId,
     content,
     mediaUrl: input.mediaFile ? URL.createObjectURL(input.mediaFile) : input.mediaUrl ?? null,
@@ -185,7 +194,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
   return post;
 }
 
-export async function updatePost(postId: string, authorId: string, content: string): Promise<Post> {
+export async function updatePost(postId: string, authorId: string, content: string, worldType: WorldType = 'sanctuary'): Promise<Post> {
   const normalizedContent = content.trim();
   if (normalizedContent.length < 1 || normalizedContent.length > 2800) {
     throw new Error('Posts must contain 1 to 2,800 characters.');
@@ -198,6 +207,7 @@ export async function updatePost(postId: string, authorId: string, content: stri
       .update({ content: normalizedContent })
       .eq('id', postId)
       .eq('author_id', authorId)
+      .eq('world_type', worldType)
       .select('*')
       .maybeSingle();
     if (error) throw new Error(`Post could not be updated: ${error.message}`);
@@ -205,6 +215,7 @@ export async function updatePost(postId: string, authorId: string, content: stri
     const mediaUrl = data.media_url ? (await createCommunityMediaUrls([data.media_url])).get(data.media_url) ?? null : null;
     return {
       id: data.id,
+      worldType: data.world_type,
       authorId: data.author_id,
       content: data.content,
       mediaUrl,
@@ -216,7 +227,7 @@ export async function updatePost(postId: string, authorId: string, content: stri
   }
 
   await delay();
-  const post = posts.find((item) => item.id === postId);
+  const post = posts.find((item) => item.id === postId && (item.worldType ?? 'sanctuary') === worldType);
   if (!post || post.authorId !== authorId) {
     throw new Error('This post could not be edited.');
   }
@@ -226,7 +237,7 @@ export async function updatePost(postId: string, authorId: string, content: stri
   return post;
 }
 
-export async function deletePost(postId: string, authorId: string): Promise<void> {
+export async function deletePost(postId: string, authorId: string, worldType: WorldType = 'sanctuary'): Promise<void> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(authorId);
     const client = getSupabaseBrowserClient();
@@ -235,6 +246,7 @@ export async function deletePost(postId: string, authorId: string): Promise<void
       .delete()
       .eq('id', postId)
       .eq('author_id', authorId)
+      .eq('world_type', worldType)
       .select('media_url')
       .maybeSingle();
     if (error) throw new Error(`Post could not be deleted: ${error.message}`);
@@ -243,7 +255,7 @@ export async function deletePost(postId: string, authorId: string): Promise<void
     return;
   }
   await delay();
-  const postIndex = posts.findIndex((item) => item.id === postId && item.authorId === authorId);
+  const postIndex = posts.findIndex((item) => item.id === postId && item.authorId === authorId && (item.worldType ?? 'sanctuary') === worldType);
   if (postIndex < 0) {
     throw new Error('This post could not be deleted.');
   }
@@ -256,9 +268,11 @@ export async function deletePost(postId: string, authorId: string): Promise<void
   }
 }
 
-export async function getPostEngagement(postId: string, userId: string) {
+export async function getPostEngagement(postId: string, userId: string, worldType: WorldType = 'sanctuary') {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
+    const { data: scopedPost, error: scopedPostError } = await getSupabaseBrowserClient().from('posts').select('id').eq('id', postId).eq('world_type', worldType).maybeSingle();
+    if (scopedPostError || !scopedPost) throw new Error('This post is unavailable in the current community.');
     const client = getSupabaseBrowserClient();
     const [like, likesCount, commentsCount] = await Promise.all([
       client.from('social_likes').select('id').eq('target_type', 'post').eq('target_id', postId).eq('user_id', userId).maybeSingle(),
@@ -270,7 +284,7 @@ export async function getPostEngagement(postId: string, userId: string) {
     }
     return { liked: Boolean(like.data), likesCount: likesCount.count ?? 0, commentsCount: commentsCount.count ?? 0 };
   }
-  if (!posts.some((post) => post.id === postId)) {
+  if (!posts.some((post) => post.id === postId && (post.worldType ?? 'sanctuary') === worldType)) {
     throw new Error('This post is unavailable.');
   }
   return {
@@ -280,9 +294,11 @@ export async function getPostEngagement(postId: string, userId: string) {
   };
 }
 
-export async function togglePostLike(postId: string, userId: string): Promise<{ liked: boolean; count: number }> {
+export async function togglePostLike(postId: string, userId: string, worldType: WorldType = 'sanctuary'): Promise<{ liked: boolean; count: number }> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
+    const { data: scopedPost, error: scopedPostError } = await getSupabaseBrowserClient().from('posts').select('id').eq('id', postId).eq('world_type', worldType).maybeSingle();
+    if (scopedPostError || !scopedPost) throw new Error('This post is unavailable in the current community.');
     const client = getSupabaseBrowserClient();
     const { data: existing, error: existingError } = await client
       .from('social_likes')
@@ -304,7 +320,7 @@ export async function togglePostLike(postId: string, userId: string): Promise<{ 
     if (error) throw new Error(`Reaction count could not be loaded: ${error.message}`);
     return { liked: !existing, count: count ?? 0 };
   }
-  if (!userId || !posts.some((post) => post.id === postId)) {
+  if (!userId || !posts.some((post) => post.id === postId && (post.worldType ?? 'sanctuary') === worldType)) {
     throw new Error('This post is unavailable for liking.');
   }
   await delay();
@@ -323,9 +339,11 @@ export async function togglePostLike(postId: string, userId: string): Promise<{ 
   return { liked: existingIndex < 0, count: likes.filter((like) => like.targetId === postId).length };
 }
 
-export async function fetchPostComments(postId: string): Promise<SocialComment[]> {
+export async function fetchPostComments(postId: string, worldType: WorldType = 'sanctuary'): Promise<SocialComment[]> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser();
+    const { data: scopedPost, error: scopedPostError } = await getSupabaseBrowserClient().from('posts').select('id').eq('id', postId).eq('world_type', worldType).maybeSingle();
+    if (scopedPostError || !scopedPost) throw new Error('This post is unavailable in the current community.');
     const { data, error } = await getSupabaseBrowserClient()
       .from('social_comments')
       .select('*')
@@ -343,20 +361,22 @@ export async function fetchPostComments(postId: string): Promise<SocialComment[]
       createdAt: comment.created_at,
     }));
   }
-  if (!posts.some((post) => post.id === postId)) {
+  if (!posts.some((post) => post.id === postId && (post.worldType ?? 'sanctuary') === worldType)) {
     throw new Error('Comments for this post are unavailable.');
   }
   await delay();
   return comments.filter((comment) => comment.targetId === postId).map((comment) => ({ ...comment }));
 }
 
-export async function addPostComment(postId: string, authorId: string, body: string): Promise<SocialComment> {
+export async function addPostComment(postId: string, authorId: string, body: string, worldType: WorldType = 'sanctuary'): Promise<SocialComment> {
   const normalizedBody = body.trim();
   if (!authorId || normalizedBody.length < 1 || normalizedBody.length > 1000) {
     throw new Error('Comments must contain 1 to 1,000 characters.');
   }
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(authorId);
+    const { data: scopedPost, error: scopedPostError } = await getSupabaseBrowserClient().from('posts').select('id').eq('id', postId).eq('world_type', worldType).maybeSingle();
+    if (scopedPostError || !scopedPost) throw new Error('This post is unavailable in the current community.');
     const { data, error } = await getSupabaseBrowserClient()
       .from('social_comments')
       .insert({ target_type: 'post', target_id: postId, author_id: authorId, body: normalizedBody })
@@ -372,7 +392,7 @@ export async function addPostComment(postId: string, authorId: string, body: str
       createdAt: data.created_at,
     };
   }
-  if (!posts.some((post) => post.id === postId)) {
+  if (!posts.some((post) => post.id === postId && (post.worldType ?? 'sanctuary') === worldType)) {
     throw new Error('Comments for this post are unavailable.');
   }
   await delay();
@@ -389,7 +409,7 @@ export async function addPostComment(postId: string, authorId: string, body: str
 }
 
 
-export async function updatePostComment(commentId: string, authorId: string, body: string): Promise<SocialComment> {
+export async function updatePostComment(commentId: string, authorId: string, body: string, worldType: WorldType = 'sanctuary'): Promise<SocialComment> {
   const normalizedBody = body.trim();
   if (!authorId || normalizedBody.length < 1 || normalizedBody.length > 1000) {
     throw new Error('Comments must contain 1 to 1,000 characters.');
@@ -402,6 +422,7 @@ export async function updatePostComment(commentId: string, authorId: string, bod
       .eq('id', commentId)
       .eq('author_id', authorId)
       .eq('target_type', 'post')
+      .in('target_id', (await getSupabaseBrowserClient().from('posts').select('id').eq('world_type', worldType)).data?.map((post) => post.id) ?? [])
       .select('*')
       .single();
     if (error) throw new Error(`Your comment could not be updated: ${error.message}`);
@@ -414,12 +435,13 @@ export async function updatePostComment(commentId: string, authorId: string, bod
   return { ...comment };
 }
 
-export async function deletePostComment(commentId: string, authorId: string): Promise<void> {
+export async function deletePostComment(commentId: string, authorId: string, worldType: WorldType = 'sanctuary'): Promise<void> {
   if (!authorId) throw new Error('Sign in before deleting a comment.');
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(authorId);
     const { error } = await getSupabaseBrowserClient().from('social_comments').delete()
-      .eq('id', commentId).eq('author_id', authorId).eq('target_type', 'post');
+      .eq('id', commentId).eq('author_id', authorId).eq('target_type', 'post')
+      .in('target_id', (await getSupabaseBrowserClient().from('posts').select('id').eq('world_type', worldType)).data?.map((post) => post.id) ?? []);
     if (error) throw new Error(`Your comment could not be deleted: ${error.message}`);
     return;
   }

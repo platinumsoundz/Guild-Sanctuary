@@ -26,7 +26,7 @@ assert.match(notifications, /closeOnEscape[\s\S]*?event\.key !== 'Escape'[\s\S]*
 assert.match(notifications, /ref=\{panelRef\}/, 'Outside-click handling must identify the notification panel');
 assert.match(notifications, /const loadRequest = useRef\(0\)/, 'Notification loading must track the latest request');
 assert.match(notifications, /if \(!isCurrentRequest\(\)\) return/, 'Stale notification requests must not overwrite current account state');
-assert.match(notifications, /\[currentUser\?\.user\.id, isGuest\]/, 'Account or guest-mode changes must clear prior notification state');
+assert.match(notifications, /\[currentUser\?\.user\.id, isGuest, worldType\]/, 'Account or guest-mode changes must clear prior notification state');
 assert.match(notifications, /if \(isCurrentRequest\(\)\) setIsLoading\(false\)/, 'Stale requests must not clear the current request loading indicator');
 
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import type { PostMediaType, PublicProfile } from '@/types/database';
+import type { PostMediaType, PublicProfile, WorldType } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { fetchPublicProfileById } from '@/modules/profiles';
 import { useFeed } from '@/modules/feeds';
@@ -25,9 +25,9 @@ function formatPostTime(value: string): string {
 const PLACEHOLDER_HEADING = 'A little room to begin';
 const PLACEHOLDER_MESSAGE = 'Thoughts and reflections from your community will find a home here.';
 
-export function FeedContent() {
+export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType }) {
   const { currentUser, isGuest } = useAppContext();
-  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(isGuest ? null : currentUser?.user.id ?? null);
+  const { posts, isLoading, error, publishPost, editPost, removePost } = useFeed(isGuest ? null : currentUser?.user.id ?? null, worldType);
   const [draft, setDraft] = useState('');
   const [attachmentUrl, setAttachmentUrl] = useState('');
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
@@ -164,7 +164,7 @@ export function FeedContent() {
   };
 
   return (
-    <section className={styles.content} aria-live="polite" aria-labelledby="feed-heading">
+    <section className={styles.content} data-world={worldType} aria-live="polite" aria-labelledby="feed-heading">
       {currentUser && !isGuest && <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
         {postMode === 'open' ? <label className={styles.composerLabel} htmlFor="post-content">Share with Sanctuary</label> : <p className={styles.composerLabel}>Share with Sanctuary</p>}
         <div className={styles.connectionToolkit} role="group" aria-labelledby="connection-toolkit-heading">
@@ -261,8 +261,9 @@ export function FeedContent() {
       </form>}
       <div className={styles.sectionHeading}>
         <div>
-          <p className={styles.sectionEyebrow}>COMMUNITY</p>
-          <h2 id="feed-heading">Everyone’s posts</h2>
+          <p className={styles.sectionEyebrow}>{worldType === 'guild' ? 'THE GUILD · COMMUNITY' : 'SANCTUARY · COMMUNITY'}</p>
+          <h2 id="feed-heading">{worldType === 'guild' ? 'Guild community' : 'Everyone’s posts'}</h2>
+          {worldType === 'guild' && <p className={styles.feedStatus}>A separate community space for Guild posts, conversations and reactions. Sanctuary activity stays in Sanctuary.</p>}
         </div>
         <span className={styles.sortLabel}>LATEST</span>
       </div>
@@ -270,12 +271,12 @@ export function FeedContent() {
       {isLoading && <p className={styles.feedStatus}>Loading your feed...</p>}
       {!isLoading && posts.length === 0 && (
         <div className={styles.emptyState}>
-          <span className={styles.emptyMark} aria-hidden="true">S</span>
+          <span className={styles.emptyMark} aria-hidden="true">{worldType === 'guild' ? 'G' : 'S'}</span>
           <div>
-            <h3>{PLACEHOLDER_HEADING}</h3>
-            <p>{PLACEHOLDER_MESSAGE}</p>
+            <h3>{worldType === 'guild' ? 'Start the Guild conversation' : PLACEHOLDER_HEADING}</h3>
+            <p>{worldType === 'guild' ? 'Be the first to share something with the Guild community.' : PLACEHOLDER_MESSAGE}</p>
           </div>
-          <span className={styles.sanctuaryLabel}>SANCTUARY</span>
+          <span className={styles.sanctuaryLabel}>{worldType === 'guild' ? 'THE GUILD' : 'SANCTUARY'}</span>
         </div>
       )}
       {!isLoading && posts.length > 0 && (
@@ -313,7 +314,7 @@ export function FeedContent() {
                     Your browser does not support video playback.
                   </video>
                 )}
-                {currentUser && !isGuest && <PostEngagement postId={post.id} userId={currentUser.user.id} />}
+                {currentUser && !isGuest && <PostEngagement postId={post.id} userId={currentUser.user.id} worldType={worldType} />}
                 {currentUser && !isGuest && (
                   <details className={styles.postOverflow}>
                     <summary aria-label="More post actions">More</summary>

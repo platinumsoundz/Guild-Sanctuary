@@ -282,3 +282,12 @@
     z-index: 1200;
   }
 }
+
+.bar[data-world="guild"] {
+  --ink: #f3f4f6;
+  --surface: #0f172a;
+  --surface-raised: #1e293b;
+  --line: #334155;
+  --muted: #94a3b8;
+  --accent: #7c9cff;
+}

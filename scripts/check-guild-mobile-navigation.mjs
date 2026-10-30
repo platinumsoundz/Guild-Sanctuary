@@ -13,7 +13,7 @@ const header = navigation.slice(headerStart, headerEnd);
 const afterHeader = navigation.slice(headerEnd + '</header>'.length);
 
 assert.match(header, /aria-label=\{open \? 'Close Guild navigation' : 'Open Guild navigation'\}/, 'menu control must have state-aware accessible naming');
-assert.match(header, /<NotificationBar compact \/>/, 'compact notifications must remain available in the console header');
+assert.match(header, /<NotificationBar compact worldType="guild" onNavigate=\{\(page\) => onSelect\(page\)\} \/>/, 'compact notifications must remain available in the console header');
 assert.match(header, /aria-label="Open Guild quick menu"/, 'Quick Menu must remain directly reachable from the header');
 assert.match(afterHeader, /className=\{styles\.quickScrim\}/, 'Quick Menu scrim must render outside the sticky header');
 assert.match(afterHeader, /className=\{styles\.quickPanel\}/, 'Quick Menu panel must render outside the sticky header');

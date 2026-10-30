@@ -28,14 +28,14 @@ const guildItems: Item[] = [
 ];
 const sanctuaryItems: Item[] = [
   { id: 'today', label: 'Today', icon: Home },
-  { id: 'feed', label: 'Community', icon: Newspaper },
+  { id: 'feed', label: 'Guild Community', icon: Newspaper },
   { id: 'discover', label: 'Discover', icon: Search },
-  { id: 'messages', label: 'Messages', icon: MessageSquare },
-  { id: 'events', label: 'Events', icon: CalendarDays },
-  { id: 'shorts', label: 'Shorts', icon: Clapperboard },
-  { id: 'planner', label: 'Daily Planner', icon: CalendarCheck },
-  { id: 'profile', label: 'My Profile', icon: UserRound },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'messages', label: 'Guild Messages', icon: MessageSquare },
+  { id: 'events', label: 'Guild Events', icon: CalendarDays },
+  { id: 'shorts', label: 'Guild Shorts', icon: Clapperboard },
+  { id: 'planner', label: 'Guild Planner', icon: CalendarCheck },
+  { id: 'profile', label: 'Guild Profile', icon: UserRound },
+  { id: 'notifications', label: 'Guild Notifications', icon: Bell },
   { id: 'games', label: 'Cosmic Arcade', icon: Gamepad2 },
   { id: 'roadmap', label: 'Sanctuary Roadmap', icon: Map },
   { id: 'guild-roadmap', label: 'Guild Roadmap', icon: Gamepad2 },
@@ -288,7 +288,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       <span className={styles.mark}><Gamepad2 size={21} /></span><span><small>CONSOLE MODE</small><strong>THE GUILD</strong></span>
     </button>
     <div className={styles.current} aria-live="polite">{label}</div>
-    <div className={styles.notificationSlot}><NotificationBar compact /></div>
+    <div className={styles.notificationSlot}><NotificationBar compact worldType="guild" onNavigate={(page) => onSelect(page)} /></div>
     <button ref={quickButtonRef} type="button" className={styles.quickButton} aria-label="Open Guild quick menu" aria-expanded={quickOpen} aria-keyshortcuts="Control+K Meta+K" onClick={() => setQuickOpen((value) => !value)}><SlidersHorizontal size={18} /><span>Quick menu</span><kbd>⌘/Ctrl K</kbd></button>
     <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Sanctuary</span></button>
     </header>
