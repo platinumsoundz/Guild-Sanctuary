@@ -29,4 +29,6 @@ assert.ok(player.includes("command: menuOpen ? 'pause' : 'resume'"), 'opening an
 assert.ok(player.includes("message.channel !== 'guild.5-sleeves' || message.version !== 1"), 'the host bridge must validate its versioned message channel');
 assert.ok(player.includes('ref={gameFrameRef}'), 'the host bridge must bind messages to the active iframe');
 
+assert.ok(library.includes('NEXT_PUBLIC_5_SLEEVES_3D_URL'), 'the 3D game host must support an HTTPS-only staging override with the canonical Pages URL as fallback');
+
 console.log('Guild game exit and lifecycle bridge contract checks passed.');
