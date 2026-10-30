@@ -23,8 +23,10 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
   const [controlsVisible, setControlsVisible] = useState(true);
 
   const exitFullscreen = useCallback(async () => {
-    try { if (document.fullscreenElement) await document.exitFullscreen(); }
-    catch { setNotice('Use your browser’s Back or fullscreen control if fullscreen cannot close here.'); }
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      try { screen.orientation.unlock(); } catch { /* Orientation lock is optional and browser-dependent. */ }
+    } catch { setNotice('Use your browser’s Back or fullscreen control if fullscreen cannot close here.'); }
   }, []);
   const returnHome = useCallback(async () => {
     await exitFullscreen();
@@ -36,10 +38,18 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
     const stage = stageRef.current;
     if (!stage) return;
     try {
-      if (document.fullscreenElement === stage) await document.exitFullscreen();
-      else {
+      if (document.fullscreenElement === stage) {
+        await document.exitFullscreen();
+        try { screen.orientation.unlock(); } catch { /* Orientation lock is optional and browser-dependent. */ }
+      } else {
         if (document.fullscreenElement) await document.exitFullscreen();
         await stage.requestFullscreen();
+        try {
+          await screen.orientation.lock('landscape');
+          setNotice('');
+        } catch {
+          setNotice('Fullscreen is active. Rotate your device to landscape for the intended layout.');
+        }
       }
     } catch { setNotice('Fullscreen is not available in this browser or must be started from a direct tap.'); }
   }, []);
