@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Home, Gamepad2, Library, Music2, Image as ImageIcon, Settings, Newspaper, Search,
-  MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard, Map,
+  MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard,
   Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
@@ -301,7 +301,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     <div className={styles.current} aria-live="polite">{label}</div>
     <div className={styles.notificationSlot}><NotificationBar compact worldType="guild" onNavigate={(page) => onSelect(page)} /></div>
     <button ref={quickButtonRef} type="button" className={styles.quickButton} aria-label="Open Guild quick menu" aria-expanded={quickOpen} aria-keyshortcuts="Control+K Meta+K" onClick={() => setQuickOpen((value) => !value)}><SlidersHorizontal size={18} /><span>Quick menu</span><kbd>⌘/Ctrl K</kbd></button>
-    <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Sanctuary</span></button>
+    <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Exit</span></button>
     </header>
     {mounted && quickOpen && createPortal(<>
       <button type="button" className={styles.quickScrim} aria-label="Close quick menu" onClick={() => { setQuickOpen(false); setQuickQuery(''); quickButtonRef.current?.focus(); }} />
