@@ -21,12 +21,12 @@ assert.match(admin, /Permission role to configure/, 'Admin must provide a role s
 assert.match(visibility, /onConflict: 'page_key,role_key'/, 'visibility must persist per page and role');
 assert.match(admin, /PageVisibilityPanel/, 'Admin must include page/system visibility controls');
 assert.match(admin, /canManageVisibility = \['developer', 'owner'\]/, 'only developer/owner see visibility controls');
-assert.doesNotMatch(admin, /<ModerationDashboard/, 'Admin must not contain the moderation queue');
+assert.match(admin, /if \(worldType === 'guild'\)[\s\S]*?<ModerationDashboard role=\{role\} worldType="guild" \/>/, 'Guild admin must show only the Guild-scoped moderation queue');
 assert.match(workspace, /contentNavigation === 'moderation'[\s\S]*?<ModerationDashboard/, 'moderation queue must have a separate route');
 assert.match(navigation, /label: 'Admin'/, 'navigation must label the permission page Admin');
 assert.match(navigation, /label: 'Moderation'/, 'navigation must expose a separate Moderation page');
 assert.match(navigation, /isPageVisible\(item\.id, pageVisibility, isGuest \? 'guest' : role\)/, 'main navigation must apply the active role visibility');
-assert.match(guildNavigation, /isPageVisible\(item\.id, pageVisibility, role\)/, 'Guild navigation must apply the active role visibility');
+assert.doesNotMatch(guildNavigation, /isPageVisible|fetchPageVisibility/, 'Guild navigation must not inherit global visibility settings from the companion environment');
 assert.match(gates, /^\s*guild: 'user',$/m, 'basic users must be able to launch Guild');
 assert.match(gates, /^\s*admin: 'admin',$/m, 'Admin requires admin or higher');
 assert.match(gates, /^\s*moderation: 'moderator',$/m, 'Moderation requires moderator or higher');
