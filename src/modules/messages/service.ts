@@ -8,6 +8,7 @@ import {
   fetchPersistentConversations,
   fetchPersistentThread,
   sendPersistentMessage,
+  markPersistentDirectMessagesRead,
   subscribeToPersistentMessages,
 } from './supabaseRepository';
 
@@ -186,6 +187,21 @@ export async function fetchConversationThread(conversationId: string, userId: st
 
 export async function fetchConversationMessages(conversationId: string, userId: string, worldType: WorldType = 'sanctuary'): Promise<Message[]> {
   return (await fetchConversationThread(conversationId, userId, worldType)).messages;
+}
+
+export async function markConversationMessagesRead(conversationId: string, userId: string, worldType: WorldType = 'sanctuary'): Promise<string | null> {
+  if (await hasPersistentSession(userId)) {
+    return markPersistentDirectMessagesRead(conversationId, worldType);
+  }
+  const conversation = requireParticipant(conversationId, userId);
+  if ((conversation.worldType ?? 'sanctuary') !== worldType || conversation.kind !== 'direct') return null;
+  const readAt = new Date().toISOString();
+  for (const message of messages) {
+    if (message.conversationId === conversationId && message.senderId !== userId && message.readAt === null) {
+      message.readAt = readAt;
+    }
+  }
+  return readAt;
 }
 
 export async function sendConversationMessage(conversationId: string, senderId: string, body: string, worldType: WorldType = 'sanctuary'): Promise<Message> {

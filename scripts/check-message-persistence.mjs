@@ -15,11 +15,12 @@ const migration = read('../supabase/migrations/20261027001557_restore_secure_per
 const dmPreferenceFix = read('../supabase/migrations/20261027002103_fix_direct_message_preference_source.sql');
 const integrationFix = read('../supabase/migrations/20261029100000_integrate_short_engagement_and_dm_preferences.sql');
 const messageReportFix = read('../supabase/migrations/20261029110000_secure_private_message_reporting.sql');
+const readReceiptsMigration = read('../supabase/migrations/20261030050000_direct_message_read_receipts.sql');
 const databaseTypes = read('../src/services/supabase/database.types.ts');
 
 const checks = [
-  ['inbox and thread clearly disclose that end-to-end encryption is not active', /MessagePrivacyNotice/.test(inbox) && /MessagePrivacyNotice/.test(thread)],
-  ['privacy notice does not claim encryption is already active', /End-to-end encryption is not active yet/.test(privacyNotice) && /not currently end-to-end encrypted/.test(privacyNotice)],
+  ['inbox and thread clearly disclose the current non-E2EE message privacy model', /MessagePrivacyNotice/.test(inbox) && /MessagePrivacyNotice/.test(thread)],
+  ['privacy notice accurately explains Supabase storage and does not promise future E2EE', /not end-to-end encrypted/.test(privacyNotice) && /Supabase services/.test(privacyNotice) && /service itself can process message contents/.test(privacyNotice) && !/Encrypted messaging is being planned/.test(privacyNotice)],
   ['encryption plan states this is design only and requires independent review', /design requirements only/.test(encryptionPlan) && /independent security review required/.test(encryptionPlan)],
   ['encryption plan forbids custom cryptography and requires a maintained reviewed library', /Do not implement primitives, key exchange, ratchets, group membership cryptography, or serialization from scratch/.test(encryptionPlan) && /maintained, independently reviewed implementations/.test(encryptionPlan)],
   ['encryption plan covers device lifecycle, recovery, and group membership', /Device model/.test(encryptionPlan) && /Recovery/.test(encryptionPlan) && /Group membership/.test(encryptionPlan)],
@@ -41,7 +42,7 @@ const checks = [
   ['message writes derive sender identity from the authenticated Supabase user', /auth\.getUser\(\)/.test(repository) && /sender_id: authData\.user\.id/.test(repository)],
   ['message history is limited to visible rows and bounded in size', /\.eq\('state', 'visible'\)/.test(repository) && /\.limit\(500\)/.test(repository)],
   ['realtime subscriptions are connected to the active message hook', /subscribeToPersistentMessages/.test(service) && /subscribeToConversationMessages/.test(hook)],
-  ['realtime events are deduplicated against send responses', /some\(\(message\) => message\.id === incoming\.id\)/.test(hook)],
+  ['realtime inserts are deduplicated and updates reconcile existing message rows', /findIndex\(\(message\) => message\.id === incoming\.id\)/.test(hook) && /currentMessages\.map\(\(message\) => message\.id === incoming\.id \? incoming : message\)/.test(hook)],
   ['local/demo conversation authorization remains in place', /requireParticipant\(conversationId, userId\)/.test(service) && /requireParticipant\(conversationId, senderId\)/.test(service)],
   ['repair migration restores all four durable messaging tables idempotently', ['conversations', 'conversation_members', 'direct_conversation_pairs', 'messages'].every((table) => migration.includes('create table if not exists public.' + table))],
   ['all durable messaging tables have row-level security enabled', ['conversations', 'conversation_members', 'direct_conversation_pairs', 'messages'].every((table) => migration.includes('alter table public.' + table + ' enable row level security'))],
@@ -50,6 +51,11 @@ const checks = [
   ['direct-message creation checks profile and saved privacy settings', /allow_direct_messages/.test(migration) && /privacy->>'allowDirectMessages'/.test(migration) && /preferences->>'allowDirectMessages'/.test(migration)],
   ['messaging tables are not granted to anon and writes are limited to messages', /from public, anon, authenticated/.test(migration) && /grant select on table public\.conversations, public\.conversation_members, public\.direct_conversation_pairs, public\.messages to authenticated/.test(migration) && /grant insert on table public\.messages to authenticated/.test(migration)],
   ['migration refreshes schema cache and conditionally enables Realtime', /notify pgrst, 'reload schema'/.test(migration) && /supabase_realtime/.test(migration) && /alter publication supabase_realtime add table public\.messages/.test(migration)],
+  ['direct-message read receipts are server-timestamped and membership-scoped', /mark_direct_messages_read/.test(readReceiptsMigration) && /auth\.uid\(\)/.test(readReceiptsMigration) && /is_active_conversation_member/.test(readReceiptsMigration) && /pg_catalog\.now\(\)/.test(readReceiptsMigration)],
+  ['read-receipt RPC is authenticated-only and does not grant direct table updates', /revoke all on function public\.mark_direct_messages_read\(uuid, public\.world_type\) from public, anon/.test(readReceiptsMigration) && /grant execute on function public\.mark_direct_messages_read\(uuid, public\.world_type\) to authenticated/.test(readReceiptsMigration)],
+  ['group conversations do not incorrectly reuse the single-recipient read timestamp', /c\.kind = 'direct'/.test(readReceiptsMigration) && /return null/.test(readReceiptsMigration)],
+  ['message repository subscribes to both inserts and read-receipt updates', /event: 'INSERT'/.test(repository) && /event: 'UPDATE'/.test(repository) && /mark_direct_messages_read/.test(repository)],
+  ['active thread marks incoming messages read and renders sender receipts', /markConversationMessagesRead/.test(hook) && /message\.readAt/.test(thread) && /Seen/.test(thread)],
   ['latest migration treats saved Settings DM preference as authoritative', /s\.preferences->>'allowDirectMessages'/.test(dmPreferenceFix) && /p\.allow_direct_messages/.test(dmPreferenceFix) && !/privacy->>'allowDirectMessages'/.test(dmPreferenceFix)],
 ];
 

@@ -23,6 +23,9 @@ Track the shortest safe path to a controlled Guild-Sanctuary beta. A feature is 
 - [ ] Verify feed load, refresh, pagination, create/edit/delete post, and error/empty states.
 - [ ] Verify comments can be created, edited, deleted, and liked only by permitted users.
 - [ ] Verify messaging preferences match actual DM-send enforcement.
+- [ ] Verify direct-message send/receive and server-backed read receipts with two real accounts in both Guild and Sanctuary; group receipts remain out of scope until per-member state exists.
+- [ ] Implement attachments, voice notes, and short video clips through the existing private Supabase Storage bucket with conversation-member read policies, file-type/size limits, and orphan-upload cleanup; do not add a new server or database.
+- [ ] Keep WebRTC/P2P calling parked; live calls are not a beta requirement for reliable messaging.
 - [ ] Verify Shorts load and engagement stats RPC resolves in the live schema; test reactions and report flows.
 - [ ] Confirm notifications open as an overlay without navigating away and have working read/unread states.
 
@@ -105,3 +108,5 @@ A controlled beta can start when all P0 gates pass, the production candidate is 
 - Read-only checks against both connected Supabase projects confirm `record_token_bundle_purchase` is executable by `service_role` only and `spend_tokens` is not executable by `anon` or `authenticated`. Do not lift the spending lock until isolated authenticated transaction tests pass for balance, ownership, insufficient funds, idempotency replay/collision and concurrent requests.
 - Added `check:stripe-test-checkout` to the CI contract suite. It is static regression protection, not a substitute for an actual test-mode round-trip.
 - **Live launch remains gated:** refund/dispute reversals, policy/terms review, payment reconciliation, and final production configuration are not complete. No live-mode payments are enabled by this work.
+
+- 2026-10-30: PR #280 adds server-timestamped read receipts for one-to-one messages using the existing Supabase Postgres/Realtime stack. Migration remains unapplied and real two-account verification is outstanding. The earlier WebRTC calling PR #260 is parked as draft per the updated Supabase-first product direction; attachments, voice notes, and short videos are next, using the existing private Storage bucket.

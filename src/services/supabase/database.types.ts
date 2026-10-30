@@ -296,6 +296,10 @@ export interface Database {
         };
         Returns: string;
       };
+      mark_direct_messages_read: {
+        Args: { requested_conversation_id: string; requested_world: SanctuaryScope };
+        Returns: string | null;
+      };
       create_sanctuary_conversation: {
         Args: {
           requested_kind: 'direct' | 'group';

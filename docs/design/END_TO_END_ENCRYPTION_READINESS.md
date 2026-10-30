@@ -1,5 +1,7 @@
 # The Sanctuary — End-to-End Encrypted Messaging Readiness Plan
 
+> **Product decision — 30 October 2026: PARKED / HISTORICAL RESEARCH.** The current approved direction is Supabase-backed messaging with authenticated access controls and Realtime delivery. E2EE is not part of the active roadmap and must not be implemented, promised, or represented as planned unless the owner explicitly reopens that decision. These notes are retained only as historical security research. Message bodies remain readable by the service and are not end-to-end encrypted.
+
 **Status:** design requirements only — no end-to-end encryption is implemented by this document.  
 **Owner:** product owner, with independent security review required before implementation.  
 **Date:** 2026-10-27  
