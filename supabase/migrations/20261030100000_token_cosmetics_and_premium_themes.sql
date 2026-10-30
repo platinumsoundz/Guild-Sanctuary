@@ -114,7 +114,6 @@ create policy "public reads enabled token shop catalog"
 grant select on public.token_spend_catalog to anon;
 
 -- Remove legacy placeholder banner paths; the catalogue renders first-party art/text,
--- so a missing static asset can never create a broken image in the shop. the catalogue renders first-party art/text,
 -- so a missing static asset can never create a broken image in the shop.
 update public.token_spend_catalog
 set asset_url = null,
