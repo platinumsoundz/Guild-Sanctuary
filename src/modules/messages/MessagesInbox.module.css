@@ -142,3 +142,17 @@
     padding: 13px;
   }
 }
+
+.inbox[data-world="guild"] {
+  --ink: #f3f4f6;
+  --surface: #0f172a;
+  --surface-raised: #1e293b;
+  --line: #334155;
+  --muted: #94a3b8;
+  --accent: #7c9cff;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  border-radius: 20px;
+  padding: clamp(12px, 2vw, 24px);
+}
