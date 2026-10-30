@@ -1,27 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import type { PublicProfile } from '@/types/database';
-import { Globe2, MapPin, Sparkles } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import type { PublicProfile, WorldType } from '@/types/database';
+import { CalendarDays, Globe2, MapPin, Search, Sparkles, Users } from 'lucide-react';
+import { fetchEvents, type EventView } from '@/modules/events';
 import { searchPublicProfiles } from '../service';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
+type DiscoveryTab = 'people' | 'events';
+
 interface ProfileDiscoveryProps {
   currentUserId: string;
+  worldType: WorldType;
   onMessage: (profile: PublicProfile) => void;
   onView: (profile: PublicProfile) => void;
 }
 
-export function ProfileDiscovery({ currentUserId, onMessage, onView }: ProfileDiscoveryProps) {
+export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }: ProfileDiscoveryProps) {
+  const [activeTab, setActiveTab] = useState<DiscoveryTab>('people');
   const [query, setQuery] = useState('');
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
+  const [events, setEvents] = useState<EventView[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [eventsError, setEventsError] = useState<string | null>(null);
 
   useEffect(() => {
     const normalizedQuery = query.trim();
-    if (normalizedQuery.length < 2) {
+    if (activeTab !== 'people' || normalizedQuery.length < 2) {
       setProfiles([]);
       setError(null);
       setIsSearching(false);
@@ -30,99 +38,168 @@ export function ProfileDiscovery({ currentUserId, onMessage, onView }: ProfileDi
 
     let cancelled = false;
     setIsSearching(true);
+    setError(null);
     const timeout = setTimeout(() => {
       searchPublicProfiles(normalizedQuery)
         .then((results) => {
-          if (!cancelled) {
-            setProfiles(results.filter((profile) => profile.userId !== currentUserId));
-            setError(null);
-          }
+          if (!cancelled) setProfiles(results.filter((profile) => profile.userId !== currentUserId));
         })
         .catch(() => {
-          if (!cancelled) {
-            setError('Profiles could not be searched right now.');
-          }
+          if (!cancelled) setError('Profiles could not be searched right now. Please try again.');
         })
         .finally(() => {
-          if (!cancelled) {
-            setIsSearching(false);
-          }
+          if (!cancelled) setIsSearching(false);
         });
-    }, 180);
+    }, 220);
 
     return () => {
       cancelled = true;
       clearTimeout(timeout);
     };
-  }, [currentUserId, query]);
+  }, [activeTab, currentUserId, query]);
+
+  useEffect(() => {
+    if (activeTab !== 'events') return;
+    let cancelled = false;
+    setIsLoadingEvents(true);
+    setEventsError(null);
+    fetchEvents(currentUserId || '', worldType)
+      .then((results) => {
+        if (!cancelled) setEvents(results);
+      })
+      .catch(() => {
+        if (!cancelled) setEventsError('Gatherings could not be loaded. Please try again shortly.');
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingEvents(false);
+      });
+    return () => { cancelled = true; };
+  }, [activeTab, currentUserId, worldType]);
+
+  const visibleEvents = useMemo(() => {
+    const normalized = query.trim().toLocaleLowerCase();
+    return events
+      .filter((event) => Date.parse(event.startsAt) >= Date.now())
+      .filter((event) => !normalized || `${event.title} ${event.description}`.toLocaleLowerCase().includes(normalized))
+      .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
+  }, [events, query]);
+
+  const resetTab = (tab: DiscoveryTab) => {
+    setActiveTab(tab);
+    setQuery('');
+    setError(null);
+    setEventsError(null);
+  };
 
   return (
     <main className={styles.discovery}>
       <header className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>MEET YOUR COMMUNITY</p>
-          <h1>Find people</h1>
+          <p className={styles.eyebrow}>EXPLORE THIS COMMUNITY</p>
+          <h1>Discover</h1>
+          <p className={styles.intro}>Find members and upcoming gatherings in the space you are currently visiting.</p>
         </div>
-        <p className={styles.privacyNote}>Searches public usernames and display names only.</p>
+        <p className={styles.privacyNote}>Only public profiles and visible events appear here. Private reflections are never included.</p>
       </header>
-      <label className={styles.searchField} htmlFor="profile-search">
-        <span>Username or display name</span>
-        <input
-          id="profile-search"
-          type="search"
-          autoComplete="off"
-          value={query}
-          onChange={(event) => setQuery(event.currentTarget.value)}
-          placeholder="Search by handle or name"
-        />
-      </label>
-      {query.trim().length < 2 ? (
-        <p className={styles.stateMessage}>Enter at least two characters to search.</p>
-      ) : isSearching ? (
-        <p className={styles.stateMessage} role="status">Searching public profiles...</p>
-      ) : error ? (
-        <p className={styles.error} role="alert">{error}</p>
-      ) : profiles.length === 0 ? (
-        <p className={styles.stateMessage}>No public profiles match that search.</p>
-      ) : (
-        <div className={styles.results}>
-          {profiles.map((profile) => (
-            <article className={styles.profileRow} key={profile.profileId}>
-              <div className={styles.avatar} aria-hidden="true">
-                {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
-              </div>
-              <div className={styles.profileCopy}>
-                <div className={styles.nameLine}>
-                  <h2>{profile.displayName}</h2>
-                  <span>@{profile.username}</span>
-                </div>
-                <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
-                <ProfileSocialLinks links={profile.socialLinks} />
-                {(profile.location || profile.age || profile.starSign || profile.belief) && (
-                  <div className={styles.publicDetails}>
-                    {profile.location && <span><MapPin size={12} />{profile.location}</span>}
-                    {profile.age && <span>{profile.age}</span>}
-                    {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
-                    {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
+
+      <div className={styles.tabs} role="tablist" aria-label="Discover">
+        <button type="button" role="tab" id="discover-people-tab" aria-controls="discover-panel" aria-selected={activeTab === 'people'}
+          className={activeTab === 'people' ? styles.activeTab : styles.tab} onClick={() => resetTab('people')}>
+          <Users size={16} aria-hidden="true" /> People
+        </button>
+        <button type="button" role="tab" id="discover-events-tab" aria-controls="discover-panel" aria-selected={activeTab === 'events'}
+          className={activeTab === 'events' ? styles.activeTab : styles.tab} onClick={() => resetTab('events')}>
+          <CalendarDays size={16} aria-hidden="true" /> Gatherings
+        </button>
+      </div>
+
+      <section id="discover-panel" role="tabpanel" aria-labelledby={activeTab === 'people' ? 'discover-people-tab' : 'discover-events-tab'}>
+        <label className={styles.searchField} htmlFor="discover-search">
+          <span>{activeTab === 'people' ? 'Search public usernames and display names' : 'Search upcoming gatherings'}</span>
+          <span className={styles.inputWrap}>
+            <Search size={16} aria-hidden="true" />
+            <input id="discover-search" type="search" autoComplete="off" value={query}
+              onChange={(event) => setQuery(event.currentTarget.value)}
+              placeholder={activeTab === 'people' ? 'Try a username or name' : 'Try a title or keyword'} />
+          </span>
+        </label>
+
+        {activeTab === 'people' ? (
+          query.trim().length < 2 ? (
+            <div className={styles.emptyState}>
+              <Users size={24} aria-hidden="true" />
+              <p>Search by a member's public username or display name. Only profiles made public by their owners can appear.</p>
+            </div>
+          ) : isSearching ? (
+            <p className={styles.stateMessage} role="status">Searching public profiles…</p>
+          ) : error ? (
+            <p className={styles.error} role="alert">{error}</p>
+          ) : profiles.length === 0 ? (
+            <p className={styles.stateMessage}>No public profiles match that search.</p>
+          ) : (
+            <div className={styles.results}>
+              {profiles.map((profile) => (
+                <article className={styles.profileRow} key={profile.profileId}>
+                  <div className={styles.avatar} aria-hidden="true">
+                    {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
                   </div>
-                )}
-              </div>
-              <div className={styles.profileActions}>
-                <button className={styles.viewButton} type="button" onClick={() => onView(profile)}>View profile</button>
-                <button
-                  className={styles.messageButton}
-                  type="button"
-                  disabled={!profile.allowDirectMessages}
-                  title={profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
-                  onClick={() => onMessage(profile)}
-                >
-                  {profile.allowDirectMessages ? 'Message' : 'Messages closed'}
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+                  <div className={styles.profileCopy}>
+                    <div className={styles.nameLine}><h2>{profile.displayName}</h2><span>@{profile.username}</span></div>
+                    <p>{profile.statusMessage || profile.bio || 'A community member.'}</p>
+                    <ProfileSocialLinks links={profile.socialLinks} />
+                    {(profile.location || profile.age || profile.starSign || profile.belief) && (
+                      <div className={styles.publicDetails}>
+                        {profile.location && <span><MapPin size={12} />{profile.location}</span>}
+                        {profile.age && <span>{profile.age}</span>}
+                        {profile.starSign && <span><Sparkles size={12} />{profile.starSign}</span>}
+                        {profile.belief && <span><Globe2 size={12} />{profile.belief}</span>}
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.profileActions}>
+                    <button className={styles.viewButton} type="button" onClick={() => onView(profile)}>View profile</button>
+                    <button className={styles.messageButton} type="button" disabled={!profile.allowDirectMessages}
+                      title={profile.allowDirectMessages ? undefined : 'This member is not accepting direct messages.'}
+                      onClick={() => onMessage(profile)}>
+                      {profile.allowDirectMessages ? 'Message' : 'Messages closed'}
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )
+        ) : isLoadingEvents ? (
+          <p className={styles.stateMessage} role="status">Loading gatherings in this community…</p>
+        ) : eventsError ? (
+          <p className={styles.error} role="alert">{eventsError}</p>
+        ) : visibleEvents.length === 0 ? (
+          <div className={styles.emptyState}>
+            <CalendarDays size={24} aria-hidden="true" />
+            <p>{query.trim() ? 'No upcoming gatherings match that search.' : 'There are no upcoming public gatherings in this community yet. Check back as members add events.'}</p>
+          </div>
+        ) : (
+          <div className={styles.eventGrid}>
+            {visibleEvents.map((event) => (
+              <article className={styles.eventCard} key={event.id}>
+                <div className={styles.eventCardTop}>
+                  <span className={styles.eventEyebrow}><CalendarDays size={13} aria-hidden="true" /> UPCOMING GATHERING</span>
+                  <span className={styles.eventRsvpCount}>{event.rsvpCount} going</span>
+                </div>
+                <h2>{event.title}</h2>
+                <p className={styles.eventDescription}>{event.description || 'A community gathering.'}</p>
+                <p className={styles.eventMeta}>
+                  <CalendarDays size={14} aria-hidden="true" />
+                  {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(event.startsAt))}
+                </p>
+                <p className={styles.eventMeta}><MapPin size={14} aria-hidden="true" /> Location shared by organiser</p>
+                <a className={styles.mapLink}
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.locationCoords.latitude},${event.locationCoords.longitude}`)}`}
+                  target="_blank" rel="noreferrer">View location</a>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
 }
