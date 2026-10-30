@@ -50,6 +50,7 @@ export function GuildHomeDashboard({ onNavigate, onContinuePlaying, role = 'user
   const recentGames = useMemo(() => recents.map((record) => games.find((game) => game.id === record.id)).filter((game): game is typeof games[number] => Boolean(game)), [recents]);
   const visibleDestinations = destinations.filter(({ target }) => {
     if (isGuest && (target === 'events' || target === 'shorts')) return false;
+    if (target === 'music') return !isGuest;
     return canAccessSanctuaryPage(target, role);
   });
   const featuredGame = recentGames[0] ?? games[0];
