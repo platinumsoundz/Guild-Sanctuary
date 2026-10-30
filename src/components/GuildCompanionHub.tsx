@@ -61,7 +61,6 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
   const playerRef = useRef<HTMLAudioElement>(null);
   const libraryImportInput = useRef<HTMLInputElement>(null);
   const audioFilesRef = useRef<MediaFile[]>([]);
-  const audioFilesRef = useRef<MediaFile[]>([]);
 
   useEffect(() => {
     try {
