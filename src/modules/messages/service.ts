@@ -60,7 +60,7 @@ async function hasPersistentSession(userId: string): Promise<boolean> {
     throw new Error('Your active Sanctuary session does not match the signed-in account. Sign out and sign in again.');
   }
   if (!isPersistentMessagingEnabled()) {
-    throw new Error('Direct messaging is not connected to the live conversation database yet. Your recipient’s settings have not blocked this message; messaging will be available after the conversation schema is verified.');
+    throw new Error('Direct messaging is disabled in this app build. The live conversation database and member-scoped access policies have been verified, but this deployment needs a fresh build with the persistent-messaging flag enabled. Your recipient’s settings have not blocked this message.');
   }
   return true;
 }
