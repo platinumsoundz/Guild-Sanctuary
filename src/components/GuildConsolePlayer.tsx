@@ -9,6 +9,8 @@ const BUTTON_LABELS = ['A / Cross · Select', 'B / Circle · Back', 'D-pad / sti
 
 export function GuildConsolePlayer({ title, url, onExit }: Props) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const gameFrameRef = useRef<HTMLIFrameElement>(null);
+  const [gameBridgeReady, setGameBridgeReady] = useState(false);
   const menuRef = useRef<HTMLElement>(null);
   const previousButtons = useRef<boolean[]>([]);
   const previousDirections = useRef({ x: 0, y: 0 });
@@ -55,6 +57,31 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
       }
     } catch { setNotice('Fullscreen is not available in this browser or must be started from a direct tap.'); }
   }, []);
+
+
+  useEffect(() => {
+    let gameOrigin = '';
+    try { gameOrigin = new URL(url).origin; } catch { return; }
+    const onGameMessage = (event: MessageEvent) => {
+      if (event.origin !== gameOrigin || event.source !== gameFrameRef.current?.contentWindow) return;
+      const message = event.data;
+      if (!message || message.channel !== 'guild.5-sleeves' || message.version !== 1 || message.game !== 'the-5-sleeves-3d') return;
+      if (message.type === 'ready') setGameBridgeReady(true);
+    };
+    window.addEventListener('message', onGameMessage);
+    return () => window.removeEventListener('message', onGameMessage);
+  }, [url]);
+
+  useEffect(() => {
+    if (!gameBridgeReady) return;
+    let gameOrigin = '';
+    try { gameOrigin = new URL(url).origin; } catch { return; }
+    gameFrameRef.current?.contentWindow?.postMessage({
+      channel: 'guild.5-sleeves',
+      version: 1,
+      command: menuOpen ? 'pause' : 'resume'
+    }, gameOrigin);
+  }, [gameBridgeReady, menuOpen, url]);
 
   const menuTargets = useCallback(() => {
     if (!menuRef.current) return [] as HTMLElement[];
@@ -193,13 +220,13 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
         <button type="button" onClick={() => setMenuOpen(true)} className={styles.menuButton} aria-label="Open Guild system menu"><Gamepad2 size={18} /><span>The Guild</span></button>
         <div className={styles.gameTitle}>{title}</div>
         <div className={styles.actions}>
-          <span className={styles.controllerState} aria-live="polite">{controllerConnected ? 'Controller connected' : 'Touch / keyboard ready'}</span>
+          <span className={styles.controllerState} aria-live="polite">{controllerConnected ? 'Controller connected' : 'Touch / keyboard ready'}{gameBridgeReady ? ' · Guild link ready' : ''}</span>
           <button type="button" className={styles.iconButton} onClick={() => void toggleFullscreen()} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>{isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button>
           <button type="button" className={styles.iconButton} onClick={() => void returnHome()} aria-label="Exit game and return to Guild home"><X size={18} /></button>
         </div>
       </div>
       <div className={styles.gameFrame}>
-        <iframe src={url} title={title} allow="fullscreen; gamepad; pointer-lock; autoplay" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen" />
+        <iframe ref={gameFrameRef} src={url} title={title} allow="fullscreen; gamepad; pointer-lock; autoplay" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen" />
       </div>
       <div className={styles.touchToolbar}>
         <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open console controls"><Gamepad2 size={17} /> Console controls</button>
