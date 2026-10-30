@@ -31,3 +31,9 @@
 @media(max-width:900px){.hero{grid-template-columns:1fr}.featured{min-height:220px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.page{padding:14px}.heroCopy,.featured{padding:21px;border-radius:16px}.grid{grid-template-columns:1fr}.card{min-height:130px}.actions>*{flex:1}}
 @media(prefers-reduced-motion:reduce){.card,.primary,.secondary{transition:none}}
+
+.continue{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:16px;padding:18px 22px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.continue h2{margin:0;font-size:clamp(18px,2.5vw,24px);letter-spacing:-.025em}
+.continue p:not(.eyebrow){margin:7px 0 0;color:var(--muted);font:12px/1.65 Arial,sans-serif}
+.continue .eyebrow{margin-bottom:6px}
+@media(max-width:560px){.continue{align-items:flex-start;flex-direction:column;padding:16px}.continue .secondary{width:100%}}
