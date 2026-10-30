@@ -293,7 +293,7 @@ export function NotificationBar({ fullPage = false, compact = false, worldType =
               </button>
             </div>
           ) : !isConnected ? (
-            <p className={styles.emptyState}>Sign in with your connected Sanctuary account to enable notifications.</p>
+            <p className={styles.emptyState}>Sign in to enable notifications.</p>
           ) : items.length === 0 ? (
             <p className={styles.emptyState}>You're all caught up. New likes and comments will appear here.</p>
           ) : (
