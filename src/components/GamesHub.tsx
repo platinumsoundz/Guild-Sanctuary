@@ -35,8 +35,8 @@ const games: GameEntry[] = [
       if (!configured) return defaultHost;
       try {
         const parsed = new URL(configured);
-        return parsed.protocol === 'https:' && !parsed.username && !parsed.password ? parsed.toString() : 'https://the-5-sleeves-3d.pages.dev/';
-      } catch { return 'https://the-5-sleeves-3d.pages.dev/'; }
+        return parsed.protocol === 'https:' && !parsed.username && !parsed.password ? parsed.toString() : defaultHost;
+      } catch { return defaultHost; }
     })(),
     badge: '3D prototype',
     embed: 'verify',
