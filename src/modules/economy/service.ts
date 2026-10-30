@@ -2,7 +2,7 @@ import { getSupabaseBrowserClient } from '@/services/supabase';
 
 export type TokenBundleId = 'tokens_100' | 'tokens_600' | 'tokens_1200';
 export interface TokenBundle { id: TokenBundleId; tokens: number; amountMinor: number; currency: 'GBP'; }
-export interface TokenLedgerEntry { id: string; kind: 'purchase' | 'bonus' | 'spend'; description: string; tokensDelta: number; amountMinor: number | null; createdAt: string; }
+export interface TokenLedgerEntry { id: string; kind: 'purchase' | 'bonus' | 'spend' | 'adjustment'; description: string; tokensDelta: number; amountMinor: number | null; createdAt: string; }
 export interface WalletSnapshot { userId: string; balanceTokens: number; ledger: TokenLedgerEntry[]; }
 
 export const tokenBundles: TokenBundle[] = [
@@ -25,16 +25,18 @@ async function requireSignedInUser(expectedUserId: string): Promise<void> {
 export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
   await requireSignedInUser(userId);
   const client = getSupabaseBrowserClient();
-  const [walletResult, purchaseResult, spendResult, bonusResult] = await Promise.all([
+  const [walletResult, purchaseResult, spendResult, bonusResult, adjustmentResult] = await Promise.all([
     client.from('token_wallets').select('balance_tokens').eq('user_id', userId).maybeSingle(),
     client.from('token_ledger').select('id,bundle_id,tokens_delta,amount_total,created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(30),
     client.from('token_spend_ledger').select('id,item_name,tokens_delta,created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(30),
     client.from('token_bonus_ledger').select('id,tokens_delta,created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
+    client.from('token_adjustment_ledger').select('id,tokens_delta,reason_code,case_reference,created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
   ]);
   if (walletResult.error) throw new Error(`Token balance could not be loaded: ${walletResult.error.message}`);
   if (purchaseResult.error) throw new Error(`Token purchase history could not be loaded: ${purchaseResult.error.message}`);
   if (spendResult.error) throw new Error(`Token spending history could not be loaded: ${spendResult.error.message}`);
   if (bonusResult.error) throw new Error(`Token bonus history could not be loaded: ${bonusResult.error.message}`);
+  if (adjustmentResult.error) throw new Error(`Token adjustment history could not be loaded: ${adjustmentResult.error.message}`);
   const ledger: TokenLedgerEntry[] = [
     ...(purchaseResult.data ?? []).map((entry) => ({
       id: entry.id, kind: 'purchase' as const, description: `Token bundle: ${entry.bundle_id.replaceAll('_', ' ')}`,
@@ -46,6 +48,10 @@ export async function fetchWallet(userId: string): Promise<WalletSnapshot> {
     })),
     ...(bonusResult.data ?? []).map((entry) => ({
       id: entry.id, kind: 'bonus' as const, description: 'Verified beta welcome bonus',
+      tokensDelta: entry.tokens_delta, amountMinor: null, createdAt: entry.created_at,
+    })),
+    ...(adjustmentResult.data ?? []).map((entry) => ({
+      id: entry.id, kind: 'adjustment' as const, description: `Reviewed adjustment: ${entry.reason_code.replaceAll('_', ' ')} · ${entry.case_reference}`,
       tokensDelta: entry.tokens_delta, amountMinor: null, createdAt: entry.created_at,
     })),
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 40);
