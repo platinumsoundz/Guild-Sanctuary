@@ -35,6 +35,8 @@ assert.match(workflow, /npm run check:guest-access/, 'Guest access contract runs
 const guildHome = readFileSync('src/components/GuildHomeDashboard.tsx', 'utf8');
 assert.match(guildHome, /isGuest && \(target === 'events' \|\| target === 'shorts'\)/,
   'Guild home must hide Events and Shorts from guest mode');
+assert.match(guildHome, /if \(target === 'music'\) return !isGuest;/,
+  'Guild-only Music destination must not be incorrectly treated as a Sanctuary page');
 assert.match(guildHome, /canAccessSanctuaryPage\(target, role\)/,
   'Guild home destinations must respect the shared role access policy');
 assert.match(workspace, /<GuildHomeDashboard role=\{currentRole \?\? 'user'\} isGuest=\{isGuest\}/,
