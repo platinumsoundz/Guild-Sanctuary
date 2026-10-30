@@ -24,6 +24,8 @@ export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldTy
   const [selectedMapEventId, setSelectedMapEventId] = useState<string | null>(null);
   const [nearbyRadiusKm, setNearbyRadiusKm] = useState(10);
   const [includePastEvents, setIncludePastEvents] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [eventView, setEventView] = useState<'list' | 'map'>('list');
   const [formError, setFormError] = useState<string | null>(null);
   const [creatorProfiles, setCreatorProfiles] = useState<Record<string, PublicProfile>>({});
 
@@ -43,7 +45,12 @@ export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldTy
     return () => { cancelled = true; };
   }, [events]);
 
-  const visibleEvents = events.filter((event) => includePastEvents || new Date(event.startsAt).getTime() >= Date.now());
+  const visibleEvents = events.filter((event) => {
+    const matchesDate = includePastEvents || new Date(event.startsAt).getTime() >= Date.now();
+    const query = searchTerm.trim().toLocaleLowerCase();
+    const matchesSearch = !query || `${event.title} ${event.description}`.toLocaleLowerCase().includes(query);
+    return matchesDate && matchesSearch;
+  });
   const selectedMapEvent = visibleEvents.find((event) => event.id === selectedMapEventId) ?? visibleEvents[0] ?? null;
   const selectedMapLinks = selectedMapEvent
     ? getMapLinks(String(selectedMapEvent.locationCoords.latitude), String(selectedMapEvent.locationCoords.longitude))
@@ -191,6 +198,14 @@ export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldTy
             <h2 id="upcoming-events-title">Upcoming events</h2>
           </div>
           <div className={styles.eventFilters}>
+            <label className={styles.searchField}>
+              <span className={styles.visuallyHidden}>Search events</span>
+              <input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.currentTarget.value)} placeholder="Search events…" />
+            </label>
+            <div className={styles.viewSwitch} role="group" aria-label="Event view">
+              <button type="button" aria-pressed={eventView === 'list'} onClick={() => setEventView('list')}>List</button>
+              <button type="button" aria-pressed={eventView === 'map'} onClick={() => setEventView('map')}>Map</button>
+            </div>
             <span>{visibleEvents.length} {visibleEvents.length === 1 ? 'event' : 'events'}</span>
             <label className={styles.pastEventsToggle}>
               <input type="checkbox" checked={includePastEvents} onChange={(event) => setIncludePastEvents(event.currentTarget.checked)} />
@@ -204,16 +219,16 @@ export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldTy
         ) : events.length === 0 ? (
           <div className={styles.emptyState}>
             <MapPinned size={25} aria-hidden="true" />
-            <p>No events to map yet. When your community creates an event, its location pin will appear here.</p>
+            <p>No events have been published in this community yet. Be the first to organise a gathering.</p>
           </div>
         ) : visibleEvents.length === 0 ? (
           <div className={styles.emptyState}>
             <MapPinned size={25} aria-hidden="true" />
-            <p>No upcoming events right now. Turn on “Include past events” to browse previous gatherings.</p>
+            <p>No events match those filters. Try another search or include past events.</p>
           </div>
         ) : (
           <>
-            <section className={styles.mapExplorer} aria-labelledby="map-explorer-title">
+            {eventView === 'map' && <section className={styles.mapExplorer} aria-labelledby="map-explorer-title">
               <div className={styles.mapHeading}>
                 <div>
                   <p className={styles.eyebrow}>MAP EXPLORER</p>
@@ -293,7 +308,7 @@ export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldTy
                   </button>
                 ))}
               </div>
-            </section>
+            </section>}
 
             <div className={styles.eventList} aria-label="Event details">
               {visibleEvents.map((event) => (
