@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 const visibility = read('../src/lib/pageVisibility.ts');
 const migration = read('../supabase/migrations/20261029120000_platform_page_visibility_controls.sql');
-const roleMigration = read('../supabase/migrations/20261030100000_role_targeted_visibility_and_moderation_fixes.sql');
+const roleMigration = read('../supabase/migrations/20261030022341_role_targeted_visibility_and_moderation_fixes.sql');
 const admin = read('../src/modules/moderation/AdminDashboard.tsx');
 const moderation = read('../src/modules/moderation/ModerationDashboard.tsx');
 const workspace = read('../src/components/AppWorkspace.tsx');
