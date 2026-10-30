@@ -48,6 +48,14 @@ assert.match(classics, /function slide2048/, '2048 merges tiles');
 assert.match(classics, /mineCells/, 'Minesweeper uses a hidden minefield');
 assert.ok(classics.includes('setLife(a=>a.map'), 'Game of Life advances cellular rules');
 assert.match(classics, /aria-label/, 'classic games include accessible control labels');
+assert.match(classics, /window\.addEventListener\('keydown',onKeyDown\)/, 'classic games register keyboard controls');
+assert.match(classics, /key==='arrowup'.*?key==='w'/, 'movement games support arrows and WASD');
+assert.match(classics, /game==='mines'.*?mineFlagMode/, 'Minesweeper supports touch-friendly flag mode');
+assert.match(classics, /onPointerMove=/, 'paddle games support mouse pointer steering');
+assert.match(classics, /inputGuide/, 'the control guide is visible to players');
+assert.match(classicsCss, /@media\(pointer:coarse\)/, 'touch devices receive larger interactive targets');
+assert.match(classicsCss, /touch-action:manipulation/, 'arcade controls avoid delayed touch activation');
+
 assert.match(classics, /Optional game extras/, 'games expose a planned token-spending integration point');
 assert.match(classics, /Token spending is not enabled yet/, 'token spending remains locked until server-side wallet validation exists');
 assert.match(classics, /sanctuary-arcade-scores-v1/, 'scores are stored locally with an explicit versioned key');
