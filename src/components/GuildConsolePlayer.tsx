@@ -45,7 +45,9 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
         if (document.fullscreenElement) await document.exitFullscreen();
         await stage.requestFullscreen();
         try {
-          await screen.orientation.lock('landscape');
+          const orientation = screen.orientation as ScreenOrientation & { lock?: (value: string) => Promise<void> };
+          if (orientation.lock) await orientation.lock('landscape');
+          else throw new Error('Orientation lock is not supported');
           setNotice('');
         } catch {
           setNotice('Fullscreen is active. Rotate your device to landscape for the intended layout.');
