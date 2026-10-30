@@ -502,3 +502,17 @@
     transform: none;
   }
 }
+
+.inventory { margin: 30px 0 8px; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.inventoryCount { display: inline-grid; min-width: 24px; height: 24px; place-items: center; margin-left: 5px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; vertical-align: middle; }
+.inventoryEmpty { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 16px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); font-size: 12px; }
+.inventoryGrid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,230px),1fr)); gap: 10px; margin-top: 16px; }
+.inventoryItem { display: grid; grid-template-columns: 42px minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 11px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); }
+.inventoryArt { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-size: 22px; }
+.inventoryCopy { display: grid; min-width: 0; gap: 3px; }
+.inventoryCopy strong { overflow: hidden; color: var(--ink); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.inventoryCopy span { color: var(--muted); font-size: 9px; text-transform: capitalize; }
+.equippedBadge { border-radius: 999px; padding: 5px 7px; background: var(--accent-soft); color: var(--accent); font-size: 9px; font-weight: 700; }
+.equipButton { grid-column: 1 / -1; min-height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--muted); font-size: 10px; font-weight: 700; cursor: not-allowed; }
+.equipButton:disabled { opacity: .78; }
+.inventoryFootnote { margin: 13px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
