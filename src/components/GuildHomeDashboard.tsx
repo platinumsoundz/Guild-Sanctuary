@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import type { NavigationState } from '@/context/AppContext';
 import { CalendarDays, Clapperboard, Gamepad2, Library, MessageSquare, Music2, Search, Settings, ShieldCheck, UsersRound, MessageSquareText } from 'lucide-react';
 import styles from './GuildHomeDashboard.module.css';
@@ -18,6 +19,15 @@ const destinations: { title: string; description: string; target: NavigationStat
 ];
 
 export function GuildHomeDashboard({ onNavigate }: { onNavigate: (page: NavigationState) => void }) {
+  const [recentTitle, setRecentTitle] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem('guild-library-recents-v1');
+      const recent = raw ? JSON.parse(raw) as Array<{ id?: string }> : [];
+      const first = Array.isArray(recent) ? recent[0]?.id : null;
+      setRecentTitle(first === 'sleeves2d' ? 'The 5 Sleeves 2D' : first === 'sleeves3d' ? 'The 5 Sleeves 3D' : null);
+    } catch { setRecentTitle(null); }
+  }, []);
   const greeting = new Date().getHours() < 12 ? 'Ready when you are.' : new Date().getHours() < 18 ? 'Your next session starts here.' : 'Make this session yours.';
   const featured = destinations[0];
   const FeaturedIcon = featured.icon;
@@ -42,6 +52,15 @@ export function GuildHomeDashboard({ onNavigate }: { onNavigate: (page: Navigati
           <span className={styles.launch}>Open library <span aria-hidden="true">→</span></span>
         </button>
       </header>
+
+      <section className={styles.continue} aria-labelledby="continue-playing-heading">
+        <div>
+          <p className={styles.eyebrow}>CONTINUE PLAYING</p>
+          <h2 id="continue-playing-heading">{recentTitle ?? 'Your next game is waiting'}</h2>
+          <p>{recentTitle ? 'Pick up from your most recently launched game.' : 'Recently launched games will appear here when you start playing.'}</p>
+        </div>
+        <button type="button" className={styles.secondary} onClick={() => onNavigate('library')}>{recentTitle ? 'Continue playing' : 'Browse games'} <span aria-hidden="true">→</span></button>
+      </section>
 
       <section className={styles.section} aria-labelledby="community-shortcuts">
         <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>QUICK ACCESS</p><h2 id="community-shortcuts">Go where you want</h2></div><span>10 destinations</span></div>
