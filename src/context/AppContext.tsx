@@ -36,7 +36,7 @@ import type { Database } from '@/services/supabase/database.types';
 import { normalizeSocialLinks } from '@/lib/socialLinks';
 import { fetchAccountSettings } from '@/modules/settings/service';
 
-export type NavigationState = 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'moderation' | 'planner';
+export type NavigationState = 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'moderation' | 'planner' | 'feedback';
 
 export type UserSession = AuthSession;
 
