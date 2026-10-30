@@ -59,7 +59,7 @@ export function GuildHomeDashboard({ onNavigate, onContinuePlaying }: { onNaviga
           <h2 id="continue-playing-heading">{recentTitle ?? 'Your next game is waiting'}</h2>
           <p>{recentTitle ? 'Pick up from your most recently launched game.' : 'Recently launched games will appear here when you start playing.'}</p>
         </div>
-        <button type="button" className={styles.secondary} onClick={() => recentTitle && onContinuePlaying ? onContinuePlaying() : onNavigate('library')}>{recentTitle ? 'Continue playing' : 'Browse games'} <span aria-hidden="true">→</span></button>
+        <button type="button" className={styles.secondary} onClick={() => recentTitle && onContinuePlaying ? onContinuePlaying() : onNavigate('library' as NavigationState)}>{recentTitle ? 'Continue playing' : 'Browse games'} <span aria-hidden="true">→</span></button>
       </section>
 
       <section className={styles.section} aria-labelledby="community-shortcuts">
