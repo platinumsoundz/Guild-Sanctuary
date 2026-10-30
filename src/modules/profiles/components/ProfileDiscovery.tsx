@@ -134,6 +134,7 @@ export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }
     setQuery('');
     setError(null);
     setEventsError(null);
+    setPostsError(null);
   };
 
   return (
@@ -142,9 +143,9 @@ export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }
         <div>
           <p className={styles.eyebrow}>EXPLORE THIS COMMUNITY</p>
           <h1>Discover</h1>
-          <p className={styles.intro}>Find members and upcoming gatherings in the space you are currently visiting.</p>
+          <p className={styles.intro}>Explore public member profiles, community posts and upcoming gatherings in the space you are currently visiting.</p>
         </div>
-        <p className={styles.privacyNote}>Only public profiles and visible events appear here. Private reflections are never included.</p>
+        <p className={styles.privacyNote}>Only public profiles, visible posts and visible events appear here. Private reflections are never included.</p>
       </header>
 
       <div className={styles.tabs} role="tablist" aria-label="Discover">
