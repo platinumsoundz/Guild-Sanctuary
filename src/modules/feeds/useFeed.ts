@@ -35,6 +35,7 @@ export function useFeed(authorId: string | null, worldType: WorldType = 'sanctua
   }, [worldType]);
 
   useEffect(() => {
+    setPosts([]);
     void refresh();
     return () => { requestGeneration.current += 1; };
   }, [refresh]);
