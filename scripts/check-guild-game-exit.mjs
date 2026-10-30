@@ -23,4 +23,10 @@ assert.ok(library.includes('Back to library'), 'a separate library return must r
 
 assert.equal((workspace.match(/onExitToGuildHome=\{\(\) => \{ setGuildAutoLaunchRecent\(false\); setGuildPage\('home'\); \}\}/g) || []).length, 2, 'Arcade and Library must both route game exit to the Guild home dashboard');
 assert.ok(roadmap.includes('returns directly to the Guild home dashboard'), 'integration roadmap must document the return destination');
-console.log('Guild game exit contract checks passed.');
+
+assert.ok(player.includes("event.origin !== gameOrigin || event.source !== gameFrameRef.current?.contentWindow"), 'game lifecycle messages must be accepted only from the expected game origin and iframe window');
+assert.ok(player.includes("command: menuOpen ? 'pause' : 'resume'"), 'opening and closing the Guild menu must pause and resume the embedded game');
+assert.ok(player.includes("message.channel !== 'guild.5-sleeves' || message.version !== 1"), 'the host bridge must validate its versioned message channel');
+assert.ok(player.includes('ref={gameFrameRef}'), 'the host bridge must bind messages to the active iframe');
+
+console.log('Guild game exit and lifecycle bridge contract checks passed.');
