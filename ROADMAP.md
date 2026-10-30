@@ -1023,7 +1023,7 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 ## Token economy update — affordable cosmetics and founding members — 2026-10-30
 
 - Reprice all 32 cosmetic catalogue items to 20–50 tokens (20p–50p at the standard 100 tokens = £1 rate); themes and top-tier cosmetics are capped at 50 tokens.
-- Replace the old proposed 1,000-token first-100 beta offer with 500 tokens total for the first 100 eligible verified accounts.
-- Existing accounts among the first 100 retain their original 100-token welcome balance and receive a one-time +400 top-up; future eligible signups receive +500.
+- Replace the old proposed 1,000-token first-100 beta offer with 500 tokens total for the first 100 active accounts by original signup timestamp.
+- Existing accounts among the first 100 retain their original 100-token welcome balance and receive a one-time +400 top-up; later eligible signups receive +500. Unverified accounts reserve their original signup-order place but receive no credit until email verification.
 - A database-locked allocation pool, unique account award and unique rank prevent duplicate or over-cap awards. The award path runs only from trusted database triggers after email verification/profile creation.
 - Both migrations are repository-only and **NOT APPLIED**. Supabase account counts, balances, and the eventual first-100 allocation must be confirmed in isolated staging before any production application. Token redemption remains disabled.
