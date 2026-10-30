@@ -1,22 +1,28 @@
 import { NextResponse } from 'next/server';
 
-function getProductionDonationUrl(): string | null {
-  if (process.env.VERCEL_ENV !== 'production' || process.env.STRIPE_DONATION_LINK_ENABLED !== 'true') {
-    return null;
-  }
+function getConfiguredDonationUrl(): string | null {
+  // This feature flag is intentionally host-agnostic so the same configuration
+  // works on Vercel and Cloudflare. Keep the destination server-configured.
+  if (process.env.COMMUNITY_TIPS_ENABLED !== 'true') return null;
 
   try {
     const url = new URL(process.env.STRIPE_DONATION_URL ?? '');
-    return url.protocol === 'https:' && url.hostname === 'buy.stripe.com' ? url.toString() : null;
+    if (
+      url.protocol !== 'https:'
+      || url.hostname !== 'buy.stripe.com'
+      || url.username
+      || url.password
+    ) return null;
+    return url.toString();
   } catch {
     return null;
   }
 }
 
-/** Return the public donation link only for explicitly enabled production deployments. */
+/** Return the voluntary external donation link when explicitly enabled on this deployment. */
 export async function GET() {
   return NextResponse.json({
-    stripeDonationUrl: getProductionDonationUrl(),
+    stripeDonationUrl: getConfiguredDonationUrl(),
     stripeTipsEnabled: false,
     lemonSqueezyCheckoutUrl: null,
     monzoContributionUrl: null,
@@ -27,7 +33,7 @@ export async function GET() {
 
 export async function POST() {
   return NextResponse.json(
-    { error: 'Community contributions are not available yet.' },
+    { error: 'Account-linked community contributions are not enabled. Use the voluntary external contribution link if one is configured.' },
     { status: 503, headers: { 'Cache-Control': 'no-store' } },
   );
 }
