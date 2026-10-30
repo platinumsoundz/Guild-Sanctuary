@@ -5,15 +5,15 @@ import { ExternalLink, MapPin, MapPinned } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useEvents, type EventView } from '@/modules/events';
 import { fetchPublicProfileById } from '@/modules/profiles';
-import type { PublicProfile } from '@/types/database';
+import type { PublicProfile, WorldType } from '@/types/database';
 import { EventEngagement } from './EventEngagement';
 import { ReportContentButton } from '@/modules/moderation';
 import styles from './MeetupCalendarPlaceholder.module.css';
 
-export function MeetupCalendarPlaceholder() {
+export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldType?: WorldType }) {
   const { currentUser, isGuest } = useAppContext();
   const userId = currentUser && !isGuest ? currentUser.user.id : '';
-  const { events, isLoading, error, addEvent, editEvent, removeEvent, rsvp } = useEvents(userId);
+  const { events, isLoading, error, addEvent, editEvent, removeEvent, rsvp } = useEvents(userId, worldType);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -310,7 +310,7 @@ export function MeetupCalendarPlaceholder() {
                         : 'Location unavailable · coordinates are missing or invalid'}
                     </span>
                     <span className={styles.attendeeCount}>{event.rsvpCount} going</span>
-                    {userId && <EventEngagement eventId={event.id} userId={userId} />}
+                    {userId && <EventEngagement eventId={event.id} userId={userId} worldType={worldType} />}
                     {userId && <ReportContentButton targetType="event" targetId={event.id} />}
                   </div>
                   <div className={styles.eventActions}>
