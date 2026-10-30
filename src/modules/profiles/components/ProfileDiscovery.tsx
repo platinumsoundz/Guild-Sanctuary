@@ -88,7 +88,10 @@ export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }
     setPostsError(null);
     fetchFeed(worldType)
       .then(async (results) => {
-        const visiblePosts = results.filter((post) => (post.worldType ?? 'sanctuary') === worldType);
+        const visiblePosts = results
+          .filter((post) => (post.worldType ?? 'sanctuary') === worldType)
+          .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+          .slice(0, 100);
         const authorIds = [...new Set(visiblePosts.map((post) => post.authorId))];
         const authorResults = await Promise.all(authorIds.map(async (authorId) => {
           try {
