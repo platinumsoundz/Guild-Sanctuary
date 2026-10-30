@@ -1,22 +1,26 @@
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
-const component = readFileSync(new URL('../src/modules/personal-planner/PersonalPlanner.tsx', import.meta.url), 'utf8');
+const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
+const component = read('../src/modules/personal-planner/PersonalPlanner.tsx');
+const migration = read('../supabase/migrations/20261030100000_personal_planner_world_scoped_storage.sql');
+const databaseTypes = read('../src/services/supabase/database.types.ts');
 
 const checks = [
-  ['habits are part of the same local-only planner record', /type PlannerHabit/.test(component) && /habits: PlannerHabit\[\]/.test(component)],
-  ['existing version-one planner records remain compatible when habits are absent', component.includes('Array.isArray(candidate.habits)') && component.includes(': []')],
-  ['habit titles are bounded and the habit list has a maximum size', /MAX_HABIT_LENGTH = 80/.test(component) && /(?:data|visibleData)\.habits\.length >= 20/.test(component)],
-  ['check-ins are stored against the selected local calendar date', /checkedDates\.includes\(selectedDate\)/.test(component) && /checkedDates: dates/.test(component)],
-  ['habit check-in dates are validated and de-duplicated on load', /habit\.checkedDates\.every\(\(date\) => typeof date === 'string' && \/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\//.test(component) && /new Set\(habit\.checkedDates\)/.test(component)],
-  ['weekly review includes check-ins without assigning a score', /reviewHabitCheckins/.test(component) && /no streaks or penalties/.test(component)],
-  ['habit deletion is an explicit action with an accessible name', /aria-label=\{\x60Delete habit: \$\{habit\.title\}\x60\}/.test(component)],
-  ['habits stay inside the environment-scoped local export and clear-all flow', /format: `\$\{worldType\}-private-planner-v1`,[\s\S]{0,100}\.{3}(?:data|visibleData)/.test(component) && /setData\(EMPTY_DATA\)/.test(component)],
-  ['planner still avoids network calls and AI processing', !/fetch\(|\.from\(['"]/.test(component) && !/openai|anthropic|ai prompt/i.test(component)],
+  ['habits are part of the account-backed planner record', /type PlannerHabit = \{ id: string; title: string; checkedDates: string\[\]/.test(component) && /habits: PlannerHabit\[\]/.test(component)],
+  ['legacy planner records without habits remain compatible', /Array\.isArray\(candidate\.habits\) \?/.test(component) && /: \[\]/.test(component)],
+  ['habit titles are bounded and the list has a maximum size', /MAX_HABIT_LENGTH = 80/.test(component) && /visibleData\.habits\.length >= 20/.test(component)],
+  ['habit check-ins use the selected calendar date and avoid duplicates', /checkedDates\.includes\(selectedDate\)/.test(component) && /new Set\(\[\.\.\.habit\.checkedDates, selectedDate\]\)/.test(component)],
+  ['habit dates are validated and de-duplicated when account data loads', /habit\.checkedDates\.every\(\(date\) => typeof date === 'string' && \/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\//.test(component) && /new Set\(habit\.checkedDates\)/.test(component)],
+  ['habit history is bounded to the most recent 366 check-ins', /slice\(-366\)/.test(component)],
+  ['weekly review summarizes habit check-ins without scoring members', /weekHabits = visibleData\.habits\.reduce/.test(component) && /\{weekHabits\}[\s\S]{0,80}Habit check-ins/.test(component) && /Progress is information, not a judgement/.test(component)],
+  ['habit deletion is an explicit accessible action', /aria-label=\{\x60Delete habit: \$\{habit\.title\}\x60\}/.test(component) && /habits: current\.habits\.filter\(\(item\) => item\.id !== habit\.id\)/.test(component)],
+  ['habit changes are saved through the authenticated planner record', /setData\(\(current\) => \(\{[\s\S]{0,200}habits:/.test(component) && /personal_planner_data/.test(component) && /world_type/.test(migration) && /personal_planner_data/.test(databaseTypes)],
+  ['planner data remains isolated by account and world with RLS', /primary key \(user_id, world_type\)/i.test(migration) && /enable row level security/i.test(migration) && /auth\.uid\(\)/.test(migration)],
 ];
 
 for (const [label, passed] of checks) {
   assert.ok(passed, label);
-  console.log(`PASS ${label}`);
+  console.log('PASS ' + label);
 }
-console.log(`Private habit contract: ${checks.length} checks passed.`);
+console.log('Account-backed habit contract: ' + checks.length + ' checks passed.');
