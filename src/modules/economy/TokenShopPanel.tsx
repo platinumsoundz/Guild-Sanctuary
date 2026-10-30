@@ -28,7 +28,7 @@ interface TokenShopPanelProps {
 
 // Keep redemption disabled until owner-approved migration and staging ledger tests pass.
 const SPENDING_ENABLED = false;
-const EQUIPPING_ENABLED = process.env.NEXT_PUBLIC_SANCTUARY_COSMETIC_EQUIP_ENABLED === 'true';
+const EQUIPPING_ENABLED = false;
 
 export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: TokenShopPanelProps) {
   const [items, setItems] = useState<ShopItem[]>([]);
