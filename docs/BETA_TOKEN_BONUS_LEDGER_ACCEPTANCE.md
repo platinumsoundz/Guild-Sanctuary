@@ -6,11 +6,17 @@
 
 ## Fixed product decisions
 
-- The first **100 eligible, verified, non-duplicate accounts** after the owner explicitly opens beta are eligible for **1,000 Sanctuary Tokens each**.
-- Maximum bonus allocation: 100,000 tokens total.
+- The first **100 eligible, verified, non-duplicate accounts** are eligible for **500 Sanctuary Tokens total each**, including accounts already registered when the programme migration is applied. The original build already gave existing accounts 100 tokens, so those existing eligible accounts receive a **400-token top-up**; eligible signups after the programme opens receive **500 tokens**.
+- Maximum thank-you allocation: 50,000 tokens total (the migration grants 400 to the first 100 pre-existing accounts to complete their original 100-token welcome balance to 500, and 500 to later eligible accounts until the cap is reached).
 - Tokens have no fixed cash equivalence. This bonus does not authorize checkout, redemption, paid conversion, or game spending.
 - Client code, testers, moderators, collaborators and ordinary authenticated users must not be able to grant/deduct tokens or write balances.
 - A user-facing balance is a projection of server-authoritative accounting, never a client-authoritative source of truth.
+
+## Revised implementation status — 2026-10-30
+
+- The repository now contains a proposed migration that tops up the first 100 already-verified active accounts by 400 tokens (their original 100-token welcome amount remains in their balance), then awards 500 tokens to each subsequent eligible verified signup until 100 total awards have been allocated.
+- A locked singleton pool row serializes concurrent award attempts. A unique award row per user and unique rank prevent duplicate grants and oversubscription. The helper is only called from database triggers; it is revoked from API roles.
+- The migration is code only and **NOT APPLIED**. No live account count or balance was queried from Supabase in this change.
 
 ## Required repository audit before implementation
 
@@ -35,7 +41,7 @@ Use the existing schema if it already provides these guarantees. Any proposed SQ
 
 | Scenario | Expected result |
 |---|---|
-| 100 eligible accounts sign up concurrently | Exactly 100 grants, each exactly 1,000 tokens |
+| 100 eligible accounts sign up concurrently | Exactly 100 awards; existing accounts receive +400 on top of their original 100, while new accounts receive +500 |
 | 101st eligible account | No bonus grant |
 | Same account retries verification/signup event | One grant maximum |
 | Same event/source key is delivered twice | Second delivery is a no-op or safe idempotent response |
