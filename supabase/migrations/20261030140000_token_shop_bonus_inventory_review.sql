@@ -217,6 +217,7 @@ begin
   where user_id=caller_id returning balance_tokens into wallet_balance;
   insert into public.token_entitlements(user_id,item_id) values(caller_id,selected_item.item_id);
 
+  perform pg_catalog.set_config('app.cosmetic_write_authorized','true',true);
   if selected_item.kind='profile_frame' then update public.profiles set equipped_frame=selected_item.item_id,updated_at=now() where id=caller_id;
   elsif selected_item.kind='profile_effect' then update public.profiles set equipped_effect=selected_item.item_id,updated_at=now() where id=caller_id;
   elsif selected_item.kind='profile_badge' then update public.profiles set equipped_badge=selected_item.item_id,updated_at=now() where id=caller_id;
@@ -269,6 +270,7 @@ declare caller_id uuid := (select auth.uid());
 begin
   if caller_id is null or not public.is_active_user() then raise exception 'An active signed-in account is required.' using errcode='42501'; end if;
   if exists(select 1 from public.token_spending_holds h where h.user_id=caller_id) then raise exception 'Cosmetic changes are paused during account review.' using errcode='42501'; end if;
+  perform pg_catalog.set_config('app.cosmetic_write_authorized','true',true);
   if requested_slot='frame' then update public.profiles set equipped_frame=null,updated_at=now() where id=caller_id;
   elsif requested_slot='effect' then update public.profiles set equipped_effect=null,updated_at=now() where id=caller_id;
   elsif requested_slot='badge' then update public.profiles set equipped_badge=null,updated_at=now() where id=caller_id;
@@ -415,7 +417,9 @@ create or replace function private.guard_profile_cosmetic_writes()
 returns trigger language plpgsql security definer set search_path=''
 as $
 begin
-  if current_user in ('authenticated','anon') and (
+  if auth.role() in ('authenticated','anon')
+    and pg_catalog.current_setting('app.cosmetic_write_authorized',true) is distinct from 'true'
+    and (
     new.equipped_frame is distinct from old.equipped_frame or
     new.equipped_effect is distinct from old.equipped_effect or
     new.equipped_badge is distinct from old.equipped_badge or
@@ -456,6 +460,7 @@ begin
   if not exists(select 1 from public.token_entitlements e where e.user_id=caller_id and e.item_id='unlock_custom_accent_picker') then
     raise exception 'Unlock the Custom Accent Picker before changing this colour.' using errcode='42501';
   end if;
+  perform pg_catalog.set_config('app.cosmetic_write_authorized','true',true);
   update public.profiles set custom_accent_color=requested_color,updated_at=now() where id=caller_id;
   return requested_color;
 end;
