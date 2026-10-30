@@ -9,7 +9,7 @@ function getConfiguredDonationUrl(): string | null {
     const url = new URL(process.env.STRIPE_DONATION_URL ?? '');
     if (
       url.protocol !== 'https:'
-      || url.hostname !== 'buy.stripe.com'
+      || !['buy.stripe.com', 'donate.stripe.com'].includes(url.hostname)
       || url.username
       || url.password
     ) return null;
