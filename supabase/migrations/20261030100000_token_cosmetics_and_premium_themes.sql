@@ -15,9 +15,6 @@ alter table public.profiles
 insert into public.token_spend_catalog
 (item_id,name,description,price_tokens,kind,enabled,asset_text,effect_key,sort_order)
 values
-('theme_dusk','Dusk','Warm low-glare evening palette with soft rose and charcoal surfaces.',500,'theme',true,'🌆','dusk',10),
-('theme_stone','Stone','A calm premium neutral palette in soft graphite and silver.',500,'theme',true,'🪨','stone',20),
-('theme_ocean','Ocean','Cool deep-blue surfaces with luminous aqua accents.',650,'theme',true,'🌊','ocean',30),
 ('theme_nebula','Nebula','A rich violet galaxy palette with luminous lavender accents.',750,'theme',true,'🌌','nebula',40),
 ('theme_aurora','Aurora','A northern-lights palette with emerald and teal cosmic glow.',850,'theme',true,'🌠','aurora',50),
 ('theme_celestial','Celestial','A warm rose-gold night palette with soft blush highlights.',850,'theme',true,'✨','celestial',60),
@@ -47,7 +44,7 @@ create or replace function public.guard_account_theme_entitlement()
 returns trigger language plpgsql set search_path = '' as $$
 declare selected_theme text := coalesce(new.preferences ->> 'theme','dark');
 begin
-  if selected_theme not in ('system','light','dark')
+  if selected_theme in ('nebula','aurora','celestial','eclipse')
     and not exists(select 1 from public.token_entitlements
       where user_id=new.user_id and item_id='theme_' || selected_theme) then
     raise exception 'Unlock this theme in the Token Shop before selecting it.' using errcode='42501';
@@ -110,3 +107,15 @@ $$;
 
 revoke all on function public.spend_tokens(text,uuid) from public,anon,authenticated,service_role;
 commit;
+
+-- Remove legacy placeholder banner paths; the catalogue renders first-party art/text,
+-- so a missing static asset can never create a broken image in the shop.
+update public.token_spend_catalog
+set asset_url = null,
+    asset_text = case item_id
+      when 'profile_banner_aurora' then '🌠'
+      when 'profile_banner_ember' then '🔥'
+      when 'profile_banner_tide' then '🌊'
+      else asset_text
+    end
+where item_id in ('profile_banner_aurora','profile_banner_ember','profile_banner_tide');
