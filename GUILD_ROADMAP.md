@@ -99,4 +99,4 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - [ ] Keep content separate using the shared database's `world_type`: Sanctuary content stays in `sanctuary`; Guild content is written to `guild`. Do not copy or duplicate the social tables.
 - [ ] Scope feed reads/writes, Shorts, events/RSVPs, conversation lists and threads, notifications, report queues and profile-post retrieval to the active world.
 - [ ] Keep comments and reactions attached to their target content so engagement follows the target's world. Notifications and reports inherit world identity from their target.
-- [ ] Preserve existing data in Sanctuary by default. Verify cross-world isolation end-to-end before announcing beta readiness.
+- [x] Preserve existing data in Sanctuary by default; the scoped database migration is applied and schema/functions/triggers are verified. Verify cross-world isolation end-to-end before announcing beta readiness.
