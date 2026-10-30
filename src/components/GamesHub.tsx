@@ -33,7 +33,7 @@ const games: GameEntry[] = [
   },
 ];
 
-export function GamesHub({ autoLaunchRecent = false }: { autoLaunchRecent?: boolean }) {
+export function GamesHub({ autoLaunchRecent = false, onExitToGuildHome }: { autoLaunchRecent?: boolean; onExitToGuildHome?: () => void }) {
   const [activeGame, setActiveGame] = useState<GameEntry | null>(null);
   const [copiedServer, setCopiedServer] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -98,7 +98,7 @@ export function GamesHub({ autoLaunchRecent = false }: { autoLaunchRecent?: bool
   if (activeGame?.url) {
     return (
       <div className={styles.hub}>
-        <GuildConsolePlayer title={activeGame.title} url={activeGame.url} onExit={() => setActiveGame(null)} />
+        <GuildConsolePlayer title={activeGame.title} url={activeGame.url} onExit={() => { setActiveGame(null); onExitToGuildHome?.(); }} />
         <p className={styles.hint}>If this game refuses to load inside the player, use the external launch option below. Host security headers and browser permissions can prevent embedding even when the Guild player supports fullscreen.</p>
         <div className={styles.cardActions}>
           <button type="button" className={styles.playButton} onClick={() => setActiveGame(null)}><Gamepad2 size={16} /> Back to library</button>
