@@ -602,3 +602,51 @@
 .content[data-world="guild"] article {
   border-color: color-mix(in srgb, var(--guild-accent, #7c9cff) 28%, transparent);
 }
+
+
+/* Feed discovery controls */
+.feedTools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.feedFilters { display: flex; flex-wrap: wrap; gap: 6px; }
+.feedFilter, .activeFeedFilter {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: 700 11px Arial, sans-serif;
+}
+.activeFeedFilter {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--ink);
+}
+.feedSearch { flex: 1 1 210px; min-width: 0; }
+.feedSearch input, .feedSort select {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: 12px Arial, sans-serif;
+}
+.feedSort { flex: 0 1 145px; }
+.feedFilter:focus-visible, .activeFeedFilter:focus-visible, .feedSearch input:focus-visible, .feedSort select:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (max-width: 560px) {
+  .feedTools { align-items: stretch; }
+  .feedFilters { width: 100%; }
+  .feedSearch { flex-basis: 100%; }
+  .feedSort { flex: 1 1 100%; }
+}
