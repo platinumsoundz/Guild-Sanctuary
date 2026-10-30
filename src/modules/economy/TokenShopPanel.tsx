@@ -225,10 +225,14 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
               const slot = item.kind;
               const equipped = equippedSlots[slot] === item.item_id;
               return <article className={styles.inventoryItem} key={item.item_id}>
-                <div className={styles.inventoryArt} data-effect={item.effect_key ?? ""} aria-hidden="true">{item.asset_text ?? <Sparkles size={22} />}</div>
+                <div className={styles.inventoryArt} data-effect={item.effect_key ?? ""} aria-hidden="true">{item.asset_url?.startsWith('/') ? <img src={item.asset_url} alt="" /> : item.asset_text ?? <Sparkles size={22} />}</div>
                 <div className={styles.inventoryCopy}><strong>{item.name}</strong><span>{item.kind.replaceAll('_', ' ')}</span></div>
                 {equipped ? <span className={styles.equippedBadge}>Equipped</span> : <span className={styles.ownedBadge}><Check size={12} /> Owned</span>}
-                <button type="button" className={styles.equipButton} disabled={!EQUIPPING_ENABLED || equipped} title="Cosmetic equipment is locked until the staging migration and permissions are approved">{equipped ? 'Currently active' : 'Equip after staging'}</button>
+                {item.kind === 'accent_customization' ? (
+                  <p className={styles.accentAvailable}>Picker available in your profile editor</p>
+                ) : (
+                  <button type="button" className={styles.equipButton} disabled={!EQUIPPING_ENABLED || equipped} title="Cosmetic equipment is locked until the staging migration and permissions are approved">{equipped ? 'Currently active' : 'Equip after staging'}</button>
+                )}
               </article>;
             })}
           </div>
@@ -259,7 +263,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
             const purchasing = purchasingItemId === item.item_id;
             const shortfall = balance === null ? 0 : Math.max(0, item.price_tokens - balance);
             return <article className={styles.card} key={item.item_id}>
-              <div className={styles.art} data-effect={item.effect_key ?? ""} aria-hidden="true">{item.asset_text ? <span>{item.asset_text}</span> : <Sparkles size={38} strokeWidth={1.2} />}<span className={styles.artKind}>{item.kind.replaceAll('_', ' ')}</span></div>
+              <div className={styles.art} data-effect={item.effect_key ?? ""} aria-hidden="true">{item.asset_url?.startsWith('/') ? <img src={item.asset_url} alt="" /> : item.asset_text ? <span>{item.asset_text}</span> : <Sparkles size={38} strokeWidth={1.2} />}<span className={styles.artKind}>{item.kind.replaceAll('_', ' ')}</span></div>
               <div className={styles.cardBody}>
                 <div className={styles.itemTitleRow}><div><p className={styles.kind}>{item.kind.replaceAll('_', ' ')}</p><h3>{item.name}</h3></div>{owned && <span className={styles.ownedBadge}><Check size={13} /> Owned</span>}</div>
                 <p className={styles.description}>{item.description}</p>
