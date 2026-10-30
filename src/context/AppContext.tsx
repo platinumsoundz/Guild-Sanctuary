@@ -37,7 +37,7 @@ import { normalizeSocialLinks } from '@/lib/socialLinks';
 import { fetchAccountSettings } from '@/modules/settings/service';
 import { applyTheme as setActiveTheme, resolveTheme, isThemePreference } from '@/lib/themes';
 
-export type NavigationState = 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'moderation' | 'planner' | 'feedback';
+export type NavigationState = 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover' | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile' | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications' | 'admin' | 'moderation' | 'planner' | 'feedback' | 'feedback-inbox';
 
 export type UserSession = AuthSession;
 
