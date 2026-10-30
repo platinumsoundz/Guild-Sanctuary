@@ -15,7 +15,7 @@ assert.match(sanctuary, /<details className=\{styles\.moreInfo\}>/, 'Sanctuary c
 assert.match(sanctuary, /What we are working on/, 'Sanctuary roadmap explains the feature list plainly');
 assert.doesNotMatch(sanctuary, /The 5 Sleeves|The-5-Sleeves|Guild Sanctuary|Connected workstreams|Three projects\. One roadmap/, 'Sanctuary roadmap must exclude separate games and Guild work');
 assert.match(sanctuary, /Sanctuary-built mini-games/, 'Sanctuary roadmap may describe its own Cosmic Arcade');
-assert.match(guild, /<h1>Guild Roadmap<\/h1>/, 'Guild has a separate roadmap page');
+assert.match(guild, /<h1>Roadmap<\/h1>/, 'Guild has a separate roadmap page with an environment-native title');
 assert.match(guild, /persistent Linux workspace/, 'Guild roadmap explains the Cloud Lab future');
 assert.match(guild, /<details className=\{styles\.moreInfo\}>/, 'Guild cards hide deeper explanations behind More info');
 assert.match(guild, /not a native desktop app/, 'Guild roadmap sets honest native-launch expectations');
