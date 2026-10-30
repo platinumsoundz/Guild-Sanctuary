@@ -516,3 +516,21 @@
 .equipButton { grid-column: 1 / -1; min-height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--muted); font-size: 10px; font-weight: 700; cursor: not-allowed; }
 .equipButton:disabled { opacity: .78; }
 .inventoryFootnote { margin: 13px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+
+/* Catalogue previews use the same visual language as the profile cosmetics. */
+.art[data-effect="moonlit-halo"] { background: radial-gradient(circle at center, rgb(169 162 245 / 22%), transparent 58%), linear-gradient(135deg,#15152f,#25234c); color: #c7c2ff; }
+.art[data-effect="wildflower-wreath"] { background: radial-gradient(circle at center, rgb(124 175 122 / 24%), transparent 58%), linear-gradient(135deg,#16291f,#2a4734); color: #a8d59e; }
+.art[data-effect="aurora-line"] { background: linear-gradient(135deg,#102d3b,#24315a 55%,#174b48); color: #8ee8dc; }
+.art[data-effect="gilded-laurel"] { background: linear-gradient(135deg,#342916,#5a4524); color: #e8ca7d; }
+.art[data-effect="tidal-glass"] { background: linear-gradient(135deg,#102b39,#24516a); color: #9be5e8; }
+.art[data-effect="twilight-garden"] { background: linear-gradient(135deg,#211b38,#45325b); color: #d4b5ed; }
+.art[data-effect="sanctuary-colour-pack"] { background: conic-gradient(from 30deg,#0d9488,#3b82f6,#8b5cf6,#ec4899,#0d9488); color: white; }
+.art[data-effect="custom-accent-picker"] { background: linear-gradient(135deg,#8b5cf6,#ec4899,#3b82f6,#0d9488); color: white; }
+.inventoryArt[data-effect="moonlit-halo"] { background: #25234c; color: #c7c2ff; }
+.inventoryArt[data-effect="wildflower-wreath"] { background: #244332; color: #a8d59e; }
+.inventoryArt[data-effect="aurora-line"] { background: #174b48; color: #8ee8dc; }
+.inventoryArt[data-effect="gilded-laurel"] { background: #5a4524; color: #e8ca7d; }
+.inventoryArt[data-effect="tidal-glass"] { background: #24516a; color: #9be5e8; }
+.inventoryArt[data-effect="twilight-garden"] { background: #45325b; color: #d4b5ed; }
+.inventoryArt[data-effect="sanctuary-colour-pack"] { background: conic-gradient(#0d9488,#3b82f6,#8b5cf6,#ec4899,#0d9488); color: white; }
+.inventoryArt[data-effect="custom-accent-picker"] { background: linear-gradient(135deg,#8b5cf6,#ec4899,#3b82f6,#0d9488); color: white; }
