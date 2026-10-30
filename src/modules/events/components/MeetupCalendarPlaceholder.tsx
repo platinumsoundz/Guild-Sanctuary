@@ -133,7 +133,7 @@ export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldTy
       <header className={styles.pageHeader}>
         <div>
           <p className={styles.eyebrow}>GATHER WITH CARE</p>
-          <h1>Community events</h1>
+          <h1>{worldType === 'guild' ? 'Guild events' : 'Community events'}</h1>
           <p className={styles.intro}>Find what is happening around you, explore event locations, and choose where to join in.</p>
         </div>
         <span className={styles.worldTag}>THE SANCTUARY</span>
