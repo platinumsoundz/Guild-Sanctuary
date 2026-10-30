@@ -45,7 +45,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
   const hasSupabaseAccount = !isGuest && isSupabaseWalletConfigured();
 
   const loadShop = useCallback(async (cancelled?: () => boolean) => {
-    if (!hasSupabaseAccount) {
+    if (!isSupabaseWalletConfigured()) {
       setItems([]);
       setOwnedItems(new Set());
       setBalance(null);
@@ -57,6 +57,26 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
     setIsLoading(true);
     try {
       const client = getSupabaseBrowserClient();
+      if (isGuest) {
+        const { data, error: catalogError } = await client.from('token_spend_catalog')
+          .select('item_id,name,description,price_tokens,kind,enabled,asset_url,asset_text,effect_key,sort_order')
+          .eq('enabled', true).order('sort_order', { ascending: true });
+        if (catalogError) throw catalogError;
+        if (cancelled?.()) return;
+        setItems((data ?? []) as ShopItem[]);
+        setOwnedItems(new Set());
+        setBalance(null);
+        setEquippedSlots({});
+        setError(null);
+        return;
+      }
+      if (!hasSupabaseAccount) {
+        setItems([]);
+        setOwnedItems(new Set());
+        setBalance(null);
+        setEquippedSlots({});
+        return;
+      }
       const { data: authData, error: authError } = await client.auth.getUser();
       if (authError || authData.user?.id !== userId) {
         throw new Error('Sign in to view your shop inventory.');
