@@ -24,11 +24,11 @@ const themeBootstrap = `
 (() => {
   try {
     const saved = window.localStorage.getItem('sanctuary-theme');
-    const preference = saved === 'system' || saved === 'light' || saved === 'dark' || saved === 'dusk' || saved === 'stone' || saved === 'ocean' ? saved : 'dark';
+    const preference = saved === 'system' || saved === 'light' || saved === 'dark' || saved === 'dusk' || saved === 'stone' || saved === 'ocean' || saved === 'midnight' || saved === 'forest' || saved === 'rose' || saved === 'lavender' || saved === 'ember' || saved === 'mint' ? saved : 'dark';
     const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
     document.documentElement.dataset.theme = theme;
     document.documentElement.dataset.layout = 'comfortable';
-    document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
+    document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean' || theme === 'midnight' || theme === 'forest' || theme === 'rose' || theme === 'ember');
   } catch {
     document.documentElement.dataset.theme = 'dark';
     document.documentElement.dataset.layout = 'comfortable';
