@@ -40,4 +40,4 @@ assert.match(navigation, /id: 'feedback', label: 'Feedback'/, 'Feedback is a nam
 assert.match(navigation, /item\.id === 'feedback' \|\| item\.id === 'feedback-inbox' \|\| isPageVisible/, 'Feedback and its privileged inbox ignore configurable page-visibility restrictions');
 assert.match(navigation, /navigationItems\.filter\(\(item\) => item\.id === 'feedback-inbox'[\s\S]*canAccessSanctuaryPage\(item\.id, currentUser \? role : 'user'\)\)/, 'feedback inbox is restricted to developer/owner while all other pages use the shared role allowlist');
 assert.match(navigation, /\['developer', 'owner'\]\.includes\(role\)/, 'feedback inbox explicitly requires developer or owner role');
-assert.match(navigation, /guestNavigationPages = new Set<NavigationState>\(\['today', 'games', 'roadmap', 'support', 'feedback'\]\)/, 'guest mode keeps only its explicit public destinations');
+assert.match(navigation, /guestNavigationPages = new Set<NavigationState>\(\['today', 'support', 'feedback'\]\)/, 'guest mode keeps only public entry pages and feedback');
