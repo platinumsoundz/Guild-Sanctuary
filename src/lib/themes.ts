@@ -28,6 +28,13 @@ export const THEME_CATALOGUE: readonly ThemeDefinition[] = [
   { id: 'aurora', label: 'Aurora · northern lights', description: 'A luminous teal and emerald night palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
   { id: 'celestial', label: 'Celestial · rose gold', description: 'A warm rose-gold cosmic palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
   { id: 'eclipse', label: 'Eclipse · midnight', description: 'A dramatic midnight and solar-gold palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
+  { id: 'ember', label: 'Ember', description: 'An additional ember palette', colorScheme: 'dark', tailwindDark: true },
+  { id: 'forest', label: 'Forest', description: 'An additional forest palette', colorScheme: 'dark', tailwindDark: true },
+  { id: 'rose', label: 'Rose', description: 'An additional rose palette', colorScheme: 'dark', tailwindDark: true },
+  { id: 'violet', label: 'Violet', description: 'An additional violet palette', colorScheme: 'dark', tailwindDark: true },
+  { id: 'midnight', label: 'Midnight', description: 'An additional midnight palette', colorScheme: 'dark', tailwindDark: true },
+  { id: 'lavender', label: 'Lavender', description: 'A soft lavender daylight palette', colorScheme: 'light', tailwindDark: false },
+  { id: 'mint', label: 'Mint', description: 'A fresh mint daylight palette', colorScheme: 'light', tailwindDark: false },
 ] as const;
 
 export const THEME_PREFERENCE_OPTIONS = [
