@@ -24,7 +24,7 @@ export const SANCTUARY_FEATURE_GATES: Record<SanctuaryFeature, {
 
 export function canAccessSanctuaryFeature(feature: SanctuaryFeature, role: string | null | undefined): boolean {
   const gate = SANCTUARY_FEATURE_GATES[feature];
-  if (!gate.enabled || !role || !(role in roleRank)) return false;
+  if (!gate.enabled || !role || !Object.prototype.hasOwnProperty.call(roleRank, role)) return false;
   return roleRank[role as SanctuaryRole] >= roleRank[gate.minimumRole];
 }
 
@@ -61,8 +61,7 @@ const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
 
 /** Fail closed for unknown pages and roles; navigation visibility is not the security boundary. */
 export function canAccessSanctuaryPage(page: string, role: string | null | undefined): boolean {
-  if (!role || !(role in roleRank)) return false;
-  if (role === 'owner') return true;
-  if (!(page in pageMinimumRole)) return false;
+  if (!role || !Object.prototype.hasOwnProperty.call(roleRank, role)) return false;
+  if (!Object.prototype.hasOwnProperty.call(pageMinimumRole, page)) return false;
   return roleRank[role as SanctuaryRole] >= roleRank[pageMinimumRole[page as SanctuaryPage]];
 }
