@@ -70,6 +70,9 @@ drop function if exists public.grant_signup_bonus_on_profile();
 drop function if exists public.grant_signup_token_bonus(uuid);
 
 -- Keep the established token_ledger as the single source of truth for wallet credits.
+alter table public.token_ledger
+  add column if not exists grant_position integer,
+  add column if not exists verified_at timestamptz;
 alter table public.token_ledger drop constraint if exists token_ledger_bundle_id_check;
 alter table public.token_ledger drop constraint if exists token_ledger_check;
 alter table public.token_ledger drop constraint if exists token_ledger_entry_check;
@@ -88,6 +91,11 @@ alter table public.token_ledger
   );
 create unique index if not exists token_ledger_one_signup_bonus_per_user_idx
   on public.token_ledger(user_id) where bundle_id='signup_bonus';
+create unique index if not exists token_ledger_signup_bonus_position_idx
+  on public.token_ledger(grant_position) where bundle_id='signup_bonus' and grant_position is not null;
+alter table public.token_ledger drop constraint if exists token_ledger_signup_bonus_position_check;
+alter table public.token_ledger add constraint token_ledger_signup_bonus_position_check
+  check (grant_position is null or grant_position between 1 and 100);
 
 -- The beta switch is intentionally OFF. An owner must explicitly open it in staging.
 create table if not exists public.token_bonus_program (
@@ -156,11 +164,11 @@ begin
   select balance_tokens into wallet_balance from public.token_wallets where user_id=requested_user_id for update;
   insert into public.token_ledger(
     user_id,bundle_id,tokens_delta,amount_total,currency,stripe_event_id,
-    checkout_session_id,livemode
+    checkout_session_id,livemode,grant_position,verified_at
   ) values (
     requested_user_id,'signup_bonus',1000,0,'gbp',
     'beta_signup_bonus:' || requested_user_id::text,
-    'beta_signup_bonus:' || requested_user_id::text,false
+    'beta_signup_bonus:' || requested_user_id::text,false,next_position,confirmed_at
   ) on conflict do nothing;
   if not found then return; end if;
 
