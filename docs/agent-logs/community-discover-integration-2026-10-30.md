@@ -121,3 +121,11 @@ This batch delivers world-scoped event discovery, not the full relationship/inte
 - Extended `check:discover-scope` to assert that both feed and event discovery receive the active world and that author labels use public profile lookup.
 
 - Bounded the post-discovery author-profile enrichment to the 100 newest visible posts before resolving public author profiles, while showing at most 30 cards. This prevents an unbounded burst of profile lookups on a busy feed; the contract test now guards the cap.
+
+
+### Follow-up performance hardening (2026-10-30)
+
+- Tightened post-author enrichment from 100 posts to 30, matching the maximum number of rendered Discover post cards. This avoids up to 70 unnecessary public-profile lookups per tab load without changing what users can see.
+- Updated the Discover scope contract to enforce the 30-post enrichment cap.
+- Main branch at merge commit `f86b6fc5d594de310012b449ca859e11e8df2066` passed the repository CI and the Cloudflare build workflow. The Cloudflare workflow explicitly skipped the deploy step for this run; no production deployment is claimed.
+- No browser/mobile interactive QA or connected production database changes are included in this follow-up.
