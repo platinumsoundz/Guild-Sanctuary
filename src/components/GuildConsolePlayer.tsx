@@ -87,7 +87,13 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
   moveMenuFocusRef.current = moveMenuFocus;
 
   useEffect(() => {
-    const sync = () => setIsFullscreen(document.fullscreenElement === stageRef.current);
+    const sync = () => {
+      const active = document.fullscreenElement === stageRef.current;
+      setIsFullscreen(active);
+      if (!active) {
+        try { screen.orientation.unlock(); } catch { /* Escape/browser exits may not expose orientation unlock. */ }
+      }
+    };
     document.addEventListener('fullscreenchange', sync);
     return () => document.removeEventListener('fullscreenchange', sync);
   }, []);
@@ -189,7 +195,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
         <div className={styles.actions}>
           <span className={styles.controllerState} aria-live="polite">{controllerConnected ? 'Controller connected' : 'Touch / keyboard ready'}</span>
           <button type="button" className={styles.iconButton} onClick={() => void toggleFullscreen()} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>{isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button>
-          <button type="button" className={styles.iconButton} onClick={() => void returnHome()} aria-label="Exit game to Guild home"><X size={18} /></button>
+          <button type="button" className={styles.iconButton} onClick={() => void returnHome()} aria-label="Exit game and return to Guild home"><X size={18} /></button>
         </div>
       </div>
       <div className={styles.gameFrame}>
@@ -214,7 +220,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
             <p className={styles.finePrint}>Audio controls affect Sanctuary media explicitly marked as Guild-managed audio. They cannot control sound inside this cross-origin game iframe.</p>
           </div>}
           <button type="button" data-guild-action className={styles.menuAction} onClick={() => void toggleFullscreen()}><Maximize2 size={19} /><span><strong>{isFullscreen ? 'Exit fullscreen' : 'Display fullscreen'}</strong><small>Expand or restore the game view</small></span></button>
-          <button type="button" data-guild-action className={styles.exitAction} onClick={() => void returnHome()}><ArrowLeft size={19} /><span><strong>Exit to Guild home</strong><small>Close this game session</small></span></button>
+          <button type="button" data-guild-action className={styles.exitAction} onClick={() => void returnHome()}><ArrowLeft size={19} /><span><strong>Exit to Guild home</strong><small>Close the game and return to your Guild dashboard</small></span></button>
           <div className={styles.virtualControls} aria-label="Virtual console navigation controls">
             <div className={styles.dpad} aria-label="Directional navigation">
               <button type="button" onClick={() => moveMenuFocus(-1)} aria-label="Navigate up"><ArrowUp size={20} /></button>
