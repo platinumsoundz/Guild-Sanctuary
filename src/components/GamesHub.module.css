@@ -547,3 +547,49 @@
   .futureGrid { grid-template-columns:repeat(3,minmax(0,1fr)); }
 }
 @media (prefers-reduced-motion:reduce) { .card:hover { transform:none; } }
+
+/* Console 2.0 refinement: keep the library legible and reachable in landscape. */
+.hub {
+  --library-radius: 18px;
+  --library-gap: clamp(10px, 1.5vw, 16px);
+  --library-focus: 0 0 0 3px color-mix(in srgb, var(--accent) 78%, transparent);
+}
+.hub :where(button,a,input) { touch-action: manipulation; }
+.hub :where(button,a):focus-visible { outline: var(--library-focus); outline-offset: 3px; }
+.recentRow {
+  display: grid;
+  grid-auto-columns: minmax(220px, 1fr);
+  grid-auto-flow: column;
+  grid-template-columns: none;
+  gap: var(--library-gap);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 2px 2px 12px;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.recentCard { scroll-snap-align: start; min-height: 68px; }
+.grid { gap: var(--library-gap); }
+.card,.player { border-radius: var(--library-radius); }
+.art { min-height: clamp(150px, 19vw, 230px); }
+.cardBody { gap: 2px; }
+.description { line-height: 1.55; }
+.gameDetails { border-radius: 14px; }
+@media (orientation:landscape) and (max-height:600px) {
+  .hub { padding: 10px 14px; }
+  .header { margin-bottom: 10px; }
+  .header h2 { margin: 0; font-size: clamp(21px, 3.2vw, 30px); }
+  .header > p:last-child { max-width: 100ch; }
+  .libraryControls { grid-template-columns: minmax(180px, .8fr) minmax(0, 1.2fr); }
+  .filterRow { justify-content: flex-end; }
+  .recentRow { grid-auto-columns: minmax(190px, 1fr); }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .art { min-height: clamp(112px, 22vh, 160px); }
+}
+@media (max-width:760px) and (orientation:portrait) {
+  .recentRow { grid-auto-columns: minmax(230px, 82vw); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .hub :where(button,a) { scroll-behavior: auto; }
+}
