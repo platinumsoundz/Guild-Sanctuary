@@ -49,11 +49,11 @@ The Guild and the Sanctuary share approved UI foundations and feature mechanics,
 - [x] Keep Today focused on useful destinations and provide a dedicated Feedback page for members and guests.
 - [ ] Final production/browser/device QA — tracked under Phase 3; do not treat source implementation as proof that every deployment is current.
 
-### Current messaging blocker
+### Current messaging verification status — 2026-10-30
 
-- The production Supabase project `Guild-Sanctuary` (`xgpzvmhldyoyrwwebcic`) has the persistent messaging tables, the typed `create_scoped_conversation` RPC, RLS policies, and the `messages` table in the Supabase Realtime publication.
-- Vercel's project environment inventory has `NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES=true` targeted at Production. Because Next.js public environment variables are embedded at build time, a stale deployment or a different host/build configuration can still produce the “not connected to the live conversation database” guard message.
-- **Not yet resolved:** perform a fresh build/deployment using the verified production environment, then test message creation and two-account send/receive/refresh. Check Cloudflare's build environment separately if that is the URL being used. Do not apply guessed migrations or weaken RLS to bypass the guard.
+- Production Supabase project `Guild-Sanctuary` (`xgpzvmhldyoyrwwebcic`) contains `conversations`, `conversation_members`, and `messages`, plus the typed `create_scoped_conversation` RPC, member-scoped RLS, and the `messages` Realtime publication.
+- Vercel Production has `NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES=true`; the production alias now resolves to a `READY` deployment built from app commit `49948b4af9fd9a108f9b7a00808527dca88c912b`. The authenticated service path uses the persistent repository only when the Supabase session identity matches the active app account; local/demo sessions retain the in-memory fallback.
+- **Still unverified:** two-account browser send/receive, refresh, read receipts, DM preference enforcement, account switching and cross-account conversation privacy. Cloudflare production has not been confirmed on the same app commit; its workflow is build-only unless manually dispatched. Do not weaken RLS or enable a different schema to bypass any runtime error.
 
 
 ## Focused accessibility task — compact notification overlay
@@ -65,7 +65,7 @@ The Guild and the Sanctuary share approved UI foundations and feature mechanics,
 ## Beta readiness dashboard — Sanctuary only
 
 > **Estimated beta readiness: 45%**  
-> Planning estimate based on the current roadmap and known verification gaps — not a live telemetry measurement. Percentages describe each Sanctuary workstream's overall readiness, including integration and testing, not just how much code exists. **The Guild is a separate co-existing project and is not included here.**
+> Planning estimate based on the current roadmap and known verification gaps — not a live telemetry measurement. See the [30 October Phase 1 close-friends beta readiness checkpoint](docs/reports/PHASE1_CLOSE_FRIENDS_BETA_READINESS_2026-10-30.md) for the latest verified integration, migration, security and deployment evidence. Percentages describe each Sanctuary workstream's overall readiness, including integration and testing, not just how much code exists. **The Guild is a separate co-existing project and is not included here.**
 
 | Sanctuary workstream | Progress | Snapshot |
 | --- | ---: | --- |
