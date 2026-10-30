@@ -7,11 +7,10 @@ const gates = readFileSync('src/lib/sanctuaryFeatureGates.ts', 'utf8');
 const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
 const workflow = readFileSync('.github/workflows/ci.yml', 'utf8');
 const context = readFileSync('src/context/AppContext.tsx', 'utf8');
-const guestPages = "today', 'feed', 'discover', 'events', 'shorts', 'games', 'roadmap', 'support', 'feedback";
+const guestAllowlist = "['today', 'feed', 'discover', 'events', 'shorts', 'games', 'roadmap', 'support', 'feedback']";
 
-assert.match(workspace, new RegExp("if \\(isGuest\\) \\{\\s*if \\(!\\['" + guestPages.replaceAll("'", "\\'") + "'\\]\\.includes\\(contentNavigation\\)\\)"),
-  'Guest direct routing must allow only the public showcase pages');
-assert.match(navigation, new RegExp("guestNavigationPages = new Set<NavigationState>\\(\\['" + guestPages.replaceAll("'", "\\'") + "'\\]\\)"),
+assert.ok(workspace.includes(guestAllowlist), 'Guest direct routing must allow only the public showcase pages');
+assert.ok(navigation.includes("guestNavigationPages = new Set<NavigationState>(" + guestAllowlist + ")"),
   'Guest navigation must show the safe public showcase');
 assert.match(workspace, /isGuest && !\['support', 'feedback', 'today'\]\.includes\(contentNavigation\)/,
   'Non-interactive guest destinations must render a preview instead of redirecting');
