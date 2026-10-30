@@ -297,7 +297,8 @@ create table if not exists private.public_profile_cosmetic_projection (
   equipped_banner text,
   equipped_border text,
   equipped_profile_theme text,
-  equipped_palette text
+  equipped_palette text,
+  custom_accent_color text
 );
 alter table private.public_profile_cosmetic_projection enable row level security;
 revoke all on private.public_profile_cosmetic_projection from public,anon,authenticated;
@@ -318,15 +319,15 @@ begin
     (new.status='active' or (new.status='suspended' and new.suspended_until is not null and new.suspended_until<=pg_catalog.now())) then
     insert into private.public_profile_cosmetic_projection(
       id,equipped_frame,equipped_effect,equipped_badge,equipped_banner,
-      equipped_border,equipped_profile_theme,equipped_palette
+      equipped_border,equipped_profile_theme,equipped_palette,custom_accent_color
     ) values (
       new.id,new.equipped_frame,new.equipped_effect,new.equipped_badge,new.equipped_banner,
-      new.equipped_border,new.equipped_profile_theme,new.equipped_palette
+      new.equipped_border,new.equipped_profile_theme,new.equipped_palette,new.custom_accent_color
     ) on conflict(id) do update set
       equipped_frame=excluded.equipped_frame,equipped_effect=excluded.equipped_effect,
       equipped_badge=excluded.equipped_badge,equipped_banner=excluded.equipped_banner,
       equipped_border=excluded.equipped_border,equipped_profile_theme=excluded.equipped_profile_theme,
-      equipped_palette=excluded.equipped_palette;
+      equipped_palette=excluded.equipped_palette,custom_accent_color=excluded.custom_accent_color;
   else
     delete from private.public_profile_cosmetic_projection where id=new.id;
   end if;
@@ -338,10 +339,10 @@ create trigger sync_public_profile_cosmetic_projection after insert or update or
 for each row execute function private.sync_public_profile_cosmetic_projection();
 insert into private.public_profile_cosmetic_projection(
   id,equipped_frame,equipped_effect,equipped_badge,equipped_banner,
-  equipped_border,equipped_profile_theme,equipped_palette
+  equipped_border,equipped_profile_theme,equipped_palette,custom_accent_color
 )
 select p.id,p.equipped_frame,p.equipped_effect,p.equipped_badge,p.equipped_banner,
-  p.equipped_border,p.equipped_profile_theme,p.equipped_palette
+  p.equipped_border,p.equipped_profile_theme,p.equipped_palette,p.custom_accent_color
 from public.profiles p
 where p.visibility='public' and p.allow_profile_discovery
   and (p.status='active' or (p.status='suspended' and p.suspended_until is not null and p.suspended_until<=pg_catalog.now()))
@@ -349,12 +350,12 @@ on conflict(id) do update set
   equipped_frame=excluded.equipped_frame,equipped_effect=excluded.equipped_effect,
   equipped_badge=excluded.equipped_badge,equipped_banner=excluded.equipped_banner,
   equipped_border=excluded.equipped_border,equipped_profile_theme=excluded.equipped_profile_theme,
-  equipped_palette=excluded.equipped_palette;
+  equipped_palette=excluded.equipped_palette,custom_accent_color=excluded.custom_accent_color;
 
 create or replace view public.public_profile_cosmetics
 with (security_barrier=true,security_invoker=true) as
 select id,equipped_frame,equipped_effect,equipped_badge,equipped_banner,
-  equipped_border,equipped_profile_theme,equipped_palette
+  equipped_border,equipped_profile_theme,equipped_palette,custom_accent_color
 from private.public_profile_cosmetic_projection;
 grant select on public.public_profile_cosmetics to anon,authenticated;
 
@@ -466,5 +467,6 @@ begin
 end;
 $;
 revoke all on function public.set_profile_custom_accent(text) from public,anon,authenticated,service_role;
+grant execute on function public.set_profile_custom_accent(text) to authenticated;
 
 commit;
