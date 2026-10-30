@@ -72,7 +72,7 @@ export function AppWorkspace() {
   const [accountRestrictionReason, setAccountRestrictionReason] = useState<string | null>(null);
   const [guildPage, setGuildPage] = useState<GuildPage>('home');
   const [guildAutoLaunchRecent, setGuildAutoLaunchRecent] = useState(false);
-  const guildInternalPages: GuildPage[] = ['home', 'arcade', 'trials', 'library', 'music', 'photos', 'tools'];
+  const guildInternalPages: GuildPage[] = ['home', 'arcade', 'trials', 'library', 'music', 'tools'];
   const contentNavigation = activeNavigation === 'guild'
     ? (guildInternalPages.includes(guildPage) ? 'guild' : guildPage)
     : activeNavigation;
@@ -400,11 +400,11 @@ export function AppWorkspace() {
                 ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub autoLaunchRecent={guildAutoLaunchRecent} onExitToGuildHome={() => { setGuildAutoLaunchRecent(false); setGuildPage('home'); }} /></div>
                 : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
                 : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub onExitToGuildHome={() => { setGuildAutoLaunchRecent(false); setGuildPage('home'); }} /></div>
-                : ['music', 'photos', 'tools'].some((page) => page === guildPage) ? null
+                : ['music', 'tools'].some((page) => page === guildPage) ? null
                 : authenticatedContent}
                 </motion.div>
               </AnimatePresence>
-              <GuildCompanionHub view={guildPage === 'library' || guildPage === 'music' || guildPage === 'photos' || guildPage === 'tools' ? guildPage : 'all'} hidden={!(['library', 'music', 'photos', 'tools'] as GuildPage[]).includes(guildPage)} />
+              <GuildCompanionHub view={guildPage === 'library' || guildPage === 'music' || guildPage === 'tools' ? guildPage : 'all'} hidden={!(['library', 'music', 'tools'] as GuildPage[]).includes(guildPage)} />
             </motion.div>
           </div>
         ) : (
