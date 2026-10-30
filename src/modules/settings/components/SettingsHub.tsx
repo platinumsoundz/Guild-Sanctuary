@@ -5,6 +5,7 @@ import type { Profile, ProfilePrivacy, SocialLinks, WorldType } from '@/types/da
 import { isSupabaseAuthConfigured } from '@/modules/auth';
 import { useAccountSettings } from '../useAccountSettings';
 import styles from './SettingsHub.module.css';
+import { applyTheme as setActiveTheme, resolveTheme, THEME_PREFERENCE_OPTIONS, isThemePreference } from '@/lib/themes';
 
 interface SettingsHubProps {
   userId: string;
@@ -102,9 +103,7 @@ export function SettingsHub({
     if (isLoading) return;
     const preference = settings.preferences.theme;
     const applyTheme = () => {
-      const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
-      document.documentElement.dataset.theme = theme;
-      document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
+      setActiveTheme(resolveTheme(preference, window.matchMedia('(prefers-color-scheme: light)').matches));
     };
     applyTheme();
     try {
@@ -300,15 +299,10 @@ export function SettingsHub({
               <span>Colour theme</span>
               <select id="sanctuary-theme" value={settings.preferences.theme} onChange={(event) => {
                 const theme = event.currentTarget.value;
-                if (theme !== 'system' && theme !== 'light' && theme !== 'dark' && theme !== 'dusk' && theme !== 'stone' && theme !== 'ocean') return;
+                if (!isThemePreference(theme)) return;
                 void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));
               }}>
-                <option value="system">Use device setting</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-                <option value="dusk">Dusk · low-glare warm</option>
-                <option value="stone">Stone · grey</option>
-                <option value="ocean">Ocean · blue</option>
+                {THEME_PREFERENCE_OPTIONS.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
               </select>
             </label>
             <p className={styles.hint}>Your theme is applied across the application pages and shared navigation, and saved to your account. Profile accent colours remain separate. Token-unlockable themes can be added to this catalogue later; purchases are not enabled here.</p>

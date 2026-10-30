@@ -34,19 +34,20 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f5f7f2;
+  /* Cosmic daylight: the dark default's palette translated, not replaced by a different brand. */
+  --bg: #f5f3ff;
   --surface: #ffffff;
-  --surface-raised: #ffffff;
-  --ink: #203528;
-  --muted: #647268;
-  --line: #dce5dc;
-  --accent: #315a3d;
+  --surface-raised: #f0edff;
+  --ink: #211a3b;
+  --muted: #554b70;
+  --line: #d9d1f0;
+  --accent: #5b3dbb;
   --accent-contrast: #ffffff;
-  --accent-soft: rgb(49 90 61 / 9%);
-  --danger: #b42318;
-  --success: #247347;
-  --warning: #8b5b00;
-  --shadow-card: 0 8px 28px rgb(32 53 40 / 7%);
+  --accent-soft: rgb(91 61 187 / 10%);
+  --danger: #a61b36;
+  --success: #176b4a;
+  --warning: #805000;
+  --shadow-card: 0 10px 30px rgb(53 36 100 / 9%);
 }
 
 :root[data-theme="dark"] {
@@ -243,37 +244,9 @@ body::before {
 
 
 /*
- * Cosmic mobile experience — reference-led responsive layer.
- * Keep the theme tokens central and preserve each alternate theme.
+ * Cosmic mobile experience — responsive behaviour only.
+ * Palette definitions live exclusively in the theme-token section above.
  */
-:root {
-  --bg: #080b1b;
-  --surface: #11152b;
-  --surface-raised: #191e3a;
-  --ink: #f4f2ff;
-  --muted: #b6b7d4;
-  --line: rgb(153 151 226 / 22%);
-  --accent: #b5a0ff;
-  --accent-contrast: #11102a;
-  --accent-soft: rgb(181 160 255 / 14%);
-  --shadow-card: 0 12px 34px rgb(0 0 0 / 26%);
-  --radius-sm: 10px;
-  --radius-md: 15px;
-  --radius-lg: 22px;
-}
-
-:root[data-theme="dark"] {
-  --bg: #080b1b;
-  --surface: #11152b;
-  --surface-raised: #191e3a;
-  --ink: #f4f2ff;
-  --muted: #b6b7d4;
-  --line: rgb(153 151 226 / 22%);
-  --accent: #b5a0ff;
-  --accent-contrast: #11102a;
-  --accent-soft: rgb(181 160 255 / 14%);
-  --shadow-card: 0 12px 34px rgb(0 0 0 / 26%);
-}
 
 /* Soft nebula glow is decorative only; all content remains above it. */
 body {
@@ -404,4 +377,29 @@ body {
 
 :root[data-layout="compact"] [data-world="sanctuary"] :where(h1, h2, h3) {
   margin-block-end: 0.65em;
+}
+
+
+/* Light palette refinements: keep daylight surfaces crisp at every viewport. */
+:root[data-theme="light"] body::before { opacity: 0.2; }
+:root[data-theme="light"] .chat-bubble { box-shadow: 0 5px 18px rgb(53 36 100 / 7%); }
+:root[data-theme="light"] :where([class*="card"], [class*="Card"], .cosmic-outline) {
+  box-shadow: 0 8px 24px rgb(53 36 100 / 7%);
+}
+
+
+/* Theme-specific atmosphere is expressed after responsive defaults so each
+   palette remains correct on both desktop and narrow mobile viewports. */
+:root[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse at 12% 0%, rgb(126 93 226 / 12%), transparent 34rem),
+    radial-gradient(ellipse at 100% 28%, rgb(48 177 204 / 10%), transparent 32rem),
+    radial-gradient(ellipse at 52% 100%, rgb(191 142 236 / 12%), transparent 42rem);
+}
+@media (max-width: 700px) {
+  :root[data-theme="light"] body {
+    background-image:
+      radial-gradient(ellipse at 5% 0%, rgb(126 93 226 / 14%), transparent 22rem),
+      radial-gradient(ellipse at 100% 25%, rgb(48 177 204 / 11%), transparent 20rem);
+  }
 }

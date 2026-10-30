@@ -977,3 +977,35 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - Added a CI contract check for world-scoped writes, reads, notification triggers, moderation queues and conversation creation.
 - **Database migration applied:** `20261030025452_restore_guild_community_scope.sql` is applied to the confirmed `Guild-Sanctuary` Supabase project (`xgpzvmhldyoyrwwebcic`). Read-only SQL verified the new `notifications.world_type` and `content_reports.world_type` columns, the report world-sync trigger, scoped conversation RPC and notification trigger functions. Existing posts, conversations, notifications and reports remain tagged `sanctuary`; no production posts were created or modified by verification.
 - **Still required:** live end-to-end verification with test posts and separate reactions/comments/notifications/reports in each world, then confirm the merged build is live on Cloudflare/Vercel. The second Supabase project remains untouched.
+
+
+## Cosmic daylight theme — 2026-10-30
+
+- **PR #297:** `feat/cosmic-light-theme-2026-10-30` introduces a light counterpart to the cosmic dark default, using lavender-tinted backgrounds, white/lilac surfaces, the same purple accent identity, and lighter theme-specific nebula ambience across desktop and mobile.
+- Updated the Appearance option label and extended the theme contract to guard the palette and atmosphere.
+- Calculated primary text contrast pairs exceed WCAG AA 4.5:1 for normal text. This is a token-level check, not a substitute for full-page visual/accessibility testing.
+- **Not merged / not visually verified:** the reported Vercel check failed due to a build-rate-limit response. Run the theme contract, contrast contract, typecheck and production build on the exact PR head when CI capacity is available, then review key pages at desktop and narrow-phone widths.
+- **Theme-system follow-up:** centralize shared theme tokens once (the global stylesheet currently repeats the root/default palette and has layered body background declarations), use semantic tokens for remaining hard-coded feature colours, and add automated screenshots for each theme across representative Sanctuary and Guild pages. Keep theme identity independent from layout density and world-specific Guild styling.
+
+
+## Central theme system — 2026-10-30
+
+- Added `src/lib/themes.ts` as the central theme catalogue: supported IDs, display labels, descriptions, light/dark colour-scheme metadata, Tailwind dark-mode metadata, preference validation, system-preference resolution and DOM application.
+- The Appearance selector, account/local preference normalization, session restoration and pre-render theme bootstrap now consume the catalogue instead of maintaining separate hard-coded theme lists.
+- Removed the duplicate base/dark token declarations from the responsive CSS layer. Theme palette tokens remain grouped in the global theme-token section; responsive CSS now controls layout/interaction rather than redefining the palette.
+- Extended the theme contract to verify catalogue ownership, palette registration and single base token ownership.
+- **Remaining verification:** run `npm run check:theme`, `npm run check:theme-contrast`, `npm run typecheck` and `npm run build` against the latest PR head. Full browser screenshots and page-by-page semantic-colour audit are still required; connector-only GitHub editing cannot run the repository scripts or inspect rendered pages.
+- **How to add a theme:** add its typed palette ID and metadata to `THEME_CATALOGUE`, add its matching `:root[data-theme="..."]` semantic-token block in the central theme-token section of `globals.css`. The settings selector, preference validation, bootstrap and contrast checks discover registered themes automatically.
+
+- Updated the contrast contract to discover every palette ID from `THEME_CATALOGUE`, so newly registered palettes are included automatically rather than requiring a second hard-coded theme list.
+
+## Permanent theme architecture — 2026-10-30
+
+- **Foundation rule:** The central theme catalogue and shared semantic-token palette are permanent platform architecture, not a one-off light-theme implementation.
+- Future themes should be palette-first. A new theme normally adds one catalogue entry (identity, label and colour-scheme metadata) plus one semantic-token palette block in the central theme-token section of `src/app/globals.css`. Existing pages, components, navigation, responsive layouts, interaction patterns and world-specific behaviour remain shared.
+- Do not create theme-specific page trees, component forks, duplicate layout systems, or separate responsive styling projects to launch a palette. Theme-specific visual effects should be exceptional, minimal, and expressed through reusable tokens or shared theme-aware primitives.
+- Keep feature styling on semantic variables such as `--bg`, `--surface`, `--ink`, `--muted`, `--line`, `--accent` and status tokens. When a hard-coded feature colour is genuinely semantic, promote it into the shared token contract rather than adding per-theme overrides to individual components.
+- Keep theme identity independent from layout density, accessibility preferences, user role, and Sanctuary/Guild world context. A theme must work across both worlds and all supported viewport sizes without changing feature behaviour.
+- The Appearance selector, preference validation, account persistence, session restoration, pre-render bootstrap and contrast checks must discover supported themes from the central catalogue. Avoid maintaining secondary hard-coded theme lists.
+- **Adding a palette:** register its ID and metadata in `THEME_CATALOGUE`; add its semantic-token block to the central theme-token section; verify the catalogue-driven contrast contract; then review representative Sanctuary and Guild pages at desktop and narrow-phone widths. The contrast script already discovers registered IDs automatically.
+- **Long-term quality gate:** migrate remaining feature-level hard-coded colours to semantic tokens and add browser screenshot coverage for every registered theme across representative Sanctuary and Guild surfaces. Static token checks do not replace visual, keyboard, contrast or device testing.

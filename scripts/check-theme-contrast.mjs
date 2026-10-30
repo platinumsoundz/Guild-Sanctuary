@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const css = readFileSync(new URL('../src/app/globals.css', import.meta.url), 'utf8');
+const themeRegistry = readFileSync(new URL('../src/lib/themes.ts', import.meta.url), 'utf8');
 
 function luminance(hex) {
   const channels = hex.replace('#', '').match(/.{2}/g).map((value) => parseInt(value, 16) / 255);
@@ -28,7 +29,8 @@ function token(block, name) {
   return match[1];
 }
 
-const themes = ['default', 'light', 'dark', 'stone', 'ocean', 'dusk'];
+const registeredThemes = Array.from(themeRegistry.matchAll(/\{ id: '([^']+)'/g), (match) => match[1]);
+const themes = ['default', ...registeredThemes.filter((theme) => theme !== 'dark' && theme !== 'system')];
 for (const theme of themes) {
   // Dark intentionally inherits the root/default palette, so validate the same token set.
   const block = readThemeBlock(theme === 'dark' ? 'default' : theme);
