@@ -78,3 +78,21 @@ Status: planned implementation programme. This document is the acceptance contra
 6. **Release verification:** typecheck, lint, unit/integration tests, migration dry-run, RLS checks, mobile viewport review, guest/basic/moderator/developer role matrix, preview deployment, and explicit production approval.
 
 A phase is not complete because its UI renders. It is complete only when its data, permissions, failure states, and cross-world boundaries pass the relevant checks.
+
+
+## Implementation progress — first large UI batch
+
+Implemented on the overhaul branch:
+- Events discovery now defaults to a readable list instead of forcing the map-first experience.
+- Event search filters title and description while preserving the existing upcoming/past toggle.
+- A List/Map switch exposes the existing map explorer only when requested; event-card map actions now switch to the map and focus the chosen event.
+- Shorts now displays creator display names/usernames where public profile lookup is available, with a safe generic fallback.
+- Shorts search filters captions and creator names.
+- Shorts authors can edit captions through the existing world-scoped update service.
+- Shorts can be shared through the native share sheet or copied-link fallback.
+- Existing one-active-video IntersectionObserver playback, reporting, likes, comments, comment moderation actions, and world-scoped service calls are retained.
+
+Still not release-complete:
+- Events still use the existing coordinate-based schema; venue/online mode, categories, capacity/waitlist, calendar export, and organiser broadcasts need schema-backed implementation.
+- Shorts still use the existing 5 MB upload path. Production media processing, configurable quotas, scanning, transcoding, and adaptive delivery remain release gates.
+- The known engagement RPC and RLS contracts require live-schema verification; no claim of production verification is made.
