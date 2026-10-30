@@ -125,6 +125,12 @@ export function Navigation({
         const canReviewFeedback = ['developer', 'owner'].includes(role);
         const next: Partial<Record<NavigationState, number>> = {};
 
+        const { count: unreadNotifications, error: notificationError } = await client.from('notifications')
+          .select('id', { count: 'exact', head: true })
+          .eq('recipient_id', currentUser.user.id).eq('world_type', worldType).is('read_at', null);
+        if (notificationError) throw notificationError;
+        next.notifications = unreadNotifications ?? 0;
+
         if (canReviewReports) {
           const { count, error } = await client.from('content_reports').select('id', { count: 'exact', head: true })
             .in('status', ['open', 'reviewing']).eq('world_type', worldType);
