@@ -28,17 +28,17 @@ from public.short_videos s where r.target_type = 'short' and r.target_id = s.id;
 update public.content_reports r set world_type = e.world_type
 from public.events e where r.target_type = 'event' and r.target_id = e.id;
 update public.content_reports r set world_type = c.world_type
-from public.social_comments comment
-join public.posts c on comment.target_type = 'post' and comment.target_id = c.id
-where r.target_type = 'comment' and r.target_id = comment.id;
+from public.social_comments sc
+join public.posts c on sc.target_type = 'post' and sc.target_id = c.id
+where r.target_type = 'comment' and r.target_id = sc.id;
 update public.content_reports r set world_type = c.world_type
-from public.social_comments comment
-join public.short_videos c on comment.target_type = 'short' and comment.target_id = c.id
-where r.target_type = 'comment' and r.target_id = comment.id;
+from public.social_comments sc
+join public.short_videos c on sc.target_type = 'short' and sc.target_id = c.id
+where r.target_type = 'comment' and r.target_id = sc.id;
 update public.content_reports r set world_type = c.world_type
-from public.social_comments comment
-join public.events c on comment.target_type = 'event' and comment.target_id = c.id
-where r.target_type = 'comment' and r.target_id = comment.id;
+from public.social_comments sc
+join public.events c on sc.target_type = 'event' and sc.target_id = c.id
+where r.target_type = 'comment' and r.target_id = sc.id;
 update public.content_reports r set world_type = conv.world_type
 from public.messages m join public.conversations conv on conv.id = m.conversation_id
 where r.target_type = 'message' and r.target_id = m.id;
