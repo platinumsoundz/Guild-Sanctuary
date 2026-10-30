@@ -72,14 +72,14 @@ export function SettingsHub({
   const [isDeleting, setIsDeleting] = useState(false);
   const [guildAccessEnabled, setGuildAccessEnabled] = useState(true);
   const [guildReducedMotion, setGuildReducedMotion] = useState(false);
-  const [guildTouchControls, setGuildTouchControls] = useState(true);
+  const [guildTouchControls, setGuildTouchControls] = useState(false);
 
   useEffect(() => {
     try {
       setGuildAccessEnabled(window.localStorage.getItem('sanctuary-hidden-guild-access') !== 'disabled');
       setGuildReducedMotion(window.localStorage.getItem('guild-reduced-motion-v1') === 'true');
       const touchSetting = window.localStorage.getItem('guild-touch-controls-v1');
-      if (touchSetting !== null) setGuildTouchControls(touchSetting === 'true');
+      setGuildTouchControls(touchSetting === null ? window.matchMedia('(max-width: 560px)').matches : touchSetting === 'true');
     } catch {
       setGuildAccessEnabled(true);
     }
