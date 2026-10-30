@@ -3,6 +3,22 @@
 -- and cosmetic equipment slots. Checkout/redemption permissions remain closed.
 begin;
 
+-- Guests may browse only enabled catalogue entries. Signed-in members may
+-- additionally read disabled catalogue rows only when they own that entitlement.
+drop policy if exists "authenticated users read enabled token spend catalog" on public.token_spend_catalog;
+create policy "authenticated users read enabled or owned token catalog"
+  on public.token_spend_catalog for select to authenticated
+  using (
+    enabled or exists (
+      select 1 from public.token_entitlements e
+      where e.user_id=(select auth.uid()) and e.item_id=token_spend_catalog.item_id
+    )
+  );
+drop policy if exists "anonymous users read enabled token spend catalog" on public.token_spend_catalog;
+create policy "anonymous users read enabled token spend catalog"
+  on public.token_spend_catalog for select to anon using (enabled);
+grant select on public.token_spend_catalog to anon;
+
 alter table public.token_spend_catalog
   drop constraint if exists token_spend_catalog_kind_check;
 alter table public.token_spend_catalog
