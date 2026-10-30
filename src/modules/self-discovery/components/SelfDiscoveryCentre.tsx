@@ -9,7 +9,7 @@ import {
 } from '../reflection';
 import styles from './SelfDiscoveryCentre.module.css';
 
-export function SelfDiscoveryCentre() {
+export function SelfDiscoveryCentre({ worldType = 'sanctuary' }: { worldType?: WorldType }) {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<SelfDiscoveryAnswers>({});
@@ -60,7 +60,7 @@ export function SelfDiscoveryCentre() {
     if (!reflection) return;
     try {
       const content = [
-        'The Sanctuary — Personal Reflection',
+        worldType === 'guild' ? 'Guild — Personal Reflection' : 'The Sanctuary — Personal Reflection',
         `Created on: ${new Date().toLocaleDateString()}`,
         `Answers included: ${reflection.answeredCount} of ${reflection.totalQuestions}`,
         '',
@@ -77,7 +77,7 @@ export function SelfDiscoveryCentre() {
         reflection.journalPrompt,
         ...(learningPlan ? [
           '',
-          'Sanctuary Intelligence — Learning Path',
+          worldType === 'guild' ? 'Guild Intelligence — Learning Path' : 'Sanctuary Intelligence — Learning Path',
           learningPlan.title,
           learningPlan.approach,
           'Start here: ' + learningPlan.firstStep,
@@ -96,7 +96,7 @@ export function SelfDiscoveryCentre() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `sanctuary-reflection-${new Date().toISOString().slice(0, 10)}.txt`;
+      link.download = `${worldType}-reflection-${new Date().toISOString().slice(0, 10)}.txt`;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setExportStatus('ready');
@@ -162,7 +162,7 @@ export function SelfDiscoveryCentre() {
         </div>
         {learningPlan && (
           <div className={styles.resultBlock} aria-labelledby="personal-learning-plan-heading">
-            <p className={styles.eyebrow}>SANCTUARY INTELLIGENCE</p>
+            <p className={styles.eyebrow}>{worldType === 'guild' ? 'GUILD INTELLIGENCE' : 'SANCTUARY INTELLIGENCE'}</p>
             <h3 id="personal-learning-plan-heading">A learning path to try</h3>
             <p><strong>{learningPlan.title}</strong></p>
             <p>{learningPlan.approach}</p>
