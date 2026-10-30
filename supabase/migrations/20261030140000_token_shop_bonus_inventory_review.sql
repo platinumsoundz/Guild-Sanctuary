@@ -248,6 +248,7 @@ begin
   if not exists(select 1 from public.token_entitlements e where e.user_id=caller_id and e.item_id=selected_item.item_id) then
     raise exception 'Unlock this cosmetic before equipping it.' using errcode='42501';
   end if;
+  perform pg_catalog.set_config('app.cosmetic_write_authorized','true',true);
   if selected_item.kind='profile_frame' then update public.profiles set equipped_frame=selected_item.item_id,updated_at=now() where id=caller_id;
   elsif selected_item.kind='profile_effect' then update public.profiles set equipped_effect=selected_item.item_id,updated_at=now() where id=caller_id;
   elsif selected_item.kind='profile_badge' then update public.profiles set equipped_badge=selected_item.item_id,updated_at=now() where id=caller_id;
