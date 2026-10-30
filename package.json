@@ -13,6 +13,7 @@
     "check:pwa": "node scripts/check-pwa-assets.mjs",
     "check:auth": "node scripts/check-auth-flows.mjs",
     "check:account-settings": "node scripts/check-account-settings-permissions.mjs",
+    "check:account-deletion": "node scripts/check-account-deletion-boundary.mjs",
     "check:messages": "node scripts/check-message-persistence.mjs",
     "check:self-discovery": "node scripts/check-self-discovery-contract.mjs",
     "check:personal-planner": "node scripts/check-personal-planner-contract.mjs",
