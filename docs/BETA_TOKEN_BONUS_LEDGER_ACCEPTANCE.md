@@ -1,6 +1,6 @@
 # Beta token bonus and ledger acceptance plan
 
-**Status:** Design/acceptance document only. No migration or provider change is applied by this document.
+**Status:** Acceptance plan plus draft implementation in PR #296. The migration is NOT APPLIED; the beta program defaults closed.
 **Owner:** Ashley for Supabase, Stripe, Lemon Squeezy, Cloudflare, Vercel, remote databases, secrets, billing and deployment.
 **Tracking issue:** [#96 — First-100 beta token bonus](https://github.com/platinumsoundz/Guild-Sanctuary/issues/96)
 
@@ -68,3 +68,15 @@ Static tests are useful but do not prove row locking, transaction isolation, RLS
 - **Production-live:** only after Ashley verifies deployment and end-to-end behavior.
 
 Never use “live,” “deployed,” “secure,” or “verified” based only on a migration file or static contract.
+
+
+## Implemented in the draft branch (not yet staging-verified)
+
+- A single-row locked allocator caps grants at 100 and serializes concurrent verified-account events.
+- Each account has one unique 1,000-token bonus ledger entry and matching wallet credit.
+- Accounts must be email-verified and created at or after the explicit beta opening timestamp.
+- The beta program defaults to closed; no bonus can be issued until the owner opens it in an isolated staging project.
+- A dedicated bonus ledger records grant position and verification time. Authenticated members may read only their own bonus receipt.
+- Existing wallet history is extended to combine purchases, spend and bonus entries.
+
+The duplicate-account rule is enforced only to the extent of unique Supabase auth accounts/email identity; this implementation does not attempt device fingerprinting or infer whether separate verified email accounts belong to one person.
