@@ -136,7 +136,7 @@ export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldTy
           <h1>{worldType === 'guild' ? 'Guild events' : 'Community events'}</h1>
           <p className={styles.intro}>Find what is happening around you, explore event locations, and choose where to join in.</p>
         </div>
-        <span className={styles.worldTag}>THE SANCTUARY</span>
+        <span className={styles.worldTag}>{worldType === 'guild' ? 'THE GUILD' : 'THE SANCTUARY'}</span>
       </header>
 
       {userId && <section className={styles.createPanel} aria-labelledby="event-form-title">

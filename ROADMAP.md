@@ -4,6 +4,17 @@ Last updated: 2026-10-30
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
+
+## Shared design foundation and independent Guild — 2026-10-30
+
+The Guild and the Sanctuary share approved UI foundations and feature mechanics, but remain separate environments. This update is being developed on `fix/guild-independent-navigation-settings-feedback-2026-10-30`; it is not considered live until CI, merge and deployment are verified.
+
+- Guild navigation uses Guild-native labels (Home, Community, Messages, Events, Settings, Feedback, Admin and Moderation) and no longer inherits the companion environment's global page-visibility preferences.
+- Guild has its own home dashboard, console settings and feedback destination. Only the explicit exit control points users back to the companion environment.
+- Guild administration and moderation are scoped to `world_type = 'guild'`; global member-role management and global page visibility are not exposed inside Guild administration.
+- Feedback submissions include an environment marker, and the staff inbox filters to the selected environment.
+- Both roadmap dashboards use the same phase-card structure, percentage bars, responsive behaviour and estimate disclaimer. Shared components should keep the design system consistent while each environment retains its own labels, settings, navigation and data.
+
 ## Phase completion dashboard — 2026-10-30
 
 > **Estimated overall Sanctuary project progress: 50%**  

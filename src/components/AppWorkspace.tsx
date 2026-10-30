@@ -28,6 +28,7 @@ import { GuildNavigation, type GuildPage } from '@/components/GuildNavigation';
 import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { GuildRoadmap } from '@/components/GuildRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
+import { GuildHomeDashboard } from '@/components/GuildHomeDashboard';
 import { NotificationBar } from '@/components/NotificationBar';
 import { FeedbackPage } from '@/components/FeedbackCenter';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
@@ -70,7 +71,6 @@ export function AppWorkspace() {
   const [accountSuspendedUntil, setAccountSuspendedUntil] = useState<string | null>(null);
   const [accountRestrictionReason, setAccountRestrictionReason] = useState<string | null>(null);
   const [guildPage, setGuildPage] = useState<GuildPage>('home');
-  const [guildRecentTitle, setGuildRecentTitle] = useState<string | null>(null);
   const [guildAutoLaunchRecent, setGuildAutoLaunchRecent] = useState(false);
   const guildInternalPages: GuildPage[] = ['home', 'arcade', 'trials', 'library', 'music', 'photos', 'tools'];
   const contentNavigation = activeNavigation === 'guild'
@@ -172,18 +172,6 @@ export function AppWorkspace() {
   }, [currentUser, isAuthenticated, isGuest, isSessionReady, setActiveNavigation]);
 
   useEffect(() => {
-    if (activeNavigation !== 'guild' || guildPage !== 'home') return;
-    try {
-      const raw = window.localStorage.getItem('guild-library-recents-v1');
-      const recent = raw ? JSON.parse(raw) as Array<{ id?: string }> : [];
-      const first = Array.isArray(recent) ? recent[0]?.id : null;
-      setGuildRecentTitle(first === 'sleeves2d' ? 'The 5 Sleeves 2D' : first === 'sleeves3d' ? 'The 5 Sleeves 3D' : null);
-    } catch {
-      setGuildRecentTitle(null);
-    }
-  }, [activeNavigation, guildPage]);
-
-  useEffect(() => {
     if (contentNavigation !== 'profile') {
       setProfileThemePreview(null);
     }
@@ -248,7 +236,7 @@ export function AppWorkspace() {
       <button type="button" onClick={() => setActiveNavigation('today')}>Return to Today</button>
     </main>
   ) : contentNavigation === 'today' ? (
-    <SanctuaryHome onNavigate={openNavigation} />
+    activeNavigation === 'guild' ? <GuildHomeDashboard onNavigate={(page) => setGuildPage(page as GuildPage)} onContinuePlaying={() => { setGuildAutoLaunchRecent(true); setGuildPage('arcade'); }} /> : <SanctuaryHome onNavigate={openNavigation} />
   ) : isGuest && !['support', 'games', 'roadmap', 'feedback'].includes(contentNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
@@ -266,27 +254,27 @@ export function AppWorkspace() {
       </p>
     </main>
   ) : contentNavigation === 'feedback' ? (
-    <FeedbackPage role={isGuest ? 'guest' : currentRole ?? 'user'} isGuest={isGuest} />
+    <FeedbackPage role={isGuest ? 'guest' : currentRole ?? 'user'} isGuest={isGuest} worldType={worldType} />
   ) : contentNavigation === 'notifications' ? (
     <main className={styles.supportPage}>
       <NotificationBar fullPage worldType={worldType} onNavigate={openNavigation} />
     </main>
   ) : contentNavigation === 'support' ? (
     <main className={styles.supportPage}>
-      <SupportPanel />
+      <SupportPanel worldType={worldType} />
     </main>
   ) : isAuthenticated && currentUser ? (
     <>
       {contentNavigation === 'planner' ? (
-        <PersonalPlanner userId={currentUser.user.id} />
+        <PersonalPlanner userId={currentUser.user.id} worldType={worldType} />
       ) : contentNavigation === 'wallet' ? (
         canAccessSanctuaryFeature('wallet', currentUser.profile.role) ? (
-          <main className={styles.supportPage}><WalletPanel userId={currentUser.user.id} isGuest={isGuest} /></main>
+          <main className={styles.supportPage}><WalletPanel userId={currentUser.user.id} isGuest={isGuest} worldType={worldType} /></main>
         ) : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Wallet access is restricted</h1><p className={styles.sectionDescription}>The Wallet is temporarily available to VIP members and above while purchases and spending are being tested. Your account and community access are unchanged.</p></main>
         )
       ) : contentNavigation === 'shop' ? (
-        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} /> : (
+        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} worldType={worldType} /> : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Token Shop access is restricted</h1><p className={styles.sectionDescription}>The Token Shop is temporarily available to VIP members and above while its payment and redemption systems are being verified. Token spending remains disabled until testing is complete.</p></main>
         )
       ) : contentNavigation === 'games' ? (
@@ -294,7 +282,7 @@ export function AppWorkspace() {
       ) : contentNavigation === 'guild' ? (
         <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
       ) : contentNavigation === 'admin' ? (
-        <AdminDashboard role={currentUser.profile.role} />
+        <AdminDashboard role={currentUser.profile.role} worldType={worldType} />
       ) : contentNavigation === 'moderation' ? (
         <ModerationDashboard role={currentUser.profile.role} worldType={worldType} />
       ) : contentNavigation === 'roadmap' ? (
@@ -316,6 +304,7 @@ export function AppWorkspace() {
           isPostsLoading={isProfilePostsLoading}
           onSave={updateProfile}
           onThemeChange={setProfileThemePreview}
+          worldType={worldType}
         />
       ) : contentNavigation === 'discover' && viewedProfile ? (
         <PublicProfilePage
@@ -352,6 +341,7 @@ export function AppWorkspace() {
         <SettingsHub
           userId={currentUser.user.id}
           email={currentUser.user.email}
+          environment={worldType}
           twoFactorEnabled={currentUser.user.twoFactorEnabled}
           privacy={currentUser.profile.privacy}
           visibility={currentUser.profile.visibility}
@@ -395,35 +385,7 @@ export function AppWorkspace() {
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={guildPage} className={styles.guildPageContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
                 {guildPage === 'home' ? (
-                  <main className={styles.guildLanding} aria-labelledby="guild-home-title">
-                    <section className={styles.guildFeatured} aria-labelledby="guild-home-title">
-                      <div className={styles.guildFeaturedCopy}>
-                        <p className={styles.sectionEyebrow}>THE GUILD · YOUR CONSOLE</p>
-                        <span className={styles.guildLiveLabel}><i /> YOUR GAMING SPACE</span>
-                        <h1 id="guild-home-title">Your worlds.<br /><em>One home.</em></h1>
-                        <p>A console-first home for your games, collection, music and memories — with Sanctuary always within reach.</p>
-                        <div className={styles.guildHeroActions}>
-                          <button type="button" className={styles.guildPrimaryAction} onClick={() => setGuildPage('arcade')}><Gamepad2 size={18} /> Open game library</button>
-                          <button type="button" className={styles.guildSecondaryAction} onClick={() => setGuildPage('trials')}>Play Guild Trials <span aria-hidden="true">↗</span></button>
-                        </div>
-                      </div>
-                      <div className={styles.guildFeaturedArt} aria-hidden="true"><div className={styles.guildOrbitRing} /><div className={styles.guildOrbitPlanet} /><span className={styles.guildOrbitMoon} /></div>
-                    </section>
-                    <section className={styles.guildContinue} aria-label="Continue playing">
-                      <div><p className={styles.sectionEyebrow}>PICK UP WHERE YOU LEFT OFF</p><h2>{guildRecentTitle ?? 'Your next adventure starts here'}</h2><p>{guildRecentTitle ? 'Your last launch is saved on this device. Open the library to continue.' : 'Launch a game and your recent activity will appear here on this device.'}</p></div>
-                      <button type="button" onClick={() => { setGuildAutoLaunchRecent(Boolean(guildRecentTitle)); setGuildPage('arcade'); }}><Play size={16} /> {guildRecentTitle ? 'Continue playing' : 'Explore games'}</button>
-                    </section>
-                    <div className={styles.guildHomeSectionHead}><div><p className={styles.sectionEyebrow}>QUICK ACCESS</p><h2>Jump back in</h2></div><span>Touch · keyboard · controller</span></div>
-                    <div className={styles.guildDestinationGrid}>
-                      <button type="button" className={styles.guildDestinationFeatured} onClick={() => setGuildPage('arcade')}><span>01 · PLAY</span><strong>Featured Games</strong><small>Open the game library, launch worlds and review compatibility.</small><b>Open library <span aria-hidden="true">↗</span></b></button>
-                      <button type="button" onClick={() => setGuildPage('trials')}><span>02 · PLAY</span><strong>Guild Trials</strong><small>Play the original Orbital Drift and Comet Dodge arcade games.</small></button>
-                      <button type="button" onClick={() => setGuildPage('library')}><span>03 · COLLECT</span><strong>My Game Collection</strong><small>Save and organise your personal game catalogue.</small></button>
-                      <button type="button" onClick={() => setGuildPage('music')}><span>04 · LISTEN</span><strong>Music Player</strong><small>Play audio files selected from this device.</small></button>
-                      <button type="button" onClick={() => setGuildPage('photos')}><span>05 · REMEMBER</span><strong>Photo Slideshow</strong><small>Build a private, in-browser slideshow.</small></button>
-                      <button type="button" onClick={() => setGuildPage('tools')}><span>06 · EXPLORE</span><strong>Guild Tools</strong><small>Review gaming destinations and Cloud Lab status.</small></button>
-                      <button type="button" onClick={() => setGuildPage('today')}><span>07 · SANCTUARY</span><strong>Return to Sanctuary</strong><small>Community, messages, profile, planner and settings.</small></button>
-                    </div>
-                  </main>
+                  <GuildHomeDashboard onNavigate={(page) => setGuildPage(page as GuildPage)} />
                 ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub autoLaunchRecent={guildAutoLaunchRecent} /></div>
                 : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
                 : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /></div>

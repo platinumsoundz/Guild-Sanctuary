@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import type { Post, Profile } from '@/types/database';
+import type { Post, Profile, WorldType } from '@/types/database';
 import { normalizeSocialLinks, socialLinkFields } from '@/lib/socialLinks';
 import { ProfileCard } from './ProfileCard';
 import { SelfDiscoveryCentre } from '@/modules/self-discovery/components/SelfDiscoveryCentre';
@@ -13,11 +13,12 @@ interface ProfileDashboardProps {
   isPostsLoading: boolean;
   onSave: (updates: Partial<Omit<Profile, 'id' | 'userId' | 'role'>>) => void | Promise<void>;
   onThemeChange: (themeColor: string) => void;
+  worldType?: WorldType;
 }
 
 const starSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
 
-export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThemeChange }: ProfileDashboardProps) {
+export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThemeChange, worldType = 'sanctuary' }: ProfileDashboardProps) {
   const [draft, setDraft] = useState(profile);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,7 +91,7 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
     <main className={styles.dashboard} style={{ '--profile-color': draft.themeColor } as React.CSSProperties}>
       <header className={styles.pageHeader}>
         <div>
-          <p className={styles.eyebrow}>YOUR SANCTUARY PROFILE</p>
+          <p className={styles.eyebrow}>{worldType === 'guild' ? 'YOUR GUILD PROFILE' : 'YOUR SANCTUARY PROFILE'}</p>
           <span className="cosmic-badge">Your space, your style</span>
           <h1>Your profile</h1>
         </div>
@@ -126,7 +127,7 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
           <div className={styles.showcaseGrid}>
             {posts.map((post) => (
               <article className={styles.showcaseItem} key={post.id}>
-                <span className={styles.showcaseWorld}>SANCTUARY</span>
+                <span className={styles.showcaseWorld}>{worldType === 'guild' ? 'GUILD' : 'SANCTUARY'}</span>
                 <p>{post.content}</p>
                 {post.mediaUrl && post.mediaType === 'image' && <img src={post.mediaUrl} alt="Media from your post" />}
                 {post.mediaUrl && post.mediaType === 'audio' && <audio controls preload="none" src={post.mediaUrl}>Audio playback is not supported.</audio>}
@@ -141,7 +142,7 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
 
       <ProfileCard profile={draft} />
 
-      <SelfDiscoveryCentre />
+      <SelfDiscoveryCentre worldType={worldType} />
 
       {isEditing && (
         <form className={`${styles.editor} grid w-full min-w-0`} onSubmit={(event) => void handleSave(event)}>

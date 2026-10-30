@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import type { Profile, ProfilePrivacy, SocialLinks } from '@/types/database';
+import type { Profile, ProfilePrivacy, SocialLinks, WorldType } from '@/types/database';
 import { isSupabaseAuthConfigured } from '@/modules/auth';
 import { useAccountSettings } from '../useAccountSettings';
 import styles from './SettingsHub.module.css';
@@ -16,6 +16,7 @@ interface SettingsHubProps {
   onUpdateProfile: (updates: Partial<Pick<Profile, 'privacy' | 'visibility' | 'socialLinks'>>) => void | Promise<void>;
   onDeleteAccount: (emailConfirmation: string, phrase: string, twoFactorCode: string) => void;
   onLaunchGuild: () => void;
+  environment?: WorldType;
 }
 
 const preferenceLabels = {
@@ -61,6 +62,7 @@ export function SettingsHub({
   onUpdateProfile,
   onDeleteAccount,
   onLaunchGuild,
+  environment = 'sanctuary',
 }: SettingsHubProps) {
   const { settings, isLoading, error, updatePreferences, setError } = useAccountSettings(userId);
   const [linksDraft, setLinksDraft] = useState<SocialLinks>(socialLinks);
@@ -69,10 +71,15 @@ export function SettingsHub({
   const [deleteCode, setDeleteCode] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [guildAccessEnabled, setGuildAccessEnabled] = useState(true);
+  const [guildReducedMotion, setGuildReducedMotion] = useState(false);
+  const [guildTouchControls, setGuildTouchControls] = useState(false);
 
   useEffect(() => {
     try {
       setGuildAccessEnabled(window.localStorage.getItem('sanctuary-hidden-guild-access') !== 'disabled');
+      setGuildReducedMotion(window.localStorage.getItem('guild-reduced-motion-v1') === 'true');
+      const touchSetting = window.localStorage.getItem('guild-touch-controls-v1');
+      setGuildTouchControls(touchSetting === null ? window.matchMedia('(max-width: 560px)').matches : touchSetting === 'true');
     } catch {
       setGuildAccessEnabled(true);
     }
@@ -209,9 +216,9 @@ export function SettingsHub({
   return (
     <main className={styles.settings}>
       <header className={styles.header}>
-        <p className={styles.eyebrow}>YOUR ACCOUNT</p>
+        <p className={styles.eyebrow}>{environment === 'guild' ? 'GUILD SETTINGS' : 'YOUR ACCOUNT'}</p>
         <h1>Settings &amp; customization</h1>
-        <p>Manage your preferences, privacy, social links, and account.</p>
+        <p>{environment === 'guild' ? 'Personalise your console controls, display preferences, privacy and account.' : 'Manage your preferences, privacy, social links, and account.'}</p>
       </header>
 
       {error && <p className={styles.error} role="alert">{error}</p>}
@@ -315,19 +322,48 @@ export function SettingsHub({
             </div>
           </section>
 
-          <section className={styles.panel} aria-labelledby="hidden-guild-title">
-            <h2 id="hidden-guild-title">Hidden feature access</h2>
-            <p className={styles.hint}>The Guild is intentionally hidden from Sanctuary navigation. Enable access, then use Launch now to enter directly on this device — no controller or physical keyboard needed. This preference is saved on this device.</p>
-            <div className={styles.guildAccessRow}>
-              <label className={styles.toggleRow}>
-                <span>Enable hidden Guild access</span>
-                <input type="checkbox" checked={guildAccessEnabled} onChange={(event) => updateGuildAccess(event.currentTarget.checked)} />
-              </label>
-              <button type="button" className={styles.launchGuildButton} onClick={onLaunchGuild} disabled={!guildAccessEnabled} aria-describedby="hidden-guild-title">
-                Launch now
-              </button>
-            </div>
-          </section>
+          {environment === 'guild' ? (
+            <section className={styles.panel} aria-labelledby="guild-controls-title">
+              <h2 id="guild-controls-title">Console controls</h2>
+              <p className={styles.hint}>These preferences affect the Guild interface on this device.</p>
+              <div className={styles.toggleList}>
+                <label className={styles.toggleRow}>
+                  <span>Reduce motion and transitions</span>
+                  <input type="checkbox" checked={guildReducedMotion} onChange={(event) => {
+                    const enabled = event.currentTarget.checked;
+                    setGuildReducedMotion(enabled);
+                    document.documentElement.dataset.guildReducedMotion = String(enabled);
+                    window.dispatchEvent(new CustomEvent('guild-reduced-motion-change', { detail: enabled }));
+                    try { window.localStorage.setItem('guild-reduced-motion-v1', String(enabled)); } catch { setError('This browser could not save the reduced-motion preference.'); }
+                  }} />
+                </label>
+                <label className={styles.toggleRow}>
+                  <span>Show touch navigation controls</span>
+                  <input type="checkbox" checked={guildTouchControls} onChange={(event) => {
+                    const enabled = event.currentTarget.checked;
+                    setGuildTouchControls(enabled);
+                    window.dispatchEvent(new CustomEvent('guild-touch-controls-change', { detail: enabled }));
+                    try { window.localStorage.setItem('guild-touch-controls-v1', String(enabled)); } catch { setError('This browser could not save the touch-controls preference.'); }
+                  }} />
+                </label>
+              </div>
+              <p className={styles.hint}>Fullscreen and connected-controller diagnostics are available from the Quick Menu.</p>
+            </section>
+          ) : (
+            <section className={styles.panel} aria-labelledby="hidden-guild-title">
+              <h2 id="hidden-guild-title">Hidden feature access</h2>
+              <p className={styles.hint}>Enable access, then use Launch now to enter the console directly on this device — no controller or physical keyboard needed. This preference is saved on this device.</p>
+              <div className={styles.guildAccessRow}>
+                <label className={styles.toggleRow}>
+                  <span>Enable hidden Guild access</span>
+                  <input type="checkbox" checked={guildAccessEnabled} onChange={(event) => updateGuildAccess(event.currentTarget.checked)} />
+                </label>
+                <button type="button" className={styles.launchGuildButton} onClick={onLaunchGuild} disabled={!guildAccessEnabled} aria-describedby="hidden-guild-title">
+                  Launch now
+                </button>
+              </div>
+            </section>
+          )}
 
           <section className={`${styles.panel} ${styles.dangerPanel}`} aria-labelledby="delete-title">
             <h2 id="delete-title">Delete account</h2>

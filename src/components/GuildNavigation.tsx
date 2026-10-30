@@ -4,12 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Home, Gamepad2, Library, Music2, Image as ImageIcon, Settings, Newspaper, Search,
-  MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard, Map,
+  MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard,
   Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
-import { fetchPageVisibility, isPageVisible, type PageVisibilityMap } from '@/lib/pageVisibility';
 import { NotificationBar } from './NotificationBar';
 import { GuildDiagnosticsPanel } from './GuildDiagnosticsPanel';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
@@ -18,31 +17,29 @@ import styles from './GuildNavigation.module.css';
 export type GuildPage = 'home' | 'arcade' | 'trials' | 'library' | 'music' | 'photos' | 'tools' | NavigationState;
 type Item = { id: GuildPage; label: string; icon: typeof Home; description?: string };
 const guildItems: Item[] = [
-  { id: 'home', label: 'Guild Home', icon: Home },
+  { id: 'home', label: 'Home', icon: Home },
   { id: 'arcade', label: 'Featured Games', icon: Gamepad2, description: 'Launch The 5 Sleeves and browser games' },
-  { id: 'trials', label: 'Guild Trials', icon: Gamepad2, description: 'Original Guild arcade games' },
+  { id: 'trials', label: 'Trials', icon: Gamepad2, description: 'Original Guild arcade games' },
   { id: 'library', label: 'My Game Collection', icon: Library, description: 'Your saved game catalogue' },
   { id: 'music', label: 'Music Player', icon: Music2, description: 'Audio selected from this device' },
   { id: 'photos', label: 'Photo Slideshow', icon: ImageIcon, description: 'Private local gallery' },
-  { id: 'tools', label: 'Guild Tools', icon: Settings, description: 'Gaming links and Cloud Lab status' },
+  { id: 'tools', label: 'Tools', icon: Settings, description: 'Gaming links and Cloud Lab status' },
 ];
-const sanctuaryItems: Item[] = [
-  { id: 'today', label: 'Today', icon: Home },
-  { id: 'feed', label: 'Guild Community', icon: Newspaper },
+const guildCommunityItems: Item[] = [
+    { id: 'feed', label: 'Community', icon: Newspaper },
   { id: 'discover', label: 'Discover', icon: Search },
-  { id: 'messages', label: 'Guild Messages', icon: MessageSquare },
-  { id: 'events', label: 'Guild Events', icon: CalendarDays },
-  { id: 'shorts', label: 'Guild Shorts', icon: Clapperboard },
-  { id: 'planner', label: 'Guild Planner', icon: CalendarCheck },
-  { id: 'profile', label: 'Guild Profile', icon: UserRound },
-  { id: 'notifications', label: 'Guild Notifications', icon: Bell },
-  { id: 'games', label: 'Cosmic Arcade', icon: Gamepad2 },
-  { id: 'roadmap', label: 'Sanctuary Roadmap', icon: Map },
-  { id: 'guild-roadmap', label: 'Guild Roadmap', icon: Gamepad2 },
+  { id: 'messages', label: 'Messages', icon: MessageSquare },
+  { id: 'events', label: 'Events', icon: CalendarDays },
+  { id: 'shorts', label: 'Shorts', icon: Clapperboard },
+  { id: 'planner', label: 'Planner', icon: CalendarCheck },
+  { id: 'profile', label: 'Profile', icon: UserRound },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'guild-roadmap', label: 'Roadmap', icon: Gamepad2 },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
-  { id: 'support', label: 'Support the community', icon: HeartHandshake },
+  { id: 'support', label: 'Support', icon: HeartHandshake },
   { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'feedback', label: 'Feedback', icon: MessageSquare },
   { id: 'admin', label: 'Admin', icon: ShieldCheck },
   { id: 'moderation', label: 'Moderation', icon: ShieldCheck },
 ];
@@ -55,7 +52,6 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   onExit: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
-  const [pageVisibility, setPageVisibility] = useState<PageVisibilityMap>({});
   const [open, setOpen] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
@@ -76,30 +72,35 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   // On narrow phones, show the touch navigation controls by default so they
   // are discoverable without requiring a trip through the Quick Menu.
   useEffect(() => {
-    if (window.matchMedia('(max-width: 560px)').matches) {
-      setControlsOpen(true);
+    try {
+      const saved = window.localStorage.getItem('guild-touch-controls-v1');
+      if (saved !== null) setControlsOpen(saved === 'true');
+      else if (window.matchMedia('(max-width: 560px)').matches) setControlsOpen(true);
+    } catch {
+      if (window.matchMedia('(max-width: 560px)').matches) setControlsOpen(true);
     }
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    void fetchPageVisibility().then((value) => { if (!cancelled) setPageVisibility(value); }).catch(() => { if (!cancelled) setPageVisibility({}); });
-    return () => { cancelled = true; };
-  }, []);
-
-  const allowed = sanctuaryItems.filter((item) => {
+  const allowed = guildCommunityItems.filter((item) => {
+    if (item.id === 'feedback') return true;
+    if (item.id === 'guild-roadmap' && !['developer', 'owner'].includes(role.toLowerCase())) return false;
     if (!canAccessSanctuaryPage(item.id, role)) return false;
-    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role) && isPageVisible(item.id, pageVisibility, role);
-    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role) && isPageVisible(item.id, pageVisibility, role);
-    return isPageVisible(item.id, pageVisibility, role);
+    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role);
+    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role);
+    return true;
   });
-  const label = [...guildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Sanctuary';
+  const label = [...guildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Guild';
   const searchableItems = [...guildItems, ...allowed];
   const quickResults = searchableItems.filter((item) => {
     const needle = quickQuery.trim().toLowerCase();
     return !needle || item.label.toLowerCase().includes(needle) || (item.description ?? '').toLowerCase().includes(needle);
   }).slice(0, 8);
   const choose = (page: GuildPage) => { onSelect(page); setOpen(false); setQuickOpen(false); setQuickKeyboardOpen(false); setQuickQuery(''); };
+  const toggleControls = () => setControlsOpen((current) => {
+    const next = !current;
+    try { window.localStorage.setItem('guild-touch-controls-v1', String(next)); } catch { /* The control remains usable for this visit. */ }
+    return next;
+  });
   const addQuickKey = (key: string) => {
     if (key === 'Backspace') setQuickQuery((value) => value.slice(0, -1));
     else if (key === 'Space') setQuickQuery((value) => value + ' ');
@@ -140,12 +141,21 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem('guild-reduced-motion-v1');
-      const enabled = stored === 'true';
+    const syncReducedMotion = (event?: Event) => {
+      const detail = event instanceof CustomEvent ? event.detail : undefined;
+      let enabled = typeof detail === 'boolean' ? detail : false;
+      if (typeof detail !== 'boolean') {
+        try { enabled = window.localStorage.getItem('guild-reduced-motion-v1') === 'true'; } catch { /* Use the default. */ }
+      }
       setReducedMotion(enabled);
       document.documentElement.dataset.guildReducedMotion = String(enabled);
-    } catch { /* Accessibility defaults still follow the operating system. */ }
+    };
+    const syncTouchControls = (event: Event) => {
+      if (event instanceof CustomEvent && typeof event.detail === 'boolean') setControlsOpen(event.detail);
+    };
+    syncReducedMotion();
+    window.addEventListener('guild-reduced-motion-change', syncReducedMotion);
+    window.addEventListener('guild-touch-controls-change', syncTouchControls);
     const syncFullscreen = () => setIsFullscreen(Boolean(document.fullscreenElement));
     const syncController = () => setControllerPresent(Boolean(getConnectedGamepad()));
     syncFullscreen();
@@ -158,6 +168,8 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       document.removeEventListener('fullscreenchange', syncFullscreen);
       window.removeEventListener('gamepadconnected', syncController);
       window.removeEventListener('gamepaddisconnected', syncController);
+      window.removeEventListener('guild-reduced-motion-change', syncReducedMotion);
+      window.removeEventListener('guild-touch-controls-change', syncTouchControls);
       window.clearInterval(poll);
     };
   }, []);
@@ -290,7 +302,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     <div className={styles.current} aria-live="polite">{label}</div>
     <div className={styles.notificationSlot}><NotificationBar compact worldType="guild" onNavigate={(page) => onSelect(page)} /></div>
     <button ref={quickButtonRef} type="button" className={styles.quickButton} aria-label="Open Guild quick menu" aria-expanded={quickOpen} aria-keyshortcuts="Control+K Meta+K" onClick={() => setQuickOpen((value) => !value)}><SlidersHorizontal size={18} /><span>Quick menu</span><kbd>⌘/Ctrl K</kbd></button>
-    <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Sanctuary</span></button>
+    <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Exit</span></button>
     </header>
     {mounted && quickOpen && createPortal(<>
       <button type="button" className={styles.quickScrim} aria-label="Close quick menu" onClick={() => { setQuickOpen(false); setQuickQuery(''); quickButtonRef.current?.focus(); }} />
@@ -309,19 +321,19 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
           }) : <p className={styles.quickEmpty}>No destinations match “{quickQuery}”. Try another search.</p>}
         </div>
         <div className={styles.quickSettings}>
-          <button type="button" aria-pressed={controlsOpen} onClick={() => setControlsOpen((value) => !value)}><Gamepad2 size={17} /><span>Touch navigation controls</span><span className={controlsOpen ? styles.toggleOn : styles.toggleOff}>{controlsOpen ? 'ON' : 'OFF'}</span></button>
+          <button type="button" aria-pressed={controlsOpen} onClick={toggleControls}><Gamepad2 size={17} /><span>Touch navigation controls</span><span className={controlsOpen ? styles.toggleOn : styles.toggleOff}>{controlsOpen ? 'ON' : 'OFF'}</span></button>
           <button type="button" onClick={() => void toggleFullscreen()}><Monitor size={17} /><span>{isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}</span>{isFullscreen ? <Check size={15} /> : <Maximize2 size={15} />}</button>
           <button type="button" aria-pressed={reducedMotion} onClick={toggleReducedMotion}><SlidersHorizontal size={17} /><span>Reduce Guild motion</span><span className={reducedMotion ? styles.toggleOn : styles.toggleOff}>{reducedMotion ? 'ON' : 'OFF'}</span></button>
-          <button type="button" onClick={() => choose('home')}><Home size={17} /><span>Resume Guild Home</span><ChevronRight size={15} /></button>
+          <button type="button" onClick={() => choose('home')}><Home size={17} /><span>Resume Home</span><ChevronRight size={15} /></button>
           <button type="button" onClick={onExit}><LogOut size={17} /><span>Exit to Sanctuary</span><ChevronRight size={15} /></button>
         </div>
         <GuildDiagnosticsPanel />
-        <p className={styles.quickFootnote}>Search is limited to available Guild and Sanctuary destinations. Settings apply to this browser; game audio and display behaviour can still depend on the game host.</p>
+        <p className={styles.quickFootnote}>Search is limited to available Guild destinations. Settings apply to this browser; game audio and display behaviour can still depend on the game host.</p>
       </section>
     </>, document.body)}
     {mounted && createPortal(<>
     {open && <button type="button" className={styles.scrim} aria-label="Close navigation" onClick={() => setOpen(false)} />}
-    <nav className={styles.drawer} data-open={open} aria-label="Guild and Sanctuary pages" aria-hidden={!open} inert={!open} onKeyDown={(event) => {
+    <nav className={styles.drawer} data-open={open} aria-label="Guild navigation" aria-hidden={!open} inert={!open} onKeyDown={(event) => {
       if (event.key === 'Escape') {
         event.preventDefault();
         setOpen(false);
@@ -343,7 +355,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     }}>
       <div className={styles.drawerHead}><div><small>YOUR CONSOLE</small><h2>Navigation</h2></div><button type="button" aria-label="Close navigation" onClick={() => setOpen(false)}><X size={20} /></button></div>
       <p className={styles.group}>THE GUILD</p>{guildItems.map(render)}
-      <p className={styles.group}>SANCTUARY PAGES</p>{allowed.map(render)}
+      <p className={styles.group}>COMMUNITY &amp; TOOLS</p>{allowed.map(render)}
       <button type="button" className={styles.return} onClick={onExit}><LogOut size={17} /> Exit Guild · Return to Sanctuary</button>
     </nav>
     </>, document.body)}

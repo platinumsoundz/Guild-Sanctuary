@@ -106,7 +106,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
 
   const handleLike = async (videoId: string) => {
     if (!canEngage) {
-      setError('Sign in with your Sanctuary account to like Shorts.');
+      setError('Sign in to your account to like Shorts.');
       return;
     }
     try {
@@ -123,7 +123,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
 
   const showComments = async (videoId: string) => {
     if (!canEngage) {
-      setError('Sign in with your Sanctuary account to view and comment on Shorts.');
+      setError('Sign in to your account to view and comment on Shorts.');
       return;
     }
     const nextId = openCommentsId === videoId ? null : videoId;
@@ -162,7 +162,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
   const handleComment = async (event: FormEvent<HTMLFormElement>, videoId: string) => {
     event.preventDefault();
     if (!canEngage) {
-      setError('Sign in with your Sanctuary account to comment on Shorts.');
+      setError('Sign in to your account to comment on Shorts.');
       return;
     }
     try {
@@ -286,7 +286,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
   const handlePublishVideo = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canEngage) {
-      setError('Sign in with your Sanctuary account to publish a Short.');
+      setError('Sign in to your account to publish a Short.');
       return;
     }
     if (!videoDraft || !videoFile) {
@@ -314,7 +314,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
 
   const handleDeleteVideo = async (videoId: string) => {
     if (!canEngage) {
-      setError('Sign in with your Sanctuary account to delete a Short.');
+      setError('Sign in to your account to delete a Short.');
       return;
     }
     if (!window.confirm('Delete this video and its uploaded media? This cannot be undone.')) return;
@@ -362,7 +362,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
           <button type="submit" disabled={!videoDraft}>Publish short</button>
         </form>
       ) : (
-        <p className={styles.empty} role="status">Sign in with your Sanctuary account to publish, like, or comment on Shorts.</p>
+        <p className={styles.empty} role="status">Sign in to publish, like, or comment on Shorts.</p>
       )}
       {error && <p className={styles.error} role="alert">{error}</p>}
       <div className={styles.feed} ref={feedRef}>

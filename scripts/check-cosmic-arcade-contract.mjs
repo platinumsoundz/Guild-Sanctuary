@@ -17,7 +17,7 @@ assert.match(navigation, /id:\s*'games',\s*label:\s*'Cosmic Arcade'/, 'Cosmic Ar
 assert.match(workspace, /contentNavigation === 'games' \? \(\s*<CosmicArcade \/>/, 'Cosmic Arcade route renders only the Sanctuary-built arcade');
 assert.doesNotMatch(gamesHub, /import \{ CosmicArcade \}/, 'external creator projects do not embed the Sanctuary-built arcade');
 assert.doesNotMatch(arcade, /GamesHub|The 5 Sleeves 2D|The 5 Sleeves 3D|My Roblox World|Minecraft|Platinum Survival/, 'Cosmic Arcade contains no external creator-world links');
-assert.match(workspace, /contentNavigation === 'support' \? \([\s\S]*?<SupportPanel \/>/, 'Support navigation renders the dedicated creator-support page');
+assert.match(workspace, /contentNavigation === 'support' \? \([\s\S]*?<SupportPanel worldType=\{worldType\} \/>/, 'Support navigation renders the dedicated environment-aware creator-support page');
 assert.doesNotMatch(supportPanel, /GamesHub|community-projects-title/, 'creator support page stays focused on contributions');
 assert.doesNotMatch(workspace, /isGuest && activeNavigation === 'guild'/, 'guest sessions cannot access the hidden Guild');
 assert.match(workspace, /activeNavigation === 'guild' \? \([\s\S]*?<GuildNavigation/, 'authenticated Guild route mounts its dedicated console shell');

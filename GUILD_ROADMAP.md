@@ -1,17 +1,17 @@
 # The Guild Roadmap
 
-> Scope: The Guild console experience only. Sanctuary has its own roadmap; The 5 Sleeves game repositories retain their own game-development roadmaps. This document tracks the Guild shell and integrations that surround those games.
+> Scope: The Guild console experience only. The companion platform has its own roadmap; The 5 Sleeves game repositories retain their own game-development roadmaps. This document tracks the Guild shell and integrations that surround those games.
 
 ## Product direction
 
-Make The Guild feel like a console, not a conventional website with game links. Blend Steam Big Picture's flexibility, Xbox's continuity, PlayStation's presentation and Nintendo's simplicity while keeping Guild's own identity. Sanctuary and Guild continue to share identity and approved foundations, but Guild keeps its own full-screen shell, navigation and roadmap.
+Make The Guild feel like a console, not a conventional website with game links. Blend Steam Big Picture's flexibility, Xbox's continuity, PlayStation's presentation and Nintendo's simplicity while keeping Guild's own identity. The platforms share approved infrastructure and design foundations, while Guild keeps its own full-screen shell, navigation, settings, content and roadmap.
 
 ## Priority order
 
 ### P0 — HUD and visual quality first
-- [ ] **Persistent quick-access HUD:** the shared notifications panel and a page-preserving Quick Menu are available from the Guild shell. The Quick Menu searches destinations, reports controller detection, toggles fullscreen and a locally persisted reduced-motion preference, and offers Guild Home / Exit to Sanctuary. Finish real-device focus/return checks and add controller/audio diagnostics.
+- [ ] **Persistent quick-access HUD:** the shared notifications panel and a page-preserving Quick Menu are available from the Guild shell. The Quick Menu searches destinations, reports controller detection, toggles fullscreen and a locally persisted reduced-motion preference, and offers Home / Exit to Sanctuary. Finish real-device focus/return checks and add controller/audio diagnostics.
 - [ ] **Input consistency:** make Menu/Guide, A/Select, B/Back, Escape, touch D-pad and keyboard alternatives consistent. Restore focus on close, support visible focus rings and reduced motion, and handle controller disconnect/reconnect.
-- [x] **Home dashboard foundation:** the Guild home now has a dominant featured destination, a Continue Playing surface based on local launch history, and quick-access cards for Games, Trials, Collection, Music, Photos, Tools and Sanctuary. Original custom game art and deeper dashboard data remain future polish.
+- [x] **Home dashboard foundation:** the Guild home now has a dominant featured destination, a Continue Playing surface based on local launch history, and quick-access cards for Games, Trials, Collection, Music, Photos and Tools. Original custom game art and deeper dashboard data remain future polish.
 - [ ] **Original game artwork:** create distinct, canon-consistent artwork for The 5 Sleeves 2D and The 5 Sleeves 3D; remove generic placeholder tiles as art assets become available.
 - [ ] **Responsive console layout:** check TV/wide desktop, laptop, tablet and Android portrait/landscape. Keep touch targets comfortable, avoid clipped overlays and preserve safe-area spacing.
 - [ ] **Accessibility and polish:** contrast, readable text, loading/error/empty states, focus management, reduced-motion behaviour and keyboard-only checks.
@@ -27,7 +27,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ### P2 — Library and social systems
 - [ ] Account-backed library sync after schema/RLS review and multi-account isolation tests.
 - [ ] Favourites, collections, last-played metadata and safe backup/restore.
-- [ ] Optional gaming identity, friends, invitations and parties, distinct from Sanctuary spiritual progress.
+- [ ] Optional gaming identity, friends, invitations and parties, separate from the companion platform's personal-progress features.
 - [ ] Achievements and progress only from trusted game/server/provider sources.
 - [ ] Privacy controls for presence, activity sharing and notifications.
 
@@ -64,7 +64,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 
 ## Hidden console entry policy — 2026-10-29
 
-- The Guild console remains part of the Sanctuary codebase and keeps its internal route/state, but `Guild Arcade` and `Guild Roadmap` must not appear in Sanctuary's ordinary navigation selector or navigation groups.
+- The Guild console is a separate environment with its own internal route/state. Guild game and roadmap destinations must not appear in the companion platform's ordinary navigation selector or navigation groups.
 - Access is intended through the dedicated/hidden Guild entry point, not a visible page-selector item. Do not remove the Guild route or Guild's own internal navigation when hiding these selector entries.
 - Messaging audit: the active inbox/thread still uses the in-memory `service.ts`; the Supabase adapter is optional and gated, and audio/video calling is not present in the current module tree. Treat durable messaging and calls as unfinished, not live features.
 
@@ -72,8 +72,8 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ## Top menu and quick-settings recovery — 2026-10-29
 
 - **Reported regression:** the Guild menu and quick settings were not appearing after the navigation was moved to the top of the console.
-- Restore explicit **Menu** and **Quick settings** controls in the active Guild world top bar, with page-preserving overlay panels for Guild Home, trial restart/pause, Exit to Sanctuary, touch controls, reduced motion, fullscreen and Big Picture layout.
-- Raise the Guild navigation drawer and Quick Menu/scrim layers above the Sanctuary shell at desktop and mobile widths; add regression assertions for the controls, overlay panels and stacking order.
+- Restore explicit **Menu** and **Quick settings** controls in the active Guild world top bar, with page-preserving overlay panels for Home, trial restart/pause, Exit to Sanctuary, touch controls, reduced motion, fullscreen and Big Picture layout.
+- Raise the Guild navigation drawer and Quick Menu/scrim layers above parent-app shell layers at desktop and mobile widths; add regression assertions for the controls, overlay panels and stacking order.
 - **Status:** implementation is on `fix/guild-top-menu-quick-settings-2026-10-29`; exact-head CI, responsive interaction tests and merge are still required. No production deployment is claimed.
 
 
@@ -88,16 +88,40 @@ Make The Guild feel like a console, not a conventional website with game links. 
 
 ## Guild overlays and Settings launch — 2026-10-29
 
-- Raised the portaled Guild navigation drawer, scrim, Quick Menu panel and quick-menu scrim above Sanctuary shell layers at all widths. Both panels remain rendered through `createPortal(..., document.body)` to avoid transformed/stacking-context parents.
-- Quick Menu and the left navigation now use global page-visibility settings for their Sanctuary destinations while preserving role gates.
+- Raised the portaled Guild navigation drawer, scrim, Quick Menu panel and quick-menu scrim above parent-app shell layers at all widths. Both panels remain rendered through `createPortal(..., document.body)` to avoid transformed/stacking-context parents.
+- Guild navigation must use Guild-specific visibility rules and must not inherit global page-visibility preferences from the companion environment.
 - Fixed the access policy so an authenticated basic user can launch The Guild from Settings. Developer/Owner restrictions continue to apply to Guild Roadmap and the separate page-visibility administration controls.
 - Validation contract now checks portal rendering and top-priority stacking order. Still requires preview interaction checks on Android portrait/landscape and desktop, including click/touch and Escape-close behaviour.
 
 ## P1 — Independent Guild community
 
-- [x] Reuse Sanctuary's feed, Shorts, events, messaging, notifications, profile-posts and moderation mechanics inside the Guild shell, with Guild console styling and Guild-specific labels.
-- [x] Keep content separate using the shared database's `world_type`: Sanctuary content stays in `sanctuary`; Guild content is written to `guild`. Do not copy or duplicate the social tables.
+- [x] Reuse the shared feed, Shorts, events, messaging, notifications, profile-posts and moderation mechanics inside the Guild shell, with Guild console styling and Guild-native labels.
+- [x] Keep content separate using the shared database's `world_type`: Each environment's content remains isolated by the database `world_type` value. Do not copy or duplicate the social tables.
 - [x] Scope feed reads/writes, Shorts, events/RSVPs, conversation lists and threads, notifications, report queues and profile-post retrieval to the active world.
 - [x] Keep comments and reactions attached to their target content so engagement follows the target's world. Notifications and reports inherit world identity from their target.
-- [x] Preserve existing data in Sanctuary by default; the scoped database migration is applied and schema/functions/triggers are verified.
+- [x] Preserve existing non-Guild data by default; the scoped database migration is applied and schema/functions/triggers are verified.
 - [ ] Run end-to-end tests with a test post in each world to confirm feeds, comments, reactions, notifications and reports stay separate before announcing beta readiness.
+
+
+## Guild independence and shared design foundation — 2026-10-30
+
+### User-facing separation
+- Guild is a separate environment, not a subsection of the companion environment. Use the native labels **Home, Community, Discover, Messages, Events, Shorts, Planner, Profile, Notifications, Settings, Feedback, Admin, Moderation and Roadmap** without adding "Guild" to every page name.
+- Do not show companion-platform branding, roadmap links, settings controls, or page-visibility settings inside Guild. The explicit **Exit to Sanctuary** control is the only cross-environment navigation reference.
+- Guild has its own home dashboard and its own settings page. Shared account preferences may be reused, but console controls (touch navigation and reduced motion) belong to Guild.
+- Admin and moderation inside Guild must operate on Guild-world content only. Do not expose account-wide role management or global page visibility from Guild administration. Account-wide warnings, suspensions and bans remain disabled from Guild until a dedicated Guild-only sanction model exists; Guild moderation can hide or remove Guild content.
+- Feedback is available to all roles and guests in each environment. New submissions carry an environment marker and staff inboxes are filtered to the active environment.
+
+### Shared UI system
+- New visual components should use the shared design tokens, spacing, responsive breakpoints, focus states and accessible interaction patterns so both environments improve together.
+- Reuse feature mechanics where appropriate, but let each environment keep its own home, navigation, labels, settings and world-scoped data. Treat each implementation as a maintained sibling, not a copy that must look identical.
+- Keep progress dashboards visually consistent and show phase percentages, an overall estimate, next work and a disclaimer that estimates are not live telemetry.
+
+### Progress snapshot (planning estimates)
+| Guild workstream | Progress | Summary |
+| --- | ---: | --- |
+| Phase 1 · Independent visual foundation | **80%** | Guild-native navigation/home and compact console shell are in source; device/accessibility checks remain. |
+| Phase 2 · Console and community features | **45%** | Shared mechanics are world-scoped; Guild settings, feedback, console library and navigation continue to evolve. |
+| Phase 3 · Reliability and beta | **30%** | World isolation, role enforcement, feedback routing, device/controller QA and live deployment checks remain. |
+| **Overall Guild project** | **50%** | Directional planning estimate; not production verification. |
+

@@ -166,7 +166,7 @@ export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType
   return (
     <section className={styles.content} data-world={worldType} aria-live="polite" aria-labelledby="feed-heading">
       {currentUser && !isGuest && <form className={`${styles.composer} w-full min-w-0 max-w-full`} onSubmit={handlePublish}>
-        {postMode === 'open' ? <label className={styles.composerLabel} htmlFor="post-content">Share with Sanctuary</label> : <p className={styles.composerLabel}>Share with Sanctuary</p>}
+        {postMode === 'open' ? <label className={styles.composerLabel} htmlFor="post-content">{worldType === 'guild' ? 'Share with the Guild' : 'Share with Sanctuary'}</label> : <p className={styles.composerLabel}>{worldType === 'guild' ? 'Share with the Guild' : 'Share with Sanctuary'}</p>}
         <div className={styles.connectionToolkit} role="group" aria-labelledby="connection-toolkit-heading">
           <p className={styles.toolkitHeading} id="connection-toolkit-heading">A little structure can help people connect</p>
           <div className={styles.templateChoices}>
@@ -263,7 +263,7 @@ export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType
         <div>
           <p className={styles.sectionEyebrow}>{worldType === 'guild' ? 'THE GUILD · COMMUNITY' : 'SANCTUARY · COMMUNITY'}</p>
           <h2 id="feed-heading">{worldType === 'guild' ? 'Guild community' : 'Everyone’s posts'}</h2>
-          {worldType === 'guild' && <p className={styles.feedStatus}>A separate community space for Guild posts, conversations and reactions. Sanctuary activity stays in Sanctuary.</p>}
+          {worldType === 'guild' && <p className={styles.feedStatus}>A separate community space for Guild posts, conversations and reactions. Activity stays within this environment.</p>}
         </div>
         <span className={styles.sortLabel}>LATEST</span>
       </div>

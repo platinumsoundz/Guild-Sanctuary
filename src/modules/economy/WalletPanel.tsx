@@ -2,17 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { isSupabaseWalletConfigured } from './service';
+import type { WorldType } from '@/types/database';
 import { useWallet } from './useWallet';
 import styles from './WalletPanel.module.css';
 
 interface WalletPanelProps {
   userId: string;
   isGuest: boolean;
+  worldType?: WorldType;
 }
 
 const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 
-export function WalletPanel({ userId, isGuest }: WalletPanelProps) {
+export function WalletPanel({ userId, isGuest, worldType = 'sanctuary' }: WalletPanelProps) {
   const {
     snapshot,
     bundles,
@@ -45,7 +47,7 @@ export function WalletPanel({ userId, isGuest }: WalletPanelProps) {
     <main className={styles.wallet}>
       <header className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>THE SANCTUARY WALLET</p>
+          <p className={styles.eyebrow}>{worldType === 'guild' ? 'THE GUILD WALLET' : 'THE SANCTUARY WALLET'}</p>
           <h1>Tokens</h1>
           <p className={styles.intro}>Your balance and available token bundles.</p>
         </div>

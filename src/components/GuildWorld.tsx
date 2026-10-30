@@ -173,7 +173,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
         const { buttons, pressed } = readGamepadButtons(pad, lastButtons.current);
         if (!worldOpen && pressed(0)) {
           if (!entryOpen) setEntryOpen(true);
-          else if (!isAuthenticated || !userId) setNotice('Sign in to your Sanctuary account first. Your Guild will use that same identity.');
+          else if (!isAuthenticated || !userId) setNotice('Sign in to continue. Your Guild profile uses your account identity.');
           else {
             setNotice('');
             setWorldOpen(true);
@@ -238,7 +238,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
 
   const enterGuild = () => {
     if (!isAuthenticated || !userId) {
-      setNotice('Sign in to your Sanctuary account first. Your Guild will use that same identity.');
+      setNotice('Sign in to continue. Your Guild profile uses your account identity.');
       return;
     }
     setNotice('');
@@ -274,7 +274,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
         <div className={`${styles.backdrop} ${bigPicture ? styles.backdropBigPicture : ""} ${reducedMotion ? styles.reducedMotion : ""}`} role="dialog" aria-modal="true" aria-labelledby="guild-title">
           <section ref={dialogRef} className={`${styles.world} ${bigPicture ? styles.worldBigPicture : ""}`}>
             <header className={styles.topbar}>
-              <div className={styles.brand}><span className={styles.brandMark}><Orbit size={20} /></span><span><small>THE SANCTUARY · HIDDEN WORLD</small><strong id="guild-title">The Guild</strong></span></div>
+              <div className={styles.brand}><span className={styles.brandMark}><Orbit size={20} /></span><span><small>GUILD GAMING SPACE</small><strong id="guild-title">The Guild</strong></span></div>
               <div className={styles.topActions}>
                 <span className={styles.connected}><Gamepad2 size={14} /> {controllerConnected ? 'Controller connected' : 'Keyboard / touch'}</span>
                 <button type="button" className={styles.consoleAction} aria-label="Open Guild menu" aria-expanded={menuOpen} onClick={() => { setMenuOpen((value) => !value); setQuickSettingsOpen(false); }}><Menu size={17} /><span>Menu</span></button>
@@ -324,7 +324,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
               </section>}
               <div className={styles.sectionHead}><div><p className={styles.eyebrow}>THE ARCADE · 02</p><h2>Comet Dodge</h2></div><span className={styles.localPill}>20-SECOND SURVIVAL</span></div>
               <GuildCometDodge />
-              <footer className={styles.footer}><span>THE GUILD · ALPHA PROTOTYPE</span><span>Sanctuary identity · isolated game state · no verified rewards</span></footer>
+              <footer className={styles.footer}><span>THE GUILD · ALPHA PROTOTYPE</span><span>Guild profile · isolated game state · no verified rewards</span></footer>
             </div>
           </section>
         </div>
