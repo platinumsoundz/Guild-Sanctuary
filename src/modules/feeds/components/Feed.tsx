@@ -3,11 +3,11 @@
 import { Compass, MessageCircle, PenLine, Sparkles } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { FeedContent } from './FeedContent';
+import type { NavigationState } from '@/context/AppContext';
 import type { WorldType } from '@/types/database';
 import styles from './Feed.module.css';
 
-export function Feed({ worldType = 'sanctuary' }: { worldType?: WorldType }) {
-  const { setActiveNavigation } = useAppContext();
+export function Feed({ worldType = 'sanctuary', onNavigate }: { worldType?: WorldType; onNavigate: (navigation: NavigationState) => void }) {
   const isGuild = worldType === 'guild';
   return (
     <main className={styles.feed} data-world={worldType}>
@@ -20,7 +20,7 @@ export function Feed({ worldType = 'sanctuary' }: { worldType?: WorldType }) {
             <button type="button" className={styles.primaryHeroAction} onClick={() => document.getElementById('community-composer')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
               <PenLine size={16} aria-hidden="true" /> Share an update
             </button>
-            <button type="button" className={styles.secondaryHeroAction} onClick={() => setActiveNavigation('discover')}>
+            <button type="button" className={styles.secondaryHeroAction} onClick={() => onNavigate('discover')}>
               <Compass size={16} aria-hidden="true" /> Explore Discover
             </button>
           </div>
