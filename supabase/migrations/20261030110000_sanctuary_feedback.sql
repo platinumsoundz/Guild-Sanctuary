@@ -12,7 +12,7 @@ create table if not exists public.sanctuary_feedback (
   created_at timestamptz not null default now(),
   constraint sanctuary_feedback_submitter_consistency check (
     (submitter_kind = 'guest' and submitted_by is null)
-    or (submitter_kind = 'member' and submitted_by is not null)
+    or submitter_kind = 'member'
   )
 );
 
@@ -51,7 +51,8 @@ create policy "Developers and owner can update sanctuary feedback"
   ));
 
 grant insert on public.sanctuary_feedback to anon, authenticated;
-grant select, update on public.sanctuary_feedback to authenticated;
+grant select on public.sanctuary_feedback to authenticated;
+grant update (status) on public.sanctuary_feedback to authenticated;
 
 comment on table public.sanctuary_feedback is
   'Beta feedback submitted by signed-in members or guests; readable and triageable only by developers and the owner.';
