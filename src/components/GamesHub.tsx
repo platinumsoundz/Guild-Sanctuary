@@ -18,7 +18,17 @@ const games: GameEntry[] = [
     title: 'The 5 Sleeves 2D',
     description: 'A browser-based multiplayer action RPG with touch, keyboard and gamepad input documented by the game project. Explore settlements and dangerous roads, fight Rust Wardens, develop your operative, and clear regional towers.',
     genre: 'Multiplayer action RPG',
-    url: process.env.NEXT_PUBLIC_5_SLEEVES_2D_URL?.trim() || null,
+    url: (() => {
+      const configured = process.env.NEXT_PUBLIC_5_SLEEVES_2D_URL?.trim();
+      const defaultHost = process.env.VERCEL_ENV === 'preview'
+        ? 'https://integration-cloudflare-guild-host-2d.the-5-sleeves-2d.pages.dev/'
+        : 'https://the-5-sleeves-2d.pages.dev/';
+      if (!configured) return defaultHost;
+      try {
+        const parsed = new URL(configured);
+        return parsed.protocol === 'https:' && !parsed.username && !parsed.password ? parsed.toString() : defaultHost;
+      } catch { return defaultHost; }
+    })(),
     badge: 'Online world',
     embed: 'verify',
   },
@@ -108,7 +118,7 @@ export function GamesHub({ autoLaunchRecent = false, onExitToGuildHome }: { auto
   if (activeGame?.url) {
     return (
       <div className={styles.hub}>
-        <GuildConsolePlayer title={activeGame.title} url={activeGame.url} onExit={() => { setActiveGame(null); onExitToGuildHome?.(); }} />
+        <GuildConsolePlayer title={activeGame.title} gameId={activeGame.id} url={activeGame.url} onExit={() => { setActiveGame(null); onExitToGuildHome?.(); }} />
         <p className={styles.hint}>If this game refuses to load inside the player, use the external launch option below. Host security headers and browser permissions can prevent embedding even when the Guild player supports fullscreen.</p>
         <div className={styles.cardActions}>
           <button type="button" className={styles.playButton} onClick={() => setActiveGame(null)}><Gamepad2 size={16} /> Back to library</button>
