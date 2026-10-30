@@ -271,7 +271,7 @@ export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType
       {isLoading && <p className={styles.feedStatus}>Loading your feed...</p>}
       {!isLoading && posts.length === 0 && (
         <div className={styles.emptyState}>
-          <span className={styles.emptyMark} aria-hidden="true">S</span>
+          <span className={styles.emptyMark} aria-hidden="true">{worldType === 'guild' ? 'G' : 'S'}</span>
           <div>
             <h3>{worldType === 'guild' ? 'Start the Guild conversation' : PLACEHOLDER_HEADING}</h3>
             <p>{worldType === 'guild' ? 'Be the first to share something with the Guild community.' : PLACEHOLDER_MESSAGE}</p>
