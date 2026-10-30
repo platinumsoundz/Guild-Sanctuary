@@ -4,11 +4,12 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Heart, LockKeyhole, RotateCcw, Save } from 'lucide-react';
 import { isSupabaseAuthConfigured } from '@/modules/auth';
 import { getSupabaseBrowserClient } from '@/services/supabase';
+import type { WorldType } from '@/types/database';
 import styles from './DailyReflection.module.css';
 
 type Mood = 'low' | 'heavy' | 'steady' | 'good' | 'bright';
 interface ReflectionEntry { id: string; date: string; mood: Mood; intention: string; reflection: string; updatedAt: string; }
-interface DailyReflectionProps { userId: string; isGuest: boolean; }
+interface DailyReflectionProps { userId: string; isGuest: boolean; worldType?: WorldType; }
 interface LegacyReflectionEntry { date: string; mood: Mood; intention: string; reflection: string; updatedAt: string; }
 const MOODS: { value: Mood; label: string; description: string }[] = [
   { value: 'low', label: 'Low', description: 'A difficult day' },
@@ -31,7 +32,7 @@ async function verifyReflectionOwner(expectedUserId: string) {
   return data.user.id;
 }
 
-export function DailyReflection({ userId, isGuest }: DailyReflectionProps) {
+export function DailyReflection({ userId, isGuest, worldType = 'sanctuary' }: DailyReflectionProps) {
   const today = localDateKey();
   const key = useMemo(() => userId, [userId]);
   const [entries, setEntries] = useState<ReflectionEntry[]>([]);
