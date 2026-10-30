@@ -1009,3 +1009,12 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - The Appearance selector, preference validation, account persistence, session restoration, pre-render bootstrap and contrast checks must discover supported themes from the central catalogue. Avoid maintaining secondary hard-coded theme lists.
 - **Adding a palette:** register its ID and metadata in `THEME_CATALOGUE`; add its semantic-token block to the central theme-token section; verify the catalogue-driven contrast contract; then review representative Sanctuary and Guild pages at desktop and narrow-phone widths. The contrast script already discovers registered IDs automatically.
 - **Long-term quality gate:** migrate remaining feature-level hard-coded colours to semantic tokens and add browser screenshot coverage for every registered theme across representative Sanctuary and Guild surfaces. Static token checks do not replace visual, keyboard, contrast or device testing.
+
+
+## Token shop — permanent cosmetic collection — 2026-10-30
+
+- Establish a first-party cosmetic catalogue using permanent account-bound entitlements. No user listings, trading, transfers, cash-out or competitive gameplay advantages.
+- Keep Cosmic dark and Cosmic light free. Premium themes (Dusk, Stone, Ocean, Nebula, Aurora, Celestial and Eclipse) unlock once and remain owned permanently; active selection is separate from ownership and applies across Sanctuary and Guild.
+- Add premium profile frames, portrait effects, identity badges and profile banners. Catalogue pricing is in tokens and is seeded idempotently by `20261030100000_token_cosmetics_and_premium_themes.sql`.
+- Premium palette IDs remain part of the central theme catalogue and use semantic CSS tokens. Do not create theme-specific page or component forks.
+- **Release gate:** shop items can be browsed, but token redemption remains disabled and the `spend_tokens` RPC remains revoked. The migration is not applied to production by this code change. Owner review, isolated staging migrations, authenticated spend/equip tests, balance/idempotency/ledger checks, theme entitlement bypass tests and security-advisor review are required before unlocking.
