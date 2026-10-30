@@ -49,6 +49,37 @@ export function GuildRoadmap() {
         <p>The plan for the cosmic gaming world, personal library and media lounge.</p>
         <div className={styles.notice} role="note"><Gamepad2 size={17} aria-hidden="true" /><span>Guild features are built in stages. This page distinguishes working browser features from integrations and infrastructure that are still planned or blocked.</span></div>
       </header>
+      <section className={styles.progressDashboard} aria-labelledby="guild-progress-heading">
+        <div className={styles.progressHeader}>
+          <div>
+            <p className={styles.eyebrow}>GUILD PROJECT STATUS</p>
+            <h2 id="guild-progress-heading">Development progress</h2>
+            <p>Guild has its own roadmap and release checks. Shared components should improve both environments without mixing their content, settings or controls.</p>
+          </div>
+          <div className={styles.overallProgress} aria-label="Estimated overall Guild progress 50 percent"><strong>50%</strong><span>overall progress</span></div>
+        </div>
+        <div className={styles.phaseGrid}>
+          <article className={styles.phaseCard}>
+            <div className={styles.phaseTitle}><span>01</span><h3>Phase 1 · Guild foundation</h3><strong>80%</strong></div>
+            <div className={styles.progressTrack} role="progressbar" aria-label="Guild foundation estimate" aria-valuemin={0} aria-valuemax={100} aria-valuenow={80}><span style={{ width: '80%' }} /></div>
+            <p>Independent navigation, home dashboard, compact HUD and responsive console styling. Final device and accessibility checks remain.</p>
+            <small>Foundation and visual polish</small>
+          </article>
+          <article className={styles.phaseCard}>
+            <div className={styles.phaseTitle}><span>02</span><h3>Phase 2 · Community and console</h3><strong>45%</strong></div>
+            <div className={styles.progressTrack} role="progressbar" aria-label="Guild community and console feature estimate" aria-valuemin={0} aria-valuemax={100} aria-valuenow={45}><span style={{ width: '45%' }} /></div>
+            <p>Guild-native home, settings, feedback, world-scoped community pages, library and controller-first navigation.</p>
+            <small>Core features and independent growth</small>
+          </article>
+          <article className={styles.phaseCard}>
+            <div className={styles.phaseTitle}><span>03</span><h3>Phase 3 · Reliability and beta</h3><strong>30%</strong></div>
+            <div className={styles.progressTrack} role="progressbar" aria-label="Guild reliability and beta estimate" aria-valuemin={0} aria-valuemax={100} aria-valuenow={30}><span style={{ width: '30%' }} /></div>
+            <p>Verify world isolation, Guild-only admin/moderation, feedback routing, mobile/controller behaviour and live deployment.</p>
+            <small>Integration and release verification</small>
+          </article>
+        </div>
+        <p className={styles.progressDisclaimer}>Percentages are planning estimates, not live telemetry. Implementation and beta readiness are tracked separately; the latest deployed build must be tested before a feature is called live.</p>
+      </section>
       <section className={styles.releaseSummary} aria-labelledby="guild-focus-heading">
         <h2 id="guild-focus-heading">What comes next</h2>
         <p>Polish the console HUD and home screen first, verify the two flagship game launch flows, then improve the library and only afterwards expand into optional desktop or cloud features.</p>
