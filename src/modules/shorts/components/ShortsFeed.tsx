@@ -61,6 +61,10 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
 
   useEffect(() => {
     let cancelled = false;
+    setVideos([]);
+    setEngagement({});
+    setCommentsByVideo({});
+    setCommentEngagement({});
     fetchShortVideos(worldType).then(async (items) => {
       if (cancelled) return;
       const stats = await Promise.all(items.map(async (item) => [
