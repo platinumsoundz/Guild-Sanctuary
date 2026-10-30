@@ -56,6 +56,39 @@ export function SanctuaryRoadmap() {
           <span>Roadmap status is a plain-language guide, not a promise that every feature is live or production-ready. Some work still needs real-device, security or backend checks.</span>
         </div>
       </header>
+      <section className={styles.progressDashboard} aria-labelledby="phase-progress-heading">
+        <div className={styles.progressHeader}>
+          <div>
+            <p className={styles.eyebrow}>PROJECT STATUS · SANCTUARY ONLY</p>
+            <h2 id="phase-progress-heading">Development progress</h2>
+            <p>Clear estimates of what is implemented and what remains before beta. Guild is tracked separately.</p>
+          </div>
+          <div className={styles.overallProgress} aria-label="Estimated overall project progress 50 percent">
+            <strong>50%</strong><span>overall progress</span>
+          </div>
+        </div>
+        <div className={styles.phaseGrid}>
+          <article className={styles.phaseCard}>
+            <div className={styles.phaseTitle}><span className={styles.phaseNumber}>01</span><h3>Phase 1 · Visual foundation</h3><strong>100%</strong></div>
+            <div className={styles.progressTrack} role="progressbar" aria-label="Phase 1 visual foundation implementation" aria-valuemin={0} aria-valuemax={100} aria-valuenow={100}><span style={{ width: '100%' }} /></div>
+            <p>Core layout, compact header, navigation placement, notification overlay, account entry, and install prompt presentation are implemented in the current source.</p>
+            <span className={styles.phaseStatus}>Implementation complete · live/device QA remains in release checks</span>
+          </article>
+          <article className={styles.phaseCard}>
+            <div className={styles.phaseTitle}><span className={styles.phaseNumber}>02</span><h3>Phase 2 · Console experience</h3><strong>25%</strong></div>
+            <div className={styles.progressTrack} role="progressbar" aria-label="Phase 2 console experience estimate" aria-valuemin={0} aria-valuemax={100} aria-valuenow={25}><span style={{ width: '25%' }} /></div>
+            <p>Build out the dashboard, consistent HUD, library and discovery, touch controls, and role-aware access to stable versus experimental features.</p>
+            <span className={styles.phaseStatus}>Main feature-development phase</span>
+          </article>
+          <article className={styles.phaseCard}>
+            <div className={styles.phaseTitle}><span className={styles.phaseNumber}>03</span><h3>Phase 3 · Reliability and beta</h3><strong>30%</strong></div>
+            <div className={styles.progressTrack} role="progressbar" aria-label="Phase 3 reliability and beta readiness estimate" aria-valuemin={0} aria-valuemax={100} aria-valuenow={30}><span style={{ width: '30%' }} /></div>
+            <p>Verify messaging, account journeys, database permissions, community actions, deployment consistency, accessibility, and real-device behaviour.</p>
+            <span className={styles.phaseStatus}>Integration and acceptance testing remain</span>
+          </article>
+        </div>
+        <p className={styles.progressDisclaimer}>Percentages are planning estimates, not live telemetry. A feature is not considered beta-ready until its deployed behaviour and relevant security checks are verified.</p>
+      </section>
       <section className={styles.releaseSummary} aria-labelledby="beta-heading">
         <h2 id="beta-heading">Our focus before beta</h2>
         <p>Make the core community experience safe, reliable, accessible and easy to understand. We will open up more features as their checks are completed.</p>
