@@ -136,3 +136,14 @@
 }
 
 .quickMusicTrack{display:flex;align-items:center;gap:13px;padding:18px 14px;border:1px solid rgba(181,167,255,.18);border-radius:14px;background:rgba(9,11,29,.5);margin:14px 0}.quickMusicTrack>svg{flex:none;color:#c6b3ff}.quickMusicTrack div{display:grid;gap:5px;min-width:0}.quickMusicTrack strong{overflow-wrap:anywhere;font-size:13px}.quickMusicTrack small{color:#aaa5cb;font-size:10px}.quickMusicControls{display:flex;align-items:center;justify-content:center;gap:18px;padding:10px}.quickMusicControls button{display:grid;place-items:center;width:48px;height:48px;border:1px solid rgba(195,176,255,.25);border-radius:50%;background:rgba(255,255,255,.07);color:#fff}.quickMusicControls button:nth-child(2){width:58px;height:58px;background:linear-gradient(135deg,#7964e9,#9d67e8)}.quickMusicControls button:disabled{opacity:.35;cursor:not-allowed}
+
+
+/* Compact console status indicators. Signal strength is intentionally not fabricated. */
+.deviceHud{display:flex;align-items:center;justify-content:flex-end;gap:clamp(6px,1vw,12px);flex:0 1 auto;min-width:0;padding:0 3px;color:var(--muted,#b6b7d4)}
+.deviceHud>span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-size:10px;font-variant-numeric:tabular-nums}
+.deviceHud>span svg{flex:none;color:var(--accent,#a5b4fc)}
+.deviceHud b{color:var(--ink,#f8fafc);font-size:10px;font-weight:800}
+.fpsGlyph{font-size:9px;font-weight:900;letter-spacing:-.04em;color:var(--accent,#a5b4fc)}
+@media(max-width:760px){.deviceHud{gap:7px}.deviceHud>span{gap:3px;font-size:9px}.deviceHud b{font-size:9px}}
+@media(max-width:560px){.deviceHud{order:5;flex:1 0 100%;justify-content:center;padding:5px 0 1px;border-top:1px solid var(--line);margin-top:1px}.header{flex-wrap:wrap}}
+@media(max-width:370px){.deviceHud{gap:12px}}
