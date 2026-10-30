@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
-import { fetchPageVisibility, isPageVisible, type PageVisibilityMap } from '@/lib/pageVisibility';
 import { NotificationBar } from './NotificationBar';
 import { GuildDiagnosticsPanel } from './GuildDiagnosticsPanel';
 import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type LogicalDirection } from '@/lib/controllerInput';
@@ -55,7 +54,6 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   onExit: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
-  const [pageVisibility, setPageVisibility] = useState<PageVisibilityMap>({});
   const [open, setOpen] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
@@ -85,19 +83,13 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     }
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    void fetchPageVisibility().then((value) => { if (!cancelled) setPageVisibility(value); }).catch(() => { if (!cancelled) setPageVisibility({}); });
-    return () => { cancelled = true; };
-  }, []);
-
   const allowed = guildCommunityItems.filter((item) => {
     if (item.id === 'feedback') return true;
     if (item.id === 'guild-roadmap' && !['developer', 'owner'].includes(role.toLowerCase())) return false;
     if (!canAccessSanctuaryPage(item.id, role)) return false;
-    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role) && isPageVisible(item.id, pageVisibility, role);
-    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role) && isPageVisible(item.id, pageVisibility, role);
-    return isPageVisible(item.id, pageVisibility, role);
+    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role);
+    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role);
+    return true;
   });
   const label = [...guildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Guild';
   const searchableItems = [...guildItems, ...allowed];
