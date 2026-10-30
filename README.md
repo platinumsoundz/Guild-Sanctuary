@@ -20,7 +20,7 @@ Implementation and verification status varies by feature; use [ROADMAP.md](ROADM
 - **Community:** feed posts, comments, likes, author display names, reporting, and short-form video surfaces.
 - **Today / personal growth:** personal planner, habits, notes, and daily reflection.
 - **Discover and profiles:** profile and discovery surfaces, privacy settings, and local preferences.
-- **Messages:** direct and group conversation UI. The active inbox/thread still uses an in-memory demo service; end-to-end encryption is not implemented.
+- **Messages:** direct and group conversation UI. Authenticated sessions use the persistent Supabase conversation/message repository when the production build flag and matching Supabase session are present; isolated local/demo sessions retain an in-memory fallback. The Vercel production build now includes the persistent-messaging flag, but two-account browser verification (send/receive, refresh, read receipts, DM preferences and privacy) remains outstanding. End-to-end encryption is not implemented.
 - **Events:** community event and RSVP UI; persistence and end-to-end behaviour need verification.
 - **Cosmic Arcade:** Starseed Word Search, Cosmic Snake, Lunar Solitaire, and a small Celestial Crossword preview. These are prototypes; Zodiac Mahjong is planned. Arcade token purchases/rewards are not enabled.
 - **Games hub:** entry points for The 5 Sleeves 2D and The 5 Sleeves 3D. The 2D host URL must be configured and verified before launch; the 3D prototype currently links to its Pages host.
