@@ -76,7 +76,7 @@ Never use “live,” “deployed,” “secure,” or “verified” based only
 - Each account has one unique 1,000-token bonus ledger entry and matching wallet credit.
 - Accounts must be email-verified and created at or after the explicit beta opening timestamp.
 - The beta program defaults to closed; no bonus can be issued until the owner opens it in an isolated staging project.
-- The existing `token_ledger` records the bonus as `signup_bonus`; a locked program row allocates a grant position and preserves verification time in the trigger audit path.
+- The existing `token_ledger` records the bonus as `signup_bonus`; each new grant stores its `grant_position` and `verified_at` timestamp on that same ledger row.
 - Existing wallet history is extended to combine purchases, spend and bonus entries.
 
 The duplicate-account rule is enforced only to the extent of unique Supabase auth accounts/email identity; this implementation does not attempt device fingerprinting or infer whether separate verified email accounts belong to one person.
