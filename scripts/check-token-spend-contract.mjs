@@ -26,7 +26,7 @@ const checks = [
   ['first 100 places are reserved in original signup order, including unverified accounts', /order by u\.created_at asc, u\.id asc/.test(bonus) && /where p\.status = 'active'/.test(bonus) && !/where u\.email_confirmed_at is not null\s+and p\.status/.test(bonus)],
   ['unverified founding members are not credited until verified', /granted_at timestamptz/.test(bonus) && /if account_verified and award_granted_at is null then/.test(bonus) && /not\('granted_at', 'is', null\)/.test(wallet)],
   ['bonus allocation pool has a hard 100-account cap and row lock', /awarded_count integer not null default 0 check \(awarded_count between 0 and 100\)/.test(bonus) && /for update;/.test(bonus)],
-  ['bonus helper requires verified and active accounts', /u\.email_confirmed_at is not null/.test(bonus) && /p\.status = 'active'/.test(bonus)],
+  ['bonus helper requires verified and active accounts', /(u\.email_confirmed_at is not null)/.test(bonus) && /p\.status = 'active'/.test(bonus)],
   ['existing accounts receive a 400-token top-up and future accounts 500', /grant_amount := 400/.test(bonus) && /grant_amount := 500/.test(bonus)],
   ['award ledger enforces one award per account and unique rank', /user_id uuid primary key/.test(bonus) && /signup_rank integer not null unique/.test(bonus)],
   ['private grant helper is revoked from API and service roles', /revoke all on function public\.grant_first_100_signup_bonus\(uuid\) from public, anon, authenticated, service_role/i.test(bonus)],
