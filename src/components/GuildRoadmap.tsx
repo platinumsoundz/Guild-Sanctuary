@@ -45,7 +45,7 @@ export function GuildRoadmap() {
     <main className={styles.page}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>THE GUILD · ROADMAP</p>
-        <h1>Guild Roadmap</h1>
+        <h1>Roadmap</h1>
         <p>The plan for the cosmic gaming world, personal library and media lounge.</p>
         <div className={styles.notice} role="note"><Gamepad2 size={17} aria-hidden="true" /><span>Guild features are built in stages. This page distinguishes working browser features from integrations and infrastructure that are still planned or blocked.</span></div>
       </header>
