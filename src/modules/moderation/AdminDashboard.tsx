@@ -6,6 +6,8 @@ import { getSupabaseBrowserClient } from '@/services/supabase';
 import { fetchPageVisibility, isPageVisible, MANAGEABLE_PAGE_VISIBILITY, PAGE_VISIBILITY_ROLES, savePageVisibility, type PageVisibilityMap, type ManagedPageKey, type PageVisibilityRole } from '@/lib/pageVisibility';
 import styles from './AdminDashboard.module.css';
 import { FeedbackInbox } from '@/components/FeedbackCenter';
+import type { WorldType } from '@/types/database';
+import { ModerationDashboard } from './ModerationDashboard';
 
 type SanctuaryRole = 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner';
 type MemberRow = { id: string; username: string; display_name: string; role: SanctuaryRole; status: string };
@@ -156,9 +158,24 @@ function PageVisibilityPanel() {
   </section>;
 }
 
-export function AdminDashboard({ role }: { role: string }) {
+export function AdminDashboard({ role, worldType = 'sanctuary' }: { role: string; worldType?: WorldType }) {
   const canManageRoles = ['admin', 'developer', 'owner'].includes(role);
   const canManageVisibility = ['developer', 'owner'].includes(role);
+
+  if (worldType === 'guild') {
+    return (
+      <div className={styles.dashboard}>
+        <header className={styles.header}>
+          <p className={styles.eyebrow}>GUILD CONTROL CENTRE</p>
+          <h1><UserCog size={27} aria-hidden="true" /> Guild administration</h1>
+          <p>These controls are scoped to Guild community reports and feedback. Account-wide role management and global page visibility are not exposed from this environment.</p>
+        </header>
+        <ModerationDashboard role={role} worldType="guild" />
+        {['developer', 'owner'].includes(role.toLowerCase()) && <FeedbackInbox role={role} worldType="guild" />}
+        <footer className={styles.footer}>Guild administration must only affect Guild-world content. Shared identity does not grant this page authority over Sanctuary reports or settings.</footer>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.dashboard}>
