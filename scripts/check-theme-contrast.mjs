@@ -28,7 +28,7 @@ function token(block, name) {
   return match[1];
 }
 
-const themes = ['default', 'light', 'dark', 'stone', 'ocean', 'dusk'];
+const themes = ['default', 'light', 'dark', 'stone', 'ocean', 'dusk', 'midnight', 'forest', 'rose', 'lavender', 'ember', 'mint'];
 for (const theme of themes) {
   // Dark intentionally inherits the root/default palette, so validate the same token set.
   const block = readThemeBlock(theme === 'dark' ? 'default' : theme);
