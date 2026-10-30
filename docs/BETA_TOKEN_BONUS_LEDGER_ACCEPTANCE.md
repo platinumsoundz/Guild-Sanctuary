@@ -8,7 +8,7 @@
 
 - The first **100 active accounts by original server-side signup timestamp** reserve the thank-you places, including accounts already registered when the migration is applied. Each receives **500 Sanctuary Tokens total** once email-verified. The original build already gave existing accounts 100 tokens, so those existing accounts receive a **400-token top-up**; later eligible signups receive **500 tokens**.
 - Maximum thank-you allocation: 50,000 tokens total (the migration grants 400 to the first 100 pre-existing accounts to complete their original 100-token welcome balance to 500, and 500 to later eligible accounts until the cap is reached).
-- Tokens have no fixed cash equivalence. This bonus does not authorize checkout, redemption, paid conversion, or game spending.
+- The standard token bundle reference is 100 tokens for £1 (larger bundles may be discounted). Tokens are not cash-redeemable; this bonus does not authorize checkout, redemption, paid conversion, or game spending.
 - Client code, testers, moderators, collaborators and ordinary authenticated users must not be able to grant/deduct tokens or write balances.
 - A user-facing balance is a projection of server-authoritative accounting, never a client-authoritative source of truth.
 
