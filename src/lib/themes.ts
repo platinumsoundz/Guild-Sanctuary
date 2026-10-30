@@ -15,14 +15,19 @@ export interface ThemeDefinition {
   description: string;
   colorScheme: 'light' | 'dark';
   tailwindDark: boolean;
+  requiresEntitlement?: boolean;
 }
 
 export const THEME_CATALOGUE: readonly ThemeDefinition[] = [
   { id: 'dark', label: 'Cosmic dark', description: 'The original deep-space default', colorScheme: 'dark', tailwindDark: true },
   { id: 'light', label: 'Cosmic light · daylight', description: 'The matching lavender daylight palette', colorScheme: 'light', tailwindDark: false },
-  { id: 'dusk', label: 'Dusk · low-glare warm', description: 'A warm, low-glare evening palette', colorScheme: 'dark', tailwindDark: true },
-  { id: 'stone', label: 'Stone · grey', description: 'A calm neutral palette', colorScheme: 'light', tailwindDark: false },
-  { id: 'ocean', label: 'Ocean · blue', description: 'A cool blue palette', colorScheme: 'dark', tailwindDark: true },
+  { id: 'dusk', label: 'Dusk · low-glare warm', description: 'A warm, low-glare evening palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
+  { id: 'stone', label: 'Stone · grey', description: 'A calm neutral palette', colorScheme: 'light', tailwindDark: false, requiresEntitlement: true },
+  { id: 'ocean', label: 'Ocean · blue', description: 'A cool blue palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
+  { id: 'nebula', label: 'Nebula · violet', description: 'A vivid violet deep-space palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
+  { id: 'aurora', label: 'Aurora · northern lights', description: 'A luminous teal and emerald night palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
+  { id: 'celestial', label: 'Celestial · rose gold', description: 'A warm rose-gold cosmic palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
+  { id: 'eclipse', label: 'Eclipse · midnight', description: 'A dramatic midnight and solar-gold palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
 ] as const;
 
 export const THEME_PREFERENCE_OPTIONS = [
