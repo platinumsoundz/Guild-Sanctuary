@@ -290,7 +290,7 @@ export async function getShortEngagement(shortId: string, userId: string, worldT
     await requireCommunityStorageUser(userId);
     const { data: scopedShort } = await getSupabaseBrowserClient().from('short_videos').select('id').eq('id', shortId).eq('world_type', worldType).maybeSingle();
     if (!scopedShort) throw new Error('This short is unavailable in the current community.');
-    const { data, error } = await getSupabaseBrowserClient().rpc('get_short_engagement_stats',
+    const { data, error } = await getSupabaseBrowserClient().rpc('get_short_engagement_stats', {
       requested_short_id: shortId,
     });
     if (error) throw new Error(`Short video reactions could not be loaded: ${error.message}`);
