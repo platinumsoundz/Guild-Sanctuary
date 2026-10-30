@@ -95,8 +95,8 @@ Make The Guild feel like a console, not a conventional website with game links. 
 
 ## P1 — Independent Guild community
 
-- [ ] Reuse Sanctuary's feed, Shorts, events, messaging, notifications, profile-posts and moderation mechanics inside the Guild shell, but render them with Guild console styling and Guild-specific labels.
-- [ ] Keep content separate using the shared database's `world_type`: Sanctuary content stays in `sanctuary`; Guild content is written to `guild`. Do not copy or duplicate the social tables.
-- [ ] Scope feed reads/writes, Shorts, events/RSVPs, conversation lists and threads, notifications, report queues and profile-post retrieval to the active world.
-- [ ] Keep comments and reactions attached to their target content so engagement follows the target's world. Notifications and reports inherit world identity from their target.
+- [x] Reuse Sanctuary's feed, Shorts, events, messaging, notifications, profile-posts and moderation mechanics inside the Guild shell, with Guild console styling and Guild-specific labels.
+- [x] Keep content separate using the shared database's `world_type`: Sanctuary content stays in `sanctuary`; Guild content is written to `guild`. Do not copy or duplicate the social tables.
+- [x] Scope feed reads/writes, Shorts, events/RSVPs, conversation lists and threads, notifications, report queues and profile-post retrieval to the active world.
+- [x] Keep comments and reactions attached to their target content so engagement follows the target's world. Notifications and reports inherit world identity from their target.
 - [x] Preserve existing data in Sanctuary by default; the scoped database migration is applied and schema/functions/triggers are verified. Verify cross-world isolation end-to-end before announcing beta readiness.
