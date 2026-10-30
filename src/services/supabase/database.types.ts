@@ -101,6 +101,7 @@ export interface Database {
       profiles: Table<ProfileRow>;
       platform_page_visibility: Table<{
         page_key: string;
+        role_key: 'all' | 'guest' | 'user' | 'vip' | 'moderator' | 'admin' | 'developer' | 'owner';
         is_visible: boolean;
         updated_by: string | null;
         updated_at: string;
