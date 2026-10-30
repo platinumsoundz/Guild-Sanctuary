@@ -6,6 +6,7 @@ import { normalizeSocialLinks, socialLinkFields } from '@/lib/socialLinks';
 import { ProfileCard } from './ProfileCard';
 import { SelfDiscoveryCentre } from '@/modules/self-discovery/components/SelfDiscoveryCentre';
 import styles from './ProfileDashboard.module.css';
+import { getSupabaseBrowserClient } from '@/services/supabase';
 
 interface ProfileDashboardProps {
   profile: Profile;
@@ -24,8 +25,35 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasCustomAccentPicker, setHasCustomAccentPicker] = useState(false);
+  const [isSavingAccent, setIsSavingAccent] = useState(false);
+  const [accentError, setAccentError] = useState<string | null>(null);
 
   useEffect(() => setDraft(profile), [profile]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void getSupabaseBrowserClient().from('token_entitlements').select('item_id')
+      .eq('user_id', profile.userId).eq('item_id', 'unlock_custom_accent_picker').maybeSingle()
+      .then(({ data, error: entitlementError }) => {
+        if (!cancelled) setHasCustomAccentPicker(!entitlementError && Boolean(data));
+      });
+    return () => { cancelled = true; };
+  }, [profile.userId]);
+
+  const saveCustomAccent = async (color: string) => {
+    setIsSavingAccent(true);
+    setAccentError(null);
+    try {
+      const { data, error: rpcError } = await getSupabaseBrowserClient().rpc('set_profile_custom_accent', { requested_color: color || null });
+      if (rpcError) throw rpcError;
+      setDraft((current) => ({ ...current, customAccentColor: typeof data === 'string' ? data : null }));
+    } catch (saveError) {
+      setAccentError(saveError instanceof Error ? saveError.message : 'Your profile accent could not be updated.');
+    } finally {
+      setIsSavingAccent(false);
+    }
+  };
 
   const updateDraft = (changes: Partial<Profile>) => {
     setDraft((current) => ({ ...current, ...changes }));
@@ -152,6 +180,16 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
                 <p className={styles.eyebrow}>PERSONALIZE</p>
                 <h2 id="appearance-heading">Profile details</h2>
               </div>
+            </div>
+            <div className={styles.accentPicker}>
+              <div><strong>Custom profile accent</strong><p>{hasCustomAccentPicker ? 'Choose an accessible accent colour for your profile.' : 'Unlock the Custom Accent Picker in the Token Shop to personalise this colour.'}</p></div>
+              {hasCustomAccentPicker ? (
+                <select aria-label="Custom profile accent" value={draft.customAccentColor ?? ''} disabled={isSavingAccent} onChange={(event) => void saveCustomAccent(event.currentTarget.value)}>
+                  <option value="">Use profile default</option>
+                  <option value="#8b5cf6">Violet</option><option value="#ec4899">Rose</option><option value="#3b82f6">Blue</option><option value="#a855f7">Amethyst</option><option value="#db2777">Berry</option><option value="#0d9488">Teal</option><option value="#7c3aed">Purple</option><option value="#2563eb">Cobalt</option>
+                </select>
+              ) : <span className={styles.accentLocked}>Locked</span>}
+              {accentError && <p className={styles.error} role="alert">{accentError}</p>}
             </div>
             <div className={styles.detailGrid}>
               <label className={styles.field}>
