@@ -97,6 +97,12 @@ export interface Database {
         status: 'open' | 'in_review' | 'closed';
         created_at: string;
       }>;
+      personal_planner_data: Table<{
+        user_id: string;
+        world_type: SanctuaryScope;
+        planner_data: { version: 1; tasks: unknown[]; notesByDate: Record<string, string>; habits: unknown[] };
+        updated_at: string;
+      }>;
       daily_reflections: Table<{
         id: string;
         user_id: string;
