@@ -196,7 +196,6 @@ export async function updateEvent(eventId: string, creatorId: string, input: Pic
       .eq('id', eventId)
       .eq('creator_id', creatorId)
       .eq('world_type', worldType)
-      .eq('world_type', worldType)
       .select('*')
       .maybeSingle();
     if (error) throw new Error(`Event could not be updated: ${error.message}`);
@@ -225,6 +224,7 @@ export async function deleteEvent(eventId: string, creatorId: string, worldType:
       .delete()
       .eq('id', eventId)
       .eq('creator_id', creatorId)
+      .eq('world_type', worldType)
       .select('id')
       .maybeSingle();
     if (error) throw new Error(`Event could not be deleted: ${error.message}`);
@@ -247,6 +247,8 @@ export async function setEventRsvp(eventId: string, userId: string, status: 'goi
   if (!userId) throw new Error('Sign in before responding to an event.');
   if (isSupabaseCommunityStorageConfigured()) {
     const currentUserId = await requireCommunityStorageUser(userId);
+    const { data: scopedEvent } = await getSupabaseBrowserClient().from('events').select('id').eq('id', eventId).eq('world_type', worldType).maybeSingle();
+    if (!scopedEvent) throw new Error('This event is unavailable in the current community.');
     const { data, error } = await getSupabaseBrowserClient()
       .from('event_rsvps')
       .upsert({ event_id: eventId, user_id: currentUserId, status, updated_at: new Date().toISOString() }, { onConflict: 'event_id,user_id' })
@@ -255,7 +257,7 @@ export async function setEventRsvp(eventId: string, userId: string, status: 'goi
     if (error) throw new Error(`Your event RSVP could not be saved: ${error.message}`);
     return toRsvp(data);
   }
-  if (!findEvent(eventId)) {
+  if (!findEvent(eventId) || (findEvent(eventId)?.worldType ?? 'sanctuary') !== worldType) {
     throw new Error('This event is not available for RSVP.');
   }
 
