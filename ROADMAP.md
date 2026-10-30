@@ -986,3 +986,13 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - Calculated primary text contrast pairs exceed WCAG AA 4.5:1 for normal text. This is a token-level check, not a substitute for full-page visual/accessibility testing.
 - **Not merged / not visually verified:** the reported Vercel check failed due to a build-rate-limit response. Run the theme contract, contrast contract, typecheck and production build on the exact PR head when CI capacity is available, then review key pages at desktop and narrow-phone widths.
 - **Theme-system follow-up:** centralize shared theme tokens once (the global stylesheet currently repeats the root/default palette and has layered body background declarations), use semantic tokens for remaining hard-coded feature colours, and add automated screenshots for each theme across representative Sanctuary and Guild pages. Keep theme identity independent from layout density and world-specific Guild styling.
+
+
+## Central theme system — 2026-10-30
+
+- Added `src/lib/themes.ts` as the central theme catalogue: supported IDs, display labels, descriptions, light/dark colour-scheme metadata, Tailwind dark-mode metadata, preference validation, system-preference resolution and DOM application.
+- The Appearance selector, account/local preference normalization, session restoration and pre-render theme bootstrap now consume the catalogue instead of maintaining separate hard-coded theme lists.
+- Removed the duplicate base/dark token declarations from the responsive CSS layer. Theme palette tokens remain grouped in the global theme-token section; responsive CSS now controls layout/interaction rather than redefining the palette.
+- Extended the theme contract to verify catalogue ownership, palette registration and single base token ownership.
+- **Remaining verification:** run `npm run check:theme`, `npm run check:theme-contrast`, `npm run typecheck` and `npm run build` against the latest PR head. Full browser screenshots and page-by-page semantic-colour audit are still required; connector-only GitHub editing cannot run the repository scripts or inspect rendered pages.
+- **How to add a theme:** add its typed palette ID and metadata to `THEME_CATALOGUE`, add its matching `:root[data-theme="..."]` semantic-token block in `globals.css`, and add its palette to the contrast checks. The settings selector, preference validation and bootstrap will then discover it automatically.
