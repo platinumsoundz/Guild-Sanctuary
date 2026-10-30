@@ -38,7 +38,9 @@ The next implementation batch now:
 - Keeps notifications in the existing compact overlay and leaves navigation/controller quick-menu behaviour intact.
 
 ## Verification state
-- Code changes are committed to the feature branch and remain in draft PR #309.
+- Code changes are committed to the feature branch and remain in draft PR #309 (17 commits ahead of main, zero behind at the latest comparison).
 - Role-gate behaviour is implemented in the Guild home; the existing `canAccessSanctuaryPage` policy remains the source of truth.
 - No Supabase migration/branch, schema write, new paid service, production deployment or physical Android QA has been performed.
-- Run typecheck, build and the existing role/navigation/Guild contracts before merge. If Vercel continues to reject builds due to its plan/rate limit, do not bypass the limit or upgrade without approval.
+- The first CI pass exposed two issues: a stale Guild-home roadmap-copy contract and invalid use of Sanctuary navigation types for Guild-only routes. Both were corrected in the latest commit.
+- A fresh CI run and Cloudflare build/deploy workflow were queued for the corrected head. Do not merge until those finish successfully and the actual phone QA pass is complete.
+- Vercel's separate build status still reports the plan build-rate limit. Do not bypass the limit or upgrade without approval.
