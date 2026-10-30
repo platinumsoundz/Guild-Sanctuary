@@ -211,3 +211,11 @@
   border-radius: 20px;
   padding: clamp(12px, 2vw, 24px);
 }
+
+.readReceipt {
+  display: block;
+  margin-top: 3px;
+  color: var(--accent);
+  font: 700 9px Arial, sans-serif;
+  text-align: right;
+}
