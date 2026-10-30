@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { Post } from '@/types/database';
+import type { Post, WorldType } from '@/types/database';
 import { createPost, deletePost, fetchFeed, updatePost, type CreatePostInput } from './service';
 
 interface UseFeedResult {
@@ -13,7 +13,7 @@ interface UseFeedResult {
   removePost: (postId: string) => Promise<void>;
 }
 
-export function useFeed(authorId: string | null): UseFeedResult {
+export function useFeed(authorId: string | null, worldType: WorldType = 'sanctuary'): UseFeedResult {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,13 +22,13 @@ export function useFeed(authorId: string | null): UseFeedResult {
     setIsLoading(true);
     setError(null);
     try {
-      setPosts(await fetchFeed());
+      setPosts(await fetchFeed(worldType));
     } catch {
       setError('The feed could not be loaded.');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [worldType]);
 
   useEffect(() => {
     void refresh();
@@ -39,7 +39,7 @@ export function useFeed(authorId: string | null): UseFeedResult {
       throw new Error('Sign in before creating a post.');
     }
 
-    const post = await createPost({ ...input, authorId });
+    const post = await createPost({ ...input, authorId, worldType });
     setPosts((currentPosts) => [post, ...currentPosts]);
   };
 
@@ -48,7 +48,7 @@ export function useFeed(authorId: string | null): UseFeedResult {
       throw new Error('Sign in before editing a post.');
     }
 
-    const updatedPost = await updatePost(postId, authorId, content);
+    const updatedPost = await updatePost(postId, authorId, content, worldType);
     setPosts((currentPosts) => currentPosts.map((post) => post.id === postId ? updatedPost : post));
   };
 
@@ -57,7 +57,7 @@ export function useFeed(authorId: string | null): UseFeedResult {
       throw new Error('Sign in before deleting a post.');
     }
 
-    await deletePost(postId, authorId);
+    await deletePost(postId, authorId, worldType);
     setPosts((currentPosts) => currentPosts.filter((post) => post.id !== postId));
   };
 
