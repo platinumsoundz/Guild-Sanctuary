@@ -76,8 +76,12 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   // On narrow phones, show the touch navigation controls by default so they
   // are discoverable without requiring a trip through the Quick Menu.
   useEffect(() => {
-    if (window.matchMedia('(max-width: 560px)').matches) {
-      setControlsOpen(true);
+    try {
+      const saved = window.localStorage.getItem('guild-touch-controls-v1');
+      if (saved !== null) setControlsOpen(saved === 'true');
+      else if (window.matchMedia('(max-width: 560px)').matches) setControlsOpen(true);
+    } catch {
+      if (window.matchMedia('(max-width: 560px)').matches) setControlsOpen(true);
     }
   }, []);
 
@@ -102,6 +106,11 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     return !needle || item.label.toLowerCase().includes(needle) || (item.description ?? '').toLowerCase().includes(needle);
   }).slice(0, 8);
   const choose = (page: GuildPage) => { onSelect(page); setOpen(false); setQuickOpen(false); setQuickKeyboardOpen(false); setQuickQuery(''); };
+  const toggleControls = () => setControlsOpen((current) => {
+    const next = !current;
+    try { window.localStorage.setItem('guild-touch-controls-v1', String(next)); } catch { /* The control remains usable for this visit. */ }
+    return next;
+  });
   const addQuickKey = (key: string) => {
     if (key === 'Backspace') setQuickQuery((value) => value.slice(0, -1));
     else if (key === 'Space') setQuickQuery((value) => value + ' ');
@@ -311,7 +320,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
           }) : <p className={styles.quickEmpty}>No destinations match “{quickQuery}”. Try another search.</p>}
         </div>
         <div className={styles.quickSettings}>
-          <button type="button" aria-pressed={controlsOpen} onClick={() => setControlsOpen((value) => !value)}><Gamepad2 size={17} /><span>Touch navigation controls</span><span className={controlsOpen ? styles.toggleOn : styles.toggleOff}>{controlsOpen ? 'ON' : 'OFF'}</span></button>
+          <button type="button" aria-pressed={controlsOpen} onClick={toggleControls}><Gamepad2 size={17} /><span>Touch navigation controls</span><span className={controlsOpen ? styles.toggleOn : styles.toggleOff}>{controlsOpen ? 'ON' : 'OFF'}</span></button>
           <button type="button" onClick={() => void toggleFullscreen()}><Monitor size={17} /><span>{isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}</span>{isFullscreen ? <Check size={15} /> : <Maximize2 size={15} />}</button>
           <button type="button" aria-pressed={reducedMotion} onClick={toggleReducedMotion}><SlidersHorizontal size={17} /><span>Reduce Guild motion</span><span className={reducedMotion ? styles.toggleOn : styles.toggleOff}>{reducedMotion ? 'ON' : 'OFF'}</span></button>
           <button type="button" onClick={() => choose('home')}><Home size={17} /><span>Resume Guild Home</span><ChevronRight size={15} /></button>
