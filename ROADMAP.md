@@ -995,7 +995,7 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - Removed the duplicate base/dark token declarations from the responsive CSS layer. Theme palette tokens remain grouped in the global theme-token section; responsive CSS now controls layout/interaction rather than redefining the palette.
 - Extended the theme contract to verify catalogue ownership, palette registration and single base token ownership.
 - **Remaining verification:** run `npm run check:theme`, `npm run check:theme-contrast`, `npm run typecheck` and `npm run build` against the latest PR head. Full browser screenshots and page-by-page semantic-colour audit are still required; connector-only GitHub editing cannot run the repository scripts or inspect rendered pages.
-- **How to add a theme:** add its typed palette ID and metadata to `THEME_CATALOGUE`, add its matching `:root[data-theme="..."]` semantic-token block in `globals.css`, and add its palette to the contrast checks. The settings selector, preference validation and bootstrap will then discover it automatically.
+- **How to add a theme:** add its typed palette ID and metadata to `THEME_CATALOGUE`, add its matching `:root[data-theme="..."]` semantic-token block in the central theme-token section of `globals.css`. The settings selector, preference validation, bootstrap and contrast checks discover registered themes automatically.
 
 - Updated the contrast contract to discover every palette ID from `THEME_CATALOGUE`, so newly registered palettes are included automatically rather than requiring a second hard-coded theme list.
 
