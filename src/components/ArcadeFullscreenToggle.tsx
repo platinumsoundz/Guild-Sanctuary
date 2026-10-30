@@ -15,10 +15,7 @@ export function ArcadeFullscreenToggle() {
   }, []);
 
   const toggle = async () => {
-    const target = document.fullscreenElement
-      ? document.fullscreenElement
-      : document.querySelector<HTMLElement>('[data-arcade-fullscreen]:focus-within') ??
-        document.querySelector<HTMLElement>('[data-arcade-fullscreen]');
+    const target = document.activeElement?.closest<HTMLElement>('[data-arcade-fullscreen]');
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else if (target?.requestFullscreen) await target.requestFullscreen({ navigationUI: 'hide' });
