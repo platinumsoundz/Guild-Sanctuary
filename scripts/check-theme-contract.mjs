@@ -16,6 +16,10 @@ for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean']) {
   assert.ok(css.includes(`:root[data-theme="${theme}"]`), `missing ${theme} palette`);
   assert.ok(settings.includes(`value="${theme}"`), `missing ${theme} option in Settings`);
 }
+assert.ok(css.includes('--bg: #f5f3ff;') && css.includes('--surface-raised: #f0edff;'), 'light theme must use the cosmic lavender daylight surfaces');
+assert.ok(css.includes('--accent: #5b3dbb;') && css.includes('--accent-contrast: #ffffff;'), 'light theme must retain the cosmic purple accent with readable contrast');
+assert.ok(css.includes(':root[data-theme="light"] body {') && css.includes('rgb(126 93 226 / 12%)'), 'light theme must use its own soft cosmic nebula instead of the dark glow');
+assert.ok(settings.includes('Cosmic light · daylight'), 'appearance settings must describe the mirrored cosmic light theme');
 assert.ok(layout.includes("localStorage.getItem('sanctuary-theme')"), 'theme bootstrap must read device preference');
 assert.ok(layout.includes("themeColor: '#080b1b'"), 'browser chrome must match the cosmic default palette');
 assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'theme bootstrap must apply selected palette before render');
