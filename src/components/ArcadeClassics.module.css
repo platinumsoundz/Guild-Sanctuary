@@ -2,3 +2,65 @@
 .levelBar,.scoreboard{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.levelBar span,.scoreboard p{color:var(--muted);font-size:.9rem;flex:1 1 180px}.levelBar button,.scoreboard button{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--surface-raised);color:var(--text)}.scoreboard{display:block}.scoreboard label{display:block;margin:8px 0 4px}.scoreboard input{max-width:260px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface-raised);color:var(--text);margin-right:8px}.scoreboard ol{padding-left:24px}.scoreboard li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)}.scoreboard li span{overflow-wrap:anywhere}.scoreboard button:disabled{opacity:.6;cursor:default}
 .runStats{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--muted);font-size:12px}.runStats strong{color:var(--ink)}.levelBar select{max-width:160px;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}.levelBar label{font-size:12px;font-weight:700;color:var(--muted)}.scoreboard input{max-width:320px}
 .runStats{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--muted);font-size:12px}.runStats strong{color:var(--ink)}.levelBar select{max-width:160px;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}.levelBar label{font-size:12px;font-weight:700;color:var(--muted)}
+
+/* Cosmic Arcade catalogue overhaul */
+.catalogHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:22px 0 12px}
+.catalogHeading h3{margin:0;font-size:clamp(18px,2.5vw,23px)}
+.catalogHeading p:not(.eyebrow){margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+.catalogCount{flex:none;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--accent);font-size:11px;font-weight:800}
+.gameCatalog{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:0 0 18px}
+.gameCard,.gameCardActive{display:flex;min-width:0;min-height:126px;flex-direction:column;align-items:flex-start;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-raised);color:var(--ink);text-align:left;cursor:pointer;transition:border-color .16s ease,background .16s ease,transform .16s ease}
+.gameCard:hover,.gameCardActive:hover{transform:translateY(-2px);border-color:var(--accent)}
+.gameCardActive{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,var(--surface-raised));box-shadow:inset 0 0 0 1px var(--accent)}
+.gameCardNumber{color:var(--accent);font-size:10px;font-weight:800;letter-spacing:1px}
+.gameCard strong{font-size:13px;line-height:1.3;overflow-wrap:anywhere}
+.gameCard small,.gameCardActive small{color:var(--muted);font-size:10px}
+.gameCardAction{margin-top:auto;color:var(--accent);font-size:10px;font-weight:750}
+.gameCard:focus-visible,.gameCardActive:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:760px){.gameCatalog{grid-template-columns:repeat(2,minmax(0,1fr))}.gameCard,.gameCardActive{min-height:112px}}
+@media(max-width:360px){.gameCatalog{gap:6px}.gameCard,.gameCardActive{padding:9px;min-height:105px}}
+
+
+/* Arcade discovery controls */
+.searchLabel{display:block;margin:14px 0 6px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.4px}
+.gameSearch{display:block;width:100%;max-width:520px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px;outline:none}
+.gameSearch:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 17%,transparent)}
+.categoryFilters{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 14px}
+.filterButton,.filterActive{padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer}
+.filterActive{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,var(--surface));color:var(--ink)}
+.filterButton:focus-visible,.filterActive:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.emptyCatalog{padding:20px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:13px;text-align:center}
+.selectionBar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.selectionBar span{color:var(--muted);font-size:11px}.selectionBar strong{color:var(--ink)}
+.selectionBar button{padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface-raised);color:var(--ink);font-size:10px}
+@media(max-width:600px){.catalogHeading{align-items:flex-start;flex-direction:column}.selectionBar{align-items:flex-start}.gameSearch{max-width:none}}
+
+
+/* Cross-device arcade input support */
+.play{outline:none;touch-action:pan-y}
+.play:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:12px}
+.play button,.gameCard,.gameCardActive{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.mineTools{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:8px 0}
+.mineTools button{min-height:42px;padding:9px 13px;border:1px solid var(--accent);border-radius:9px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--ink);font-weight:750}
+.mineTools small{color:var(--muted);font-size:11px}
+@media(pointer:coarse){.play button{min-width:42px;min-height:42px}.controls button,.letterButtons button{min-height:46px;padding:10px 13px}.gameCard,.gameCardActive{min-height:120px}}
+
+.inputGuide{margin:0 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--muted);font-size:11px;line-height:1.6}
+@media(pointer:coarse){.mineTools button{min-height:48px}.gameSearch{min-height:46px}}
+
+
+/* Immersive game viewport: native browser fullscreen keeps the app shell out of the way. */
+.fullscreenToolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:0 0 10px;border-bottom:1px solid var(--line);color:var(--muted);font-size:11px}
+.fullscreenToolbar button,.gameHeaderActions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:9px 12px;border:1px solid var(--accent);border-radius:9px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--ink);font-weight:750;cursor:pointer;touch-action:manipulation}
+.fullscreenToolbar button:disabled,.gameHeaderActions button:disabled{opacity:.5;cursor:not-allowed}
+.gameHeaderActions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+.playArea:fullscreen,.play:fullscreen{box-sizing:border-box;width:100vw;height:100vh;height:100dvh;max-width:none;max-height:100dvh;margin:0;padding:clamp(14px,3vw,30px);overflow:auto;overscroll-behavior:contain;border:0;border-radius:0;background:var(--surface-raised);color:var(--ink)}
+.playArea:fullscreen .playHeader,.play:fullscreen .fullscreenToolbar{position:sticky;top:0;z-index:5;background:var(--surface-raised)}
+.playArea:fullscreen .snakeBoard{width:min(76vmin, min(100%,720px));}
+.playArea:fullscreen .letterGrid{max-width:min(76vw,720px)}
+.playArea:fullscreen .solitaireTableau{max-width:1200px;margin-inline:auto}
+.playArea:fullscreen .crosswordGrid{width:min(62vmin,520px)}
+.play:fullscreen .grid4,.play:fullscreen .grid8,.play:fullscreen .grid5,.play:fullscreen .grid10,.play:fullscreen .connect,.play:fullscreen .pongBoard,.play:fullscreen .breakoutField{max-width:min(78vw, min(72vh,720px));}
+.play:fullscreen .tetrisGrid{width:min(54vmin,520px)}
+.playArea:fullscreen button,.play:fullscreen button{touch-action:manipulation}
+@media(max-width:620px){.gameHeaderActions{width:100%;justify-content:flex-start}.playArea:fullscreen,.play:fullscreen{padding:12px}.playArea:fullscreen .snakeBoard{width:min(88vw,76vh)}.play:fullscreen .grid4,.play:fullscreen .grid8,.play:fullscreen .grid5,.play:fullscreen .grid10{max-width:min(92vw,68vh)}}

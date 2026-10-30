@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 import styles from './CosmicArcade.module.css';
+import { ArcadeFullscreenToggle } from './ArcadeFullscreenToggle';
 
 type Suit = '♠' | '♥' | '♦' | '♣';
 type Card = { id: string; rank: number; suit: Suit; faceUp: boolean };
@@ -205,10 +206,10 @@ export function LunarSolitaire() {
   const won = foundationSuits.every((suit) => deal.foundations[suit].length === 13);
 
   return (
-    <div className={styles.playArea}>
+    <div className={styles.playArea} data-arcade-fullscreen>
       <div className={styles.playHeader}>
         <div><p className={styles.eyebrow}>MOONLIT CLASSIC</p><h2>Lunar Solitaire</h2><p>Build four suit foundations from Ace to King. Tableau stacks descend in alternating colours.</p></div>
-        <button className={styles.resetButton} type="button" onClick={reset}><RotateCcw size={15} /> New game</button>
+        <div className={styles.gameHeaderActions}><ArcadeFullscreenToggle /><button className={styles.resetButton} type="button" onClick={reset}><RotateCcw size={15} /> New game</button></div>
       </div>
       <div className={styles.solitaireTop}>
         <div className={styles.solitairePile}>

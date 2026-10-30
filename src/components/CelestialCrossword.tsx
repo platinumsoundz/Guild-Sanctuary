@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 import styles from './CosmicArcade.module.css';
+import { ArcadeFullscreenToggle } from './ArcadeFullscreenToggle';
 
 type Direction = 'across' | 'down';
 type Entry = { number: number; answer: string; clue: string; row: number; col: number; direction: Direction };
@@ -97,10 +98,10 @@ export function CelestialCrossword() {
   };
 
   return (
-    <div className={styles.playArea}>
+    <div className={styles.playArea} data-arcade-fullscreen>
       <div className={styles.playHeader}>
         <div><p className={styles.eyebrow}>COSMIC WORDPLAY</p><h2>Celestial Crossword</h2><p>Fill the shared squares to solve this mini crossword. Select a clue to focus its letters, or use arrow keys to move around the grid.</p></div>
-        <button className={styles.resetButton} type="button" onClick={reset}><RotateCcw size={15} /> Reset</button>
+        <div className={styles.gameHeaderActions}><ArcadeFullscreenToggle /><button className={styles.resetButton} type="button" onClick={reset}><RotateCcw size={15} /> Reset</button></div>
       </div>
       <div className={styles.crosswordLayout}>
         <div className={styles.crosswordGrid} role="group" aria-label="Celestial crossword letter grid">

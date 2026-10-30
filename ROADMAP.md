@@ -1021,3 +1021,84 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - The Appearance selector, preference validation, account persistence, session restoration, pre-render bootstrap and contrast checks must discover supported themes from the central catalogue. Avoid maintaining secondary hard-coded theme lists.
 - **Adding a palette:** register its ID and metadata in `THEME_CATALOGUE`; add its semantic-token block to the central theme-token section; verify the catalogue-driven contrast contract; then review representative Sanctuary and Guild pages at desktop and narrow-phone widths. The contrast script already discovers registered IDs automatically.
 - **Long-term quality gate:** migrate remaining feature-level hard-coded colours to semantic tokens and add browser screenshot coverage for every registered theme across representative Sanctuary and Guild surfaces. Static token checks do not replace visual, keyboard, contrast or device testing.
+
+
+## Cosmic Arcade catalogue and display overhaul — 2026-10-30
+
+- Corrected the Arcade Classics collection count from the stale 16 label to **24 mini-games**, matching the actual 24-entry game catalogue.
+- Replaced the single 2048-default dropdown with a visible, responsive game library: all 24 titles are displayed as selectable cards, with category labels and a clear selected state. The selected game opens below the catalogue.
+- Preserved the existing individual game mechanics, local score table, difficulty and progression controls; this slice changes discovery and presentation rather than removing games.
+- Cosmic Arcade inventory: five standalone entries (four playable previews — Starseed Word Search, Celestial Crossword, Lunar Solitaire and Cosmic Snake — plus Zodiac Mahjong coming soon) and 24 Arcade Classics mini-games. That is 28 currently listed playable entries plus one upcoming standalone entry; gameplay QA may still identify prototype limitations.
+- Added regression assertions for the exact count, visible catalogue cards, removal of the dropdown and mobile grid styling.
+- **Status: implementation committed to feat/cosmic-arcade-overhaul-2026-10-30; CI/typecheck/build and browser/device review pending. Not merged or deployed.** Token spending remains locked; no Supabase migration or payment configuration changes are included.
+
+## Cosmic Arcade product roadmap — competitor-informed plan — 2026-10-30
+
+The Arcade should grow into a connected gaming destination inside the Sanctuary/Guild ecosystem, not attempt to copy the scale of major game portals. Keep the catalogue fast, welcoming and easy to use on phones, while making each game feel like a complete experience. Reuse shared platform services; do not create parallel account, wallet, navigation or theme systems.
+
+### Phase 1 — Playable foundation and catalogue (current delivery)
+
+- [x] Replace the 2048-first dropdown with a visible, selectable Arcade Classics catalogue.
+- [x] Add catalogue search, category filters, selected-game state and clear empty states.
+- [x] Show accurate playable/upcoming counts and keep Zodiac Mahjong clearly marked as coming soon.
+- [x] Add responsive layouts and touch-friendly targets for narrow mobile screens.
+- [x] Add keyboard shortcuts and game-specific input guidance; retain mouse/pointer and touch controls where supported.
+- [x] Add native browser fullscreen controls to playable game panels, with Escape/browser exit support and responsive viewport sizing.
+- [ ] Verify each listed game individually on desktop keyboard/mouse and mobile touch; correct any control mismatch or broken game state.
+- [ ] Verify fullscreen entry/exit, orientation/viewport behaviour, scrolling and return to the Guild shell on supported browsers.
+- [ ] Run the focused Arcade contract, full CI, typecheck and production build on the final commit; confirm preview/deployment state without claiming browser QA from static checks.
+- **Exit gate:** catalogue inventory is accurate; every advertised playable entry launches and can be played with its stated input; no blocking mobile/fullscreen regressions; all automated checks pass. Token spending and database changes remain out of scope.
+
+### Phase 2 — Discovery and game detail
+
+- Create an Arcade home with featured, recently played, popular and new/recently added collections.
+- Add clear game detail/launch views with short descriptions, input requirements, estimated session length, accessibility notes and status.
+- Add sorting and filters for genre, difficulty, session length and input method; preserve search and keyboard navigation.
+- Add favourites and recently played locally first, with explicit privacy and sync decisions before account persistence.
+- Use lightweight previews/thumbnail treatments only where they improve discovery; lazy-load game bundles and defer non-selected games to keep the catalogue responsive.
+- Establish a small, curated release cadence and a consistent “new” / “updated” marker without fake popularity metrics.
+
+### Phase 3 — Player identity and personal progress
+
+- Define a shared Arcade player profile using existing Sanctuary/Guild identity and role boundaries.
+- Add achievements, personal bests, play history and per-game progress with clear local/offline behaviour.
+- Design account sync and data deletion/retention rules before introducing server persistence.
+- Keep guest play accessible; do not require sign-in for ordinary free games.
+
+### Phase 4 — Competition and community
+
+- Add server-authoritative leaderboards only after score validation, rate limiting, anti-replay/idempotency and moderation are proven.
+- Support daily/weekly challenges and friend/community competition with clear reset windows and transparent rules.
+- Provide reporting/moderation paths for usernames and submitted content; never trust client-submitted scores as authoritative.
+- Keep multiplayer/network features opt-in and architect for low-latency, resilient sessions without making the single-player catalogue dependent on live services.
+
+### Phase 5 — Guild economy and optional extras
+
+- Consider cosmetics, themes, optional game packs and DLC only after the free catalogue and core play are stable.
+- Any token deduction or purchase must be server-authoritative, idempotent, auditable and reversible through a documented support/refund process.
+- No pay-to-win boosts, paid leaderboard advantages, paid retries that distort rankings, or gameplay gating that undermines free access.
+- Keep token spending, checkout and reward grants disabled until owner-approved staging tests and release gates are complete. No Supabase migration or payment configuration is authorised by this roadmap entry.
+
+### Phase 6 — Expansion and online experiences
+
+- Expand the catalogue through curated original games and carefully reviewed external/creator submissions.
+- Add optional multiplayer rooms, events and tournaments only where the game benefits from them.
+- Establish performance budgets, lazy-loaded game modules, telemetry minimisation, crash reporting without sensitive gameplay capture, and cross-browser/device QA.
+- Review moderation, accessibility, controller support, privacy and operational cost before each online feature ships.
+
+### Product-wide quality standards
+
+- Mobile-first responsive UI; touch, keyboard and mouse support where the game design permits; controller support for games that benefit from it.
+- Fullscreen is game-scoped, reversible, and never traps the player away from Guild navigation.
+- Accessible focus states, readable contrast, reduced-motion support, clear control instructions and non-colour-only game cues.
+- Fast first interaction: load the shell/catalogue first, then load only the selected game's code and assets.
+- Save state and scores honestly; distinguish local records from verified server records.
+- Do not show popularity, ratings, player counts or “trending” claims unless supported by real measured data.
+- Keep all existing free gameplay available without token payment. Purchases are optional extras and remain locked until explicitly approved.
+
+### Phase 1 implementation checkpoint — 2026-10-30
+
+- PR [#311](https://github.com/platinumsoundz/Guild-Sanctuary/pull/311) contains the catalogue, input and fullscreen implementation and this roadmap expansion.
+- The latest observed CI run failed before typecheck/build because the Arcade contract script had an invalid regular-expression literal. This is a test-script syntax issue; it is not evidence that the application build passed or failed. The focused contract has been corrected on the PR branch and must be rerun.
+- The Cloudflare workflow completed successfully for the PR head, but this is not proof of a production deployment. The visual preview workflow completed successfully; inspect its artifact/preview before claiming visual acceptance.
+- **Not yet complete:** full CI after the contract fix, browser/device gameplay QA, and merge/deployment verification. Keep Phase 1 open until the exit gate above is met.

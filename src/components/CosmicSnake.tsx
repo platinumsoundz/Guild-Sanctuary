@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, RotateCcw, Sparkles } from 'lucide-react';
 import styles from './CosmicArcade.module.css';
+import { ArcadeFullscreenToggle } from './ArcadeFullscreenToggle';
 
 type Point = { x: number; y: number };
 type Direction = 'up' | 'down' | 'left' | 'right';
@@ -91,10 +92,10 @@ export function CosmicSnake() {
   }, [direction, food, playing, score]);
 
   return (
-    <div className={styles.playArea}>
+    <div className={styles.playArea} data-arcade-fullscreen>
       <div className={styles.playHeader}>
         <div><p className={styles.eyebrow}>ARCADE CLASSIC</p><h2>Cosmic Snake</h2><p>Collect stardust, grow your trail and avoid the edges. No tokens are needed to play.</p></div>
-        <button className={styles.resetButton} type="button" onClick={reset}><RotateCcw size={15} /> Restart</button>
+        <div className={styles.gameHeaderActions}><ArcadeFullscreenToggle /><button className={styles.resetButton} type="button" onClick={reset}><RotateCcw size={15} /> Restart</button></div>
       </div>
       <div className={styles.snakeStats}>
         <div><span>STARDUST</span><strong>{score}</strong></div>

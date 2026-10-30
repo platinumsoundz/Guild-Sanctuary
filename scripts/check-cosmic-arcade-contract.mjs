@@ -12,6 +12,7 @@ const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
 const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
 const gamesHub = readFileSync('src/components/GamesHub.tsx', 'utf8');
 const supportPanel = readFileSync('src/modules/support/SupportPanel.tsx', 'utf8');
+const fullscreen = readFileSync('src/components/ArcadeFullscreenToggle.tsx', 'utf8');
 
 assert.match(navigation, /id:\s*'games',\s*label:\s*'Cosmic Arcade'/, 'Cosmic Arcade remains reachable from navigation');
 assert.match(workspace, /contentNavigation === 'games' \? \(\s*<CosmicArcade \/>/, 'Cosmic Arcade route renders only the Sanctuary-built arcade');
@@ -32,12 +33,30 @@ assert.match(gamesHub, /My Roblox World/,'creator projects retain the Roblox exp
 assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the Bedrock server');
 assert.match(arcade, /Starseed Word Search/, 'word search preview remains available');
 assert.ok(arcade.includes("selectedGame === 'classics' ? <ArcadeClassics />"), 'arcade classics are connected to the main selector');
-assert.match(arcade, /16 playable games/, 'the classic games collection is advertised');
+assert.match(arcade, /24 playable games/, 'the classic games collection advertises the exact catalogue size');
+assert.match(arcade, /<strong>28<\/strong>[\s\S]*?Playable games/, 'the arcade overview distinguishes the playable game count');
+assert.match(arcade, /Coming soon/, 'coming-soon status remains visible');
+assert.match(classics, /GAME LIBRARY · 24 TITLES/, 'the full classic catalogue is visible above the game');
+assert.match(classics, /arcade-game-search/, 'the catalogue provides a searchable game field');
+assert.match(classics, /categoryFilters/, 'the catalogue provides category filters');
+assert.match(classics, /filteredOptions\.map/, 'the visible catalogue responds to search and category filters');
+assert.match(classics, /filteredOptions\.map/, 'every visible classic game is presented as a selectable catalogue card');
+assert.doesNotMatch(classics, /classic-game-select|Choose a game[\\s\\S]*?<select/, 'classic games are not hidden in a dropdown');
+assert.match(classicsCss, /\.gameCatalog\{display:grid/, 'the classic catalogue uses a responsive visible grid');
+assert.match(classicsCss, /@media\(max-width:760px\)/, 'the classic catalogue adapts to mobile screens');
 for (const game of ['2048', 'Minesweeper', 'Lights Out', 'Memory Match', 'Word Guess', 'Hangman', 'Tic-Tac-Toe', 'Connect Four', 'Tower of Hanoi', 'Flood Fill', 'Game of Life', 'Whack-a-Star', 'Cosmic Trivia', '15 Puzzle', 'Simon Memory', 'Cosmic Pong', 'Brick Breaker', 'Starfall Blocks', 'Sudoku', 'Maze Runner', 'Typing Sprint', 'Asteroid Dodge', 'Space Invaders']) assert.ok(classics.includes(game), `classic collection includes ${game}`);
 assert.match(classics, /function slide2048/, '2048 merges tiles');
 assert.match(classics, /mineCells/, 'Minesweeper uses a hidden minefield');
 assert.ok(classics.includes('setLife(a=>a.map'), 'Game of Life advances cellular rules');
 assert.match(classics, /aria-label/, 'classic games include accessible control labels');
+assert.match(classics, /window\.addEventListener\('keydown',onKeyDown\)/, 'classic games register keyboard controls');
+assert.match(classics, /key==='arrowup'.*?key==='w'/, 'movement games support arrows and WASD');
+assert.match(classics, /game==='mines'.*?mineFlagMode/, 'Minesweeper supports touch-friendly flag mode');
+assert.match(classics, /onPointerMove=/, 'paddle games support mouse pointer steering');
+assert.match(classics, /inputGuide/, 'the control guide is visible to players');
+assert.match(classicsCss, /@media\(pointer:coarse\)/, 'touch devices receive larger interactive targets');
+assert.match(classicsCss, /touch-action:manipulation/, 'arcade controls avoid delayed touch activation');
+
 assert.match(classics, /Optional game extras/, 'games expose a planned token-spending integration point');
 assert.match(classics, /Token spending is not enabled yet/, 'token spending remains locked until server-side wallet validation exists');
 assert.match(classics, /sanctuary-arcade-scores-v1/, 'scores are stored locally with an explicit versioned key');
@@ -93,5 +112,19 @@ assert.match(solitaire, /stock: current\.waste\.slice\(\)\.reverse\(\)/, 'solita
 assert.match(css, /solitaireTableau/, 'solitaire tableau styles are present');
 assert.match(css, /@media \(max-width:420px\)/, 'small-screen styles are present');
 assert.doesNotMatch(snake, /\.rpc\(|spend_tokens|token_balance/i, 'gameplay must not modify token balances from the client');
+assert.match(fullscreen, /requestFullscreen/, 'arcade games can enter native browser fullscreen');
+assert.match(fullscreen, /exitFullscreen/, 'arcade games can exit fullscreen');
+assert.match(fullscreen, /fullscreenchange/, 'fullscreen state stays synchronised with browser controls and Escape');
+assert.match(classics, /data-arcade-fullscreen/, 'Arcade Classics game viewport is fullscreen-capable');
+assert.match(classics, /<ArcadeFullscreenToggle \/>/, 'Arcade Classics exposes a fullscreen control');
+assert.match(arcade, /data-arcade-fullscreen/, 'standalone word search is fullscreen-capable');
+for (const [name,source] of [['snake',snake],['solitaire',solitaire],['crossword',crossword]]) {
+  assert.match(source, /data-arcade-fullscreen/, name+' game viewport is fullscreen-capable');
+  assert.match(source, /<ArcadeFullscreenToggle \/>/, name+' exposes a fullscreen control');
+}
+assert.match(classicsCss, /\.play:fullscreen/, 'classic games use an immersive viewport in fullscreen');
+assert.match(css, /\.playArea:fullscreen/, 'standalone games use an immersive viewport in fullscreen');
+assert.match(css, /100dvh/, 'fullscreen layouts account for mobile dynamic viewport height');
+
 
 console.log('Cosmic Arcade contract checks passed.');

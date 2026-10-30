@@ -7,6 +7,7 @@ import { CelestialCrossword } from './CelestialCrossword';
 import { ArcadeClassics } from './ArcadeClassics';
 import { BookOpen, CreditCard, Gem, LockKeyhole, MoonStar, Puzzle, RotateCcw, Sparkles, Star } from 'lucide-react';
 import styles from './CosmicArcade.module.css';
+import { ArcadeFullscreenToggle } from './ArcadeFullscreenToggle';
 
 type ArcadeGame = 'wordsearch' | 'crossword' | 'solitaire' | 'mahjong' | 'snake' | 'classics';
 type Cell = { row: number; col: number };
@@ -17,7 +18,7 @@ const games: { id: ArcadeGame; title: string; subtitle: string; icon: typeof Sta
   { id: 'solitaire', title: 'Lunar Solitaire', subtitle: 'A calm, moonlit take on a classic card game.', icon: MoonStar, status: 'Playable preview' },
   { id: 'mahjong', title: 'Zodiac Mahjong', subtitle: 'Match celestial tiles and zodiac symbols.', icon: Gem, status: 'Coming soon' },
   { id: 'snake', title: 'Cosmic Snake', subtitle: 'Collect stardust and see how long you survive.', icon: Sparkles, status: 'Playable preview' },
-  { id: 'classics', title: 'Arcade Classics', subtitle: 'A collection of quick puzzles, memory games and arcade challenges.', icon: Star, status: '16 playable games' },
+  { id: 'classics', title: 'Arcade Classics', subtitle: 'A collection of quick puzzles, memory games and arcade challenges.', icon: Star, status: '24 playable games' },
 ];
 
 const wordGrid = [
@@ -121,6 +122,12 @@ export function CosmicArcade() {
         <div className={styles.heroNote}><MoonStar size={18} /><span>Games are for reflection and entertainment, not predictions or professional advice.</span></div>
       </header>
 
+      <section className={styles.availability} aria-label="Arcade availability">
+        <div><strong>28</strong><span>Playable games</span><small>4 standalone previews + 24 Arcade Classics</small></div>
+        <div><strong>1</strong><span>Coming soon</span><small>Zodiac Mahjong</small></div>
+        <div><strong>24</strong><span>Arcade Classics</span><small>Full mini-game collection</small></div>
+      </section>
+
       <div className={styles.gameTabs} role="tablist" aria-label="Arcade games">
         {games.map((game) => {
           const Icon = game.icon;
@@ -131,10 +138,10 @@ export function CosmicArcade() {
       </div>
 
       {selectedGame === 'classics' ? <ArcadeClassics /> : selectedGame === 'crossword' ? <CelestialCrossword /> : selectedGame === 'snake' ? <CosmicSnake /> : selectedGame === 'solitaire' ? <LunarSolitaire /> : selectedGame === 'wordsearch' ? (
-        <div className={styles.playArea}>
+        <div className={styles.playArea} data-arcade-fullscreen>
           <div className={styles.playHeader}>
             <div><p className={styles.eyebrow}>MINDFUL PUZZLE</p><h2>Starseed Word Search</h2><p>Choose a word's first letter, then its last letter in a straight line. Horizontal, vertical and diagonal words all count.</p></div>
-            <button className={styles.resetButton} type="button" onClick={resetWordSearch}><RotateCcw size={15} /> Reset</button>
+            <div className={styles.gameHeaderActions}><ArcadeFullscreenToggle /><button className={styles.resetButton} type="button" onClick={resetWordSearch}><RotateCcw size={15} /> Reset</button></div>
           </div>
           <div className={styles.puzzleLayout}>
             <div className={styles.letterGrid} aria-label="Word search letter grid">
