@@ -129,7 +129,7 @@ export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldTy
   };
 
   return (
-    <main className={styles.calendar}>
+    <main className={styles.calendar} data-world={worldType}>
       <header className={styles.pageHeader}>
         <div>
           <p className={styles.eyebrow}>GATHER WITH CARE</p>
