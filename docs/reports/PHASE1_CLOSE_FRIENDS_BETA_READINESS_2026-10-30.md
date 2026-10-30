@@ -36,7 +36,7 @@ This report records verified repository and connected-service observations. It i
 
 ### P0 — Moderation and privileged operations
 
-- The inspected live schema does not contain `public.get_moderation_queue()`. Do not call the moderation dashboard complete until its actual data path is reconciled and tested.
+- `public.get_moderation_queue()` is absent, but the active `fetchModerationQueue` implementation intentionally reads `content_reports` under RLS and resolves target ownership through `get_report_target_owner()`. The missing RPC is not itself a blocker; the current RLS-backed query and report/action lifecycle still require end-to-end role testing. Private message report bodies are intentionally not previewed.
 - Existing SECURITY DEFINER RPCs, including role-change and moderation functions, require per-function authorization, search-path, grants, hierarchy, and concurrency review.
 - Leaked-password protection was reported disabled by the Supabase security advisor.
 - `game_wallet_sessions` and `stripe_payment_entitlements` have RLS enabled without client policies in the inspected schema. Treat this as intentional deny-by-default unless a reviewed use case proves otherwise.
