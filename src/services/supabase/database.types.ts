@@ -31,6 +31,14 @@ export type ProfileRow = {
   visibility: 'public' | 'private';
   created_at: string;
   updated_at: string;
+  equipped_frame: string | null;
+  equipped_effect: string | null;
+  equipped_badge: string | null;
+  equipped_banner: string | null;
+  equipped_border: string | null;
+  equipped_profile_theme: string | null;
+  equipped_palette: string | null;
+  custom_accent_color: string | null;
 }
 
 export type PrivateProfileVaultRow = {
@@ -153,6 +161,10 @@ export interface Database {
       }>;
       token_entitlements: Table<{
         user_id: string; item_id: string; granted_at: string;
+      }>;
+      token_bonus_ledger: Table<{
+        id: string; user_id: string; tokens_delta: number; grant_position: number;
+        source: string; verified_at: string; created_at: string;
       }>;
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
@@ -285,6 +297,20 @@ export interface Database {
         };
         Relationships: [];
       };
+      public_profile_cosmetics: {
+        Row: {
+          id: string;
+          equipped_frame: string | null;
+          equipped_effect: string | null;
+          equipped_badge: string | null;
+          equipped_banner: string | null;
+          equipped_border: string | null;
+          equipped_profile_theme: string | null;
+          equipped_palette: string | null;
+          custom_accent_color: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       create_scoped_conversation: {
@@ -369,8 +395,12 @@ export interface Database {
         Returns: { item_id: string; kind: string }[];
       };
       clear_profile_cosmetic: {
-        Args: { requested_slot: 'frame' | 'effect' | 'badge' | 'banner' };
+        Args: { requested_slot: 'frame' | 'effect' | 'badge' | 'banner' | 'border' | 'profile_theme' | 'palette' };
         Returns: undefined;
+      };
+      set_profile_custom_accent: {
+        Args: { requested_color: string | null };
+        Returns: string | null;
       };
       is_moderator: {
         Args: Record<string, never>;
