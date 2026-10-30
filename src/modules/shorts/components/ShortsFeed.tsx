@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Heart, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import { fetchPublicProfileById } from '@/modules/profiles';
+import type { PublicProfile } from '@/types/database';
 import type { WorldType } from '@/types/database';
 import { ReportContentButton } from '@/modules/moderation';
 import type { ShortVideo, SocialComment } from '@/types/database';
-import { addShortComment, createShortVideo, deleteShortComment, deleteShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike, updateShortComment } from '../service';
+import { addShortComment, createShortVideo, deleteShortComment, deleteShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike, updateShortComment, updateShortVideo } from '../service';
 import { getCommentEngagement, toggleCommentLike } from '@/modules/feeds/commentEngagement';
 import styles from './ShortsFeed.module.css';
 
@@ -21,6 +23,10 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
   const viewerId = currentUser?.user.id ?? '';
   const canEngage = Boolean(viewerId) && !isGuest;
   const [videos, setVideos] = useState<ShortVideo[]>([]);
+  const [creatorProfiles, setCreatorProfiles] = useState<Record<string, PublicProfile>>({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
+  const [editingCaption, setEditingCaption] = useState('');
   const [engagement, setEngagement] = useState<Record<string, ShortState>>({});
   const [commentsByVideo, setCommentsByVideo] = useState<Record<string, SocialComment[]>>({});
   const [openCommentsId, setOpenCommentsId] = useState<string | null>(null);
@@ -79,6 +85,22 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
     });
     return () => { cancelled = true; };
   }, [viewerId, worldType]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const creatorIds = [...new Set(videos.map((video) => video.authorId))];
+    void Promise.all(creatorIds.map(async (creatorId) => {
+      try {
+        const profile = await fetchPublicProfileById(creatorId);
+        return profile ? [creatorId, profile] as const : null;
+      } catch {
+        return null;
+      }
+    })).then((profiles) => {
+      if (!cancelled) setCreatorProfiles(Object.fromEntries(profiles.filter((profile): profile is NonNullable<typeof profile> => profile !== null)));
+    });
+    return () => { cancelled = true; };
+  }, [videos]);
 
   useEffect(() => {
     const feed = feedRef.current;
@@ -312,6 +334,34 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
     }
   };
 
+  const saveShortCaption = async (videoId: string) => {
+    try {
+      const updated = await updateShortVideo(videoId, viewerId, editingCaption, worldType);
+      setVideos((current) => current.map((video) => video.id === videoId ? updated : video));
+      setEditingVideoId(null);
+      setEditingCaption('');
+      setError(null);
+    } catch (editError) {
+      setError(editError instanceof Error ? editError.message : 'The caption could not be updated.');
+    }
+  };
+
+  const shareShort = async (videoId: string) => {
+    const shareUrl = `${window.location.origin}${window.location.pathname}#short-${encodeURIComponent(videoId)}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Community Short', url: shareUrl });
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        setError('Short link copied to clipboard.');
+      } else {
+        setError('Sharing is not available in this browser.');
+      }
+    } catch (shareError) {
+      if (shareError instanceof Error && shareError.name !== 'AbortError') setError('This Short could not be shared.');
+    }
+  };
+
   const handleDeleteVideo = async (videoId: string) => {
     if (!canEngage) {
       setError('Sign in to your account to delete a Short.');
@@ -365,17 +415,38 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
         <p className={styles.empty} role="status">Sign in to publish, like, or comment on Shorts.</p>
       )}
       {error && <p className={styles.error} role="alert">{error}</p>}
+      <div className={styles.feedTools}>
+        <label className={styles.searchLabel}>
+          <span>Find a Short</span>
+          <input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.currentTarget.value)} placeholder="Search captions and creators…" />
+        </label>
+        <span>{videos.filter((video) => {
+          const query = searchTerm.trim().toLocaleLowerCase();
+          const profile = creatorProfiles[video.authorId];
+          return !query || `${video.caption} ${profile?.displayName ?? ''} ${profile?.username ?? ''}`.toLocaleLowerCase().includes(query);
+        }).length} clips</span>
+      </div>
       <div className={styles.feed} ref={feedRef}>
-        {videos.map((video, index) => {
+        {videos.filter((video) => {
+          const query = searchTerm.trim().toLocaleLowerCase();
+          const profile = creatorProfiles[video.authorId];
+          return !query || `${video.caption} ${profile?.displayName ?? ''} ${profile?.username ?? ''}`.toLocaleLowerCase().includes(query);
+        }).map((video, index) => {
           const stats = engagement[video.id] ?? { liked: false, likesCount: 0, commentsCount: 0 };
           const isCommentsOpen = openCommentsId === video.id;
           return (
-            <article className={styles.clip} key={video.id}>
+            <article className={styles.clip} key={video.id} id={`short-${video.id}`}>
               <video className={styles.video} src={video.videoUrl} controls muted playsInline preload={index === 0 ? 'metadata' : 'none'} aria-label={`Short video: ${video.caption}`} />
               <div className={styles.scrim} aria-hidden="true" />
               <div className={styles.caption}>
-                <span>@{video.authorId}</span>
-                <p>{video.caption}</p>
+                <span>{creatorProfiles[video.authorId] ? `${creatorProfiles[video.authorId].displayName} · @${creatorProfiles[video.authorId].username}` : 'Community creator'}</span>
+                {editingVideoId === video.id ? (
+                  <div className={styles.captionEditor}>
+                    <textarea value={editingCaption} maxLength={500} onChange={(event) => setEditingCaption(event.currentTarget.value)} aria-label="Edit Short caption" />
+                    <button type="button" onClick={() => void saveShortCaption(video.id)}>Save caption</button>
+                    <button type="button" onClick={() => { setEditingVideoId(null); setEditingCaption(''); }}>Cancel</button>
+                  </div>
+                ) : <p>{video.caption}</p>}
               </div>
               <div className={styles.actions}>
                 <button type="button" disabled={!canEngage} aria-pressed={stats.liked} aria-label={`${stats.liked ? 'Unlike' : 'Like'} short, ${stats.likesCount} likes`} onClick={() => void handleLike(video.id)}>
@@ -386,11 +457,21 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
                   <MessageCircle />
                   <span>{stats.commentsCount}</span>
                 </button>
+                <button type="button" aria-label="Share this short video" onClick={() => void shareShort(video.id)}>
+                  <icon />
+                  <span>Share</span>
+                </button>
                 {video.authorId === viewerId && (
-                  <button type="button" disabled={!canEngage} aria-label="Delete your short video" onClick={() => void handleDeleteVideo(video.id)}>
-                    <Trash2 />
-                    <span>Delete</span>
-                  </button>
+                  <>
+                    <button type="button" disabled={!canEngage} aria-label="Edit your short caption" onClick={() => { setEditingVideoId(video.id); setEditingCaption(video.caption); }}>
+                      <Pencil />
+                      <span>Edit</span>
+                    </button>
+                    <button type="button" disabled={!canEngage} aria-label="Delete your short video" onClick={() => void handleDeleteVideo(video.id)}>
+                      <Trash2 />
+                      <span>Delete</span>
+                    </button>
+                  </>
                 )}
               </div>
               <ReportContentButton targetType="short" targetId={video.id} />
@@ -430,7 +511,12 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
             </article>
           );
         })}
-        {videos.length === 0 && <p className={styles.empty}>No short videos yet.</p>}
+        {videos.length === 0 && <p className={styles.empty}>No short videos yet. Share the first clip with your community.</p>}
+        {videos.length > 0 && !videos.some((video) => {
+          const query = searchTerm.trim().toLocaleLowerCase();
+          const profile = creatorProfiles[video.authorId];
+          return !query || `${video.caption} ${profile?.displayName ?? ''} ${profile?.username ?? ''}`.toLocaleLowerCase().includes(query);
+        }) && <p className={styles.empty}>No Shorts match that search.</p>}
       </div>
     </main>
   );
