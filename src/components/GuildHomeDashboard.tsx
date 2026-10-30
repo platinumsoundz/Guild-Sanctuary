@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { NavigationState } from '@/context/AppContext';
+import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import {
   ArrowRight, Bell, CalendarDays, Clapperboard, Compass, Gamepad2, Heart,
   Library, MessageCircle, Music2, Play, Search, Settings2, Sparkles, UsersRound
@@ -26,7 +27,7 @@ const destinations: { title: string; description: string; target: NavigationStat
   { title: 'Music', description: 'Your local music player', target: 'music' as NavigationState, icon: Music2 },
 ];
 
-export function GuildHomeDashboard({ onNavigate, onContinuePlaying }: { onNavigate: (page: NavigationState) => void; onContinuePlaying?: () => void }) {
+export function GuildHomeDashboard({ onNavigate, onContinuePlaying, role = 'user', isGuest = false }: { onNavigate: (page: NavigationState) => void; onContinuePlaying?: () => void; role?: string; isGuest?: boolean }) {
   const [recents, setRecents] = useState<Recent[]>([]);
   const [favourites, setFavourites] = useState<GameId[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -47,6 +48,10 @@ export function GuildHomeDashboard({ onNavigate, onContinuePlaying }: { onNaviga
   }, []);
 
   const recentGames = useMemo(() => recents.map((record) => games.find((game) => game.id === record.id)).filter((game): game is typeof games[number] => Boolean(game)), [recents]);
+  const visibleDestinations = destinations.filter(({ target }) => {
+    if (isGuest && (target === 'events' || target === 'shorts')) return false;
+    return canAccessSanctuaryPage(target, role);
+  });
   const featuredGame = recentGames[0] ?? games[0];
   const toggleFavourite = (id: GameId) => {
     const next = favourites.includes(id) ? favourites.filter((item) => item !== id) : [...favourites, id];
@@ -100,7 +105,7 @@ export function GuildHomeDashboard({ onNavigate, onContinuePlaying }: { onNaviga
 
       <section className={styles.communitySection} aria-labelledby="community-heading">
         <div className={styles.sectionHeading}><div><span className={styles.kicker}>BEYOND THE GAMES</span><h2 id="community-heading">Your Guild</h2></div></div>
-        <div className={styles.destinationRail}>{destinations.map(({ title, description, target, icon: Icon }) => <button type="button" key={title} className={styles.destination} onClick={() => onNavigate(target)}><span className={styles.destinationIcon}><Icon size={19} /></span><span><strong>{title}</strong><small>{description}</small></span><ArrowRight size={15} /></button>)}</div>
+        <div className={styles.destinationRail}>{visibleDestinations.map(({ title, description, target, icon: Icon }) => <button type="button" key={title} className={styles.destination} onClick={() => onNavigate(target)}><span className={styles.destinationIcon}><Icon size={19} /></span><span><strong>{title}</strong><small>{description}</small></span><ArrowRight size={15} /></button>)}</div>
       </section>
 
       <footer className={styles.footer}><span><Bell size={14} /> Your notifications and updates are one tap away.</span><button type="button" onClick={() => onNavigate('notifications')}>OPEN NOTIFICATIONS <ArrowRight size={13} /></button></footer>
