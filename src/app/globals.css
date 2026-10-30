@@ -386,3 +386,20 @@ body {
 :root[data-theme="light"] :where([class*="card"], [class*="Card"], .cosmic-outline) {
   box-shadow: 0 8px 24px rgb(53 36 100 / 7%);
 }
+
+
+/* Theme-specific atmosphere is expressed after responsive defaults so each
+   palette remains correct on both desktop and narrow mobile viewports. */
+:root[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse at 12% 0%, rgb(126 93 226 / 12%), transparent 34rem),
+    radial-gradient(ellipse at 100% 28%, rgb(48 177 204 / 10%), transparent 32rem),
+    radial-gradient(ellipse at 52% 100%, rgb(191 142 236 / 12%), transparent 42rem);
+}
+@media (max-width: 700px) {
+  :root[data-theme="light"] body {
+    background-image:
+      radial-gradient(ellipse at 5% 0%, rgb(126 93 226 / 14%), transparent 22rem),
+      radial-gradient(ellipse at 100% 25%, rgb(48 177 204 / 11%), transparent 20rem);
+  }
+}
