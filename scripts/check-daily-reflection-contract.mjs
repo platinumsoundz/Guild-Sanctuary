@@ -12,7 +12,7 @@ const checks = [
   ['reads and writes are scoped to the verified owner id', /\.eq\('user_id', ownerId\)/.test(component) && /user_id: ownerId/.test(component)],
   ['history is bounded to 90 entries and sorted newest first', /\.limit\(90\)/.test(component) && /order\('reflection_date', \{ ascending: false \}\)/.test(component)],
   ['one entry per user per day is saved with the unique upsert key', /onConflict: 'user_id,reflection_date'/.test(component)],
-  ['delete history is confirmed and restricted to the active owner', /window\.confirm\('Delete all Sanctuary reflections/.test(component) && /\.delete\(\)\.eq\('user_id', ownerId\)/.test(component)],
+  ['delete history is confirmed and restricted to the active owner', /window\.confirm\('Delete all reflections/.test(component) && /\.delete\(\)\.eq\('user_id', ownerId\)/.test(component)],
   ['guest mode remains read-only', /if \(isGuest\)[\s\S]*?Sign in to save private diary entries/.test(component)],
   ['legacy browser entries are read only for an explicit, confirmed import', /localStorage\.getItem\(/.test(component) && /const importBrowserReflections = async/.test(component) && /This uploads private mood and reflection text/.test(component) && !component.includes('localStorage.setItem(') && !component.includes('localStorage.removeItem(')],
   ['existing account entries are not overwritten during import', /ignoreDuplicates: true/.test(component) && /existingDates = new Set\(entries\.map\(\(entry\) => entry\.date\)\)/.test(component)],
