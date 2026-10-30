@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Heart, MessageCircle, Pencil, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Pencil, Share2, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { fetchPublicProfileById } from '@/modules/profiles';
 import type { PublicProfile } from '@/types/database';
@@ -458,7 +458,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
                   <span>{stats.commentsCount}</span>
                 </button>
                 <button type="button" aria-label="Share this short video" onClick={() => void shareShort(video.id)}>
-                  <icon />
+                  <Share2 />
                   <span>Share</span>
                 </button>
                 {video.authorId === viewerId && (
