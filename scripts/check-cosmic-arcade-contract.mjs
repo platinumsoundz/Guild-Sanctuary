@@ -32,7 +32,12 @@ assert.match(gamesHub, /My Roblox World/,'creator projects retain the Roblox exp
 assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the Bedrock server');
 assert.match(arcade, /Starseed Word Search/, 'word search preview remains available');
 assert.ok(arcade.includes("selectedGame === 'classics' ? <ArcadeClassics />"), 'arcade classics are connected to the main selector');
-assert.match(arcade, /16 playable games/, 'the classic games collection is advertised');
+assert.match(arcade, /24 mini-games/, 'the classic games collection advertises the exact catalogue size');
+assert.match(classics, /GAME LIBRARY · 24 TITLES/, 'the full classic catalogue is visible above the game');
+assert.match(classics, /options\.map\(\(option,index\)=>\s*<button/, 'every classic game is presented as a selectable catalogue card');
+assert.doesNotMatch(classics, /classic-game-select|Choose a game[\\s\\S]*?<select/, 'classic games are not hidden in a dropdown');
+assert.match(classicsCss, /\.gameCatalog\{display:grid/, 'the classic catalogue uses a responsive visible grid');
+assert.match(classicsCss, /@media\(max-width:760px\)/, 'the classic catalogue adapts to mobile screens');
 for (const game of ['2048', 'Minesweeper', 'Lights Out', 'Memory Match', 'Word Guess', 'Hangman', 'Tic-Tac-Toe', 'Connect Four', 'Tower of Hanoi', 'Flood Fill', 'Game of Life', 'Whack-a-Star', 'Cosmic Trivia', '15 Puzzle', 'Simon Memory', 'Cosmic Pong', 'Brick Breaker', 'Starfall Blocks', 'Sudoku', 'Maze Runner', 'Typing Sprint', 'Asteroid Dodge', 'Space Invaders']) assert.ok(classics.includes(game), `classic collection includes ${game}`);
 assert.match(classics, /function slide2048/, '2048 merges tiles');
 assert.match(classics, /mineCells/, 'Minesweeper uses a hidden minefield');
