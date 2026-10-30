@@ -31,4 +31,11 @@ assert.ok(player.includes('ref={gameFrameRef}'), 'the host bridge must bind mess
 
 assert.ok(library.includes('NEXT_PUBLIC_5_SLEEVES_3D_URL'), 'the 3D game host must support an HTTPS-only staging override with the canonical Pages URL as fallback');
 
+assert.ok(player.includes("message.type === 'ack' && message.requestId === latestBridgeRequest.current"), 'the Guild player must correlate game pause/resume acknowledgements');
+assert.ok(player.includes("command: menuOpen ? 'pause' : 'resume'"), 'the Guild menu must send the matching lifecycle command');
+assert.ok(player.includes('requestId'), 'lifecycle commands must carry a request identifier');
+assert.ok(library.includes("process.env.VERCEL_ENV === 'preview'"), 'preview deployments must use the matching game bridge preview by default');
+assert.ok(library.includes('integration-guild-host-bridg.the-5-sleeves-3d.pages.dev'), 'preview deployment must target the game branch preview');
+assert.ok(library.includes('https://the-5-sleeves-3d.pages.dev/'), 'production fallback must remain the canonical game host');
+
 console.log('Guild game exit and lifecycle bridge contract checks passed.');
