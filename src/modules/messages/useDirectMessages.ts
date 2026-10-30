@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Message, WorldType } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
-import { fetchConversationThread, createDirectConversation, sendConversationMessage, subscribeToConversationMessages } from './service';
+import { fetchConversationThread, createDirectConversation, sendConversationMessage, markConversationMessagesRead, subscribeToConversationMessages } from './service';
 
 interface UseDirectMessagesResult {
   messages: Message[];
@@ -52,6 +52,16 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
         setConversationId(thread.conversation.id);
         setMessages(thread.messages);
         setError(null);
+        void markConversationMessagesRead(thread.conversation.id, userId, worldType).then((readAt) => {
+          if (!readAt || activeConversationId.current !== thread.conversation.id || threadRequest.current !== requestId) return;
+          setMessages((currentMessages) => currentMessages.map((message) =>
+            message.senderId !== userId && message.readAt === null ? { ...message, readAt } : message,
+          ));
+        }).catch((readError) => {
+          if (activeConversationId.current === thread.conversation.id && threadRequest.current === requestId) {
+            setError(readError instanceof Error ? readError.message : 'Read receipt could not be saved.');
+          }
+        });
       }
     }).catch((loadError) => {
       if (!cancelled && requestId === threadRequest.current) {
@@ -148,9 +158,23 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
       userId,
       (incoming) => {
         if (activeConversationId.current !== conversationId) return;
-        setMessages((currentMessages) => currentMessages.some((message) => message.id === incoming.id)
-          ? currentMessages
-          : [...currentMessages, incoming].sort((a, b) => a.sentAt.localeCompare(b.sentAt)));
+        setMessages((currentMessages) => {
+          const existingIndex = currentMessages.findIndex((message) => message.id === incoming.id);
+          if (existingIndex < 0) return [...currentMessages, incoming].sort((a, b) => a.sentAt.localeCompare(b.sentAt));
+          return currentMessages.map((message) => message.id === incoming.id ? incoming : message);
+        });
+        if (incoming.senderId !== userId && incoming.readAt === null) {
+          void markConversationMessagesRead(conversationId, userId, worldType).then((readAt) => {
+            if (!readAt || activeConversationId.current !== conversationId) return;
+            setMessages((currentMessages) => currentMessages.map((message) =>
+              message.senderId !== userId && message.readAt === null ? { ...message, readAt } : message,
+            ));
+          }).catch((readError) => {
+            if (activeConversationId.current === conversationId) {
+              setError(readError instanceof Error ? readError.message : 'Read receipt could not be saved.');
+            }
+          });
+        }
       },
       (subscriptionError) => {
         if (activeConversationId.current === conversationId) setError(subscriptionError);
