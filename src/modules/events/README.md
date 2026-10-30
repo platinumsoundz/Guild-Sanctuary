@@ -7,3 +7,6 @@ The service supports Sanctuary/Guild world scoping when reading and mutating eve
 Current known experience: event list, map-pin explorer, nearby coordinate matching, create/edit form, RSVP actions, comments/reactions, and reporting. Current gaps to close in the overhaul include venue/address and online-event support, categories/search/calendar views, full event detail, privacy/visibility controls, capacity/waitlist, organiser management, reminders, and production-grade validation/notifications.
 
 See `docs/EVENTS_SHORTS_OVERHAUL.md` for the acceptance contract and delivery gates.
+
+
+The current UI batch adds list-first discovery, title/description search, a List/Map switch, and map-focus actions from event cards. The existing world-scoped event service and RSVP/engagement flows remain in place. Extended event metadata (venue, online access, category, capacity and waitlist) is still pending a schema audit.
