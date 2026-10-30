@@ -329,8 +329,8 @@ export function MeetupCalendarPlaceholder({ worldType = 'sanctuary' }: { worldTy
                     {userId && <ReportContentButton targetType="event" targetId={event.id} />}
                   </div>
                   <div className={styles.eventActions}>
-                    <button className={styles.secondaryButton} type="button" onClick={() => setSelectedMapEventId(event.id)} aria-pressed={selectedMapEvent?.id === event.id}>
-                      <MapPin size={14} aria-hidden="true" /> {selectedMapEvent?.id === event.id ? 'On map' : 'Show on map'}
+                    <button className={styles.secondaryButton} type="button" onClick={() => { setSelectedMapEventId(event.id); setEventView('map'); }} aria-pressed={eventView === 'map' && selectedMapEvent?.id === event.id}>
+                      <MapPin size={14} aria-hidden="true" /> {eventView === 'map' && selectedMapEvent?.id === event.id ? 'On map' : 'Show on map'}
                     </button>
                     {userId && <>
                       <button className={event.viewerStatus === 'going' ? styles.selectedButton : styles.secondaryButton} type="button" onClick={() => void handleRsvp(event.id, event.viewerStatus === 'going' ? 'cancelled' : 'going')}>
