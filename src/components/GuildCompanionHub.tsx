@@ -86,6 +86,7 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
   }, [games, libraryLoaded]);
 
   useEffect(() => { audioFilesRef.current = audioFiles; }, [audioFiles]);
+  useEffect(() => { folderInput.current?.setAttribute('webkitdirectory', ''); folderInput.current?.setAttribute('directory', ''); }, []);
   useEffect(() => () => audioFilesRef.current.forEach((item) => URL.revokeObjectURL(item.url)), []);
   useEffect(() => {
     const publish = () => window.dispatchEvent(new CustomEvent('guild-music-state', { detail: {
