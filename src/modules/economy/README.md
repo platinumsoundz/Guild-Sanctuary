@@ -17,3 +17,12 @@ The shop now has a searchable catalogue, category filters derived from the serve
 **Catalog reconciliation is still required before staging:** the existing migration seed contains 12 profile frames/effects/badges/banners, while `TOKEN_CATALOG_PROPOSAL.md` describes a different starter set of frames, borders, profile themes and colour customisation. Review the existing migration history and live catalogue before creating a forward-only reconciliation migration. Do not edit an already-applied migration or silently change prices.
 
 The shop still needs a full item preview/equip experience, a dedicated inventory/collection view, bonus-grant ledger support, purchase/dispute review workflow, and the isolated staging verification matrix. No live token redemption or live Stripe checkout is enabled by this work.
+
+
+## October 30 economy completion batch
+
+The draft implementation now includes the owner-approved eight-item starter catalogue as a forward-only migration, retires the previous twelve demo seed items from sale while preserving existing entitlements, adds an account collection view, renders equipped cosmetics on signed-in/public profiles through a separate privacy-safe projection, and adds an entitlement-gated accessible accent picker.
+
+Wallet activity now combines verified Stripe credits, cosmetic spend entries and beta bonus grants into one chronological history. The proposed first-100 bonus is serialized by a locked singleton program row, restricted to verified accounts created after the explicit beta-open timestamp, unique per account, and capped at 100 grants. The program defaults closed. Support-only spending holds are audited and block spend/equip/customisation RPCs.
+
+**All database work is a repository migration proposal only.** The new migration is NOT APPLIED to Supabase. The beta program remains closed, token spending/equipping RPCs remain revoked, Stripe checkout remains independently gated, and no live payment or balance mutation has been enabled by this PR. Do not apply to production. Staging migration review, permission checks, concurrency tests and browser QA remain required.
