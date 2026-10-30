@@ -141,12 +141,21 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem('guild-reduced-motion-v1');
-      const enabled = stored === 'true';
+    const syncReducedMotion = (event?: Event) => {
+      const detail = event instanceof CustomEvent ? event.detail : undefined;
+      let enabled = typeof detail === 'boolean' ? detail : false;
+      if (typeof detail !== 'boolean') {
+        try { enabled = window.localStorage.getItem('guild-reduced-motion-v1') === 'true'; } catch { /* Use the default. */ }
+      }
       setReducedMotion(enabled);
       document.documentElement.dataset.guildReducedMotion = String(enabled);
-    } catch { /* Accessibility defaults still follow the operating system. */ }
+    };
+    const syncTouchControls = (event: Event) => {
+      if (event instanceof CustomEvent && typeof event.detail === 'boolean') setControlsOpen(event.detail);
+    };
+    syncReducedMotion();
+    window.addEventListener('guild-reduced-motion-change', syncReducedMotion);
+    window.addEventListener('guild-touch-controls-change', syncTouchControls);
     const syncFullscreen = () => setIsFullscreen(Boolean(document.fullscreenElement));
     const syncController = () => setControllerPresent(Boolean(getConnectedGamepad()));
     syncFullscreen();
@@ -159,6 +168,8 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
       document.removeEventListener('fullscreenchange', syncFullscreen);
       window.removeEventListener('gamepadconnected', syncController);
       window.removeEventListener('gamepaddisconnected', syncController);
+      window.removeEventListener('guild-reduced-motion-change', syncReducedMotion);
+      window.removeEventListener('guild-touch-controls-change', syncTouchControls);
       window.clearInterval(poll);
     };
   }, []);
