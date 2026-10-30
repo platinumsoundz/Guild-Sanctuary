@@ -50,9 +50,13 @@ function slide2048(grid: number[][], direction: string) {
 
 export function ArcadeClassics() {
   const [game,setGame]=useState<GameId>('2048');
+  const [search,setSearch]=useState('');
+  const [category,setCategory]=useState('All');
   const [level,setLevel]=useState(1);
   const [difficulty,setDifficulty]=useState<'chill'|'standard'|'expert'>('standard');
   const completedRunRef=useRef('');
+  const categories=['All',...Array.from(new Set(options.map(option=>option.group)))];
+  const filteredOptions=useMemo(()=>options.filter(option=>(category==='All'||option.group===category)&&`${option.title} ${option.group}`.toLowerCase().includes(search.trim().toLowerCase())),[category,search]);
   const [playerName,setPlayerName]=useState('Player');
   const [leaderboard,setLeaderboard]=useState<{name:string;game:string;score:number;level:number}[]>([]);
   const [savedScore,setSavedScore]=useState(false);
@@ -177,8 +181,12 @@ export function ArcadeClassics() {
   const moveFifteen = (i:number) => {const empty=fifteen.indexOf(0);if(Math.abs(Math.floor(i/4)-Math.floor(empty/4))+Math.abs(i%4-empty%4)!==1)return;setFifteen(a=>{const b=a.slice();[b[i],b[empty]]=[b[empty],b[i]];return b;});};
   return <section className={styles.wrap} aria-labelledby="classics-title">
     <div className={styles.heading}><div><p className={styles.eyebrow}><Sparkles size={13}/> ARCADE CLASSICS</p><h2 id="classics-title">Pick your next little challenge</h2><p>24 browser mini-games with progressive difficulty, automatic level clears for supported objectives, and a local high-score table. Shared online rankings and token spending remain locked until trusted server validation is implemented.</p></div><button className={styles.reset} onClick={reset} type="button"><RotateCcw size={14}/> Reset game</button></div>
-    <div className={styles.catalogHeading}><div><p className={styles.eyebrow}>GAME LIBRARY · 24 TITLES</p><h3>Choose your challenge</h3><p>Browse every mini-game below. Select a game to open it — no hidden dropdown list.</p></div><span className={styles.catalogCount}>{options.length} games</span></div>
-    <div className={styles.gameCatalog} role="group" aria-label="Choose an arcade classic">{options.map((option,index)=><button key={option.id} type="button" className={game===option.id?styles.gameCardActive:styles.gameCard} aria-pressed={game===option.id} onClick={()=>{const next=option.id;reset();completedRunRef.current='';setSavedScore(false);setGame(next);setMessage('');}}><span className={styles.gameCardNumber}>{String(index+1).padStart(2,'0')}</span><strong>{option.title}</strong><small>{option.group}</small><span className={styles.gameCardAction}>{game===option.id?'Selected':'Play game →'}</span></button>)}</div>
+    <div className={styles.catalogHeading}><div><p className={styles.eyebrow}>GAME LIBRARY · 24 TITLES</p><h3>Find your next challenge</h3><p>Browse the full collection, filter by style or search by name. Your selected game opens below.</p></div><span className={styles.catalogCount}>{filteredOptions.length} of {options.length} games</span></div>
+    <label className={styles.searchLabel} htmlFor="arcade-game-search">Search games</label><input id="arcade-game-search" className={styles.gameSearch} type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Try puzzle, words, arcade…" />
+    <div className={styles.categoryFilters} role="group" aria-label="Filter games by category">{categories.map(item=><button key={item} type="button" className={category===item?styles.filterActive:styles.filterButton} aria-pressed={category===item} onClick={()=>setCategory(item)}>{item}</button>)}</div>
+    <div className={styles.gameCatalog} role="group" aria-label="Choose an arcade classic">{filteredOptions.map(option=>{const index=options.findIndex(item=>item.id===option.id);return <button key={option.id} type="button" className={game===option.id?styles.gameCardActive:styles.gameCard} aria-pressed={game===option.id} onClick={()=>{const next=option.id;reset();completedRunRef.current='';setSavedScore(false);setGame(next);setMessage('');}}><span className={styles.gameCardNumber}>{String(index+1).padStart(2,'0')}</span><strong>{option.title}</strong><small>{option.group}</small><span className={styles.gameCardAction}>{game===option.id?'Currently selected':'Open game →'}</span></button>;})}</div>
+    {filteredOptions.length===0&&<p className={styles.emptyCatalog} role="status">No games match that search. Try another title or choose All.</p>}
+    <div className={styles.selectionBar}><span><strong>{options.find(option=>option.id===game)?.title}</strong> selected</span><button type="button" onClick={()=>{setSearch('');setCategory('All');}}>Clear filters</button></div>
     <div className={styles.levelBar}><strong>Level {level}</strong><span>{levelComplete ? 'Level cleared — generating the next challenge…' : 'Clear the objective to auto-advance and bank a score.'}</span><label htmlFor="arcade-difficulty">Difficulty</label><select id="arcade-difficulty" value={difficulty} onChange={e=>setDifficulty(e.target.value as 'chill'|'standard'|'expert')}><option value="chill">Chill · 0.75×</option><option value="standard">Standard · 1×</option><option value="expert">Expert · 2×</option></select><button type="button" onClick={advanceLevel}>Skip level ↗</button></div>
     <p className={styles.runStats}>Run score <strong>{Math.round(pointsForRun).toLocaleString()}</strong> · Difficulty multiplier <strong>{difficulty === 'expert' ? '2×' : difficulty === 'chill' ? '0.75×' : '1×'}</strong> · {levelComplete ? 'Objective complete' : 'Objective in progress'}</p>
     <div className={styles.play}>
