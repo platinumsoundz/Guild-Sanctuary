@@ -1,0 +1,91 @@
+# Phase 1 — Close-friends beta readiness checkpoint
+
+Date: 2026-10-30 (UTC)
+Repository: `platinumsoundz/Guild-Sanctuary`
+Baseline main before this checkpoint: `7a8d91f9df3f89ee3af80d65f61d61387a274c14`
+Integrated access commit: `49948b4af9fd9a108f9b7a00808527dca88c912b`
+Status: **IN PROGRESS — NOT APPROVED FOR FRIENDS BETA**
+
+This report records verified repository and connected-service observations. It is not a substitute for staging acceptance, two-account browser tests, or owner release approval.
+
+## Completed in this checkpoint
+
+- Merged PR [#306](https://github.com/platinumsoundz/Guild-Sanctuary/pull/306) using squash merge at `49948b4af9fd9a108f9b7a00808527dca88c912b`.
+- Integrated staged guest/basic/VIP/staff navigation and direct-route page gates.
+- Guest public showcase is Today, Community preview, Discover preview, Roadmap, Support and Feedback. Guest access to Events, Shorts, Cosmic Arcade, Messages, Profile, Planner, Notifications, Wallet and Token Shop is excluded.
+- Basic users receive the stable member set; VIP preview pages are role-gated. Moderator/admin/developer/owner tools remain role-gated.
+- Unknown roles and unknown pages fail closed, including inherited JavaScript object properties.
+- Feedback remains available to guests and members; the feedback inbox remains developer/owner-only.
+- Token spending remains disabled. No live checkout or wallet-spending permission was enabled.
+- The PR's CI, typecheck/build, screenshot and CodeQL checks passed on its exact head before merge. Mainline CI and Cloudflare workflow were triggered on the merge commit; their final outcomes must be recorded before release.
+
+## Current verified blockers
+
+### P0 — Environment and migrations
+
+- Production Supabase project inspected: `xgpzvmhldyoyrwwebcic` (Guild-Sanctuary).
+- A second connected project `kchrskkchoyqweowskxv` has a different, staging-like migration ledger. Its purpose was not independently confirmed; do not assume it is the authorised staging project.
+- The production migration ledger and checked-in migration filenames are not a one-to-one match. The second project's ledger is also different. Recover original SQL and reconcile each version before applying any migration.
+- The repository contains duplicate migration version prefixes:
+  - `20261030100000_personal_planner_world_scoped_storage.sql`
+  - `20261030100000_token_cosmetics_and_premium_themes.sql`
+  - `20261030120000_allow_members_to_delete_own_notifications.sql`
+  - `20261030120000_first_100_signup_bonus_500.sql`
+- Do not simply rename/reorder these files or run `supabase db push`: the production ledger already contains later, differently versioned migrations. First reconstruct provenance and exact SQL equivalence.
+- No database migration was applied by this checkpoint.
+
+### P0 — Moderation and privileged operations
+
+- The inspected live schema does not contain `public.get_moderation_queue()`. Do not call the moderation dashboard complete until its actual data path is reconciled and tested.
+- Existing SECURITY DEFINER RPCs, including role-change and moderation functions, require per-function authorization, search-path, grants, hierarchy, and concurrency review.
+- Leaked-password protection was reported disabled by the Supabase security advisor.
+- `game_wallet_sessions` and `stripe_payment_entitlements` have RLS enabled without client policies in the inspected schema. Treat this as intentional deny-by-default unless a reviewed use case proves otherwise.
+- Token spending is owner-only at the database grant layer and must stay disabled for ordinary users.
+
+### P0 — Messaging and account privacy
+
+- Persistent messaging tables and policies exist in the inspected production schema, but repository documentation still contains stale descriptions of in-memory/demo messaging and older schema snapshots. Reconcile documentation and the actual runtime flag/configuration.
+- Required acceptance: two independent accounts send/receive, refresh, read receipts, DM preference enforcement, account switching, and unauthorized conversation access.
+- End-to-end encryption and audio/video calling are not closed-friends beta requirements and must not be advertised as shipped.
+
+### P0 — Deployment and client QA
+
+- Vercel's last inspected production deployment was behind main before this merge. Verify the actual production deployment SHA after the provider build-rate limit clears.
+- Cloudflare deployment must be checked against the same approved commit and environment. A successful GitHub workflow is not proof that both public hosts serve the same commit.
+- Desktop, Android portrait/landscape, narrow mobile, keyboard navigation, and accessibility smoke tests remain outstanding.
+- No close-friends invite should be sent until the approved candidate is deployed and the P0 acceptance suite passes.
+
+## Open pull-request handling
+
+Do not merge all open PRs indiscriminately. The remaining open PR set includes drafts, stacked PRs, and security/payment changes. In particular:
+
+- #305 is a draft migration/index change whose database effects and file versions need reconciliation against both live ledgers before merge.
+- #230 and #261 are draft wallet/moderation/role changes and need staging security acceptance.
+- #260 is optional calling work and remains out of beta scope.
+- #203, #205 and #232 are stacked on non-main parents; do not retarget them without reconstructing their full diff.
+- #200 and #81 are draft security/backend work; inspect and integrate only after current-main reconciliation and independent review.
+- #189 member discovery and #85 beta showcase require diff-based review against current main; no force merge.
+
+No branches were deleted or force-pushed in this checkpoint.
+
+## Required Phase 1 exit gates
+
+- [ ] Confirm the designated staging Supabase project and its owner-approved disposable/restore plan.
+- [ ] Reconcile the full production and staging migration ledgers to source SQL; resolve duplicate version prefixes without replaying already-applied work.
+- [ ] Complete the role/RLS/RPC security review, including moderation hierarchy and concurrent role changes.
+- [ ] Resolve the missing moderation queue RPC or remove/disable the unsupported dashboard path.
+- [ ] Verify auth registration, login, logout, session expiry, password reset and account recovery.
+- [ ] Verify two-account messaging, preferences, read receipts and privacy.
+- [ ] Verify community post/comment edit-delete-like-report flows and discover privacy.
+- [ ] Verify Events and Shorts core journeys, reporting and notifications.
+- [ ] Verify planner/reflection persistence, deletion and cross-account isolation.
+- [ ] Verify guest/basic/VIP/moderator/admin/developer/owner navigation and direct API access with real accounts.
+- [ ] Confirm Vercel and Cloudflare serve the same approved release candidate and correct environment variables.
+- [ ] Complete desktop/mobile/Android, keyboard/accessibility and error-state QA.
+- [ ] Verify backup/restore and rollback procedures.
+- [ ] Keep checkout, token spending, ads and mandatory Terms gates disabled until their separate release gates pass.
+- [ ] Record evidence for every test and obtain explicit owner go/no-go approval.
+
+## Decision
+
+**NOT READY FOR CLOSE-FRIENDS BETA.** The access-boundary integration is merged, but the database target/migration provenance, moderation, messaging, cross-account privacy, deployment parity, and real-device acceptance gates remain unresolved. This is a controlled stabilisation checkpoint, not a release declaration.
