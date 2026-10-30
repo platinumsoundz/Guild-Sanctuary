@@ -14,7 +14,7 @@ The game should launch inside the Guild browser player, fill the display in full
 ### Guild
 - `src/components/GamesHub.tsx` lists The 5 Sleeves 3D at `https://the-5-sleeves-3d.pages.dev/`.
 - Selecting it opens `GuildConsolePlayer`, which renders a sandboxed iframe with fullscreen, gamepad and pointer-lock permissions.
-- `GuildConsolePlayer` already has a Guild overlay menu, fullscreen request, exit-to-library action, keyboard navigation, virtual menu D-pad/A/B controls and gamepad polling for the Guild menu.
+- `GuildConsolePlayer` has a Guild overlay menu, fullscreen request, keyboard navigation, virtual menu D-pad/A/B controls and gamepad polling for the Guild menu. The primary close/exit action now returns directly to the Guild home dashboard from either the Arcade or Library entry; a separate Back to library action remains available below the player.
 - Guild menu/gamepad input is distinct from the game's own controls. The overlay cannot inject gameplay input into a cross-origin iframe; the game must retain its own native touch, keyboard/mouse and gamepad input.
 - The player volume setting only affects Guild-managed media; it cannot control cross-origin iframe audio.
 - Recent games and favourites are currently stored locally in the browser.
@@ -62,7 +62,7 @@ Illustrative pricing in mockups is not a final price list. Do not publish prices
 - Landscape-first layout and best-effort orientation lock after a direct user gesture; portrait remains usable.
 - Keep game iframe permissions minimal but sufficient for fullscreen, pointer lock, autoplay where appropriate and gamepad.
 - Confirm touch, keyboard, mouse and physical controller gameplay controls remain native to the game.
-- Reliable exit, pause/resume behaviour, safe area handling and external-launch fallback.
+- Reliable exit to the Guild home dashboard from every Guild game entry, a separate return-to-library action, browser Escape/fullscreen-change orientation cleanup, pause/resume behaviour, safe area handling and external-launch fallback.
 - Audio controls must be presented honestly: Guild cannot directly control cross-origin game audio without a deliberate bridge.
 - Test Android Chrome, installed PWA/WebView if used, desktop browsers and a physical controller.
 
@@ -97,7 +97,8 @@ Illustrative pricing in mockups is not a final price list. Do not publish prices
 - [x] Existing Guild game entry and iframe player audited.
 - [x] Existing 3D controls, PWA structure and local-save model audited from the game README and source tree.
 - [x] Product, security and economy boundaries recorded.
-- [ ] Full-viewport fullscreen chrome removal and best-effort landscape lock.
+- [x] Full-viewport fullscreen chrome removal and best-effort landscape lock.
+- [x] Exit-to-Guild-home action wired from both Arcade and Library launch paths; Back to library remains a separate action.
 - [ ] Physical Android and controller QA.
 - [ ] Secure account launch ticket and cloud save bridge.
 - [ ] Game store catalogue and entitlement UI.
