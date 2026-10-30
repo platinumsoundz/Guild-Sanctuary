@@ -305,3 +305,12 @@
   border-radius: 20px;
   overflow: clip;
 }
+
+.feedTools { display: flex; width: min(100%, 780px); align-items: end; justify-content: space-between; gap: 12px; margin: 0 auto 12px; color: var(--muted); font: 11px Arial, sans-serif; }
+.searchLabel { display: grid; width: min(100%, 360px); gap: 5px; }
+.searchLabel input { width: 100%; min-height: 36px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); font: 12px Arial, sans-serif; }
+.captionEditor { display: grid; gap: 6px; margin-top: 7px; pointer-events: auto; }
+.captionEditor textarea { width: 100%; min-height: 60px; padding: 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface-raised); color: var(--ink); }
+.captionEditor button { justify-self: start; padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface-raised); color: var(--ink); cursor: pointer; }
+.actions button:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 560px) { .feedTools { padding: 0 7px; } .searchLabel { flex: 1; } }
