@@ -401,6 +401,7 @@ export function AppWorkspace() {
           <div className={`${styles.worldSurface} w-full min-w-0 max-w-full overflow-x-clip`} data-world="sanctuary" style={{ '--profile-accent': profileThemePreview ?? currentUser?.profile.themeColor ?? '#52765c' } as CSSProperties}>
         <Navigation
           activeNavigation={activeNavigation}
+          worldType={worldType}
           currentUser={currentUser}
           isGuest={isGuest}
           onExploreAsGuest={loginAsGuest}
