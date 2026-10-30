@@ -1,6 +1,6 @@
 'use client';
 
-import type { ShortVideo, SocialComment, SocialLike } from '@/types/database';
+import type { ShortVideo, SocialComment, SocialLike, WorldType } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import {
   createCommunityMediaUrls,
@@ -32,18 +32,20 @@ function findShort(shortId: string): ShortVideo | undefined {
   return videos.find((video) => video.id === shortId);
 }
 
-export async function fetchShortVideos(): Promise<ShortVideo[]> {
+export async function fetchShortVideos(worldType: WorldType = 'sanctuary'): Promise<ShortVideo[]> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser();
     const { data, error } = await getSupabaseBrowserClient()
       .from('short_videos')
       .select('*')
+      .eq('world_type', worldType)
       .eq('state', 'visible')
       .order('created_at', { ascending: false });
     if (error) throw new Error(`Short videos could not be loaded: ${error.message}`);
     const urls = await createCommunityMediaUrls(data.map((row) => row.video_url));
     return data.map((row) => ({
       id: row.id,
+      worldType: row.world_type,
       authorId: row.author_id,
       videoUrl: urls.get(row.video_url) ?? '',
       caption: row.caption,
@@ -51,10 +53,10 @@ export async function fetchShortVideos(): Promise<ShortVideo[]> {
     }));
   }
   await delay();
-  return videos.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return videos.filter((video) => (video.worldType ?? 'sanctuary') === worldType).slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'caption'> & { videoFile: File; videoUrl?: string }): Promise<ShortVideo> {
+export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'caption'> & { videoFile: File; videoUrl?: string; worldType?: WorldType }): Promise<ShortVideo> {
   const caption = input.caption.trim();
   if (!input.authorId || !input.videoFile || input.videoFile.size > 5 * 1024 * 1024 || caption.length > 500) {
     throw new Error('Choose a video and add a caption of no more than 500 characters.');
@@ -83,6 +85,7 @@ export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'cap
       .from('short_videos')
       .insert({
         author_id: userId,
+        world_type: input.worldType ?? 'sanctuary',
         video_url: videoPath,
         caption,
       })
@@ -98,6 +101,7 @@ export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'cap
     }
     return {
       id: data.id,
+      worldType: data.world_type,
       authorId: data.author_id,
       videoUrl,
       caption: data.caption,
@@ -110,13 +114,14 @@ export async function createShortVideo(input: Pick<ShortVideo, 'authorId' | 'cap
     videoUrl: URL.createObjectURL(input.videoFile),
     caption,
     id: `short-local-${nextId++}`,
+    worldType: input.worldType ?? 'sanctuary',
     createdAt: new Date().toISOString(),
   };
   videos.unshift(video);
   return video;
 }
 
-export async function deleteShortVideo(shortId: string, authorId: string): Promise<void> {
+export async function deleteShortVideo(shortId: string, authorId: string, worldType: WorldType = 'sanctuary'): Promise<void> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(authorId);
     const { data, error } = await getSupabaseBrowserClient()
@@ -124,6 +129,8 @@ export async function deleteShortVideo(shortId: string, authorId: string): Promi
       .delete()
       .eq('id', shortId)
       .eq('author_id', authorId)
+      .eq('world_type', worldType)
+      .eq('world_type', worldType)
       .select('video_url')
       .maybeSingle();
     if (error) throw new Error(`Short video could not be deleted: ${error.message}`);
@@ -131,7 +138,7 @@ export async function deleteShortVideo(shortId: string, authorId: string): Promi
     await removeCommunityMedia(data.video_url);
     return;
   }
-  const videoIndex = videos.findIndex((video) => video.id === shortId && video.authorId === authorId);
+  const videoIndex = videos.findIndex((video) => video.id === shortId && video.authorId === authorId && (video.worldType ?? 'sanctuary') === worldType);
   if (videoIndex < 0) throw new Error('This short video could not be deleted.');
   videos.splice(videoIndex, 1);
   for (let index = likes.length - 1; index >= 0; index -= 1) {
@@ -142,7 +149,7 @@ export async function deleteShortVideo(shortId: string, authorId: string): Promi
   }
 }
 
-export async function updateShortVideo(shortId: string, authorId: string, caption: string): Promise<ShortVideo> {
+export async function updateShortVideo(shortId: string, authorId: string, caption: string, worldType: WorldType = 'sanctuary'): Promise<ShortVideo> {
   const normalizedCaption = caption.trim();
   if (normalizedCaption.length > 500) throw new Error('Captions cannot exceed 500 characters.');
   if (isSupabaseCommunityStorageConfigured()) {
@@ -160,6 +167,7 @@ export async function updateShortVideo(shortId: string, authorId: string, captio
     if (!videoUrl) throw new Error('The caption was saved, but the video playback URL could not be created.');
     return {
       id: data.id,
+      worldType: data.world_type,
       authorId: data.author_id,
       videoUrl,
       caption: data.caption,
@@ -167,12 +175,13 @@ export async function updateShortVideo(shortId: string, authorId: string, captio
     };
   }
   const video = findShort(shortId);
+  if (video && (video.worldType ?? 'sanctuary') !== worldType) throw new Error('This short is unavailable in the current community.');
   if (!video || video.authorId !== authorId) throw new Error('This short video could not be edited.');
   video.caption = normalizedCaption;
   return { ...video };
 }
 
-export async function toggleShortLike(shortId: string, userId: string): Promise<{ liked: boolean; count: number }> {
+export async function toggleShortLike(shortId: string, userId: string, worldType: WorldType = 'sanctuary'): Promise<{ liked: boolean; count: number }> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
     const { data, error } = await getSupabaseBrowserClient().rpc('toggle_short_like', {
@@ -205,9 +214,11 @@ export async function toggleShortLike(shortId: string, userId: string): Promise<
   };
 }
 
-export async function fetchShortComments(shortId: string): Promise<SocialComment[]> {
+export async function fetchShortComments(shortId: string, worldType: WorldType = 'sanctuary'): Promise<SocialComment[]> {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser();
+    const { data: scopedShort } = await getSupabaseBrowserClient().from('short_videos').select('id').eq('id', shortId).eq('world_type', worldType).maybeSingle();
+    if (!scopedShort) throw new Error('This short is unavailable in the current community.');
     const { data, error } = await getSupabaseBrowserClient()
       .from('social_comments')
       .select('*')
@@ -232,13 +243,15 @@ export async function fetchShortComments(shortId: string): Promise<SocialComment
   return comments.filter((comment) => comment.targetId === shortId).map((comment) => ({ ...comment }));
 }
 
-export async function addShortComment(shortId: string, authorId: string, body: string): Promise<SocialComment> {
+export async function addShortComment(shortId: string, authorId: string, body: string, worldType: WorldType = 'sanctuary'): Promise<SocialComment> {
   const normalizedBody = body.trim();
   if (!authorId || normalizedBody.length < 1 || normalizedBody.length > 1000) {
     throw new Error('Comments must contain 1 to 1,000 characters.');
   }
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(authorId);
+    const { data: scopedShort } = await getSupabaseBrowserClient().from('short_videos').select('id').eq('id', shortId).eq('world_type', worldType).maybeSingle();
+    if (!scopedShort) throw new Error('This short is unavailable in the current community.');
     const { data, error } = await getSupabaseBrowserClient()
       .from('social_comments')
       .insert({ target_type: 'short', target_id: shortId, author_id: authorId, body: normalizedBody })
@@ -268,7 +281,7 @@ export async function addShortComment(shortId: string, authorId: string, body: s
   return { ...comment };
 }
 
-export async function getShortEngagement(shortId: string, userId: string) {
+export async function getShortEngagement(shortId: string, userId: string, worldType: WorldType = 'sanctuary') {
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(userId);
     const { data, error } = await getSupabaseBrowserClient().rpc('get_short_engagement_stats', {
@@ -291,7 +304,7 @@ export async function getShortEngagement(shortId: string, userId: string) {
 }
 
 
-export async function updateShortComment(commentId: string, authorId: string, body: string): Promise<SocialComment> {
+export async function updateShortComment(commentId: string, authorId: string, body: string, worldType: WorldType = 'sanctuary'): Promise<SocialComment> {
   const normalizedBody = body.trim();
   if (!authorId || normalizedBody.length < 1 || normalizedBody.length > 1000) {
     throw new Error('Comments must contain 1 to 1,000 characters.');
@@ -301,6 +314,7 @@ export async function updateShortComment(commentId: string, authorId: string, bo
     const { data, error } = await getSupabaseBrowserClient().from('social_comments')
       .update({ body: normalizedBody })
       .eq('id', commentId).eq('author_id', authorId).eq('target_type', 'short')
+      .in('target_id', (await getSupabaseBrowserClient().from('short_videos').select('id').eq('world_type', worldType)).data?.map((video) => video.id) ?? [])
       .select('*').single();
     if (error) throw new Error(`Your comment could not be updated: ${error.message}`);
     return { id: data.id, targetType: 'short', targetId: data.target_id, authorId: data.author_id, body: data.body, createdAt: data.created_at };
@@ -312,12 +326,13 @@ export async function updateShortComment(commentId: string, authorId: string, bo
   return { ...comment };
 }
 
-export async function deleteShortComment(commentId: string, authorId: string): Promise<void> {
+export async function deleteShortComment(commentId: string, authorId: string, worldType: WorldType = 'sanctuary'): Promise<void> {
   if (!authorId) throw new Error('Sign in before deleting a comment.');
   if (isSupabaseCommunityStorageConfigured()) {
     await requireCommunityStorageUser(authorId);
     const { error } = await getSupabaseBrowserClient().from('social_comments').delete()
-      .eq('id', commentId).eq('author_id', authorId).eq('target_type', 'short');
+      .eq('id', commentId).eq('author_id', authorId).eq('target_type', 'short')
+      .in('target_id', (await getSupabaseBrowserClient().from('short_videos').select('id').eq('world_type', worldType)).data?.map((video) => video.id) ?? []);
     if (error) throw new Error(`Your comment could not be deleted: ${error.message}`);
     return;
   }
