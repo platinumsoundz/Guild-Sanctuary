@@ -34,6 +34,15 @@ on conflict (item_id) do update set
   kind=excluded.kind, enabled=excluded.enabled, asset_text=excluded.asset_text,
   effect_key=excluded.effect_key, sort_order=excluded.sort_order;
 
+-- Retire the legacy starter seed from sale while retaining old entitlements.
+update public.token_spend_catalog set enabled=false
+where item_id in (
+  'profile_frame_sanctuary','profile_frame_aurora','profile_frame_ember',
+  'profile_effect_sparkle','profile_effect_glow','profile_badge_sparkle',
+  'profile_badge_moon','profile_badge_flame','profile_badge_leaf',
+  'profile_banner_aurora','profile_banner_ember','profile_banner_tide'
+);
+
 -- The beta switch is intentionally OFF. An owner must explicitly open it in staging.
 create table if not exists public.token_bonus_program (
   singleton boolean primary key default true check (singleton),
@@ -231,7 +240,7 @@ begin
   if caller_id is null or not public.is_active_user() then raise exception 'An active signed-in account is required.' using errcode='42501'; end if;
   if exists(select 1 from public.token_spending_holds h where h.user_id=caller_id) then raise exception 'Cosmetic changes are paused during account review.' using errcode='42501'; end if;
   select * into selected_item from public.token_spend_catalog
-  where item_id=requested_item_id and enabled
+  where item_id=requested_item_id
     and kind in ('profile_frame','profile_effect','profile_badge','profile_banner','profile_border','profile_theme','colour_palette')
   for share;
   if not found then raise exception 'That cosmetic is not available.' using errcode='22023'; end if;
@@ -346,5 +355,52 @@ select id,equipped_frame,equipped_effect,equipped_badge,equipped_banner,
   equipped_border,equipped_profile_theme,equipped_palette
 from private.public_profile_cosmetic_projection;
 grant select on public.public_profile_cosmetics to anon,authenticated;
+
+
+-- Support-only case controls. The service role can place/release holds while
+-- the public client cannot read or mutate these records.
+create or replace function public.place_token_spending_hold(
+  requested_user_id uuid, requested_case_reference text, requested_reason_code text, requested_actor text
+)
+returns void language plpgsql security definer set search_path=''
+as $
+begin
+  if auth.role() <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
+  if requested_user_id is null or coalesce(trim(requested_case_reference),'')='' or
+    requested_reason_code not in ('payment_dispute','chargeback','fraud_review','manual_review') or
+    coalesce(trim(requested_actor),'')='' then
+    raise exception 'A valid user, case reference, reason and actor are required.' using errcode='22023';
+  end if;
+  insert into public.token_spending_holds(user_id,case_reference,reason_code,placed_by)
+  values(requested_user_id,requested_case_reference,requested_reason_code,requested_actor)
+  on conflict(user_id) do update set case_reference=excluded.case_reference,
+    reason_code=excluded.reason_code,placed_by=excluded.placed_by,created_at=now();
+  insert into public.token_spending_hold_audit(user_id,case_reference,action,reason_code,actor)
+  values(requested_user_id,requested_case_reference,'hold_placed',requested_reason_code,requested_actor);
+end;
+$;
+
+create or replace function public.release_token_spending_hold(
+  requested_user_id uuid, requested_actor text
+)
+returns void language plpgsql security definer set search_path=''
+as $
+declare existing_hold public.token_spending_holds%rowtype;
+begin
+  if auth.role() <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
+  if coalesce(trim(requested_actor),'')='' then raise exception 'An actor is required.' using errcode='22023'; end if;
+  select * into existing_hold from public.token_spending_holds
+  where user_id=requested_user_id for update;
+  if not found then return; end if;
+  delete from public.token_spending_holds where user_id=requested_user_id;
+  insert into public.token_spending_hold_audit(user_id,case_reference,action,reason_code,actor)
+  values(requested_user_id,existing_hold.case_reference,'hold_released',existing_hold.reason_code,requested_actor);
+end;
+$;
+
+revoke all on function public.place_token_spending_hold(uuid,text,text,text) from public,anon,authenticated;
+revoke all on function public.release_token_spending_hold(uuid,text) from public,anon,authenticated;
+grant execute on function public.place_token_spending_hold(uuid,text,text,text) to service_role;
+grant execute on function public.release_token_spending_hold(uuid,text) to service_role;
 
 commit;
