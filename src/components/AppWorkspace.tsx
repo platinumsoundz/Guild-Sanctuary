@@ -274,20 +274,20 @@ export function AppWorkspace() {
     </main>
   ) : contentNavigation === 'support' ? (
     <main className={styles.supportPage}>
-      <SupportPanel />
+      <SupportPanel worldType={worldType} />
     </main>
   ) : isAuthenticated && currentUser ? (
     <>
       {contentNavigation === 'planner' ? (
-        <PersonalPlanner userId={currentUser.user.id} />
+        <PersonalPlanner userId={currentUser.user.id} worldType={worldType} />
       ) : contentNavigation === 'wallet' ? (
         canAccessSanctuaryFeature('wallet', currentUser.profile.role) ? (
-          <main className={styles.supportPage}><WalletPanel userId={currentUser.user.id} isGuest={isGuest} /></main>
+          <main className={styles.supportPage}><WalletPanel userId={currentUser.user.id} isGuest={isGuest} worldType={worldType} /></main>
         ) : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Wallet access is restricted</h1><p className={styles.sectionDescription}>The Wallet is temporarily available to VIP members and above while purchases and spending are being tested. Your account and community access are unchanged.</p></main>
         )
       ) : contentNavigation === 'shop' ? (
-        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} /> : (
+        canAccessSanctuaryFeature('tokenShop', currentUser.profile.role) ? <TokenShopPanel userId={currentUser.user.id} isGuest={isGuest} worldType={worldType} /> : (
           <main className={styles.sectionPage} role="status"><p className={styles.sectionEyebrow}>VIP FEATURE</p><h1>Token Shop access is restricted</h1><p className={styles.sectionDescription}>The Token Shop is temporarily available to VIP members and above while its payment and redemption systems are being verified. Token spending remains disabled until testing is complete.</p></main>
         )
       ) : contentNavigation === 'games' ? (
@@ -317,6 +317,7 @@ export function AppWorkspace() {
           isPostsLoading={isProfilePostsLoading}
           onSave={updateProfile}
           onThemeChange={setProfileThemePreview}
+          worldType={worldType}
         />
       ) : contentNavigation === 'discover' && viewedProfile ? (
         <PublicProfilePage
