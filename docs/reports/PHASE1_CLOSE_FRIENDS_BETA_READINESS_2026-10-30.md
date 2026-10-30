@@ -17,7 +17,7 @@ This report records verified repository and connected-service observations. It i
 - Unknown roles and unknown pages fail closed, including inherited JavaScript object properties.
 - Feedback remains available to guests and members; the feedback inbox remains developer/owner-only.
 - Token spending remains disabled. No live checkout or wallet-spending permission was enabled.
-- The PR's CI, typecheck/build, screenshot and CodeQL checks passed on its exact head before merge. Mainline CI and Cloudflare workflow were triggered on the merge commit; their final outcomes must be recorded before release.
+- The PR's CI, typecheck/build, screenshot and CodeQL checks passed on its exact head before merge. Mainline CI passed on merge commit `49948b4af9fd9a108f9b7a00808527dca88c912b`. Cloudflare's mainline deployment workflow was still running at the latest inspection; record its final result before release. The subsequent docs-only report commit is `08c2be8476a592a79b32c7e5f438abed37fc9d5e`.
 
 ## Current verified blockers
 
@@ -50,8 +50,8 @@ This report records verified repository and connected-service observations. It i
 
 ### P0 — Deployment and client QA
 
-- Vercel's last inspected production deployment was behind main before this merge. Verify the actual production deployment SHA after the provider build-rate limit clears.
-- Cloudflare deployment must be checked against the same approved commit and environment. A successful GitHub workflow is not proof that both public hosts serve the same commit.
+- Vercel production is now `READY` on app commit `49948b4af9fd9a108f9b7a00808527dca88c912b`; main is one later docs-only commit ahead (`08c2be8476a592a79b32c7e5f438abed37fc9d5e`). This confirms the guest/basic access integration is deployed on Vercel, but does not prove browser journeys or Supabase correctness.
+- Cloudflare's deployment workflow for the app commit was still in progress at the latest inspection. Confirm the deployed SHA and environment before treating both hosts as aligned.
 - Desktop, Android portrait/landscape, narrow mobile, keyboard navigation, and accessibility smoke tests remain outstanding.
 - No close-friends invite should be sent until the approved candidate is deployed and the P0 acceptance suite passes.
 
