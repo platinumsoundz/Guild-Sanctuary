@@ -19,8 +19,8 @@ const readReceiptsMigration = read('../supabase/migrations/20261030050000_direct
 const databaseTypes = read('../src/services/supabase/database.types.ts');
 
 const checks = [
-  ['inbox and thread clearly disclose that end-to-end encryption is not active', /MessagePrivacyNotice/.test(inbox) && /MessagePrivacyNotice/.test(thread)],
-  ['privacy notice does not claim encryption is already active', /End-to-end encryption is not active yet/.test(privacyNotice) && /not currently end-to-end encrypted/.test(privacyNotice)],
+  ['inbox and thread clearly disclose the current non-E2EE message privacy model', /MessagePrivacyNotice/.test(inbox) && /MessagePrivacyNotice/.test(thread)],
+  ['privacy notice accurately explains Supabase storage and does not promise future E2EE', /not end-to-end encrypted/.test(privacyNotice) && /Supabase services/.test(privacyNotice) && /service itself can process message contents/.test(privacyNotice) && !/Encrypted messaging is being planned/.test(privacyNotice)],
   ['encryption plan states this is design only and requires independent review', /design requirements only/.test(encryptionPlan) && /independent security review required/.test(encryptionPlan)],
   ['encryption plan forbids custom cryptography and requires a maintained reviewed library', /Do not implement primitives, key exchange, ratchets, group membership cryptography, or serialization from scratch/.test(encryptionPlan) && /maintained, independently reviewed implementations/.test(encryptionPlan)],
   ['encryption plan covers device lifecycle, recovery, and group membership', /Device model/.test(encryptionPlan) && /Recovery/.test(encryptionPlan) && /Group membership/.test(encryptionPlan)],
