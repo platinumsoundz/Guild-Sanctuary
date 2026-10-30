@@ -2,14 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { ModerationAction } from '@/services/supabase';
+import type { WorldType } from '@/types/database';
 import { fetchModerationQueue, takeModerationAction, type ModerationQueueItem } from './service';
 import styles from './ModerationDashboard.module.css';
 
 interface ModerationDashboardProps {
   role?: string;
+  worldType?: WorldType;
 }
 
-export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardProps) {
+export function ModerationDashboard({ role = 'moderator', worldType = 'sanctuary' }: ModerationDashboardProps) {
   const [reports, setReports] = useState<ModerationQueueItem[]>([]);
   const [rationales, setRationales] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +26,7 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
   const refresh = useCallback(async () => {
     setIsLoading(true);
     try {
-      const queue = await fetchModerationQueue();
+      const queue = await fetchModerationQueue(worldType);
       setReports(queue);
       setIsAuthorized(true);
       setError(null);
@@ -34,7 +36,7 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [worldType]);
 
   useEffect(() => { void refresh(); }, [refresh]);
 
