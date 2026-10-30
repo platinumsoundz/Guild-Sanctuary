@@ -101,17 +101,19 @@ as $$
 declare
   program_row public.token_bonus_program%rowtype;
   confirmed_at timestamptz;
+  account_created_at timestamptz;
   next_position integer;
 begin
   if requested_user_id is null then return; end if;
-  select u.email_confirmed_at into confirmed_at
+  select u.email_confirmed_at,u.created_at into confirmed_at,account_created_at
   from auth.users u where u.id = requested_user_id;
   if confirmed_at is null then return; end if;
   if not exists (select 1 from public.profiles p where p.id = requested_user_id) then return; end if;
 
   select * into program_row from public.token_bonus_program
   where singleton = true for update;
-  if not found or not program_row.beta_open or program_row.awarded_count >= 100 then return; end if;
+  if not found or not program_row.beta_open or program_row.opened_at is null
+    or account_created_at < program_row.opened_at or program_row.awarded_count >= 100 then return; end if;
   if exists (select 1 from public.token_bonus_ledger b where b.user_id = requested_user_id) then return; end if;
 
   next_position := program_row.awarded_count + 1;
