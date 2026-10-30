@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { LockKeyhole, ShoppingBag, Sparkles } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { isSupabaseWalletConfigured } from './service';
+import type { WorldType } from '@/types/database';
 import styles from './TokenShopPanel.module.css';
 
 type ShopItem = {
@@ -21,12 +22,13 @@ type ShopItem = {
 interface TokenShopPanelProps {
   userId: string;
   isGuest: boolean;
+  worldType?: WorldType;
 }
 
 // Keep redemption disabled until owner-approved migration and staging ledger tests pass.
 const SPENDING_ENABLED = false;
 
-export function TokenShopPanel({ userId, isGuest }: TokenShopPanelProps) {
+export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: TokenShopPanelProps) {
   const [items, setItems] = useState<ShopItem[]>([]);
   const [ownedItems, setOwnedItems] = useState<Set<string>>(new Set());
   const [balance, setBalance] = useState<number | null>(null);
@@ -50,7 +52,7 @@ export function TokenShopPanel({ userId, isGuest }: TokenShopPanelProps) {
       const client = getSupabaseBrowserClient();
       const { data: authData, error: authError } = await client.auth.getUser();
       if (authError || authData.user?.id !== userId) {
-        throw new Error('Sign in with your connected Sanctuary account to view your shop inventory.');
+        throw new Error('Sign in to view your shop inventory.');
       }
 
       const [catalogResult, entitlementsResult, walletResult] = await Promise.all([
@@ -114,7 +116,7 @@ export function TokenShopPanel({ userId, isGuest }: TokenShopPanelProps) {
           throw new Error('This item is already in your collection. Refreshing your inventory.');
         }
         if (message.includes('active user') || message.includes('sign in') || message.includes('authentication')) {
-          throw new Error('An active, signed-in Sanctuary account is required to spend tokens.');
+          throw new Error('An active, signed-in account is required to spend tokens.');
         }
         throw new Error('The purchase could not be completed. No success was reported; refresh your shop and try again.');
       }
@@ -140,9 +142,9 @@ export function TokenShopPanel({ userId, isGuest }: TokenShopPanelProps) {
     <main className={styles.shop}>
       <header className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>THE SANCTUARY COLLECTION</p>
+          <p className={styles.eyebrow}>{worldType === 'guild' ? 'THE GUILD COLLECTION' : 'THE SANCTUARY COLLECTION'}</p>
           <h1>Token Shop</h1>
-          <p>Unlock first-party profile cosmetics with Sanctuary Tokens. Items are account-bound and cannot be traded or cashed out.</p>
+          <p>Unlock first-party profile cosmetics with tokens. Items are account-bound and cannot be traded or cashed out.</p>
         </div>
         <div className={styles.balance}>
           <span>Wallet balance</span>
@@ -158,8 +160,8 @@ export function TokenShopPanel({ userId, isGuest }: TokenShopPanelProps) {
         </div>
       </div>
 
-      {isGuest && <p className={styles.status}>Guest mode can explore The Sanctuary, but personal balances and owned items require a signed-in account.</p>}
-      {!isGuest && !hasSupabaseAccount && <p className={styles.status}>Connect a Sanctuary account to view your balance and inventory.</p>}
+      {isGuest && <p className={styles.status}>Guest mode can explore the catalogue, but personal balances and owned items require a signed-in account.</p>}
+      {!isGuest && !hasSupabaseAccount && <p className={styles.status}>Sign in with your account to view your balance and inventory.</p>}
       {error && <p className={styles.error} role="alert">{error}</p>}
       {notice && <p className={styles.status} role="status">{notice}</p>}
       {isLoading ? (
