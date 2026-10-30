@@ -116,10 +116,24 @@ A small, versioned `guild.5-sleeves` postMessage contract is being added in the 
 - The Guild accepts messages only when both `event.origin` matches the configured game URL origin and `event.source` is the active iframe window.
 - The Guild sends only versioned `pause` and `resume` lifecycle commands to the exact game origin; no wildcard target origin is used.
 - The game accepts commands only from its actual parent window and the exact parent origin, then acknowledges the command.
-- Pausing clears held game input and preserves the pre-existing pause state so opening the Guild menu does not accidentally resume a title, story or in-game menu.
+- Pausing releases held keyboard, gamepad, touch-stick and pointer input, preventing movement/actions from sticking behind the Guild overlay.
+- The Guild sends request IDs and reflects game acknowledgements for the pause/resume state; the game preserves its pre-existing pause state so opening the Guild menu does not accidentally resume a title, story or in-game menu.
 - The bridge does not expose account identity, save data, Supabase credentials, Guild Token balance, purchases or DLC entitlements.
 
-**Dependency:** merge and deploy the game-side bridge PR before expecting the Guild's `Guild link ready` indicator and pause/resume behaviour to activate in a hosted preview. Until then, the existing iframe player and Guild overlay continue to work independently. This is not account linking or cloud-save integration.
+**Preview routing:** Vercel preview builds use the dedicated game branch preview by default; production builds continue to use the canonical Pages URL. An explicit HTTPS-only `NEXT_PUBLIC_5_SLEEVES_3D_URL` can override either host.
+
+**Dependency:** deploy the game-side bridge branch before expecting the Guild's `Guild link ready` indicator and pause/resume acknowledgements to activate in a hosted preview. Until then, the existing iframe player and Guild overlay continue to work independently. This is not account linking or cloud-save integration.
 
 
 **Staging host:** `NEXT_PUBLIC_5_SLEEVES_3D_URL` may override the canonical Pages URL for preview testing. The override is accepted only as an HTTPS URL without embedded credentials; otherwise the canonical game URL is used. This allows the Guild preview to target a game-branch preview without changing production defaults.
+
+
+## Phase 1.2 — Input safety and preview handoff (30 October 2026)
+
+- [x] Added a dedicated input-release operation that clears held keys, gamepad buttons, analog movement, touch-stick state and pointer actions when the Guild opens its overlay.
+- [x] Kept the existing game restart input reset semantics separate from the new release-all behaviour.
+- [x] Added acknowledgement correlation to the Guild player so pause/resume status is reflected only for the latest request.
+- [x] Added bridge tests for unsupported commands, protocol-version rejection and repeated pause/resume calls.
+- [x] Routed Vercel preview builds to the matching Cloudflare Pages game branch preview while retaining the canonical game host for production.
+- [ ] Verify the live embedded bridge on an actual Android device, including held movement/action input while opening the Guild menu.
+- [ ] Confirm Vercel preview and production environment resolution after build.
