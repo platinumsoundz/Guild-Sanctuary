@@ -76,7 +76,7 @@ function normalizePreferences(value: unknown): AccountPreferences {
     emailNotifications: typeof record.emailNotifications === 'boolean' ? record.emailNotifications : true,
     personalizedFeed: typeof record.personalizedFeed === 'boolean' ? record.personalizedFeed : true,
     layout: record.layout === 'compact' ? 'compact' : 'comfortable',
-    theme: record.theme === 'system' || record.theme === 'light' || record.theme === 'dark' || record.theme === 'dusk' || record.theme === 'stone' || record.theme === 'ocean' ? record.theme : 'dark',
+    theme: record.theme === 'system' || record.theme === 'light' || record.theme === 'dark' || record.theme === 'dusk' || record.theme === 'stone' || record.theme === 'ocean' || record.theme === 'midnight' || record.theme === 'forest' || record.theme === 'rose' || record.theme === 'lavender' || record.theme === 'ember' || record.theme === 'mint' ? record.theme : 'dark',
   };
 }
 
