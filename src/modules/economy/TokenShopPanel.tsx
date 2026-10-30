@@ -41,7 +41,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
   const hasSupabaseAccount = !isGuest && isSupabaseWalletConfigured();
 
   const loadShop = useCallback(async (cancelled?: () => boolean) => {
-    if (!hasSupabaseAccount) {
+    if (!isSupabaseWalletConfigured()) {
       setItems([]);
       setOwnedItems(new Set());
       setBalance(null);
@@ -52,28 +52,36 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
     setIsLoading(true);
     try {
       const client = getSupabaseBrowserClient();
-      const { data: authData, error: authError } = await client.auth.getUser();
-      if (authError || authData.user?.id !== userId) {
-        throw new Error('Sign in to view your shop inventory.');
+      if (hasSupabaseAccount) {
+        const { data: authData, error: authError } = await client.auth.getUser();
+        if (authError || authData.user?.id !== userId) {
+          throw new Error('Sign in to view your personal shop inventory.');
+        }
       }
 
-      const [catalogResult, entitlementsResult, walletResult] = await Promise.all([
-        client.from('token_spend_catalog')
-          .select('item_id,name,description,price_tokens,kind,asset_url,asset_text,effect_key,sort_order')
-          .eq('enabled', true)
-          .order('sort_order', { ascending: true }),
-        client.from('token_entitlements').select('item_id').eq('user_id', userId),
-        client.from('token_wallets').select('balance_tokens').eq('user_id', userId).maybeSingle(),
-      ]);
-
+      const catalogResult = await client.from('token_spend_catalog')
+        .select('item_id,name,description,price_tokens,kind,asset_url,asset_text,effect_key,sort_order')
+        .eq('enabled', true)
+        .order('sort_order', { ascending: true });
       if (catalogResult.error) throw catalogResult.error;
-      if (entitlementsResult.error) throw entitlementsResult.error;
-      if (walletResult.error) throw walletResult.error;
+
+      let ownedItemIds: string[] = [];
+      let walletBalance: number | null = null;
+      if (hasSupabaseAccount) {
+        const [entitlementsResult, walletResult] = await Promise.all([
+          client.from('token_entitlements').select('item_id').eq('user_id', userId),
+          client.from('token_wallets').select('balance_tokens').eq('user_id', userId).maybeSingle(),
+        ]);
+        if (entitlementsResult.error) throw entitlementsResult.error;
+        if (walletResult.error) throw walletResult.error;
+        ownedItemIds = (entitlementsResult.data ?? []).map((item) => item.item_id);
+        walletBalance = walletResult.data?.balance_tokens ?? 0;
+      }
       if (cancelled?.()) return;
 
       setItems((catalogResult.data ?? []) as ShopItem[]);
-      setOwnedItems(new Set((entitlementsResult.data ?? []).map((item) => item.item_id)));
-      setBalance(walletResult.data?.balance_tokens ?? 0);
+      setOwnedItems(new Set(ownedItemIds));
+      setBalance(walletBalance);
       setError(null);
     } catch (loadError) {
       if (!cancelled?.()) {
