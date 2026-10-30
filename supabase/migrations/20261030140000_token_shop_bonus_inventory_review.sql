@@ -433,6 +433,8 @@ $$;
 revoke all on function public.spend_tokens(text,uuid) from public,anon,authenticated,service_role;
 revoke all on function public.equip_profile_cosmetic(text) from public,anon,authenticated,service_role;
 revoke all on function public.clear_profile_cosmetic(text) from public,anon,authenticated,service_role;
+grant execute on function public.equip_profile_cosmetic(text) to authenticated;
+grant execute on function public.clear_profile_cosmetic(text) to authenticated;
 
 -- Public cosmetic projection is separate from the private profile row. It exposes
 -- only already-public profiles and cosmetic identifiers, never wallet or ledger data.
