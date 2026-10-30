@@ -12,7 +12,7 @@ const appContext = read('../src/context/AppContext.tsx');
 const workspaceCss = read('../src/components/AppWorkspace.module.css');
 const shellCss = read('../src/components/ResponsiveShell.module.css');
 
-assert.ok(settings.includes('value="system"'), 'missing system preference option in Settings');
+assert.ok(themeRegistry.includes("{ id: 'system', label: 'Use device setting' }"), 'missing system preference option in theme catalogue');
 for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean']) {
   assert.ok(css.includes(`:root[data-theme="${theme}"]`), `missing ${theme} palette`);
   assert.ok(themeRegistry.includes(`id: '${theme}'`), `missing ${theme} in the central theme catalogue`);
@@ -54,7 +54,7 @@ for (const token of ['--surface', '--line', '--ink', '--muted', '--accent', '--a
 }
 assert.ok(!shellCss.includes('background: #fbfcf9'), 'responsive shell must not hard-code a light viewport background');
 assert.ok(settings.includes('Token-unlockable themes can be added to this catalogue later'), 'token themes must remain future-facing, not falsely enabled');
-assert.ok(settings.includes('value="stone"') && settings.includes('value="ocean"'), 'grey and blue themes must be selectable');
+assert.ok(themeRegistry.includes("id: 'stone'") && themeRegistry.includes("id: 'ocean'"), 'grey and blue themes must remain selectable from the catalogue');
 assert.ok(/body::before\s*\{[^}]*pointer-events:\s*none/s.test(css), 'cosmic star field must not block interaction');
 assert.ok(css.includes('background-attachment: fixed'), 'cosmic atmosphere should stay visually anchored while scrolling');
 assert.ok(css.includes('.ai-tag') && css.includes('.cosmic-badge') && css.includes('.cosmic-outline') && css.includes('.chat-bubble'), 'custom cosmic UI accents must be available');
