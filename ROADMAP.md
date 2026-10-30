@@ -998,3 +998,14 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - **How to add a theme:** add its typed palette ID and metadata to `THEME_CATALOGUE`, add its matching `:root[data-theme="..."]` semantic-token block in `globals.css`, and add its palette to the contrast checks. The settings selector, preference validation and bootstrap will then discover it automatically.
 
 - Updated the contrast contract to discover every palette ID from `THEME_CATALOGUE`, so newly registered palettes are included automatically rather than requiring a second hard-coded theme list.
+
+## Permanent theme architecture — 2026-10-30
+
+- **Foundation rule:** The central theme catalogue and shared semantic-token palette are permanent platform architecture, not a one-off light-theme implementation.
+- Future themes should be palette-first. A new theme normally adds one catalogue entry (identity, label and colour-scheme metadata) plus one semantic-token palette block in the central theme-token section of `src/app/globals.css`. Existing pages, components, navigation, responsive layouts, interaction patterns and world-specific behaviour remain shared.
+- Do not create theme-specific page trees, component forks, duplicate layout systems, or separate responsive styling projects to launch a palette. Theme-specific visual effects should be exceptional, minimal, and expressed through reusable tokens or shared theme-aware primitives.
+- Keep feature styling on semantic variables such as `--bg`, `--surface`, `--ink`, `--muted`, `--line`, `--accent` and status tokens. When a hard-coded feature colour is genuinely semantic, promote it into the shared token contract rather than adding per-theme overrides to individual components.
+- Keep theme identity independent from layout density, accessibility preferences, user role, and Sanctuary/Guild world context. A theme must work across both worlds and all supported viewport sizes without changing feature behaviour.
+- The Appearance selector, preference validation, account persistence, session restoration, pre-render bootstrap and contrast checks must discover supported themes from the central catalogue. Avoid maintaining secondary hard-coded theme lists.
+- **Adding a palette:** register its ID and metadata in `THEME_CATALOGUE`; add its semantic-token block to the central theme-token section; verify the catalogue-driven contrast contract; then review representative Sanctuary and Guild pages at desktop and narrow-phone widths. The contrast script already discovers registered IDs automatically.
+- **Long-term quality gate:** migrate remaining feature-level hard-coded colours to semantic tokens and add browser screenshot coverage for every registered theme across representative Sanctuary and Guild surfaces. Static token checks do not replace visual, keyboard, contrast or device testing.
