@@ -167,7 +167,7 @@ export function AdminDashboard({ role, worldType = 'sanctuary' }: { role: string
       <div className={styles.dashboard}>
         <header className={styles.header}>
           <p className={styles.eyebrow}>GUILD CONTROL CENTRE</p>
-          <h1><UserCog size={27} aria-hidden="true" /> Guild administration</h1>
+          <h1><UserCog size={27} aria-hidden="true" /> Admin</h1>
           <p>These controls are scoped to Guild community reports and feedback. Account-wide role management and global page visibility are not exposed from this environment.</p>
         </header>
         <ModerationDashboard role={role} worldType="guild" />
