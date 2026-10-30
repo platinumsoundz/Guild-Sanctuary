@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, ExternalLink, Gamepad2, Library, Music2, Plus, ShieldCheck, Terminal, Trash2, Upload, SkipBack, SkipForward, Play, Pause, FolderOpen } from 'lucide-react';
 import styles from './GuildCompanionHub.module.css';
 import { createClient } from '@/lib/supabase/client';
@@ -108,18 +108,18 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
     };
     window.addEventListener('guild-music-action', onAction);
     return () => window.removeEventListener('guild-music-action', onAction);
-  }, [audioFiles, currentTrack]);
+  }, [audioFiles, currentTrack, changeTrack]);
   useEffect(() => {
     if (playerRef.current && audioFiles[currentTrack]) {
       playerRef.current.load();
       if (isPlaying) void playerRef.current.play().catch(() => setIsPlaying(false));
     }
   }, [currentTrack, audioFiles]);
-  const changeTrack = (delta: number) => {
+  const changeTrack = useCallback((delta: number) => {
     if (!audioFiles.length) return;
     setCurrentTrack((index) => (index + delta + audioFiles.length) % audioFiles.length);
     setCurrentTime(0);
-  };
+  }, [audioFiles.length]);
   const addFiles = (files: FileList | null) => {
     if (!files) return;
     const existing = audioFilesRef.current;
