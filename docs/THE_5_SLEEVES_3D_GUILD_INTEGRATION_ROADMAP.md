@@ -120,3 +120,6 @@ A small, versioned `guild.5-sleeves` postMessage contract is being added in the 
 - The bridge does not expose account identity, save data, Supabase credentials, Guild Token balance, purchases or DLC entitlements.
 
 **Dependency:** merge and deploy the game-side bridge PR before expecting the Guild's `Guild link ready` indicator and pause/resume behaviour to activate in a hosted preview. Until then, the existing iframe player and Guild overlay continue to work independently. This is not account linking or cloud-save integration.
+
+
+**Staging host:** `NEXT_PUBLIC_5_SLEEVES_3D_URL` may override the canonical Pages URL for preview testing. The override is accepted only as an HTTPS URL without embedded credentials; otherwise the canonical game URL is used. This allows the Guild preview to target a game-branch preview without changing production defaults.
