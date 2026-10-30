@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { CheckCircle2, MessageSquareText, Send, ShieldCheck } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import styles from './FeedbackCenter.module.css';
@@ -119,7 +119,7 @@ export function FeedbackPage({ role, isGuest }: { role: string; isGuest: boolean
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitting(true);
     setMessage('');
