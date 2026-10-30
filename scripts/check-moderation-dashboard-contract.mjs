@@ -5,7 +5,7 @@ const dashboard = readFileSync(new URL('../src/modules/moderation/ModerationDash
 const service = readFileSync(new URL('../src/modules/moderation/service.ts', import.meta.url), 'utf8');
 const admin = readFileSync(new URL('../src/modules/moderation/AdminDashboard.tsx', import.meta.url), 'utf8');
 const workspace = readFileSync(new URL('../src/components/AppWorkspace.tsx', import.meta.url), 'utf8');
-const moderationMigration = readFileSync(new URL('../supabase/migrations/20261030100000_role_targeted_visibility_and_moderation_fixes.sql', import.meta.url), 'utf8');
+const moderationMigration = readFileSync(new URL('../supabase/migrations/20261030022341_role_targeted_visibility_and_moderation_fixes.sql', import.meta.url), 'utf8');
 
 assert.ok(!admin.includes('<ModerationDashboard'), 'Admin must remain separate from the moderation queue');
 assert.ok(workspace.includes('<ModerationDashboard role={currentUser.profile.role} />'), 'workspace must pass the authenticated role to the standalone Moderation page');
