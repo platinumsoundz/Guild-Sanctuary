@@ -134,3 +134,5 @@
 @media (prefers-reduced-motion:reduce) {
   .drawer,.quickPanel,.touchPad button { transition:none; }
 }
+
+.quickMusicTrack{display:flex;align-items:center;gap:13px;padding:18px 14px;border:1px solid rgba(181,167,255,.18);border-radius:14px;background:rgba(9,11,29,.5);margin:14px 0}.quickMusicTrack>svg{flex:none;color:#c6b3ff}.quickMusicTrack div{display:grid;gap:5px;min-width:0}.quickMusicTrack strong{overflow-wrap:anywhere;font-size:13px}.quickMusicTrack small{color:#aaa5cb;font-size:10px}.quickMusicControls{display:flex;align-items:center;justify-content:center;gap:18px;padding:10px}.quickMusicControls button{display:grid;place-items:center;width:48px;height:48px;border:1px solid rgba(195,176,255,.25);border-radius:50%;background:rgba(255,255,255,.07);color:#fff}.quickMusicControls button:nth-child(2){width:58px;height:58px;background:linear-gradient(135deg,#7964e9,#9d67e8)}.quickMusicControls button:disabled{opacity:.35;cursor:not-allowed}
