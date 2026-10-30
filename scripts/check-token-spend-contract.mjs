@@ -27,7 +27,7 @@ const checks = [
   ['bonus helper requires verified and active accounts', /u\.email_confirmed_at is not null/.test(bonus) && /p\.status = 'active'/.test(bonus)],
   ['existing accounts receive a 400-token top-up and future accounts 500', /grant_amount := 400/.test(bonus) && /grant_amount := 500/.test(bonus)],
   ['award ledger enforces one award per account and unique rank', /user_id uuid primary key/.test(bonus) && /signup_rank integer not null unique/.test(bonus)],
-  ['private grant helper is revoked from API and service roles', /revoke all on function public\.grant_first_100_signup_bonus\\(uuid\\) from public, anon, authenticated, service_role/i.test(bonus)],
+  ['private grant helper is revoked from API and service roles', /revoke all on function public\.grant_first_100_signup_bonus\(uuid\) from public, anon, authenticated, service_role/i.test(bonus)],
   ['wallet displays the thank-you notice only when an award record exists', /token_signup_bonus_awards/.test(wallet) && /founding member token reward has been credited/.test(wallet)],
 ];
 
