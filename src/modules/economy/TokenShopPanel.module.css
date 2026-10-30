@@ -193,3 +193,18 @@
     min-height: 0;
   }
 }
+
+.categoryNav{display:flex;gap:9px;flex-wrap:wrap;margin:22px 0 8px}
+.categoryNav a{padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-size:12px;text-decoration:none}
+.categoryNav a:hover{border-color:var(--accent);color:var(--accent)}
+.categorySection{margin-top:28px;scroll-margin-top:24px}
+.categoryHeading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.categoryHeading h2{margin:0;font-size:20px}
+.categoryHeading span{color:var(--muted);font-size:11px}
+.art[data-kind="theme"]{background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 45%,transparent),transparent 62%),linear-gradient(135deg,var(--surface),var(--surface-raised))}
+.art[data-effect="aurora"]{background:linear-gradient(120deg,#0b2630,#15584d,#18284e)}
+.art[data-effect="celestial"],.art[data-effect="solar-flare"]{background:linear-gradient(120deg,#4b2536,#bd785e,#e3bf7a)}
+.art[data-effect="eclipse"],.art[data-effect="void"]{background:linear-gradient(120deg,#111522,#3b3548,#c9a64d)}
+.art[data-effect="nebula"],.art[data-effect="crystal"]{background:linear-gradient(120deg,#20133f,#6849a0,#b8a4ff)}
+.art[data-effect="ocean"],.art[data-effect="tide"]{background:linear-gradient(120deg,#0d2a44,#176d86,#7bd5df)}
+@media(max-width:620px){.categoryNav{overflow-x:auto;flex-wrap:nowrap;padding-bottom:6px}.categoryNav a{white-space:nowrap}.categoryHeading h2{font-size:18px}}

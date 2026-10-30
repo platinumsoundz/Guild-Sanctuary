@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { isSupabaseWalletConfigured } from './service';
+import { getSupabaseBrowserClient } from '@/services/supabase';
 import type { WorldType } from '@/types/database';
 import { useWallet } from './useWallet';
 import styles from './WalletPanel.module.css';
@@ -26,7 +27,35 @@ export function WalletPanel({ userId, isGuest, worldType = 'sanctuary' }: Wallet
     buyBundle,
   } = useWallet(userId, isGuest);
   const [notice, setNotice] = useState<string | null>(null);
+  const [hasFoundingBonus, setHasFoundingBonus] = useState(false);
   const hasSupabaseAccount = !isGuest && isSupabaseWalletConfigured();
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadFoundingBonus = async () => {
+      if (!hasSupabaseAccount) {
+        setHasFoundingBonus(false);
+        return;
+      }
+      setHasFoundingBonus(false);
+      try {
+        const client = getSupabaseBrowserClient();
+        const { data: authData, error: authError } = await client.auth.getUser();
+        if (authError || authData.user?.id !== userId) return;
+        const { data, error: bonusError } = await client
+          .from('token_signup_bonus_awards')
+          .select('user_id,granted_at')
+          .eq('user_id', userId)
+          .not('granted_at', 'is', null)
+          .maybeSingle();
+        if (!cancelled && !bonusError) setHasFoundingBonus(Boolean(data));
+      } catch {
+        if (!cancelled) setHasFoundingBonus(false);
+      }
+    };
+    void loadFoundingBonus();
+    return () => { cancelled = true; };
+  }, [hasSupabaseAccount, userId]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -60,6 +89,7 @@ export function WalletPanel({ userId, isGuest, worldType = 'sanctuary' }: Wallet
       {process.env.NEXT_PUBLIC_SANCTUARY_STRIPE_TEST_CHECKOUT_ENABLED === 'true' && <p className={styles.notice} role="status">Test mode only: payments are simulated and no real money is charged.</p>}
       {checkoutEnabled && <p className={styles.notice} role="status">TEST MODE ONLY — payments are simulated; no real money will be charged.</p>}
       {notice && <p className={styles.notice} role="status">{notice}</p>}
+      {hasFoundingBonus && <p className={styles.notice} role="status">Thank you for joining The Sanctuary early — your first-100 founding member token reward has been credited to this wallet.</p>}
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isGuest && <p className={styles.notice}>Guest Mode is read-only. Sign in with your account to view a wallet or buy tokens.</p>}
       {!isGuest && !hasSupabaseAccount && (
