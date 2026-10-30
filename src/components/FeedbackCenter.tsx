@@ -116,7 +116,7 @@ export function FeedbackInbox({ role, worldType = 'sanctuary' }: { role: string;
   );
 }
 
-export function FeedbackPage({ role, isGuest, worldType = 'sanctuary' }: { role: string; isGuest: boolean; worldType?: WorldType }) {
+export function FeedbackPage({ isGuest, worldType = 'sanctuary' }: { isGuest: boolean; worldType?: WorldType }) {
   const [feedbackType, setFeedbackType] = useState<FeedbackKind>('Idea or improvement');
   const [title, setTitle] = useState('');
   const [details, setDetails] = useState('');
@@ -193,7 +193,21 @@ export function FeedbackPage({ role, isGuest, worldType = 'sanctuary' }: { role:
         </form>
         {isGuest && <p className={styles.guestNote}>You are browsing as a guest. You can still submit feedback without creating an account.</p>}
       </section>
-      {['developer', 'owner'].includes(role.toLowerCase()) && <FeedbackInbox role={role} worldType={worldType} />}
+    </main>
+  );
+}
+
+
+export function FeedbackInboxPage({ role, worldType = 'sanctuary' }: { role: string; worldType?: WorldType }) {
+  return (
+    <main className={styles.page}>
+      <header className={styles.hero}>
+        <span className={styles.heroIcon}><ShieldCheck size={24} aria-hidden="true" /></span>
+        <p className={styles.eyebrow}>STAFF WORKSPACE</p>
+        <h1>Feedback inbox</h1>
+        <p>Review submissions from guests and members, update their status, and keep feedback separate from day-to-day administration.</p>
+      </header>
+      <FeedbackInbox role={role} worldType={worldType} />
     </main>
   );
 }
