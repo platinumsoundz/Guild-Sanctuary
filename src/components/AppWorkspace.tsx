@@ -381,7 +381,7 @@ export function AppWorkspace() {
       <ResponsiveShell>
         {activeNavigation === 'guild' ? (
           <div className={styles.guildExperience} data-world="guild">
-            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
+            <GuildNavigation selectedPage={guildPage} role={currentUser?.profile.role ?? 'user'} userId={!isGuest ? currentUser?.user.id ?? null : null} onSelect={(page) => { setGuildAutoLaunchRecent(false); setGuildPage(page); }} onExit={() => { setGuildAutoLaunchRecent(false); setActiveNavigation('today'); }} />
             <motion.div className={styles.guildWorldContent}>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={guildPage} className={styles.guildPageContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
