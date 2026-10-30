@@ -39,7 +39,7 @@ assert.ok(library.includes("process.env.VERCEL_ENV === 'preview'"), 'preview dep
 assert.ok(library.includes('integration-guild-host-bridg.the-5-sleeves-3d.pages.dev'), 'preview deployment must target the game branch preview');
 assert.ok(library.includes('https://the-5-sleeves-3d.pages.dev/'), 'production fallback must remain the canonical 3D game host');
 assert.ok(library.includes('https://the-5-sleeves-2d.pages.dev/'), '2D production fallback must use its Cloudflare Pages host');
-assert.ok(library.includes('integration-cloudflare-guild-host-2d.the-5-sleeves-2d.pages.dev'), '2D preview must use its matching Cloudflare Pages branch preview');
+assert.ok(library.includes('integration-cloudflare-guild.the-5-sleeves-2d.pages.dev'), '2D preview must use its matching Cloudflare Pages branch preview');
 assert.ok(library.includes('gameId={activeGame.id}'), 'the player must receive the active game identity');
 assert.ok(player.includes("gameId === 'sleeves2d' ? 'the-5-sleeves-2d' : 'the-5-sleeves-3d'"), 'the bridge must validate the correct 2D or 3D identity');
 assert.ok(player.includes('gameId, url'), 'the lifecycle listener must be scoped to the selected game identity');
