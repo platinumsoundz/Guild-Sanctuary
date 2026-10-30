@@ -63,7 +63,7 @@ export function DirectMessageThread({ peer, conversation, onBack, worldType = 's
   return (
     <main className={styles.thread} data-world={worldType}>
       <header className={styles.threadHeader}>
-        <button className={styles.backButton} type="button" onClick={onBack}>Conversations</button>
+        <button className={styles.backButton} type="button" onClick={onBack}>{worldType === 'guild' ? 'Guild conversations' : 'Conversations'}</button>
         <div className={styles.peer}>
           <div className={styles.avatar} aria-hidden="true">{resolvedPeer?.avatarUrl ? <img src={resolvedPeer.avatarUrl} alt="" /> : title.slice(0, 1).toUpperCase()}</div>
           <div>
