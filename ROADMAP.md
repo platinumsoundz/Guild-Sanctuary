@@ -4,6 +4,45 @@ Last updated: 2026-10-30
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
+## Phase completion dashboard — 2026-10-30
+
+> **Estimated overall Sanctuary project progress: 50%**  
+> Phase completion and beta readiness are different measures. These percentages are planning estimates from repository/deployment evidence, not live telemetry. The Guild is a separate co-existing project and is excluded from Sanctuary progress percentages.
+
+| Phase | Progress | Status and remaining work |
+| --- | ---: | --- |
+| 🟢 **Phase 1 — Visual foundation** | **100% implementation** | Compact header, top-left navigation, compact notification overlay, merged account entry, install prompt area, Today-page simplification, and dedicated Feedback destination are implemented in source. Production/browser/device verification remains part of Phase 3 rather than being counted as unfinished visual design. |
+| 🟡 **Phase 2 — Console experience** | **25%** | Build out the console-style dashboard, HUD/navigation consistency, library and discovery, touchscreen controls, and role-aware visibility for stable versus experimental features. |
+| 🟡 **Phase 3 — Reliability and beta readiness** | **30%** | Verify persistent messaging, account journeys, role/RLS enforcement, community interactions, deployment consistency, accessibility, and real-device behaviour. |
+| **Overall project estimate** | **50%** | Weighted planning estimate across implementation and integration scope; not a percentage of lines of code. |
+
+### At-a-glance bars
+
+| Work area | Progress |
+| --- | --- |
+| Phase 1 · Visual foundation | `██████████ 100%` |
+| Phase 2 · Console experience | `██▌░░░░░░░ 25%` |
+| Phase 3 · Reliability and beta | `███░░░░░░░ 30%` |
+| Overall Sanctuary project | `█████░░░░░ 50%` |
+
+### Phase 1 exit checklist
+
+- [x] Remove oversized branding/activity header space; keep the shell compact.
+- [x] Keep main navigation accessible from the top-left.
+- [x] Keep notifications as a compact overlay that preserves the current page.
+- [x] Keep Token Shop and Admin out of the top bar; role-aware navigation controls their page access.
+- [x] Present account entry as one compact control with sign-in/guest options.
+- [x] Provide a dismissible PWA install prompt area.
+- [x] Keep Today focused on useful destinations and provide a dedicated Feedback page for members and guests.
+- [ ] Final production/browser/device QA — tracked under Phase 3; do not treat source implementation as proof that every deployment is current.
+
+### Current messaging blocker
+
+- The production Supabase project `Guild-Sanctuary` (`xgpzvmhldyoyrwwebcic`) has the persistent messaging tables, the typed `create_scoped_conversation` RPC, RLS policies, and the `messages` table in the Supabase Realtime publication.
+- Vercel's project environment inventory has `NEXT_PUBLIC_SANCTUARY_PERSISTENT_MESSAGES=true` targeted at Production. Because Next.js public environment variables are embedded at build time, a stale deployment or a different host/build configuration can still produce the “not connected to the live conversation database” guard message.
+- **Not yet resolved:** perform a fresh build/deployment using the verified production environment, then test message creation and two-account send/receive/refresh. Check Cloudflare's build environment separately if that is the URL being used. Do not apply guessed migrations or weaken RLS to bypass the guard.
+
+
 ## Focused accessibility task — compact notification overlay
 
 - **Task completion target: 100% of the code-and-contract scope.** When the compact notifications panel is closed with its close button, keyboard focus returns to the notification bell, consistent with the existing Escape-key behaviour.
@@ -12,7 +51,7 @@ Status reconciliation: this update corrects stale theme/notification labels from
 
 ## Beta readiness dashboard — Sanctuary only
 
-> **Estimated beta readiness: 55%**  
+> **Estimated beta readiness: 45%**  
 > Planning estimate based on the current roadmap and known verification gaps — not a live telemetry measurement. Percentages describe each Sanctuary workstream's overall readiness, including integration and testing, not just how much code exists. **The Guild is a separate co-existing project and is not included here.**
 
 | Sanctuary workstream | Progress | Snapshot |
