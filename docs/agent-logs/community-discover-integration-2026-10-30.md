@@ -86,3 +86,25 @@ The connected Supabase project named Guild-Sanctuary was inspected without chang
 - Current main's feed service accepts `fetchFeed(worldType)` and filters `posts.world_type`. Current event service accepts `fetchEvents(userId, worldType)` and filters `events.world_type`. Both default to Sanctuary when callers omit the argument. The expanded Discover component must therefore receive worldType and explicitly pass it to both calls.
 
 No migrations were applied. This was a read-only verification; a staging database/multi-account RLS test is still required before adopting the feature bundle.
+
+
+## First implementation batch (2026-10-30)
+
+Implemented on the isolated integration branch:
+
+- Reworked Discover into two clear areas: public member search and upcoming community gatherings.
+- Added a required `worldType` prop to `ProfileDiscovery` and passed the active world from `AppWorkspace`.
+- Gatherings load through the existing `fetchEvents(currentUserId, worldType)` service, which already filters visible events by `world_type`. Guild discovery therefore does not silently fall back to Sanctuary.
+- Added event search, chronological upcoming-event ordering, RSVP totals, date/time display and external map links.
+- Kept people discovery on the existing `public_profiles` projection and `searchPublicProfiles` service. No private profile fields, interests, intentions, journals or reflections are added to public search.
+- Added responsive event cards, keyboard focus styling, reduced-motion support, loading/error/empty states.
+- Added `scripts/check-discover-scope.mjs` and npm script `check:discover-scope` to guard world-scope and private-reflection boundaries.
+
+### Validation
+- Branch compares cleanly against its original main base (0 commits behind at the latest compare).
+- GitHub Actions has started for exact head `d17ef5db6264c3e67595bbb9f038fdc556c8427e`: CI, dependency-map contract, daily-reflection contract and visual preview are queued; Cloudflare PR workflow is pending. Results must be read before considering merge.
+- No production database schema or data was changed. No discovery/relationship migrations were applied.
+- A local checkout/build/browser session is unavailable in this execution environment; static contract coverage and GitHub Actions are the verification path for this batch.
+
+### Remaining scope
+This batch delivers world-scoped event discovery, not the full relationship/interests feature set from the larger candidate branch. Follows, connection requests, blocks, saved/hidden profiles, public interests and intentions remain gated on a separate migration/RLS implementation and staging multi-account verification. Community feed and engagement were retained from current main because their newer world-scoped implementation already supersedes several stale candidate branches.
