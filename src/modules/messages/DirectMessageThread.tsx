@@ -14,11 +14,12 @@ interface DirectMessageThreadProps {
   peer?: PublicProfile;
   conversation?: Conversation;
   onBack: () => void;
+  worldType?: WorldType;
 }
 
-export function DirectMessageThread({ peer, conversation, onBack }: DirectMessageThreadProps) {
+export function DirectMessageThread({ peer, conversation, onBack, worldType = 'sanctuary' }: DirectMessageThreadProps) {
   const { currentUser } = useAppContext();
-  const { messages, isLoading, isSending, error, send } = useDirectMessages(peer?.userId ?? null, conversation?.id ?? null);
+  const { messages, isLoading, isSending, error, send } = useDirectMessages(peer?.userId ?? null, conversation?.id ?? null, worldType);
   const [draft, setDraft] = useState('');
   const [senderProfiles, setSenderProfiles] = useState<Record<string, PublicProfile>>({});
   const peerId = peer?.userId ?? conversation?.participantIds.find((participantId) => participantId !== currentUser?.user.id);
