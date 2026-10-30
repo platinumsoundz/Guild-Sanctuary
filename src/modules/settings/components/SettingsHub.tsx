@@ -217,7 +217,7 @@ export function SettingsHub({
     <main className={styles.settings}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>{environment === 'guild' ? 'GUILD SETTINGS' : 'YOUR ACCOUNT'}</p>
-        <h1>{environment === 'guild' ? 'Settings &amp; customization' : 'Settings &amp; customization'}</h1>
+        <h1>Settings &amp; customization</h1>
         <p>{environment === 'guild' ? 'Personalise your console controls, display preferences, privacy and account.' : 'Manage your preferences, privacy, social links, and account.'}</p>
       </header>
 
