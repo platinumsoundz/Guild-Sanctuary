@@ -545,7 +545,8 @@ begin
   where source_key=requested_source_key for update;
   if found then
     if existing_entry.user_id<>requested_user_id or existing_entry.tokens_delta<>requested_tokens_delta or
-      existing_entry.reason_code<>requested_reason_code or existing_entry.case_reference<>requested_case_reference then
+      existing_entry.reason_code<>requested_reason_code or existing_entry.case_reference<>requested_case_reference or
+      existing_entry.actor<>requested_actor or existing_entry.item_id is distinct from requested_item_id then
       raise exception 'Adjustment source key conflicts with an existing ledger entry.' using errcode='22023';
     end if;
     return wallet_balance;
