@@ -74,3 +74,15 @@ No candidate feature branch was merged or copied in this pass because every subs
 - GitHub source files and branch trees were inspected.
 - No repository checkout, local package install, TypeScript run, build, browser session, Supabase connection, migration execution or live QA was available through the connected GitHub operations used here.
 - Therefore this pass does not claim CI success, feature completion, PR merge, migration application or deployment.
+
+
+## Connected Supabase verification (read-only, 2026-10-30)
+
+The connected Supabase project named Guild-Sanctuary was inspected without changing schema or data:
+
+- Its migration ledger currently ends at `20261030032022` (`sanctuary_feedback`). The candidate discovery migrations `20261028150000_member_discovery_interests`, `20261028170000_connection_relationships`, `20261028180000_add_profile_report_target`, and `20261028180100_profile_report_rpc` are not recorded as applied.
+- A read-only catalog query found no `profile_interests`, `profile_discovery_intentions`, `profile_follows`, `profile_connections`, `profile_blocks`, `profile_discovery_hidden`, or `profile_discovery_saved` tables in the inspected public/private schemas.
+- The same catalog query confirmed `posts`, `events` and `profiles` are present with RLS enabled. `public_profiles` is a view, not a base table; the simple catalog flag does not establish its view security mode, so that still needs separate review.
+- Current main's feed service accepts `fetchFeed(worldType)` and filters `posts.world_type`. Current event service accepts `fetchEvents(userId, worldType)` and filters `events.world_type`. Both default to Sanctuary when callers omit the argument. The expanded Discover component must therefore receive worldType and explicitly pass it to both calls.
+
+No migrations were applied. This was a read-only verification; a staging database/multi-account RLS test is still required before adopting the feature bundle.
