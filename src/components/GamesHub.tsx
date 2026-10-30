@@ -29,7 +29,10 @@ const games: GameEntry[] = [
     genre: 'Third-person 3D prototype',
     url: (() => {
       const configured = process.env.NEXT_PUBLIC_5_SLEEVES_3D_URL?.trim();
-      if (!configured) return 'https://the-5-sleeves-3d.pages.dev/';
+      const defaultHost = process.env.VERCEL_ENV === 'preview'
+        ? 'https://integration-guild-host-bridg.the-5-sleeves-3d.pages.dev/'
+        : 'https://the-5-sleeves-3d.pages.dev/';
+      if (!configured) return defaultHost;
       try {
         const parsed = new URL(configured);
         return parsed.protocol === 'https:' && !parsed.username && !parsed.password ? parsed.toString() : 'https://the-5-sleeves-3d.pages.dev/';
