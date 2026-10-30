@@ -405,3 +405,54 @@ body {
 :root[data-layout="compact"] [data-world="sanctuary"] :where(h1, h2, h3) {
   margin-block-end: 0.65em;
 }
+
+
+/* Expanded theme library — each palette defines the same semantic contract. */
+:root[data-theme="midnight"] {
+  color-scheme: dark;
+  --bg: #080f24; --surface: #111d38; --surface-raised: #1a2a4a;
+  --ink: #eff5ff; --muted: #b7c5e0; --line: #34496d;
+  --accent: #8db7ff; --accent-contrast: #08152d; --accent-soft: rgb(141 183 255 / 15%);
+  --danger: #ffaaa8; --success: #91dfb3; --warning: #f4d18a;
+  --shadow-card: 0 12px 34px rgb(0 0 0 / 28%);
+}
+:root[data-theme="forest"] {
+  color-scheme: dark;
+  --bg: #071a14; --surface: #102820; --surface-raised: #19382d;
+  --ink: #f0fff6; --muted: #b9d6c5; --line: #315747;
+  --accent: #83d6a5; --accent-contrast: #082016; --accent-soft: rgb(131 214 165 / 15%);
+  --danger: #ffaaa2; --success: #83d6a5; --warning: #f0ce83;
+  --shadow-card: 0 12px 34px rgb(0 0 0 / 28%);
+}
+:root[data-theme="rose"] {
+  color-scheme: dark;
+  --bg: #1d1018; --surface: #2b1924; --surface-raised: #3a2331;
+  --ink: #fff0f5; --muted: #d9bac8; --line: #634153;
+  --accent: #f0a8c8; --accent-contrast: #301321; --accent-soft: rgb(240 168 200 / 15%);
+  --danger: #ffaaa8; --success: #9bd9b0; --warning: #f1ce88;
+  --shadow-card: 0 12px 34px rgb(0 0 0 / 28%);
+}
+:root[data-theme="lavender"] {
+  color-scheme: light;
+  --bg: #f5f1ff; --surface: #ffffff; --surface-raised: #ffffff;
+  --ink: #2c2340; --muted: #665b7a; --line: #ddd3f0;
+  --accent: #6446a8; --accent-contrast: #ffffff; --accent-soft: rgb(100 70 168 / 10%);
+  --danger: #a92e3b; --success: #236b49; --warning: #805600;
+  --shadow-card: 0 8px 28px rgb(44 35 64 / 8%);
+}
+:root[data-theme="ember"] {
+  color-scheme: dark;
+  --bg: #1b100b; --surface: #2a1a12; --surface-raised: #3b2619;
+  --ink: #fff3e8; --muted: #d8bba5; --line: #62432f;
+  --accent: #ffb36b; --accent-contrast: #301707; --accent-soft: rgb(255 179 107 / 15%);
+  --danger: #ffaaa0; --success: #9bd9a9; --warning: #f3d18b;
+  --shadow-card: 0 12px 34px rgb(0 0 0 / 28%);
+}
+:root[data-theme="mint"] {
+  color-scheme: light;
+  --bg: #eff8f3; --surface: #ffffff; --surface-raised: #ffffff;
+  --ink: #173c2c; --muted: #536f61; --line: #cfe2d7;
+  --accent: #236b4a; --accent-contrast: #ffffff; --accent-soft: rgb(35 107 74 / 10%);
+  --danger: #a92e3b; --success: #236b49; --warning: #805600;
+  --shadow-card: 0 8px 28px rgb(23 60 44 / 8%);
+}
