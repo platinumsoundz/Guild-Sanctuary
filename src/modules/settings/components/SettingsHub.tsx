@@ -304,7 +304,7 @@ export function SettingsHub({
                 void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));
               }}>
                 <option value="system">Use device setting</option>
-                <option value="light">Light</option>
+                <option value="light">Cosmic light · daylight</option>
                 <option value="dark">Dark</option>
                 <option value="dusk">Dusk · low-glare warm</option>
                 <option value="stone">Stone · grey</option>
