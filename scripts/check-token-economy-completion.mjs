@@ -23,6 +23,7 @@ const checks = [
   ['public cosmetic projection exposes only public profile cosmetic fields', /public_profile_cosmetics/.test(migration) && /sync_public_profile_cosmetic_projection/.test(migration)],
   ['custom accent picker requires entitlement and a fixed accessible palette', /unlock_custom_accent_picker/.test(migration) && /Choose an accessible colour/.test(migration)],
   ['shop displays an owned collection and equipped state', /Your collection/.test(shop) && /Equipped/.test(shop) && /EQUIPPING_ENABLED = false/.test(shop)],
+  ['guests can browse enabled catalog items without accessing account balances', /if \(isGuest\)/.test(shop) && /setBalance\(null\)/.test(shop) && /anonymous users read enabled token spend catalog/.test(migration)],
   ['wallet combines purchase, spend and bonus ledgers', /token_ledger/.test(wallet) && /token_spend_ledger/.test(wallet) && /token_bonus_ledger/.test(wallet)],
   ['wallet renders positive and negative activity descriptions', /entry\.description/.test(walletPanel) && /entry\.tokensDelta < 0/.test(walletPanel)],
   ['public profiles load cosmetic projection', /public_profile_cosmetics/.test(profileService)],
