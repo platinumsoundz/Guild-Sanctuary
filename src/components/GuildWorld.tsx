@@ -238,7 +238,7 @@ export function GuildWorld({ userId, isAuthenticated }: GuildWorldProps) {
 
   const enterGuild = () => {
     if (!isAuthenticated || !userId) {
-      setNotice('Sign in to your Sanctuary account first. Your Guild will use that same identity.');
+      setNotice('Sign in to continue. Your Guild profile uses your account identity.');
       return;
     }
     setNotice('');
