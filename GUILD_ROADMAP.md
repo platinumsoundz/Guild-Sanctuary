@@ -1,6 +1,6 @@
 # The Guild Roadmap
 
- > Scope: The Guild console experience only. The companion platform has its own roadmap; The 5 Sleeves game repositories retain their own game-development roadmaps. This document tracks the Guild shell and integrations that surround those games.
+> Scope: The Guild console experience only. The companion platform has its own roadmap; The 5 Sleeves game repositories retain their own game-development roadmaps. This document tracks the Guild shell and integrations that surround those games.
 
 ## Product direction
 
@@ -109,7 +109,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 - Guild is a separate environment, not a subsection of the companion environment. Use the native labels **Home, Community, Discover, Messages, Events, Shorts, Planner, Profile, Notifications, Settings, Feedback, Admin, Moderation and Roadmap** without adding "Guild" to every page name.
 - Do not show companion-platform branding, roadmap links, settings controls, or page-visibility settings inside Guild. The explicit **Exit to Sanctuary** control is the only cross-environment navigation reference.
 - Guild has its own home dashboard and its own settings page. Shared account preferences may be reused, but console controls (touch navigation and reduced motion) belong to Guild.
-- Admin and moderation inside Guild must operate on Guild-world content only. Do not expose account-wide role management or global page visibility from Guild administration.
+- Admin and moderation inside Guild must operate on Guild-world content only. Do not expose account-wide role management or global page visibility from Guild administration. Account-wide warnings, suspensions and bans remain disabled from Guild until a dedicated Guild-only sanction model exists; Guild moderation can hide or remove Guild content.
 - Feedback is available to all roles and guests in each environment. New submissions carry an environment marker and staff inboxes are filtered to the active environment.
 
 ### Shared UI system
