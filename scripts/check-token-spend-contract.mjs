@@ -22,7 +22,7 @@ const checks = [
   ['staging lock revokes anonymous execution', /REVOKE ALL ON FUNCTION public\.spend_tokens\(text, uuid\) FROM anon;/i.test(migration)],
   ['staging lock revokes authenticated execution until approval', /REVOKE ALL ON FUNCTION public\.spend_tokens\(text, uuid\) FROM authenticated;/i.test(migration)],
   ['staging lock does not grant execution to any role', !/GRANT EXECUTE ON FUNCTION public\.spend_tokens\(text, uuid\)/i.test(migration)],
-  ['all cosmetic prices are within 20–50 tokens', /when 'theme_nebula' then 50/.test(repricing) && /when 'profile_effect_sparkle' then 20/.test(repricing) && /when 'banner_crystal_garden' then 50/.test(repricing) && !/then (?:[1-9]?[0-9]{2,}|[5-9][1-9])/.test(repricing)],
+  ['all cosmetic prices are within 20–50 tokens', /when 'theme_nebula' then 50/.test(repricing) && /when 'profile_effect_sparkle' then 20/.test(repricing) && /when 'banner_crystal_garden' then 50/.test(repricing) && !/then (?:[1-9][0-9]{2,}|[6-9][0-9]|5[1-9])/.test(repricing)],
   ['bonus allocation pool has a hard 100-account cap and row lock', /awarded_count integer not null default 0 check \(awarded_count between 0 and 100\)/.test(bonus) && /for update;/.test(bonus)],
   ['bonus helper requires verified and active accounts', /u\.email_confirmed_at is not null/.test(bonus) && /p\.status = 'active'/.test(bonus)],
   ['existing accounts receive a 400-token top-up and future accounts 500', /grant_amount := 400/.test(bonus) && /grant_amount := 500/.test(bonus)],
