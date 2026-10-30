@@ -17,7 +17,7 @@ const games: { id: ArcadeGame; title: string; subtitle: string; icon: typeof Sta
   { id: 'solitaire', title: 'Lunar Solitaire', subtitle: 'A calm, moonlit take on a classic card game.', icon: MoonStar, status: 'Playable preview' },
   { id: 'mahjong', title: 'Zodiac Mahjong', subtitle: 'Match celestial tiles and zodiac symbols.', icon: Gem, status: 'Coming soon' },
   { id: 'snake', title: 'Cosmic Snake', subtitle: 'Collect stardust and see how long you survive.', icon: Sparkles, status: 'Playable preview' },
-  { id: 'classics', title: 'Arcade Classics', subtitle: 'A collection of quick puzzles, memory games and arcade challenges.', icon: Star, status: '24 mini-games' },
+  { id: 'classics', title: 'Arcade Classics', subtitle: 'A collection of quick puzzles, memory games and arcade challenges.', icon: Star, status: '24 playable games' },
 ];
 
 const wordGrid = [
@@ -120,6 +120,12 @@ export function CosmicArcade() {
         <p>Mindful little games inspired by the cosmos, symbolism, spiritual traditions and the zodiac. Play for fun, earn in-game progress, and personalise your experience.</p>
         <div className={styles.heroNote}><MoonStar size={18} /><span>Games are for reflection and entertainment, not predictions or professional advice.</span></div>
       </header>
+
+      <section className={styles.availability} aria-label="Arcade availability">
+        <div><strong>28</strong><span>Playable games</span><small>4 standalone previews + 24 Arcade Classics</small></div>
+        <div><strong>1</strong><span>Coming soon</span><small>Zodiac Mahjong</small></div>
+        <div><strong>24</strong><span>Arcade Classics</span><small>Full mini-game collection</small></div>
+      </section>
 
       <div className={styles.gameTabs} role="tablist" aria-label="Arcade games">
         {games.map((game) => {
