@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { Post, PublicProfile, WorldType } from '@/types/database';
+import type { PublicProfile, WorldType } from '@/types/database';
 import { CalendarDays, FileText, Globe2, MapPin, Search, Sparkles, Users } from 'lucide-react';
 import { fetchEvents, type EventView } from '@/modules/events';
 import { fetchFeed } from '@/modules/feeds';
@@ -23,7 +23,7 @@ export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }
   const [query, setQuery] = useState('');
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
   const [events, setEvents] = useState<EventView[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Awaited<ReturnType<typeof fetchFeed>>>([]);
   const [postAuthors, setPostAuthors] = useState<Record<string, PublicProfile>>({});
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [postsError, setPostsError] = useState<string | null>(null);
