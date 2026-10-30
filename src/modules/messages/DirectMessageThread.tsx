@@ -61,7 +61,7 @@ export function DirectMessageThread({ peer, conversation, onBack, worldType = 's
   };
 
   return (
-    <main className={styles.thread}>
+    <main className={styles.thread} data-world={worldType}>
       <header className={styles.threadHeader}>
         <button className={styles.backButton} type="button" onClick={onBack}>Conversations</button>
         <div className={styles.peer}>
