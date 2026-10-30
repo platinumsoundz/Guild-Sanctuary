@@ -94,6 +94,11 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
     }}));
     publish();
   }, [audioFiles, currentTrack, isPlaying, currentTime, duration]);
+  const changeTrack = useCallback((delta: number) => {
+    if (!audioFiles.length) return;
+    setCurrentTrack((index) => (index + delta + audioFiles.length) % audioFiles.length);
+    setCurrentTime(0);
+  }, [audioFiles.length]);
   useEffect(() => {
     const onAction = (event: Event) => {
       const action = (event as CustomEvent<string>).detail;
@@ -109,17 +114,6 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
     window.addEventListener('guild-music-action', onAction);
     return () => window.removeEventListener('guild-music-action', onAction);
   }, [audioFiles, currentTrack, changeTrack]);
-  useEffect(() => {
-    if (playerRef.current && audioFiles[currentTrack]) {
-      playerRef.current.load();
-      if (isPlaying) void playerRef.current.play().catch(() => setIsPlaying(false));
-    }
-  }, [currentTrack, audioFiles]);
-  const changeTrack = useCallback((delta: number) => {
-    if (!audioFiles.length) return;
-    setCurrentTrack((index) => (index + delta + audioFiles.length) % audioFiles.length);
-    setCurrentTime(0);
-  }, [audioFiles.length]);
   const addFiles = (files: FileList | null) => {
     if (!files) return;
     const existing = audioFilesRef.current;
@@ -418,7 +412,7 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
           </div>
           <p className={styles.footnote}>Choose a folder to add its supported audio files in one go. Your browser asks you to select the folder; it does not grant silent access to the rest of your device. Folder selection support varies by browser, with individual-file selection as a fallback. The queue lasts for this browser session.</p>
           {audioFiles.length > 0 ? <div className={styles.player}>
-            <audio ref={playerRef} src={audioFiles[currentTrack]?.url} preload="metadata" onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} onLoadedMetadata={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => changeTrack(1)} />
+            <audio ref={playerRef} src={audioFiles[currentTrack]?.url} preload="metadata" onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} onLoadedMetadata={(event) => { setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0); if (isPlaying) void event.currentTarget.play().catch(() => setIsPlaying(false)); }} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => changeTrack(1)} />
             <div className={styles.nowPlaying}><span className={styles.icon}><Music2 size={20} /></span><div><small>NOW PLAYING · {currentTrack + 1} OF {audioFiles.length}</small><strong title={audioFiles[currentTrack]?.file.name}>{audioFiles[currentTrack]?.file.name}</strong></div></div>
             <input className={styles.seek} aria-label="Seek track" type="range" min="0" max={duration || 0} step="0.1" value={Math.min(currentTime, duration || 0)} onChange={(event) => { if (playerRef.current) playerRef.current.currentTime = Number(event.target.value); }} />
             <div className={styles.timeRow}><span>{formatTime(currentTime)}</span><span>{formatTime(duration)}</span></div>
