@@ -71,7 +71,6 @@ export function AppWorkspace() {
   const [accountSuspendedUntil, setAccountSuspendedUntil] = useState<string | null>(null);
   const [accountRestrictionReason, setAccountRestrictionReason] = useState<string | null>(null);
   const [guildPage, setGuildPage] = useState<GuildPage>('home');
-  const [guildRecentTitle, setGuildRecentTitle] = useState<string | null>(null);
   const [guildAutoLaunchRecent, setGuildAutoLaunchRecent] = useState(false);
   const guildInternalPages: GuildPage[] = ['home', 'arcade', 'trials', 'library', 'music', 'photos', 'tools'];
   const contentNavigation = activeNavigation === 'guild'
@@ -171,18 +170,6 @@ export function AppWorkspace() {
       window.clearInterval(poll);
     };
   }, [currentUser, isAuthenticated, isGuest, isSessionReady, setActiveNavigation]);
-
-  useEffect(() => {
-    if (activeNavigation !== 'guild' || guildPage !== 'home') return;
-    try {
-      const raw = window.localStorage.getItem('guild-library-recents-v1');
-      const recent = raw ? JSON.parse(raw) as Array<{ id?: string }> : [];
-      const first = Array.isArray(recent) ? recent[0]?.id : null;
-      setGuildRecentTitle(first === 'sleeves2d' ? 'The 5 Sleeves 2D' : first === 'sleeves3d' ? 'The 5 Sleeves 3D' : null);
-    } catch {
-      setGuildRecentTitle(null);
-    }
-  }, [activeNavigation, guildPage]);
 
   useEffect(() => {
     if (contentNavigation !== 'profile') {
