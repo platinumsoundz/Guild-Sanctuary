@@ -106,7 +106,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
 
   const handleLike = async (videoId: string) => {
     if (!canEngage) {
-      setError('Sign in with your Sanctuary account to like Shorts.');
+      setError('Sign in to your account to like Shorts.');
       return;
     }
     try {
@@ -362,7 +362,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
           <button type="submit" disabled={!videoDraft}>Publish short</button>
         </form>
       ) : (
-        <p className={styles.empty} role="status">Sign in with your Sanctuary account to publish, like, or comment on Shorts.</p>
+        <p className={styles.empty} role="status">Sign in to publish, like, or comment on Shorts.</p>
       )}
       {error && <p className={styles.error} role="alert">{error}</p>}
       <div className={styles.feed} ref={feedRef}>
