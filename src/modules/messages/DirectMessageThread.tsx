@@ -80,6 +80,9 @@ export function DirectMessageThread({ peer, conversation, onBack, worldType = 's
             {conversation?.kind === 'group' && <span className={styles.senderName}>{message.senderId === currentUser?.user.id ? currentUser.profile.displayName : senderProfiles[message.senderId]?.displayName ?? (senderProfiles[message.senderId]?.username ? `@${senderProfiles[message.senderId].username}` : 'Member profile unavailable')}</span>}
             <p>{message.body}</p>
             <time dateTime={message.sentAt}>{message.sentAt.slice(11, 16)} UTC</time>
+            {message.senderId === currentUser?.user.id && message.readAt && conversation?.kind !== 'group' && (
+              <span className={styles.readReceipt} aria-label={`Seen at ${message.readAt}`}>Seen</span>
+            )}
             {message.senderId !== currentUser?.user.id && <ReportContentButton targetType="message" targetId={message.id} />}
           </article>
         ))}
