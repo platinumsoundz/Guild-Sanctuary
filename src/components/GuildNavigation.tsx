@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import {
   Home, Gamepad2, Library, Music2, Settings, Newspaper, Search, SkipBack, SkipForward, Play, Pause,
   MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard,
-  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard, BatteryCharging, Wifi, Signal, Gauge
+  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard, Battery, BatteryCharging, Wifi, Signal, Gauge
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
@@ -396,7 +396,7 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
     </button>
     <div className={styles.current} aria-live="polite">{label}</div>
     <div className={styles.deviceHud} aria-label="Device status">
-      <span title={deviceStatus.battery === null ? 'Battery information unavailable in this browser' : `Battery ${deviceStatus.battery}%`}><BatteryCharging size={14} /><b>{deviceStatus.battery === null ? '—' : `${deviceStatus.battery}%`}</b></span>
+      <span title={deviceStatus.battery === null ? 'Battery information unavailable in this browser' : `Battery ${deviceStatus.battery}%`}>{deviceStatus.charging ? <BatteryCharging size={14} /> : <Battery size={14} />}<b>{deviceStatus.battery === null ? '—' : `${deviceStatus.battery}%`}</b></span>
       <span title={deviceStatus.connection === 'wifi' ? 'Wi-Fi connection detected; signal strength is not exposed by the browser' : deviceStatus.connection === 'cellular' ? 'Mobile data connection detected; signal strength is not exposed by the browser' : 'Connection type or signal details unavailable'}>{deviceStatus.connection === 'wifi' ? <Wifi size={14}/> : <Signal size={14}/>}<b>{deviceStatus.connection === 'wifi' ? 'Wi-Fi' : deviceStatus.connection === 'cellular' ? 'Mobile' : deviceStatus.connection === 'ethernet' ? 'LAN' : 'NET'}</b></span>
       <span title={deviceStatus.rtt === null ? 'Browser network round-trip estimate unavailable' : 'Browser-estimated network round-trip time; not a server ping'}><Gauge size={14}/><b>{deviceStatus.rtt === null ? '—' : `${deviceStatus.rtt} ms`}</b></span>
       <span title={deviceStatus.fps === null ? 'Measuring frame rate' : 'Approximate Guild interface frame rate'}><span className={styles.fpsGlyph}>FPS</span><b>{deviceStatus.fps === null ? '—' : deviceStatus.fps}</b></span>
