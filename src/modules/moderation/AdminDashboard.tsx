@@ -5,7 +5,6 @@ import { ExternalLink, Search, ShieldCheck, UserCog } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { fetchPageVisibility, isPageVisible, MANAGEABLE_PAGE_VISIBILITY, PAGE_VISIBILITY_ROLES, savePageVisibility, type PageVisibilityMap, type ManagedPageKey, type PageVisibilityRole } from '@/lib/pageVisibility';
 import styles from './AdminDashboard.module.css';
-import { FeedbackInbox } from '@/components/FeedbackCenter';
 import type { WorldType } from '@/types/database';
 import { ModerationDashboard } from './ModerationDashboard';
 
@@ -186,7 +185,6 @@ export function AdminDashboard({ role, worldType = 'sanctuary' }: { role: string
       </header>
       {canManageRoles ? <RoleManagement /> : <section className={styles.notice} role="status"><strong>Member permission controls are restricted.</strong><p>Admin, Developer or Owner access is required. Moderation work is available separately in the Moderation page.</p></section>}
       {canManageVisibility && <PageVisibilityPanel />}
-      {['developer', 'owner'].includes(role.toLowerCase()) && <FeedbackInbox role={role} />}
       <footer className={styles.footer}>Role changes and moderation actions must be validated by the connected Supabase project. If access is denied, confirm that the security migration is applied and your account has been assigned its role.</footer>
     </div>
   );
