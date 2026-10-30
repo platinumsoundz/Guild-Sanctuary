@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import {
   Home, Gamepad2, Library, Music2, Settings, Newspaper, Search, SkipBack, SkipForward, Play, Pause,
   MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard,
-  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
+  Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard, BatteryCharging, Wifi, Signal, Gauge
 } from 'lucide-react';
 import type { NavigationState } from '@/context/AppContext';
 import { canAccessSanctuaryFeature, canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
@@ -64,6 +64,7 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
   const [reducedMotion, setReducedMotion] = useState(false);
   const [musicState, setMusicState] = useState<{title:string;hasTracks:boolean;isPlaying:boolean;index:number;count:number}>({title:'No music selected',hasTracks:false,isPlaying:false,index:0,count:0});
   const [musicPanelOpen, setMusicPanelOpen] = useState(false);
+  const [deviceStatus, setDeviceStatus] = useState<{battery:number|null;charging:boolean;connection:string;rtt:number|null;fps:number|null}>({battery:null,charging:false,connection:'unknown',rtt:null,fps:null});
   const quickButtonRef = useRef<HTMLButtonElement>(null);
   const quickSearchRef = useRef<HTMLInputElement>(null);
   const quickPanelRef = useRef<HTMLElement>(null);
@@ -205,6 +206,69 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
     };
   }, []);
 
+  // Best-effort browser diagnostics. Unsupported system details remain unavailable.
+  useEffect(() => {
+    let active = true;
+    let batteryManager: (EventTarget & { level:number; charging:boolean }) | null = null;
+    let connectionManager: (EventTarget & { type?:string; effectiveType?:string; rtt?:number }) | null = null;
+    const updateBattery = () => {
+      if (!active || !batteryManager) return;
+      setDeviceStatus((current) => ({ ...current, battery: Math.round(batteryManager!.level * 100), charging: batteryManager!.charging }));
+    };
+    const updateConnection = () => {
+      if (!active) return;
+      const type = connectionManager?.type;
+      const connection = type === 'wifi' ? 'wifi' : type === 'cellular' ? 'cellular' : type === 'ethernet' ? 'ethernet' : connectionManager?.effectiveType || 'unknown';
+      const rtt = typeof connectionManager?.rtt === 'number' && Number.isFinite(connectionManager.rtt) ? connectionManager.rtt : null;
+      setDeviceStatus((current) => ({ ...current, connection, rtt }));
+    };
+    const nav = navigator as Navigator & {
+      getBattery?: () => Promise<EventTarget & { level:number; charging:boolean }>;
+      connection?: EventTarget & { type?:string; effectiveType?:string; rtt?:number };
+      mozConnection?: EventTarget & { type?:string; effectiveType?:string; rtt?:number };
+      webkitConnection?: EventTarget & { type?:string; effectiveType?:string; rtt?:number };
+    };
+    connectionManager = nav.connection ?? nav.mozConnection ?? nav.webkitConnection ?? null;
+    updateConnection();
+    connectionManager?.addEventListener('change', updateConnection);
+    if (typeof nav.getBattery === 'function') {
+      void nav.getBattery().then((battery) => {
+        if (!active) return;
+        batteryManager = battery;
+        updateBattery();
+        batteryManager.addEventListener('levelchange', updateBattery);
+        batteryManager.addEventListener('chargingchange', updateBattery);
+      }).catch(() => undefined);
+    }
+    let frame = 0;
+    let frames = 0;
+    let windowStart = performance.now();
+    const measureFrameRate = (now:number) => {
+      if (!active) return;
+      if (document.visibilityState === 'visible') {
+        frames += 1;
+        const elapsed = now - windowStart;
+        if (elapsed >= 1000) {
+          setDeviceStatus((current) => ({ ...current, fps: Math.round((frames * 1000) / elapsed) }));
+          frames = 0;
+          windowStart = now;
+        }
+      } else {
+        frames = 0;
+        windowStart = now;
+      }
+      frame = window.requestAnimationFrame(measureFrameRate);
+    };
+    frame = window.requestAnimationFrame(measureFrameRate);
+    return () => {
+      active = false;
+      window.cancelAnimationFrame(frame);
+      connectionManager?.removeEventListener('change', updateConnection);
+      batteryManager?.removeEventListener('levelchange', updateBattery);
+      batteryManager?.removeEventListener('chargingchange', updateBattery);
+    };
+  }, []);
+
   useEffect(() => {
     const onQuickKeys = (event: KeyboardEvent) => {
       const target = event.target;
@@ -331,6 +395,12 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
       <span className={styles.mark}><Gamepad2 size={21} /></span><span><small>CONSOLE MODE</small><strong>THE GUILD</strong></span>
     </button>
     <div className={styles.current} aria-live="polite">{label}</div>
+    <div className={styles.deviceHud} aria-label="Device status">
+      <span title={deviceStatus.battery === null ? 'Battery information unavailable in this browser' : `Battery ${deviceStatus.battery}%`}><BatteryCharging size={14} /><b>{deviceStatus.battery === null ? '—' : `${deviceStatus.battery}%`}</b></span>
+      <span title={deviceStatus.connection === 'wifi' ? 'Wi-Fi connection detected; signal strength is not exposed by the browser' : deviceStatus.connection === 'cellular' ? 'Mobile data connection detected; signal strength is not exposed by the browser' : 'Connection type or signal details unavailable'}>{deviceStatus.connection === 'wifi' ? <Wifi size={14}/> : <Signal size={14}/>}<b>{deviceStatus.connection === 'wifi' ? 'Wi-Fi' : deviceStatus.connection === 'cellular' ? 'Mobile' : deviceStatus.connection === 'ethernet' ? 'LAN' : 'NET'}</b></span>
+      <span title={deviceStatus.rtt === null ? 'Browser network round-trip estimate unavailable' : 'Browser-estimated network round-trip time; not a server ping'}><Gauge size={14}/><b>{deviceStatus.rtt === null ? '—' : `${deviceStatus.rtt} ms`}</b></span>
+      <span title={deviceStatus.fps === null ? 'Measuring frame rate' : 'Approximate Guild interface frame rate'}><span className={styles.fpsGlyph}>FPS</span><b>{deviceStatus.fps === null ? '—' : deviceStatus.fps}</b></span>
+    </div>
     <div className={styles.notificationSlot}><NotificationBar compact worldType="guild" onNavigate={(page) => onSelect(page)} /></div>
     <button ref={quickButtonRef} type="button" className={styles.quickButton} aria-label="Open Guild quick menu" aria-expanded={quickOpen} aria-keyshortcuts="Control+K Meta+K" onClick={() => setQuickOpen((value) => !value)}><SlidersHorizontal size={18} /><span>Quick menu</span><kbd>⌘/Ctrl K</kbd></button>
     <button type="button" className={styles.exit} onClick={onExit}><LogOut size={17} /><span>Exit</span></button>
