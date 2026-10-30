@@ -194,7 +194,7 @@ export function useDirectMessages(peerUserId: string | null, selectedConversatio
       cancelled = true;
       unsubscribe();
     };
-  }, [conversationId, userId]);
+  }, [conversationId, userId, worldType]);
 
   return { messages: visibleMessages, isLoading, isSending, error, send };
 }
