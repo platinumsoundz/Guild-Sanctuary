@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { CheckCircle2, MessageSquareText, Send, ShieldCheck } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
+import type { WorldType } from '@/types/database';
 import styles from './FeedbackCenter.module.css';
 
 type FeedbackKind = 'Idea or improvement' | 'Bug report' | 'Confusing experience' | 'Accessibility issue';
@@ -24,7 +25,7 @@ const statusLabels: Record<FeedbackStatus, string> = {
   closed: 'Closed',
 };
 
-export function FeedbackInbox({ role }: { role: string }) {
+export function FeedbackInbox({ role, worldType = 'sanctuary' }: { role: string; worldType?: WorldType }) {
   const [items, setItems] = useState<FeedbackRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
@@ -33,11 +34,15 @@ export function FeedbackInbox({ role }: { role: string }) {
     setLoading(true);
     setMessage('');
     try {
-      const { data, error } = await getSupabaseBrowserClient()
+      let query = getSupabaseBrowserClient()
         .from('sanctuary_feedback')
         .select('id,feedback_type,title,details,submitter_kind,status,page_url,created_at')
         .order('created_at', { ascending: false })
         .limit(200);
+      query = worldType === 'guild'
+        ? query.ilike('page_url', '%environment=guild%')
+        : query.not('page_url', 'ilike', '%environment=guild%');
+      const { data, error } = await query;
       if (error) throw new Error(error.message);
       setItems((data ?? []) as FeedbackRow[]);
     } catch (error) {
@@ -56,7 +61,7 @@ export function FeedbackInbox({ role }: { role: string }) {
     void loadFeedback();
   // loadFeedback intentionally runs on mount and after explicit refresh.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role]);
+  }, [role, worldType]);
 
   const updateStatus = async (id: string, status: FeedbackStatus) => {
     setMessage('');
@@ -76,7 +81,7 @@ export function FeedbackInbox({ role }: { role: string }) {
       <div className={styles.inboxHeader}>
         <div>
           <p className={styles.eyebrow}>DEVELOPER & OWNER TOOLS</p>
-          <h2 id="feedback-inbox-title"><ShieldCheck size={20} aria-hidden="true" /> Beta feedback inbox</h2>
+          <h2 id="feedback-inbox-title"><ShieldCheck size={20} aria-hidden="true" /> {worldType === 'guild' ? 'Guild feedback inbox' : 'Feedback inbox'}</h2>
           <p>Submissions from signed-in members and guests, newest first.</p>
         </div>
         <button type="button" onClick={() => void loadFeedback()} disabled={loading}>{loading ? 'Loading…' : 'Refresh'}</button>
@@ -111,7 +116,7 @@ export function FeedbackInbox({ role }: { role: string }) {
   );
 }
 
-export function FeedbackPage({ role, isGuest }: { role: string; isGuest: boolean }) {
+export function FeedbackPage({ role, isGuest, worldType = 'sanctuary' }: { role: string; isGuest: boolean; worldType?: WorldType }) {
   const [feedbackType, setFeedbackType] = useState<FeedbackKind>('Idea or improvement');
   const [title, setTitle] = useState('');
   const [details, setDetails] = useState('');
@@ -134,13 +139,13 @@ export function FeedbackPage({ role, isGuest }: { role: string; isGuest: boolean
         details: details.trim(),
         submitted_by: userId,
         submitter_kind: userId ? 'member' : 'guest',
-        page_url: typeof window !== 'undefined' ? window.location.pathname : null,
+        page_url: typeof window !== 'undefined' ? `${window.location.pathname}?environment=${worldType}` : null,
       });
       if (error) throw new Error(error.message);
       setTitle('');
       setDetails('');
       setSubmitted(true);
-      setMessage('Thank you — your feedback has been sent to the Sanctuary development team.');
+      setMessage('Thank you — your feedback has been sent to the development team.');
     } catch (error) {
       setMessage(error instanceof Error
         ? `Your feedback could not be submitted: ${error.message}. Please try again later.`
@@ -154,10 +159,10 @@ export function FeedbackPage({ role, isGuest }: { role: string; isGuest: boolean
     <main className={styles.page}>
       <header className={styles.hero}>
         <span className={styles.heroIcon}><MessageSquareText size={24} aria-hidden="true" /></span>
-        <p className={styles.eyebrow}>HELP SHAPE THE SANCTUARY</p>
+        <p className={styles.eyebrow}>{worldType === 'guild' ? 'HELP SHAPE THE GUILD' : 'HELP SHAPE THE SANCTUARY'}</p>
         <h1>Feedback</h1>
         <p>Found a bug, have an idea, or something confusing? Tell us directly. Feedback is available to every account role and to guests.</p>
-        <p className={styles.privacy}>Please avoid passwords or other sensitive personal information. Your report is visible to Sanctuary Developers and the Owner.</p>
+        <p className={styles.privacy}>Please avoid passwords or other sensitive personal information. Your report is visible to Developers and the Owner.</p>
       </header>
       <section className={styles.formPanel} aria-labelledby="feedback-form-title">
         <div className={styles.formHeading}>
@@ -188,7 +193,7 @@ export function FeedbackPage({ role, isGuest }: { role: string; isGuest: boolean
         </form>
         {isGuest && <p className={styles.guestNote}>You are browsing as a guest. You can still submit feedback without creating an account.</p>}
       </section>
-      {['developer', 'owner'].includes(role.toLowerCase()) && <FeedbackInbox role={role} />}
+      {['developer', 'owner'].includes(role.toLowerCase()) && <FeedbackInbox role={role} worldType={worldType} />}
     </main>
   );
 }
