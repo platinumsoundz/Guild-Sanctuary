@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { LockKeyhole, ShoppingBag, Sparkles } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Check, LockKeyhole, Search, ShoppingBag, Sparkles } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { isSupabaseWalletConfigured } from './service';
 import type { WorldType } from '@/types/database';
@@ -36,6 +36,9 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
   const [purchasingItemId, setPurchasingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [ownedOnly, setOwnedOnly] = useState(false);
   const hasSupabaseAccount = !isGuest && isSupabaseWalletConfigured();
 
   const loadShop = useCallback(async (cancelled?: () => boolean) => {
@@ -81,6 +84,17 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
       if (!cancelled?.()) setIsLoading(false);
     }
   }, [hasSupabaseAccount, userId]);
+
+  const categories = useMemo(() => Array.from(new Set(items.map((item) => item.kind))).sort(), [items]);
+  const visibleItems = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return items.filter((item) => {
+      const matchesCategory = activeCategory === 'all' || item.kind === activeCategory;
+      const matchesOwned = !ownedOnly || ownedItems.has(item.item_id);
+      const matchesSearch = !query || `${item.name} ${item.description} ${item.kind}`.toLowerCase().includes(query);
+      return matchesCategory && matchesOwned && matchesSearch;
+    });
+  }, [activeCategory, items, ownedItems, ownedOnly, search]);
 
   useEffect(() => {
     let cancelled = false;
@@ -164,42 +178,41 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
       {!isGuest && !hasSupabaseAccount && <p className={styles.status}>Sign in with your account to view your balance and inventory.</p>}
       {error && <p className={styles.error} role="alert">{error}</p>}
       {notice && <p className={styles.status} role="status">{notice}</p>}
-      {isLoading ? (
-        <p className={styles.status} role="status">Loading shop items…</p>
-      ) : items.length === 0 ? (
-        <p className={styles.status}>No shop items are currently enabled in the catalogue. The shop will display items once the database catalogue is available.</p>
-      ) : (
-        <section className={styles.grid} aria-label="Cosmetic catalogue">
-          {items.map((item) => {
+      <section className={styles.catalogue} aria-label="Cosmetic catalogue">
+        <div className={styles.catalogueHeading}>
+          <div><p className={styles.eyebrow}>THE COLLECTION</p><h2>Find your look</h2><p>{items.length} {items.length === 1 ? 'item' : 'items'} in the catalogue</p></div>
+          <label className={styles.searchBox}><Search size={17} aria-hidden="true" /><span className={styles.visuallyHidden}>Search cosmetics</span><input value={search} onChange={(event) => setSearch(event.currentTarget.value)} placeholder="Search the collection…" /></label>
+        </div>
+        {!isLoading && items.length > 0 && <div className={styles.filters}>
+          <div className={styles.categoryFilters} aria-label="Filter by category">
+            <button type="button" className={activeCategory === 'all' ? styles.activeFilter : styles.filterButton} aria-pressed={activeCategory === 'all'} onClick={() => setActiveCategory('all')}>All items</button>
+            {categories.map((category) => <button key={category} type="button" className={activeCategory === category ? styles.activeFilter : styles.filterButton} aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)}>{category.replaceAll('_', ' ')}</button>)}
+          </div>
+          <label className={styles.ownedFilter}><input type="checkbox" checked={ownedOnly} onChange={(event) => setOwnedOnly(event.currentTarget.checked)} /><span>Show owned only</span></label>
+        </div>}
+        {isLoading ? <p className={styles.status} role="status">Loading shop items…</p> : items.length === 0 ? (
+          <div className={styles.emptyState}><ShoppingBag size={28} aria-hidden="true" /><h3>Collection is being prepared</h3><p>No shop items are currently enabled in the catalogue. New cosmetics will appear here when the server catalogue is ready.</p></div>
+        ) : visibleItems.length === 0 ? (
+          <div className={styles.emptyState}><Search size={26} aria-hidden="true" /><h3>No matching cosmetics</h3><p>Try another search or clear your filters to see the full collection.</p><button type="button" className={styles.resetButton} onClick={() => { setSearch(''); setActiveCategory('all'); setOwnedOnly(false); }}>Clear filters</button></div>
+        ) : <>
+          <p className={styles.resultCount} aria-live="polite">Showing {visibleItems.length} of {items.length} items</p>
+          <div className={styles.grid}>{visibleItems.map((item) => {
             const owned = ownedItems.has(item.item_id);
             const purchasing = purchasingItemId === item.item_id;
-            return (
-              <article className={styles.card} key={item.item_id}>
-                <div className={styles.art} aria-hidden="true">
-                  {item.asset_text ? <span>{item.asset_text}</span> : <Sparkles size={34} strokeWidth={1.2} />}
-                </div>
-                <div className={styles.cardBody}>
-                  <p className={styles.kind}>{item.kind.replaceAll('_', ' ')}</p>
-                  <h2>{item.name}</h2>
-                  <p className={styles.description}>{item.description}</p>
-                  <div className={styles.cardFooter}>
-                    <strong>{item.price_tokens.toLocaleString('en-GB')} tokens</strong>
-                    <button
-                      type="button"
-                      disabled={!SPENDING_ENABLED || !hasSupabaseAccount || owned || purchasingItemId !== null}
-                      onClick={() => void purchaseItem(item)}
-                      className={styles.buyButton}
-                    >
-                      {owned ? 'Owned' : !SPENDING_ENABLED ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}
-                    </button>
-                  </div>
-                  {owned && <p className={styles.ownedNote}>Already in your account collection.</p>}
-                </div>
-              </article>
-            );
-          })}
-        </section>
-      )}
+            const shortfall = balance === null ? 0 : Math.max(0, item.price_tokens - balance);
+            return <article className={styles.card} key={item.item_id}>
+              <div className={styles.art} aria-hidden="true">{item.asset_text ? <span>{item.asset_text}</span> : <Sparkles size={38} strokeWidth={1.2} />}<span className={styles.artKind}>{item.kind.replaceAll('_', ' ')}</span></div>
+              <div className={styles.cardBody}>
+                <div className={styles.itemTitleRow}><div><p className={styles.kind}>{item.kind.replaceAll('_', ' ')}</p><h3>{item.name}</h3></div>{owned && <span className={styles.ownedBadge}><Check size={13} /> Owned</span>}</div>
+                <p className={styles.description}>{item.description}</p>
+                <div className={styles.cardFooter}><strong>{item.price_tokens.toLocaleString('en-GB')} <span>tokens</span></strong><button type="button" disabled={!SPENDING_ENABLED || !hasSupabaseAccount || owned || purchasingItemId !== null} onClick={() => void purchaseItem(item)} className={styles.buyButton}>{owned ? 'In collection' : !SPENDING_ENABLED ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}</button></div>
+                {!owned && balance !== null && shortfall > 0 && <p className={styles.shortfall}>You need {shortfall.toLocaleString('en-GB')} more tokens</p>}
+                {owned && <p className={styles.ownedNote}>This cosmetic is permanently linked to your account.</p>}
+              </div>
+            </article>;
+          })}</div>
+        </>}
+      </section>
 
       <p className={styles.footerNote}><ShoppingBag size={15} aria-hidden="true" /> Prices and eligibility come from the server-owned catalogue. Your balance changes only after the database confirms a successful redemption.</p>
     </main>
