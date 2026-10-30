@@ -444,8 +444,7 @@ $$;
 revoke all on function public.spend_tokens(text,uuid) from public,anon,authenticated,service_role;
 revoke all on function public.equip_profile_cosmetic(text) from public,anon,authenticated,service_role;
 revoke all on function public.clear_profile_cosmetic(text) from public,anon,authenticated,service_role;
-grant execute on function public.equip_profile_cosmetic(text) to authenticated;
-grant execute on function public.clear_profile_cosmetic(text) to authenticated;
+-- Keep equip/clear RPCs closed until the separate staging entitlement and RLS test matrix passes.
 
 -- Public cosmetic projection is separate from the private profile row. It exposes
 -- only already-public profiles and cosmetic identifiers, never wallet or ledger data.
@@ -528,7 +527,7 @@ create or replace function public.place_token_spending_hold(
 returns void language plpgsql security definer set search_path=''
 as $
 begin
-  if auth.role() <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
+  if coalesce(auth.jwt()->>'role','') <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
   if requested_user_id is null or coalesce(trim(requested_case_reference),'')='' or
     requested_reason_code not in ('payment_dispute','chargeback','fraud_review','manual_review') or
     coalesce(trim(requested_actor),'')='' then
@@ -572,7 +571,7 @@ create or replace function private.guard_profile_cosmetic_writes()
 returns trigger language plpgsql security definer set search_path=''
 as $
 begin
-  if auth.role() in ('authenticated','anon')
+  if coalesce(auth.jwt()->>'role','') in ('authenticated','anon')
     and pg_catalog.current_setting('app.cosmetic_write_authorized',true) is distinct from 'true'
     and (
     new.equipped_frame is distinct from old.equipped_frame or
