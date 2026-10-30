@@ -81,7 +81,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
     return () => window.removeEventListener('message', onGameMessage);
   }, [url]);
 
-  useEffect(() => {
+  const sendGameCommand = useCallback((command: 'pause' | 'resume') => {
     if (!gameBridgeReady) return;
     let gameOrigin = '';
     try { gameOrigin = new URL(url).origin; } catch { return; }
@@ -90,10 +90,22 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
     gameFrameRef.current?.contentWindow?.postMessage({
       channel: 'guild.5-sleeves',
       version: 1,
-      command: menuOpen ? 'pause' : 'resume',
+      command,
       requestId
     }, gameOrigin);
-  }, [gameBridgeReady, menuOpen, url]);
+  }, [gameBridgeReady, url]);
+
+  useEffect(() => {
+    sendGameCommand(menuOpen ? 'pause' : 'resume');
+  }, [menuOpen, sendGameCommand]);
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      sendGameCommand(document.visibilityState === 'hidden' || menuOpen ? 'pause' : 'resume');
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [menuOpen, sendGameCommand]);
 
   const menuTargets = useCallback(() => {
     if (!menuRef.current) return [] as HTMLElement[];
