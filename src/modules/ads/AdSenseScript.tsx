@@ -4,11 +4,17 @@ import { ADSENSE_CLIENT_ID, isValidAdsenseClientId } from './config';
 const publisherId = ADSENSE_CLIENT_ID;
 const validPublisherId = isValidAdsenseClientId(publisherId);
 const adsEnabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED === 'true';
-const isProductionDeployment = process.env.VERCEL_ENV === 'production';
+const isExplicitProductionDeployment =
+  process.env.NEXT_PUBLIC_ADSENSE_ENVIRONMENT === 'production' &&
+  process.env.NODE_ENV === 'production';
 
-/** Loads Google AdSense only when explicitly enabled for a Vercel Production deployment. */
+/**
+ * Loads AdSense only when explicitly enabled for a production build.
+ * The explicit environment flag works on Vercel and Cloudflare Pages/Workers.
+ * Preview environments must leave NEXT_PUBLIC_ADSENSE_ENVIRONMENT unset.
+ */
 export function AdSenseScript() {
-  if (!adsEnabled || !isProductionDeployment || !validPublisherId) return null;
+  if (!adsEnabled || !isExplicitProductionDeployment || !validPublisherId) return null;
 
   return (
     <Script
