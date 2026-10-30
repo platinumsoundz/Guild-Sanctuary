@@ -32,11 +32,14 @@ assert.match(app, /<ModerationDashboard role=\{currentUser\.profile\.role\} worl
 
 assert.match(posts, /\.eq\('world_type', worldType\)/, 'Post reads and writes must scope to the requested world');
 assert.match(posts, /world_type: input\.worldType \?\? 'sanctuary'/, 'New posts must be tagged with their world');
+assert.match(posts, /const localPost = comment \? posts\.find\(\(item\) => item\.id === comment\.targetId\) : undefined;[\s\S]*?localPost\.worldType \?\? 'sanctuary'\) !== worldType/, 'Local post-comment edits must remain within their community');
 assert.match(feedHook, /fetchFeed\(worldType\)/, 'Feed hook must fetch the requested world');
 assert.match(feedUi, /THE GUILD · COMMUNITY/, 'Guild community must have its own presentation');
 assert.match(shorts, /\.eq\('world_type', worldType\)/, 'Shorts reads and mutations must scope to the requested world');
+assert.match(shorts, /const localShort = findShort\(shortId\);[\s\S]*?localShort\.worldType \?\? 'sanctuary'\) !== worldType/, 'Local Shorts fallback must not cross community boundaries');
 assert.match(shortsUi, /fetchShortVideos\(worldType\)/, 'Shorts UI must load the requested world');
 assert.match(events, /\.eq\('world_type', worldType\)/, 'Events reads and mutations must scope to the requested world');
+assert.match(events, /const localEvent = findEvent\(eventId\);[\s\S]*?localEvent\.worldType \?\? 'sanctuary'\) !== worldType/, 'Local events fallback must not cross community boundaries');
 assert.match(messages, /conversation\.worldType \?\? 'sanctuary'\) !== worldType/, 'Local messages must not cross world boundaries');
 assert.match(messageRepo, /create_scoped_conversation/, 'Persistent messages must create conversations in the requested world');
 assert.match(messageRepo, /\.eq\('world_type', worldType\)/, 'Persistent conversations must be fetched only from the active world');
