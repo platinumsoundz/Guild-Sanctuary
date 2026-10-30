@@ -247,7 +247,7 @@ export function NotificationBar({ fullPage = false, compact = false, worldType =
             ref={bellButtonRef}
             type="button"
             className={styles.bellButton}
-            aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+            aria-label={unreadCount ? `${worldType === 'guild' ? 'Guild notifications' : 'Notifications'}, ${unreadCount} unread` : worldType === 'guild' ? 'Guild notifications' : 'Notifications'}
             aria-expanded={isOpen}
             aria-controls="sanctuary-notification-panel"
             onClick={() => {
@@ -256,7 +256,7 @@ export function NotificationBar({ fullPage = false, compact = false, worldType =
             }}
           >
             <Bell size={17} aria-hidden="true" />
-            <span>Notifications</span>
+            <span>{worldType === 'guild' ? 'Guild notifications' : 'Notifications'}</span>
             {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 99 ? '99+' : unreadCount}</span>}
           </button>}
         </div>
@@ -266,7 +266,7 @@ export function NotificationBar({ fullPage = false, compact = false, worldType =
         <section ref={panelRef} id="sanctuary-notification-panel" className={styles.panel} aria-label="Recent notifications" role="region">
           <header className={styles.panelHeader}>
             <div>
-              <h2>Notifications</h2>
+              <h2>{worldType === 'guild' ? 'Guild notifications' : 'Notifications'}</h2>
               <p>Likes and comments on your community posts.</p>
             </div>
             <div className={styles.panelActions}>
