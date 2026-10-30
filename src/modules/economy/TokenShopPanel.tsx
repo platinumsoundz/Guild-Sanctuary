@@ -13,6 +13,7 @@ type ShopItem = {
   description: string;
   price_tokens: number;
   kind: string;
+  enabled: boolean;
   asset_url: string | null;
   asset_text: string | null;
   effect_key: string | null;
@@ -63,8 +64,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
 
       const [catalogResult, entitlementsResult, walletResult, profileResult] = await Promise.all([
         client.from('token_spend_catalog')
-          .select('item_id,name,description,price_tokens,kind,asset_url,asset_text,effect_key,sort_order')
-          .eq('enabled', true)
+          .select('item_id,name,description,price_tokens,kind,enabled,asset_url,asset_text,effect_key,sort_order')
           .order('sort_order', { ascending: true }),
         client.from('token_entitlements').select('item_id').eq('user_id', userId),
         client.from('token_wallets').select('balance_tokens').eq('user_id', userId).maybeSingle(),
@@ -99,10 +99,11 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
     }
   }, [hasSupabaseAccount, userId]);
 
-  const categories = useMemo(() => Array.from(new Set(items.map((item) => item.kind))).sort(), [items]);
+  const categories = useMemo(() => Array.from(new Set(items.filter((item) => item.enabled).map((item) => item.kind))).sort(), [items]);
   const visibleItems = useMemo(() => {
     const query = search.trim().toLowerCase();
     return items.filter((item) => {
+      if (!item.enabled) return false;
       const matchesCategory = activeCategory === 'all' || item.kind === activeCategory;
       const matchesOwned = !ownedOnly || ownedItems.has(item.item_id);
       const matchesSearch = !query || `${item.name} ${item.description} ${item.kind}`.toLowerCase().includes(query);
@@ -217,22 +218,22 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
 
       <section className={styles.catalogue} aria-label="Cosmetic catalogue">
         <div className={styles.catalogueHeading}>
-          <div><p className={styles.eyebrow}>THE COLLECTION</p><h2>Find your look</h2><p>{items.length} {items.length === 1 ? 'item' : 'items'} in the catalogue</p></div>
+          <div><p className={styles.eyebrow}>THE COLLECTION</p><h2>Find your look</h2><p>{items.filter((item) => item.enabled).length} {items.filter((item) => item.enabled).length === 1 ? 'item' : 'items'} in the catalogue</p></div>
           <label className={styles.searchBox}><Search size={17} aria-hidden="true" /><span className={styles.visuallyHidden}>Search cosmetics</span><input value={search} onChange={(event) => setSearch(event.currentTarget.value)} placeholder="Search the collection…" /></label>
         </div>
-        {!isLoading && items.length > 0 && <div className={styles.filters}>
+        {!isLoading && items.some((item) => item.enabled) && <div className={styles.filters}>
           <div className={styles.categoryFilters} aria-label="Filter by category">
             <button type="button" className={activeCategory === 'all' ? styles.activeFilter : styles.filterButton} aria-pressed={activeCategory === 'all'} onClick={() => setActiveCategory('all')}>All items</button>
             {categories.map((category) => <button key={category} type="button" className={activeCategory === category ? styles.activeFilter : styles.filterButton} aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)}>{category.replaceAll('_', ' ')}</button>)}
           </div>
           <label className={styles.ownedFilter}><input type="checkbox" checked={ownedOnly} onChange={(event) => setOwnedOnly(event.currentTarget.checked)} /><span>Show owned only</span></label>
         </div>}
-        {isLoading ? <p className={styles.status} role="status">Loading shop items…</p> : items.length === 0 ? (
+        {isLoading ? <p className={styles.status} role="status">Loading shop items…</p> : !items.some((item) => item.enabled) ? (
           <div className={styles.emptyState}><ShoppingBag size={28} aria-hidden="true" /><h3>Collection is being prepared</h3><p>No shop items are currently enabled in the catalogue. New cosmetics will appear here when the server catalogue is ready.</p></div>
         ) : visibleItems.length === 0 ? (
           <div className={styles.emptyState}><Search size={26} aria-hidden="true" /><h3>No matching cosmetics</h3><p>Try another search or clear your filters to see the full collection.</p><button type="button" className={styles.resetButton} onClick={() => { setSearch(''); setActiveCategory('all'); setOwnedOnly(false); }}>Clear filters</button></div>
         ) : <>
-          <p className={styles.resultCount} aria-live="polite">Showing {visibleItems.length} of {items.length} items</p>
+          <p className={styles.resultCount} aria-live="polite">Showing {visibleItems.length} of {items.filter((item) => item.enabled).length} items</p>
           <div className={styles.grid}>{visibleItems.map((item) => {
             const owned = ownedItems.has(item.item_id);
             const purchasing = purchasingItemId === item.item_id;
