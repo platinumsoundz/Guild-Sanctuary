@@ -27,7 +27,7 @@ assert.equal((css.match(/:root\[data-theme="dark"\]\s*\{/g) || []).length, 1, 'd
 assert.ok(settings.includes('Cosmic light · daylight'), 'appearance settings must describe the mirrored cosmic light theme');
 assert.ok(layout.includes("localStorage.getItem('sanctuary-theme')"), 'theme bootstrap must read device preference');
 assert.ok(layout.includes("themeColor: '#080b1b'"), 'browser chrome must match the cosmic default palette');
-assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'theme bootstrap must apply selected palette before render');
+assert.ok(layout.includes('document.documentElement.dataset.theme = definition.id'), 'theme bootstrap must apply selected palette before render');
 assert.ok(layout.includes('THEME_PREFERENCES') && layout.includes('THEME_CATALOGUE'), 'pre-render bootstrap must derive supported palettes from the central catalogue');
 assert.ok(layout.includes("? saved : 'dark'"), 'fresh visits must default to the cosmic dark palette');
 assert.ok(layout.includes('definition.tailwindDark'), 'pre-render bootstrap must derive Tailwind dark variants from theme metadata');
@@ -37,7 +37,7 @@ assert.ok(appContext.includes('fetchAccountSettings(currentUser.user.id)'), 'sig
 assert.ok(appContext.includes('document.documentElement.dataset.layout = preferences.layout'), 'saved account layout must apply across the app at session restore');
 assert.ok(css.includes(':root[data-layout="compact"] [data-world="sanctuary"]'), 'compact layout must change app-wide visual density');
 assert.ok(appContext.includes("let preference = 'dark'"), 'unsigned-in sessions must default to the cosmic dark palette');
-assert.ok(appContext.includes('document.documentElement.dataset.theme = theme'), 'account theme must apply after session restore');
+assert.ok(appContext.includes('applyTheme(resolveTheme(preference'), 'account theme must apply after session restore');
 assert.ok(layout.includes('__html: themeBootstrap'), 'theme bootstrap must be included in document head');
 assert.ok(!layout.includes('className="dark"'), 'fixed dark class must not override selected theme');
 assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection must persist through account settings');
