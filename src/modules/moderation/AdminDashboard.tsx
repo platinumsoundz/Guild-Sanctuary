@@ -170,7 +170,6 @@ export function AdminDashboard({ role, worldType = 'sanctuary' }: { role: string
           <p>These controls are scoped to Guild community reports and feedback. Account-wide role management and global page visibility are not exposed from this environment.</p>
         </header>
         <ModerationDashboard role={role} worldType="guild" />
-        {['developer', 'owner'].includes(role.toLowerCase()) && <FeedbackInbox role={role} worldType="guild" />}
         <footer className={styles.footer}>Guild administration must only affect Guild-world content. Shared sign-in does not grant this page authority over reports or settings in another environment.</footer>
       </div>
     );
