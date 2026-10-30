@@ -30,7 +30,7 @@ import { GuildRoadmap } from '@/components/GuildRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { GuildHomeDashboard } from '@/components/GuildHomeDashboard';
 import { NotificationBar } from '@/components/NotificationBar';
-import { FeedbackPage } from '@/components/FeedbackCenter';
+import { FeedbackInboxPage, FeedbackPage } from '@/components/FeedbackCenter';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { ModerationDashboard } from '@/modules/moderation/ModerationDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
@@ -254,7 +254,9 @@ export function AppWorkspace() {
       </p>
     </main>
   ) : contentNavigation === 'feedback' ? (
-    <FeedbackPage role={isGuest ? 'guest' : currentRole ?? 'user'} isGuest={isGuest} worldType={worldType} />
+    <FeedbackPage isGuest={isGuest} worldType={worldType} />
+  ) : contentNavigation === 'feedback-inbox' ? (
+    <FeedbackInboxPage role={currentRole ?? 'user'} worldType={worldType} />
   ) : contentNavigation === 'notifications' ? (
     <main className={styles.supportPage}>
       <NotificationBar fullPage worldType={worldType} onNavigate={openNavigation} />
