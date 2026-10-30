@@ -37,6 +37,7 @@ type PublicProfileRow = {
   equipped_border?: string | null;
   equipped_profile_theme?: string | null;
   equipped_palette?: string | null;
+  custom_accent_color?: string | null;
 };
 
 function toPublicProfile(row: PublicProfileRow): PublicProfile {
@@ -63,6 +64,7 @@ function toPublicProfile(row: PublicProfileRow): PublicProfile {
     equippedBorder: row.equipped_border ?? null,
     equippedProfileTheme: row.equipped_profile_theme ?? null,
     equippedPalette: row.equipped_palette ?? null,
+    customAccentColor: row.custom_accent_color ?? null,
     role: 'member',
   };
 }
