@@ -104,7 +104,7 @@ export function SettingsHub({
     const applyTheme = () => {
       const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
       document.documentElement.dataset.theme = theme;
-      document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
+      document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean' || theme === 'midnight' || theme === 'forest' || theme === 'rose' || theme === 'ember');
     };
     applyTheme();
     try {
@@ -300,7 +300,7 @@ export function SettingsHub({
               <span>Colour theme</span>
               <select id="sanctuary-theme" value={settings.preferences.theme} onChange={(event) => {
                 const theme = event.currentTarget.value;
-                if (theme !== 'system' && theme !== 'light' && theme !== 'dark' && theme !== 'dusk' && theme !== 'stone' && theme !== 'ocean') return;
+                if (theme !== 'system' && theme !== 'light' && theme !== 'dark' && theme !== 'dusk' && theme !== 'stone' && theme !== 'ocean' && theme !== 'midnight' && theme !== 'forest' && theme !== 'rose' && theme !== 'lavender' && theme !== 'ember' && theme !== 'mint') return;
                 void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));
               }}>
                 <option value="system">Use device setting</option>
@@ -309,9 +309,15 @@ export function SettingsHub({
                 <option value="dusk">Dusk · low-glare warm</option>
                 <option value="stone">Stone · grey</option>
                 <option value="ocean">Ocean · blue</option>
+                <option value="midnight">Midnight · deep navy</option>
+                <option value="forest">Forest · evergreen</option>
+                <option value="rose">Rose · soft berry</option>
+                <option value="lavender">Lavender · soft purple</option>
+                <option value="ember">Ember · warm charcoal</option>
+                <option value="mint">Mint · fresh green</option>
               </select>
             </label>
-            <p className={styles.hint}>Your theme is applied across the application pages and shared navigation, and saved to your account. Profile accent colours remain separate. Token-unlockable themes can be added to this catalogue later; purchases are not enabled here.</p>
+            <p className={styles.hint}>Choose from 11 coordinated colour palettes, including richer dark options and softer light options. Your choice is saved to your account and applied across shared navigation and application pages. Profile accent colours remain separate.</p>
           </section>
 
           <section className={styles.panel} aria-labelledby="layout-title">
