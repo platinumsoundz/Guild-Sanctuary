@@ -153,6 +153,19 @@ export async function sendPersistentMessage(conversationId: string, body: string
   return toMessage(data);
 }
 
+export async function markPersistentDirectMessagesRead(conversationId: string, worldType: WorldType = 'sanctuary'): Promise<string | null> {
+  const client = getSupabaseBrowserClient();
+  const { data: authData, error: authError } = await client.auth.getUser();
+  if (authError) throw new Error(`Authentication could not be verified: ${authError.message}`);
+  if (!authData.user) throw new Error('Sign in before marking messages as read.');
+  const { data, error } = await client.rpc('mark_direct_messages_read', {
+    requested_conversation_id: conversationId,
+    requested_world: worldType,
+  });
+  if (error) throw new Error(`Read receipt could not be saved: ${error.message}`);
+  return data;
+}
+
 export function subscribeToPersistentMessages(
   conversationId: string,
   onMessage: (message: Message) => void,
@@ -163,6 +176,14 @@ export function subscribeToPersistentMessages(
     .channel(`conversation:${conversationId}`)
     .on('postgres_changes', {
       event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `conversation_id=eq.${conversationId}`,
+    }, (payload) => {
+      onMessage(toMessage(payload.new as MessageRow));
+    })
+    .on('postgres_changes', {
+      event: 'UPDATE',
       schema: 'public',
       table: 'messages',
       filter: `conversation_id=eq.${conversationId}`,
