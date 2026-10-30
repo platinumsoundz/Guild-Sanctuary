@@ -263,7 +263,7 @@ export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType
         <div>
           <p className={styles.sectionEyebrow}>{worldType === 'guild' ? 'THE GUILD · COMMUNITY' : 'SANCTUARY · COMMUNITY'}</p>
           <h2 id="feed-heading">{worldType === 'guild' ? 'Guild community' : 'Everyone’s posts'}</h2>
-          {worldType === 'guild' && <p className={styles.feedStatus}>A separate community space for Guild posts, conversations and reactions. Sanctuary activity stays in Sanctuary.</p>
+          {worldType === 'guild' && <p className={styles.feedStatus}>A separate community space for Guild posts, conversations and reactions. Sanctuary activity stays in Sanctuary.</p>}
         </div>
         <span className={styles.sortLabel}>LATEST</span>
       </div>
@@ -273,10 +273,10 @@ export function FeedContent({ worldType = 'sanctuary' }: { worldType?: WorldType
         <div className={styles.emptyState}>
           <span className={styles.emptyMark} aria-hidden="true">S</span>
           <div>
-            <h3>{PLACEHOLDER_HEADING}</h3>
-            <p>{PLACEHOLDER_MESSAGE}</p>
+            <h3>{worldType === 'guild' ? 'Start the Guild conversation' : PLACEHOLDER_HEADING}</h3>
+            <p>{worldType === 'guild' ? 'Be the first to share something with the Guild community.' : PLACEHOLDER_MESSAGE}</p>
           </div>
-          <span className={styles.sanctuaryLabel}>SANCTUARY</span>
+          <span className={styles.sanctuaryLabel}>{worldType === 'guild' ? 'THE GUILD' : 'SANCTUARY'}</span>
         </div>
       )}
       {!isLoading && posts.length > 0 && (
