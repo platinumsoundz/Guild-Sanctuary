@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { MOCK_TWO_FACTOR_CODE, type SignUpInput } from '../sessionStore';
+import { CURRENT_TERMS_VERSION } from '../terms';
 import styles from './AuthenticationForm.module.css';
 
 export type AuthMode = 'login' | 'signup';
@@ -40,6 +41,7 @@ export function AuthenticationForm({
   const [verificationCode, setVerificationCode] = useState('');
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
   const [notice, setNotice] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,12 +74,14 @@ export function AuthenticationForm({
       if (step !== 'credentials') return;
 
       if (mode === 'signup') {
+        if (!acceptedTerms) throw new Error('Please agree to the Terms and Conditions before creating your account.');
         if (password.length < 10) throw new Error('Use a password with at least 10 characters.');
         if (password !== confirmPassword) throw new Error('The passwords do not match.');
         const needsConfirmation = await onSignup({
           email: email.trim(),
           username: username.trim(),
           displayName: displayName.trim(),
+          termsVersion: CURRENT_TERMS_VERSION,
         }, password);
         if (needsConfirmation) {
           setStep('signup-confirm');
@@ -114,7 +118,7 @@ export function AuthenticationForm({
         <div className={styles.modeTabs} role="tablist" aria-label="Authentication options">
           <button id="sign-in-tab" className={styles.modeTab} type="button" role="tab"
             aria-selected={mode === 'login'} aria-controls="authentication-panel"
-            onClick={() => { setError(null); setNotice(null); setMode('login'); }}>
+            onClick={() => { setError(null); setNotice(null); setAcceptedTerms(false); setMode('login'); }}>
             Sign in
           </button>
           <button id="register-tab" className={styles.modeTab} type="button" role="tab"
@@ -154,6 +158,11 @@ export function AuthenticationForm({
                 minLength={10} maxLength={128} value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.currentTarget.value)} required />
             </label>}
+            {mode === 'signup' && <label className={styles.termsAgreement}>
+              <input type="checkbox" name="acceptTerms" checked={acceptedTerms}
+                onChange={(event) => setAcceptedTerms(event.currentTarget.checked)} required />
+              <span>I have read and agree to the <a href="/terms" target="_blank" rel="noopener noreferrer">Terms and Conditions</a> (version {CURRENT_TERMS_VERSION}).</span>
+            </label>}
             {mode === 'login' && <button className={styles.backButton} type="button" onClick={() => {
               setStep('reset-email'); setPassword(''); setError(null); setNotice(null);
             }}>Forgot password?</button>}
@@ -180,7 +189,7 @@ export function AuthenticationForm({
           </>}
           {error && <p className={styles.error} role="alert">{error}</p>}
           {notice && <p className={styles.challengeCopy} role="status">{notice}</p>}
-          {step !== 'signup-confirm' && <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
+          {step !== 'signup-confirm' && <button className={styles.submitButton} type="submit" disabled={isSubmitting || (step === 'credentials' && mode === 'signup' && !acceptedTerms)}>
             {isSubmitting ? 'Please wait…' : step === 'reset-email' ? 'Send reset link' : step === 'email-code' ? 'Verify email' : step === 'two-factor-code' ? 'Verify and continue' : mode === 'signup' ? 'Create account' : 'Sign in'}
           </button>}
           {step === 'signup-confirm' && <button className={styles.submitButton} type="button" onClick={() => { setStep('credentials'); setMode('login'); setPassword(''); setError(null); }}>Return to sign in</button>}

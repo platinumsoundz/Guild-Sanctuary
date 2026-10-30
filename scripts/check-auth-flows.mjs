@@ -7,8 +7,13 @@ const context = read('../src/context/AppContext.tsx');
 const form = read('../src/modules/auth/components/AuthenticationForm.tsx');
 const callback = read('../src/app/auth/callback/route.ts');
 const resetPage = read('../src/app/reset-password/page.tsx');
+const terms = read('../src/modules/auth/terms.ts');
+const termsMigration = read('../supabase/migrations/20261030040000_mandatory_terms_acceptance.sql');
 
 const checks = [
+  ['signup requires explicit agreement and links to terms', form.includes('type="checkbox"') && form.includes('required') && form.includes('href="/terms"')],
+  ['signup records current terms version in Auth metadata', auth.includes('terms_accepted: true') && auth.includes('terms_version: input.termsVersion') && terms.includes('CURRENT_TERMS_VERSION')],
+  ['database blocks unaccepted signup and records acceptance', termsMigration.includes('before insert on auth.users') && termsMigration.includes('after insert on auth.users') && termsMigration.includes('terms_acceptances')],
   ['signup uses Supabase password credentials', /auth\.signUp\(\{[\s\S]*?password,[\s\S]*?emailRedirectTo/.test(auth)],
   ['login verifies email and password with Supabase', /auth\.signInWithPassword\(\{[\s\S]*?email:[\s\S]*?password,/.test(auth)],
   ['password reset sends a recovery email to the app callback', /auth\.resetPasswordForEmail\([\s\S]*?redirectTo:[\s\S]*?\/auth\/callback\?next=\/reset-password/.test(auth)],

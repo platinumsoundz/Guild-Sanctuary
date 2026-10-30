@@ -131,7 +131,7 @@ export async function signInWithSupabasePassword(email: string, password: string
 }
 
 export async function signUpWithSupabasePassword(
-  input: { email: string; username: string; displayName: string },
+  input: { email: string; username: string; displayName: string; termsVersion: string },
   password: string,
 ): Promise<{ needsEmailConfirmation: boolean }> {
   if (password.length < 10) throw new Error('Use a password with at least 10 characters.');
@@ -141,7 +141,7 @@ export async function signUpWithSupabasePassword(
     password,
     options: {
       emailRedirectTo: `${window.location.origin}/auth/callback`,
-      data: { username: input.username.trim(), display_name: input.displayName.trim() },
+      data: { username: input.username.trim(), display_name: input.displayName.trim(), terms_accepted: true, terms_version: input.termsVersion },
     },
   });
   if (error) throw new Error(`Account creation failed: ${error.message}`);

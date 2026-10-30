@@ -27,6 +27,7 @@ export interface SignUpInput {
   email: string;
   username: string;
   displayName: string;
+  termsVersion: string;
 }
 
 export const MOCK_EMAIL_CODE = '000000';
