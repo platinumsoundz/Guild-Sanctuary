@@ -1,5 +1,12 @@
 # Events
 
-Owns community-wide event creation, editing, deletion, RSVPs, likes, and comments. `useEvents` and `MeetupCalendarPlaceholder` operate on one Sanctuary event list; there is no world-scoped event data.
+Owns event discovery, creation/editing/deletion, RSVPs, event reactions, and comments. The current experience is rendered by `MeetupCalendarPlaceholder`; the component name is legacy and should be renamed as part of the Events UX rebuild.
 
-The current repository is in-memory and demo-only. Capacity rules, durable persistence, organizer authorization, notifications, and production abuse controls remain future work.
+The service supports Sanctuary/Guild world scoping when reading and mutating event records. Keep the active `world_type` explicit through every query, mutation, RSVP, engagement action, notification, and moderation flow.
+
+Current known experience: event list, map-pin explorer, nearby coordinate matching, create/edit form, RSVP actions, comments/reactions, and reporting. Current gaps to close in the overhaul include venue/address and online-event support, categories/search/calendar views, full event detail, privacy/visibility controls, capacity/waitlist, organiser management, reminders, and production-grade validation/notifications.
+
+See `docs/EVENTS_SHORTS_OVERHAUL.md` for the acceptance contract and delivery gates.
+
+
+The current UI batch adds list-first discovery, title/description search, a List/Map switch, and map-focus actions from event cards. The existing world-scoped event service and RSVP/engagement flows remain in place. Extended event metadata (venue, online access, category, capacity and waitlist) is still pending a schema audit.
