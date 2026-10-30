@@ -33,11 +33,20 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
 
   useEffect(() => {
     let cancelled = false;
-    void getSupabaseBrowserClient().from('token_entitlements').select('item_id')
-      .eq('user_id', profile.userId).eq('item_id', 'unlock_custom_accent_picker').maybeSingle()
-      .then(({ data, error: entitlementError }) => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setHasCustomAccentPicker(false);
+      return () => { cancelled = true; };
+    }
+    void (async () => {
+      try {
+        const { data, error: entitlementError } = await getSupabaseBrowserClient()
+          .from('token_entitlements').select('item_id')
+          .eq('user_id', profile.userId).eq('item_id', 'unlock_custom_accent_picker').maybeSingle();
         if (!cancelled) setHasCustomAccentPicker(!entitlementError && Boolean(data));
-      });
+      } catch {
+        if (!cancelled) setHasCustomAccentPicker(false);
+      }
+    })();
     return () => { cancelled = true; };
   }, [profile.userId]);
 
