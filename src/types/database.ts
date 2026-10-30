@@ -93,6 +93,7 @@ export interface Profile {
   equippedBorder?: string | null;
   equippedProfileTheme?: string | null;
   equippedPalette?: string | null;
+  customAccentColor?: string | null;
   role: string;
 }
 
