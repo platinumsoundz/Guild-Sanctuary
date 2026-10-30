@@ -108,3 +108,7 @@
   .quickScrim { z-index: 2147483646; }
   .quickPanel { z-index: 2147483647; }
 }
+
+
+/* Shared live inbox counters, consistent with the Sanctuary navigation. */
+.navigationBadge { display: inline-flex; min-width: 19px; height: 19px; align-items: center; justify-content: center; margin-left: auto; padding: 0 5px; border: 1px solid color-mix(in srgb, var(--accent) 48%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--accent) 18%, var(--surface-raised)); color: var(--ink); font: 750 10px/1 Arial, sans-serif; font-variant-numeric: tabular-nums; }
