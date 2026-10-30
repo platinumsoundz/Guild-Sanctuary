@@ -73,10 +73,12 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
     setCommentEngagement({});
     fetchShortVideos(worldType).then(async (items) => {
       if (cancelled) return;
-      const stats = await Promise.all(items.map(async (item) => [
-        item.id,
-        await getShortEngagement(item.id, viewerId, worldType),
-      ] as const));
+      const stats = viewerId
+        ? await Promise.all(items.map(async (item) => [
+          item.id,
+          await getShortEngagement(item.id, viewerId, worldType),
+        ] as const))
+        : items.map((item) => [item.id, { liked: false, likesCount: 0, commentsCount: 0 }] as const);
       if (cancelled) return;
       setVideos(items);
       setEngagement(Object.fromEntries(stats));
@@ -124,7 +126,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
       observer.disconnect();
       feed.querySelectorAll('video').forEach((video) => video.pause());
     };
-  }, [videos]);
+  }, [videos, searchTerm]);
 
   const handleLike = async (videoId: string) => {
     if (!canEngage) {
