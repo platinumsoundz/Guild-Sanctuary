@@ -12,8 +12,8 @@ export function MessagePrivacyNotice() {
       <ShieldAlert size={18} aria-hidden="true" />
       <div>
         <strong>End-to-end encryption is not active yet</strong>
-        <p>Messages in this version are stored in Sanctuary's message database and are not currently end-to-end encrypted. Avoid sending passwords, financial details, medical information, or anything you would not want stored on the service.</p>
-        <span>Encrypted messaging is being planned with private keys kept on your devices, not on Sanctuary's servers.</span>
+        <p>Messages are stored and delivered through the platform's Supabase services so they can sync between your signed-in devices. Avoid sending passwords, payment details, or highly sensitive information.</p>
+        <span>Private conversations are restricted by account and conversation access controls, but the service itself can process message contents. This is not end-to-end encryption.</span>
       </div>
     </aside>
   );
