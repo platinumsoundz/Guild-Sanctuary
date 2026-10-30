@@ -132,6 +132,9 @@ export default {
           user_id: userId,
           bundle_id: bundleId,
         },
+        payment_intent_data: {
+          metadata: { sanctuary_purchase: 'token_bundle', user_id: userId, bundle_id: bundleId },
+        },
         success_url: `${appOrigin}/?wallet=success`,
         cancel_url: `${appOrigin}/?wallet=cancelled`,
       })
