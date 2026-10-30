@@ -216,3 +216,6 @@
     grid-column: 1 / -1;
   }
 }
+
+.positiveDelta { color: var(--success); font-weight: 700; }
+.negativeDelta { color: var(--danger); font-weight: 700; }
