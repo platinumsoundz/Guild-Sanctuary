@@ -1,3 +1,4 @@
+import { isThemePreference } from '@/lib/themes';
 import type { AccountPreferences, AccountSettings } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 import { isSupabaseCommunityStorageConfigured } from '@/services/supabase/communityMedia';
@@ -41,7 +42,7 @@ export function fetchLocalAppearancePreferences(userId: string): AppearancePrefe
     const value: unknown = JSON.parse(raw);
     if (!isRecord(value)) return defaults;
     return {
-      theme: value.theme === 'system' || value.theme === 'light' || value.theme === 'dark' || value.theme === 'dusk' || value.theme === 'stone' || value.theme === 'ocean' ? value.theme : defaults.theme,
+      theme: isThemePreference(value.theme) ? value.theme : defaults.theme,
       layout: value.layout === 'compact' ? 'compact' : value.layout === 'comfortable' ? 'comfortable' : defaults.layout,
     };
   } catch { return defaults; }
@@ -49,7 +50,7 @@ export function fetchLocalAppearancePreferences(userId: string): AppearancePrefe
 
 export function saveLocalAppearancePreferences(userId: string, preferences: AppearancePreferences): void {
   if (!userId) throw new Error('Sign in before changing appearance settings.');
-  if (!['system', 'light', 'dark', 'dusk', 'stone', 'ocean'].includes(preferences.theme)) throw new Error('Choose a supported Sanctuary theme.');
+  if (!isThemePreference(preferences.theme)) throw new Error('Choose a supported Sanctuary theme.');
   if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') throw new Error('Choose a supported layout arrangement.');
   try {
     getStorage().setItem(appearanceStoragePrefix + userId, JSON.stringify(preferences));
@@ -76,7 +77,7 @@ function normalizePreferences(value: unknown): AccountPreferences {
     emailNotifications: typeof record.emailNotifications === 'boolean' ? record.emailNotifications : true,
     personalizedFeed: typeof record.personalizedFeed === 'boolean' ? record.personalizedFeed : true,
     layout: record.layout === 'compact' ? 'compact' : 'comfortable',
-    theme: record.theme === 'system' || record.theme === 'light' || record.theme === 'dark' || record.theme === 'dusk' || record.theme === 'stone' || record.theme === 'ocean' ? record.theme : 'dark',
+    theme: isThemePreference(record.theme) ? record.theme : 'dark',
   };
 }
 
