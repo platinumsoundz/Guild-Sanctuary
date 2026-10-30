@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import type { WorldType } from '@/types/database';
 import {
   createSelfDiscoveryReflection,
   createPersonalizedLearningPlan,
