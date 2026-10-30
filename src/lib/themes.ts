@@ -21,9 +21,9 @@ export interface ThemeDefinition {
 export const THEME_CATALOGUE: readonly ThemeDefinition[] = [
   { id: 'dark', label: 'Cosmic dark', description: 'The original deep-space default', colorScheme: 'dark', tailwindDark: true },
   { id: 'light', label: 'Cosmic light · daylight', description: 'The matching lavender daylight palette', colorScheme: 'light', tailwindDark: false },
-  { id: 'dusk', label: 'Dusk · low-glare warm', description: 'A warm, low-glare evening palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
-  { id: 'stone', label: 'Stone · grey', description: 'A calm neutral palette', colorScheme: 'light', tailwindDark: false, requiresEntitlement: true },
-  { id: 'ocean', label: 'Ocean · blue', description: 'A cool blue palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
+  { id: 'dusk', label: 'Dusk · low-glare warm', description: 'A warm, low-glare evening palette', colorScheme: 'dark', tailwindDark: true },
+  { id: 'stone', label: 'Stone · grey', description: 'A calm neutral palette', colorScheme: 'light', tailwindDark: false },
+  { id: 'ocean', label: 'Ocean · blue', description: 'A cool blue palette', colorScheme: 'dark', tailwindDark: true },
   { id: 'nebula', label: 'Nebula · violet', description: 'A vivid violet deep-space palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
   { id: 'aurora', label: 'Aurora · northern lights', description: 'A luminous teal and emerald night palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
   { id: 'celestial', label: 'Celestial · rose gold', description: 'A warm rose-gold cosmic palette', colorScheme: 'dark', tailwindDark: true, requiresEntitlement: true },
