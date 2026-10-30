@@ -11,12 +11,12 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const profileAccent = profile.customAccentColor ?? (profile.equippedPalette === 'palette_sanctuary_colour_pack' ? '#0d9488' : profile.themeColor);
   const badgeGlyph = profile.equippedBadge === 'profile_badge_sparkle' ? '✨' : profile.equippedBadge === 'profile_badge_moon' ? '🌙' : profile.equippedBadge === 'profile_badge_flame' ? '🔥' : profile.equippedBadge === 'profile_badge_leaf' ? '🌿' : null;
   return (
-    <article className={styles.profileCard} data-border={profile.equippedBorder ?? ''} data-profile-theme={profile.equippedProfileTheme ?? ''} data-palette={profile.equippedPalette ?? ''} data-custom-accent={profile.customAccentColor ?? ''} style={{ borderColor: profileAccent, '--profile-accent': profile.customAccentColor ?? profile.themeColor } as CSSProperties}>
+    <article className={styles.profileCard} data-border={profile.equippedBorder ?? ''} data-profile-theme={profile.equippedProfileTheme ?? ''} data-palette={profile.equippedPalette ?? ''} data-custom-accent={profile.customAccentColor ?? ''} style={{ borderColor: profileAccent, '--profile-accent': profileAccent } as CSSProperties}>
       {profile.bannerUrl ? <img className={styles.banner} src={profile.bannerUrl} alt="" /> : (
         <div className={styles.bannerFallback} style={{ backgroundColor: `${profile.themeColor}20` }} />
       )}
       <div className={styles.profileIdentity}>
-        <div className={styles.avatar} data-frame={profile.equippedFrame ?? ''} data-effect={profile.equippedEffect ?? ''} aria-hidden="true" style={{ borderColor: profile.customAccentColor ?? profile.themeColor }}>
+        <div className={styles.avatar} data-frame={profile.equippedFrame ?? ''} data-effect={profile.equippedEffect ?? ''} aria-hidden="true" style={{ borderColor: profileAccent }}>
           {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : profile.displayName.slice(0, 1).toUpperCase()}
         </div>
         <div className={styles.profileDetails}>
