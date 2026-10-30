@@ -147,3 +147,5 @@
 @media(max-width:760px){.deviceHud{gap:7px}.deviceHud>span{gap:3px;font-size:9px}.deviceHud b{font-size:9px}}
 @media(max-width:560px){.deviceHud{order:5;flex:1 0 100%;justify-content:center;padding:5px 0 1px;border-top:1px solid var(--line);margin-top:1px}.header{flex-wrap:wrap}}
 @media(max-width:370px){.deviceHud{gap:12px}}
+
+.metricGlyph{font-size:8px;font-weight:900;letter-spacing:.04em;color:var(--accent,#a5b4fc)}
