@@ -2,6 +2,8 @@
 
 Last updated: 2026-10-30
 
+> **Guild planning (not implemented):** [Hidden Guild shared-platform blueprint, phased roadmap, and release-readiness estimate](docs/THE_GUILD_SHARED_PLATFORM_BLUEPRINT_AND_PROGRESS_2026-10-28.md). The Guild remains hidden and is designed to inherit Sanctuary capabilities rather than duplicate the application. This document records the approved concept only; it does not override Sanctuary release gates.
+
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
 
