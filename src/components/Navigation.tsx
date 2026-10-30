@@ -118,7 +118,7 @@ export function Navigation({
     : navigationItems.filter((item) => item.id === 'feedback-inbox'
       ? ['developer', 'owner'].includes(role)
       : canAccessSanctuaryPage(item.id, currentUser ? role : 'user')))
-    .filter((item) => item.id === 'feedback' || isPageVisible(item.id, pageVisibility, isGuest ? 'guest' : role));
+    .filter((item) => item.id === 'feedback' || item.id === 'feedback-inbox' || isPageVisible(item.id, pageVisibility, isGuest ? 'guest' : role));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);
