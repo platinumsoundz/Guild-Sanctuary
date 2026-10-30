@@ -96,7 +96,7 @@ Make The Guild feel like a console, not a conventional website with game links. 
 ## P1 — Independent Guild community
 
 - [x] Reuse the shared feed, Shorts, events, messaging, notifications, profile-posts and moderation mechanics inside the Guild shell, with Guild console styling and Guild-native labels.
-- [x] Keep content separate using the shared database's `world_type`: Each environment's content remains isolated by the database `world_type` value. Do not copy or duplicate the social tables. Do not copy or duplicate the social tables.
+- [x] Keep content separate using the shared database's `world_type`: Each environment's content remains isolated by the database `world_type` value. Do not copy or duplicate the social tables.
 - [x] Scope feed reads/writes, Shorts, events/RSVPs, conversation lists and threads, notifications, report queues and profile-post retrieval to the active world.
 - [x] Keep comments and reactions attached to their target content so engagement follows the target's world. Notifications and reports inherit world identity from their target.
 - [x] Preserve existing non-Guild data by default; the scoped database migration is applied and schema/functions/triggers are verified.
