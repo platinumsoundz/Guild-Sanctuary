@@ -79,7 +79,7 @@ export function GuildHomeDashboard({ onNavigate, onContinuePlaying }: { onNaviga
         <aside className={styles.sidePanel}>
           <div className={styles.sidePanelHead}><span className={styles.kicker}>QUICK RESUME</span><span className={styles.smallStatus}>LOCAL HISTORY</span></div>
           {loaded && recentGames.length ? recentGames.slice(0, 2).map((game) => (
-            <button type="button" key={game.id} className={styles.resumeItem} onClick={() => onContinuePlaying?.()}>
+            <button type="button" key={game.id} className={styles.resumeItem} onClick={() => game.id === recentGames[0]?.id && onContinuePlaying ? onContinuePlaying() : onNavigate('library' as NavigationState)}>
               <span className={styles.miniArt} data-art={game.art}><Gamepad2 size={22} /></span><span className={styles.resumeCopy}><strong>{game.title}</strong><small>{game.subtitle}</small></span><Play size={15} />
             </button>
           )) : <div className={styles.emptyResume}><Gamepad2 size={25} /><strong>Your next adventure starts here</strong><span>Launch a game and it will appear here for quick access.</span></div>}
