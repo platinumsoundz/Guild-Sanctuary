@@ -22,7 +22,7 @@ assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'th
 assert.ok(layout.includes("saved === 'stone' || saved === 'ocean' || saved === 'aurora' || saved === 'ember' || saved === 'forest' || saved === 'rose' || saved === 'violet' || saved === 'midnight'"), 'pre-render bootstrap must accept new palettes');
 assert.ok(layout.includes("? saved : 'dark'"), 'fresh visits must default to the cosmic dark palette');
 assert.ok(layout.includes("classList.toggle('dark', ['dark','dusk','ocean','aurora','ember','forest','rose','violet','midnight'].includes(theme))"), 'Tailwind dark variants must follow selected theme');
-assert.ok(settings.includes("classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean')"), 'live theme changes must update Tailwind dark variants');
+assert.ok(settings.includes("classList.toggle('dark', ['dark','dusk','ocean','aurora','ember','forest','rose','violet','midnight'].includes(theme))"), 'live theme changes must update Tailwind dark variants');
 assert.ok(settings.includes("window.matchMedia('(prefers-color-scheme: light)')"), 'system preference must follow OS colour scheme');
 assert.ok(appContext.includes('fetchAccountSettings(currentUser.user.id)'), 'signed-in accounts must load saved theme on session restore');
 assert.ok(appContext.includes('document.documentElement.dataset.layout = preferences.layout'), 'saved account layout must apply across the app at session restore');
@@ -33,7 +33,7 @@ assert.ok(layout.includes('__html: themeBootstrap'), 'theme bootstrap must be in
 assert.ok(!layout.includes('className="dark"'), 'fixed dark class must not override selected theme');
 assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection must persist through account settings');
 assert.ok(service.includes("theme: 'dark'"), 'new accounts must default to the cosmic dark palette');
-assert.ok(service.includes("record.theme === 'stone'") && service.includes("record.theme === 'ocean'"), 'settings service must normalize added themes');
+assert.ok(service.includes("isSupportedTheme(record.theme)") && service.includes("'midnight'"), 'settings service must normalize added themes');
 assert.ok(service.includes("'system', 'light', 'dark', 'dusk', 'stone', 'ocean', 'aurora', 'ember', 'forest', 'rose', 'violet', 'midnight'"), 'settings service must accept every supported theme when saving');
 assert.ok(types.includes("'system' | 'light' | 'dark' | 'dusk' | 'stone' | 'ocean' | 'aurora' | 'ember' | 'forest' | 'rose' | 'violet' | 'midnight'"), 'account theme type must include all palettes');
 assert.ok(!workspaceCss.includes('--surface: #fbfcf9') && !workspaceCss.includes('--ink: #25372c'), 'app workspace must not override global semantic palette tokens');
