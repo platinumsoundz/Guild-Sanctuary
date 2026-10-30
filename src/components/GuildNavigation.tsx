@@ -34,7 +34,6 @@ const guildCommunityItems: Item[] = [
   { id: 'planner', label: 'Planner', icon: CalendarCheck },
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'games', label: 'Cosmic Arcade', icon: Gamepad2 },
   { id: 'guild-roadmap', label: 'Roadmap', icon: Gamepad2 },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
