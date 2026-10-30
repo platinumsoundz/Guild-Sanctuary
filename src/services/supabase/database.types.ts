@@ -166,6 +166,10 @@ export interface Database {
         id: string; user_id: string; tokens_delta: number; grant_position: number;
         source: string; verified_at: string; created_at: string;
       }>;
+      token_adjustment_ledger: Table<{
+        id: string; user_id: string; tokens_delta: number; reason_code: 'purchase_refund' | 'chargeback_reversal' | 'manual_correction' | 'bonus_correction';
+        case_reference: string; source_key: string; actor: string; item_id: string | null; created_at: string;
+      }>;
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
         user_id: string;
@@ -401,6 +405,10 @@ export interface Database {
       set_profile_custom_accent: {
         Args: { requested_color: string | null };
         Returns: string | null;
+      };
+      apply_token_adjustment: {
+        Args: { requested_user_id: string; requested_tokens_delta: number; requested_reason_code: 'purchase_refund' | 'chargeback_reversal' | 'manual_correction' | 'bonus_correction'; requested_case_reference: string; requested_source_key: string; requested_actor: string; requested_item_id?: string | null };
+        Returns: number;
       };
       is_moderator: {
         Args: Record<string, never>;
