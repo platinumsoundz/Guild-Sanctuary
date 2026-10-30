@@ -5,9 +5,10 @@ import styles from './SupportPanel.module.css';
 import type { WorldType } from '@/types/database';
 
 const tipOptions = [
-  { id: 'tip_5_usd', amount: '$5' },
-  { id: 'tip_10_usd', amount: '$10' },
-  { id: 'tip_25_usd', amount: '$25' },
+  { id: 'tip_1_gbp', amount: '£1' },
+  { id: 'tip_5_gbp', amount: '£5' },
+  { id: 'tip_10_gbp', amount: '£10' },
+  { id: 'tip_25_gbp', amount: '£25' },
 ] as const;
 
 type TipOption = (typeof tipOptions)[number]['id'];
@@ -15,6 +16,7 @@ type TipOption = (typeof tipOptions)[number]['id'];
 interface SupportOptions {
   stripeDonationUrl: string | null;
   stripeTipsEnabled: boolean;
+  stripeTestMode?: boolean;
   lemonSqueezyCheckoutUrl: string | null;
   monzoContributionUrl: string | null;
 }
@@ -33,6 +35,7 @@ export function SupportPanel({ worldType = 'sanctuary' }: { worldType?: WorldTyp
   const [options, setOptions] = useState<SupportOptions>({
     stripeDonationUrl: null,
     stripeTipsEnabled: false,
+    stripeTestMode: false,
     lemonSqueezyCheckoutUrl: null,
     monzoContributionUrl: null,
   });
@@ -125,8 +128,8 @@ export function SupportPanel({ worldType = 'sanctuary' }: { worldType?: WorldTyp
               </p>
             </section>
           )}
-          {!options.stripeDonationUrl && (
-            <p className={styles.status} role="status">External contribution links are disabled in this deployment.</p>
+          {!options.stripeDonationUrl && !options.stripeTipsEnabled && (
+            <p className={styles.status} role="status">Stripe contributions are not configured in this deployment.</p>
           )}
 
           {options.lemonSqueezyCheckoutUrl && (
@@ -148,7 +151,8 @@ export function SupportPanel({ worldType = 'sanctuary' }: { worldType?: WorldTyp
 
           {options.stripeTipsEnabled && (
             <section className={styles.provider}>
-              <h2>One-time community contribution</h2>
+              <h2>Support The Sanctuary</h2>
+              {options.stripeTestMode && <p className={styles.providerNote}>TEST MODE — use Stripe test card details. Successful verified payments grant permanent VIP to your signed-in account.</p>}
               <div className={styles.options} aria-label="One-time contribution amount">
                 {tipOptions.map((option) => (
                   <button
@@ -183,10 +187,7 @@ export function SupportPanel({ worldType = 'sanctuary' }: { worldType?: WorldTyp
       )}
 
       <p className={styles.privacy}>
-        Contributions are optional and do not affect community visibility. External payment providers process
-        transactions under their own terms. Voluntary contributions are not linked to your account; digital
-        purchases do not grant in-app entitlements until that service is implemented. We do not use behavioral
-        advertising.
+        Contributions are optional. A successful payment is linked to your signed-in Sanctuary account and grants permanent VIP after Stripe verifies payment. Higher account roles are preserved. Payment does not verify age. Stripe processes transactions under its own terms.
       </p>
     </section>
   );
