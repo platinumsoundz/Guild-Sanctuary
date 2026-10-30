@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     const charge = event.data.object as Stripe.Charge;
     const paymentIntentId = typeof charge.payment_intent === 'string'
       ? charge.payment_intent : charge.payment_intent?.id;
-    if (!paymentIntentId) return NextResponse.json({ received: true });
+    if (!paymentIntentId || charge.amount_refunded < charge.amount) return NextResponse.json({ received: true });
     const { error } = await admin.schema('private').rpc('revoke_refunded_stripe_entitlement', {
       requested_payment_intent_id: paymentIntentId,
     });
