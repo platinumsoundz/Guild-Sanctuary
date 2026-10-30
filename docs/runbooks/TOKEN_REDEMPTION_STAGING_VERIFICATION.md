@@ -102,3 +102,28 @@ A successful typecheck/build is not proof of correct database behavior. A succes
 ## Rollback
 
 If a staging test fails, stop further test purchases and keep the feature unavailable. Revert the application PR or disable the shop action in a follow-up code change. Do not delete ledger rows or manually refund balances to make a test pass. For permission rollback, prepare and review a separate migration that revokes authenticated EXECUTE; do not improvise destructive SQL in a live project.
+
+
+## October 30 completion-batch additions (NOT APPLIED)
+
+The draft PR adds migration `20261030140000_token_shop_bonus_inventory_review.sql`. Review it in a disposable staging project only after checking the target ref and full migration dry-run. It:
+- Reconciles the sale catalogue to the eight approved staging items and disables the legacy twelve demo items without deleting old entitlements.
+- Adds bonus ledger/program tables, verified-account triggers and the closed-by-default first-100 allocator.
+- Adds support-only audited spending holds and checks those holds before spend/equip/custom accent operations.
+- Adds equipment slots and a privacy-safe public cosmetic projection.
+- Adds a contrast-tested preset accent picker that requires the relevant entitlement.
+- Keeps `spend_tokens`, `equip_profile_cosmetic`, and `clear_profile_cosmetic` execution revoked. The custom accent RPC alone is granted to authenticated users, and only after checking entitlement and approved palette values.
+
+To open the bonus program in staging only, after the migration is applied and test accounts are ready, an owner must explicitly set both fields in the staging SQL editor:
+```sql
+update public.token_bonus_program
+set beta_open = true, opened_at = now(), updated_at = now()
+where singleton = true;
+```
+To close it:
+```sql
+update public.token_bonus_program
+set beta_open = false, updated_at = now()
+where singleton = true;
+```
+Never run the opening statement in production as part of this PR. Verify exactly 100 grants under concurrent load and that account creation before the open timestamp is ineligible. The migration is a proposal only until Ashley confirms the staging target and applies it.
