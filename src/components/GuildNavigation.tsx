@@ -231,6 +231,32 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
     connectionManager = nav.connection ?? nav.mozConnection ?? nav.webkitConnection ?? null;
     updateConnection();
     connectionManager?.addEventListener('change', updateConnection);
+    let pingInFlight = false;
+    const measureGuildPing = async () => {
+      if (!active || document.visibilityState !== 'visible' || pingInFlight) return;
+      pingInFlight = true;
+      const startedAt = performance.now();
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 5000);
+      try {
+        const response = await fetch(`${window.location.origin}/?guild-ping=${Date.now()}`, {
+          method: 'HEAD',
+          cache: 'no-store',
+          credentials: 'same-origin',
+          signal: controller.signal,
+        });
+        setDeviceStatus((current) => ({ ...current, rtt: response.ok ? Math.round(performance.now() - startedAt) : null }));
+      } catch {
+        setDeviceStatus((current) => ({ ...current, rtt: null }));
+      } finally {
+        window.clearTimeout(timeout);
+        pingInFlight = false;
+      }
+    };
+    const pingInterval = window.setInterval(() => { void measureGuildPing(); }, 15000);
+    const onVisibilityChange = () => { if (document.visibilityState === 'visible') void measureGuildPing(); };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    void measureGuildPing();
     if (typeof nav.getBattery === 'function') {
       void nav.getBattery().then((battery) => {
         if (!active) return;
@@ -264,6 +290,8 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
       active = false;
       window.cancelAnimationFrame(frame);
       connectionManager?.removeEventListener('change', updateConnection);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.clearInterval(pingInterval);
       batteryManager?.removeEventListener('levelchange', updateBattery);
       batteryManager?.removeEventListener('chargingchange', updateBattery);
     };
