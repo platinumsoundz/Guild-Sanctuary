@@ -6,11 +6,17 @@
 
 ## Fixed product decisions
 
-- The first **100 eligible, verified, non-duplicate accounts** after the owner explicitly opens beta are eligible for **1,000 Sanctuary Tokens each**.
-- Maximum bonus allocation: 100,000 tokens total.
-- Tokens have no fixed cash equivalence. This bonus does not authorize checkout, redemption, paid conversion, or game spending.
+- The first **100 active accounts by original server-side signup timestamp** reserve the thank-you places, including accounts already registered when the migration is applied. Each receives **500 Sanctuary Tokens total** once email-verified. The original build already gave existing accounts 100 tokens, so those existing accounts receive a **400-token top-up**; later eligible signups receive **500 tokens**.
+- Maximum thank-you allocation: 50,000 tokens total (the migration grants 400 to the first 100 pre-existing accounts to complete their original 100-token welcome balance to 500, and 500 to later eligible accounts until the cap is reached).
+- The standard token bundle reference is 100 tokens for £1 (larger bundles may be discounted). Tokens are not cash-redeemable; this bonus does not authorize checkout, redemption, paid conversion, or game spending.
 - Client code, testers, moderators, collaborators and ordinary authenticated users must not be able to grant/deduct tokens or write balances.
 - A user-facing balance is a projection of server-authoritative accounting, never a client-authoritative source of truth.
+
+## Revised implementation status — 2026-10-30
+
+- The repository now contains a proposed migration that reserves the first 100 active accounts in original signup order, whether already registered or signing up later. Verified accounts are credited immediately; unverified accounts keep their reserved rank and receive the one-time grant after email verification. Existing accounts receive +400 (their original 100 remains); later signups receive +500.
+- A locked singleton pool row serializes rank reservations and credits. A unique award row per user and unique rank prevent duplicate grants and oversubscription. Pending reservations have no wallet credit until email verification; the helper is only called from database triggers and is revoked from API roles.
+- The migration is code only and **NOT APPLIED**. No live account count or balance was queried from Supabase in this change.
 
 ## Required repository audit before implementation
 
@@ -35,7 +41,7 @@ Use the existing schema if it already provides these guarantees. Any proposed SQ
 
 | Scenario | Expected result |
 |---|---|
-| 100 eligible accounts sign up concurrently | Exactly 100 grants, each exactly 1,000 tokens |
+| 100 active accounts sign up concurrently | Exactly 100 places are reserved in original signup order; verified accounts are credited, unverified accounts receive credit only after verification |
 | 101st eligible account | No bonus grant |
 | Same account retries verification/signup event | One grant maximum |
 | Same event/source key is delivered twice | Second delivery is a no-op or safe idempotent response |
