@@ -32,8 +32,13 @@ assert.match(gamesHub, /My Roblox World/,'creator projects retain the Roblox exp
 assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the Bedrock server');
 assert.match(arcade, /Starseed Word Search/, 'word search preview remains available');
 assert.ok(arcade.includes("selectedGame === 'classics' ? <ArcadeClassics />"), 'arcade classics are connected to the main selector');
-assert.match(arcade, /24 mini-games/, 'the classic games collection advertises the exact catalogue size');
+assert.match(arcade, /24 playable games/, 'the classic games collection advertises the exact catalogue size');
+assert.match(arcade, /28<\\/strong>[\\s\\S]*?Playable games/, 'the arcade overview distinguishes the playable game count');
+assert.match(arcade, /Coming soon/, 'coming-soon status remains visible');
 assert.match(classics, /GAME LIBRARY · 24 TITLES/, 'the full classic catalogue is visible above the game');
+assert.match(classics, /arcade-game-search/, 'the catalogue provides a searchable game field');
+assert.match(classics, /categoryFilters/, 'the catalogue provides category filters');
+assert.match(classics, /filteredOptions\.map/, 'the visible catalogue responds to search and category filters');
 assert.match(classics, /options\.map\(\(option,index\)=>\s*<button/, 'every classic game is presented as a selectable catalogue card');
 assert.doesNotMatch(classics, /classic-game-select|Choose a game[\\s\\S]*?<select/, 'classic games are not hidden in a dropdown');
 assert.match(classicsCss, /\.gameCatalog\{display:grid/, 'the classic catalogue uses a responsive visible grid');
