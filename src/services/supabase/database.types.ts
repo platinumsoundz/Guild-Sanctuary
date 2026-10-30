@@ -86,6 +86,17 @@ export type ModerationAction = 'warn' | 'hide' | 'remove' | 'restore' | 'suspend
 export interface Database {
   public: {
     Tables: {
+      sanctuary_feedback: Table<{
+        id: string;
+        feedback_type: 'Idea or improvement' | 'Bug report' | 'Confusing experience' | 'Accessibility issue';
+        title: string;
+        details: string;
+        submitted_by: string | null;
+        submitter_kind: 'guest' | 'member';
+        page_url: string | null;
+        status: 'open' | 'in_review' | 'closed';
+        created_at: string;
+      }>;
       daily_reflections: Table<{
         id: string;
         user_id: string;

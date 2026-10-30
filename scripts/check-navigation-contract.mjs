@@ -36,6 +36,8 @@ assert.doesNotMatch(navigation.slice(navigation.indexOf('const navigationGroups'
 console.log('Hidden Guild selector contract passed.');
 
 assert.match(navigation, /canAccessSanctuaryPage/, 'navigation uses the shared role allowlist');
+assert.match(navigation, /id: 'feedback', label: 'Feedback'/, 'Feedback is a named navigation destination');
+assert.match(navigation, /item\.id === 'feedback' \|\| isPageVisible/, 'Feedback ignores page-visibility restrictions');
 assert.match(navigation, /navigationItems\.filter\(\(item\) => canAccessSanctuaryPage\(item\.id, currentUser \? role : 'user'\)\)/, 'basic navigation is filtered by the page role allowlist');
-assert.match(navigation, /guestNavigationPages = new Set<NavigationState>\(\['today', 'games', 'roadmap', 'support'\]\)/, 'guest mode keeps only its explicit public destinations');
+assert.match(navigation, /guestNavigationPages = new Set<NavigationState>\(\['today', 'games', 'roadmap', 'support', 'feedback'\]\)/, 'guest mode keeps only its explicit public destinations');
 

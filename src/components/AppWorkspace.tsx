@@ -29,6 +29,7 @@ import { SanctuaryRoadmap } from '@/components/SanctuaryRoadmap';
 import { GuildRoadmap } from '@/components/GuildRoadmap';
 import { SanctuaryHome } from '@/components/SanctuaryHome';
 import { NotificationBar } from '@/components/NotificationBar';
+import { FeedbackPage } from '@/components/FeedbackCenter';
 import { AdminDashboard } from '@/modules/moderation/AdminDashboard';
 import { ModerationDashboard } from '@/modules/moderation/ModerationDashboard';
 import { fetchPostsByAuthor } from '@/modules/feeds';
@@ -82,7 +83,7 @@ export function AppWorkspace() {
     if (!isSessionReady) return;
     let cancelled = false;
     void fetchPageVisibility().then((visibility) => {
-      if (cancelled || isPageVisible(contentNavigation, visibility, isGuest ? 'guest' : currentRole ?? 'user')) return;
+      if (cancelled || contentNavigation === 'feedback' || isPageVisible(contentNavigation, visibility, isGuest ? 'guest' : currentRole ?? 'user')) return;
       // Keep the developer/owner's recovery surface reachable even if its nav item was hidden.
       if (contentNavigation === 'admin' && ['developer', 'owner'].includes(currentRole ?? '')) return;
       setActiveNavigation('today');
@@ -93,7 +94,7 @@ export function AppWorkspace() {
   useEffect(() => {
     if (!isSessionReady) return;
     if (isGuest) {
-      if (!['today', 'support', 'games', 'roadmap'].includes(contentNavigation)) {
+      if (!['today', 'support', 'games', 'roadmap', 'feedback'].includes(contentNavigation)) {
         setActiveNavigation('today');
       }
       return;
@@ -239,7 +240,7 @@ export function AppWorkspace() {
     setActiveNavigation(navigation);
   };
 
-  const authenticatedContent = !isGuest && currentUser && !canAccessSanctuaryPage(contentNavigation, currentRole) ? (
+  const authenticatedContent = !isGuest && currentUser && contentNavigation !== 'feedback' && !canAccessSanctuaryPage(contentNavigation, currentRole) ? (
     <main className={styles.sectionPage} role="status">
       <p className={styles.sectionEyebrow}>RESTRICTED DESTINATION</p>
       <h1>This page is not available for your account</h1>
@@ -248,7 +249,7 @@ export function AppWorkspace() {
     </main>
   ) : contentNavigation === 'today' ? (
     <SanctuaryHome onNavigate={openNavigation} />
-  ) : isGuest && !['support', 'games', 'roadmap'].includes(contentNavigation) ? (
+  ) : isGuest && !['support', 'games', 'roadmap', 'feedback'].includes(contentNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
       <h1 id="guest-access-title">Explore before you join</h1>
@@ -264,6 +265,8 @@ export function AppWorkspace() {
         Sign in to post, react, comment, message, manage your profile, use the planner, or access wallet and shop features.
       </p>
     </main>
+  ) : contentNavigation === 'feedback' ? (
+    <FeedbackPage role={isGuest ? 'guest' : currentRole ?? 'user'} isGuest={isGuest} />
   ) : contentNavigation === 'notifications' ? (
     <main className={styles.supportPage}>
       <NotificationBar fullPage worldType={worldType} onNavigate={openNavigation} />

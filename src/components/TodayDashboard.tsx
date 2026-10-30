@@ -4,7 +4,6 @@ import {
   ArrowRight,
   CalendarDays,
   Compass,
-  Gamepad2,
   MessageCircle,
   Search,
   Clapperboard,
@@ -22,18 +21,10 @@ type LaunchSpace = {
   target: NavigationState;
   icon: LucideIcon;
   eyebrow: string;
-  tone: 'guild' | 'arcade' | 'community' | 'shorts';
+  tone: 'arcade' | 'community' | 'shorts';
 };
 
 const launchSpaces: LaunchSpace[] = [
-  {
-    title: 'Guild Arcade',
-    description: 'Enter the Guild, explore its world and find community game spaces.',
-    target: 'guild',
-    icon: Gamepad2,
-    eyebrow: 'PLAY & EXPLORE',
-    tone: 'guild',
-  },
   {
     title: 'Cosmic Arcade',
     description: 'Jump into Sanctuary-built browser games and quick-play experiences.',
@@ -83,7 +74,7 @@ export function TodayDashboard({ onNavigate }: { onNavigate: (navigation: Naviga
           <span className={styles.date}>{dateLabel}</span>
         </div>
         <h1>{greeting}.</h1>
-        <p className={styles.intro}>Your games, community and personal space — all one step away. Pick up where you want to go.</p>
+        <p className={styles.intro}>Your community, personal tools and Cosmic Arcade — all one step away. Pick up where you want to go.</p>
       </header>
 
       <section className={styles.focus} aria-labelledby="today-focus-title">

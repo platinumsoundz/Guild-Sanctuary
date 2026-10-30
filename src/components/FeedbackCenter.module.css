@@ -1,0 +1,22 @@
+.page{width:min(100%,1040px);margin:0 auto;padding:clamp(18px,3vw,34px);display:grid;gap:22px;color:var(--ink)}
+.hero,.formPanel,.inbox{border:1px solid var(--border);border-radius:22px;background:linear-gradient(145deg,color-mix(in srgb,var(--surface-raised) 94%,#17103d),var(--surface));box-shadow:0 18px 48px rgb(0 0 0 / 13%),inset 0 1px 0 rgb(255 255 255 / 5%)}
+.hero{padding:clamp(24px,4vw,42px);background:radial-gradient(ellipse at 100% 0%,rgb(132 84 255 / 15%),transparent 48%),linear-gradient(145deg,color-mix(in srgb,var(--surface-raised) 94%,#17103d),var(--surface))}
+.heroIcon{display:grid;place-items:center;width:48px;height:48px;border:1px solid rgb(183 149 255 / 45%);border-radius:15px;color:#d7baff;background:rgb(125 83 255 / 14%);box-shadow:0 0 25px rgb(126 76 255 / 15%)}
+.eyebrow{margin:16px 0 8px;color:var(--muted);font-size:10px;font-weight:750;letter-spacing:.2em}
+.hero h1{font-size:clamp(36px,5vw,56px);line-height:1.05;letter-spacing:-.04em;font-family:Georgia,'Times New Roman',serif;font-weight:400}
+.hero>p:not(.eyebrow){max-width:700px;margin-top:12px;line-height:1.8;color:var(--muted)}
+.privacy{font-size:12px}
+.formPanel{padding:clamp(20px,3vw,32px)}
+.formHeading,.inboxHeader,.itemTop,.itemMeta{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.formHeading{margin-bottom:22px}.formHeading h2,.inboxHeader h2{font-size:24px;font-weight:600;letter-spacing:-.025em}.formHeading span{font-size:11px;color:var(--muted)}
+.formPanel form{display:grid;gap:17px}.formPanel label{display:grid;gap:8px;font-size:13px;font-weight:650}
+.formPanel input,.formPanel select,.formPanel textarea,.statusControl select{width:100%;min-width:0;border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--ink);padding:12px 13px;font:inherit;font-weight:400;outline-offset:2px}
+.formPanel input:focus-visible,.formPanel select:focus-visible,.formPanel textarea:focus-visible{outline:2px solid #a88aff}
+.formPanel textarea{resize:vertical;line-height:1.65}.counter{justify-self:end;color:var(--muted);font-size:11px;font-weight:400}
+.submitButton,.inboxHeader>button{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:fit-content;min-height:44px;padding:0 18px;border:1px solid rgb(188 154 255 / 40%);border-radius:12px;background:linear-gradient(105deg,#3c6aff,#8748ff);color:white;font-weight:700;cursor:pointer}
+.submitButton:disabled,.inboxHeader>button:disabled{opacity:.6;cursor:wait}
+.success,.message,.guestNote{padding:12px 14px;border-radius:11px;background:color-mix(in srgb,var(--surface-raised) 85%,#8a70ff);font-size:13px;line-height:1.6}
+.success{border:1px solid rgb(76 175 120 / 40%)}.message{border:1px solid rgb(230 170 80 / 40%)}.guestNote{margin-top:18px;color:var(--muted)}
+.inbox{padding:clamp(18px,3vw,30px)}.inboxHeader{align-items:flex-start;margin-bottom:20px}.inboxHeader h2{display:flex;align-items:center;gap:9px}.inboxHeader h2 svg{color:#b59aff}.inboxHeader p:not(.eyebrow){margin-top:6px;color:var(--muted);font-size:13px}.inboxHeader>button{background:var(--surface);color:var(--ink)}
+.feedbackList{display:grid;gap:12px}.feedbackItem{padding:17px;border:1px solid var(--border);border-radius:15px;background:color-mix(in srgb,var(--surface) 90%,#5f43a5)}.itemTop{justify-content:flex-start;flex-wrap:wrap}.kind,.submitter{display:inline-flex;border:1px solid var(--border);border-radius:999px;padding:5px 9px;font-size:10px;color:var(--muted)}.kind{color:#cbb8ff;border-color:rgb(175 145 255 / 35%)}.feedbackItem h3{margin-top:12px;font-size:17px;font-weight:700}.details{margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;font-size:13px}.itemMeta{justify-content:flex-start;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-size:11px}.pageUrl{overflow-wrap:anywhere}.statusControl{display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--muted);font-size:12px}.statusControl select{width:auto;min-width:140px;padding:7px 9px}.empty{padding:22px;border:1px dashed var(--border);border-radius:13px;color:var(--muted);font-size:13px}
+@media(max-width:560px){.page{padding:14px 12px 28px;gap:14px}.hero,.formPanel,.inbox{border-radius:17px}.inboxHeader{flex-direction:column}.inboxHeader>button{width:100%}.statusControl{align-items:flex-start;flex-direction:column}.statusControl select{width:100%}}
