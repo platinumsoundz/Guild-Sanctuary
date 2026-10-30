@@ -36,10 +36,12 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
   const [purchasingItemId, setPurchasingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const categories = ['theme', 'profile_frame', 'profile_effect', 'profile_badge', 'profile_banner'] as const;
+  const categoryLabels: Record<string, string> = { theme: 'Premium themes', profile_frame: 'Profile frames', profile_effect: 'Portrait effects', profile_badge: 'Identity badges', profile_banner: 'Profile banners' };
   const hasSupabaseAccount = !isGuest && isSupabaseWalletConfigured();
 
   const loadShop = useCallback(async (cancelled?: () => boolean) => {
-    if (!hasSupabaseAccount) {
+    if (!isSupabaseWalletConfigured()) {
       setItems([]);
       setOwnedItems(new Set());
       setBalance(null);
@@ -50,28 +52,36 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
     setIsLoading(true);
     try {
       const client = getSupabaseBrowserClient();
-      const { data: authData, error: authError } = await client.auth.getUser();
-      if (authError || authData.user?.id !== userId) {
-        throw new Error('Sign in to view your shop inventory.');
+      if (hasSupabaseAccount) {
+        const { data: authData, error: authError } = await client.auth.getUser();
+        if (authError || authData.user?.id !== userId) {
+          throw new Error('Sign in to view your personal shop inventory.');
+        }
       }
 
-      const [catalogResult, entitlementsResult, walletResult] = await Promise.all([
-        client.from('token_spend_catalog')
-          .select('item_id,name,description,price_tokens,kind,asset_url,asset_text,effect_key,sort_order')
-          .eq('enabled', true)
-          .order('sort_order', { ascending: true }),
-        client.from('token_entitlements').select('item_id').eq('user_id', userId),
-        client.from('token_wallets').select('balance_tokens').eq('user_id', userId).maybeSingle(),
-      ]);
-
+      const catalogResult = await client.from('token_spend_catalog')
+        .select('item_id,name,description,price_tokens,kind,asset_url,asset_text,effect_key,sort_order')
+        .eq('enabled', true)
+        .order('sort_order', { ascending: true });
       if (catalogResult.error) throw catalogResult.error;
-      if (entitlementsResult.error) throw entitlementsResult.error;
-      if (walletResult.error) throw walletResult.error;
+
+      let ownedItemIds: string[] = [];
+      let walletBalance: number | null = null;
+      if (hasSupabaseAccount) {
+        const [entitlementsResult, walletResult] = await Promise.all([
+          client.from('token_entitlements').select('item_id').eq('user_id', userId),
+          client.from('token_wallets').select('balance_tokens').eq('user_id', userId).maybeSingle(),
+        ]);
+        if (entitlementsResult.error) throw entitlementsResult.error;
+        if (walletResult.error) throw walletResult.error;
+        ownedItemIds = (entitlementsResult.data ?? []).map((item) => item.item_id);
+        walletBalance = walletResult.data?.balance_tokens ?? 0;
+      }
       if (cancelled?.()) return;
 
       setItems((catalogResult.data ?? []) as ShopItem[]);
-      setOwnedItems(new Set((entitlementsResult.data ?? []).map((item) => item.item_id)));
-      setBalance(walletResult.data?.balance_tokens ?? 0);
+      setOwnedItems(new Set(ownedItemIds));
+      setBalance(walletBalance);
       setError(null);
     } catch (loadError) {
       if (!cancelled?.()) {
@@ -144,11 +154,11 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
         <div>
           <p className={styles.eyebrow}>{worldType === 'guild' ? 'THE GUILD COLLECTION' : 'THE SANCTUARY COLLECTION'}</p>
           <h1>Token Shop</h1>
-          <p>Unlock first-party profile cosmetics with tokens. Items are account-bound and cannot be traded or cashed out.</p>
+          <p>Unlock first-party cosmetics and premium themes with tokens. Items cost just 20–50 tokens (20p–50p at the standard rate of 100 tokens per £1), are account-bound and cannot be traded or cashed out.</p>
         </div>
         <div className={styles.balance}>
           <span>Wallet balance</span>
-          <strong>{balance === null ? '—' : `${balance.toLocaleString('en-GB')} tokens`}</strong>
+          <strong>{balance === null ? (isGuest ? 'Sign in for balance' : '—') : `${balance.toLocaleString('en-GB')} tokens`}</strong>
         </div>
       </header>
 
@@ -169,13 +179,20 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
       ) : items.length === 0 ? (
         <p className={styles.status}>No shop items are currently enabled in the catalogue. The shop will display items once the database catalogue is available.</p>
       ) : (
-        <section className={styles.grid} aria-label="Cosmetic catalogue">
-          {items.map((item) => {
+        <>
+        <nav className={styles.categoryNav} aria-label="Shop categories">{categories.filter((kind) => items.some((item) => item.kind === kind)).map((kind) => <a key={kind} href={`#shop-${kind}`}>{categoryLabels[kind]}</a>)}</nav>
+        {categories.map((kind) => {
+          const categoryItems = items.filter((item) => item.kind === kind);
+          if (!categoryItems.length) return null;
+          return <section className={styles.categorySection} id={`shop-${kind}`} key={kind} aria-label={categoryLabels[kind]}>
+            <div className={styles.categoryHeading}><h2>{categoryLabels[kind]}</h2><span>{categoryItems.length} items</span></div>
+            <div className={styles.grid}>
+          {categoryItems.map((item) => {
             const owned = ownedItems.has(item.item_id);
             const purchasing = purchasingItemId === item.item_id;
             return (
               <article className={styles.card} key={item.item_id}>
-                <div className={styles.art} aria-hidden="true">
+                <div className={styles.art} data-kind={item.kind} data-effect={item.effect_key ?? undefined} aria-hidden="true">
                   {item.asset_text ? <span>{item.asset_text}</span> : <Sparkles size={34} strokeWidth={1.2} />}
                 </div>
                 <div className={styles.cardBody}>
@@ -190,7 +207,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
                       onClick={() => void purchaseItem(item)}
                       className={styles.buyButton}
                     >
-                      {owned ? 'Owned' : !SPENDING_ENABLED ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}
+                      {owned ? 'Owned' : !hasSupabaseAccount ? 'Sign in to unlock' : !SPENDING_ENABLED ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}
                     </button>
                   </div>
                   {owned && <p className={styles.ownedNote}>Already in your account collection.</p>}
@@ -198,7 +215,10 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
               </article>
             );
           })}
-        </section>
+            </div>
+          </section>;
+        })}
+        </>
       )}
 
       <p className={styles.footerNote}><ShoppingBag size={15} aria-hidden="true" /> Prices and eligibility come from the server-owned catalogue. Your balance changes only after the database confirms a successful redemption.</p>
