@@ -83,7 +83,7 @@ export function AppWorkspace() {
     if (!isSessionReady) return;
     let cancelled = false;
     void fetchPageVisibility().then((visibility) => {
-      if (cancelled || contentNavigation === 'feedback' || isPageVisible(contentNavigation, visibility, isGuest ? 'guest' : currentRole ?? 'user')) return;
+      if (cancelled || (contentNavigation === 'feedback' || contentNavigation === 'feedback-inbox') || isPageVisible(contentNavigation, visibility, isGuest ? 'guest' : currentRole ?? 'user')) return;
       // Keep the developer/owner's recovery surface reachable even if its nav item was hidden.
       if (contentNavigation === 'admin' && ['developer', 'owner'].includes(currentRole ?? '')) return;
       setActiveNavigation('today');
