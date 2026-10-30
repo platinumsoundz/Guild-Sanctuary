@@ -429,7 +429,8 @@ export async function updatePostComment(commentId: string, authorId: string, bod
     return { id: data.id, targetType: 'post', targetId: data.target_id, authorId: data.author_id, body: data.body, createdAt: data.created_at };
   }
   const comment = comments.find((item) => item.id === commentId && item.authorId === authorId && item.targetType === 'post');
-  if (!comment) throw new Error('You can only edit your own comment.');
+  const localPost = comment ? posts.find((item) => item.id === comment.targetId) : undefined;
+  if (!comment || !localPost || (localPost.worldType ?? 'sanctuary') !== worldType) throw new Error('You can only edit your own comment in this community.');
   await delay();
   comment.body = normalizedBody;
   return { ...comment };
@@ -446,7 +447,8 @@ export async function deletePostComment(commentId: string, authorId: string, wor
     return;
   }
   const index = comments.findIndex((item) => item.id === commentId && item.authorId === authorId && item.targetType === 'post');
-  if (index < 0) throw new Error('You can only delete your own comment.');
+  const localPost = index >= 0 ? posts.find((item) => item.id === comments[index].targetId) : undefined;
+  if (index < 0 || !localPost || (localPost.worldType ?? 'sanctuary') !== worldType) throw new Error('You can only delete your own comment in this community.');
   await delay();
   comments.splice(index, 1);
 }
