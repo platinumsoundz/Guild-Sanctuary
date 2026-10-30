@@ -10,14 +10,14 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $function$
   select exists (
     select 1 from public.profiles
     where id = (select auth.uid())
       and role in ('moderator', 'admin', 'developer', 'owner')
       and status = 'active'
   );
-$;
+$function$;
 
 alter table public.platform_page_visibility
   add column if not exists role_key text not null default 'all';
@@ -126,7 +126,7 @@ language plpgsql
 stable
 security definer
 set search_path = ''
-as $
+as $function$
 declare
   owner_id uuid;
 begin
@@ -142,7 +142,7 @@ begin
   end case;
   return owner_id;
 end;
-$;
+$function$;
 
 revoke all on function public.get_report_target_owner(public.report_target_type, uuid) from public;
 grant execute on function public.get_report_target_owner(public.report_target_type, uuid) to authenticated;
