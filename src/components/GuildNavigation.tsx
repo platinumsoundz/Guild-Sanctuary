@@ -244,9 +244,9 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
           credentials: 'same-origin',
           signal: controller.signal,
         });
-        setDeviceStatus((current) => ({ ...current, rtt: response.ok ? Math.round(performance.now() - startedAt) : null }));
+        if (active) setDeviceStatus((current) => ({ ...current, rtt: response.ok ? Math.round(performance.now() - startedAt) : null }));
       } catch {
-        setDeviceStatus((current) => ({ ...current, rtt: null }));
+        if (active) setDeviceStatus((current) => ({ ...current, rtt: null }));
       } finally {
         window.clearTimeout(timeout);
         pingInFlight = false;
