@@ -89,7 +89,7 @@ Copy `.env.example` to `.env.local` and only populate values for services you ar
 
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are public client configuration. **Never** put a Supabase service-role/secret key in a public variable.
 - Stripe secret keys, webhook secrets, and private price configuration must remain server-side. Token checkout is disabled by default; do not enable live checkout until authenticated staging, webhook, refund/chargeback, and host-specific origin checks have been verified.
-- Voluntary external donations are host-independent: set `COMMUNITY_TIPS_ENABLED=true` and `STRIPE_DONATION_URL` to a real HTTPS Stripe Payment Link on `buy.stripe.com`. The endpoint exposes the link only when both are valid; no account perks or tokens are granted. Keep account-linked Stripe checkout, token purchases and paid entitlements disabled until their separate webhook, refund/dispute and staging safeguards are verified. AdSense remains separately gated.
+- Voluntary external donations are host-independent: set `COMMUNITY_TIPS_ENABLED=true` and `STRIPE_DONATION_URL` to a real HTTPS Stripe Payment Link on `buy.stripe.com` or `donate.stripe.com`. The endpoint exposes the link only when both are valid; no account perks or tokens are granted. Keep account-linked Stripe checkout, token purchases and paid entitlements disabled until their separate webhook, refund/dispute and staging safeguards are verified. AdSense remains separately gated.
 - `NEXT_PUBLIC_*` values are generally inlined at build time. Configure the correct values for each environment before building.
 - Keep previews isolated from production accounts, user data, and live payment configuration. Do not use production credentials for local development.
 
