@@ -549,7 +549,7 @@ returns void language plpgsql security definer set search_path=''
 as $
 declare existing_hold public.token_spending_holds%rowtype;
 begin
-  if auth.role() <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
+  if coalesce(auth.jwt()->>'role','') <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
   if coalesce(trim(requested_actor),'')='' then raise exception 'An actor is required.' using errcode='22023'; end if;
   select * into existing_hold from public.token_spending_holds
   where user_id=requested_user_id and case_reference=requested_case_reference for update;
@@ -659,7 +659,7 @@ declare
   wallet_balance bigint;
   existing_entry public.token_adjustment_ledger%rowtype;
 begin
-  if auth.role() <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
+  if coalesce(auth.jwt()->>'role','') <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
   if requested_user_id is null or requested_tokens_delta is null or requested_tokens_delta=0 or
     requested_reason_code not in ('purchase_refund','chargeback_reversal','manual_correction','bonus_correction') or
     coalesce(trim(requested_case_reference),'')='' or coalesce(trim(requested_source_key),'')='' or
