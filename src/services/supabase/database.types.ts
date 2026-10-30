@@ -154,6 +154,16 @@ export interface Database {
       token_entitlements: Table<{
         user_id: string; item_id: string; granted_at: string;
       }>;
+      token_signup_bonus_awards: Table<{
+        user_id: string;
+        signup_rank: number;
+        tokens_delta: number;
+        reason: 'founding_member_top_up' | 'founding_member_signup_bonus';
+        source: string;
+        created_at: string;
+        granted_at: string | null;
+      }>;
+
       private_profile_vault: Table<PrivateProfileVaultRow>;
       account_settings: Table<{
         user_id: string;
