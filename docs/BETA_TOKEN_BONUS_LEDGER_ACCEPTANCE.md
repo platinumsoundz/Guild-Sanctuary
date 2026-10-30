@@ -76,7 +76,12 @@ Never use “live,” “deployed,” “secure,” or “verified” based only
 - Each account has one unique 1,000-token bonus ledger entry and matching wallet credit.
 - Accounts must be email-verified and created at or after the explicit beta opening timestamp.
 - The beta program defaults to closed; no bonus can be issued until the owner opens it in an isolated staging project.
-- A dedicated bonus ledger records grant position and verification time. Authenticated members may read only their own bonus receipt.
+- The existing `token_ledger` records the bonus as `signup_bonus`; a locked program row allocates a grant position and preserves verification time in the trigger audit path.
 - Existing wallet history is extended to combine purchases, spend and bonus entries.
 
 The duplicate-account rule is enforced only to the extent of unique Supabase auth accounts/email identity; this implementation does not attempt device fingerprinting or infer whether separate verified email accounts belong to one person.
+
+
+## Existing database reconciliation
+
+A read-only audit of the populated Guild-Sanctuary project found four historical `signup_bonus` ledger entries of 100 tokens each, created by a profile-insert trigger that did not require email verification or enforce the 100-account cap. The draft migration drops that legacy trigger and its helper functions, preserves those four ledger rows and balances, and reuses `token_ledger` for the new 1,000-token grant. The new program does not top up historic grants and excludes accounts created before its explicit opening timestamp.
