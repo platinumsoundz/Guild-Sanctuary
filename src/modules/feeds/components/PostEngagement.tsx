@@ -44,7 +44,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
 
   useEffect(() => {
     let cancelled = false;
-    getPostEngagement(postId, userId).then((value) => {
+    getPostEngagement(postId, userId, worldType).then((value) => {
       if (!cancelled) setStats(value);
     }).catch((loadError) => {
       if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Post reactions could not be loaded.');
@@ -60,7 +60,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
       setIsLoadingComments(true);
       setError(null);
       try {
-        const items = await fetchPostComments(postId);
+        const items = await fetchPostComments(postId, worldType);
         setComments(items);
         const authorNames = Object.fromEntries(items.flatMap((comment) => {
           if (comment.authorId === userId) return [];
@@ -88,7 +88,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
 
   const handleLike = async () => {
     try {
-      const result = await togglePostLike(postId, userId);
+      const result = await togglePostLike(postId, userId, worldType);
       setStats((current) => ({ ...current, liked: result.liked, likesCount: result.count }));
       setError(null);
     } catch (likeError) {
@@ -143,7 +143,7 @@ export function PostEngagement({ postId, userId }: PostEngagementProps) {
     if (!body || isSubmittingComment) return;
     setIsSubmittingComment(true);
     try {
-      const comment = await addPostComment(postId, userId, body);
+      const comment = await addPostComment(postId, userId, body, worldType);
       setComments((current) => [...current, comment]);
       setLoadedCommentsForPostId(postId);
       setCommentEngagement((current) => ({ ...current, [comment.id]: { liked: false, count: 0 } }));
