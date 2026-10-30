@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { DailyReflection } from '@/modules/practice';
+import type { WorldType } from '@/types/database';
 import { SelfDiscoveryCentre } from '@/modules/self-discovery/components/SelfDiscoveryCentre';
 import styles from './PersonalPlanner.module.css';
 
@@ -50,8 +51,8 @@ function parseData(raw: string | null): PlannerData {
   }
 }
 
-export function PersonalPlanner({ userId }: { userId: string }) {
-  const storageKey = `sanctuary-private-planner:v1:${userId}`;
+export function PersonalPlanner({ userId, worldType = 'sanctuary' }: { userId: string; worldType?: WorldType }) {
+  const storageKey = `${worldType}-private-planner:v1:${userId}`;
   const [data, setData] = useState<PlannerData>(EMPTY_DATA);
   const [ready, setReady] = useState(false);
   const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
@@ -141,11 +142,11 @@ export function PersonalPlanner({ userId }: { userId: string }) {
   };
 
   const exportData = () => {
-    const payload = { exportedAt: new Date().toISOString(), format: 'sanctuary-private-planner-v1', ...visibleData };
+    const payload = { exportedAt: new Date().toISOString(), format: `${worldType}-private-planner-v1`, ...visibleData };
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `sanctuary-planner-${localDateKey()}.json`;
+    anchor.download = `${worldType}-planner-${localDateKey()}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
     setStatus('A planner export was prepared on this device.');
