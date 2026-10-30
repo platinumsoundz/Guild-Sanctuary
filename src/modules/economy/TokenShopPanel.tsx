@@ -36,6 +36,8 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
   const [purchasingItemId, setPurchasingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const categories = ['theme', 'profile_frame', 'profile_effect', 'profile_badge', 'profile_banner'] as const;
+  const categoryLabels: Record<string, string> = { theme: 'Premium themes', profile_frame: 'Profile frames', profile_effect: 'Portrait effects', profile_badge: 'Identity badges', profile_banner: 'Profile banners' };
   const hasSupabaseAccount = !isGuest && isSupabaseWalletConfigured();
 
   const loadShop = useCallback(async (cancelled?: () => boolean) => {
@@ -169,13 +171,20 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
       ) : items.length === 0 ? (
         <p className={styles.status}>No shop items are currently enabled in the catalogue. The shop will display items once the database catalogue is available.</p>
       ) : (
-        <section className={styles.grid} aria-label="Cosmetic catalogue">
-          {items.map((item) => {
+        <>
+        <nav className={styles.categoryNav} aria-label="Shop categories">{categories.filter((kind) => items.some((item) => item.kind === kind)).map((kind) => <a key={kind} href={`#shop-${kind}`}>{categoryLabels[kind]}</a>)}</nav>
+        {categories.map((kind) => {
+          const categoryItems = items.filter((item) => item.kind === kind);
+          if (!categoryItems.length) return null;
+          return <section className={styles.categorySection} id={`shop-${kind}`} key={kind} aria-label={categoryLabels[kind]}>
+            <div className={styles.categoryHeading}><h2>{categoryLabels[kind]}</h2><span>{categoryItems.length} items</span></div>
+            <div className={styles.grid}>
+          {categoryItems.map((item) => {
             const owned = ownedItems.has(item.item_id);
             const purchasing = purchasingItemId === item.item_id;
             return (
               <article className={styles.card} key={item.item_id}>
-                <div className={styles.art} aria-hidden="true">
+                <div className={styles.art} data-kind={item.kind} data-effect={item.effect_key ?? undefined} aria-hidden="true">
                   {item.asset_text ? <span>{item.asset_text}</span> : <Sparkles size={34} strokeWidth={1.2} />}
                 </div>
                 <div className={styles.cardBody}>
@@ -198,7 +207,10 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
               </article>
             );
           })}
-        </section>
+            </div>
+          </section>;
+        })}
+        </>
       )}
 
       <p className={styles.footerNote}><ShoppingBag size={15} aria-hidden="true" /> Prices and eligibility come from the server-owned catalogue. Your balance changes only after the database confirms a successful redemption.</p>
