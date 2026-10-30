@@ -17,10 +17,11 @@ interface UseEventsResult {
 export function useEvents(userId: string, worldType: WorldType = 'sanctuary'): UseEventsResult {
   const [events, setEvents] = useState<EventView[]>([]);
   const [eventsUserId, setEventsUserId] = useState(userId);
+  const [eventsWorldType, setEventsWorldType] = useState(worldType);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestGeneration = useRef(0);
-  const sessionReady = eventsUserId === userId;
+  const sessionReady = eventsUserId === userId && eventsWorldType === worldType;
   const visibleEvents = sessionReady ? events : [];
   const visibleError = sessionReady ? error : null;
 
@@ -42,12 +43,13 @@ export function useEvents(userId: string, worldType: WorldType = 'sanctuary'): U
 
   useEffect(() => {
     setEventsUserId(userId);
+    setEventsWorldType(worldType);
     setEvents([]);
     setError(null);
     setIsLoading(true);
     void refresh();
     return () => { requestGeneration.current += 1; };
-  }, [userId, refresh]);
+  }, [userId, worldType, refresh]);
 
   const addEvent = async (input: CreateEventInput) => {
     if (!sessionReady) throw new Error('Wait for your account events to finish loading.');
