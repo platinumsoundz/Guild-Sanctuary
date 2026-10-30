@@ -9,6 +9,11 @@ const navigation = read('src/components/Navigation.tsx');
 const context = read('src/context/AppContext.tsx');
 const guildStyles = read('src/components/GuildRoadmap.module.css');
 const sanctuaryStyles = read('src/components/SanctuaryRoadmap.module.css');
+const guildNavigation = read('src/components/GuildNavigation.tsx');
+const guildHome = read('src/components/GuildHomeDashboard.tsx');
+const feedback = read('src/components/FeedbackCenter.tsx');
+const settings = read('src/modules/settings/components/SettingsHub.tsx');
+const admin = read('src/modules/moderation/AdminDashboard.tsx');
 
 assert.match(sanctuary, /<h1>Roadmap<\/h1>/, 'Sanctuary roadmap uses a simple member-facing title');
 assert.match(sanctuary, /<details className=\{styles\.moreInfo\}>/, 'Sanctuary cards hide deeper explanations behind More info');
@@ -28,5 +33,21 @@ assert.doesNotMatch(navigation.slice(navigation.indexOf('const navigationItems')
 assert.match(guildStyles, /@media\(max-width:560px\)/, 'Guild roadmap is responsive');
 assert.match(guildStyles, /:focus-visible/, 'Guild roadmap has visible keyboard focus');
 assert.match(sanctuaryStyles, /\.moreInfo summary:focus-visible/, 'Sanctuary More info has visible keyboard focus');
+
+assert.match(guild, /progressDashboard/, 'Guild roadmap uses the shared phase progress dashboard pattern');
+assert.match(guildNavigation, /label: 'Messages'/, 'Guild uses native Messages label');
+assert.match(guildNavigation, /label: 'Events'/, 'Guild uses native Events label');
+assert.match(guildNavigation, /label: 'Feedback'/, 'Feedback is available from Guild navigation');
+assert.doesNotMatch(guildNavigation, /SANCTUARY PAGES|Guild Messages|Guild Events|Guild Planner|Guild Profile|Guild Notifications|Sanctuary Roadmap/, 'Guild navigation must not expose companion-platform labels');
+assert.doesNotMatch(guildNavigation, /fetchPageVisibility|isPageVisible/, 'Guild navigation must not inherit global page-visibility settings');
+assert.match(guildNavigation, /Exit to Sanctuary/, 'The explicit exit control remains available');
+assert.match(guildHome, /Your Guild experience has its own community, settings and activity space/, 'Guild home has environment-native copy');
+assert.match(workspace, /guildPage === 'home' \?[\s\S]*?<GuildHomeDashboard/, 'Guild home uses its own dashboard');
+assert.match(settings, /environment === 'guild' \? 'GUILD SETTINGS'/, 'Settings adapts to the Guild environment');
+assert.match(settings, /guild-touch-controls-v1/, 'Guild touch-control preference is stored independently');
+assert.match(settings, /guild-reduced-motion-v1/, 'Guild reduced-motion preference is stored independently');
+assert.match(admin, /if \(worldType === 'guild'\)[\s\S]*?<ModerationDashboard role=\{role\} worldType="guild" \/>/, 'Guild administration only renders Guild-scoped moderation');
+assert.match(feedback, /environment=\$\{worldType\}/, 'Feedback submissions record their environment');
+assert.match(feedback, /query\.ilike\('page_url', '%environment=guild%'\)/, 'Guild feedback inbox filters to Guild submissions');
 
 console.log('Roadmap separation and readability contracts passed.');
