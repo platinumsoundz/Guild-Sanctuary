@@ -132,3 +132,5 @@ Never run the opening statement in production as part of this PR. Verify exactly
 ## Stripe dispute handling
 
 The draft webhook stores each token checkout's PaymentIntent ID with its canonical ledger credit. On `charge.dispute.created`, the webhook resolves the owning token wallet using the PaymentIntent ID or Stripe metadata and places a case-scoped spending hold. Multiple disputes can hold the same wallet independently. Dispute closure does not automatically release spending; support must review and release the exact case through the service-role-only `release_token_spending_hold(user_id, case_reference, actor)` RPC. This requires staging tests with signed Stripe test dispute events before production use.
+
+The equip/unequip UI is gated by `NEXT_PUBLIC_SANCTUARY_COSMETIC_EQUIP_ENABLED`. After applying the migration in staging, verify ownership checks, one-active-item-per-slot behavior, clear/unequip behavior and account holds before enabling this flag. `spend_tokens` remains revoked and is not controlled by this flag.
