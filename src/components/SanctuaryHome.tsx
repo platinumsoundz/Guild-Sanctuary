@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowDownRight, ArrowRight, BookOpen, CalendarDays, Compass, Heart, Layers3,
+  ArrowDownRight, ArrowRight, BookOpen, CalendarDays, CircleHelp, Compass, Heart, Layers3,
   MessageCircle, MessageSquare, Search, ShieldCheck, Sparkles, Sun, Users, Video,
   WalletCards, X, LockKeyhole, type LucideIcon,
 } from 'lucide-react';
