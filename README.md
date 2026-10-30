@@ -107,6 +107,8 @@ Provider dashboards, production secrets, migrations, and deployment settings are
 
 ## Documentation
 
+- [The 5 Sleeves 3D inside Guild — integration roadmap](docs/THE_5_SLEEVES_3D_GUILD_INTEGRATION_ROADMAP.md)
+
 - [Product roadmap and locked decisions](ROADMAP.md)
 - [Master architecture blueprint](MASTER_BLUEPRINT.md)
 - [AI restore and project handoff notes](AI_RESTORE_PROMPT.md)
