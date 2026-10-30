@@ -30,7 +30,7 @@ function token(block, name) {
 }
 
 const registeredThemes = Array.from(themeRegistry.matchAll(/\{ id: '([^']+)'/g), (match) => match[1]);
-const themes = ['default', ...registeredThemes.filter((theme) => theme !== 'dark')];
+const themes = ['default', ...registeredThemes.filter((theme) => theme !== 'dark' && theme !== 'system')];
 for (const theme of themes) {
   // Dark intentionally inherits the root/default palette, so validate the same token set.
   const block = readThemeBlock(theme === 'dark' ? 'default' : theme);
