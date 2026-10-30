@@ -1,7 +1,6 @@
 'use client';
 
 import { Compass, MessageCircle, PenLine, Sparkles } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
 import { FeedContent } from './FeedContent';
 import type { NavigationState } from '@/context/AppContext';
 import type { WorldType } from '@/types/database';
