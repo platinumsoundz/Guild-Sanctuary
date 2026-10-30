@@ -19,9 +19,10 @@ export function ModerationDashboard({ role = 'moderator', worldType = 'sanctuary
   const [error, setError] = useState<string | null>(null);
   const [busyReportId, setBusyReportId] = useState<string | null>(null);
 
-  const canWarn = ['moderator', 'admin', 'developer', 'owner'].includes(role);
-  const canSuspend = ['admin', 'developer', 'owner'].includes(role);
-  const canBan = ['developer', 'owner'].includes(role);
+  // Guild moderation may only affect Guild-world content until per-world account sanctions exist.
+  const canWarn = worldType !== 'guild' && ['moderator', 'admin', 'developer', 'owner'].includes(role);
+  const canSuspend = worldType !== 'guild' && ['admin', 'developer', 'owner'].includes(role);
+  const canBan = worldType !== 'guild' && ['developer', 'owner'].includes(role);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
@@ -64,7 +65,7 @@ export function ModerationDashboard({ role = 'moderator', worldType = 'sanctuary
       <header>
         <p className={styles.eyebrow}>TRUST & SAFETY</p>
         <h1>Moderation queue</h1>
-        <p>Review the reported content and its author before taking action. Every action requires a rationale and is written to the audit log.</p>
+        <p>{worldType === 'guild' ? 'Review reports on Guild content. Actions here are limited to the Guild world; account-wide warnings, suspensions and bans are disabled so they cannot affect another environment.' : 'Review the reported content and its author before taking action. Every action requires a rationale and is written to the audit log.'}</p>
       </header>
       {error && <p className={styles.error} role="alert">{error}</p>}
       {isLoading ? <p role="status">Loading moderation access…</p> : !isAuthorized ? (
