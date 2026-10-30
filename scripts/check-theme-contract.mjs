@@ -13,7 +13,7 @@ const workspaceCss = read('../src/components/AppWorkspace.module.css');
 const shellCss = read('../src/components/ResponsiveShell.module.css');
 
 assert.ok(themeRegistry.includes("{ id: 'system', label: 'Use device setting' }"), 'missing system preference option in theme catalogue');
-for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean']) {
+for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean', 'nebula', 'aurora', 'celestial', 'eclipse']) {
   assert.ok(css.includes(`:root[data-theme="${theme}"]`), `missing ${theme} palette`);
   assert.ok(themeRegistry.includes(`id: '${theme}'`), `missing ${theme} in the central theme catalogue`);
 }
@@ -32,6 +32,7 @@ assert.ok(layout.includes('THEME_PREFERENCES') && layout.includes('THEME_CATALOG
 assert.ok(layout.includes("? saved : 'dark'"), 'fresh visits must default to the cosmic dark palette');
 assert.ok(layout.includes('definition.tailwindDark'), 'pre-render bootstrap must derive Tailwind dark variants from theme metadata');
 assert.ok(settings.includes('THEME_PREFERENCE_OPTIONS.map') && settings.includes('setActiveTheme(resolveTheme'), 'settings selector and live theme application must use the central catalogue');
+assert.ok(settings.includes('ownedThemeIds.has(option.id)') && settings.includes('requiresEntitlement'), 'premium theme selector options must require owned entitlements');
 assert.ok(settings.includes("window.matchMedia('(prefers-color-scheme: light)')"), 'system preference must follow OS colour scheme');
 assert.ok(appContext.includes('fetchAccountSettings(currentUser.user.id)'), 'signed-in accounts must load saved theme on session restore');
 assert.ok(appContext.includes('document.documentElement.dataset.layout = preferences.layout'), 'saved account layout must apply across the app at session restore');
@@ -44,7 +45,7 @@ assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection mu
 assert.ok(service.includes("theme: 'dark'"), 'new accounts must default to the cosmic dark palette');
 assert.ok(service.includes('isThemePreference(record.theme)'), 'settings service must normalize preferences through the central catalogue');
 assert.ok(service.includes('isThemePreference(preferences.theme)'), 'settings service must validate saved themes through the central catalogue');
-assert.ok(types.includes("'system' | 'light' | 'dark' | 'dusk' | 'stone' | 'ocean'"), 'account theme type must include all palettes');
+assert.ok(types.includes("'system' | 'light' | 'dark' | 'dusk' | 'stone' | 'ocean' | 'nebula' | 'aurora' | 'celestial' | 'eclipse'"), 'account theme type must include all palettes');
 assert.ok(!workspaceCss.includes('--surface: #fbfcf9') && !workspaceCss.includes('--ink: #25372c'), 'app workspace must not override global semantic palette tokens');
 assert.ok(!workspaceCss.includes('--accent: var(--theme-accent, var(--accent))'), 'workspace must not self-reference the accent token');
 assert.ok(/\.viewport\s*\{[^}]*background:\s*var\(--bg\)/s.test(shellCss), 'responsive shell viewport must use the active theme background');
