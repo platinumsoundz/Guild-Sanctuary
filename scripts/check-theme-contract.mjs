@@ -12,16 +12,16 @@ const workspaceCss = read('../src/components/AppWorkspace.module.css');
 const shellCss = read('../src/components/ResponsiveShell.module.css');
 
 assert.ok(settings.includes('value="system"'), 'missing system preference option in Settings');
-for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean']) {
+for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean', 'aurora', 'ember', 'forest', 'rose', 'violet', 'midnight']) {
   assert.ok(css.includes(`:root[data-theme="${theme}"]`), `missing ${theme} palette`);
   assert.ok(settings.includes(`value="${theme}"`), `missing ${theme} option in Settings`);
 }
 assert.ok(layout.includes("localStorage.getItem('sanctuary-theme')"), 'theme bootstrap must read device preference');
 assert.ok(layout.includes("themeColor: '#080b1b'"), 'browser chrome must match the cosmic default palette');
 assert.ok(layout.includes('document.documentElement.dataset.theme = theme'), 'theme bootstrap must apply selected palette before render');
-assert.ok(layout.includes("saved === 'stone' || saved === 'ocean'"), 'pre-render bootstrap must accept new palettes');
+assert.ok(layout.includes("saved === 'stone' || saved === 'ocean' || saved === 'aurora' || saved === 'ember' || saved === 'forest' || saved === 'rose' || saved === 'violet' || saved === 'midnight'"), 'pre-render bootstrap must accept new palettes');
 assert.ok(layout.includes("? saved : 'dark'"), 'fresh visits must default to the cosmic dark palette');
-assert.ok(layout.includes("classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean')"), 'Tailwind dark variants must follow selected theme');
+assert.ok(layout.includes("classList.toggle('dark', ['dark','dusk','ocean','aurora','ember','forest','rose','violet','midnight'].includes(theme))"), 'Tailwind dark variants must follow selected theme');
 assert.ok(settings.includes("classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean')"), 'live theme changes must update Tailwind dark variants');
 assert.ok(settings.includes("window.matchMedia('(prefers-color-scheme: light)')"), 'system preference must follow OS colour scheme');
 assert.ok(appContext.includes('fetchAccountSettings(currentUser.user.id)'), 'signed-in accounts must load saved theme on session restore');
@@ -34,8 +34,8 @@ assert.ok(!layout.includes('className="dark"'), 'fixed dark class must not overr
 assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection must persist through account settings');
 assert.ok(service.includes("theme: 'dark'"), 'new accounts must default to the cosmic dark palette');
 assert.ok(service.includes("record.theme === 'stone'") && service.includes("record.theme === 'ocean'"), 'settings service must normalize added themes');
-assert.ok(service.includes("'system', 'light', 'dark', 'dusk', 'stone', 'ocean'"), 'settings service must accept every supported theme when saving');
-assert.ok(types.includes("'system' | 'light' | 'dark' | 'dusk' | 'stone' | 'ocean'"), 'account theme type must include all palettes');
+assert.ok(service.includes("'system', 'light', 'dark', 'dusk', 'stone', 'ocean', 'aurora', 'ember', 'forest', 'rose', 'violet', 'midnight'"), 'settings service must accept every supported theme when saving');
+assert.ok(types.includes("'system' | 'light' | 'dark' | 'dusk' | 'stone' | 'ocean' | 'aurora' | 'ember' | 'forest' | 'rose' | 'violet' | 'midnight'"), 'account theme type must include all palettes');
 assert.ok(!workspaceCss.includes('--surface: #fbfcf9') && !workspaceCss.includes('--ink: #25372c'), 'app workspace must not override global semantic palette tokens');
 assert.ok(!workspaceCss.includes('--accent: var(--theme-accent, var(--accent))'), 'workspace must not self-reference the accent token');
 assert.ok(/\.viewport\s*\{[^}]*background:\s*var\(--bg\)/s.test(shellCss), 'responsive shell viewport must use the active theme background');
