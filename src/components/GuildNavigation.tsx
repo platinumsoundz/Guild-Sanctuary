@@ -26,8 +26,7 @@ const guildItems: Item[] = [
   { id: 'tools', label: 'Tools', icon: Settings, description: 'Gaming links and Cloud Lab status' },
 ];
 const guildCommunityItems: Item[] = [
-  { id: 'today', label: 'Home', icon: Home },
-  { id: 'feed', label: 'Community', icon: Newspaper },
+    { id: 'feed', label: 'Community', icon: Newspaper },
   { id: 'discover', label: 'Discover', icon: Search },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'events', label: 'Events', icon: CalendarDays },
