@@ -56,6 +56,7 @@ const navigationItems: { id: NavigationState; label: string; icon: LucideIcon }[
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'support', label: 'Support the community', icon: HeartHandshake },
+  { id: 'feedback', label: 'Feedback', icon: MessageSquare },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -64,7 +65,7 @@ const navigationGroups: { label: string; items: NavigationState[] }[] = [
   { label: 'Connect', items: ['discover', 'messages', 'events', 'shorts'] },
   { label: 'Your space', items: ['profile', 'planner', 'wallet'] },
   { label: 'Explore', items: ['games', 'support', 'shop'] },
-  { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'settings'] },
+  { label: 'Sanctuary tools', items: ['notifications', 'roadmap', 'feedback', 'settings'] },
   { label: 'Stewardship', items: ['admin', 'moderation'] },
 ];
 
@@ -104,7 +105,7 @@ export function Navigation({
   onLogout,
 }: NavigationProps) {
   const role = currentUser?.profile.role?.toLowerCase() ?? 'user';
-  const guestNavigationPages = new Set<NavigationState>(['today', 'games', 'roadmap', 'support']);
+  const guestNavigationPages = new Set<NavigationState>(['today', 'games', 'roadmap', 'support', 'feedback']);
   const [pageVisibility, setPageVisibility] = useState<PageVisibilityMap>({});
   useEffect(() => {
     let cancelled = false;
@@ -114,7 +115,7 @@ export function Navigation({
   const visibleNavigationItems = (isGuest
     ? navigationItems.filter((item) => guestNavigationPages.has(item.id))
     : navigationItems.filter((item) => canAccessSanctuaryPage(item.id, currentUser ? role : 'user')))
-    .filter((item) => isPageVisible(item.id, pageVisibility, isGuest ? 'guest' : role));
+    .filter((item) => item.id === 'feedback' || isPageVisible(item.id, pageVisibility, isGuest ? 'guest' : role));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);
