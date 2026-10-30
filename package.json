@@ -48,7 +48,8 @@
     "check:guild-console-hud": "node scripts/check-guild-console-hud.mjs",
     "check:guild-community-scope": "node scripts/check-guild-community-scope.mjs",
     "check:feedback-page": "node scripts/check-feedback-page-contract.mjs",
-    "check:discover-scope": "node scripts/check-discover-scope.mjs"
+    "check:discover-scope": "node scripts/check-discover-scope.mjs",
+    "check:adsense": "node scripts/check-adsense-release-gate.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
