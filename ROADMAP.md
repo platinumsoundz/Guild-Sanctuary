@@ -1021,3 +1021,13 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - The Appearance selector, preference validation, account persistence, session restoration, pre-render bootstrap and contrast checks must discover supported themes from the central catalogue. Avoid maintaining secondary hard-coded theme lists.
 - **Adding a palette:** register its ID and metadata in `THEME_CATALOGUE`; add its semantic-token block to the central theme-token section; verify the catalogue-driven contrast contract; then review representative Sanctuary and Guild pages at desktop and narrow-phone widths. The contrast script already discovers registered IDs automatically.
 - **Long-term quality gate:** migrate remaining feature-level hard-coded colours to semantic tokens and add browser screenshot coverage for every registered theme across representative Sanctuary and Guild surfaces. Static token checks do not replace visual, keyboard, contrast or device testing.
+
+
+## Cosmic Arcade catalogue and display overhaul — 2026-10-30
+
+- Corrected the Arcade Classics collection count from the stale 16 label to **24 mini-games**, matching the actual 24-entry game catalogue.
+- Replaced the single 2048-default dropdown with a visible, responsive game library: all 24 titles are displayed as selectable cards, with category labels and a clear selected state. The selected game opens below the catalogue.
+- Preserved the existing individual game mechanics, local score table, difficulty and progression controls; this slice changes discovery and presentation rather than removing games.
+- Cosmic Arcade inventory: five standalone entries (four playable previews — Starseed Word Search, Celestial Crossword, Lunar Solitaire and Cosmic Snake — plus Zodiac Mahjong coming soon) and 24 Arcade Classics mini-games. That is 28 currently listed playable entries plus one upcoming standalone entry; gameplay QA may still identify prototype limitations.
+- Added regression assertions for the exact count, visible catalogue cards, removal of the dropdown and mobile grid styling.
+- **Status: implementation committed to feat/cosmic-arcade-overhaul-2026-10-30; CI/typecheck/build and browser/device review pending. Not merged or deployed.** Token spending remains locked; no Supabase migration or payment configuration changes are included.
