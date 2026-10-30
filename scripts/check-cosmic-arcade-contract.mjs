@@ -12,6 +12,7 @@ const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
 const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
 const gamesHub = readFileSync('src/components/GamesHub.tsx', 'utf8');
 const supportPanel = readFileSync('src/modules/support/SupportPanel.tsx', 'utf8');
+const fullscreen = readFileSync('src/components/ArcadeFullscreenToggle.tsx', 'utf8');
 
 assert.match(navigation, /id:\s*'games',\s*label:\s*'Cosmic Arcade'/, 'Cosmic Arcade remains reachable from navigation');
 assert.match(workspace, /contentNavigation === 'games' \? \(\s*<CosmicArcade \/>/, 'Cosmic Arcade route renders only the Sanctuary-built arcade');
@@ -111,5 +112,19 @@ assert.match(solitaire, /stock: current\.waste\.slice\(\)\.reverse\(\)/, 'solita
 assert.match(css, /solitaireTableau/, 'solitaire tableau styles are present');
 assert.match(css, /@media \(max-width:420px\)/, 'small-screen styles are present');
 assert.doesNotMatch(snake, /\.rpc\(|spend_tokens|token_balance/i, 'gameplay must not modify token balances from the client');
+assert.match(fullscreen, /requestFullscreen/, 'arcade games can enter native browser fullscreen');
+assert.match(fullscreen, /exitFullscreen/, 'arcade games can exit fullscreen');
+assert.match(fullscreen, /fullscreenchange/, 'fullscreen state stays synchronised with browser controls and Escape');
+assert.match(classics, /data-arcade-fullscreen/, 'Arcade Classics game viewport is fullscreen-capable');
+assert.match(classics, /<ArcadeFullscreenToggle \/>/, 'Arcade Classics exposes a fullscreen control');
+assert.match(arcade, /data-arcade-fullscreen/, 'standalone word search is fullscreen-capable');
+for (const [name,source] of [['snake',snake],['solitaire',solitaire],['crossword',crossword]]) {
+  assert.match(source, /data-arcade-fullscreen/, name+' game viewport is fullscreen-capable');
+  assert.match(source, /<ArcadeFullscreenToggle \/>/, name+' exposes a fullscreen control');
+}
+assert.match(classicsCss, /\.play:fullscreen/, 'classic games use an immersive viewport in fullscreen');
+assert.match(css, /\.playArea:fullscreen/, 'standalone games use an immersive viewport in fullscreen');
+assert.match(css, /100dvh/, 'fullscreen layouts account for mobile dynamic viewport height');
+
 
 console.log('Cosmic Arcade contract checks passed.');
