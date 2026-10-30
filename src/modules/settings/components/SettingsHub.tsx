@@ -300,7 +300,7 @@ export function SettingsHub({
               <span>Colour theme</span>
               <select id="sanctuary-theme" value={settings.preferences.theme} onChange={(event) => {
                 const theme = event.currentTarget.value;
-                if (theme !== 'system' && theme !== 'light' && theme !== 'dark' && theme !== 'dusk' && theme !== 'stone' && theme !== 'ocean') return;
+                if (!['system','light','dark','dusk','stone','ocean','aurora','ember','forest','rose','violet','midnight'].includes(theme)) return;
                 void updatePreferences({ theme }).catch((saveError) => setError(saveError instanceof Error ? saveError.message : 'The theme could not be saved.'));
               }}>
                 <option value="system">Use device setting</option>
@@ -308,10 +308,16 @@ export function SettingsHub({
                 <option value="dark">Dark</option>
                 <option value="dusk">Dusk · low-glare warm</option>
                 <option value="stone">Stone · grey</option>
-                <option value="ocean">Ocean · blue</option>
+                <option value="ocean">Ocean · deep blue</option>
+                <option value="aurora">Aurora · northern lights</option>
+                <option value="ember">Ember · warm copper</option>
+                <option value="forest">Forest · evergreen</option>
+                <option value="rose">Rose · muted pink</option>
+                <option value="violet">Violet · rich purple</option>
+                <option value="midnight">Midnight · deep navy</option>
               </select>
             </label>
-            <p className={styles.hint}>Your theme is applied across the application pages and shared navigation, and saved to your account. Profile accent colours remain separate. Token-unlockable themes can be added to this catalogue later; purchases are not enabled here.</p>
+            <p className={styles.hint}>Your theme is applied across the application pages and shared navigation, and saved to your account. Profile accent colours remain separate. Choose from the expanded palette collection. The cosmic default remains the standard look; light mode has been refreshed for a softer, more polished daytime finish.</p>
           </section>
 
           <section className={styles.panel} aria-labelledby="layout-title">
