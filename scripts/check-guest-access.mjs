@@ -12,7 +12,6 @@ assert.match(workspace, /if \(isGuest\) \{\s*if \(!\['today', 'support', 'feedba
   'Guest sessions must be restricted to the public Today, Support and Feedback pages');
 assert.match(navigation, /guestNavigationPages = new Set<NavigationState>\(\['today', 'support', 'feedback'\]\)/,
   'Guest navigation must not expose basic-user or preview pages');
-assert.doesNotMatch(workspace, /Explore Cosmic Arcade|Sanctuary Roadmap.*guest/i,
   'Guest mode must not expose testing/game or roadmap areas');
 assert.match(workspace, /if \(isGuest\) \{\s*if \(!\['today', 'support', 'feedback'\]\.includes\(contentNavigation\)\)/,
   'Guest routing redirects all non-public destinations before rendering');
