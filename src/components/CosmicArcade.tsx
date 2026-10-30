@@ -17,7 +17,7 @@ const games: { id: ArcadeGame; title: string; subtitle: string; icon: typeof Sta
   { id: 'solitaire', title: 'Lunar Solitaire', subtitle: 'A calm, moonlit take on a classic card game.', icon: MoonStar, status: 'Playable preview' },
   { id: 'mahjong', title: 'Zodiac Mahjong', subtitle: 'Match celestial tiles and zodiac symbols.', icon: Gem, status: 'Coming soon' },
   { id: 'snake', title: 'Cosmic Snake', subtitle: 'Collect stardust and see how long you survive.', icon: Sparkles, status: 'Playable preview' },
-  { id: 'classics', title: 'Arcade Classics', subtitle: 'A collection of quick puzzles, memory games and arcade challenges.', icon: Star, status: '16 playable games' },
+  { id: 'classics', title: 'Arcade Classics', subtitle: 'A collection of quick puzzles, memory games and arcade challenges.', icon: Star, status: '24 mini-games' },
 ];
 
 const wordGrid = [
