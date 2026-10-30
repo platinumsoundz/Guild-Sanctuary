@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import type { Conversation, PublicProfile } from '@/types/database';
+import type { Conversation, PublicProfile, WorldType } from '@/types/database';
 import { fetchPublicProfileById, searchPublicProfiles } from '@/modules/profiles';
 import { createGroupConversation, fetchUserConversations } from './service';
 import styles from './MessagesInbox.module.css';
@@ -11,9 +11,10 @@ interface MessagesInboxProps {
   currentUserId: string;
   onDiscoverPeople: () => void;
   onOpenConversation: (conversation: Conversation) => void;
+  worldType?: WorldType;
 }
 
-export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversation }: MessagesInboxProps) {
+export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversation, worldType = 'sanctuary' }: MessagesInboxProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [participantProfiles, setParticipantProfiles] = useState<Record<string, PublicProfile>>({});
   const [sessionUserId, setSessionUserId] = useState(currentUserId);
@@ -59,7 +60,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
     const requestId = ++inboxRequest.current;
     const requestedUserId = currentUserId;
     try {
-      const nextConversations = await fetchUserConversations(requestedUserId);
+      const nextConversations = await fetchUserConversations(requestedUserId, worldType);
       if (requestId !== inboxRequest.current || activeUserId.current !== requestedUserId) return;
       setConversations(nextConversations);
       setError(null);
@@ -72,7 +73,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
         setIsLoading(false);
       }
     }
-  }, [currentUserId]);
+  }, [currentUserId, worldType]);
 
   useEffect(() => {
     activeUserId.current = currentUserId;
@@ -156,7 +157,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
     setIsCreatingGroup(true);
     setError(null);
     try {
-      const conversation = await createGroupConversation(requestedUserId, requestedMembers, requestedName);
+      const conversation = await createGroupConversation(requestedUserId, requestedMembers, requestedName, worldType);
       if (requestId !== groupRequest.current || activeUserId.current !== requestedUserId) return;
       setGroupName('');
       setSelectedMembers([]);
