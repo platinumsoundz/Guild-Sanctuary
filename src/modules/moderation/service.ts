@@ -82,7 +82,7 @@ export async function fetchModerationQueue(worldType: WorldType = 'sanctuary'): 
     let targetCreatedAt: string | null = null;
 
     if (report.target_type === 'post') {
-      const { data } = await client.from('posts').select('content,media_url,state,created_at').eq('id', report.target_id).maybeSingle();
+      const { data } = await client.from('posts').select('content,media_url,state,created_at').eq('id', report.target_id).eq('world_type', worldType).maybeSingle();
       if (data) {
         targetContent = data.content?.slice(0, 600) ?? null;
         targetMediaUrl = data.media_url && (data.media_url.startsWith('https://') || data.media_url.startsWith('http://')) ? data.media_url : null;
@@ -90,7 +90,7 @@ export async function fetchModerationQueue(worldType: WorldType = 'sanctuary'): 
         targetCreatedAt = data.created_at;
       }
     } else if (report.target_type === 'short') {
-      const { data } = await client.from('short_videos').select('caption,video_url,state,created_at').eq('id', report.target_id).maybeSingle();
+      const { data } = await client.from('short_videos').select('caption,video_url,state,created_at').eq('id', report.target_id).eq('world_type', worldType).maybeSingle();
       if (data) {
         targetContent = data.caption?.slice(0, 600) ?? null;
         targetMediaUrl = data.video_url && (data.video_url.startsWith('https://') || data.video_url.startsWith('http://')) ? data.video_url : null;
@@ -98,7 +98,7 @@ export async function fetchModerationQueue(worldType: WorldType = 'sanctuary'): 
         targetCreatedAt = data.created_at;
       }
     } else if (report.target_type === 'event') {
-      const { data } = await client.from('events').select('title,description,state,created_at').eq('id', report.target_id).maybeSingle();
+      const { data } = await client.from('events').select('title,description,state,created_at').eq('id', report.target_id).eq('world_type', worldType).maybeSingle();
       if (data) {
         targetTitle = data.title?.slice(0, 160) ?? null;
         targetContent = data.description?.slice(0, 600) ?? null;
