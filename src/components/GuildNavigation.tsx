@@ -26,23 +26,23 @@ const guildItems: Item[] = [
   { id: 'photos', label: 'Photo Slideshow', icon: ImageIcon, description: 'Private local gallery' },
   { id: 'tools', label: 'Guild Tools', icon: Settings, description: 'Gaming links and Cloud Lab status' },
 ];
-const sanctuaryItems: Item[] = [
-  { id: 'today', label: 'Today', icon: Home },
-  { id: 'feed', label: 'Guild Community', icon: Newspaper },
+const guildCommunityItems: Item[] = [
+  { id: 'today', label: 'Home', icon: Home },
+  { id: 'feed', label: 'Community', icon: Newspaper },
   { id: 'discover', label: 'Discover', icon: Search },
-  { id: 'messages', label: 'Guild Messages', icon: MessageSquare },
-  { id: 'events', label: 'Guild Events', icon: CalendarDays },
-  { id: 'shorts', label: 'Guild Shorts', icon: Clapperboard },
-  { id: 'planner', label: 'Guild Planner', icon: CalendarCheck },
-  { id: 'profile', label: 'Guild Profile', icon: UserRound },
-  { id: 'notifications', label: 'Guild Notifications', icon: Bell },
+  { id: 'messages', label: 'Messages', icon: MessageSquare },
+  { id: 'events', label: 'Events', icon: CalendarDays },
+  { id: 'shorts', label: 'Shorts', icon: Clapperboard },
+  { id: 'planner', label: 'Planner', icon: CalendarCheck },
+  { id: 'profile', label: 'Profile', icon: UserRound },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'games', label: 'Cosmic Arcade', icon: Gamepad2 },
-  { id: 'roadmap', label: 'Sanctuary Roadmap', icon: Map },
-  { id: 'guild-roadmap', label: 'Guild Roadmap', icon: Gamepad2 },
+  { id: 'guild-roadmap', label: 'Roadmap', icon: Gamepad2 },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'shop', label: 'Token Shop', icon: ShoppingBag },
-  { id: 'support', label: 'Support the community', icon: HeartHandshake },
+  { id: 'support', label: 'Support', icon: HeartHandshake },
   { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'feedback', label: 'Feedback', icon: MessageSquare },
   { id: 'admin', label: 'Admin', icon: ShieldCheck },
   { id: 'moderation', label: 'Moderation', icon: ShieldCheck },
 ];
@@ -87,13 +87,15 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     return () => { cancelled = true; };
   }, []);
 
-  const allowed = sanctuaryItems.filter((item) => {
+  const allowed = guildCommunityItems.filter((item) => {
+    if (item.id === 'feedback') return true;
+    if (item.id === 'guild-roadmap' && !['developer', 'owner'].includes(role.toLowerCase())) return false;
     if (!canAccessSanctuaryPage(item.id, role)) return false;
     if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role) && isPageVisible(item.id, pageVisibility, role);
     if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role) && isPageVisible(item.id, pageVisibility, role);
     return isPageVisible(item.id, pageVisibility, role);
   });
-  const label = [...guildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Sanctuary';
+  const label = [...guildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Guild';
   const searchableItems = [...guildItems, ...allowed];
   const quickResults = searchableItems.filter((item) => {
     const needle = quickQuery.trim().toLowerCase();
@@ -316,12 +318,12 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
           <button type="button" onClick={onExit}><LogOut size={17} /><span>Exit to Sanctuary</span><ChevronRight size={15} /></button>
         </div>
         <GuildDiagnosticsPanel />
-        <p className={styles.quickFootnote}>Search is limited to available Guild and Sanctuary destinations. Settings apply to this browser; game audio and display behaviour can still depend on the game host.</p>
+        <p className={styles.quickFootnote}>Search is limited to available Guild destinations. Settings apply to this browser; game audio and display behaviour can still depend on the game host.</p>
       </section>
     </>, document.body)}
     {mounted && createPortal(<>
     {open && <button type="button" className={styles.scrim} aria-label="Close navigation" onClick={() => setOpen(false)} />}
-    <nav className={styles.drawer} data-open={open} aria-label="Guild and Sanctuary pages" aria-hidden={!open} inert={!open} onKeyDown={(event) => {
+    <nav className={styles.drawer} data-open={open} aria-label="Guild navigation" aria-hidden={!open} inert={!open} onKeyDown={(event) => {
       if (event.key === 'Escape') {
         event.preventDefault();
         setOpen(false);
@@ -343,7 +345,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
     }}>
       <div className={styles.drawerHead}><div><small>YOUR CONSOLE</small><h2>Navigation</h2></div><button type="button" aria-label="Close navigation" onClick={() => setOpen(false)}><X size={20} /></button></div>
       <p className={styles.group}>THE GUILD</p>{guildItems.map(render)}
-      <p className={styles.group}>SANCTUARY PAGES</p>{allowed.map(render)}
+      <p className={styles.group}>COMMUNITY &amp; TOOLS</p>{allowed.map(render)}
       <button type="button" className={styles.return} onClick={onExit}><LogOut size={17} /> Exit Guild · Return to Sanctuary</button>
     </nav>
     </>, document.body)}
