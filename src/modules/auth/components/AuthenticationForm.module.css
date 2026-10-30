@@ -179,3 +179,32 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+.termsAgreement {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  color: var(--ink, #25372c);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.termsAgreement input {
+  width: 17px;
+  height: 17px;
+  margin: 1px 0 0;
+  accent-color: var(--accent, #52765c);
+}
+.termsAgreement a {
+  color: var(--accent, #52765c);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.termsHint {
+  margin: -10px 0 0 28px;
+  color: var(--muted, #68776c);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.5;
+}
