@@ -1,5 +1,11 @@
 import type { AccountTheme } from '@/types/database';
 
+/**
+ * Permanent theme foundation.
+ * Register selectable themes here; keep page/component/layout styling shared.
+ * Palette values live in the single semantic-token section of globals.css.
+ * A new theme should be a palette addition, not a parallel styling project.
+ */
 export type ThemePreference = AccountTheme;
 export type ResolvedTheme = Exclude<AccountTheme, 'system'>;
 
