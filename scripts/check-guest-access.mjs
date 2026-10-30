@@ -31,4 +31,13 @@ assert.equal(packageJson.scripts['check:guest-access'], 'node scripts/check-gues
   'Guest access contract is exposed as an npm script');
 assert.match(workflow, /npm run check:guest-access/, 'Guest access contract runs in CI');
 
+
+const guildHome = readFileSync('src/components/GuildHomeDashboard.tsx', 'utf8');
+assert.match(guildHome, /isGuest && \(target === 'events' \|\| target === 'shorts'\)/,
+  'Guild home must hide Events and Shorts from guest mode');
+assert.match(guildHome, /canAccessSanctuaryPage\(target, role\)/,
+  'Guild home destinations must respect the shared role access policy');
+assert.match(workspace, /<GuildHomeDashboard role=\{currentRole \?\? 'user'\} isGuest=\{isGuest\}/,
+  'Guild home must receive the active role and guest state from the workspace');
+
 console.log('Guest/basic-user showcase access contract passed.');
