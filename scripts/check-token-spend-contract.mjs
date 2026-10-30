@@ -6,6 +6,9 @@ const migration = readFileSync(
   'supabase/migrations/20261027120000_keep_token_spending_locked_until_staging.sql',
   'utf8',
 );
+const repricing = readFileSync('supabase/migrations/20261030110000_reprice_token_cosmetics.sql', 'utf8');
+const bonus = readFileSync('supabase/migrations/20261030120000_first_100_signup_bonus_500.sql', 'utf8');
+const wallet = readFileSync('src/modules/economy/WalletPanel.tsx', 'utf8');
 
 const checks = [
   ['redemption is explicitly disabled until owner-approved staging', /const SPENDING_ENABLED = false/.test(shop)],
