@@ -30,6 +30,13 @@ type PublicProfileRow = {
   belief: string | null;
   social_links: Record<string, string | null> | null;
   allow_direct_messages: boolean;
+  equipped_frame?: string | null;
+  equipped_effect?: string | null;
+  equipped_badge?: string | null;
+  equipped_banner?: string | null;
+  equipped_border?: string | null;
+  equipped_profile_theme?: string | null;
+  equipped_palette?: string | null;
 };
 
 function toPublicProfile(row: PublicProfileRow): PublicProfile {
@@ -49,6 +56,13 @@ function toPublicProfile(row: PublicProfileRow): PublicProfile {
     belief: row.belief,
     socialLinks: { ...emptySocialLinks, ...(row.social_links ?? {}) },
     allowDirectMessages: row.allow_direct_messages,
+    equippedFrame: row.equipped_frame ?? null,
+    equippedEffect: row.equipped_effect ?? null,
+    equippedBadge: row.equipped_badge ?? null,
+    equippedBanner: row.equipped_banner ?? null,
+    equippedBorder: row.equipped_border ?? null,
+    equippedProfileTheme: row.equipped_profile_theme ?? null,
+    equippedPalette: row.equipped_palette ?? null,
     role: 'member',
   };
 }
@@ -73,9 +87,14 @@ export async function searchPublicProfiles(query: string): Promise<PublicProfile
     throw new Error(`Public profiles could not be searched: ${usernameResults.error?.message ?? displayNameResults.error?.message}`);
   }
 
+  const rows = [...new Map([...usernameResults.data, ...displayNameResults.data].map((row) => [row.id, row])).values()] as PublicProfileRow[];
+  const cosmeticsResult = await client.from('public_profile_cosmetics').select('*').in('id', rows.map((row) => row.id));
+  if (cosmeticsResult.error) throw new Error(`Public profile cosmetics could not be loaded: ${cosmeticsResult.error.message}`);
+  const cosmetics = new Map((cosmeticsResult.data ?? []).map((row) => [row.id, row]));
   const profiles = new Map<string, PublicProfile>();
-  for (const row of [...usernameResults.data, ...displayNameResults.data] as PublicProfileRow[]) {
-    profiles.set(row.id, toPublicProfile(row));
+  for (const row of rows) {
+    const cosmetic = cosmetics.get(row.id);
+    profiles.set(row.id, toPublicProfile({ ...row, ...(cosmetic ?? {}) } as PublicProfileRow));
   }
   return [...profiles.values()].sort((first, second) => first.displayName.localeCompare(second.displayName)).slice(0, 40);
 }
@@ -91,5 +110,8 @@ export async function fetchPublicProfileById(userId: string): Promise<PublicProf
     .eq('id', userId)
     .maybeSingle();
   if (error) throw new Error(`This public profile could not be loaded: ${error.message}`);
-  return data ? toPublicProfile(data as PublicProfileRow) : null;
+  if (!data) return null;
+  const cosmetics = await getSupabaseBrowserClient().from('public_profile_cosmetics').select('*').eq('id', userId).maybeSingle();
+  if (cosmetics.error) throw new Error(`Public profile cosmetics could not be loaded: ${cosmetics.error.message}`);
+  return toPublicProfile({ ...(data as PublicProfileRow), ...(cosmetics.data ?? {}) } as PublicProfileRow);
 }
