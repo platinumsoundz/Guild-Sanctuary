@@ -86,7 +86,7 @@ assert.match(guildNavigation, /goBack/, 'B/Back closes the drawer or returns to 
 assert.match(guildNavigation, /Navigate up/, 'touch D-pad controls operate the Guild navigation');
 assert.match(guildNavigation, /padA/, 'touchscreen A/Select is available');
 assert.match(guildNavigation, /padB/, 'touchscreen B/Back is available');
-assert.match(guildNavigation, /<NotificationBar compact \/>/, 'the Guild shell exposes the shared compact notifications panel');
+assert.match(guildNavigation, /<NotificationBar compact worldType="guild" onNavigate=\{\(page\) => onSelect\(page\)\} \/>/, 'the Guild shell exposes the shared compact notifications panel');
 assert.match(guildNavigation, /notificationSlot/, 'notification access has a dedicated console HUD slot');
 assert.match(guildNavigation, /aria-hidden={!open} inert={!open}/, 'closed Guild navigation is removed from keyboard interaction');
 assert.match(guildNavigation, /event\.key === 'Escape'[\s\S]*?menuButtonRef\.current\?\.focus\(\)/, 'Escape closes the Guild drawer and restores focus to its trigger');
