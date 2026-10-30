@@ -17,7 +17,7 @@ This report records verified repository and connected-service observations. It i
 - Unknown roles and unknown pages fail closed, including inherited JavaScript object properties.
 - Feedback remains available to guests and members; the feedback inbox remains developer/owner-only.
 - Token spending remains disabled. No live checkout or wallet-spending permission was enabled.
-- The PR's CI, typecheck/build, screenshot and CodeQL checks passed on its exact head before merge. Mainline CI passed on merge commit `49948b4af9fd9a108f9b7a00808527dca88c912b`. Cloudflare's mainline deployment workflow was still running at the latest inspection; record its final result before release. The subsequent docs-only report commit is `08c2be8476a592a79b32c7e5f438abed37fc9d5e`.
+- The PR's CI, typecheck/build, screenshot and CodeQL checks passed on its exact head before merge. Mainline CI passed on merge commit `49948b4af9fd9a108f9b7a00808527dca88c912b`. The mainline Cloudflare workflow was cancelled after a subsequent push superseded it; the PR's Cloudflare build-only check passed, but no production deploy is confirmed. The docs-only report commit was subsequently updated to `1a5100419c9ef7b930e59ab8fec3d77c3a9a312a`.
 
 ## Current verified blockers
 
@@ -51,7 +51,7 @@ This report records verified repository and connected-service observations. It i
 ### P0 — Deployment and client QA
 
 - Vercel production is now `READY` on app commit `49948b4af9fd9a108f9b7a00808527dca88c912b`; main is one later docs-only commit ahead (`08c2be8476a592a79b32c7e5f438abed37fc9d5e`). This confirms the guest/basic access integration is deployed on Vercel, but does not prove browser journeys or Supabase correctness.
-- Cloudflare's deployment workflow for the app commit was still in progress at the latest inspection. Confirm the deployed SHA and environment before treating both hosts as aligned.
+- Cloudflare's production SHA is not confirmed. Its workflow is intentionally build-only on push/PR and requires an explicit manual dispatch to deploy; the latest mainline run was cancelled. Do not treat the successful PR build as a production deployment.
 - Desktop, Android portrait/landscape, narrow mobile, keyboard navigation, and accessibility smoke tests remain outstanding.
 - No close-friends invite should be sent until the approved candidate is deployed and the P0 acceptance suite passes.
 
