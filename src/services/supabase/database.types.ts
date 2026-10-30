@@ -161,6 +161,7 @@ export interface Database {
         reason: 'founding_member_top_up' | 'founding_member_signup_bonus';
         source: string;
         created_at: string;
+        granted_at: string | null;
       }>;
 
       private_profile_vault: Table<PrivateProfileVaultRow>;
