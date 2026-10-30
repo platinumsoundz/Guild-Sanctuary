@@ -143,7 +143,7 @@ export interface Database {
       token_ledger: Table<{
         id: string;
         user_id: string;
-        bundle_id: 'tokens_100' | 'tokens_600' | 'tokens_1200';
+        bundle_id: 'tokens_100' | 'tokens_600' | 'tokens_1200' | 'signup_bonus';
         tokens_delta: number;
         amount_total: number;
         currency: 'gbp';
@@ -161,10 +161,6 @@ export interface Database {
       }>;
       token_entitlements: Table<{
         user_id: string; item_id: string; granted_at: string;
-      }>;
-      token_bonus_ledger: Table<{
-        id: string; user_id: string; tokens_delta: number; grant_position: number;
-        source: string; verified_at: string; created_at: string;
       }>;
       token_adjustment_ledger: Table<{
         id: string; user_id: string; tokens_delta: number; reason_code: 'purchase_refund' | 'chargeback_reversal' | 'manual_correction' | 'bonus_correction';
