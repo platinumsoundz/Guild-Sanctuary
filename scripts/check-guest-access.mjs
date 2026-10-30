@@ -14,8 +14,8 @@ assert.match(navigation, /guestNavigationPages = new Set<NavigationState>\(\['to
   'Guest navigation must not expose basic-user or preview pages');
 assert.doesNotMatch(workspace, /Explore Cosmic Arcade|Sanctuary Roadmap.*guest/i,
   'Guest mode must not expose testing/game or roadmap areas');
-assert.doesNotMatch(workspace, /setActiveNavigation\('guild'\)/,
-  'Guest sessions cannot open the hidden Guild');
+assert.match(workspace, /if \(isGuest\) \{\s*if \(!\['today', 'support', 'feedback'\]\.includes\(contentNavigation\)\)/,
+  'Guest routing redirects all non-public destinations before rendering');
 assert.match(context, /setActiveNavigation\('today'\)/, 'Guest sessions start on the public welcome page');
 assert.match(workspace, /contentNavigation === 'feedback'/, 'Guest feedback route remains public');
 assert.match(gates, /feedback: 'user'/, 'Feedback remains available to all signed-in roles');
