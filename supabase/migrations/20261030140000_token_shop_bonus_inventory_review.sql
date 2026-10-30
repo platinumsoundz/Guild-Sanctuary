@@ -403,4 +403,63 @@ revoke all on function public.release_token_spending_hold(uuid,text) from public
 grant execute on function public.place_token_spending_hold(uuid,text,text,text) to service_role;
 grant execute on function public.release_token_spending_hold(uuid,text) to service_role;
 
+
+-- Members may read their own bonus receipt, but cannot write it or alter the program.
+drop policy if exists "users read own beta token bonus" on public.token_bonus_ledger;
+create policy "users read own beta token bonus" on public.token_bonus_ledger
+for select to authenticated using (user_id=(select auth.uid()));
+grant select on public.token_bonus_ledger to authenticated;
+
+-- Prevent profile-edit APIs from forging cosmetic ownership/equipment fields.
+create or replace function private.guard_profile_cosmetic_writes()
+returns trigger language plpgsql security definer set search_path=''
+as $
+begin
+  if current_user in ('authenticated','anon') and (
+    new.equipped_frame is distinct from old.equipped_frame or
+    new.equipped_effect is distinct from old.equipped_effect or
+    new.equipped_badge is distinct from old.equipped_badge or
+    new.equipped_banner is distinct from old.equipped_banner or
+    new.equipped_border is distinct from old.equipped_border or
+    new.equipped_profile_theme is distinct from old.equipped_profile_theme or
+    new.equipped_palette is distinct from old.equipped_palette or
+    new.custom_accent_color is distinct from old.custom_accent_color
+  ) then
+    raise exception 'Profile cosmetics can only be changed through the verified cosmetic service.' using errcode='42501';
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists guard_profile_cosmetic_writes on public.profiles;
+create trigger guard_profile_cosmetic_writes before update on public.profiles
+for each row execute function private.guard_profile_cosmetic_writes();
+
+alter table public.profiles
+  drop constraint if exists profiles_custom_accent_color_check;
+alter table public.profiles
+  add constraint profiles_custom_accent_color_check check (
+    custom_accent_color is null or custom_accent_color in
+    ('#8b5cf6','#ec4899','#3b82f6','#a855f7','#db2777','#0d9488','#7c3aed','#2563eb')
+  );
+
+create or replace function public.set_profile_custom_accent(requested_color text)
+returns text language plpgsql security definer set search_path=''
+as $
+declare caller_id uuid := (select auth.uid());
+begin
+  if caller_id is null or not public.is_active_user() then raise exception 'An active signed-in account is required.' using errcode='42501'; end if;
+  if exists(select 1 from public.token_spending_holds h where h.user_id=caller_id) then raise exception 'Profile cosmetic changes are paused during account review.' using errcode='42501'; end if;
+  if requested_color is not null and requested_color not in
+    ('#8b5cf6','#ec4899','#3b82f6','#a855f7','#db2777','#0d9488','#7c3aed','#2563eb') then
+    raise exception 'Choose an accessible colour from the approved palette.' using errcode='22023';
+  end if;
+  if not exists(select 1 from public.token_entitlements e where e.user_id=caller_id and e.item_id='unlock_custom_accent_picker') then
+    raise exception 'Unlock the Custom Accent Picker before changing this colour.' using errcode='42501';
+  end if;
+  update public.profiles set custom_accent_color=requested_color,updated_at=now() where id=caller_id;
+  return requested_color;
+end;
+$;
+revoke all on function public.set_profile_custom_accent(text) from public,anon,authenticated,service_role;
+
 commit;
