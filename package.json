@@ -31,6 +31,7 @@
     "check:event-time": "node scripts/check-event-time-contract.mjs",
     "check:framework-security": "node scripts/check-framework-security.mjs",
     "check:token-spend": "node scripts/check-token-spend-contract.mjs",
+    "check:token-economy": "node scripts/check-token-economy-completion.mjs",
     "check:stripe-test-checkout": "node scripts/check-stripe-test-checkout-contract.mjs",
     "check:cosmic-arcade": "node scripts/check-cosmic-arcade-contract.mjs",
     "check:sanctuary-home": "node scripts/check-sanctuary-home-contract.mjs",
