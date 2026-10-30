@@ -907,3 +907,11 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - Verified by SQL that `public.platform_page_visibility` exists and has the `public can read page visibility` SELECT policy plus the `developers and owners manage page visibility` ALL policy for authenticated users.
 - Security Advisor returned pre-existing findings involving other tables/functions and leaked-password protection; the new table did not appear in the reported findings. These broader findings remain a separate security-hardening task.
 - The second Supabase project, `platinumsoundz's Project`, was left untouched because its environment/deployment mapping is not confirmed.
+
+## Role-targeted visibility and moderation reliability — 2026-10-30
+
+- Admin page visibility now has a role selector for Guest, Basic User, VIP, Moderator, Admin, Developer and Owner. Each page/role pair is persisted independently; existing rows remain as the fallback `all` setting.
+- Navigation in Sanctuary, The Guild and direct route guards evaluates the current account role against the role-specific override, then falls back to the preserved global setting. This changes discoverability only; feature and server-side authorization checks remain authoritative.
+- Added migration `20261030100000_role_targeted_visibility_and_moderation_fixes.sql` to extend the visibility table's key, align the moderator RPC gate with Developer/Owner permissions, and support comment report submission, ownership lookup and hide/remove/restore actions.
+- The moderation queue no longer fails entirely when one report's owner lookup fails. Account actions remain disabled until the target owner is verified, and moderation actions are serialized in the UI to prevent overlapping submissions.
+- **Verification still required:** run the new contract checks and typecheck/build in CI, apply the migration to the confirmed live `Guild-Sanctuary` Supabase project, then verify a Developer/Owner can load reports and hide a test post end-to-end. Do not apply this migration to the other Supabase project without confirming its environment mapping.

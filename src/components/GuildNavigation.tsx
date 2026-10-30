@@ -89,9 +89,9 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
 
   const allowed = sanctuaryItems.filter((item) => {
     if (!canAccessSanctuaryPage(item.id, role)) return false;
-    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role) && isPageVisible(item.id, pageVisibility);
-    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role) && isPageVisible(item.id, pageVisibility);
-    return isPageVisible(item.id, pageVisibility);
+    if (item.id === 'wallet') return canAccessSanctuaryFeature('wallet', role) && isPageVisible(item.id, pageVisibility, role);
+    if (item.id === 'shop') return canAccessSanctuaryFeature('tokenShop', role) && isPageVisible(item.id, pageVisibility, role);
+    return isPageVisible(item.id, pageVisibility, role);
   });
   const label = [...guildItems, ...allowed].find((item) => item.id === selectedPage)?.label ?? 'Sanctuary';
   const searchableItems = [...guildItems, ...allowed];

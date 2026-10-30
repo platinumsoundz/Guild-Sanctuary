@@ -114,7 +114,7 @@ export function Navigation({
   const visibleNavigationItems = (isGuest
     ? navigationItems.filter((item) => guestNavigationPages.has(item.id))
     : navigationItems.filter((item) => canAccessSanctuaryPage(item.id, currentUser ? role : 'user')))
-    .filter((item) => isPageVisible(item.id, pageVisibility));
+    .filter((item) => isPageVisible(item.id, pageVisibility, isGuest ? 'guest' : role));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEntryMenuOpen, setIsEntryMenuOpen] = useState(false);

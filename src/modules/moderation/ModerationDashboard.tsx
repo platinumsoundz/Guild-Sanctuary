@@ -109,11 +109,11 @@ export function ModerationDashboard({ role = 'moderator' }: ModerationDashboardP
                 <small id={`rationale-help-${report.id}`}>Use at least 3 characters. This is stored in the moderation audit trail.</small>
               </label>
               <div className={styles.actions}>
-                <button disabled={busyReportId === report.id || !rationales[report.id]?.trim()} onClick={() => void act(report, 'hide')}>Hide content</button>
-                <button disabled={busyReportId === report.id || !rationales[report.id]?.trim()} onClick={() => void act(report, 'remove')}>Remove content</button>
-                {canWarn && <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'warn')}>Warn member</button>}
-                {canSuspend && <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'suspend', true)}>Suspend 24 hours</button>}
-                {canBan && <button disabled={busyReportId === report.id || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'ban')}>Ban member</button>}
+                <button disabled={busyReportId !== null || !rationales[report.id]?.trim()} onClick={() => void act(report, 'hide')}>{busyReportId === report.id ? 'Applying…' : 'Hide content'}</button>
+                <button disabled={busyReportId !== null || !rationales[report.id]?.trim()} onClick={() => void act(report, 'remove')}>Remove content</button>
+                {canWarn && <button disabled={busyReportId !== null || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'warn')}>Warn member</button>}
+                {canSuspend && <button disabled={busyReportId !== null || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'suspend', true)}>Suspend 24 hours</button>}
+                {canBan && <button disabled={busyReportId !== null || !report.targetOwnerId || !rationales[report.id]?.trim()} onClick={() => void act(report, 'ban')}>Ban member</button>}
               </div>
             </article>
           ))}
