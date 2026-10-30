@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { NavigationState } from '@/context/AppContext';
+import type { GuildPage } from './GuildNavigation';
 import { canAccessSanctuaryPage } from '@/lib/sanctuaryFeatureGates';
 import {
   ArrowRight, Bell, CalendarDays, Clapperboard, Compass, Gamepad2, Heart,
@@ -13,8 +13,8 @@ type GameId = 'sleeves2d' | 'sleeves3d';
 type Recent = { id?: GameId; at?: number };
 const RECENTS_KEY = 'guild-library-recents-v1';
 const FAVOURITES_KEY = 'guild-library-favourites-v1';
-const games: { id: GameId; title: string; subtitle: string; art: string; target: NavigationState }[] = [
-  { id: 'sleeves3d', title: 'The 5 Sleeves 3D', subtitle: 'Third-person adventure', art: 'three-d', target: 'arcade' as NavigationState },
+const games: { id: GameId; title: string; subtitle: string; art: string; target: GuildPage }[] = [
+  { id: 'sleeves3d', title: 'The 5 Sleeves 3D', subtitle: 'Third-person adventure', art: 'three-d', target: 'arcade' },
   { id: 'sleeves2d', title: 'The 5 Sleeves 2D', subtitle: 'Multiplayer action RPG', art: 'two-d', target: 'arcade' as NavigationState },
 ];
 
@@ -24,10 +24,10 @@ const destinations: { title: string; description: string; target: NavigationStat
   { title: 'Discover', description: 'People and new worlds', target: 'discover', icon: Compass },
   { title: 'Events', description: 'What is happening next', target: 'events', icon: CalendarDays },
   { title: 'Shorts', description: 'Clips from the community', target: 'shorts', icon: Clapperboard },
-  { title: 'Music', description: 'Your local music player', target: 'music' as NavigationState, icon: Music2 },
+  { title: 'Music', description: 'Your local music player', target: 'music', icon: Music2 },
 ];
 
-export function GuildHomeDashboard({ onNavigate, onContinuePlaying, role = 'user', isGuest = false }: { onNavigate: (page: NavigationState) => void; onContinuePlaying?: () => void; role?: string; isGuest?: boolean }) {
+export function GuildHomeDashboard({ onNavigate, onContinuePlaying, role = 'user', isGuest = false }: { onNavigate: (page: GuildPage) => void; onContinuePlaying?: () => void; role?: string; isGuest?: boolean }) {
   const [recents, setRecents] = useState<Recent[]>([]);
   const [favourites, setFavourites] = useState<GameId[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -63,7 +63,7 @@ export function GuildHomeDashboard({ onNavigate, onContinuePlaying, role = 'user
   return (
     <main className={styles.page} aria-label="Guild console home">
       <section className={styles.welcomeBar}>
-        <div><span className={styles.kicker}>{nowLabel} · THE GUILD</span><h1>Ready for your next session?</h1><p>Your games, people and favourite spaces. All from one place.</p></div>
+        <div><span className={styles.kicker}>{nowLabel} · THE GUILD</span><h1>Ready for your next session?</h1><p>Your Guild experience has its own community, settings and activity space. Your games, people and favourite spaces, all from one place.</p></div>
         <div className={styles.statusCluster}><span><span className={styles.liveDot} /> CONSOLE ONLINE</span><button type="button" aria-label="Open settings" onClick={() => onNavigate('settings')}><Settings2 size={18} /></button></div>
       </section>
 
@@ -77,7 +77,7 @@ export function GuildHomeDashboard({ onNavigate, onContinuePlaying, role = 'user
             <p>{featuredGame.subtitle}</p>
             <div className={styles.heroActions}>
               <button type="button" className={styles.playButton} onClick={() => recentGames.length && onContinuePlaying ? onContinuePlaying() : onNavigate('arcade')}><Play size={16} fill="currentColor" /> {recentGames.length ? 'CONTINUE PLAYING' : 'EXPLORE GAMES'}</button>
-              <button type="button" className={styles.outlineButton} onClick={() => onNavigate('library' as NavigationState)}><Library size={16} /> OPEN LIBRARY</button>
+              <button type="button" className={styles.outlineButton} onClick={() => onNavigate('library')}><Library size={16} /> OPEN LIBRARY</button>
             </div>
           </div>
           <div className={styles.heroOrnament} aria-hidden="true"><Gamepad2 size={104} strokeWidth={0.65} /></div>
