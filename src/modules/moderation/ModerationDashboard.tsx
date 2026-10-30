@@ -25,6 +25,7 @@ export function ModerationDashboard({ role = 'moderator', worldType = 'sanctuary
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
+    setReports([]);
     try {
       const queue = await fetchModerationQueue(worldType);
       setReports(queue);
