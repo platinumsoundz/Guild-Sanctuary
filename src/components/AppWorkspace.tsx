@@ -236,7 +236,7 @@ export function AppWorkspace() {
       <button type="button" onClick={() => setActiveNavigation('today')}>Return to Today</button>
     </main>
   ) : contentNavigation === 'today' ? (
-    activeNavigation === 'guild' ? <GuildHomeDashboard onNavigate={(page) => setGuildPage(page as GuildPage)} onContinuePlaying={() => { setGuildAutoLaunchRecent(true); setGuildPage('arcade'); }} /> : <SanctuaryHome onNavigate={openNavigation} />
+    activeNavigation === 'guild' ? <GuildHomeDashboard role={currentRole ?? 'user'} isGuest={isGuest} onNavigate={(page) => setGuildPage(page as GuildPage)} onContinuePlaying={() => { setGuildAutoLaunchRecent(true); setGuildPage('arcade'); }} /> : <SanctuaryHome onNavigate={openNavigation} />
   ) : isGuest && !['support', 'feedback', 'today'].includes(contentNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
       <p className={styles.sectionEyebrow}>GUEST PREVIEW · READ ONLY</p>
@@ -396,7 +396,7 @@ export function AppWorkspace() {
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={guildPage} className={styles.guildPageContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
                 {guildPage === 'home' ? (
-                  <GuildHomeDashboard onNavigate={(page) => setGuildPage(page as GuildPage)} />
+                  <GuildHomeDashboard role={currentRole ?? 'user'} isGuest={isGuest} onNavigate={(page) => setGuildPage(page as GuildPage)} />
                 ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub autoLaunchRecent={guildAutoLaunchRecent} /></div>
                 : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
                 : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /></div>
