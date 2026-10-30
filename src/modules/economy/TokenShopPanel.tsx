@@ -27,11 +27,13 @@ interface TokenShopPanelProps {
 
 // Keep redemption disabled until owner-approved migration and staging ledger tests pass.
 const SPENDING_ENABLED = false;
+const EQUIPPING_ENABLED = false;
 
 export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: TokenShopPanelProps) {
   const [items, setItems] = useState<ShopItem[]>([]);
   const [ownedItems, setOwnedItems] = useState<Set<string>>(new Set());
   const [balance, setBalance] = useState<number | null>(null);
+  const [equippedSlots, setEquippedSlots] = useState<Record<string, string | null>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [purchasingItemId, setPurchasingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +48,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
       setItems([]);
       setOwnedItems(new Set());
       setBalance(null);
+      setEquippedSlots({});
       setIsLoading(false);
       return;
     }
@@ -58,23 +61,34 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
         throw new Error('Sign in to view your shop inventory.');
       }
 
-      const [catalogResult, entitlementsResult, walletResult] = await Promise.all([
+      const [catalogResult, entitlementsResult, walletResult, profileResult] = await Promise.all([
         client.from('token_spend_catalog')
           .select('item_id,name,description,price_tokens,kind,asset_url,asset_text,effect_key,sort_order')
           .eq('enabled', true)
           .order('sort_order', { ascending: true }),
         client.from('token_entitlements').select('item_id').eq('user_id', userId),
         client.from('token_wallets').select('balance_tokens').eq('user_id', userId).maybeSingle(),
+        client.from('profiles').select('equipped_frame,equipped_effect,equipped_badge,equipped_banner,equipped_border,equipped_profile_theme,equipped_palette').eq('id', userId).maybeSingle(),
       ]);
 
       if (catalogResult.error) throw catalogResult.error;
       if (entitlementsResult.error) throw entitlementsResult.error;
       if (walletResult.error) throw walletResult.error;
+      if (profileResult.error) throw profileResult.error;
       if (cancelled?.()) return;
 
       setItems((catalogResult.data ?? []) as ShopItem[]);
       setOwnedItems(new Set((entitlementsResult.data ?? []).map((item) => item.item_id)));
       setBalance(walletResult.data?.balance_tokens ?? 0);
+      setEquippedSlots({
+        profile_frame: profileResult.data?.equipped_frame ?? null,
+        profile_effect: profileResult.data?.equipped_effect ?? null,
+        profile_badge: profileResult.data?.equipped_badge ?? null,
+        profile_banner: profileResult.data?.equipped_banner ?? null,
+        profile_border: profileResult.data?.equipped_border ?? null,
+        profile_theme: profileResult.data?.equipped_profile_theme ?? null,
+        colour_palette: profileResult.data?.equipped_palette ?? null,
+      });
       setError(null);
     } catch (loadError) {
       if (!cancelled?.()) {
@@ -178,6 +192,29 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
       {!isGuest && !hasSupabaseAccount && <p className={styles.status}>Sign in with your account to view your balance and inventory.</p>}
       {error && <p className={styles.error} role="alert">{error}</p>}
       {notice && <p className={styles.status} role="status">{notice}</p>}
+      <section className={styles.inventory} aria-labelledby="inventory-heading">
+        <div className={styles.catalogueHeading}>
+          <div><p className={styles.eyebrow}>YOUR ACCOUNT</p><h2 id="inventory-heading">Your collection <span className={styles.inventoryCount}>{ownedItems.size}</span></h2><p>Permanent cosmetics unlocked on this account.</p></div>
+        </div>
+        {ownedItems.size === 0 ? (
+          <div className={styles.inventoryEmpty}><ShoppingBag size={22} aria-hidden="true" /><span>Your collection is empty for now. Unlocked items will appear here.</span></div>
+        ) : (
+          <div className={styles.inventoryGrid}>
+            {items.filter((item) => ownedItems.has(item.item_id)).map((item) => {
+              const slot = item.kind;
+              const equipped = equippedSlots[slot] === item.item_id;
+              return <article className={styles.inventoryItem} key={item.item_id}>
+                <div className={styles.inventoryArt} aria-hidden="true">{item.asset_text ?? <Sparkles size={22} />}</div>
+                <div className={styles.inventoryCopy}><strong>{item.name}</strong><span>{item.kind.replaceAll('_', ' ')}</span></div>
+                {equipped ? <span className={styles.equippedBadge}>Equipped</span> : <span className={styles.ownedBadge}><Check size={12} /> Owned</span>}
+                <button type="button" className={styles.equipButton} disabled={!EQUIPPING_ENABLED || equipped} title="Cosmetic equipment is locked until the staging migration and permissions are approved">{equipped ? 'Currently active' : 'Equip after staging'}</button>
+              </article>;
+            })}
+          </div>
+        )}
+        <p className={styles.inventoryFootnote}>Equipment is account-bound. Changes remain locked until the reviewed staging migration is applied and the authenticated equip tests pass.</p>
+      </section>
+
       <section className={styles.catalogue} aria-label="Cosmetic catalogue">
         <div className={styles.catalogueHeading}>
           <div><p className={styles.eyebrow}>THE COLLECTION</p><h2>Find your look</h2><p>{items.length} {items.length === 1 ? 'item' : 'items'} in the catalogue</p></div>
