@@ -13,6 +13,10 @@ alter table public.token_spend_catalog
   ));
 
 alter table public.profiles
+  add column if not exists equipped_frame text,
+  add column if not exists equipped_effect text,
+  add column if not exists equipped_badge text,
+  add column if not exists equipped_banner text,
   add column if not exists equipped_border text,
   add column if not exists equipped_profile_theme text,
   add column if not exists equipped_palette text,
