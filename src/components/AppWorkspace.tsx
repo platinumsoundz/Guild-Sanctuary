@@ -94,7 +94,7 @@ export function AppWorkspace() {
   useEffect(() => {
     if (!isSessionReady) return;
     if (isGuest) {
-      if (!['today', 'feed', 'discover', 'events', 'shorts', 'games', 'roadmap', 'support', 'feedback'].includes(contentNavigation)) {
+      if (!['today', 'feed', 'discover', 'roadmap', 'support', 'feedback'].includes(contentNavigation)) {
         setActiveNavigation('today');
       }
       return;
