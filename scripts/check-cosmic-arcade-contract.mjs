@@ -34,7 +34,7 @@ assert.match(gamesHub, /Platinum Survival Bedrock/,'creator projects retain the 
 assert.match(arcade, /Starseed Word Search/, 'word search preview remains available');
 assert.ok(arcade.includes("selectedGame === 'classics' ? <ArcadeClassics />"), 'arcade classics are connected to the main selector');
 assert.match(arcade, /24 playable games/, 'the classic games collection advertises the exact catalogue size');
-assert.match(arcade, /28<\\/strong>[\\s\\S]*?Playable games/, 'the arcade overview distinguishes the playable game count');
+assert.match(arcade, /<strong>28<\/strong>[\s\S]*?Playable games/, 'the arcade overview distinguishes the playable game count');
 assert.match(arcade, /Coming soon/, 'coming-soon status remains visible');
 assert.match(classics, /GAME LIBRARY · 24 TITLES/, 'the full classic catalogue is visible above the game');
 assert.match(classics, /arcade-game-search/, 'the catalogue provides a searchable game field');
