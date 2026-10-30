@@ -31,13 +31,13 @@ assert.ok(layout.includes('document.documentElement.dataset.theme = definition.i
 assert.ok(layout.includes('THEME_PREFERENCES') && layout.includes('THEME_CATALOGUE'), 'pre-render bootstrap must derive supported palettes from the central catalogue');
 assert.ok(layout.includes("? saved : 'dark'"), 'fresh visits must default to the cosmic dark palette');
 assert.ok(layout.includes('definition.tailwindDark'), 'pre-render bootstrap must derive Tailwind dark variants from theme metadata');
-assert.ok(settings.includes('THEME_PREFERENCE_OPTIONS.map') && settings.includes('applyTheme(resolveTheme'), 'settings selector and live theme application must use the central catalogue');
+assert.ok(settings.includes('THEME_PREFERENCE_OPTIONS.map') && settings.includes('setActiveTheme(resolveTheme'), 'settings selector and live theme application must use the central catalogue');
 assert.ok(settings.includes("window.matchMedia('(prefers-color-scheme: light)')"), 'system preference must follow OS colour scheme');
 assert.ok(appContext.includes('fetchAccountSettings(currentUser.user.id)'), 'signed-in accounts must load saved theme on session restore');
 assert.ok(appContext.includes('document.documentElement.dataset.layout = preferences.layout'), 'saved account layout must apply across the app at session restore');
 assert.ok(css.includes(':root[data-layout="compact"] [data-world="sanctuary"]'), 'compact layout must change app-wide visual density');
 assert.ok(appContext.includes("let preference = 'dark'"), 'unsigned-in sessions must default to the cosmic dark palette');
-assert.ok(appContext.includes('applyTheme(resolveTheme(preference'), 'account theme must apply after session restore');
+assert.ok(appContext.includes('setActiveTheme(resolveTheme(preference'), 'account theme must apply after session restore');
 assert.ok(layout.includes('__html: themeBootstrap'), 'theme bootstrap must be included in document head');
 assert.ok(!layout.includes('className="dark"'), 'fixed dark class must not override selected theme');
 assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection must persist through account settings');
