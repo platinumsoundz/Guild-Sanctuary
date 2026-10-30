@@ -125,7 +125,7 @@ function PageVisibilityPanel() {
     setMessage('');
     try {
       await savePageVisibility(key, selectedRole, visible);
-      setVisibility((current) => ({ ...current, [key]: visible }));
+      setVisibility((current) => ({ ...current, [key]: { ...(current[key] ?? {}), [selectedRole]: visible } }));
       setMessage(`${MANAGEABLE_PAGE_VISIBILITY.find((page) => page.key === key)?.label ?? key} is now ${visible ? 'visible' : 'hidden'} for ${PAGE_VISIBILITY_ROLES.find((item) => item.value === selectedRole)?.label ?? selectedRole}.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'The setting could not be saved. Check that the page-visibility migration is deployed.');
@@ -147,7 +147,7 @@ function PageVisibilityPanel() {
     </div>
     {loading ? <p role="status">Loading page visibility…</p> : <div className={styles.memberList}>
       {MANAGEABLE_PAGE_VISIBILITY.map((page) => <label key={page.key} className={styles.memberRow}>
-        <span><strong>{page.label}</strong><small>{page.key === 'admin' ? 'Always available to staff for recovery' : isPageVisible(page.key, visibility) ? 'Shown in navigation' : 'Hidden from navigation'}</small></span>
+        <span><strong>{page.label}</strong><small>{page.key === 'admin' ? 'Always available to staff for recovery' : isPageVisible(page.key, visibility, selectedRole) ? 'Shown in navigation' : 'Hidden from navigation'}</small></span>
         <input type="checkbox" checked={isPageVisible(page.key, visibility, selectedRole)} disabled={savingKey !== null || page.key === 'admin'} onChange={(event) => void update(page.key, event.currentTarget.checked)} aria-label={`Show ${page.label}`} />
       </label>)}
     </div>}
