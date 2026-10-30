@@ -21,7 +21,7 @@ const games: GameEntry[] = [
     url: (() => {
       const configured = process.env.NEXT_PUBLIC_5_SLEEVES_2D_URL?.trim();
       const defaultHost = process.env.VERCEL_ENV === 'preview'
-        ? 'https://integration-cloudflare-guild-host-2d.the-5-sleeves-2d.pages.dev/'
+        ? 'https://integration-cloudflare-guild.the-5-sleeves-2d.pages.dev/'
         : 'https://the-5-sleeves-2d.pages.dev/';
       if (!configured) return defaultHost;
       try {
