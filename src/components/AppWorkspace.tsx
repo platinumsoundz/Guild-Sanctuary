@@ -94,7 +94,7 @@ export function AppWorkspace() {
   useEffect(() => {
     if (!isSessionReady) return;
     if (isGuest) {
-      if (!['today', 'support', 'feedback'].includes(contentNavigation)) {
+      if (!['today', 'feed', 'discover', 'events', 'shorts', 'games', 'roadmap', 'support', 'feedback'].includes(contentNavigation)) {
         setActiveNavigation('today');
       }
       return;
@@ -237,20 +237,28 @@ export function AppWorkspace() {
     </main>
   ) : contentNavigation === 'today' ? (
     activeNavigation === 'guild' ? <GuildHomeDashboard onNavigate={(page) => setGuildPage(page as GuildPage)} onContinuePlaying={() => { setGuildAutoLaunchRecent(true); setGuildPage('arcade'); }} /> : <SanctuaryHome onNavigate={openNavigation} />
-  ) : isGuest && !['support', 'games', 'roadmap', 'feedback'].includes(contentNavigation) ? (
+  ) : isGuest && !['support', 'feedback', 'today'].includes(contentNavigation) ? (
     <main className={styles.sectionPage} aria-labelledby="guest-access-title">
-      <p className={styles.sectionEyebrow}>GUEST EXPLORATION</p>
-      <h1 id="guest-access-title">Explore before you join</h1>
+      <p className={styles.sectionEyebrow}>GUEST PREVIEW · READ ONLY</p>
+      <h1 id="guest-access-title">{({
+        feed: 'Community preview',
+        discover: 'Discover preview',
+        events: 'Events preview',
+        shorts: 'Sanctuary Shorts preview',
+        games: 'Cosmic Arcade preview',
+        roadmap: 'Sanctuary roadmap',
+      } as Record<string, string>)[contentNavigation] ?? 'Explore the Sanctuary'}</h1>
       <p className={styles.sectionDescription}>
-        Guest mode is read-only. You can explore the Cosmic Arcade, review the Sanctuary roadmap,
-        and learn about the community without creating an account.
+        You are welcome to look around. This area is shown as a safe preview in guest mode; private member data
+        and interactive account features stay protected until you sign in.
       </p>
       <div className="flex flex-wrap gap-3">
-        <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('games')}>Explore Cosmic Arcade</button>
-        <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('roadmap')}>Sanctuary Roadmap</button>
+        <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('today')}>Back to Today</button>
+        <button type="button" className="rounded-lg border px-4 py-3" onClick={() => setActiveNavigation('feedback')}>Send feedback</button>
       </div>
       <p className={styles.sectionDescription}>
-        Sign in to post, react, comment, message, manage your profile, use the planner, or access wallet and shop features.
+        Sign in or create an account to join conversations, discover members, message people, manage your profile,
+        use the planner, and access member features. Guests can continue exploring public previews without signing in.
       </p>
     </main>
   ) : contentNavigation === 'feedback' ? (
