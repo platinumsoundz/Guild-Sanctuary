@@ -118,7 +118,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
     } finally {
       if (!cancelled?.()) setIsLoading(false);
     }
-  }, [hasSupabaseAccount, userId]);
+  }, [hasSupabaseAccount, isGuest, userId]);
 
   const categories = useMemo(() => Array.from(new Set(items.filter((item) => item.enabled).map((item) => item.kind))).sort(), [items]);
   const visibleItems = useMemo(() => {
@@ -283,7 +283,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
                   <button
                     type="button"
                     className={styles.equipButton}
-                    disabled={!EQUIPPING_ENABLED || !hasSupabaseAccount || equippingItemId !== null}
+                    disabled={!EQUIPPING_ENABLED || !hasSupabaseAccount || equippingItemId !== null || purchasingItemId !== null}
                     onClick={() => void (equipped ? unequipItem(item) : equipItem(item))}
                     title={!EQUIPPING_ENABLED ? 'Enable cosmetic equipment after staging verification.' : 'Change this cosmetic on your profile.'}
                   >
@@ -324,7 +324,7 @@ export function TokenShopPanel({ userId, isGuest, worldType = 'sanctuary' }: Tok
               <div className={styles.cardBody}>
                 <div className={styles.itemTitleRow}><div><p className={styles.kind}>{item.kind.replaceAll('_', ' ')}</p><h3>{item.name}</h3></div>{owned && <span className={styles.ownedBadge}><Check size={13} /> Owned</span>}</div>
                 <p className={styles.description}>{item.description}</p>
-                <div className={styles.cardFooter}><strong>{item.price_tokens.toLocaleString('en-GB')} <span>tokens</span></strong><button type="button" disabled={!SPENDING_ENABLED || !hasSupabaseAccount || owned || purchasingItemId !== null} onClick={() => void purchaseItem(item)} className={styles.buyButton}>{owned ? 'In collection' : !SPENDING_ENABLED ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}</button></div>
+                <div className={styles.cardFooter}><strong>{item.price_tokens.toLocaleString('en-GB')} <span>tokens</span></strong><button type="button" disabled={!SPENDING_ENABLED || !hasSupabaseAccount || owned || purchasingItemId !== null || equippingItemId !== null} onClick={() => void purchaseItem(item)} className={styles.buyButton}>{owned ? 'In collection' : !SPENDING_ENABLED ? 'Coming soon' : purchasing ? 'Unlocking…' : 'Unlock item'}</button></div>
                 {!owned && balance !== null && shortfall > 0 && <p className={styles.shortfall}>You need {shortfall.toLocaleString('en-GB')} more tokens</p>}
                 {owned && <p className={styles.ownedNote}>This cosmetic is permanently linked to your account.</p>}
               </div>
