@@ -41,7 +41,7 @@ export function fetchLocalAppearancePreferences(userId: string): AppearancePrefe
     const value: unknown = JSON.parse(raw);
     if (!isRecord(value)) return defaults;
     return {
-      theme: value.theme === 'system' || value.theme === 'light' || value.theme === 'dark' || value.theme === 'dusk' || value.theme === 'stone' || value.theme === 'ocean' ? value.theme : defaults.theme,
+      theme: value.theme === 'system' || value.theme === 'light' || value.theme === 'dark' || value.theme === 'dusk' || value.theme === 'stone' || value.theme === 'ocean' || value.theme === 'midnight' || value.theme === 'forest' || value.theme === 'rose' || value.theme === 'lavender' || value.theme === 'ember' || value.theme === 'mint' ? value.theme : defaults.theme,
       layout: value.layout === 'compact' ? 'compact' : value.layout === 'comfortable' ? 'comfortable' : defaults.layout,
     };
   } catch { return defaults; }
@@ -49,7 +49,7 @@ export function fetchLocalAppearancePreferences(userId: string): AppearancePrefe
 
 export function saveLocalAppearancePreferences(userId: string, preferences: AppearancePreferences): void {
   if (!userId) throw new Error('Sign in before changing appearance settings.');
-  if (!['system', 'light', 'dark', 'dusk', 'stone', 'ocean'].includes(preferences.theme)) throw new Error('Choose a supported Sanctuary theme.');
+  if (!['system', 'light', 'dark', 'dusk', 'stone', 'ocean', 'midnight', 'forest', 'rose', 'lavender', 'ember', 'mint'].includes(preferences.theme)) throw new Error('Choose a supported Sanctuary theme.');
   if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') throw new Error('Choose a supported layout arrangement.');
   try {
     getStorage().setItem(appearanceStoragePrefix + userId, JSON.stringify(preferences));
@@ -125,7 +125,7 @@ export async function saveAccountPreferences(userId: string, preferences: Accoun
   if (preferences.layout !== 'comfortable' && preferences.layout !== 'compact') {
     throw new Error('Choose a supported layout arrangement.');
   }
-  if (!['system', 'light', 'dark', 'dusk', 'stone', 'ocean'].includes(preferences.theme)) {
+  if (!['system', 'light', 'dark', 'dusk', 'stone', 'ocean', 'midnight', 'forest', 'rose', 'lavender', 'ember', 'mint'].includes(preferences.theme)) {
     throw new Error('Choose a supported Sanctuary theme.');
   }
   if (isSupabaseCommunityStorageConfigured()) {
