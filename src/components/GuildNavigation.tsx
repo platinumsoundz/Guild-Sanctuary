@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  Home, Gamepad2, Library, Music2, Image as ImageIcon, Settings, Newspaper, Search,
+  Home, Gamepad2, Library, Music2, Settings, Newspaper, Search,
   MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard,
   Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
 } from 'lucide-react';
@@ -15,7 +15,7 @@ import { getConnectedGamepad, readGamepadButtons, readGamepadDirections, type Lo
 import { fetchNavigationBadgeCounts, type NavigationBadgeCounts } from '@/lib/navigationBadges';
 import styles from './GuildNavigation.module.css';
 
-export type GuildPage = 'home' | 'arcade' | 'trials' | 'library' | 'music' | 'photos' | 'tools' | NavigationState;
+export type GuildPage = 'home' | 'arcade' | 'trials' | 'library' | 'music' | 'tools' | NavigationState;
 type Item = { id: GuildPage; label: string; icon: typeof Home; description?: string };
 const guildItems: Item[] = [
   { id: 'home', label: 'Home', icon: Home },
@@ -23,7 +23,6 @@ const guildItems: Item[] = [
   { id: 'trials', label: 'Trials', icon: Gamepad2, description: 'Original Guild arcade games' },
   { id: 'library', label: 'My Game Collection', icon: Library, description: 'Your saved game catalogue' },
   { id: 'music', label: 'Music Player', icon: Music2, description: 'Audio selected from this device' },
-  { id: 'photos', label: 'Photo Slideshow', icon: ImageIcon, description: 'Private local gallery' },
   { id: 'tools', label: 'Tools', icon: Settings, description: 'Gaming links and Cloud Lab status' },
 ];
 const guildCommunityItems: Item[] = [
@@ -63,6 +62,8 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
   const [controllerPresent, setControllerPresent] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [musicState, setMusicState] = useState<{title:string;hasTracks:boolean;isPlaying:boolean;index:number;count:number}>({title:'No music selected',hasTracks:false,isPlaying:false,index:0,count:0});
+  const [musicPanelOpen, setMusicPanelOpen] = useState(false);
   const quickButtonRef = useRef<HTMLButtonElement>(null);
   const quickSearchRef = useRef<HTMLInputElement>(null);
   const quickPanelRef = useRef<HTMLElement>(null);
@@ -161,6 +162,14 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
   };
 
   useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    const onState = (event: Event) => { const detail = (event as CustomEvent).detail; if (detail && typeof detail === 'object') setMusicState(detail); };
+    const onOpen = () => { setMusicPanelOpen(true); setQuickOpen(false); };
+    window.addEventListener('guild-music-state', onState);
+    window.addEventListener('guild-music-panel-open', onOpen);
+    return () => { window.removeEventListener('guild-music-state', onState); window.removeEventListener('guild-music-panel-open', onOpen); };
+  }, []);
 
   useEffect(() => {
     const syncReducedMotion = (event?: Event) => {
@@ -343,6 +352,7 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
           }) : <p className={styles.quickEmpty}>No destinations match “{quickQuery}”. Try another search.</p>}
         </div>
         <div className={styles.quickSettings}>
+          <button type="button" onClick={() => { setMusicPanelOpen(true); setQuickOpen(false); }}><Music2 size={17} /><span>Music player</span><ChevronRight size={15} /></button>
           <button type="button" aria-pressed={controlsOpen} onClick={toggleControls}><Gamepad2 size={17} /><span>Touch navigation controls</span><span className={controlsOpen ? styles.toggleOn : styles.toggleOff}>{controlsOpen ? 'ON' : 'OFF'}</span></button>
           <button type="button" onClick={() => void toggleFullscreen()}><Monitor size={17} /><span>{isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}</span>{isFullscreen ? <Check size={15} /> : <Maximize2 size={15} />}</button>
           <button type="button" aria-pressed={reducedMotion} onClick={toggleReducedMotion}><SlidersHorizontal size={17} /><span>Reduce Guild motion</span><span className={reducedMotion ? styles.toggleOn : styles.toggleOff}>{reducedMotion ? 'ON' : 'OFF'}</span></button>
@@ -351,6 +361,19 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
         </div>
         <GuildDiagnosticsPanel />
         <p className={styles.quickFootnote}>Search is limited to available Guild destinations. Settings apply to this browser; game audio and display behaviour can still depend on the game host.</p>
+      </section>
+    </>, document.body)}
+    {mounted && musicPanelOpen && createPortal(<>
+      <button type="button" className={styles.quickScrim} aria-label="Close music player" onClick={() => setMusicPanelOpen(false)} />
+      <section className={styles.quickPanel} role="dialog" aria-modal="true" aria-label="Guild music player">
+        <div className={styles.quickHeading}><div><small>THE GUILD · MUSIC</small><h2>Now playing</h2></div><button type="button" aria-label="Close music player" onClick={() => setMusicPanelOpen(false)}><X size={18} /></button></div>
+        <div className={styles.quickMusicTrack}><Music2 size={24}/><div><strong>{musicState.title || 'No track selected'}</strong><small>{musicState.hasTracks ? `Track ${musicState.index+1} of ${musicState.count}` : 'Choose a folder or tracks in Music Player'}</small></div></div>
+        <div className={styles.quickMusicControls}>
+          <button type="button" disabled={!musicState.hasTracks} aria-label="Previous track" onClick={() => window.dispatchEvent(new CustomEvent('guild-music-action',{detail:'previous'}))}><SkipBack size={20}/></button>
+          <button type="button" disabled={!musicState.hasTracks} aria-label={musicState.isPlaying?'Pause':'Play'} onClick={() => window.dispatchEvent(new CustomEvent('guild-music-action',{detail:'play-pause'}))}>{musicState.isPlaying?<Pause size={22}/>:<Play size={22}/>}</button>
+          <button type="button" disabled={!musicState.hasTracks} aria-label="Next track" onClick={() => window.dispatchEvent(new CustomEvent('guild-music-action',{detail:'next'}))}><SkipForward size={20}/></button>
+        </div>
+        <button type="button" className={styles.quickKeyboardToggle} onClick={() => {setMusicPanelOpen(false);choose('music');}}>Open full music library <ChevronRight size={15}/></button>
       </section>
     </>, document.body)}
     {mounted && createPortal(<>
