@@ -9,7 +9,7 @@ assert.match(dashboard, /<h1>\{greeting\}\.<\/h1>/, 'Today has a concise persona
 assert.match(dashboard, /target: 'planner'/, 'Today links to the full planner rather than duplicating task controls');
 assert.match(dashboard, /target: 'feed'/, 'Today links to Community');
 assert.match(dashboard, /target: 'wallet'/, 'Today links to the wallet');
-assert.match(dashboard, /target: 'guild'/, 'The main launcher links to Guild Arcade');
+assert.doesNotMatch(dashboard, /target: 'guild'|Guild Arcade/, 'The Sanctuary Today launcher does not link to Guild or external game projects');
 assert.match(dashboard, /target: 'games'/, 'The main launcher links to Cosmic Arcade');
 assert.match(dashboard, /target: 'shorts'/, 'The main launcher links to Shorts');
 assert.match(dashboard, /target: 'discover'/, 'The toolkit links to member discovery');
