@@ -4,7 +4,7 @@ Date: 2026-10-30 (UTC)
 Repository: `platinumsoundz/Guild-Sanctuary`
 Baseline main before this checkpoint: `7a8d91f9df3f89ee3af80d65f61d61387a274c14`
 Integrated access commit: `49948b4af9fd9a108f9b7a00808527dca88c912b`
-Status: **IN PROGRESS — NOT APPROVED FOR FRIENDS BETA**
+Status: **IMPLEMENTATION HANDOFF — OWNER USER ACCEPTANCE PENDING**
 
 This report records verified repository and connected-service observations. It is not a substitute for staging acceptance, two-account browser tests, or owner release approval.
 
@@ -89,3 +89,29 @@ No branches were deleted or force-pushed in this checkpoint.
 ## Decision
 
 **NOT READY FOR CLOSE-FRIENDS BETA.** The access-boundary integration is merged, but the database target/migration provenance, moderation, messaging, cross-account privacy, deployment parity, and real-device acceptance gates remain unresolved. This is a controlled stabilisation checkpoint, not a release declaration.
+
+
+## Owner-directed Phase 1 handoff — 2026-10-30
+
+The owner has confirmed that the application is behaving as intended in their testing and has asked that remaining product/user-journey testing be left to them. No Supabase staging branch is to be created, and no branch/compute charge is authorised.
+
+### Additional read-only production security audit
+
+- Re-inspected production `public` SECURITY DEFINER functions using read-only catalog queries. Their functions are pinned to an empty `search_path`; the 16 advisor warnings identify authenticated execution of exposed SECURITY DEFINER RPCs, not proof that all 16 are exploitable.
+- `apply_moderation_action`, `get_moderation_report_context`, and `get_report_target_owner` all check `public.is_moderator()`. The role-change function validates active caller status, role rank, self-change prevention, and target-role rank before writing an audit event.
+- Conversation creation checks caller authentication/active status, caller membership, member counts, recipient availability and DM preferences. Read-receipt updates require active conversation membership and a direct conversation.
+- `submit_content_report` checks active-user status, validates target visibility and applies a per-user rate limit; message reports additionally require active conversation membership.
+- Token-spending and profile-cosmetic SECURITY DEFINER functions are not executable by the authenticated role in the inspected ACLs; token spending remains disabled at the application/release boundary.
+- `game_wallet_sessions` and `stripe_payment_entitlements` have RLS enabled without client policies and remain deny-by-default. No broad policies or grants were added.
+- Leaked-password protection remains flagged by the advisor. The available connected controls do not expose a safe Auth configuration update in this workflow; it has not been changed through SQL.
+- No database schema or Auth configuration was changed in this pass. No Supabase branch was created. No cost was incurred.
+
+### Handoff boundary
+
+- The owner is taking over hands-on user acceptance: account journeys, role-by-role navigation, messaging, community, Events/Shorts, planner/reflection, and desktop/Android/mobile behaviour.
+- The Phase 1 access-boundary implementation is merged. Vercel's approved app commit remains `49948b4af9fd9a108f9b7a00808527dca88c912b`.
+- Cloudflare production parity is not independently confirmed; the repository workflow builds on push and deploys only on manual dispatch. Do not describe it as deployed until a successful production deployment is observed.
+- Migration-ledger reconciliation remains a controlled release-engineering task. Do not run `supabase db push`, rename duplicate migration prefixes, or apply production DDL as a shortcut.
+- Keep checkout, ads, and token spending disabled. Do not merge stale/stacked security or payment PRs merely to clear the queue.
+
+**Status: IMPLEMENTATION HANDOFF — OWNER USER ACCEPTANCE PENDING.** This records the owner's decision to take over product testing; it does not claim that Cloudflare deployment parity, Auth leaked-password protection, or migration-ledger reconciliation has been completed.
