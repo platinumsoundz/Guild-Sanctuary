@@ -15,6 +15,7 @@ const migration = read('../supabase/migrations/20261027001557_restore_secure_per
 const dmPreferenceFix = read('../supabase/migrations/20261027002103_fix_direct_message_preference_source.sql');
 const integrationFix = read('../supabase/migrations/20261029100000_integrate_short_engagement_and_dm_preferences.sql');
 const messageReportFix = read('../supabase/migrations/20261029110000_secure_private_message_reporting.sql');
+const readReceiptsMigration = read('../supabase/migrations/20261030050000_direct_message_read_receipts.sql');
 const databaseTypes = read('../src/services/supabase/database.types.ts');
 
 const checks = [
@@ -50,6 +51,11 @@ const checks = [
   ['direct-message creation checks profile and saved privacy settings', /allow_direct_messages/.test(migration) && /privacy->>'allowDirectMessages'/.test(migration) && /preferences->>'allowDirectMessages'/.test(migration)],
   ['messaging tables are not granted to anon and writes are limited to messages', /from public, anon, authenticated/.test(migration) && /grant select on table public\.conversations, public\.conversation_members, public\.direct_conversation_pairs, public\.messages to authenticated/.test(migration) && /grant insert on table public\.messages to authenticated/.test(migration)],
   ['migration refreshes schema cache and conditionally enables Realtime', /notify pgrst, 'reload schema'/.test(migration) && /supabase_realtime/.test(migration) && /alter publication supabase_realtime add table public\.messages/.test(migration)],
+  ['direct-message read receipts are server-timestamped and membership-scoped', /mark_direct_messages_read/.test(readReceiptsMigration) && /auth\.uid\(\)/.test(readReceiptsMigration) && /is_active_conversation_member/.test(readReceiptsMigration) && /pg_catalog\.now\(\)/.test(readReceiptsMigration)],
+  ['read-receipt RPC is authenticated-only and does not grant direct table updates', /revoke all on function public\.mark_direct_messages_read\(uuid, public\.world_type\) from public, anon/.test(readReceiptsMigration) && /grant execute on function public\.mark_direct_messages_read\(uuid, public\.world_type\) to authenticated/.test(readReceiptsMigration)],
+  ['group conversations do not incorrectly reuse the single-recipient read timestamp', /c\.kind = 'direct'/.test(readReceiptsMigration) && /return null/.test(readReceiptsMigration)],
+  ['message repository subscribes to both inserts and read-receipt updates', /event: 'INSERT'/.test(repository) && /event: 'UPDATE'/.test(repository) && /mark_direct_messages_read/.test(repository)],
+  ['active thread marks incoming messages read and renders sender receipts', /markConversationMessagesRead/.test(hook) && /message\.readAt/.test(thread) && /Seen/.test(thread)],
   ['latest migration treats saved Settings DM preference as authoritative', /s\.preferences->>'allowDirectMessages'/.test(dmPreferenceFix) && /p\.allow_direct_messages/.test(dmPreferenceFix) && !/privacy->>'allowDirectMessages'/.test(dmPreferenceFix)],
 ];
 
