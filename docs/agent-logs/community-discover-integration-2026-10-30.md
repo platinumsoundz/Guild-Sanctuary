@@ -110,3 +110,12 @@ Implemented on the isolated integration branch:
 This batch delivers world-scoped event discovery, not the full relationship/interests feature set from the larger candidate branch. Follows, connection requests, blocks, saved/hidden profiles, public interests and intentions remain gated on a separate migration/RLS implementation and staging multi-account verification. Community feed and engagement were retained from current main because their newer world-scoped implementation already supersedes several stale candidate branches.
 
 - Wired `check:discover-scope` into the repository's pull-request CI workflow so the new scope/privacy contract is not merely an optional local script.
+
+
+### Expanded content discovery batch
+
+- Added a third Discover area for visible Community posts alongside People and Gatherings.
+- Posts load through `fetchFeed(worldType)` and are filtered again client-side to the active world before display. Search covers public post text and story tags; latest posts are shown first with a 30-item cap.
+- Author labels are resolved through the existing public-profile lookup only; missing/unavailable public profiles use a generic community label. Private self-discovery, daily reflections, journals and vault content are not queried.
+- Added responsive post cards, author avatars where public, local timestamps, story-tag labels and attachment-type indicators.
+- Extended `check:discover-scope` to assert that both feed and event discovery receive the active world and that author labels use public profile lookup.
