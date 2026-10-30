@@ -12,6 +12,10 @@ assert.ok(component.includes('<iframe') && component.includes('OpenStreetMap'), 
 assert.ok(component.includes('aria-label="Choose an event map pin"'), 'event map pins must have an accessible selector');
 assert.ok(component.includes('aria-pressed={selectedMapEvent?.id === event.id}'), 'map pin selection state must be exposed to assistive technology');
 assert.ok(component.includes('Show on map'), 'event cards must let users focus the map on a specific event');
+assert.ok(component.includes("const [eventView, setEventView] = useState<'list' | 'map'>('list')"), 'event discovery must default to a readable list');
+assert.ok(component.includes('Search events'), 'event discovery must expose a search control');
+assert.ok(component.includes("eventView === 'map' && <section"), 'map explorer must be optional rather than forced into the default list view');
+assert.ok(component.includes("setEventView('map')"), 'event-card map actions must switch to the map view');
 assert.ok(component.includes('Open full map'), 'users must be able to open the selected map location');
 assert.ok(component.includes('Map data © OpenStreetMap contributors'), 'map attribution must be visible');
 assert.ok(component.includes('timeZoneName: \'short\''), 'event cards must display a timezone abbreviation');
@@ -57,10 +61,15 @@ assert.ok(eventService.includes("latitude: input.locationCoords.latitude") && ev
 console.log('Event location editing contract checks passed.');
 
 assert.ok(component.includes('const [includePastEvents, setIncludePastEvents] = useState(false)'), 'past-event browsing must be opt-in by default');
-assert.ok(component.includes('const visibleEvents = events.filter((event) => includePastEvents || new Date(event.startsAt).getTime() >= Date.now())'), 'the default event view must not label past events as upcoming');
+assert.ok(component.includes('const matchesDate = includePastEvents || new Date(event.startsAt).getTime() >= Date.now()'), 'the default event view must not label past events as upcoming');
+assert.ok(component.includes('const matchesSearch = !query ||'), 'event search must filter the currently selected date range');
 assert.ok(component.includes('Include past events') && component.includes('checked={includePastEvents}'), 'people must be able to include past events with an accessible toggle');
-assert.ok(component.includes('No upcoming events right now'), 'the upcoming-only view must explain its empty state and how to find past events');
+assert.ok(component.includes('No events match those filters'), 'empty search/date results must explain how to broaden the filter');
 assert.ok(component.includes('visibleEvents.map((event, index)'), 'map pin selection must follow the active upcoming/past filter');
 assert.ok(component.includes('visibleEvents.map((event) => ('), 'event cards must follow the active upcoming/past filter');
 assert.ok(styles.includes('.pastEventsToggle input:focus-visible'), 'past-event filter must have visible keyboard focus');
 console.log('Upcoming/past event filter contract checks passed.');
+
+assert.ok(component.includes('value={searchTerm}') && component.includes('setSearchTerm(event.currentTarget.value)'), 'event search must be a controlled, working input');
+assert.ok(component.includes("aria-pressed={eventView === 'list'}") && component.includes("aria-pressed={eventView === 'map'}"), 'list/map selection must be exposed accessibly');
+console.log('List-first event discovery and search contract checks passed.');
