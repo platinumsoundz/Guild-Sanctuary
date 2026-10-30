@@ -298,8 +298,9 @@ export async function getEventEngagement(eventId: string, userId: string, worldT
     }
     return { liked: Boolean(like.data), likesCount: likesCount.count ?? 0, commentsCount: commentsCount.count ?? 0 };
   }
-  if (!findEvent(eventId)) {
-    throw new Error('This event is unavailable.');
+  const localEvent = findEvent(eventId);
+  if (!localEvent || (localEvent.worldType ?? 'sanctuary') !== worldType) {
+    throw new Error('This event is unavailable in the current community.');
   }
   return {
     liked: likes.some((like) => like.targetId === eventId && like.userId === userId),
@@ -333,7 +334,8 @@ export async function toggleEventLike(eventId: string, userId: string, worldType
     if (error) throw new Error(`Event reaction count could not be loaded: ${error.message}`);
     return { liked: !existing, count: count ?? 0 };
   }
-  if (!userId || !findEvent(eventId)) throw new Error('This event is unavailable for liking.');
+  const localEvent = findEvent(eventId);
+  if (!userId || !localEvent || (localEvent.worldType ?? 'sanctuary') !== worldType) throw new Error('This event is unavailable for liking in the current community.');
   await delay();
   const existingIndex = likes.findIndex((like) => like.targetId === eventId && like.userId === userId);
   if (existingIndex >= 0) likes.splice(existingIndex, 1);
@@ -363,7 +365,8 @@ export async function fetchEventComments(eventId: string, worldType: WorldType =
       createdAt: row.created_at,
     }));
   }
-  if (!findEvent(eventId)) throw new Error('Comments for this event are unavailable.');
+  const localEvent = findEvent(eventId);
+  if (!localEvent || (localEvent.worldType ?? 'sanctuary') !== worldType) throw new Error('Comments for this event are unavailable in the current community.');
   await delay();
   return comments.filter((comment) => comment.targetId === eventId).map((comment) => ({ ...comment }));
 }
@@ -392,7 +395,8 @@ export async function addEventComment(eventId: string, authorId: string, body: s
       createdAt: data.created_at,
     };
   }
-  if (!findEvent(eventId)) throw new Error('Comments for this event are unavailable.');
+  const localEvent = findEvent(eventId);
+  if (!localEvent || (localEvent.worldType ?? 'sanctuary') !== worldType) throw new Error('Comments for this event are unavailable in the current community.');
   await delay();
   const comment: SocialComment = {
     id: `event-comment-${Date.now()}`,
