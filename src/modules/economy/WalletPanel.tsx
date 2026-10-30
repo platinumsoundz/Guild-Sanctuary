@@ -37,6 +37,7 @@ export function WalletPanel({ userId, isGuest, worldType = 'sanctuary' }: Wallet
         setHasFoundingBonus(false);
         return;
       }
+      setHasFoundingBonus(false);
       try {
         const client = getSupabaseBrowserClient();
         const { data: authData, error: authError } = await client.auth.getUser();
