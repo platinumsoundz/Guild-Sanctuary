@@ -340,7 +340,7 @@ export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType 
   return (
     <main className={styles.page} data-world={worldType} aria-label={worldType === 'guild' ? "Guild short-form video feed" : "Short-form video feed"}>
       <header className={styles.header}>
-        <div><p>COMMUNITY CLIPS</p><h1>Shorts</h1></div>
+        <div><p>{worldType === 'guild' ? 'THE GUILD · COMMUNITY CLIPS' : 'COMMUNITY CLIPS'}</p><h1>{worldType === 'guild' ? 'Guild Shorts' : 'Shorts'}</h1></div>
         <span>Scroll or swipe to explore</span>
       </header>
       {canEngage ? (
