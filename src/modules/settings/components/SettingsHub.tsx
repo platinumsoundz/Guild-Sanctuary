@@ -5,7 +5,7 @@ import type { Profile, ProfilePrivacy, SocialLinks, WorldType } from '@/types/da
 import { isSupabaseAuthConfigured } from '@/modules/auth';
 import { useAccountSettings } from '../useAccountSettings';
 import styles from './SettingsHub.module.css';
-import { applyTheme, resolveTheme, THEME_PREFERENCE_OPTIONS, isThemePreference } from '@/lib/themes';
+import { applyTheme as setActiveTheme, resolveTheme, THEME_PREFERENCE_OPTIONS, isThemePreference } from '@/lib/themes';
 
 interface SettingsHubProps {
   userId: string;
@@ -103,7 +103,7 @@ export function SettingsHub({
     if (isLoading) return;
     const preference = settings.preferences.theme;
     const applyTheme = () => {
-      applyTheme(resolveTheme(preference, window.matchMedia('(prefers-color-scheme: light)').matches));
+      setActiveTheme(resolveTheme(preference, window.matchMedia('(prefers-color-scheme: light)').matches));
     };
     applyTheme();
     try {
