@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import type { PublicProfile } from '@/types/database';
-import type { Conversation } from '@/types/database';
+import type { Conversation, PublicProfile, WorldType } from '@/types/database';
 import { useAppContext } from '@/context/AppContext';
 import { fetchPublicProfileById } from '@/modules/profiles';
 import { useDirectMessages } from './useDirectMessages';
