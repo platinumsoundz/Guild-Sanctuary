@@ -1,6 +1,24 @@
 -- Add per-role page visibility while preserving existing global ("all") settings.
 begin;
 
+-- Keep the RPC's server-side role check aligned with the platform role hierarchy.
+-- The earlier helper only recognised moderator/admin, which blocked Developer/Owner
+-- accounts even though the Moderation page and hierarchy trigger explicitly allow them.
+create or replace function public.is_moderator()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select exists (
+    select 1 from public.profiles
+    where id = (select auth.uid())
+      and role in ('moderator', 'admin', 'developer', 'owner')
+      and status = 'active'
+  );
+$;
+
 alter table public.platform_page_visibility
   add column if not exists role_key text not null default 'all';
 
