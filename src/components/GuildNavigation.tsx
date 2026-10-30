@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  Home, Gamepad2, Library, Music2, Settings, Newspaper, Search,
+  Home, Gamepad2, Library, Music2, Settings, Newspaper, Search, SkipBack, SkipForward, Play, Pause,
   MessageSquare, CalendarDays, CalendarCheck, UserRound, Bell, Clapperboard,
   Wallet, ShoppingBag, HeartHandshake, ShieldCheck, ChevronRight, Menu, X, LogOut, SlidersHorizontal, Maximize2, Monitor, Check, Keyboard
 } from 'lucide-react';
