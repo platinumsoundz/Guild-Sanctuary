@@ -1,4 +1,5 @@
 import type { ContentReportRow, ModerationAction } from '@/services/supabase';
+import type { WorldType } from '@/types/database';
 import { getSupabaseBrowserClient } from '@/services/supabase';
 
 export type ReportTarget = ContentReportRow['target_type'];
@@ -35,7 +36,7 @@ export async function submitContentReport(input: {
   if (error) throw new Error(`Report could not be submitted: ${error.message}`);
 }
 
-export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
+export async function fetchModerationQueue(worldType: WorldType = 'sanctuary'): Promise<ModerationQueueItem[]> {
   const client = getSupabaseBrowserClient();
   const { data: userData, error: authError } = await client.auth.getUser();
   if (authError) throw new Error(`Your account could not be verified: ${authError.message}`);
@@ -59,6 +60,7 @@ export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
     .from('content_reports')
     .select('*')
     .in('status', ['open', 'reviewing'])
+    .eq('world_type', worldType)
     .order('created_at', { ascending: true })
     .limit(100);
   if (error) throw new Error(`Moderation reports could not be loaded: ${error.message}`);
