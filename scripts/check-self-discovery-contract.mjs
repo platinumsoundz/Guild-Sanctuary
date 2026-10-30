@@ -61,7 +61,7 @@ assert.ok(component.includes('const downloadReflection = () =>'), 'reflection ex
 assert.ok(component.includes('URL.createObjectURL(blob)'), 'reflection export must create a local text file without a server request');
 assert.ok(component.includes('reflection.disclaimer'), 'exported reflection must retain its non-clinical disclaimer');
 assert.ok(component.includes('setTimeout(() => URL.revokeObjectURL(url), 1000)'), 'temporary object URLs must be released after download');
-assert.ok(component.includes('sanctuary-reflection-'), 'exported file must have a recognizable filename');
+assert.ok(component.includes('sanctuary-reflection-') || component.includes('`${worldType}-reflection-'), 'exported file must have a recognizable environment-specific filename');
 assert.ok(profile.includes('<SelfDiscoveryCentre />'), 'self-discovery centre must be available from the member profile');
 
 for (const required of [
