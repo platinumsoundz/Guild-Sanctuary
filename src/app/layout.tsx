@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { AppContextProvider } from '@/context/AppContext'
 import { PwaServiceWorker } from '@/components/PwaServiceWorker'
 import { AdSenseScript } from '@/modules/ads/AdSenseScript'
+import { THEME_PREFERENCES, THEME_CATALOGUE } from '@/lib/themes'
 
 export const metadata: Metadata = {
   title: 'The Sanctuary',
@@ -24,11 +25,15 @@ const themeBootstrap = `
 (() => {
   try {
     const saved = window.localStorage.getItem('sanctuary-theme');
-    const preference = saved === 'system' || saved === 'light' || saved === 'dark' || saved === 'dusk' || saved === 'stone' || saved === 'ocean' ? saved : 'dark';
+    const supported = ${JSON.stringify(THEME_PREFERENCES)};
+    const preference = supported.includes(saved) ? saved : 'dark';
     const theme = preference === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
-    document.documentElement.dataset.theme = theme;
+    const definitions = ${JSON.stringify(THEME_CATALOGUE.map(({id,colorScheme,tailwindDark})=>({id,colorScheme,tailwindDark})))};
+    const definition = definitions.find((item) => item.id === theme) || definitions[0];
+    document.documentElement.dataset.theme = definition.id;
+    document.documentElement.style.colorScheme = definition.colorScheme;
     document.documentElement.dataset.layout = 'comfortable';
-    document.documentElement.classList.toggle('dark', theme === 'dark' || theme === 'dusk' || theme === 'ocean');
+    document.documentElement.classList.toggle('dark', definition.tailwindDark);
   } catch {
     document.documentElement.dataset.theme = 'dark';
     document.documentElement.dataset.layout = 'comfortable';
