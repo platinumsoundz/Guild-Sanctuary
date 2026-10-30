@@ -51,7 +51,8 @@
     "check:feedback-page": "node scripts/check-feedback-page-contract.mjs",
     "check:discover-scope": "node scripts/check-discover-scope.mjs",
     "check:stripe-token-fulfillment": "node scripts/check-stripe-token-fulfillment-contract.mjs",
-    "check:adsense": "node scripts/check-adsense-release-gate.mjs"
+    "check:adsense": "node scripts/check-adsense-release-gate.mjs",
+    "check:guild-device-hud": "node scripts/check-guild-device-hud.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
