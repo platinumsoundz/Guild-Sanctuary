@@ -33,7 +33,7 @@ export type SanctuaryPage =
   | 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover'
   | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile'
   | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications'
-  | 'admin' | 'moderation' | 'planner';
+  | 'admin' | 'moderation' | 'planner' | 'feedback';
 
 const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
   today: 'user',
@@ -55,6 +55,7 @@ const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
   admin: 'admin',
   moderation: 'moderator',
   planner: 'user',
+  feedback: 'user',
 };
 
 /** Fail closed for unknown pages and roles; navigation visibility is not the security boundary. */
