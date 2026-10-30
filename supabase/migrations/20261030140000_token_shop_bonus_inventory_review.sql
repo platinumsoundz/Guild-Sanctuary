@@ -163,14 +163,25 @@ begin
   end if;
 
   select * into existing_entry from public.token_ledger
-  where checkout_session_id=requested_session_id or stripe_payment_intent_id=requested_payment_intent_id
-  for update;
+  where checkout_session_id=requested_session_id for update;
   if found then
     if existing_entry.user_id<>requested_user_id or existing_entry.bundle_id<>requested_bundle_id or
       existing_entry.tokens_delta<>expected_tokens or existing_entry.amount_total<>expected_amount or
       existing_entry.currency<>requested_currency or existing_entry.livemode<>requested_livemode or
       existing_entry.stripe_payment_intent_id is distinct from requested_payment_intent_id then
-      raise exception 'Token purchase replay does not match the original payment.' using errcode='22023';
+      raise exception 'Checkout session replay does not match the original payment.' using errcode='22023';
+    end if;
+    return wallet_balance;
+  end if;
+
+  select * into existing_entry from public.token_ledger
+  where stripe_payment_intent_id=requested_payment_intent_id for update;
+  if found then
+    if existing_entry.user_id<>requested_user_id or existing_entry.bundle_id<>requested_bundle_id or
+      existing_entry.tokens_delta<>expected_tokens or existing_entry.amount_total<>expected_amount or
+      existing_entry.currency<>requested_currency or existing_entry.livemode<>requested_livemode or
+      existing_entry.checkout_session_id<>requested_session_id then
+      raise exception 'PaymentIntent replay does not match the original payment.' using errcode='22023';
     end if;
     return wallet_balance;
   end if;
