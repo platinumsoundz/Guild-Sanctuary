@@ -13,7 +13,7 @@ const workspaceCss = read('../src/components/AppWorkspace.module.css');
 const shellCss = read('../src/components/ResponsiveShell.module.css');
 
 assert.ok(themeRegistry.includes("{ id: 'system', label: 'Use device setting' }"), 'missing system preference option in theme catalogue');
-for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean']) {
+for (const theme of ['light', 'dark', 'dusk', 'stone', 'ocean', 'nebula', 'aurora', 'celestial', 'eclipse']) {
   assert.ok(css.includes(`:root[data-theme="${theme}"]`), `missing ${theme} palette`);
   assert.ok(themeRegistry.includes(`id: '${theme}'`), `missing ${theme} in the central theme catalogue`);
 }
@@ -44,7 +44,7 @@ assert.ok(settings.includes('updatePreferences({ theme })'), 'theme selection mu
 assert.ok(service.includes("theme: 'dark'"), 'new accounts must default to the cosmic dark palette');
 assert.ok(service.includes('isThemePreference(record.theme)'), 'settings service must normalize preferences through the central catalogue');
 assert.ok(service.includes('isThemePreference(preferences.theme)'), 'settings service must validate saved themes through the central catalogue');
-assert.ok(types.includes("'system' | 'light' | 'dark' | 'dusk' | 'stone' | 'ocean'"), 'account theme type must include all palettes');
+assert.ok(types.includes("'system' | 'light' | 'dark' | 'dusk' | 'stone' | 'ocean' | 'nebula' | 'aurora' | 'celestial' | 'eclipse'"), 'account theme type must include all palettes');
 assert.ok(!workspaceCss.includes('--surface: #fbfcf9') && !workspaceCss.includes('--ink: #25372c'), 'app workspace must not override global semantic palette tokens');
 assert.ok(!workspaceCss.includes('--accent: var(--theme-accent, var(--accent))'), 'workspace must not self-reference the accent token');
 assert.ok(/\.viewport\s*\{[^}]*background:\s*var\(--bg\)/s.test(shellCss), 'responsive shell viewport must use the active theme background');
@@ -54,6 +54,7 @@ for (const token of ['--surface', '--line', '--ink', '--muted', '--accent', '--a
 }
 assert.ok(!shellCss.includes('background: #fbfcf9'), 'responsive shell must not hard-code a light viewport background');
 assert.ok(settings.includes('Premium palettes unlock permanently from the Token Shop'), 'premium theme ownership must be explained in Appearance settings');
+assert.ok(settings.includes('ownedThemeIds.has(option.id)') && settings.includes('requiresEntitlement'), 'premium theme selector options must require owned entitlements');
 assert.ok(themeRegistry.includes("id: 'stone'") && themeRegistry.includes("id: 'ocean'"), 'grey and blue themes must remain selectable from the catalogue');
 assert.ok(/body::before\s*\{[^}]*pointer-events:\s*none/s.test(css), 'cosmic star field must not block interaction');
 assert.ok(css.includes('background-attachment: fixed'), 'cosmic atmosphere should stay visually anchored while scrolling');
