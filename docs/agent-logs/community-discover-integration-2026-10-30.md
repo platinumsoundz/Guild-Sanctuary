@@ -44,3 +44,33 @@ Discover candidates:
 ## Rollback
 
 All work is isolated on this branch from canonical main. Close the PR/branch if regressions are found. No production database or deployment changes are made by this audit.
+
+
+## Focused source review (continued 2026-10-30)
+
+### Community
+
+- Re-fetched current main and the Guild-independent branch versions of FeedContent.tsx, FeedContent.module.css, MeetupCalendarPlaceholder.tsx, and event CSS. The core feed and event components are already substantially aligned; the broad branch versions do not provide a clean replacement.
+- Current feed already has free-form, life-lesson and conversation-starter composition; media upload/preview; author identity and timestamps; edit/delete controls; reporting; and the worldType passed into useFeed and PostEngagement.
+- Current PostEngagement is newer than the stale community candidates for comment edit/delete/like and carries worldType. Do not regress it by copying older versions.
+- The remaining Community work should be based on targeted bug reproduction and tests, not wholesale replacement of these components. No reliable reproduction or executable test environment was available through the GitHub connector in this session.
+
+### Discover
+
+- Current main ProfileDiscovery.tsx only searches public usernames/display names and has no interest/intention filters, suggestions, relationship controls, topic discovery or event discovery.
+- The connection-discovery branch contains a much larger candidate implementation plus discoveryInterests.ts, discoveryIntentions.ts, connectionService.ts, profile editors, notification integration, four migrations, and an RLS contract test. It is a feature bundle, not a standalone component that can safely be copied.
+- The candidate's topic discovery calls fetchFeed() without a worldType, and event discovery calls fetchEvents(currentUserId) without a worldType. That is not acceptable for Guild/Sanctuary isolation without first changing those APIs and proving their filters.
+- The candidate depends on profile_interests, profile_discovery_intentions, relationship tables, block-aware policies/triggers, profile-report enum/RPC changes and matching notification behavior. These migrations are not present in current main and cannot be safely introduced by a UI-only cherry-pick.
+- The branch's own Supabase handoff explicitly says the migrations have not been confirmed applied and requires checking the connected project's migration ledger, schema, grants, RLS and multi-account behavior. Static contract checks do not prove live database security.
+- Its localStorage fallback is useful for a local preview but is not a production privacy/security boundary. Public visibility must be enforced by database RLS and verified against the connected Supabase project.
+- Private self-discovery reflections remain a separate feature family and are not imported into public discovery.
+
+### Integration decision
+
+No candidate feature branch was merged or copied in this pass because every substantial Discover candidate is coupled to unverified database changes and currently lacks the required world isolation in its content-discovery calls. Copying it would create a superficially larger UI while risking cross-world leakage and privacy regressions. The correct next implementation is to adapt the discovery service/API contracts to require worldType, then stage the schema/RLS bundle separately after a connected-project migration review. Community's current implementation is retained rather than replaced with older overlapping code.
+
+### Verification status
+
+- GitHub source files and branch trees were inspected.
+- No repository checkout, local package install, TypeScript run, build, browser session, Supabase connection, migration execution or live QA was available through the connected GitHub operations used here.
+- Therefore this pass does not claim CI success, feature completion, PR merge, migration application or deployment.
