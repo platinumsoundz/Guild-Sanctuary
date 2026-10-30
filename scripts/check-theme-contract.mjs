@@ -24,7 +24,7 @@ assert.ok(themeRegistry.includes('THEME_CATALOGUE') && themeRegistry.includes('T
 assert.ok(themeRegistry.includes('resolveTheme') && themeRegistry.includes('applyTheme'), 'theme registry must own system resolution and DOM application');
 assert.equal(css.split(':root {').slice(1).filter((segment) => segment.slice(0, segment.indexOf('}')).includes('--bg:')).length, 1, 'global CSS must define the base token palette only once');
 assert.equal((css.match(/:root\[data-theme="dark"\]\s*\{/g) || []).length, 1, 'dark theme token palette must have one definition');
-assert.ok(settings.includes('Cosmic light · daylight'), 'appearance settings must describe the mirrored cosmic light theme');
+assert.ok(themeRegistry.includes("label: 'Cosmic light · daylight'"), 'central theme catalogue must describe the mirrored cosmic light theme');
 assert.ok(layout.includes("localStorage.getItem('sanctuary-theme')"), 'theme bootstrap must read device preference');
 assert.ok(layout.includes("themeColor: '#080b1b'"), 'browser chrome must match the cosmic default palette');
 assert.ok(layout.includes('document.documentElement.dataset.theme = definition.id'), 'theme bootstrap must apply selected palette before render');
