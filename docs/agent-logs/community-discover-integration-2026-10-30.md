@@ -108,3 +108,5 @@ Implemented on the isolated integration branch:
 
 ### Remaining scope
 This batch delivers world-scoped event discovery, not the full relationship/interests feature set from the larger candidate branch. Follows, connection requests, blocks, saved/hidden profiles, public interests and intentions remain gated on a separate migration/RLS implementation and staging multi-account verification. Community feed and engagement were retained from current main because their newer world-scoped implementation already supersedes several stale candidate branches.
+
+- Wired `check:discover-scope` into the repository's pull-request CI workflow so the new scope/privacy contract is not merely an optional local script.
