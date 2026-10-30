@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { PublicProfile, WorldType } from '@/types/database';
-import { CalendarDays, Globe2, MapPin, Search, Sparkles, Users } from 'lucide-react';
+import type { Post, PublicProfile, WorldType } from '@/types/database';
+import { CalendarDays, FileText, Globe2, MapPin, Search, Sparkles, Users } from 'lucide-react';
 import { fetchEvents, type EventView } from '@/modules/events';
-import { searchPublicProfiles } from '../service';
+import { fetchFeed } from '@/modules/feeds';
+import { fetchPublicProfileById, searchPublicProfiles } from '../service';
 import styles from './ProfileDiscovery.module.css';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 
-type DiscoveryTab = 'people' | 'events';
+type DiscoveryTab = 'people' | 'posts' | 'events';
 
 interface ProfileDiscoveryProps {
   currentUserId: string;
@@ -22,6 +23,10 @@ export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }
   const [query, setQuery] = useState('');
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
   const [events, setEvents] = useState<EventView[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [postAuthors, setPostAuthors] = useState<Record<string, PublicProfile>>({});
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+  const [postsError, setPostsError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +81,46 @@ export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }
     return () => { cancelled = true; };
   }, [activeTab, currentUserId, worldType]);
 
+  useEffect(() => {
+    if (activeTab !== 'posts') return;
+    let cancelled = false;
+    setIsLoadingPosts(true);
+    setPostsError(null);
+    fetchFeed(worldType)
+      .then(async (results) => {
+        const visiblePosts = results.filter((post) => (post.worldType ?? 'sanctuary') === worldType);
+        const authorIds = [...new Set(visiblePosts.map((post) => post.authorId))];
+        const authorResults = await Promise.all(authorIds.map(async (authorId) => {
+          try {
+            const profile = await fetchPublicProfileById(authorId);
+            return profile ? [authorId, profile] as const : null;
+          } catch {
+            return null;
+          }
+        }));
+        if (!cancelled) {
+          setPosts(visiblePosts);
+          setPostAuthors(Object.fromEntries(authorResults.filter((entry): entry is NonNullable<typeof entry> => entry !== null)));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPostsError('Community posts could not be loaded. Please try again shortly.');
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingPosts(false);
+      });
+    return () => { cancelled = true; };
+  }, [activeTab, worldType]);
+
+  const visiblePosts = useMemo(() => {
+    const normalized = query.trim().toLocaleLowerCase();
+    return posts
+      .filter((post) => (post.worldType ?? 'sanctuary') === worldType)
+      .filter((post) => !normalized || `${post.content} ${post.storyTag ?? ''}`.toLocaleLowerCase().includes(normalized))
+      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+      .slice(0, 30);
+  }, [posts, query, worldType]);
+
   const visibleEvents = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
     return events
@@ -107,20 +152,24 @@ export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }
           className={activeTab === 'people' ? styles.activeTab : styles.tab} onClick={() => resetTab('people')}>
           <Users size={16} aria-hidden="true" /> People
         </button>
+        <button type="button" role="tab" id="discover-posts-tab" aria-controls="discover-panel" aria-selected={activeTab === 'posts'}
+          className={activeTab === 'posts' ? styles.activeTab : styles.tab} onClick={() => resetTab('posts')}>
+          <FileText size={16} aria-hidden="true" /> Community posts
+        </button>
         <button type="button" role="tab" id="discover-events-tab" aria-controls="discover-panel" aria-selected={activeTab === 'events'}
           className={activeTab === 'events' ? styles.activeTab : styles.tab} onClick={() => resetTab('events')}>
           <CalendarDays size={16} aria-hidden="true" /> Gatherings
         </button>
       </div>
 
-      <section id="discover-panel" role="tabpanel" aria-labelledby={activeTab === 'people' ? 'discover-people-tab' : 'discover-events-tab'}>
+      <section id="discover-panel" role="tabpanel" aria-labelledby={activeTab === 'people' ? 'discover-people-tab' : activeTab === 'posts' ? 'discover-posts-tab' : 'discover-events-tab'}>
         <label className={styles.searchField} htmlFor="discover-search">
-          <span>{activeTab === 'people' ? 'Search public usernames and display names' : 'Search upcoming gatherings'}</span>
+          <span>{activeTab === 'people' ? 'Search public usernames and display names' : activeTab === 'posts' ? 'Search visible community posts' : 'Search upcoming gatherings'}</span>
           <span className={styles.inputWrap}>
             <Search size={16} aria-hidden="true" />
             <input id="discover-search" type="search" autoComplete="off" value={query}
               onChange={(event) => setQuery(event.currentTarget.value)}
-              placeholder={activeTab === 'people' ? 'Try a username or name' : 'Try a title or keyword'} />
+              placeholder={activeTab === 'people' ? 'Try a username or name' : activeTab === 'posts' ? 'Search post text or tag' : 'Try a title or keyword'} />
           </span>
         </label>
 
@@ -166,6 +215,40 @@ export function ProfileDiscovery({ currentUserId, worldType, onMessage, onView }
                   </div>
                 </article>
               ))}
+            </div>
+          )
+        ) : activeTab === 'posts' ? (
+          isLoadingPosts ? (
+            <p className={styles.stateMessage} role="status">Loading visible posts in this community…</p>
+          ) : postsError ? (
+            <p className={styles.error} role="alert">{postsError}</p>
+          ) : visiblePosts.length === 0 ? (
+            <div className={styles.emptyState}>
+              <FileText size={24} aria-hidden="true" />
+              <p>{query.trim() ? 'No visible community posts match that search.' : 'There are no visible posts to discover in this community yet.'}</p>
+            </div>
+          ) : (
+            <div className={styles.discoverPostGrid}>
+              {visiblePosts.map((post) => {
+                const author = postAuthors[post.authorId];
+                return (
+                  <article className={styles.discoverPostCard} key={post.id}>
+                    <div className={styles.discoverPostAuthor}>
+                      <div className={styles.discoverPostAvatar} aria-hidden="true">
+                        {author?.avatarUrl ? <img src={author.avatarUrl} alt="" /> : (author?.displayName ?? 'C').slice(0, 1).toUpperCase()}
+                      </div>
+                      <div>
+                        <strong>{author?.displayName ?? 'Community member'}</strong>
+                        <span>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(post.createdAt))}</span>
+                      </div>
+                      {post.storyTag && <span className={styles.discoverPostTag}>{post.storyTag}</span>}
+                    </div>
+                    <p className={styles.discoverPostText}>{post.content}</p>
+                    {post.mediaType && <span className={styles.discoverPostMedia}>Includes {post.mediaType} attachment</span>}
+                    {author && <button className={styles.discoverPostProfile} type="button" onClick={() => onView(author)}>View member profile</button>}
+                  </article>
+                );
+              })}
             </div>
           )
         ) : isLoadingEvents ? (
