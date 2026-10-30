@@ -1,6 +1,6 @@
 # The Sanctuary — Roadmap
 
-Last updated: 2026-10-29
+Last updated: 2026-10-30
 
 Status reconciliation: this update corrects stale theme/notification labels from repository and coordination evidence. It does not claim browser QA, migration application, or production deployment.
 
@@ -913,5 +913,6 @@ Branch: `feat/admin-page-controls-and-guild-overlays-2026-10-29`
 - Admin page visibility now has a role selector for Guest, Basic User, VIP, Moderator, Admin, Developer and Owner. Each page/role pair is persisted independently; existing rows remain as the fallback `all` setting.
 - Navigation in Sanctuary, The Guild and direct route guards evaluates the current account role against the role-specific override, then falls back to the preserved global setting. This changes discoverability only; feature and server-side authorization checks remain authoritative.
 - Added migration `20261030022341_role_targeted_visibility_and_moderation_fixes.sql` to extend the visibility table's key, align the moderator RPC gate with Developer/Owner permissions, and support comment report submission, ownership lookup and hide/remove/restore actions.
+- Applied the migration to the confirmed `Guild-Sanctuary` Supabase project (`xgpzvmhldyoyrwwebcic`) on 2026-10-30. Read-only SQL verified the `role_key` column, composite `(page_key, role_key)` primary key, Developer/Owner role gate and comment-action branch. The table currently has zero rules, so existing pages remain visible by default until a role-specific switch is changed. The separate Supabase project remains untouched.
 - The moderation queue no longer fails entirely when one report's owner lookup fails. Account actions remain disabled until the target owner is verified, and moderation actions are serialized in the UI to prevent overlapping submissions.
-- **Verification still required:** run the new contract checks and typecheck/build in CI, apply the migration to the confirmed live `Guild-Sanctuary` Supabase project, then verify a Developer/Owner can load reports and hide a test post end-to-end. Do not apply this migration to the other Supabase project without confirming its environment mapping.
+- Contract checks, TypeScript typecheck and Next.js build passed on the merged feature branch. **Still outstanding:** confirm the latest main-branch Cloudflare deployment, then exercise the live UI with an authenticated Developer/Owner account and verify that hiding a test post changes its database state and removes it from the public feed. No production post was modified as part of this work.
