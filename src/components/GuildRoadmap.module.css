@@ -5,3 +5,27 @@
 .card:hover, .card:focus-within { border-color: rgba(183,165,255,.48); box-shadow: 0 16px 36px rgba(0,0,0,.2); transform: translateY(-2px); }
 .statusAvailable, .statusPreview, .statusPlanned, .statusGated { min-height: 26px; }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover, .card:focus-within { transform: none; } }
+
+
+/* Shared roadmap progress-card pattern, tuned to the Guild console palette. */
+.progressDashboard{margin:22px 0 30px;padding:clamp(16px,3vw,26px);border:1px solid rgba(178,155,255,.25);border-radius:16px;background:radial-gradient(ellipse at 100% 0%,rgba(117,82,218,.16),transparent 55%),rgba(20,18,48,.58)}
+.progressHeader{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}
+.progressHeader h2{margin:0;color:#f6f3ff;font-size:clamp(21px,3.2vw,29px);font-weight:700;letter-spacing:-.025em}
+.progressHeader>div:first-child>p:last-child{max-width:660px;margin:8px 0 0;color:#c2bdd9;font:12px/1.7 Arial,sans-serif}
+.overallProgress{display:flex;flex:0 0 auto;min-width:112px;flex-direction:column;align-items:center;justify-content:center;padding:13px 16px;border:1px solid rgba(178,155,255,.25);border-radius:12px;background:rgba(20,18,48,.72);text-align:center}
+.overallProgress strong{color:#b7a5ff;font-size:32px;line-height:1.1}
+.overallProgress span{margin-top:5px;color:#c2bdd9;font:10px Arial,sans-serif}
+.phaseGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.phaseCard{min-width:0;padding:15px;border:1px solid rgba(178,155,255,.22);border-radius:12px;background:rgba(9,8,27,.55)}
+.phaseTitle{display:grid;grid-template-columns:27px minmax(0,1fr) auto;align-items:center;gap:8px}
+.phaseTitle>span{display:grid;width:27px;height:27px;place-items:center;border-radius:8px;background:rgba(117,82,218,.22);color:#cbbcff;font:800 10px Arial,sans-serif}
+.phaseTitle h3{margin:0;color:#f6f3ff;font-size:12px;line-height:1.45;font-weight:750}
+.phaseTitle strong{color:#b7a5ff;font-size:19px}
+.progressTrack{height:7px;overflow:hidden;margin:14px 0 12px;border-radius:99px;background:rgba(178,155,255,.15)}
+.progressTrack span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7c5ce7,#b7a5ff);transition:width 220ms ease}
+.phaseCard>p{margin:0;color:#c2bdd9;font:12px/1.7 Arial,sans-serif}
+.phaseCard>small{display:block;margin-top:12px;padding-top:10px;border-top:1px solid rgba(178,155,255,.18);color:#f0eaff;font:700 10px/1.55 Arial,sans-serif}
+.progressDisclaimer{margin:15px 0 0;color:#c2bdd9;font:10px/1.65 Arial,sans-serif}
+@media(max-width:900px){.phaseGrid{grid-template-columns:1fr}.phaseCard{padding:16px}}
+@media(max-width:580px){.progressHeader{align-items:flex-start;flex-direction:column}.overallProgress{min-width:0;align-items:flex-start;padding:10px 14px}.overallProgress strong{font-size:26px}.phaseTitle{grid-template-columns:27px minmax(0,1fr) auto}}
+@media(prefers-reduced-motion:reduce){.progressTrack span{transition:none}}
