@@ -28,4 +28,17 @@ The primary Guild experience is a phone held horizontally. Design and acceptance
 - Do not claim production deployment or device QA until actually verified.
 
 ## Current batch note
-The first code pass replaces the generic Guild home dashboard with a console-led, landscape-aware home and documents the full seven-workstream programme. Follow-on work must carry the same visual system into the library, HUD, community and settings pages rather than treating the home screen as a one-off reskin.
+The first code pass replaces the generic Guild home dashboard with a console-led, landscape-aware home and documents the full seven-workstream programme.
+
+The next implementation batch now:
+- Passes the active role and guest state into the Guild home and filters destinations through the existing page-access gates. Guest mode does not show Events or Shorts; basic users do not see VIP-gated destinations.
+- Carries the shared console interaction language into the game library, including horizontal recent-play rails, consistent focus rings, thumb-friendly controls and landscape density.
+- Refines Guild community feed presentation for landscape without changing feed services, world scoping or persistence.
+- Refines account settings for landscape with a compact two-column cockpit, while retaining the existing settings service and account preference model.
+- Keeps notifications in the existing compact overlay and leaves navigation/controller quick-menu behaviour intact.
+
+## Verification state
+- Code changes are committed to the feature branch and remain in draft PR #309.
+- Role-gate behaviour is implemented in the Guild home; the existing `canAccessSanctuaryPage` policy remains the source of truth.
+- No Supabase migration/branch, schema write, new paid service, production deployment or physical Android QA has been performed.
+- Run typecheck, build and the existing role/navigation/Guild contracts before merge. If Vercel continues to reject builds due to its plan/rate limit, do not bypass the limit or upgrade without approval.
