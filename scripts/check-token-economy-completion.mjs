@@ -8,6 +8,8 @@ const walletPanel = readFileSync('src/modules/economy/WalletPanel.tsx', 'utf8');
 const profileService = readFileSync('src/modules/profiles/service.ts', 'utf8');
 const profileCard = readFileSync('src/modules/profiles/components/ProfileCard.tsx', 'utf8');
 const profileDashboard = readFileSync('src/modules/profiles/components/ProfileDashboard.tsx', 'utf8');
+const stripeWebhook = readFileSync('supabase/functions/stripe-token-webhook/index.ts', 'utf8');
+const tokenCheckout = readFileSync('supabase/functions/token-checkout/index.ts', 'utf8');
 
 const checks = [
   ['approved eight-item staging catalog is seeded', ['frame_moonlit_halo','frame_wildflower_wreath','border_aurora_line','border_gilded_laurel','theme_tidal_glass','theme_twilight_garden','palette_sanctuary_colour_pack','unlock_custom_accent_picker'].every((id) => migration.includes(id))],
@@ -19,6 +21,8 @@ const checks = [
   ['support spending holds are audited and service-role-only', /token_spending_hold_audit/.test(migration) && /grant execute on function public\.place_token_spending_hold/.test(migration) && /auth\.role\(\) <> 'service_role'/.test(migration)],
   ['manual adjustments are service-role-only, idempotent and reject negative balances', /token_adjustment_ledger/.test(migration) && /apply_token_adjustment/.test(migration) && /wallet_balance \+ requested_tokens_delta < 0/.test(migration) && /source_key text not null unique/.test(migration)],
   ['spend RPC checks account holds', /Token spending is paused while your account is under review/.test(migration)],
+  ['Stripe dispute webhook automatically pauses the linked wallet', /charge\\.dispute\\.created/.test(stripeWebhook) && /place_token_spending_hold/.test(stripeWebhook) && /stripe_payment_intent_id/.test(stripeWebhook)],
+  ['checkout records token metadata on the PaymentIntent', /payment_intent_data/.test(tokenCheckout) && /sanctuary_purchase: 'token_bundle'/.test(tokenCheckout) && /stripe_payment_intent_id text/.test(migration)],
   ['spend and equip remain revoked until staging approval', /revoke all on function public\.spend_tokens\(text,uuid\) from public,anon,authenticated,service_role/.test(migration) && /revoke all on function public\.equip_profile_cosmetic\(text\) from public,anon,authenticated,service_role/.test(migration)],
   ['profile cosmetic direct writes are guarded', /guard_profile_cosmetic_writes/.test(migration) && /app\.cosmetic_write_authorized/.test(migration)],
   ['public cosmetic projection exposes only public profile cosmetic fields', /public_profile_cosmetics/.test(migration) && /sync_public_profile_cosmetic_projection/.test(migration)],
