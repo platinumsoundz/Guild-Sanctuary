@@ -4,7 +4,7 @@
 **Scope:** Verify the cosmetic token-spend RPC and shop integration in a disposable or isolated staging Supabase project.  
 **Non-scope:** Production migration/grants, enabling live payments, changing Stripe configuration, issuing real charges, or altering real member balances.  
 **Status:** Prepared runbook; not executed.  
-**Dependency:** The token catalog/spend schema and `public.spend_tokens(text, uuid)` must exist in the target staging project. The application integration is in draft PR #122.
+**Dependency:** The token catalog/spend schema and `public.spend_tokens(text, uuid)` must exist in the target staging project. The current application integration and proposed economy completion are in draft PR #296.
 
 ## Safety gates
 
@@ -34,7 +34,7 @@ Apply reviewed migrations to staging only:
 supabase db push
 ```
 
-The migration in PR #122 is `supabase/migrations/20261027120000_grant_authenticated_token_spending.sql`. It is repository code until applied. After application, refresh PostgREST schema cache only if needed; a cache refresh does not create missing objects.
+There is no permission-opening migration in this batch. The forward-only proposal `supabase/migrations/20261030140000_token_shop_bonus_inventory_review.sql` is repository code only and is NOT APPLIED. It deliberately keeps spend/equip/clear RPC execution revoked. Do not create or apply a grant migration until the owner-approved staging test matrix passes.
 
 ## 2. Inspect function security and permissions
 
@@ -66,7 +66,7 @@ select
   has_function_privilege('public', 'public.spend_tokens(text, uuid)', 'EXECUTE') as public_can_execute;
 ```
 
-Expected after the reviewed migration: authenticated = true; anon = false; public = false. If the function definition is unsafe or permissions differ, stop and request review rather than improvising grants.
+Expected in this batch: authenticated = false; anon = false; public = false. Any change to this expectation requires a separate reviewed migration after all isolated staging tests pass.
 
 ## 3. Verify the app-level behavior
 
