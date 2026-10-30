@@ -142,7 +142,7 @@ export function ProfileDashboard({ profile, posts, isPostsLoading, onSave, onThe
 
       <ProfileCard profile={draft} />
 
-      <SelfDiscoveryCentre />
+      <SelfDiscoveryCentre worldType={worldType} />
 
       {isEditing && (
         <form className={`${styles.editor} grid w-full min-w-0`} onSubmit={(event) => void handleSave(event)}>
