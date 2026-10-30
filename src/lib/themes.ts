@@ -33,8 +33,8 @@ export const THEME_CATALOGUE: readonly ThemeDefinition[] = [
   { id: 'rose', label: 'Rose', description: 'An additional rose palette', colorScheme: 'dark', tailwindDark: true },
   { id: 'violet', label: 'Violet', description: 'An additional violet palette', colorScheme: 'dark', tailwindDark: true },
   { id: 'midnight', label: 'Midnight', description: 'An additional midnight palette', colorScheme: 'dark', tailwindDark: true },
-  { id: 'lavender', label: 'Lavender', description: 'An additional lavender palette', colorScheme: 'dark', tailwindDark: true },
-  { id: 'mint', label: 'Mint', description: 'An additional mint palette', colorScheme: 'dark', tailwindDark: true },
+  { id: 'lavender', label: 'Lavender', description: 'A soft lavender daylight palette', colorScheme: 'light', tailwindDark: false },
+  { id: 'mint', label: 'Mint', description: 'A fresh mint daylight palette', colorScheme: 'light', tailwindDark: false },
 ] as const;
 
 export const THEME_PREFERENCE_OPTIONS = [
