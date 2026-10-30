@@ -63,6 +63,32 @@ where item_id in (
   'profile_banner_aurora','profile_banner_ember','profile_banner_tide'
 );
 
+-- Retire the legacy profile-created 100-token grant before adding the verified/capped program.
+-- Existing historical signup_bonus rows and their balances are deliberately preserved.
+drop trigger if exists profiles_grant_signup_token_bonus on public.profiles;
+drop function if exists public.grant_signup_bonus_on_profile();
+drop function if exists public.grant_signup_token_bonus(uuid);
+
+-- Keep the established token_ledger as the single source of truth for wallet credits.
+alter table public.token_ledger drop constraint if exists token_ledger_bundle_id_check;
+alter table public.token_ledger drop constraint if exists token_ledger_check;
+alter table public.token_ledger drop constraint if exists token_ledger_entry_check;
+alter table public.token_ledger drop constraint if exists token_ledger_tokens_delta_check;
+alter table public.token_ledger
+  add constraint token_ledger_bundle_id_check
+  check (bundle_id in ('tokens_100','tokens_600','tokens_1200','signup_bonus'));
+alter table public.token_ledger
+  add constraint token_ledger_tokens_delta_check check (tokens_delta > 0);
+alter table public.token_ledger
+  add constraint token_ledger_economy_entry_check check (
+    (bundle_id='tokens_100' and tokens_delta=100 and amount_total=100) or
+    (bundle_id='tokens_600' and tokens_delta=600 and amount_total=500) or
+    (bundle_id='tokens_1200' and tokens_delta=1200 and amount_total=1000) or
+    (bundle_id='signup_bonus' and tokens_delta in (100,1000) and amount_total=0 and livemode=false)
+  );
+create unique index if not exists token_ledger_one_signup_bonus_per_user_idx
+  on public.token_ledger(user_id) where bundle_id='signup_bonus';
+
 -- The beta switch is intentionally OFF. An owner must explicitly open it in staging.
 create table if not exists public.token_bonus_program (
   singleton boolean primary key default true check (singleton),
@@ -73,16 +99,6 @@ create table if not exists public.token_bonus_program (
 );
 insert into public.token_bonus_program(singleton,beta_open,awarded_count)
 values (true,false,0) on conflict (singleton) do nothing;
-
-create table if not exists public.token_bonus_ledger (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null unique references public.profiles(id) on delete cascade,
-  tokens_delta bigint not null default 1000 check (tokens_delta = 1000),
-  grant_position integer not null unique check (grant_position between 1 and 100),
-  source text not null default 'verified_beta_signup',
-  verified_at timestamptz not null,
-  created_at timestamptz not null default now()
-);
 
 create table if not exists public.token_spending_holds (
   user_id uuid primary key references public.profiles(id) on delete cascade,
@@ -102,15 +118,12 @@ create table if not exists public.token_spending_hold_audit (
 );
 
 alter table public.token_bonus_program enable row level security;
-alter table public.token_bonus_ledger enable row level security;
 alter table public.token_spending_holds enable row level security;
 alter table public.token_spending_hold_audit enable row level security;
-revoke all on public.token_bonus_program, public.token_bonus_ledger,
-  public.token_spending_holds, public.token_spending_hold_audit
+revoke all on public.token_bonus_program, public.token_spending_holds, public.token_spending_hold_audit
 from public, anon, authenticated;
 grant select, insert, update, delete on public.token_bonus_program,
-  public.token_bonus_ledger, public.token_spending_holds,
-  public.token_spending_hold_audit to service_role;
+  public.token_spending_holds, public.token_spending_hold_audit to service_role;
 
 create or replace function public.try_grant_verified_beta_tokens(requested_user_id uuid)
 returns void
@@ -123,6 +136,7 @@ declare
   confirmed_at timestamptz;
   account_created_at timestamptz;
   next_position integer;
+  wallet_balance bigint;
 begin
   if requested_user_id is null then return; end if;
   select u.email_confirmed_at,u.created_at into confirmed_at,account_created_at
@@ -134,14 +148,20 @@ begin
   where singleton = true for update;
   if not found or not program_row.beta_open or program_row.opened_at is null
     or account_created_at < program_row.opened_at or program_row.awarded_count >= 100 then return; end if;
-  if exists (select 1 from public.token_bonus_ledger b where b.user_id = requested_user_id) then return; end if;
+  if exists (select 1 from public.token_ledger b where b.user_id=requested_user_id and b.bundle_id='signup_bonus') then return; end if;
 
   next_position := program_row.awarded_count + 1;
   insert into public.token_wallets(user_id) values (requested_user_id)
   on conflict (user_id) do nothing;
-  insert into public.token_bonus_ledger(user_id,tokens_delta,grant_position,verified_at)
-  values (requested_user_id,1000,next_position,confirmed_at)
-  on conflict (user_id) do nothing;
+  select balance_tokens into wallet_balance from public.token_wallets where user_id=requested_user_id for update;
+  insert into public.token_ledger(
+    user_id,bundle_id,tokens_delta,amount_total,currency,stripe_event_id,
+    checkout_session_id,livemode
+  ) values (
+    requested_user_id,'signup_bonus',1000,0,'gbp',
+    'beta_signup_bonus:' || requested_user_id::text,
+    'beta_signup_bonus:' || requested_user_id::text,false
+  ) on conflict do nothing;
   if not found then return; end if;
 
   update public.token_wallets
@@ -429,12 +449,6 @@ revoke all on function public.release_token_spending_hold(uuid,text) from public
 grant execute on function public.place_token_spending_hold(uuid,text,text,text) to service_role;
 grant execute on function public.release_token_spending_hold(uuid,text) to service_role;
 
-
--- Members may read their own bonus receipt, but cannot write it or alter the program.
-drop policy if exists "users read own beta token bonus" on public.token_bonus_ledger;
-create policy "users read own beta token bonus" on public.token_bonus_ledger
-for select to authenticated using (user_id=(select auth.uid()));
-grant select on public.token_bonus_ledger to authenticated;
 
 -- Prevent profile-edit APIs from forging cosmetic ownership/equipment fields.
 create or replace function private.guard_profile_cosmetic_writes()
