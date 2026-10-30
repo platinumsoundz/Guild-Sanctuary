@@ -397,9 +397,9 @@ export function AppWorkspace() {
                 <motion.div key={guildPage} className={styles.guildPageContent} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }}>
                 {guildPage === 'home' ? (
                   <GuildHomeDashboard role={currentRole ?? 'user'} isGuest={isGuest} onNavigate={(page) => setGuildPage(page as GuildPage)} />
-                ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub autoLaunchRecent={guildAutoLaunchRecent} /></div>
+                ) : guildPage === 'arcade' ? <div className={styles.guildSection}><GamesHub autoLaunchRecent={guildAutoLaunchRecent} onExitToGuildHome={() => { setGuildAutoLaunchRecent(false); setGuildPage('home'); }} /></div>
                 : guildPage === 'trials' ? <GuildWorld userId={currentUser?.user.id ?? null} isAuthenticated={isAuthenticated && !isGuest} />
-                : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub /></div>
+                : guildPage === 'library' ? <div className={styles.guildSection}><GamesHub onExitToGuildHome={() => { setGuildAutoLaunchRecent(false); setGuildPage('home'); }} /></div>
                 : ['music', 'photos', 'tools'].some((page) => page === guildPage) ? null
                 : authenticatedContent}
                 </motion.div>
