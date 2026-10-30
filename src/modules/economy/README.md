@@ -30,3 +30,5 @@ Wallet activity now combines verified Stripe credits, cosmetic spend entries and
 Reviewed refunds and token corrections use a separate service-role-only adjustment ledger with unique source keys, case references and actor attribution. A negative adjustment is rejected if it would take the wallet below zero; any item already spent needs a manual item-level review rather than an automatic negative balance. The app never initiates a Stripe refund from this ledger.
 
 Stripe dispute-created events are linked to the wallet by the saved PaymentIntent ID (with PaymentIntent/Checkout metadata fallback for older sessions). The webhook places a service-role hold automatically; dispute closure does not auto-release it. Support must review the case and release that specific hold explicitly.
+
+Cosmetic equipping is implemented through entitlement-checked, hold-aware RPCs and member-only grants. The UI is feature-gated by `NEXT_PUBLIC_SANCTUARY_COSMETIC_EQUIP_ENABLED=true`; leave it unset until the staging migration and equipment tests pass. Token spending remains disabled independently.
