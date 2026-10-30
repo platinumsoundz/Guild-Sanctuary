@@ -219,8 +219,7 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
       if (!active) return;
       const type = connectionManager?.type;
       const connection = type === 'wifi' ? 'wifi' : type === 'cellular' ? 'cellular' : type === 'ethernet' ? 'ethernet' : connectionManager?.effectiveType || 'unknown';
-      const rtt = typeof connectionManager?.rtt === 'number' && Number.isFinite(connectionManager.rtt) ? connectionManager.rtt : null;
-      setDeviceStatus((current) => ({ ...current, connection, rtt }));
+      setDeviceStatus((current) => ({ ...current, connection }));
     };
     const nav = navigator as Navigator & {
       getBattery?: () => Promise<EventTarget & { level:number; charging:boolean }>;
@@ -426,7 +425,7 @@ export function GuildNavigation({ selectedPage, role, userId, onSelect, onExit }
     <div className={styles.deviceHud} aria-label="Device status">
       <span title={deviceStatus.battery === null ? 'Battery information unavailable in this browser' : `Battery ${deviceStatus.battery}%`}>{deviceStatus.charging ? <BatteryCharging size={14} /> : <Battery size={14} />}<b>{deviceStatus.battery === null ? '—' : `${deviceStatus.battery}%`}</b></span>
       <span title={deviceStatus.connection === 'wifi' ? 'Wi-Fi connection detected; signal strength is not exposed by the browser' : deviceStatus.connection === 'cellular' ? 'Mobile data connection detected; signal strength is not exposed by the browser' : 'Connection type or signal details unavailable'}>{deviceStatus.connection === 'wifi' ? <Wifi size={14}/> : <Signal size={14}/>}<b>{deviceStatus.connection === 'wifi' ? 'Wi-Fi' : deviceStatus.connection === 'cellular' ? 'Mobile' : deviceStatus.connection === 'ethernet' ? 'LAN' : 'NET'}</b></span>
-      <span title={deviceStatus.rtt === null ? 'Browser network round-trip estimate unavailable' : 'Browser-estimated network round-trip time; not a server ping'}><Gauge size={14}/><b>{deviceStatus.rtt === null ? '—' : `${deviceStatus.rtt} ms`}</b></span>
+      <span title={deviceStatus.rtt === null ? 'Guild host ping unavailable' : 'Measured HTTP round-trip time to the Guild host'}><Gauge size={14}/><b>{deviceStatus.rtt === null ? '—' : `${deviceStatus.rtt} ms`}</b></span>
       <span title={deviceStatus.fps === null ? 'Measuring frame rate' : 'Approximate Guild interface frame rate'}><span className={styles.fpsGlyph}>FPS</span><b>{deviceStatus.fps === null ? '—' : deviceStatus.fps}</b></span>
     </div>
     <div className={styles.notificationSlot}><NotificationBar compact worldType="guild" onNavigate={(page) => onSelect(page)} /></div>
