@@ -290,3 +290,18 @@
 .commentTools > button, .commentEdit > button { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0; border: 0; background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; }
 .commentEdit { display: grid; gap: 6px; margin: 6px 0; }
 .commentEdit textarea { width: 100%; min-height: 56px; padding: 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); }
+
+
+.page[data-world="guild"] {
+  --ink: #f3f4f6;
+  --surface: #0f172a;
+  --surface-raised: #1e293b;
+  --line: #334155;
+  --muted: #94a3b8;
+  --accent: #7c9cff;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  border-radius: 20px;
+  overflow: clip;
+}
