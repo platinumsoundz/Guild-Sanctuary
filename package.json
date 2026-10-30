@@ -46,6 +46,7 @@
     "check:today-dashboard": "node scripts/check-today-dashboard-contract.mjs",
     "check:guild-mobile-navigation": "node scripts/check-guild-mobile-navigation.mjs",
     "check:guild-console-hud": "node scripts/check-guild-console-hud.mjs",
+    "check:guild-game-exit": "node scripts/check-guild-game-exit.mjs",
     "check:guild-community-scope": "node scripts/check-guild-community-scope.mjs",
     "check:feedback-page": "node scripts/check-feedback-page-contract.mjs",
     "check:discover-scope": "node scripts/check-discover-scope.mjs",
