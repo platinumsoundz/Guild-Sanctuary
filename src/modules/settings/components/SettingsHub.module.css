@@ -281,3 +281,32 @@
 @media (prefers-reduced-motion: reduce) {
   .launchGuildButton { transition: none; }
 }
+
+/* Guild Console 2.0: compact settings cockpit for phone landscape. */
+.settings :where(button,input,select) { touch-action: manipulation; }
+.settings :where(button,input,select):focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+@media (orientation:landscape) and (max-height:600px) {
+  .settings {
+    width:100%;
+    max-width:none;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:start;
+    gap:12px;
+    padding:12px 16px 28px;
+  }
+  .header { grid-column:1/-1; margin:0; padding:16px 20px; }
+  .header h1 { font-size:clamp(22px,3vw,30px); }
+  .header > p:last-child { margin:7px 0 0; font-size:11px; line-height:1.5; }
+  .panel { padding:14px; border-radius:16px; }
+  .panel h2 { margin-bottom:10px; font-size:15px; }
+  .toggleList,.linksForm { gap:6px; }
+  .toggleRow { min-height:42px; padding:7px 9px; font-size:11px; }
+  .layoutChoices label { min-height:40px; padding:8px 10px; font-size:11px; }
+  .dangerPanel { grid-column:1/-1; }
+}
+@media (max-width:560px) and (orientation:portrait) {
+  .settings :where(button,input,select) { min-height:44px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .settings * { scroll-behavior:auto; }
+}
