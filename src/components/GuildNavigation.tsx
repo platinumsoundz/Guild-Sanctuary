@@ -17,13 +17,13 @@ import styles from './GuildNavigation.module.css';
 export type GuildPage = 'home' | 'arcade' | 'trials' | 'library' | 'music' | 'photos' | 'tools' | NavigationState;
 type Item = { id: GuildPage; label: string; icon: typeof Home; description?: string };
 const guildItems: Item[] = [
-  { id: 'home', label: 'Guild Home', icon: Home },
+  { id: 'home', label: 'Home', icon: Home },
   { id: 'arcade', label: 'Featured Games', icon: Gamepad2, description: 'Launch The 5 Sleeves and browser games' },
-  { id: 'trials', label: 'Guild Trials', icon: Gamepad2, description: 'Original Guild arcade games' },
+  { id: 'trials', label: 'Trials', icon: Gamepad2, description: 'Original Guild arcade games' },
   { id: 'library', label: 'My Game Collection', icon: Library, description: 'Your saved game catalogue' },
   { id: 'music', label: 'Music Player', icon: Music2, description: 'Audio selected from this device' },
   { id: 'photos', label: 'Photo Slideshow', icon: ImageIcon, description: 'Private local gallery' },
-  { id: 'tools', label: 'Guild Tools', icon: Settings, description: 'Gaming links and Cloud Lab status' },
+  { id: 'tools', label: 'Tools', icon: Settings, description: 'Gaming links and Cloud Lab status' },
 ];
 const guildCommunityItems: Item[] = [
   { id: 'today', label: 'Home', icon: Home },
@@ -315,7 +315,7 @@ export function GuildNavigation({ selectedPage, role, onSelect, onExit }: {
           <button type="button" aria-pressed={controlsOpen} onClick={toggleControls}><Gamepad2 size={17} /><span>Touch navigation controls</span><span className={controlsOpen ? styles.toggleOn : styles.toggleOff}>{controlsOpen ? 'ON' : 'OFF'}</span></button>
           <button type="button" onClick={() => void toggleFullscreen()}><Monitor size={17} /><span>{isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}</span>{isFullscreen ? <Check size={15} /> : <Maximize2 size={15} />}</button>
           <button type="button" aria-pressed={reducedMotion} onClick={toggleReducedMotion}><SlidersHorizontal size={17} /><span>Reduce Guild motion</span><span className={reducedMotion ? styles.toggleOn : styles.toggleOff}>{reducedMotion ? 'ON' : 'OFF'}</span></button>
-          <button type="button" onClick={() => choose('home')}><Home size={17} /><span>Resume Guild Home</span><ChevronRight size={15} /></button>
+          <button type="button" onClick={() => choose('home')}><Home size={17} /><span>Resume Home</span><ChevronRight size={15} /></button>
           <button type="button" onClick={onExit}><LogOut size={17} /><span>Exit to Sanctuary</span><ChevronRight size={15} /></button>
         </div>
         <GuildDiagnosticsPanel />
