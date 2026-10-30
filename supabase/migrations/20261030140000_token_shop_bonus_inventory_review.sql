@@ -38,6 +38,11 @@ alter table public.profiles
   add column if not exists equipped_palette text,
   add column if not exists custom_accent_color text;
 
+alter table public.profiles
+  add constraint profiles_equipped_border_fkey foreign key (equipped_border) references public.token_spend_catalog(item_id) on delete set null,
+  add constraint profiles_equipped_profile_theme_fkey foreign key (equipped_profile_theme) references public.token_spend_catalog(item_id) on delete set null,
+  add constraint profiles_equipped_palette_fkey foreign key (equipped_palette) references public.token_spend_catalog(item_id) on delete set null;
+
 insert into public.token_spend_catalog
   (item_id,name,description,price_tokens,kind,enabled,asset_text,effect_key,sort_order)
 values
