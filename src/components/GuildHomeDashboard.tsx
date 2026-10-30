@@ -1,7 +1,7 @@
 'use client';
 
 import type { NavigationState } from '@/context/AppContext';
-import { CalendarDays, Clapperboard, Compass, Gamepad2, Library, MessageSquare, Music2, Search, Settings, ShieldCheck, UsersRound, MessageSquareText } from 'lucide-react';
+import { CalendarDays, Clapperboard, Gamepad2, Library, MessageSquare, Music2, Search, Settings, ShieldCheck, UsersRound, MessageSquareText } from 'lucide-react';
 import styles from './GuildHomeDashboard.module.css';
 
 const destinations: { title: string; description: string; target: NavigationState; icon: typeof Gamepad2; kind: 'featured' | 'community' | 'utility' }[] = [
