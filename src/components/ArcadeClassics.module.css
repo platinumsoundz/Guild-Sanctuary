@@ -44,3 +44,6 @@
 .mineTools button{min-height:42px;padding:9px 13px;border:1px solid var(--accent);border-radius:9px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--ink);font-weight:750}
 .mineTools small{color:var(--muted);font-size:11px}
 @media(pointer:coarse){.play button{min-width:42px;min-height:42px}.controls button,.letterButtons button{min-height:46px;padding:10px 13px}.gameCard,.gameCardActive{min-height:120px}}
+
+.inputGuide{margin:0 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--muted);font-size:11px;line-height:1.6}
+@media(pointer:coarse){.mineTools button{min-height:48px}.gameSearch{min-height:46px}}
