@@ -38,6 +38,7 @@ jobs:
       - run: npm run check:admin-visibility
       - run: npm run check:guild-mobile-navigation
       - run: npm run check:guild-console-hud
+      - run: npm run check:guild-community-scope
       - run: npm run check:feed-polish
       - run: npm run check:community-toolkit
       - run: npm run test:community-connection
