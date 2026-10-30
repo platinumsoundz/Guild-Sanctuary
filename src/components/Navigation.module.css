@@ -557,3 +557,31 @@
 .accountEntryMenu button { display: flex; min-height: 44px; align-items: center; padding: 8px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); cursor: pointer; font: 600 12px Arial, sans-serif; text-align: left; }
 .accountEntryMenu button:hover, .accountEntryMenu button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; background: var(--surface); }
 @media (max-width: 420px) { .accountButtonLabel { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .accountEntryMenu { right: 0; max-width: calc(100vw - 24px); } }
+
+
+/* Live update counts for destinations with pending work */
+.navigationBadge {
+  display: inline-flex;
+  min-width: 19px;
+  height: 19px;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface-raised));
+  color: var(--ink);
+  font: 750 10px/1 Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.mobileBottomButton .navigationBadge {
+  position: absolute;
+  top: 3px;
+  right: calc(50% - 26px);
+  min-width: 17px;
+  height: 17px;
+  margin: 0;
+  padding: 0 4px;
+  font-size: 9px;
+}
