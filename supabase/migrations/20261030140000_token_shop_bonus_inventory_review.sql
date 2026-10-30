@@ -492,4 +492,81 @@ $;
 revoke all on function public.set_profile_custom_accent(text) from public,anon,authenticated,service_role;
 grant execute on function public.set_profile_custom_accent(text) to authenticated;
 
+
+-- Audited, manual-only token adjustments for reviewed refunds/reversals.
+-- No Stripe refund is initiated here and no adjustment may create a negative balance.
+create table if not exists public.token_adjustment_ledger (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.token_wallets(user_id) on delete cascade,
+  tokens_delta bigint not null check (tokens_delta <> 0),
+  reason_code text not null check (reason_code in ('purchase_refund','chargeback_reversal','manual_correction','bonus_correction')),
+  case_reference text not null,
+  source_key text not null unique,
+  actor text not null,
+  item_id text references public.token_spend_catalog(item_id) on delete set null,
+  created_at timestamptz not null default now()
+);
+alter table public.token_adjustment_ledger enable row level security;
+revoke all on public.token_adjustment_ledger from public,anon,authenticated;
+grant select,insert,update,delete on public.token_adjustment_ledger to service_role;
+drop policy if exists "users read own token adjustments" on public.token_adjustment_ledger;
+create policy "users read own token adjustments" on public.token_adjustment_ledger
+for select to authenticated using (user_id=(select auth.uid()));
+grant select on public.token_adjustment_ledger to authenticated;
+
+create or replace function public.apply_token_adjustment(
+  requested_user_id uuid,
+  requested_tokens_delta bigint,
+  requested_reason_code text,
+  requested_case_reference text,
+  requested_source_key text,
+  requested_actor text,
+  requested_item_id text default null
+)
+returns bigint language plpgsql security definer set search_path=''
+as $
+declare
+  wallet_balance bigint;
+  existing_entry public.token_adjustment_ledger%rowtype;
+begin
+  if auth.role() <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
+  if requested_user_id is null or requested_tokens_delta is null or requested_tokens_delta=0 or
+    requested_reason_code not in ('purchase_refund','chargeback_reversal','manual_correction','bonus_correction') or
+    coalesce(trim(requested_case_reference),'')='' or coalesce(trim(requested_source_key),'')='' or
+    coalesce(trim(requested_actor),'')='' then
+    raise exception 'A valid user, non-zero adjustment, reason, case, source key and actor are required.' using errcode='22023';
+  end if;
+
+  insert into public.token_wallets(user_id) values(requested_user_id) on conflict(user_id) do nothing;
+  select w.balance_tokens into wallet_balance from public.token_wallets w
+  where w.user_id=requested_user_id for update;
+
+  select * into existing_entry from public.token_adjustment_ledger
+  where source_key=requested_source_key for update;
+  if found then
+    if existing_entry.user_id<>requested_user_id or existing_entry.tokens_delta<>requested_tokens_delta or
+      existing_entry.reason_code<>requested_reason_code or existing_entry.case_reference<>requested_case_reference then
+      raise exception 'Adjustment source key conflicts with an existing ledger entry.' using errcode='22023';
+    end if;
+    return wallet_balance;
+  end if;
+
+  if wallet_balance + requested_tokens_delta < 0 then
+    raise exception 'Adjustment would create a negative token balance; manual item review is required.' using errcode='22003';
+  end if;
+
+  insert into public.token_adjustment_ledger(
+    user_id,tokens_delta,reason_code,case_reference,source_key,actor,item_id
+  ) values (
+    requested_user_id,requested_tokens_delta,requested_reason_code,
+    requested_case_reference,requested_source_key,requested_actor,requested_item_id
+  );
+  update public.token_wallets set balance_tokens=balance_tokens+requested_tokens_delta,updated_at=now()
+  where user_id=requested_user_id returning balance_tokens into wallet_balance;
+  return wallet_balance;
+end;
+$;
+revoke all on function public.apply_token_adjustment(uuid,bigint,text,text,text,text,text) from public,anon,authenticated,service_role;
+grant execute on function public.apply_token_adjustment(uuid,bigint,text,text,text,text,text) to service_role;
+
 commit;
