@@ -23,7 +23,7 @@ const checks = [
   ['spend RPC checks account holds', /Token spending is paused while your account is under review/.test(migration)],
   ['Stripe dispute webhook automatically pauses the linked wallet', stripeWebhook.includes('charge.dispute.created') && stripeWebhook.includes('place_token_spending_hold') && stripeWebhook.includes('stripe_payment_intent_id')],
   ['checkout records token metadata on the PaymentIntent', /payment_intent_data/.test(tokenCheckout) && /sanctuary_purchase: 'token_bundle'/.test(tokenCheckout) && /stripe_payment_intent_id text/.test(migration)],
-  ['token spending remains revoked while entitlement-checked equipment is member-only', migration.includes('revoke all on function public.spend_tokens(text,uuid) from public,anon,authenticated,service_role') && migration.includes('grant execute on function public.equip_profile_cosmetic(text) to authenticated') && migration.includes('grant execute on function public.clear_profile_cosmetic(text) to authenticated')],
+  ['token spending remains revoked while entitlement-checked equipment is member-only', migration.includes('revoke all on function public.spend_tokens(text,uuid) from public,anon,authenticated,service_role') && migration.includes('revoke all on function public.equip_profile_cosmetic(text) from public,anon,authenticated,service_role') && migration.includes('revoke all on function public.clear_profile_cosmetic(text) from public,anon,authenticated,service_role') && !migration.includes('grant execute on function public.equip_profile_cosmetic') && !migration.includes('grant execute on function public.clear_profile_cosmetic')],
   ['profile cosmetic direct writes are guarded', /guard_profile_cosmetic_writes/.test(migration) && /app\.cosmetic_write_authorized/.test(migration)],
   ['public cosmetic projection exposes only public profile cosmetic fields', /public_profile_cosmetics/.test(migration) && /sync_public_profile_cosmetic_projection/.test(migration)],
   ['custom accent picker requires entitlement and a fixed accessible palette', /unlock_custom_accent_picker/.test(migration) && /Choose an accessible colour/.test(migration)],
@@ -34,7 +34,7 @@ const checks = [
   ['public profiles load cosmetic projection', /public_profile_cosmetics/.test(profileService)],
   ['profile card renders equipped frames, badges, borders and themes', /equippedFrame/.test(profileCard) && /equippedBadge/.test(profileCard) && /equippedBanner/.test(profileCard) && /equippedBorder/.test(profileCard) && /equippedProfileTheme/.test(profileCard)],
   ['profile accent picker is entitlement-gated and server-validated', /hasCustomAccentPicker/.test(profileDashboard) && /set_profile_custom_accent/.test(profileDashboard)],
-  ['owned cosmetics can be equipped and unequipped through guarded RPCs', /equip_profile_cosmetic/.test(shop) && /clear_profile_cosmetic/.test(shop)],
+  ['equip UI stays disabled until staging entitlement and RLS tests pass', /const EQUIPPING_ENABLED = false/.test(shop) && /equip_profile_cosmetic/.test(shop) && /clear_profile_cosmetic/.test(shop)],
 ];
 
 for (const [label, passed] of checks) {
