@@ -22,7 +22,7 @@ assert.ok(css.includes('--accent: #5b3dbb;') && css.includes('--accent-contrast:
 assert.ok(css.includes(':root[data-theme="light"] body {') && css.includes('rgb(126 93 226 / 12%)'), 'light theme must use its own soft cosmic nebula instead of the dark glow');
 assert.ok(themeRegistry.includes('THEME_CATALOGUE') && themeRegistry.includes('THEME_PREFERENCE_OPTIONS') && themeRegistry.includes('isThemePreference'), 'theme registry must own the catalogue, selector options and preference validation');
 assert.ok(themeRegistry.includes('resolveTheme') && themeRegistry.includes('applyTheme'), 'theme registry must own system resolution and DOM application');
-assert.equal((css.match(/:root\\s*\\{[^}]*\\}/g) || []).filter((block) => block.includes('--bg:')).length, 1, 'global CSS must define the base token palette only once');
+assert.equal(css.split(':root {').slice(1).filter((segment) => segment.slice(0, segment.indexOf('}')).includes('--bg:')).length, 1, 'global CSS must define the base token palette only once');
 assert.equal((css.match(/:root\[data-theme="dark"\]\s*\{/g) || []).length, 1, 'dark theme token palette must have one definition');
 assert.ok(settings.includes('Cosmic light · daylight'), 'appearance settings must describe the mirrored cosmic light theme');
 assert.ok(layout.includes("localStorage.getItem('sanctuary-theme')"), 'theme bootstrap must read device preference');
