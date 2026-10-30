@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Heart, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import type { WorldType } from '@/types/database';
 import { ReportContentButton } from '@/modules/moderation';
 import type { ShortVideo, SocialComment } from '@/types/database';
 import { addShortComment, createShortVideo, deleteShortComment, deleteShortVideo, fetchShortComments, fetchShortVideos, getShortEngagement, toggleShortLike, updateShortComment } from '../service';
@@ -15,7 +16,7 @@ interface ShortState {
   commentsCount: number;
 }
 
-export function ShortsFeed() {
+export function ShortsFeed({ worldType = 'sanctuary' }: { worldType?: WorldType }) {
   const { currentUser, isGuest } = useAppContext();
   const viewerId = currentUser?.user.id ?? '';
   const canEngage = Boolean(viewerId) && !isGuest;
@@ -60,7 +61,7 @@ export function ShortsFeed() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchShortVideos().then(async (items) => {
+    fetchShortVideos(worldType).then(async (items) => {
       if (cancelled) return;
       const stats = await Promise.all(items.map(async (item) => [
         item.id,
@@ -191,7 +192,7 @@ export function ShortsFeed() {
   const removeShortComment = async (videoId: string, commentId: string) => {
     if (!window.confirm('Delete your comment? This cannot be undone.')) return;
     try {
-      await deleteShortComment(commentId, viewerId);
+      await deleteShortComment(commentId, viewerId, worldType);
       setCommentsByVideo((current) => ({
         ...current,
         [videoId]: (current[videoId] ?? []).filter((comment) => comment.id !== commentId),
@@ -291,6 +292,7 @@ export function ShortsFeed() {
     try {
       const video = await createShortVideo({
         authorId: viewerId,
+        worldType,
         videoFile,
         caption: captionDraft,
       });
@@ -313,7 +315,7 @@ export function ShortsFeed() {
     }
     if (!window.confirm('Delete this video and its uploaded media? This cannot be undone.')) return;
     try {
-      await deleteShortVideo(videoId, viewerId);
+      await deleteShortVideo(videoId, viewerId, worldType);
       setVideos((current) => current.filter((video) => video.id !== videoId));
       setEngagement((current) => {
         const next = { ...current };
