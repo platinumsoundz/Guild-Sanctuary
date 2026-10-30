@@ -4,11 +4,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, AudioLines, Check, Gamepad2, Maximize2, Minimize2, Settings2, Volume2, X } from 'lucide-react';
 import styles from './GuildConsolePlayer.module.css';
 
-type Props = { title: string; url: string; onExit: () => void };
+type Props = { title: string; gameId: 'sleeves2d' | 'sleeves3d'; url: string; onExit: () => void };
 const BUTTON_LABELS = ['A / Cross · Select', 'B / Circle · Back', 'D-pad / stick · Navigate'];
 
-export function GuildConsolePlayer({ title, url, onExit }: Props) {
+export function GuildConsolePlayer({ title, gameId, url, onExit }: Props) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const gameFrameRef = useRef<HTMLIFrameElement>(null);
+  const [gameBridgeReady, setGameBridgeReady] = useState(false);
+  const [gameBridgeStatus, setGameBridgeStatus] = useState('Connecting to game…');
+  const bridgeRequestSequence = useRef(0);
+  const latestBridgeRequest = useRef('');
   const menuRef = useRef<HTMLElement>(null);
   const previousButtons = useRef<boolean[]>([]);
   const previousDirections = useRef({ x: 0, y: 0 });
@@ -23,8 +28,10 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
   const [controlsVisible, setControlsVisible] = useState(true);
 
   const exitFullscreen = useCallback(async () => {
-    try { if (document.fullscreenElement) await document.exitFullscreen(); }
-    catch { setNotice('Use your browser’s Back or fullscreen control if fullscreen cannot close here.'); }
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      try { screen.orientation.unlock(); } catch { /* Orientation lock is optional and browser-dependent. */ }
+    } catch { setNotice('Use your browser’s Back or fullscreen control if fullscreen cannot close here.'); }
   }, []);
   const returnHome = useCallback(async () => {
     await exitFullscreen();
@@ -36,13 +43,69 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
     const stage = stageRef.current;
     if (!stage) return;
     try {
-      if (document.fullscreenElement === stage) await document.exitFullscreen();
-      else {
+      if (document.fullscreenElement === stage) {
+        await document.exitFullscreen();
+        try { screen.orientation.unlock(); } catch { /* Orientation lock is optional and browser-dependent. */ }
+      } else {
         if (document.fullscreenElement) await document.exitFullscreen();
         await stage.requestFullscreen();
+        try {
+          const orientation = screen.orientation as ScreenOrientation & { lock?: (value: string) => Promise<void> };
+          if (orientation.lock) await orientation.lock('landscape');
+          else throw new Error('Orientation lock is not supported');
+          setNotice('');
+        } catch {
+          setNotice('Fullscreen is active. Rotate your device to landscape for the intended layout.');
+        }
       }
     } catch { setNotice('Fullscreen is not available in this browser or must be started from a direct tap.'); }
   }, []);
+
+
+  useEffect(() => {
+    let gameOrigin = '';
+    try { gameOrigin = new URL(url).origin; } catch { return; }
+    const onGameMessage = (event: MessageEvent) => {
+      if (event.origin !== gameOrigin || event.source !== gameFrameRef.current?.contentWindow) return;
+      const message = event.data;
+      if (!message || message.channel !== 'guild.5-sleeves' || message.version !== 1 || message.game !== (gameId === 'sleeves2d' ? 'the-5-sleeves-2d' : 'the-5-sleeves-3d')) return;
+      if (message.type === 'ready') {
+        setGameBridgeReady(true);
+        setGameBridgeStatus('Guild link ready');
+      }
+      if (message.type === 'ack' && message.requestId === latestBridgeRequest.current) {
+        setGameBridgeStatus(message.command === 'pause' ? 'Game paused' : 'Guild link ready');
+      }
+    };
+    window.addEventListener('message', onGameMessage);
+    return () => window.removeEventListener('message', onGameMessage);
+  }, [gameId, url]);
+
+  const sendGameCommand = useCallback((command: 'pause' | 'resume') => {
+    if (!gameBridgeReady) return;
+    let gameOrigin = '';
+    try { gameOrigin = new URL(url).origin; } catch { return; }
+    const requestId = `guild-${++bridgeRequestSequence.current}`;
+    latestBridgeRequest.current = requestId;
+    gameFrameRef.current?.contentWindow?.postMessage({
+      channel: 'guild.5-sleeves',
+      version: 1,
+      command,
+      requestId
+    }, gameOrigin);
+  }, [gameBridgeReady, gameId, url]);
+
+  useEffect(() => {
+    sendGameCommand(menuOpen ? 'pause' : 'resume');
+  }, [menuOpen, sendGameCommand]);
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      sendGameCommand(document.visibilityState === 'hidden' || menuOpen ? 'pause' : 'resume');
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [menuOpen, sendGameCommand]);
 
   const menuTargets = useCallback(() => {
     if (!menuRef.current) return [] as HTMLElement[];
@@ -75,7 +138,13 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
   moveMenuFocusRef.current = moveMenuFocus;
 
   useEffect(() => {
-    const sync = () => setIsFullscreen(document.fullscreenElement === stageRef.current);
+    const sync = () => {
+      const active = document.fullscreenElement === stageRef.current;
+      setIsFullscreen(active);
+      if (!active) {
+        try { screen.orientation.unlock(); } catch { /* Escape/browser exits may not expose orientation unlock. */ }
+      }
+    };
     document.addEventListener('fullscreenchange', sync);
     return () => document.removeEventListener('fullscreenchange', sync);
   }, []);
@@ -175,13 +244,13 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
         <button type="button" onClick={() => setMenuOpen(true)} className={styles.menuButton} aria-label="Open Guild system menu"><Gamepad2 size={18} /><span>The Guild</span></button>
         <div className={styles.gameTitle}>{title}</div>
         <div className={styles.actions}>
-          <span className={styles.controllerState} aria-live="polite">{controllerConnected ? 'Controller connected' : 'Touch / keyboard ready'}</span>
+          <span className={styles.controllerState} aria-live="polite">{controllerConnected ? 'Controller connected' : 'Touch / keyboard ready'}{gameBridgeReady ? ` · ${gameBridgeStatus}` : ''}</span>
           <button type="button" className={styles.iconButton} onClick={() => void toggleFullscreen()} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>{isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button>
-          <button type="button" className={styles.iconButton} onClick={() => void returnHome()} aria-label="Exit game to Guild home"><X size={18} /></button>
+          <button type="button" className={styles.iconButton} onClick={() => void returnHome()} aria-label="Exit game and return to Guild home"><X size={18} /></button>
         </div>
       </div>
       <div className={styles.gameFrame}>
-        <iframe src={url} title={title} allow="fullscreen; gamepad; pointer-lock; autoplay" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen" />
+        <iframe ref={gameFrameRef} src={url} title={title} allow="fullscreen; gamepad; pointer-lock; autoplay" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-fullscreen" />
       </div>
       <div className={styles.touchToolbar}>
         <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open console controls"><Gamepad2 size={17} /> Console controls</button>
@@ -202,7 +271,7 @@ export function GuildConsolePlayer({ title, url, onExit }: Props) {
             <p className={styles.finePrint}>Audio controls affect Sanctuary media explicitly marked as Guild-managed audio. They cannot control sound inside this cross-origin game iframe.</p>
           </div>}
           <button type="button" data-guild-action className={styles.menuAction} onClick={() => void toggleFullscreen()}><Maximize2 size={19} /><span><strong>{isFullscreen ? 'Exit fullscreen' : 'Display fullscreen'}</strong><small>Expand or restore the game view</small></span></button>
-          <button type="button" data-guild-action className={styles.exitAction} onClick={() => void returnHome()}><ArrowLeft size={19} /><span><strong>Exit to Guild home</strong><small>Close this game session</small></span></button>
+          <button type="button" data-guild-action className={styles.exitAction} onClick={() => void returnHome()}><ArrowLeft size={19} /><span><strong>Exit to Guild home</strong><small>Close the game and return to your Guild dashboard</small></span></button>
           <div className={styles.virtualControls} aria-label="Virtual console navigation controls">
             <div className={styles.dpad} aria-label="Directional navigation">
               <button type="button" onClick={() => moveMenuFocus(-1)} aria-label="Navigate up"><ArrowUp size={20} /></button>

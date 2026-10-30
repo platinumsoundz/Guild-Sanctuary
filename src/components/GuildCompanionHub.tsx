@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { Download, ExternalLink, Gamepad2, Image as ImageIcon, Library, Music2, Plus, ShieldCheck, Terminal, Trash2, Upload } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Download, ExternalLink, Gamepad2, Library, Music2, Plus, ShieldCheck, Terminal, Trash2, Upload, SkipBack, SkipForward, Play, Pause, FolderOpen } from 'lucide-react';
 import styles from './GuildCompanionHub.module.css';
 import { createClient } from '@/lib/supabase/client';
 
@@ -14,9 +14,9 @@ const OWNER_KEY = 'sanctuary-guild-library-owner-v1';
 const platforms = ['Browser', 'Steam', 'Xbox', 'RetroArch', 'Other'];
 const MAX_MEDIA_FILES = 30;
 const MAX_AUDIO_BYTES = 100 * 1024 * 1024;
-const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
 const MAX_AUDIO_TOTAL_BYTES = 250 * 1024 * 1024;
-const MAX_IMAGE_TOTAL_BYTES = 100 * 1024 * 1024;
+
+function formatTime(seconds: number): string { return Number.isFinite(seconds) ? `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}` : '0:00'; }
 
 function safeWebUrl(value: string): string {
   if (!value.trim()) return '';
@@ -35,7 +35,7 @@ const services = [
   { name: 'itch.io', kind: 'Indie games', description: 'Browse indie games and add supported browser-playable titles to your personal library.', url: 'https://itch.io/' },
 ];
 
-export type GuildCompanionView = 'all' | 'library' | 'music' | 'photos' | 'tools';
+export type GuildCompanionView = 'all' | 'library' | 'music' | 'tools';
 
 export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: GuildCompanionView; hidden?: boolean }) {
   const [games, setGames] = useState<LocalGame[]>([]);
@@ -51,15 +51,16 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
   const [librarySearch, setLibrarySearch] = useState('');
   const [libraryPlatformFilter, setLibraryPlatformFilter] = useState('All');
   const [audioFiles, setAudioFiles] = useState<MediaFile[]>([]);
-  const [photos, setPhotos] = useState<MediaFile[]>([]);
-  const [photoIndex, setPhotoIndex] = useState(0);
-  const [slideshow, setSlideshow] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [mediaMessage, setMediaMessage] = useState('');
   const audioInput = useRef<HTMLInputElement>(null);
-  const photoInput = useRef<HTMLInputElement>(null);
+  const folderInput = useRef<HTMLInputElement>(null);
+  const playerRef = useRef<HTMLAudioElement>(null);
   const libraryImportInput = useRef<HTMLInputElement>(null);
   const audioFilesRef = useRef<MediaFile[]>([]);
-  const photosRef = useRef<MediaFile[]>([]);
 
   useEffect(() => {
     try {
@@ -84,41 +85,51 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
   }, [games, libraryLoaded]);
 
   useEffect(() => { audioFilesRef.current = audioFiles; }, [audioFiles]);
-  useEffect(() => { photosRef.current = photos; }, [photos]);
-  useEffect(() => () => {
-    audioFilesRef.current.forEach((item) => URL.revokeObjectURL(item.url));
-    photosRef.current.forEach((item) => URL.revokeObjectURL(item.url));
-  }, []);
-
+  useEffect(() => { folderInput.current?.setAttribute('webkitdirectory', ''); folderInput.current?.setAttribute('directory', ''); }, []);
+  useEffect(() => () => audioFilesRef.current.forEach((item) => URL.revokeObjectURL(item.url)), []);
   useEffect(() => {
-    if (!slideshow || photos.length < 2) return;
-    const timer = window.setInterval(() => setPhotoIndex((index) => (index + 1) % photos.length), 5000);
-    return () => window.clearInterval(timer);
-  }, [photos.length, slideshow]);
-
-  const addFiles = (files: FileList | null, type: 'audio' | 'photo') => {
+    const publish = () => window.dispatchEvent(new CustomEvent('guild-music-state', { detail: {
+      title: audioFiles[currentTrack]?.file.name ?? '', hasTracks: audioFiles.length > 0,
+      isPlaying, currentTime, duration, index: currentTrack, count: audioFiles.length
+    }}));
+    publish();
+  }, [audioFiles, currentTrack, isPlaying, currentTime, duration]);
+  const changeTrack = useCallback((delta: number) => {
+    if (!audioFiles.length) return;
+    setCurrentTrack((index) => (index + delta + audioFiles.length) % audioFiles.length);
+    setCurrentTime(0);
+  }, [audioFiles.length]);
+  useEffect(() => {
+    const onAction = (event: Event) => {
+      const action = (event as CustomEvent<string>).detail;
+      if (action === 'play-pause') {
+        const player = playerRef.current;
+        if (!player || !audioFiles.length) return;
+        if (player.paused) void player.play().then(() => setIsPlaying(true)).catch(() => setMediaMessage('Playback was blocked. Press Play in the music player to start audio.'));
+        else { player.pause(); setIsPlaying(false); }
+      } else if (action === 'next') changeTrack(1);
+      else if (action === 'previous') changeTrack(-1);
+      else if (action === 'open') window.dispatchEvent(new CustomEvent('guild-music-panel-open'));
+    };
+    window.addEventListener('guild-music-action', onAction);
+    return () => window.removeEventListener('guild-music-action', onAction);
+  }, [audioFiles, currentTrack, changeTrack]);
+  const addFiles = (files: FileList | null) => {
     if (!files) return;
-    const remaining = Math.max(0, MAX_MEDIA_FILES - (type === 'audio' ? audioFilesRef.current.length : photosRef.current.length));
-    const maxBytes = type === 'audio' ? MAX_AUDIO_BYTES : MAX_IMAGE_BYTES;
-    const maxTotalBytes = type === 'audio' ? MAX_AUDIO_TOTAL_BYTES : MAX_IMAGE_TOTAL_BYTES;
-    const existing = type === 'audio' ? audioFilesRef.current : photosRef.current;
+    const existing = audioFilesRef.current;
+    const remaining = Math.max(0, MAX_MEDIA_FILES - existing.length);
     let totalBytes = existing.reduce((total, item) => total + item.file.size, 0);
-    const eligible = Array.from(files).filter((file) => (type === 'audio' ? file.type.startsWith('audio/') : file.type.startsWith('image/')) && file.size > 0 && file.size <= maxBytes);
+    const eligible = Array.from(files).filter((file) => file.type.startsWith('audio/') && file.size > 0 && file.size <= MAX_AUDIO_BYTES);
     const selected: File[] = [];
     for (const file of eligible) {
-      if (selected.length >= remaining || totalBytes + file.size > maxTotalBytes) continue;
-      selected.push(file);
-      totalBytes += file.size;
+      if (selected.length >= remaining || totalBytes + file.size > MAX_AUDIO_TOTAL_BYTES) continue;
+      selected.push(file); totalBytes += file.size;
     }
     const additions = selected.map((file) => ({ id: crypto.randomUUID(), file, url: URL.createObjectURL(file) }));
-    if (type === 'audio') setAudioFiles((current) => [...current, ...additions]);
-    else {
-      setPhotos((current) => [...current, ...additions]);
-      setPhotoIndex(0);
-      setSlideshow(false);
-    }
+    setAudioFiles((current) => [...current, ...additions]);
+    if (!existing.length && additions.length) setCurrentTrack(0);
     const skipped = files.length - selected.length;
-    setMediaMessage(selected.length ? `${selected.length} ${type === 'audio' ? 'audio file(s)' : 'photo(s)'} selected. ${skipped ? `${skipped} skipped (unsupported type, per-file/total-size limit, or 30-file limit). ` : ''}Files stay in this browser session; they are not uploaded.` : `No files added. Choose supported ${type === 'audio' ? 'audio up to 100 MB each (250 MB total)' : 'images up to 25 MB each (100 MB total)'}; the limit is 30 files per lounge.`);
+    setMediaMessage(selected.length ? `${selected.length} track(s) added to your queue. ${skipped ? `${skipped} skipped due to file type or size limits. ` : ''}Audio stays on this device and is not uploaded.` : 'No audio added. Select audio files up to 100 MB each (250 MB total), with a 30-track limit.');
   };
 
   const exportLibrary = () => {
@@ -362,8 +373,8 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
   return (
     <section className={hidden ? styles.hiddenHub : styles.hub} aria-label="Guild companion features" aria-hidden={hidden}>
       <div className={styles.heading}>
-        <div><p className={styles.eyebrow}>THE GUILD · PERSONAL SPACE</p><h2>{view === 'library' ? 'Game library' : view === 'music' ? 'Music player' : view === 'photos' ? 'Photo slideshow' : view === 'tools' ? 'Guild tools' : 'Library & lounges'}</h2><p>{view === 'music' ? 'Play audio you choose from this device. Files stay local to this browser session.' : view === 'photos' ? 'Create a private slideshow from photos selected on this device.' : view === 'library' ? 'Keep a personal catalogue alongside the featured Guild games. Account sync still depends on the staged database migration.' : 'Your game catalogue and personal media are separated into their own Guild pages. Personal media stays on your device by default.'}</p></div>
-        <span className={styles.privacy}><ShieldCheck size={15} />{view === 'music' || view === 'photos' ? ' Device-local media' : view === 'tools' ? ' Status & integrations' : ' Local cache + account sync'}</span>
+        <div><p className={styles.eyebrow}>THE GUILD · PERSONAL SPACE</p><h2>{view === 'library' ? 'Game library' : view === 'music' ? 'Music player' : view === 'tools' ? 'Guild tools' : 'Library & lounges'}</h2><p>{view === 'music' ? 'Your personal music queue, with folder selection and full playback controls.' : view === 'library' ? 'Keep a personal catalogue alongside the featured Guild games. Account sync still depends on the staged database migration.' : 'Your game catalogue and personal media are separated into their own Guild pages. Personal media stays on your device by default.'}</p></div>
+        <span className={styles.privacy}><ShieldCheck size={15} />{view === 'music' ? ' Device-local media' : view === 'tools' ? ' Status & integrations' : ' Local cache + account sync'}</span>
       </div>
 
       {(view === 'all' || view === 'library') && (
@@ -393,23 +404,30 @@ export function GuildCompanionHub({ view = 'all', hidden = false }: { view?: Gui
         {(view === 'all' || view === 'music') && (
         <section className={styles.panel} aria-labelledby="guild-music-title">
           <div className={styles.panelHeading}><span className={styles.icon}><Music2 size={19} /></span><div><h3 id="guild-music-title">Music lounge</h3><p>Select audio from your device to play in the Guild.</p></div></div>
-          <input ref={audioInput} className={styles.hiddenInput} type="file" accept="audio/*" multiple onChange={(event) => addFiles(event.target.files, 'audio')} />
-          <button type="button" className={styles.secondary} onClick={() => audioInput.current?.click()}><Plus size={15} /> Choose music files</button>
-          {audioFiles.length > 0 ? <div className={styles.audioList}>{audioFiles.map((item) => <div className={styles.audioItem} key={item.id}><strong title={item.file.name}>{item.file.name}</strong><audio controls preload="metadata" src={item.url}>Your browser does not support audio playback.</audio><button type="button" className={styles.textButton} onClick={() => { URL.revokeObjectURL(item.url); setAudioFiles((current) => current.filter((file) => file.id !== item.id)); }}>Remove</button></div>)}</div> : <div className={styles.empty}>No audio selected. Playback is local to this page; streaming-service account linking is a separate future integration.</div>}        </section>)}
-        {(view === 'all' || view === 'photos') && (
-        <section className={styles.panel} aria-labelledby="guild-gallery-title">
-          <div className={styles.panelHeading}><span className={styles.icon}><ImageIcon size={19} /></span><div><h3 id="guild-gallery-title">Memory gallery</h3><p>Choose photos for a private, in-browser slideshow.</p></div></div>
-          <input ref={photoInput} className={styles.hiddenInput} type="file" accept="image/*" multiple onChange={(event) => addFiles(event.target.files, 'photo')} />
-          <button type="button" className={styles.secondary} onClick={() => photoInput.current?.click()}><Plus size={15} /> Choose photos</button>
-          {photos.length > 0 ? <div className={styles.gallery}>
-            <img src={photos[photoIndex]?.url} alt={photos[photoIndex]?.file.name || 'Selected personal photo'} />
-            <div className={styles.galleryControls}><button type="button" className={styles.secondary} onClick={() => { setSlideshow(false); setPhotoIndex((index) => (index - 1 + photos.length) % photos.length); }}>Previous</button><span>{photoIndex + 1} / {photos.length}</span><button type="button" className={styles.secondary} onClick={() => { setSlideshow(false); setPhotoIndex((index) => (index + 1) % photos.length); }}>Next</button></div>
-            <button type="button" className={styles.primary} onClick={() => setSlideshow((value) => !value)}>{slideshow ? 'Pause slideshow' : 'Start 5-second slideshow'}</button>
-            <button type="button" className={styles.textButton} onClick={() => { photos.forEach((item) => URL.revokeObjectURL(item.url)); setPhotos([]); setPhotoIndex(0); setSlideshow(false); }}>Clear selected photos</button>
-          </div> : <div className={styles.empty}>No photos selected. Your images are previewed locally and are not uploaded to Sanctuary.</div>}        </section>)}
+          <input ref={audioInput} className={styles.hiddenInput} type="file" accept="audio/*" multiple onChange={(event) => { addFiles(event.target.files); event.currentTarget.value = ''; }} />
+          <input ref={folderInput} className={styles.hiddenInput} type="file" accept="audio/*" multiple onChange={(event) => { addFiles(event.target.files); event.currentTarget.value = ''; }} />
+          <div className={styles.libraryTools}>
+            <button type="button" className={styles.primary} onClick={() => folderInput.current?.click()}><FolderOpen size={15} /> Choose music folder</button>
+            <button type="button" className={styles.secondary} onClick={() => audioInput.current?.click()}><Plus size={15} /> Add individual tracks</button>
+          </div>
+          <p className={styles.footnote}>Choose a folder to add its supported audio files in one go. Your browser asks you to select the folder; it does not grant silent access to the rest of your device. Folder selection support varies by browser, with individual-file selection as a fallback. The queue lasts for this browser session.</p>
+          {audioFiles.length > 0 ? <div className={styles.player}>
+            <audio ref={playerRef} src={audioFiles[currentTrack]?.url} preload="metadata" onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} onLoadedMetadata={(event) => { setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0); if (isPlaying) void event.currentTarget.play().catch(() => setIsPlaying(false)); }} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => changeTrack(1)} />
+            <div className={styles.nowPlaying}><span className={styles.icon}><Music2 size={20} /></span><div><small>NOW PLAYING · {currentTrack + 1} OF {audioFiles.length}</small><strong title={audioFiles[currentTrack]?.file.name}>{audioFiles[currentTrack]?.file.name}</strong></div></div>
+            <input className={styles.seek} aria-label="Seek track" type="range" min="0" max={duration || 0} step="0.1" value={Math.min(currentTime, duration || 0)} onChange={(event) => { if (playerRef.current) playerRef.current.currentTime = Number(event.target.value); }} />
+            <div className={styles.timeRow}><span>{formatTime(currentTime)}</span><span>{formatTime(duration)}</span></div>
+            <div className={styles.playerControls}>
+              <button type="button" className={styles.secondary} aria-label="Previous track" onClick={() => changeTrack(-1)}><SkipBack size={18} /></button>
+              <button type="button" className={styles.primary} aria-label={isPlaying ? 'Pause' : 'Play'} onClick={() => window.dispatchEvent(new CustomEvent('guild-music-action',{detail:'play-pause'}))}>{isPlaying ? <Pause size={19} /> : <Play size={19} />}</button>
+              <button type="button" className={styles.secondary} aria-label="Next track" onClick={() => changeTrack(1)}><SkipForward size={18} /></button>
+            </div>
+            <div className={styles.queueList}>{audioFiles.map((item,index) => <button type="button" key={item.id} data-active={index===currentTrack} onClick={() => {setCurrentTrack(index);setIsPlaying(true);}}><span>{index+1}</span><strong>{item.file.name}</strong>{index===currentTrack && <span>Playing</span>}</button>)}</div>
+            <button type="button" className={styles.textButton} onClick={() => { playerRef.current?.pause(); audioFiles.forEach((item) => URL.revokeObjectURL(item.url)); setAudioFiles([]); setCurrentTrack(0); setIsPlaying(false); }}>Clear music queue</button>
+          </div> : <div className={styles.empty}>No music selected. Choose a folder or add tracks to build your queue.</div>}        </section>)}
+
       </div>
       {(view === 'all' || view === 'library') && storageWarning && <p className={styles.status} role="status">This browser could not read or save the device-local cache. Sign in and sync to keep a server copy; changes may not persist on this device.</p>}
-      {(view === 'all' || view === 'music' || view === 'photos') && mediaMessage && <p className={styles.status} role="status">{mediaMessage}</p>}
+      {(view === 'all' || view === 'music') && mediaMessage && <p className={styles.status} role="status">{mediaMessage}</p>}
 
       {(view === 'all' || view === 'tools') && (
       <section className={styles.panel} aria-labelledby="guild-cloud-lab-title">

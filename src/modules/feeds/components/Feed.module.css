@@ -143,3 +143,29 @@
 @media (prefers-reduced-motion: reduce) {
   .primaryHeroAction, .secondaryHeroAction { transition: none; }
 }
+
+/* Guild community is a console destination first, not a desktop feed squeezed down. */
+.feed[data-world="guild"] {
+  --guild-card-radius:16px;
+  padding:clamp(12px,2vw,22px);
+}
+.feed[data-world="guild"] :where(button,a,input,textarea,select) { touch-action:manipulation; }
+.feed[data-world="guild"] :where(button,a,input,textarea,select):focus-visible {
+  outline:3px solid var(--accent);
+  outline-offset:3px;
+}
+@media (orientation:landscape) and (max-height:600px) {
+  .feed[data-world="guild"] { width:100%; max-width:none; padding:10px 14px; }
+  .feed[data-world="guild"] .communityHero { grid-template-columns:minmax(0,1.6fr) minmax(190px,.8fr); gap:12px; padding:16px; }
+  .feed[data-world="guild"] .heroCopy h1 { font-size:clamp(23px,3.3vw,34px); }
+  .feed[data-world="guild"] .heroCopy > p:not(.heroEyebrow) { margin-top:7px; font-size:11px; line-height:1.5; }
+  .feed[data-world="guild"] .heroActions { margin-top:12px; }
+  .feed[data-world="guild"] .heroSide { padding:13px; }
+}
+@media (max-width:640px) and (orientation:landscape) {
+  .feed[data-world="guild"] .communityHero { grid-template-columns:minmax(0,1fr); }
+  .feed[data-world="guild"] .heroSide { flex-direction:row; align-items:center; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .feed[data-world="guild"] * { scroll-behavior:auto; }
+}
