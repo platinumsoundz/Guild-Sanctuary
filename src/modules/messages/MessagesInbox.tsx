@@ -16,6 +16,7 @@ interface MessagesInboxProps {
 
 export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversation, worldType = 'sanctuary' }: MessagesInboxProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversationsWorldType, setConversationsWorldType] = useState(worldType);
   const [participantProfiles, setParticipantProfiles] = useState<Record<string, PublicProfile>>({});
   const [sessionUserId, setSessionUserId] = useState(currentUserId);
   const [query, setQuery] = useState('');
@@ -31,7 +32,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   const groupRequest = useRef(0);
   const activeUserId = useRef(currentUserId);
   const sessionReady = sessionUserId === currentUserId;
-  const visibleConversations = sessionReady ? conversations : [];
+  const visibleConversations = sessionReady && conversationsWorldType === worldType ? conversations : [];
   const visibleSelectedMembers = sessionReady ? selectedMembers : [];
 
   useEffect(() => {
