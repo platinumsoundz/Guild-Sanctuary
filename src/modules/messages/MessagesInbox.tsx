@@ -181,7 +181,7 @@ export function MessagesInbox({ currentUserId, onDiscoverPeople, onOpenConversat
   return (
     <main className={styles.inbox} data-world={worldType}>
       <p className={styles.eyebrow}>PRIVATE MESSAGES</p>
-      <h1>Messages</h1>
+      <h1>{worldType === 'guild' ? 'Guild messages' : 'Messages'}</h1>
       <p className={styles.description}>Choose a one-to-one conversation or start a group chat.</p>
       <MessagePrivacyNotice />
       <section className={styles.groups} aria-labelledby="direct-title">
