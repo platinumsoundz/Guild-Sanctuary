@@ -172,7 +172,7 @@ export function AdminDashboard({ role, worldType = 'sanctuary' }: { role: string
         </header>
         <ModerationDashboard role={role} worldType="guild" />
         {['developer', 'owner'].includes(role.toLowerCase()) && <FeedbackInbox role={role} worldType="guild" />}
-        <footer className={styles.footer}>Guild administration must only affect Guild-world content. Shared identity does not grant this page authority over Sanctuary reports or settings.</footer>
+        <footer className={styles.footer}>Guild administration must only affect Guild-world content. Shared sign-in does not grant this page authority over reports or settings in another environment.</footer>
       </div>
     );
   }
