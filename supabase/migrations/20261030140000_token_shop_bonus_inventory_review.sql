@@ -77,7 +77,8 @@ drop function if exists public.grant_signup_token_bonus(uuid);
 -- Keep the established token_ledger as the single source of truth for wallet credits.
 alter table public.token_ledger
   add column if not exists grant_position integer,
-  add column if not exists verified_at timestamptz;
+  add column if not exists verified_at timestamptz,
+  add column if not exists stripe_payment_intent_id text;
 alter table public.token_ledger drop constraint if exists token_ledger_bundle_id_check;
 alter table public.token_ledger drop constraint if exists token_ledger_check;
 alter table public.token_ledger drop constraint if exists token_ledger_entry_check;
@@ -98,9 +99,98 @@ create unique index if not exists token_ledger_one_signup_bonus_per_user_idx
   on public.token_ledger(user_id) where bundle_id='signup_bonus';
 create unique index if not exists token_ledger_signup_bonus_position_idx
   on public.token_ledger(grant_position) where bundle_id='signup_bonus' and grant_position is not null;
+create unique index if not exists token_ledger_payment_intent_idx
+  on public.token_ledger(stripe_payment_intent_id) where stripe_payment_intent_id is not null;
 alter table public.token_ledger drop constraint if exists token_ledger_signup_bonus_position_check;
 alter table public.token_ledger add constraint token_ledger_signup_bonus_position_check
   check (grant_position is null or grant_position between 1 and 100);
+
+
+-- Persist the Stripe PaymentIntent ID so dispute events can resolve the wallet
+-- even if Stripe delivers a dispute webhook before checkout fulfillment.
+drop function if exists public.record_token_bundle_purchase(text,text,text,uuid,text,integer,text,boolean);
+create or replace function public.record_token_bundle_purchase(
+  requested_event_id text,
+  requested_event_type text,
+  requested_session_id text,
+  requested_user_id uuid,
+  requested_bundle_id text,
+  requested_amount_total integer,
+  requested_currency text,
+  requested_livemode boolean,
+  requested_payment_intent_id text
+)
+returns bigint language plpgsql security definer set search_path=''
+as $
+declare
+  expected_tokens bigint;
+  expected_amount integer;
+  wallet_balance bigint;
+  existing_entry public.token_ledger%rowtype;
+begin
+  if requested_event_id is null or requested_event_id='' or
+    requested_event_type not in ('checkout.session.completed','checkout.session.async_payment_succeeded') or
+    requested_session_id is null or requested_session_id='' or
+    requested_user_id is null or requested_payment_intent_id is null or requested_payment_intent_id='' or
+    requested_livemode is null or requested_currency<>'gbp' then
+    raise exception 'Invalid token purchase event.' using errcode='22023';
+  end if;
+  case requested_bundle_id
+    when 'tokens_100' then expected_tokens:=100; expected_amount:=100;
+    when 'tokens_600' then expected_tokens:=600; expected_amount:=500;
+    when 'tokens_1200' then expected_tokens:=1200; expected_amount:=1000;
+    else raise exception 'Unsupported token bundle.' using errcode='22023';
+  end case;
+  if requested_amount_total is distinct from expected_amount then
+    raise exception 'Paid amount does not match the token bundle.' using errcode='22023';
+  end if;
+
+  insert into public.token_wallets(user_id) values(requested_user_id) on conflict(user_id) do nothing;
+  select balance_tokens into wallet_balance from public.token_wallets
+  where user_id=requested_user_id for update;
+
+  select * into existing_entry from public.token_ledger
+  where stripe_event_id=requested_event_id for update;
+  if found then
+    if existing_entry.user_id<>requested_user_id or existing_entry.bundle_id<>requested_bundle_id or
+      existing_entry.tokens_delta<>expected_tokens or existing_entry.amount_total<>expected_amount or
+      existing_entry.currency<>requested_currency or existing_entry.checkout_session_id<>requested_session_id or
+      existing_entry.livemode<>requested_livemode or
+      existing_entry.stripe_payment_intent_id is distinct from requested_payment_intent_id then
+      raise exception 'Stripe event replay does not match the original payment.' using errcode='22023';
+    end if;
+    return wallet_balance;
+  end if;
+
+  select * into existing_entry from public.token_ledger
+  where checkout_session_id=requested_session_id or stripe_payment_intent_id=requested_payment_intent_id
+  for update;
+  if found then
+    if existing_entry.user_id<>requested_user_id or existing_entry.bundle_id<>requested_bundle_id or
+      existing_entry.tokens_delta<>expected_tokens or existing_entry.amount_total<>expected_amount or
+      existing_entry.currency<>requested_currency or existing_entry.livemode<>requested_livemode or
+      existing_entry.stripe_payment_intent_id is distinct from requested_payment_intent_id then
+      raise exception 'Token purchase replay does not match the original payment.' using errcode='22023';
+    end if;
+    return wallet_balance;
+  end if;
+
+  insert into public.token_ledger(
+    user_id,bundle_id,tokens_delta,amount_total,currency,stripe_event_id,
+    checkout_session_id,livemode,stripe_payment_intent_id
+  ) values (
+    requested_user_id,requested_bundle_id,expected_tokens,expected_amount,requested_currency,
+    requested_event_id,requested_session_id,requested_livemode,requested_payment_intent_id
+  );
+  update public.token_wallets set balance_tokens=balance_tokens+expected_tokens,updated_at=now()
+  where user_id=requested_user_id returning balance_tokens into wallet_balance;
+  return wallet_balance;
+end;
+$;
+revoke all on function public.record_token_bundle_purchase(text,text,text,uuid,text,integer,text,boolean,text)
+from public,anon,authenticated,service_role;
+grant execute on function public.record_token_bundle_purchase(text,text,text,uuid,text,integer,text,boolean,text)
+to service_role;
 
 -- The beta switch is intentionally OFF. An owner must explicitly open it in staging.
 create table if not exists public.token_bonus_program (
@@ -114,11 +204,12 @@ insert into public.token_bonus_program(singleton,beta_open,awarded_count)
 values (true,false,0) on conflict (singleton) do nothing;
 
 create table if not exists public.token_spending_holds (
-  user_id uuid primary key references public.profiles(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
   case_reference text not null,
   reason_code text not null check (reason_code in ('payment_dispute','chargeback','fraud_review','manual_review')),
   placed_by text not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  primary key (user_id,case_reference)
 );
 create table if not exists public.token_spending_hold_audit (
   id uuid primary key default gen_random_uuid(),
@@ -432,7 +523,7 @@ begin
   end if;
   insert into public.token_spending_holds(user_id,case_reference,reason_code,placed_by)
   values(requested_user_id,requested_case_reference,requested_reason_code,requested_actor)
-  on conflict(user_id) do update set case_reference=excluded.case_reference,
+  on conflict(user_id,case_reference) do update set
     reason_code=excluded.reason_code,placed_by=excluded.placed_by,created_at=now();
   insert into public.token_spending_hold_audit(user_id,case_reference,action,reason_code,actor)
   values(requested_user_id,requested_case_reference,'hold_placed',requested_reason_code,requested_actor);
@@ -440,7 +531,7 @@ end;
 $;
 
 create or replace function public.release_token_spending_hold(
-  requested_user_id uuid, requested_actor text
+  requested_user_id uuid, requested_case_reference text, requested_actor text
 )
 returns void language plpgsql security definer set search_path=''
 as $
@@ -449,18 +540,18 @@ begin
   if auth.role() <> 'service_role' then raise exception 'Service role required.' using errcode='42501'; end if;
   if coalesce(trim(requested_actor),'')='' then raise exception 'An actor is required.' using errcode='22023'; end if;
   select * into existing_hold from public.token_spending_holds
-  where user_id=requested_user_id for update;
+  where user_id=requested_user_id and case_reference=requested_case_reference for update;
   if not found then return; end if;
-  delete from public.token_spending_holds where user_id=requested_user_id;
+  delete from public.token_spending_holds where user_id=requested_user_id and case_reference=requested_case_reference;
   insert into public.token_spending_hold_audit(user_id,case_reference,action,reason_code,actor)
   values(requested_user_id,existing_hold.case_reference,'hold_released',existing_hold.reason_code,requested_actor);
 end;
 $;
 
 revoke all on function public.place_token_spending_hold(uuid,text,text,text) from public,anon,authenticated;
-revoke all on function public.release_token_spending_hold(uuid,text) from public,anon,authenticated;
+revoke all on function public.release_token_spending_hold(uuid,text,text) from public,anon,authenticated;
 grant execute on function public.place_token_spending_hold(uuid,text,text,text) to service_role;
-grant execute on function public.release_token_spending_hold(uuid,text) to service_role;
+grant execute on function public.release_token_spending_hold(uuid,text,text) to service_role;
 
 
 -- Prevent profile-edit APIs from forging cosmetic ownership/equipment fields.
