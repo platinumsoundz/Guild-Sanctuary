@@ -4,7 +4,7 @@ const feedback = readFileSync('src/components/FeedbackCenter.tsx', 'utf8');
 const workspace = readFileSync('src/components/AppWorkspace.tsx', 'utf8');
 const navigation = readFileSync('src/components/Navigation.tsx', 'utf8');
 const home = readFileSync('src/components/SanctuaryHome.tsx', 'utf8');
-const migration = readFileSync('supabase/migrations/20261030110000_sanctuary_feedback.sql', 'utf8');
+const migration = readFileSync('supabase/migrations/20261030032022_sanctuary_feedback.sql', 'utf8');
 const databaseTypes = readFileSync('src/services/supabase/database.types.ts', 'utf8');
 
 const checks = [
