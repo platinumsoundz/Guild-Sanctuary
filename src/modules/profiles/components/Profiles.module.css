@@ -184,3 +184,9 @@
 
 .profileCard[data-custom-accent] .eyebrow,
 .profileCard[data-custom-accent] .cosmeticCaption { color: var(--profile-accent); }
+
+.bannerWrap { position: relative; overflow: hidden; }
+.bannerCosmetic { position: absolute; inset: 0; display: block; pointer-events: none; }
+.profileCard[data-banner="profile_banner_aurora"] .bannerCosmetic { background: linear-gradient(120deg, transparent 12%, rgb(80 229 215 / 22%) 34%, rgb(133 105 255 / 22%) 58%, transparent 82%); mix-blend-mode: screen; }
+.profileCard[data-banner="profile_banner_ember"] .bannerCosmetic { background: linear-gradient(110deg, transparent 12%, rgb(255 116 49 / 30%) 42%, rgb(255 194 87 / 22%) 62%, transparent 84%); mix-blend-mode: screen; }
+.profileCard[data-banner="profile_banner_tide"] .bannerCosmetic { background: linear-gradient(120deg, transparent 10%, rgb(59 169 220 / 24%) 35%, rgb(56 226 194 / 22%) 60%, transparent 86%); mix-blend-mode: screen; }
