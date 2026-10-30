@@ -41,7 +41,7 @@ export function FeedbackInbox({ role, worldType = 'sanctuary' }: { role: string;
         .limit(200);
       query = worldType === 'guild'
         ? query.ilike('page_url', '%environment=guild%')
-        : query.not('page_url', 'ilike', '%environment=guild%');
+        : query.or('page_url.is.null,page_url.not.ilike.%environment=guild%');
       const { data, error } = await query;
       if (error) throw new Error(error.message);
       setItems((data ?? []) as FeedbackRow[]);
