@@ -1,5 +1,7 @@
 # Sanctuary Messaging Privacy and End-to-End Encryption
 
+> **Product decision — 30 October 2026: PARKED / HISTORICAL RESEARCH.** The current approved direction is Supabase-backed messaging with authenticated access controls and Realtime delivery. E2EE is not part of the active roadmap and must not be implemented, promised, or represented as planned unless the owner explicitly reopens that decision. These notes are retained only as historical security research. Message bodies remain readable by the service and are not end-to-end encrypted.
+
 ## Current status
 
 **End-to-end encryption is not active.** The current persistent messaging path writes the message body to the Supabase `public.messages.body` column. The database and authorised application paths can therefore process message plaintext. A private conversation is not the same thing as an end-to-end encrypted conversation.
