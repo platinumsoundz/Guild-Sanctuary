@@ -11,6 +11,8 @@ const profiles = read('../src/modules/profiles/service.ts');
 assert.match(app, /<ProfileDiscovery[\s\S]*?worldType=\{worldType\}/, 'Discover receives the active Guild/Sanctuary scope');
 assert.match(discover, /worldType: WorldType/, 'Discover requires an explicit world scope');
 assert.match(discover, /fetchEvents\(currentUserId \|\| '', worldType\)/, 'Gathering discovery passes the active world to the event service');
+assert.match(discover, /fetchFeed\(worldType\)/, 'Community post discovery passes the active world to the feed service');
+assert.match(discover, /fetchPublicProfileById\(authorId\)/, 'Post author labels resolve only through public profile lookup');
 assert.match(discover, /fetchEvents\(currentUserId \|\| '', worldType\)[\s\S]*?setEvents/, 'Gatherings are loaded through the scoped service');
 assert.match(events, /\.eq\('world_type', worldType\)/, 'Event service filters database rows by world');
 assert.match(discover, /searchPublicProfiles\(normalizedQuery\)/, 'People search uses the public-profile search service');
