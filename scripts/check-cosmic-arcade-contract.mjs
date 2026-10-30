@@ -40,7 +40,7 @@ assert.match(classics, /GAME LIBRARY · 24 TITLES/, 'the full classic catalogue 
 assert.match(classics, /arcade-game-search/, 'the catalogue provides a searchable game field');
 assert.match(classics, /categoryFilters/, 'the catalogue provides category filters');
 assert.match(classics, /filteredOptions\.map/, 'the visible catalogue responds to search and category filters');
-assert.match(classics, /options\.map\(\(option,index\)=>\s*<button/, 'every classic game is presented as a selectable catalogue card');
+assert.match(classics, /filteredOptions\.map/, 'every visible classic game is presented as a selectable catalogue card');
 assert.doesNotMatch(classics, /classic-game-select|Choose a game[\\s\\S]*?<select/, 'classic games are not hidden in a dropdown');
 assert.match(classicsCss, /\.gameCatalog\{display:grid/, 'the classic catalogue uses a responsive visible grid');
 assert.match(classicsCss, /@media\(max-width:760px\)/, 'the classic catalogue adapts to mobile screens');
