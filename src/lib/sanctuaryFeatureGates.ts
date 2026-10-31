@@ -32,7 +32,7 @@ export type SanctuaryPage =
   | 'today' | 'feed' | 'events' | 'shorts' | 'messages' | 'discover'
   | 'games' | 'guild' | 'roadmap' | 'guild-roadmap' | 'profile'
   | 'wallet' | 'shop' | 'support' | 'settings' | 'notifications'
-  | 'admin' | 'moderation' | 'planner' | 'feedback';
+  | 'admin' | 'moderation' | 'planner' | 'feedback' | 'feedback-inbox';
 
 const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
   // Stable member experience.
@@ -46,6 +46,8 @@ const pageMinimumRole: Record<SanctuaryPage, SanctuaryRole> = {
   notifications: 'user',
   settings: 'user',
   feedback: 'user',
+  // Private staff workspace: do not expose submissions to ordinary members.
+  'feedback-inbox': 'developer',
   // Preview and stewardship areas remain out of the basic-user navigation.
   events: 'vip',
   shorts: 'vip',
